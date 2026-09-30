@@ -376,6 +376,7 @@ func _on_wave_cleared(number: int) -> void:
 
 ## Босс главы повержен и все враги добиты: на помосте открывается портал.
 func _on_chapter_cleared(_chapter_index: int) -> void:
+	pickups.vacuum()
 	var next := ContentDB.get_chapter(director.chapter_index + 1)
 	_portal = map.open_portal(Color("#b84dff"), Color("#00f5ff") if next.get("layout", "") != "bank" else Color("#ffd257"))
 	if not _portal.entered.is_connected(_enter_portal):
