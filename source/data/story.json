@@ -4,7 +4,8 @@
     "rico": {
       "name": "РИКО",
       "color": "#7ed321",
-      "glyph": "Р"
+      "glyph": "Р",
+      "portrait": "res://assets/ui/portraits/rico.png"
     },
     "nell": {
       "name": "НЭЛЛ",
@@ -15,17 +16,20 @@
     "baron": {
       "name": "ПИВНОЙ БАРОН",
       "color": "#ffb020",
-      "glyph": "Б"
+      "glyph": "Б",
+      "portrait": "res://assets/ui/portraits/baron.png"
     },
     "king": {
       "name": "КОРОЛЬ ХЛАМА",
       "color": "#ff5a5a",
-      "glyph": "К"
+      "glyph": "К",
+      "portrait": "res://assets/ui/portraits/king.png"
     },
     "toxic": {
       "name": "ТОКСИК",
       "color": "#b6ff00",
-      "glyph": "Т"
+      "glyph": "Т",
+      "portrait": "res://assets/ui/portraits/toxic.png"
     }
   },
   "missions": [
@@ -34,11 +38,6 @@
       "title": "МИССИЯ 1",
       "subtitle": "СВАЛКА",
       "shards": 1,
-      "zones": {
-        "3": "ЗОНА 2 · ЗАВОД ТОКСИКОВ",
-        "6": "ЗОНА 3 · СВАЛКА ИСКРУНОВ",
-        "10": "ЗОНА 4 · ТРОН КОРОЛЯ ХЛАМА"
-      },
       "dialogs": {
         "intro": [
           {
@@ -174,7 +173,226 @@
           "Мои колонки! Они стоили мне трёх мусоровозов!",
           "Всё на него! Весь хлам — на Рико!"
         ]
-      }
+      },
+      "zones": [
+        {
+          "from": 0.0,
+          "name": "ЗОНА 1 · ВОРОТА СВАЛКИ",
+          "say": "intro"
+        },
+        {
+          "from": 0.22,
+          "name": "ЗОНА 2 · ЗАВОД ТОКСИКОВ",
+          "say": "gate"
+        },
+        {
+          "from": 0.52,
+          "name": "ЗОНА 3 · СВАЛКА ИСКРУНОВ",
+          "crate": true
+        },
+        {
+          "from": 0.87,
+          "name": "ЗОНА 4 · ТРОН КОРОЛЯ ХЛАМА"
+        }
+      ],
+      "encounters": [
+        {
+          "at": 0.07,
+          "lock": false,
+          "waves": [
+            {
+              "delay": 0,
+              "enemies": {
+                "rat_punk": 5
+              }
+            }
+          ]
+        },
+        {
+          "at": 0.13,
+          "lock": true,
+          "waves": [
+            {
+              "delay": 0,
+              "enemies": {
+                "rat_punk": 6
+              }
+            },
+            {
+              "delay": 3.0,
+              "enemies": {
+                "rat_punk": 4
+              }
+            }
+          ]
+        },
+        {
+          "at": 0.19,
+          "lock": true,
+          "waves": [
+            {
+              "delay": 0,
+              "enemies": {
+                "rat_punk": 6
+              }
+            },
+            {
+              "delay": 3.5,
+              "enemies": {
+                "rat_punk": 6
+              }
+            }
+          ]
+        },
+        {
+          "at": 0.27,
+          "lock": false,
+          "waves": [
+            {
+              "delay": 0,
+              "enemies": {
+                "toxic_rat": 3,
+                "rat_punk": 3
+              }
+            }
+          ]
+        },
+        {
+          "at": 0.33,
+          "lock": true,
+          "say": "toxic",
+          "waves": [
+            {
+              "delay": 0,
+              "enemies": {
+                "toxic_rat": 5
+              }
+            },
+            {
+              "delay": 3.5,
+              "enemies": {
+                "toxic_rat": 3,
+                "rat_punk": 3
+              }
+            }
+          ]
+        },
+        {
+          "at": 0.41,
+          "lock": true,
+          "waves": [
+            {
+              "delay": 0,
+              "enemies": {
+                "toxic_rat": 4,
+                "bomb_rat": 2
+              }
+            },
+            {
+              "delay": 4.0,
+              "enemies": {
+                "bomb_rat": 3,
+                "rat_punk": 4
+              }
+            }
+          ]
+        },
+        {
+          "at": 0.48,
+          "lock": true,
+          "boss": "beer_baron",
+          "mini": true,
+          "hp": 1.4
+        },
+        {
+          "at": 0.58,
+          "lock": false,
+          "waves": [
+            {
+              "delay": 0,
+              "enemies": {
+                "spark_rat": 4,
+                "rat_punk": 3
+              }
+            }
+          ]
+        },
+        {
+          "at": 0.65,
+          "lock": true,
+          "waves": [
+            {
+              "delay": 0,
+              "enemies": {
+                "spark_rat": 4,
+                "magnet_trapper": 2
+              }
+            },
+            {
+              "delay": 4.0,
+              "enemies": {
+                "spark_rat": 3
+              }
+            }
+          ]
+        },
+        {
+          "at": 0.72,
+          "lock": true,
+          "waves": [
+            {
+              "delay": 0,
+              "enemies": {
+                "spark_shank": 4,
+                "spark_rat": 3
+              }
+            },
+            {
+              "delay": 4.0,
+              "enemies": {
+                "spark_shank": 3,
+                "bomb_rat": 3
+              }
+            }
+          ]
+        },
+        {
+          "at": 0.8,
+          "lock": true,
+          "waves": [
+            {
+              "delay": 0,
+              "enemies": {
+                "spark_shank": 3,
+                "spark_rat": 3,
+                "magnet_trapper": 2
+              }
+            },
+            {
+              "delay": 4.5,
+              "enemies": {
+                "rat_punk": 6,
+                "bomb_rat": 3
+              }
+            },
+            {
+              "delay": 9.0,
+              "enemies": {
+                "spark_rat": 4,
+                "spark_shank": 2
+              }
+            }
+          ]
+        },
+        {
+          "at": 0.89,
+          "lock": true,
+          "boss": "junk_overlord",
+          "mini": false,
+          "hp": 1.6,
+          "say": "king_pre"
+        }
+      ]
     }
   ],
   "enemy_lines": {

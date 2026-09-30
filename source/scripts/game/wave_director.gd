@@ -42,6 +42,8 @@ const STALL_ALIVE := 3
 const STALL_TIME := 9.0
 
 var elapsed := 0.0
+var story_mode := false
+var story_mini := false
 var wave_number := 0
 ## Боссы были слишком жирными: общий коэффициент здоровья (−10%).
 const BOSS_HP_TRIM := 0.9
@@ -117,7 +119,7 @@ func is_boss_wave() -> bool:
 
 ## Мини-босс посреди главы: выходит в начале волны, портал не открывает.
 func is_mini_wave() -> bool:
-	return String(_wave.get("miniboss", "")) != ""
+	return story_mini or String(_wave.get("miniboss", "")) != ""
 
 
 func _boss_key() -> String:
@@ -143,7 +145,7 @@ func next_chapter() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if _player == null or _player.is_dead or _chapter.is_empty():
+	if story_mode or _player == null or _player.is_dead or _chapter.is_empty():
 		return
 	if phase != Phase.PORTAL:
 		elapsed += delta

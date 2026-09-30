@@ -15,6 +15,7 @@ var _typed := 0.0
 var _full_text := ""
 var _panel: PanelContainer
 var _portrait: Label
+var _portrait_tex: TextureRect
 var _portrait_box: PanelContainer
 var _name: Label
 var _text: Label
@@ -76,6 +77,11 @@ func _build() -> void:
 	row.add_child(_portrait_box)
 	_portrait = UiStyle.label("", 72, UiStyle.TEXT, 10)
 	_portrait_box.add_child(_portrait)
+	_portrait_tex = TextureRect.new()
+	_portrait_tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_portrait_tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_portrait_tex.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_portrait_box.add_child(_portrait_tex)
 
 	var column := VBoxContainer.new()
 	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -112,14 +118,30 @@ func _show_line() -> void:
 	var color := Color(str(who.get("color", "#ffffff")))
 	_name.text = str(who.get("name", ""))
 	_name.add_theme_color_override("font_color", color)
-	_portrait.text = str(who.get("glyph", "?"))
+	var tex_path := str(who.get("portrait", ""))
+	_portrait_tex.texture = load(tex_path) as Texture2D if not tex_path.is_empty() else null
+	_portrait_tex.visible = _portrait_tex.texture != null
+	_portrait.text = "" if _portrait_tex.visible else str(who.get("glyph", "?"))
 	_portrait.add_theme_color_override("font_color", color)
 	_portrait_box.add_theme_stylebox_override("panel", UiStyle.box(color.darkened(0.7), color, 5, 60 if bool(who.get("radio", false)) else 16))
 	_full_text = str(line.get("text", ""))
 	_text.text = _full_text
+	_fit_panel()
 	_text.visible_characters = 0
 	_typed = 0.0
 	SoundManager.play(&"ui_click", -10.0)
+
+
+## Высота панели под текст: оценка числа строк по ширине колонки текста.
+func _fit_panel() -> void:
+	var view := get_viewport().get_visible_rect().size
+	var text_width := maxf(view.x - 36.0 - 120.0 - 18.0 - 32.0 - 20.0, 160.0)
+	var chars_per_line := maxf(text_width / 14.5, 8.0)
+	var lines := ceili(float(_full_text.length()) / chars_per_line) + 1
+	var need := 40.0 + float(lines) * 34.0 + 34.0 + 28.0
+	var height := clampf(need, 170.0, view.y * 0.6)
+	_panel.offset_top = -height - 14.0
+	_text.custom_minimum_size = Vector2(text_width, 0.0)
 
 
 func _process(delta: float) -> void:

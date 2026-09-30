@@ -91,6 +91,7 @@ var _recorded := false
 var _portal: Portal
 var story_mission := ""
 var story: StoryRun
+var story_target: Node2D
 var _switching := false
 
 
@@ -134,6 +135,7 @@ func start(_weapon_id: StringName = &"") -> void:
 	director = WaveDirector.new()
 	add_child(director)
 	director.setup(enemies, player, map)
+	director.story_mode = not story_mission.is_empty()
 
 	_arrow = TargetArrow.new()
 	layers.fx.add_child(_arrow)
@@ -258,6 +260,8 @@ func _physics_process(delta: float) -> void:
 	_update_interact()
 	map.update_ripples(player, fx, delta)
 	var target: Node2D = director.boss if director.boss != null and director.boss.is_alive() else null
+	if story_target != null:
+		target = story_target
 	if target == null and _portal != null and _portal.visible:
 		target = _portal
 	if target != null and target is Enemy:
@@ -281,6 +285,9 @@ func _physics_process(delta: float) -> void:
 
 func _update_hud_timer() -> void:
 	hud.set_time(director.elapsed)
+	if story != null:
+		hud.set_wave_text(story.hud_text())
+		return
 	hud.set_wave(maxi(director.wave_number, 1), director.get_enemies_left())
 
 
@@ -357,8 +364,6 @@ func _on_wave_started(number: int, title: String, mood: String, is_boss: bool) -
 	atmosphere.letterbox(true)
 	get_tree().create_timer(1.9, false).timeout.connect(func() -> void: atmosphere.letterbox(false))
 	hud.show_wave_intro(director.chapter_wave(), title, is_boss)
-	if story != null:
-		story.on_wave_started(director.chapter_wave(), is_boss)
 	SoundManager.play(&"boss_spawn" if is_boss else &"ui_confirm", -2.0, false)
 	if director.chapter_wave() >= 2 and not is_boss:
 		map.airdrop(player.global_position)
@@ -712,6 +717,8 @@ func _on_boss_killed(boss: Enemy, at: Vector2) -> void:
 		_on_miniboss_killed(boss, at)
 		return
 	_clear_remaining_enemies()
+	if story != null:
+		story.on_king_killed()
 	bosses_killed += 1
 	SaveService.add_boss_kill()
 	add_shake(1.0)
@@ -809,12 +816,14 @@ func _roll_weapon(rarity: String) -> WeaponData:
 
 ## Ящик сюжета открыт пробкой-ключом: тяжёлый легендарный ствол рядом с Енотом.
 func open_story_crate() -> void:
-	var at := player.global_position + Vector2(130, -30)
-	fx.burst(at + Vector2(0, -24), Color("#ffd257"), 28, 340.0, 4.5)
-	fx.ring(at, Color("#ffd257"), 120.0)
-	SoundManager.play(&"crate_break", -2.0)
-	hud.toast("ЯЩИК ОТКРЫТ КЛЮЧОМ", "Тяжёлая Бочка: подбери ствол и готовься к Королю", Color("#ffd257"))
-	_drop_weapon(_roll_weapon("legendary"), at, true)
+	var crate := map.airdrop(player.global_position)
+	if crate != null:
+		crate.loot_rarity = "epic"
+	hud.toast("ЯЩИК СБРОШЕН", "Открой его пробкой-ключом: стреляй по ящику", Color("#ffd257"))
+
+
+func announce_boss(boss: Enemy) -> void:
+	_on_boss_spawned(boss)
 
 
 ## Миссия пройдена: итоговый экран боя (победа).

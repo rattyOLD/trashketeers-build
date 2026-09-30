@@ -88,6 +88,7 @@ func build(currency_icon: Texture2D, weapon: WeaponData) -> void:
 	_root.add_child(_build_banner())
 	_root.add_child(_build_wave_titles())
 	_root.add_child(_build_minimap_slot())
+	_root.move_child(_minimap_slot, 0)
 	_rail_combo = UiStyle.label("", 46, UiStyle.GOLD, 12)
 	_rail_combo.anchor_left = 0.0
 	_rail_combo.anchor_right = 1.0
@@ -214,6 +215,10 @@ func set_kills(kills: int) -> void:
 
 func set_wave(number: int, enemies_left: int) -> void:
 	_wave_label.text = "ВОЛНА %d · %d" % [number, enemies_left] if enemies_left > 0 else "ВОЛНА %d" % number
+
+
+func set_wave_text(text: String) -> void:
+	_wave_label.text = text
 
 
 func set_weapon(weapon: WeaponData) -> void:
@@ -355,6 +360,9 @@ func hide_boss() -> void:
 
 
 func show_banner(text: String, color: Color, duration: float = 2.2) -> void:
+	var half := minf(350.0, (_root.size.x - 28.0) * 0.5)
+	_banner.offset_left = -half
+	_banner.offset_right = half
 	_banner.text = text
 	_banner.add_theme_color_override("font_color", color)
 	_banner.visible = true
@@ -473,6 +481,11 @@ func _next_toast() -> void:
 		return
 	_toast_busy = true
 	var item: Array = _toast_queue.pop_front()
+	var half := minf(300.0, (_root.size.x - 36.0) * 0.5)
+	_toast.offset_left = -half
+	_toast.offset_right = half
+	_toast_title.custom_minimum_size.x = half * 2.0 - 40.0
+	_toast_text.custom_minimum_size.x = half * 2.0 - 40.0
 	_toast_title.text = item[0]
 	_toast_text.text = item[1]
 	_toast_title.add_theme_color_override("font_color", item[2])
@@ -660,8 +673,10 @@ func _build_toast() -> Control:
 	column.add_theme_constant_override("separation", 2)
 	_toast.add_child(column)
 	_toast_title = UiStyle.label("", 28, UiStyle.GOLD, 8)
+	_toast_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(_toast_title)
 	_toast_text = UiStyle.label("", 20, UiStyle.TEXT, 5)
+	_toast_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(_toast_text)
 	return _toast
 
