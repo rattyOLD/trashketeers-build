@@ -318,7 +318,7 @@ html, body {
 	// index.wasm / index.pck и отдаём ему уже скачанные и распакованные байты.
 	const FILES = {
 		wasm: { parts: [{url:"raccoon.core.0.wasm",bytes:5221065},{url:"raccoon.core.1.wasm",bytes:4165384}] },
-		pck: { parts: [{url:"raccoon.pack.0.wasm",bytes:12013868},{url:"raccoon.pack.1.wasm",bytes:4763334}] },
+		pck: { parts: [{url:"raccoon.pack.0.wasm",bytes:12013890},{url:"raccoon.pack.1.wasm",bytes:4764888}] },
 	};
 	const GODOT_CONFIG = {
 		args: [],
@@ -326,7 +326,7 @@ html, body {
 		ensureCrossOriginIsolationHeaders: false,
 		executable: 'index',
 		experimentalVK: false,
-		fileSizes: { 'index.pck': 17605552, 'index.wasm': 43699190 },
+		fileSizes: { 'index.pck': 17607408, 'index.wasm': 43699190 },
 		focusCanvas: true,
 		gdextensionLibs: [],
 		onPrint: function () {
@@ -348,11 +348,79 @@ html, body {
 
 	// Адрес сбора отчётов о вылетах (Google Apps Script / Supabase и т.п.); пусто — отчёты не отправляются.
 	const REPORT_URL = 'https://script.google.com/macros/s/AKfycbxVyy-SnRANW0Im-1Blne2TcUbca93WqzyBulpADwWWD7YH6x3KIygBYImTe8VfP5pp/exec';
+	const BUILD_ID_REPORT = '1790759462';
 	const SESSION_ID = Math.random().toString(36).slice(2, 8);
 	const SESSION_START = Date.now();
-	const REPORT_CAP = 60;
+	const REPORT_CAP = 250;
 	const sentKeys = {};
 	let reportCount = 0;
+	const logTail = [];
+	const eventLog = [];
+	let hiddenMs = 0;
+	let hiddenSince = 0;
+	let battery = null;
+	let userId = '';
+	try {
+		userId = window.localStorage.getItem('trk_uid') || '';
+		if (!userId) {
+			userId = Math.random().toString(36).slice(2, 10);
+			window.localStorage.setItem('trk_uid', userId);
+		}
+	} catch (e) { userId = 'nostorage'; }
+
+	function noteEvent(text) {
+		eventLog.push(Math.round((Date.now() - SESSION_START) / 1000) + 's ' + text);
+		if (eventLog.length > 25) { eventLog.shift(); }
+	}
+	window.trkNote = noteEvent;
+
+	function gpuInfo() {
+		try {
+			const c = document.createElement('canvas');
+			const gl = c.getContext('webgl2') || c.getContext('webgl');
+			if (!gl) { return 'no webgl'; }
+			const ext = gl.getExtension('WEBGL_debug_renderer_info');
+			const name = ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER);
+			return name + ' | maxTex ' + gl.getParameter(gl.MAX_TEXTURE_SIZE);
+		} catch (e) { return 'gpu?'; }
+	}
+
+	function envInfo() {
+		const nav = navigator;
+		const conn = nav.connection || {};
+		let heap = '';
+		try { if (performance.memory) { heap = Math.round(performance.memory.usedJSHeapSize / 1048576) + '/' + Math.round(performance.memory.jsHeapSizeLimit / 1048576) + 'MB'; } } catch (e) {}
+		let standalone = false;
+		try { standalone = !!(window.matchMedia('(display-mode: standalone)').matches || nav.standalone); } catch (e) {}
+		return {
+			uid: userId,
+			ua: nav.userAgent,
+			lang: nav.language,
+			tz: (function () { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (e) { return ''; } })(),
+			screen: screen.width + 'x' + screen.height,
+			inner: window.innerWidth + 'x' + window.innerHeight,
+			dpr: window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio,
+			dprCap: window.__trash_dpr_cap,
+			mem: nav.deviceMemory || '?',
+			cores: nav.hardwareConcurrency || '?',
+			net: (conn.effectiveType || '?') + ' ' + (conn.downlink || '?') + 'Mbps rtt' + (conn.rtt || '?') + (conn.saveData ? ' saveData' : ''),
+			battery: battery ? Math.round(battery.level * 100) + '%' + (battery.charging ? ' charging' : '') : '?',
+			heap: heap,
+			visible: document.visibilityState,
+			standalone: standalone,
+			online: nav.onLine,
+			hiddenSec: Math.round((hiddenMs + (hiddenSince ? Date.now() - hiddenSince : 0)) / 1000),
+			url: location.href.slice(0, 120),
+			ref: (document.referrer || '').slice(0, 80)
+		};
+	}
+
+	try {
+		if (navigator.getBattery) {
+			navigator.getBattery().then(function (b) { battery = b; });
+		}
+	} catch (e) {}
+
 	window.trkReport = function (kind, text) {
 		if (!REPORT_URL || reportCount >= REPORT_CAP) {
 			return;
@@ -365,7 +433,27 @@ html, body {
 			}
 			sentKeys[key] = true;
 			reportCount += 1;
-			const body = JSON.stringify({ kind: kind, text: '[' + SESSION_ID + ' +' + Math.round((Date.now() - SESSION_START) / 1000) + 's] ' + text.slice(0, 3000), time: new Date().toISOString(), build: 'v34' });
+			const heavy = kind !== 'heartbeat';
+			const env = envInfo();
+			let full = '[' + SESSION_ID + ' +' + Math.round((Date.now() - SESSION_START) / 1000) + 's] ' + text.slice(0, 3000);
+			full += '\nENV ' + JSON.stringify(env);
+			if (heavy && kind !== 'session_start') {
+				full += '\nEVENTS ' + eventLog.slice(-25).join(' ; ') + '\nCONSOLE ' + logTail.slice(-15).join(' ; ');
+			}
+			const payload = {
+				kind: kind,
+				text: full.slice(0, 8000),
+				time: new Date().toISOString(),
+				build: 'v34',
+				buildId: BUILD_ID_REPORT,
+				session: SESSION_ID,
+				env: env
+			};
+			if (heavy && kind !== 'session_start') {
+				payload.events = eventLog.slice(-25);
+				payload.console = logTail.slice(-15);
+			}
+			const body = JSON.stringify(payload);
 			if (navigator.sendBeacon) {
 				navigator.sendBeacon(REPORT_URL, body);
 			} else {
@@ -374,20 +462,46 @@ html, body {
 		} catch (e) {}
 	};
 
-	window.addEventListener('pagehide', function () {
+	document.addEventListener('visibilitychange', function () {
+		noteEvent('visibility ' + document.visibilityState);
+		if (document.visibilityState === 'hidden') {
+			hiddenSince = Date.now();
+		} else if (hiddenSince) {
+			hiddenMs += Date.now() - hiddenSince;
+			hiddenSince = 0;
+		}
+	});
+	window.addEventListener('orientationchange', function () { noteEvent('orientationchange ' + window.innerWidth + 'x' + window.innerHeight); });
+	window.addEventListener('online', function () { noteEvent('online'); });
+	window.addEventListener('offline', function () { noteEvent('offline'); });
+	window.addEventListener('pagehide', function (event) { noteEvent('pagehide persisted=' + event.persisted); });
+	window.addEventListener('unhandledrejection', function (event) {
+		noteEvent('promise rejection: ' + String(event.reason).slice(0, 200));
+		window.trkReport('error', 'unhandledrejection: ' + String(event.reason).slice(0, 500));
+	});
+	window.addEventListener('error', function (event) {
+		window.trkReport('error', 'js: ' + event.message + ' @ ' + (event.filename || '').split('/').pop() + ':' + event.lineno);
+	});
+
+	// Раз в 45 секунд, пока идёт бой: если вкладку убьёт система, по последнему пульсу видно, что происходило.
+	let beats = 0;
+	setInterval(function () {
+		if (document.visibilityState !== 'visible' || beats >= 40) { return; }
 		let ctx = '';
 		try { ctx = window.localStorage.getItem('__trash_ctx') || ''; } catch (e) {}
-		window.trkReport('session_end', Math.round((Date.now() - SESSION_START) / 1000) + 's | last: ' + ctx);
-	});
+		if (ctx.indexOf('t=') < 0) { return; }
+		beats += 1;
+		window.trkReport('heartbeat', ctx + ' | beat ' + beats);
+	}, 45000);
 
 	if (window.location.hash === '#reporttest') {
 		window.trkReport('test', 'Проверка связи: ' + navigator.userAgent);
 	}
 
-	window.trkReport('session_start', navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + (window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio) + ' | screen ' + screen.width + 'x' + screen.height + ' | cores ' + (navigator.hardwareConcurrency || '?'));
+	window.trkReport('session_start', gpuInfo() + ' | ' + navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + (window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio) + ' | screen ' + screen.width + 'x' + screen.height + ' | cores ' + (navigator.hardwareConcurrency || '?'));
 
 	// Вкладка могла висеть со старой версией: при возврате в неё сверяем номер сборки и предлагаем обновиться.
-	const BUILD_ID = '1790758926';
+	const BUILD_ID = '1790759462';
 	function checkVersion() {
 		fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (v) {
 			if (v && v.build && v.build !== BUILD_ID && !document.getElementById('newver')) {
@@ -407,7 +521,6 @@ html, body {
 	});
 	setTimeout(checkVersion, 8000);
 
-	const logTail = [];
 	let started = false;
 	let crashed = false;
 

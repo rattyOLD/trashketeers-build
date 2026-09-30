@@ -202,6 +202,11 @@ func device_info() -> String:
 	return str(_js("return navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + (window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio);"))
 
 
+func note_event(text: String) -> void:
+	if is_web:
+		_js("if (window.trkNote) { window.trkNote(%s); }" % JSON.stringify(text))
+
+
 func send_report(kind: String, text: String) -> void:
 	if is_web:
 		_js("if (window.trkReport) { window.trkReport(%s, %s); }" % [JSON.stringify(kind), JSON.stringify(text)])

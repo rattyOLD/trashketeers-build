@@ -334,6 +334,7 @@ func _apply_chapter_look(chapter: Dictionary) -> void:
 
 
 func _on_wave_started(number: int, title: String, mood: String, is_boss: bool) -> void:
+	Platform.note_event("wave %d %s boss=%s" % [number, title, is_boss])
 	_last_marker.reset_hunt()
 	atmosphere.set_mood(mood)
 	_check_clean_sweep()
@@ -347,6 +348,7 @@ func _on_wave_started(number: int, title: String, mood: String, is_boss: bool) -
 
 
 func _on_wave_cleared(number: int) -> void:
+	Platform.note_event("wave %d cleared" % number)
 	events.on_wave_cleared()
 	_loot_at_clear = pickups.get_count()
 	if player != null and not player.is_dead:
@@ -578,6 +580,7 @@ func _on_enemy_exploded(_enemy: Enemy, at: Vector2, radius: float, damage: float
 
 
 func _on_boss_spawned(boss: Enemy) -> void:
+	Platform.note_event("boss spawned")
 	hud.show_boss(boss.data.display_name, boss.hp, boss.max_hp)
 	hud.show_banner("БОСС: %s!" % boss.data.display_name.to_upper(), UiStyle.DANGER)
 	var passive := BossBrain.passive_text(boss.data.boss_pattern)
@@ -956,6 +959,12 @@ func _celebrate_level_up() -> void:
 	SoundManager.play(&"level_up", 0.0, false)
 
 
+func _extra_context() -> String:
+	if director == null or player == null:
+		return ""
+	return "wave=%d enemies=%d lvl=%d hp=%d/%d pos=(%d,%d)" % [director.wave_number, enemies.get_active_count(), level, int(player.hp), int(player.max_hp), int(player.global_position.x), int(player.global_position.y)]
+
+
 func _xp_needed(for_level: int) -> int:
 	return XP_BASE + XP_STEP * for_level
 
@@ -1064,6 +1073,7 @@ func _on_achievement(achievement: Dictionary) -> void:
 # --- Смерть, возрождение, конец забега -----------------------------------------------------------
 
 func _on_player_died() -> void:
+	Platform.note_event("player died lvl=%d" % level)
 	fx.burst(player.global_position, UiStyle.DANGER, 50, 380.0, 5.0)
 	fx.chunks(player.global_position, Color("#8e8aa6"), 14, 260.0, 5.0)
 	add_shake(1.0)
@@ -1135,6 +1145,7 @@ func _record() -> Dictionary:
 
 
 func _finish() -> void:
+	Platform.note_event("run finished")
 	if finished:
 		return
 	hud.hide_revive()

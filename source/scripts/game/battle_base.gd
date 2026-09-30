@@ -10,10 +10,12 @@ signal exit_requested
 signal restart_requested
 
 const CAMERA_SMOOTHING := 9.0
-const PERF_SAMPLE_FRAMES := 3000
+const ADAPT_WINDOW := 5.0
+const ADAPT_FPS := 38.0
+const PERF_SAMPLE_FRAMES := 1500
 const SPIKE_MS := 140.0
 const MAX_SPIKE_REPORTS := 3
-const MAX_PERF_REPORTS := 4
+const MAX_PERF_REPORTS := 10
 const HITSTOP_SCALE := 0.05
 const HITSTOP_COOLDOWN := 0.12
 const CAMERA_KICK_DECAY := 16.0
@@ -40,6 +42,9 @@ var _context_timer := 0.0
 var _spikes_sent := 0
 static var _perfs_sent := 0
 const LANDSCAPE_ZOOM := 1.3
+var _adapt_time := 0.0
+var _adapt_frames := 0
+var _adapt_level := 0
 var camera: Camera2D
 var hud: Hud
 var atmosphere: AtmosphereFX
@@ -170,6 +175,7 @@ func _exit_tree() -> void:
 	SoundManager.stop_all_loops()
 	SoundManager.stop_ambient()
 	Engine.time_scale = 1.0
+	SaveService.apply_quality()
 	get_tree().paused = false
 
 
@@ -196,6 +202,7 @@ func _process(delta: float) -> void:
 			Platform.send_report("spike", "%.0f ms | %s" % [ms, _perf_context()])
 	_perf_last_usec = now
 	_perf_age += delta
+	_adapt_quality(delta)
 	_context_timer -= delta
 	if _context_timer <= 0.0:
 		_context_timer = 4.0
@@ -205,12 +212,43 @@ func _process(delta: float) -> void:
 
 
 func _perf_context() -> String:
-	return "%s hero=%s q=%d lite=%s t=%.0fs nodes=%d objs=%d draws=%d vram=%dMB" % [
-		get_script().get_global_name(), SaveService.get_character_id(), SaveService.get_quality(), SaveService.is_fx_lite(), _perf_age,
+	return "%s hero=%s weapon=%s nick=%s q=%d lite=%s t=%.0fs fps=%d frame=%.1fms nodes=%d objs=%d draws=%d vram=%dMB heap=%dMB %s" % [
+		get_script().get_global_name(), SaveService.get_character_id(), SaveService.get_selected_weapon(), SaveService.get_nickname(),
+		SaveService.get_quality(), SaveService.is_fx_lite(), _perf_age, Engine.get_frames_per_second(),
+		Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0 + Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
 		int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT)),
 		int(Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME)),
 		int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)),
-		int(Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0)]
+		int(Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0),
+		int(OS.get_static_memory_usage() / 1048576.0), _extra_context()]
+
+
+## Динамическое качество: если 5 секунд подряд средний FPS ниже порога — упрощаем эффекты, затем снижаем разрешение холста.
+## Изменения действуют только в этом бою; настройки игрока не трогаем.
+func _adapt_quality(delta: float) -> void:
+	if _perf_age < 8.0 or _adapt_level >= 2:
+		return
+	_adapt_time += delta
+	_adapt_frames += 1
+	if _adapt_time < ADAPT_WINDOW:
+		return
+	var fps := _adapt_frames / _adapt_time
+	_adapt_time = 0.0
+	_adapt_frames = 0
+	if fps >= ADAPT_FPS:
+		return
+	_adapt_level += 1
+	if _adapt_level == 1:
+		_fx_scale = 0.5
+		SoftGlow.lite = true
+	else:
+		Platform.set_render_cap(1.0)
+	Platform.note_event("adapt level %d at fps %.0f" % [_adapt_level, fps])
+	Platform.send_report("adapt", "level %d fps %.0f | %s" % [_adapt_level, fps, _perf_context()])
+
+
+func _extra_context() -> String:
+	return ""
 
 
 func _send_perf_report() -> void:
