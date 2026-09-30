@@ -374,6 +374,27 @@ html, body {
 
 	window.trkReport('session_start', navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + (window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio) + ' | screen ' + screen.width + 'x' + screen.height + ' | cores ' + (navigator.hardwareConcurrency || '?'));
 
+	// Вкладка могла висеть со старой версией: при возврате в неё сверяем номер сборки и предлагаем обновиться.
+	const BUILD_ID = '__BUILD_ID__';
+	function checkVersion() {
+		fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (v) {
+			if (v && v.build && v.build !== BUILD_ID && !document.getElementById('newver')) {
+				const bar = document.createElement('div');
+				bar.id = 'newver';
+				bar.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:9;padding:10px 14px;background:#ff2ea6;color:#fff;font:600 15px system-ui,sans-serif;text-align:center;cursor:pointer';
+				bar.textContent = 'Вышла новая версия игры. Нажми, чтобы обновить.';
+				bar.addEventListener('click', function () { window.location.reload(); });
+				document.body.appendChild(bar);
+			}
+		}).catch(function () {});
+	}
+	document.addEventListener('visibilitychange', function () {
+		if (document.visibilityState === 'visible') {
+			checkVersion();
+		}
+	});
+	setTimeout(checkVersion, 8000);
+
 	const logTail = [];
 	let started = false;
 	let crashed = false;

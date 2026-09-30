@@ -306,7 +306,7 @@ html, body {
 	// index.wasm / index.pck и отдаём ему уже скачанные и распакованные байты.
 	const FILES = {
 		wasm: { parts: [{url:"raccoon.core.0.wasm",bytes:5221065},{url:"raccoon.core.1.wasm",bytes:4165384}] },
-		pck: { parts: [{url:"raccoon.pack.0.wasm",bytes:12013890},{url:"raccoon.pack.1.wasm",bytes:4755820}] },
+		pck: { parts: [{url:"raccoon.pack.0.wasm",bytes:12013880},{url:"raccoon.pack.1.wasm",bytes:4755843}] },
 	};
 	const GODOT_CONFIG = {
 		args: [],
@@ -314,7 +314,7 @@ html, body {
 		ensureCrossOriginIsolationHeaders: false,
 		executable: 'index',
 		experimentalVK: false,
-		fileSizes: { 'index.pck': 17598192, 'index.wasm': 43699190 },
+		fileSizes: { 'index.pck': 17598112, 'index.wasm': 43699190 },
 		focusCanvas: true,
 		gdextensionLibs: [],
 		onPrint: function () {
@@ -373,6 +373,27 @@ html, body {
 	}
 
 	window.trkReport('session_start', navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + (window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio) + ' | screen ' + screen.width + 'x' + screen.height + ' | cores ' + (navigator.hardwareConcurrency || '?'));
+
+	// Вкладка могла висеть со старой версией: при возврате в неё сверяем номер сборки и предлагаем обновиться.
+	const BUILD_ID = '1790755699';
+	function checkVersion() {
+		fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (v) {
+			if (v && v.build && v.build !== BUILD_ID && !document.getElementById('newver')) {
+				const bar = document.createElement('div');
+				bar.id = 'newver';
+				bar.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:9;padding:10px 14px;background:#ff2ea6;color:#fff;font:600 15px system-ui,sans-serif;text-align:center;cursor:pointer';
+				bar.textContent = 'Вышла новая версия игры. Нажми, чтобы обновить.';
+				bar.addEventListener('click', function () { window.location.reload(); });
+				document.body.appendChild(bar);
+			}
+		}).catch(function () {});
+	}
+	document.addEventListener('visibilitychange', function () {
+		if (document.visibilityState === 'visible') {
+			checkVersion();
+		}
+	});
+	setTimeout(checkVersion, 8000);
 
 	const logTail = [];
 	let started = false;
