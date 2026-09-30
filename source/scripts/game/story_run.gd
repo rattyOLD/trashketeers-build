@@ -103,6 +103,7 @@ func setup(owner_game: Game, mission_id: String) -> bool:
 	waypoint = Node2D.new()
 	game.layers.fx.add_child(waypoint)
 	game.map.open_story_gate("boss")
+	_place_decor()
 	var span := maxf(_start_y - _end_y, 1.0)
 	for enc in _encounters:
 		if enc.has("boss") and not bool(enc.get("mini", false)):
@@ -171,6 +172,26 @@ func on_start() -> void:
 	game.hud.show_banner(title(), UiStyle.GOLD, 2.2)
 	_update_progress()
 	_check_zone()
+
+
+func _place_decor() -> void:
+	var inner_left: float = game.map.bounds.position.x + LevelSpawner.RING_SIDE * LevelSpawner.CELL
+	var inner_right: float = game.map.bounds.end.x - LevelSpawner.RING_SIDE * LevelSpawner.CELL
+	for entry in mission.get("posters", []):
+		var poster := Poster.new()
+		poster.title = str(entry["title"])
+		poster.text = str(entry["text"])
+		var side := float(entry.get("side", 1.0))
+		poster.position = Vector2(inner_left + 46.0 if side < 0.0 else inner_right - 46.0, _y_of(float(entry["at"])))
+		poster.rotation = randf_range(-0.07, 0.07)
+		game.layers.fx.add_child(poster)
+	for entry in mission.get("graffiti", []):
+		var tag := Graffiti.new()
+		tag.text = str(entry["text"])
+		tag.color = Color(str(entry.get("color", "#ff2ea6")))
+		tag.position = Vector2(randf_range(-260.0, 260.0), _y_of(float(entry["at"])))
+		tag.rotation = randf_range(-0.14, 0.14)
+		game.layers.decals.add_child(tag)
 
 
 func debug_jump(target: float) -> void:
@@ -582,3 +603,37 @@ class Captive:
 		draw_rect(Rect2(-34, 10, 68, 8), Color("#3a3550"), true)
 		var pulse := 0.6 + 0.4 * sin(_time * 6.0)
 		draw_rect(Rect2(-40, -58, 80, 80), Color(1.0, 0.82, 0.3, 0.6 * pulse), false, 3.0)
+
+
+## Плакат на стене: бумага с булавкой, заголовок и пара строк в тоне свалки.
+class Poster:
+	extends Node2D
+
+	var title := ""
+	var text := ""
+
+	func _init() -> void:
+		z_index = 2
+
+	func _draw() -> void:
+		var font := ThemeDB.fallback_font
+		draw_rect(Rect2(-56, -74, 112, 148), Color(0, 0, 0, 0.3), true)
+		draw_rect(Rect2(-60, -80, 112, 148), Color("#d8caa4"), true)
+		draw_rect(Rect2(-60, -80, 112, 148), Color("#6b5a3a"), false, 3.0)
+		draw_rect(Rect2(-60, -80, 112, 26), Color("#b3262e"), true)
+		draw_multiline_string(font, Vector2(-56, -62), title, HORIZONTAL_ALIGNMENT_CENTER, 104.0, 11, 2, Color("#fff4dc"))
+		draw_multiline_string(font, Vector2(-54, -36), text, HORIZONTAL_ALIGNMENT_CENTER, 100.0, 11, 6, Color("#2a1f12"))
+		draw_circle(Vector2(-4, -80), 5.0, Color("#ff3b5c"))
+
+
+## Неоновый тег на полу: крупная надпись краской под небольшим углом.
+class Graffiti:
+	extends Node2D
+
+	var text := ""
+	var color := Color("#ff2ea6")
+
+	func _draw() -> void:
+		var font := ThemeDB.fallback_font
+		draw_string(font, Vector2(-250, 14), text, HORIZONTAL_ALIGNMENT_CENTER, 500.0, 54, Color(color, 0.16))
+		draw_string(font, Vector2(-252, 10), text, HORIZONTAL_ALIGNMENT_CENTER, 500.0, 54, Color(color, 0.34))
