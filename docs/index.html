@@ -306,7 +306,7 @@ html, body {
 	// index.wasm / index.pck и отдаём ему уже скачанные и распакованные байты.
 	const FILES = {
 		wasm: { parts: [{url:"raccoon.core.0.wasm",bytes:5221065},{url:"raccoon.core.1.wasm",bytes:4165384}] },
-		pck: { parts: [{url:"raccoon.pack.0.wasm",bytes:12013880},{url:"raccoon.pack.1.wasm",bytes:4755843}] },
+		pck: { parts: [{url:"raccoon.pack.0.wasm",bytes:12013869},{url:"raccoon.pack.1.wasm",bytes:4756217}] },
 	};
 	const GODOT_CONFIG = {
 		args: [],
@@ -314,7 +314,7 @@ html, body {
 		ensureCrossOriginIsolationHeaders: false,
 		executable: 'index',
 		experimentalVK: false,
-		fileSizes: { 'index.pck': 17598112, 'index.wasm': 43699190 },
+		fileSizes: { 'index.pck': 17598560, 'index.wasm': 43699190 },
 		focusCanvas: true,
 		gdextensionLibs: [],
 		onPrint: function () {
@@ -375,7 +375,7 @@ html, body {
 	window.trkReport('session_start', navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + (window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio) + ' | screen ' + screen.width + 'x' + screen.height + ' | cores ' + (navigator.hardwareConcurrency || '?'));
 
 	// Вкладка могла висеть со старой версией: при возврате в неё сверяем номер сборки и предлагаем обновиться.
-	const BUILD_ID = '1790755699';
+	const BUILD_ID = '1790756183';
 	function checkVersion() {
 		fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (v) {
 			if (v && v.build && v.build !== BUILD_ID && !document.getElementById('newver')) {

@@ -35,6 +35,7 @@ var hero_skills: HeroSkills
 var _perf_last_usec := 0
 var _perf_frames: PackedFloat32Array = PackedFloat32Array()
 var _perf_age := 0.0
+var _perf_resume_guard := 0
 var _context_timer := 0.0
 var _spikes_sent := 0
 static var _perfs_sent := 0
@@ -164,7 +165,17 @@ func _exit_tree() -> void:
 	get_tree().paused = false
 
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_APPLICATION_FOCUS_IN:
+		_perf_last_usec = 0
+		_perf_resume_guard = 2
+
+
 func _process(delta: float) -> void:
+	if _perf_resume_guard > 0:
+		_perf_resume_guard -= 1
+		_perf_last_usec = 0
+		return
 	if get_tree().paused:
 		_perf_last_usec = 0
 		return
@@ -186,12 +197,12 @@ func _process(delta: float) -> void:
 
 
 func _perf_context() -> String:
-	return "%s hero=%s q=%d lite=%s t=%.0fs nodes=%d objs=%d draws=%d mem=%dMB" % [
+	return "%s hero=%s q=%d lite=%s t=%.0fs nodes=%d objs=%d draws=%d vram=%dMB" % [
 		get_script().get_global_name(), SaveService.get_character_id(), SaveService.get_quality(), SaveService.is_fx_lite(), _perf_age,
 		int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT)),
 		int(Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME)),
 		int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)),
-		int(Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0)]
+		int(Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0)]
 
 
 func _send_perf_report() -> void:
