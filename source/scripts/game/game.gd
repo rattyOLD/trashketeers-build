@@ -1,0 +1,1200 @@
+class_name Game
+extends BattleBase
+## Основной режим: главы-арены по концепт-листам (Неоновая Свалка → Золотой Банк → круг
+## заново жёстче), 10 волн в главе, босс — только на 10-й. После босса на его помосте
+## открывается портал: Енот входит — арена перестраивается под следующую главу без смены сцены
+## (уровень, стволы, прокачка забега сохраняются). Автострельба, прокачка 1-из-3, стволы из
+## ящиков, возрождение за рекламу или неонит. Все пулы создаются в start() — до геймплея.
+
+const ENEMY_CAPACITY := 90
+const WEAPON_PICKUPS := 6
+const XP_BASE := 5
+const XP_STEP := 5
+const ADRENALINE_TIME := 20.0
+const ADRENALINE_FIRE := 0.35
+const ADRENALINE_SPEED := 0.15
+const WAVE_CLEAR_HEAL := 0.15
+const PICKUP_COMBO_WINDOW := 0.45
+const KILL_HITSTOP := 0.03
+const BOSS_HITSTOP := 0.14
+const LEVEL_UP_DELAY := 0.35
+const DEATH_DELAY := 1.1
+const WEAPON_SWAP_DELAY := 1.2
+const TIER_CHANCE_BASE := 0.08
+const TIER_CHANCE_PER_WAVE := 0.035
+const REVIVE_HP := 0.6
+const REVIVE_INVULN := 2.5
+const REVIVE_BLAST := 260.0
+
+var level := 1
+var xp := 0
+var kills := 0
+var nuts := 0
+var bosses_killed := 0
+var run_loot: Array = []
+## Награды боссов за забег: неонит и чертежи (зачисляются в record_run).
+var run_gems := 0
+var run_blueprints: Array = []
+var revives_used := 0
+
+var map: LevelSpawner
+var pickups: PickupManager
+var enemies: EnemyManager
+var director: WaveDirector
+var minimap: Minimap
+var events: MapEvents
+var lobs: LobPool
+var traps: MagnetTraps
+const DAMAGE_NUMBERS_PER_SEC := 22.0
+const REROLL_BASE_COST := 220.0
+const DEATH_TIP_NEWBIE := 6
+const DEATH_TIP_EVERY := 3
+const DEATH_FAST_TIME := 100.0
+const SHADOW_BONUS := 0.35
+const SHADOW_TIME := 3.0
+const REROLL_GROWTH := 1.55
+const QUICK_CLEAR_TIME := 10.0
+const GOLD_CLEAR_TIME := 5.0
+const CLEAN_SWEEP_MIN := 8
+const CLEAN_SWEEP_RATIO := 0.35
+const CLEAN_SWEEP_XP := 3
+const QUICK_CLEAR_RATIO := 0.6
+var _number_budget := 10.0
+var status: StatusSystem
+var dash_trail: DashTrail
+var _rail_combo := 0
+var _rail_timer := 0.0
+const RAIL_COMBO_WINDOW := 4.0
+const RAIL_COMBO_MEGA := 25
+var hazards: HazardDirector
+
+var _pending_levelups := 0
+var _level_up_open := false
+var _rerolls_free := 0
+var _shadow_left := 0.0
+var _current_bonus := false
+var _rerolls_paid := 0
+var _reroll_deal := false
+var _loot_at_clear := 0
+var _last_choices: Array[StringName] = []
+var _bonus_choices := 0
+var _drones: Array[JunkDrone] = []
+var _arrow: TargetArrow
+var _last_marker: LastEnemyMarker
+var _weapon_pickups: Array[WeaponPickup] = []
+var _adrenaline_left := ADRENALINE_TIME
+var _combo := 0
+var _combo_timer := 0.0
+var _recorded := false
+var _portal: Portal
+var _switching := false
+
+
+func start(_weapon_id: StringName = &"") -> void:
+	randomize()
+	for id in ContentDB.get_enemy_ids():
+		var enemy_data := ContentDB.get_enemy(id)
+		if enemy_data == null or not enemy_data.frames_id.is_empty():
+			continue
+		RigSprite.prewarm(enemy_data.rig_id, Enemy.RIG_MARGIN)
+		for variant in enemy_data.rig_variants:
+			RigSprite.prewarm(variant, Enemy.RIG_MARGIN)
+	_build_layers()
+	map = LevelSpawner.new()
+	layers.floor_layer.add_child(map)
+	pickups = PickupManager.new()
+	layers.decals.add_child(pickups)
+	var chapter := ContentDB.get_chapter(0)
+	map.build(layers, chapter)
+
+	_spawn_player(map.player_start, SaveService.get_loadout(), _find_target)
+	map.attach_player(player)
+	enemies = EnemyManager.new()
+	add_child(enemies)
+	enemies.setup(player, entities, ENEMY_CAPACITY, map.nav_direction)
+	pickups.setup(player)
+	for i in WEAPON_PICKUPS:
+		var pickup := WeaponPickup.new()
+		pickup.setup(player)
+		pickup.picked.connect(_on_weapon_picked)
+		entities.add_child(pickup)
+		_weapon_pickups.append(pickup)
+	lobs = LobPool.new()
+	lobs.fx = fx
+	layers.fx.add_child(lobs)
+	traps = MagnetTraps.new()
+	traps.player = player
+	layers.decals.add_child(traps)
+	BulletPool.homing_target = player
+
+	director = WaveDirector.new()
+	add_child(director)
+	director.setup(enemies, player, map)
+
+	_arrow = TargetArrow.new()
+	layers.fx.add_child(_arrow)
+	_last_marker = LastEnemyMarker.new()
+	layers.fx.add_child(_last_marker)
+
+	_setup_common(map.bounds, pickups.nut_texture)
+	_last_marker.setup(director, enemies, camera)
+	minimap = Minimap.new()
+	minimap.setup(map, player, enemies, director)
+	hud.set_minimap(minimap)
+	if SaveService.is_glow_enabled() and not SaveService.is_fx_lite():
+		add_child(_make_glow())
+	_apply_chapter_look(chapter)
+
+	hazards = HazardDirector.new()
+	hazards.setup(player, director, map, fx)
+	layers.decals.add_child(hazards)
+	status = StatusSystem.new()
+	status.setup(stats, player, enemies, fx)
+	dash_trail = DashTrail.new()
+	layers.decals.add_child(dash_trail)
+	dash_trail.setup(player, enemies, stats, fx)
+	add_child(status)
+	Enemy.status_sink = _on_enemy_status
+	events = MapEvents.new()
+	add_child(events)
+	events.setup(player, director, enemies, map, pickups, fx, status, atmosphere, layers.decals)
+	events.announced.connect(func(title: String, text: String, color: Color) -> void: hud.toast(title, text, color))
+	minimap.events = events
+	minimap.pickups = pickups
+	events.loot_count.connect(hud.set_loot_left)
+	events.event_started.connect(func(_kind: int) -> void: _reroll_deal = true)
+	enemies.enemy_died.connect(_on_enemy_died)
+	enemies.enemy_damaged.connect(_on_enemy_damaged)
+	enemies.enemy_exploded.connect(_on_enemy_exploded)
+	enemies.enemy_blocked.connect(_on_enemy_blocked)
+	enemies.enemy_blinked.connect(_on_enemy_blinked)
+	enemies.enemy_fx.connect(_on_enemy_fx)
+	enemies.boss_phase.connect(_on_boss_phase)
+	pickups.collected.connect(_on_nuts_collected)
+	pickups.xp_collected.connect(_on_xp_collected)
+	map.object_destroyed.connect(_on_object_destroyed)
+	map.crate_landed.connect(_on_crate_landed)
+	director.boss_spawned.connect(_on_boss_spawned)
+	director.wave_started.connect(_on_wave_started)
+	director.wave_cleared.connect(_on_wave_cleared)
+	director.chapter_cleared.connect(_on_chapter_cleared)
+	director.intermission_tick.connect(func(seconds: int) -> void: hud.show_countdown(seconds))
+	hud.upgrade_chosen.connect(_on_upgrade_chosen)
+	hud.reroll_requested.connect(_on_reroll_requested)
+	hud.upgrade_pressed.connect(func() -> void:
+		MainMenuUI.open_upgrades_next = true
+		_on_menu_pressed())
+	_rerolls_free = 1 + int(SaveService.get_perk_bonus("reroll")) + Premium.reroll_bonus()
+	WeaponPickup.auto_pick = bool(Controls.get_value("auto_pick"))
+	for pickup in _weapon_pickups:
+		pickup.expired.connect(_on_pickup_expired)
+	player.weapon_controller.slots_changed.connect(_refresh_slots)
+	player.dashed.connect(player.weapon_controller.charge_overdrive)
+	player.weapon_controller.overdrive_changed.connect(_on_overdrive_changed)
+	player.weapon_controller.overdrive_fired.connect(_on_overdrive_fired)
+	hud.slot_pressed.connect(_switch_slot)
+	hud.interact_pressed.connect(_try_pick)
+	hud.weapon_swiped.connect(_cycle_weapon)
+	_refresh_slots()
+	_apply_tester_flags()
+	_apply_tester_start()
+	hud.revive_requested.connect(_on_revive_requested)
+	hud.revive_declined.connect(_finish)
+	restart_requested.connect(func() -> void: _record())
+	SaveService.achievement_unlocked.connect(_on_achievement)
+
+	stats.add_flat(&"fire_rate_mult", ADRENALINE_FIRE)
+	player.set_speed_buff(ADRENALINE_SPEED)
+	player.apply_run_stats(stats)
+	hud.set_xp(xp, _xp_needed(level), level)
+	hud.set_nuts(nuts)
+	hud.set_kills(kills)
+	hud.set_time(0.0)
+	hud.show_chapter(str(chapter.get("subtitle", "")), str(chapter.get("title", "")))
+	hud.toast("АДРЕНАЛИН!", "+35% скорострельности и +15% скорости на 20 с", Color("#ff7a3d"))
+	SoundManager.play_music(StringName(str(chapter.get("music", "battle"))))
+	SoundManager.start_ambient()
+
+
+func _exit_tree() -> void:
+	Enemy.status_sink = Callable()
+	Enemy.global_speed_mult = 1.0
+	if SaveService.achievement_unlocked.is_connected(_on_achievement):
+		SaveService.achievement_unlocked.disconnect(_on_achievement)
+	super._exit_tree()
+
+
+## Приоритет автоприцела: ближайший враг, если его нет — ближайший разрушаемый объект.
+func _find_target(from: Vector2, max_distance: float) -> Node2D:
+	var enemy := enemies.find_nearest(from, max_distance)
+	if enemy != null:
+		return enemy
+	return map.find_nearest_destructible(from, max_distance)
+
+
+func _physics_process(delta: float) -> void:
+	super._physics_process(delta)
+	if _rail_combo > 0:
+		_rail_timer -= delta
+		if _rail_timer <= 0.0:
+			_rail_combo = 0
+			hud.set_rail_combo(0)
+	_number_budget = minf(_number_budget + DAMAGE_NUMBERS_PER_SEC * _fx_scale * delta, DAMAGE_NUMBERS_PER_SEC * 0.5)
+	if player == null or player.is_dead:
+		return
+	_update_interact()
+	map.update_ripples(player, fx, delta)
+	var target: Node2D = director.boss if director.boss != null and director.boss.is_alive() else null
+	if target == null and _portal != null and _portal.visible:
+		target = _portal
+	_arrow.track(camera.get_screen_center_position(), get_viewport_rect().size / camera.zoom, target)
+	_combo_timer -= delta
+	if _combo_timer <= 0.0:
+		_combo = 0
+	if _shadow_left > 0.0:
+		_shadow_left -= delta
+		if _shadow_left <= 0.0:
+			stats.add_flat(&"damage_mult", -SHADOW_BONUS)
+			player.apply_run_stats(stats)
+	if _adrenaline_left > 0.0:
+		_adrenaline_left -= delta
+		if _adrenaline_left <= 0.0:
+			stats.add_flat(&"fire_rate_mult", -ADRENALINE_FIRE)
+			player.set_speed_buff(0.0)
+			player.apply_run_stats(stats)
+
+
+func _update_hud_timer() -> void:
+	hud.set_time(director.elapsed)
+	hud.set_wave(maxi(director.wave_number, 1), director.get_enemies_left())
+
+
+func _run_summary() -> Dictionary:
+	return {
+		"wave": _waves_cleared(),
+		"best_wave": maxi(int(SaveService.data["best_wave"]), _waves_cleared()),
+		"kills": kills,
+		"level": level,
+		"time": director.elapsed,
+		"coins": nuts,
+		"gems": run_gems,
+		"bosses": bosses_killed,
+		"chapter": str(director.current_chapter().get("title", "")),
+		"weapon": player.weapon_controller.base_weapon.get_title(),
+		"loot": run_loot,
+		"blueprints": run_blueprints,
+	}
+
+
+## Подсказка после смерти: короткая, по причине; новичкам — почти всегда, остальным — раз в три смерти.
+func _death_tip() -> String:
+	if bosses_killed > 0 and not player.is_dead:
+		return ""
+	var count := int(SaveService.data.get("death_tips", 0))
+	SaveService.data["death_tips"] = count + 1
+	if count >= DEATH_TIP_NEWBIE and count % DEATH_TIP_EVERY != 0:
+		return ""
+	var boss := director.boss
+	var text: String
+	if boss != null and boss.is_alive() and boss.hp > boss.max_hp * 0.55:
+		text = ["Босс слишком жирный для твоего урона. Прокачай урон или скорость атаки.",
+			"Босс почти не поцарапан. Загляни в Прокачку: урон решает."].pick_random()
+	elif director.elapsed < DEATH_FAST_TIME:
+		text = ["Тебя слишком быстро убивают. Загляни в Прокачку и качни здоровье и броню.",
+			"Слабовато. В Прокачке есть чем это исправить."].pick_random()
+	else:
+		text = ["Ты опять отлетел. Иди качнись, пока не поздно.",
+			"Не получается? В Прокачке можно стать сильнее.",
+			"Умираешь часто: качни выживаемость. Долго бьёшь босса: качни урон."].pick_random()
+	var cheapest := 1 << 30
+	for perk_id in SaveService.PERKS:
+		if not SaveService.is_perk_maxed(perk_id):
+			cheapest = mini(cheapest, SaveService.get_perk_cost(perk_id))
+	if SaveService.get_nuts() + nuts >= cheapest:
+		text += " Монет уже хватает на улучшение."
+	return text
+
+
+func _run_summary_lines() -> PackedStringArray:
+	return PackedStringArray([
+		"Волна %d · %s" % [maxi(director.wave_number, 1), director.current_chapter().get("title", "")],
+		"Врагов: %d · Уровень %d" % [kills, level],
+		"Время: %s · Монеты: %d" % [BattleBase.format_time(director.elapsed), nuts],
+	])
+
+
+# --- Главы и волны --------------------------------------------------------------------------------
+
+func _apply_chapter_look(chapter: Dictionary) -> void:
+	var grade: Dictionary = chapter.get("grade", {})
+	if not grade.is_empty():
+		var sh: Array = grade.get("shadow", [0.1, 0.02, 0.16])
+		var hi: Array = grade.get("highlight", [0.06, 0.03, -0.02])
+		atmosphere.set_grade(Vector3(sh[0], sh[1], sh[2]), Vector3(hi[0], hi[1], hi[2]))
+
+
+func _on_wave_started(number: int, title: String, mood: String, is_boss: bool) -> void:
+	_last_marker.reset_hunt()
+	atmosphere.set_mood(mood)
+	_check_clean_sweep()
+	events.on_wave_started(is_boss)
+	atmosphere.letterbox(true)
+	get_tree().create_timer(1.9, false).timeout.connect(func() -> void: atmosphere.letterbox(false))
+	hud.show_wave_intro(director.chapter_wave(), title, is_boss)
+	SoundManager.play(&"boss_spawn" if is_boss else &"ui_confirm", -2.0, false)
+	if director.chapter_wave() >= 2 and not is_boss:
+		map.airdrop(player.global_position)
+
+
+func _on_wave_cleared(number: int) -> void:
+	events.on_wave_cleared()
+	_loot_at_clear = pickups.get_count()
+	if player != null and not player.is_dead:
+		player.visual.cheer()
+	var bonus := Economy.wave_bonus(director.chapter_wave(), director.loop)
+	nuts += bonus
+	hud.set_nuts(nuts)
+	hud.punch_nuts()
+	hud.show_wave_cleared(bonus)
+	if _last_marker.hunt_time > 0.0 and _last_marker.hunt_time <= QUICK_CLEAR_TIME and not director.is_boss_wave():
+		var golden := _last_marker.hunt_time <= GOLD_CLEAR_TIME
+		var quick := maxi(int(bonus * QUICK_CLEAR_RATIO * (1.8 if golden else 1.0)), 10)
+		nuts += quick
+		hud.set_nuts(nuts)
+		hud.toast("ЗОЛОТАЯ ЗАЧИСТКА!" if golden else "БЫСТРАЯ ЗАЧИСТКА!", "Последние враги за %.1f с: +%d" % [_last_marker.hunt_time, quick], Color("#5cf3ff"))
+	player.heal(player.max_hp * WAVE_CLEAR_HEAL)
+	fx.confetti(player.global_position + Vector2(0, -40), 70)
+	fx.ring(player.global_position, Color("#7cff6b"), 160.0)
+	atmosphere.flash(Color(0.6, 1.0, 0.6), 0.2, 0.4)
+	SoundManager.play(&"level_up", 0.0, false)
+	if number > int(SaveService.data["best_wave"]):
+		SaveService.data["best_wave"] = number
+		SaveService.check_achievements()
+
+
+## Босс главы повержен и все враги добиты: на помосте открывается портал.
+func _on_chapter_cleared(_chapter_index: int) -> void:
+	var next := ContentDB.get_chapter(director.chapter_index + 1)
+	_portal = map.open_portal(Color("#b84dff"), Color("#00f5ff") if next.get("layout", "") != "bank" else Color("#ffd257"))
+	if not _portal.entered.is_connected(_enter_portal):
+		_portal.entered.connect(_enter_portal)
+	hud.show_banner("ПОРТАЛ ОТКРЫТ!\nВперёд — %s" % (str(next.get("title", "")) + " · " + str(next.get("subtitle", "")).get_slice("· ", 1)).to_upper(), Color("#b8f0ff"), 3.2)
+	SoundManager.play(&"shield_up", 0.0, false)
+
+
+## Переход в следующую главу: затемнение, перестройка арены, Енот — у нижнего входа.
+func _enter_portal() -> void:
+	if _switching or player.is_dead:
+		return
+	_switching = true
+	SoundManager.play(&"comet_impact", -2.0, false)
+	Platform.haptic("heavy")
+	var tween := create_tween()
+	atmosphere.fade(1.0, 0.45)
+	tween.tween_interval(0.5)
+	tween.tween_callback(_switch_chapter)
+	tween.tween_interval(0.25)
+	tween.tween_callback(func() -> void:
+		atmosphere.fade(0.0, 0.6)
+		_switching = false)
+
+
+func _switch_chapter(index: int = -1) -> void:
+	var chapter := ContentDB.get_chapter(director.chapter_index + 1 if index < 0 else index)
+	enemies.release_all()
+	BulletPool.release_all()
+	lobs.clear()
+	traps.clear()
+	for pickup in _weapon_pickups:
+		pickup.clear()
+	pickups.clear()
+	map.clear()
+	map.build(layers, chapter)
+	hazards.attach_level(map)
+	_portal = null
+	player.global_position = map.player_start
+	player.velocity = Vector2.ZERO
+	set_camera_bounds(map.bounds)
+	camera.global_position = player.global_position
+	camera.reset_smoothing()
+	minimap.rebuild()
+	events.reset()
+	_apply_chapter_look(chapter)
+	director.next_chapter()
+	player.heal(player.max_hp)
+	SoundManager.play_music(StringName(str(chapter.get("music", "battle"))))
+	hud.show_chapter(str(chapter.get("subtitle", "")), str(chapter.get("title", "")))
+
+
+# --- Враги ---------------------------------------------------------------------------------------
+
+func _on_bullet_hit(bullet: Bullet, target: Node2D) -> void:
+	super._on_bullet_hit(bullet, target)
+	if bullet.team == Bullet.Team.PLAYER and target is Enemy:
+		status.on_player_hit(bullet, target as Enemy)
+	if bullet.weapon.pierce_ramp > 0.0 and target is Enemy:
+		_bump_rail_combo(bullet.pierced)
+		if bullet.pierced == 3 or bullet.pierced == 5 or bullet.pierced == 8 or bullet.pierced == 12:
+			fx.popup(bullet.global_position + Vector2(0, -70), "КАССА ×%d" % bullet.pierced, Color("#ffc93c"), 30.0)
+			fx.burst(bullet.global_position, Color("#ffe27a"), 8, 260.0, 3.5)
+			add_shake(0.2)
+
+
+func _on_enemy_status(enemy: Enemy, amount: float, kind: String) -> void:
+	status.on_status_damage(enemy, amount, kind)
+	if enemy.data.is_boss():
+		hud.update_boss(maxf(enemy.hp, 0.0), enemy.max_hp)
+
+
+func _on_enemy_damaged(enemy: Enemy, amount: float, is_crit: bool) -> void:
+	if _number_budget >= 1.0 or is_crit:
+		_number_budget -= 1.0
+		fx.number(enemy.get_aim_point() + Vector2(0, -enemy.data.radius * 1.6), amount, FxManager.DAMAGE_COLOR, is_crit)
+	if is_crit:
+		SaveService.add_stat("crits", 1, false)
+	if enemy.data.is_boss():
+		hud.update_boss(maxf(enemy.hp, 0.0), enemy.max_hp)
+
+
+## Пуля в щит: искры, звон, короткое «БЛОК» — игрок сразу понимает, что надо зайти сбоку.
+func _on_enemy_blocked(_enemy: Enemy, at: Vector2) -> void:
+	fx.burst(at, Color("#ffe27a"), 8, 260.0, 3.0)
+	if randf() < 0.35:
+		fx.popup(at + Vector2(0, -16), "БЛОК", Color("#ffe27a"), 24.0)
+	SoundManager.play_pitched(&"hit", 1.7, -4.0)
+
+
+## Крупье исчезает в вихре карт: вспышка там и тут, чтобы глаз успел за ним.
+func _on_enemy_blinked(_enemy: Enemy, from: Vector2, to: Vector2) -> void:
+	for at in [from, to]:
+		fx.burst(at + Vector2(0, -24), Color("#ff2e4d"), 12, 300.0, 4.0)
+		fx.burst(at + Vector2(0, -24), Color.WHITE, 8, 220.0, 3.0)
+		fx.ring(at, Color("#ffd257"), 46.0)
+	SoundManager.play(&"wing_flap", -4.0)
+
+
+func _on_enemy_fx(_enemy: Enemy, kind: String, at: Vector2, radius: float) -> void:
+	match kind:
+		"transform":
+			fx.burst(at + Vector2(0, -60), Color("#ffd257"), 60, 520.0, 5.0)
+			fx.chunks(at, Color("#6a6070"), 26, 420.0, 6.0)
+			fx.chunks(at, Color("#ffd257"), 14, 380.0, 5.0)
+			fx.ring(at, Color.WHITE, 260.0)
+			fx.sprite_flash(ArenaProp.texture_of("res://assets/props/ch1/fx_explosion.png"), at + Vector2(0, -60), 320.0, 0.55)
+			atmosphere.flash(Color.WHITE, 0.55, 0.5)
+			add_shake(1.0)
+			hitstop(0.12)
+		"stomp":
+			fx.sprite_flash(ArenaProp.texture_of("res://assets/bosses/mud_wave.png"), at, radius * 2.2, 0.55)
+			fx.dust(at, 16, radius)
+			fx.ring(at, Color("#c9a26a"), radius)
+			add_shake(0.6)
+		"muzzle":
+			fx.muzzle_flash(at, (player.global_position - at).angle(), Color("#ffb347"), 1.4)
+		"summon":
+			director.summon_minions(int(radius))
+			fx.ring(at, Color("#ffd257"), 200.0)
+			fx.dust(at, 14, 160.0)
+			hud.show_banner("ПОДМОГА!", Color("#ffd257"), 1.4)
+		"repair":
+			var healer := _enemy
+			var healed := 0
+			for other in enemies.get_active():
+				if other == healer or not other.is_alive() or other.data.is_boss() or other.hp >= other.max_hp:
+					continue
+				if other.global_position.distance_to(at) > radius:
+					continue
+				other.hp = minf(other.max_hp, other.hp + other.max_hp * healer.data.heal_pct)
+				healed += 1
+				fx.burst(other.global_position + Vector2(0, -20), Color("#5ff2ff"), 5, 160.0, 2.5)
+			if healed > 0:
+				fx.ring(at, Color("#5ff2ff"), radius * 0.6)
+		"enrage":
+			hud.show_banner("ЯРОСТЬ! БОСС УСКОРИЛСЯ", UiStyle.DANGER, 2.2)
+			atmosphere.flash(Color(1.0, 0.2, 0.2), 0.4, 0.6)
+			hud.set_boss_fury()
+			add_shake(0.6)
+			SoundManager.play(&"boss_spawn", 0.0, false)
+
+
+func _on_boss_phase(boss: Enemy, phase: int) -> void:
+	if phase < 2:
+		return
+	hud.set_boss_fury()
+	var text := "МЕХ РАЗБИТ! МАГНАТ В ЯРОСТИ"
+	match boss.data.boss_pattern:
+		"overlord":
+			text = "ТРОН РАЗВАЛИЛСЯ! КОРОЛЬ В ЯРОСТИ"
+		"baron":
+			text = "БАРОН ПЬЯН В ХЛАМ! ПИВОМЁТ НА ПОЛНУЮ"
+		"shaman":
+			text = "ГРОЗА НАБИРАЕТ СИЛУ! ШАМАН В ЯРОСТИ"
+	hud.show_banner(text, UiStyle.DANGER, 2.4)
+	SoundManager.play(&"boss_spawn", 0.0, false)
+	Platform.haptic("heavy")
+
+
+func _on_enemy_died(enemy: Enemy) -> void:
+	var data := enemy.data
+	var at := enemy.global_position
+	var fall_dir := 1.0 if randf() < 0.5 else -1.0
+	if enemy.is_framed():
+		fx.frame_corpse(enemy.get_sprite(), at + enemy.get_sprite_offset(), enemy.get_sprite_scale())
+	else:
+		fx.corpse(enemy.get_texture(), enemy.get_corpse_origin(), enemy.get_sprite_scale(), fall_dir, enemy.get_corpse_tint())
+	var body := enemy.get_aim_point()
+	fx.burst(body, data.fx_color, 16 if not data.is_boss() else 70, 340.0, 4.5)
+	fx.chunks(body, data.fx_color, 7 if not data.is_boss() else 30, 240.0, 5.0)
+	fx.chunks(body, Color("#8e8aa6"), 4, 180.0, 4.0)
+	fx.splat(at + Vector2(0, 6), data.fx_color.darkened(0.2), data.radius * 1.3)
+	fx.ring(at, data.fx_color, data.radius * 2.2)
+	if enemy.self_destructed:
+		return
+	kills += 1
+	hud.set_kills(kills)
+	SaveService.add_stat("kills", 1, false)
+	SaveService.add_stat("k_" + String(data.id), 1, false)
+	status.on_enemy_died(enemy, at)
+	dash_trail.on_enemy_died()
+	pickups.spawn_xp(at, data.xp)
+	if enemy.loot > 0:
+		pickups.spawn(at, enemy.loot)
+		pickups.spawn_xp_gold(at + Vector2(0, -10), 6 + director.chapter_wave())
+		SaveService.add_stat("marauders", 1, false)
+		hud.toast("МАРОДЁР ПОЙМАН!", "+%d монет добычи" % enemy.loot, Color("#ffd23f"))
+		fx.confetti(at, 40)
+	if randf() < data.nut_drop_chance and data.nut_drop > 0:
+		pickups.spawn(at, data.nut_drop * (2 if randf() < stats.get_stat(&"double_drop") else 1))
+	if data.is_boss():
+		_on_boss_killed(enemy, at)
+		return
+	SoundManager.play(&"enemy_death")
+	add_shake(0.1)
+	hitstop(KILL_HITSTOP)
+
+
+func _on_enemy_exploded(_enemy: Enemy, at: Vector2, radius: float, damage: float) -> void:
+	BulletPool.explode(at, radius, damage, Bullet.Team.ENEMY, Color("#b6ff00"), 1.2)
+
+
+func _on_boss_spawned(boss: Enemy) -> void:
+	hud.show_boss(boss.data.display_name, boss.hp, boss.max_hp)
+	hud.show_banner("БОСС: %s!" % boss.data.display_name.to_upper(), UiStyle.DANGER)
+	var passive := BossBrain.passive_text(boss.data.boss_pattern)
+	if not passive.is_empty():
+		hud.toast("ПАССИВКА БОССА", passive, Color("#ff9a3d"))
+	add_shake(0.6)
+	fx.ring(boss.global_position, UiStyle.DANGER, 180.0)
+	fx.dust(boss.global_position + Vector2(0, 30), 16, 140.0)
+	SoundManager.play(&"boss_spawn", 0.0, false)
+	Platform.haptic("heavy")
+
+
+func _on_miniboss_killed(boss: Enemy, at: Vector2) -> void:
+	add_shake(0.8)
+	hitstop(BOSS_HITSTOP * 0.7)
+	atmosphere.flash(Color.WHITE, 0.4, 0.5)
+	hud.hide_boss()
+	hud.show_banner("%s ПОВЕРЖЕН!" % boss.data.display_name.to_upper(), UiStyle.GOLD, 2.2)
+	SoundManager.play(&"comet_impact", 0.0, false)
+	pickups.spawn(at, boss.data.nut_drop)
+	pickups.spawn_xp_gold(at, 30 + director.chapter_wave() * 4)
+	var reward := Economy.boss_reward(director.chapter_index, director.loop)
+	run_gems += int(int(reward["gems"]) * 0.5)
+	hud.toast("МИНИ-БОСС", "+%s" % Economy.format_gems(int(int(reward["gems"]) * 0.5)), Color("#ff7ae0"))
+	_drop_weapon(_roll_weapon("epic" if randf() < 0.5 else "rare"), at, true)
+	fx.confetti(at, 30)
+
+
+func _on_boss_killed(boss: Enemy, at: Vector2) -> void:
+	# Узел босса вернётся в пул и достанется обычному врагу — ссылку снимаем сразу,
+	# иначе эскорт, стрелка и мини-карта «увидят босса» в случайной крысе.
+	var mini := director.is_mini_wave()
+	director.on_boss_killed()
+	if mini:
+		_on_miniboss_killed(boss, at)
+		return
+	_clear_remaining_enemies()
+	bosses_killed += 1
+	SaveService.add_boss_kill()
+	add_shake(1.0)
+	hitstop(BOSS_HITSTOP)
+	atmosphere.flash(Color.WHITE, 0.6, 0.6)
+	hud.hide_boss()
+	hud.show_banner("%s ПОВЕРЖЕН!" % boss.data.display_name.to_upper(), UiStyle.GOLD, 2.6)
+	SoundManager.play(&"comet_impact", 0.0, false)
+	pickups.spawn(at, boss.data.nut_drop)
+	var reward := Economy.boss_reward(director.chapter_index, director.loop)
+	run_gems += int(reward["gems"])
+	var shards: Array = reward["blueprints"]
+	for shard in shards:
+		run_blueprints.append(shard)
+	var shard_text := Economy.blueprint_title(shards[0]) if not shards.is_empty() else "—"
+	hud.toast("НАГРАДА БОССА", "+%s · чертёж: %s" % [Economy.format_gems(int(reward["gems"])), shard_text], Color("#ff7ae0"))
+	_drop_weapon(_roll_weapon("legendary" if randf() < Economy.BOSS_LEGENDARY_CHANCE else "epic"), at, true)
+	fx.confetti(at, 45)
+	_bonus_choices += 1
+	_pending_levelups += 1
+	if not _level_up_open:
+		_level_up_open = true
+		get_tree().create_timer(1.8, false).timeout.connect(_after_boss_ad)
+
+
+## Межстраничная реклама после босса (игра на паузе); VIP 2+ и «Без рекламы» её отключают.
+func _after_boss_ad() -> void:
+	if Premium.ads_removed():
+		_open_level_up()
+		return
+	get_tree().paused = true
+	Platform.show_interstitial(func() -> void:
+		get_tree().paused = false
+		_open_level_up())
+
+
+## Смерть босса гасит эскорт и миньонов: рассыпаются в опыт без урона игроку.
+func _clear_remaining_enemies() -> void:
+	for e in enemies.get_active().duplicate():
+		if e == null or e.data == null or e.data.is_boss():
+			continue
+		pickups.spawn_xp(e.global_position, e.data.xp)
+		fx.burst(e.global_position, e.data.fx_color, 8, 220.0, 3.5)
+		enemies.release(e)
+
+
+# --- Лут -----------------------------------------------------------------------------------------
+
+func _on_object_destroyed(object: DestructibleObject) -> void:
+	pickups.spawn(object.global_position + Vector2(0, -10), object.nut_reward)
+	object.play_break_fx(fx)
+	SoundManager.play(object.get_sound())
+	add_shake(0.15)
+	if object.kind == DestructibleObject.Kind.WEAPON_CRATE:
+		SaveService.add_stat("crates", 1, false)
+		fx.burst(object.global_position + Vector2(0, -24), object.get_rarity_color(), 20, 320.0, 4.5)
+		fx.ring(object.global_position, object.get_rarity_color(), 70.0)
+		_drop_weapon(_roll_weapon(object.loot_rarity), object.global_position + Vector2(0, 4), true)
+
+
+func _on_crate_landed(crate: DestructibleObject) -> void:
+	fx.dust(crate.global_position, 12, 70.0)
+	fx.ring(crate.global_position, crate.get_rarity_color(), 80.0)
+	add_shake(0.2)
+	SoundManager.play(&"crate_break", -6.0)
+
+
+## Ствол заданной редкости (или ближайшей ниже) с тиром, растущим от номера волны.
+func _roll_weapon(rarity: String) -> WeaponData:
+	var start := WeaponData.RARITIES.find(rarity)
+	for r in range(maxi(start, 0), -1, -1):
+		var pool: Array[WeaponData] = []
+		var total := 0.0
+		for weapon in WeaponDB.get_player_weapons():
+			if weapon.rarity == WeaponData.RARITIES[r] and weapon.loot_weight > 0.0:
+				pool.append(weapon)
+				total += weapon.loot_weight
+		if pool.is_empty():
+			continue
+		var roll := randf() * total
+		var chosen: WeaponData = pool.back()
+		for weapon in pool:
+			roll -= weapon.loot_weight
+			if roll <= 0.0:
+				chosen = weapon
+				break
+		var tier := 1
+		var chance := TIER_CHANCE_BASE + TIER_CHANCE_PER_WAVE * director.chapter_wave() + 0.1 * director.chapter_index
+		while tier < 3 and randf() < chance:
+			tier += 1
+			chance *= 0.4
+		return chosen.with_tier(tier)
+	return WeaponDB.get_weapon(StringName(SaveService.START_WEAPON)).with_tier(1)
+
+
+func _drop_weapon(weapon: WeaponData, at: Vector2, loot: bool, delay: float = 0.4) -> void:
+	for pickup in _weapon_pickups:
+		if not pickup.active:
+			pickup.drop(weapon, at, loot, delay)
+			return
+	_weapon_pickups[0].drop(weapon, at, loot, delay)
+
+
+func _refresh_slots() -> void:
+	var wc := player.weapon_controller
+	var close := false
+	var rail := false
+	for i in wc.slot_count:
+		if wc.slots[i] != null:
+			close = close or wc.slots[i].is_close_range()
+			rail = rail or wc.slots[i].dash_charge
+	stats.close_context = close
+	stats.rail_context = rail
+	hud.set_slots(wc.slots.slice(0, wc.slot_count), wc.active_slot, wc.slot_count)
+
+
+func _switch_slot(index: int) -> void:
+	if player.is_dead or get_tree().paused:
+		return
+	if player.weapon_controller.switch_slot(index):
+		_after_switch()
+
+
+func _cycle_weapon() -> void:
+	if player.is_dead or get_tree().paused:
+		return
+	if player.weapon_controller.cycle_slot():
+		_after_switch()
+
+
+func _after_switch() -> void:
+	var weapon := player.weapon_controller.base_weapon
+	SoundManager.play(&"weapon_pickup", -6.0, false)
+	fx.popup(player.global_position + Vector2(0, -90), weapon.short_name.to_upper(), weapon.get_rarity_color(), 28.0)
+	fx.ring(player.global_position, weapon.get_rarity_color(), 44.0)
+	player.visual.pickup_pop()
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed(&"interact"):
+		_try_pick()
+	elif event.is_action_pressed(&"weapon_next"):
+		_cycle_weapon()
+	elif event.is_action_pressed(&"weapon_1"):
+		_switch_slot(0)
+	elif event.is_action_pressed(&"weapon_2"):
+		_switch_slot(1)
+	elif event.is_action_pressed(&"weapon_3"):
+		_switch_slot(2)
+	else:
+		super._unhandled_input(event)
+
+
+func _nearest_pickup() -> WeaponPickup:
+	var best: WeaponPickup = null
+	var best_d := WeaponPickup.INTERACT_RADIUS * WeaponPickup.INTERACT_RADIUS
+	for pickup in _weapon_pickups:
+		if not pickup.active:
+			continue
+		var d := pickup.global_position.distance_squared_to(player.global_position)
+		if d < best_d:
+			best_d = d
+			best = pickup
+	return best
+
+
+func _update_interact() -> void:
+	var target := _nearest_pickup()
+	for pickup in _weapon_pickups:
+		pickup.focused = pickup == target and pickup.can_pick()
+	if target == null or not target.can_pick():
+		hud.set_interact(null)
+		return
+	var wc := player.weapon_controller
+	var note := "в пустой слот %d" % (wc.first_empty_slot() + 1) if wc.first_empty_slot() >= 0 else "заменит: %s" % wc.base_weapon.short_name
+	hud.set_interact(target.weapon, note)
+
+
+func _try_pick() -> void:
+	if player.is_dead or get_tree().paused:
+		return
+	var target := _nearest_pickup()
+	if target != null and target.can_pick():
+		_on_weapon_picked(target)
+
+
+func _on_pickup_expired(pickup: WeaponPickup) -> void:
+	if pickup.weapon == null:
+		pickup.clear()
+		return
+	fx.burst(pickup.global_position + Vector2(0, -30), pickup.weapon.get_rarity_color(), 10, 200.0, 3.0)
+	pickup.clear()
+
+
+## Каждый враг, пробитый лучом рельсотрона, растит комбо; рывок-овердрайв даёт самые длинные цепочки.
+func _bump_rail_combo(pierced: int) -> void:
+	_rail_combo += 1
+	_rail_timer = RAIL_COMBO_WINDOW
+	hud.set_rail_combo(_rail_combo)
+	if _rail_combo % RAIL_COMBO_MEGA == 0:
+		fx.popup(player.global_position + Vector2(0, -130), "МЕГА-КАССА!", Color("#ff4fd8"), 46.0)
+		fx.confetti(player.global_position, 30)
+		add_shake(0.6)
+		player.heal(player.max_hp * 0.06)
+		SoundManager.play(&"level_up", -3.0, false)
+
+
+## Тестер: старт с выбранной главы и волны (в том числе сразу на босса).
+func _apply_tester_start() -> void:
+	var chapter_number := Tester.start_chapter()
+	var wave := Tester.start_wave()
+	if chapter_number == 0 and wave == 1:
+		return
+	if chapter_number > 0:
+		_switch_chapter(chapter_number)
+	director.wave_number = chapter_number * WaveDirector.WAVES_PER_CHAPTER + wave - 1
+
+
+func _apply_tester_flags() -> void:
+	if Tester.flag("dmg"):
+		stats.add_flat(&"damage_mult", 9.0)
+	if Tester.flag("speed"):
+		stats.add_flat(&"move_speed_mult", 0.6)
+		stats.add_flat(&"dash_haste", 0.6)
+	player.apply_run_stats(stats)
+	if Tester.flag("levels"):
+		_pending_levelups += 10
+		_level_up_open = true
+		get_tree().create_timer(1.5, false).timeout.connect(_open_level_up)
+
+
+func _on_overdrive_changed(active: bool) -> void:
+	if not active:
+		return
+	fx.ring(player.global_position, Color("#ffc93c"), 70.0)
+	fx.burst(player.global_position + Vector2(0, -20), Color("#ffe27a"), 10, 260.0, 3.5)
+	fx.popup(player.global_position + Vector2(0, -100), "ЗАРЯЖЕН!", Color("#ffe27a"), 30.0)
+	SoundManager.play(&"dash_ready", -2.0, false)
+
+
+func _on_overdrive_fired() -> void:
+	add_shake(0.55)
+	hitstop(0.05)
+	atmosphere.flash(Color("#ffd257"), 0.3, 0.3)
+	fx.popup(player.global_position + Vector2(0, -110), "РЕЛЬСА!", Color("#fff2b0"), 44.0)
+
+
+func _on_weapon_picked(pickup: WeaponPickup) -> void:
+	var wc := player.weapon_controller
+	var found := pickup.weapon
+	var was_loot := pickup.is_loot
+	pickup.clear()
+	var slot := wc.first_empty_slot()
+	var old: WeaponData = null
+	if slot >= 0:
+		wc.set_slot(slot, found)
+		wc.switch_slot(slot)
+	else:
+		old = wc.base_weapon
+		wc.set_slot(wc.active_slot, found)
+	if was_loot:
+		var kept := randf() < Economy.keep_chance(found.rarity)
+		if kept:
+			run_loot.append([String(found.id), found.tier])
+		var fate := "★ останется в арсенале" if kept else "только на этот забег"
+		hud.toast(found.get_title(), "%s · %s" % [WeaponData.RARITY_NAMES[found.rarity], fate], found.get_rarity_color())
+	if old != null and not (old.id == found.id and old.tier == found.tier):
+		_drop_weapon(old, player.global_position + Vector2(0, 6), false, WEAPON_SWAP_DELAY)
+	player.visual.pickup_pop()
+	fx.popup(player.global_position + Vector2(0, -90), found.short_name.to_upper(), found.get_rarity_color(), 30.0)
+	fx.ring(player.global_position, found.get_rarity_color(), 60.0)
+	SoundManager.play(&"weapon_pickup", 0.0, false)
+
+
+## Награда за чистый сбор: на зачистке волны на полу лежало много лута, а к началу следующей его почти нет.
+func _check_clean_sweep() -> void:
+	var was := _loot_at_clear
+	_loot_at_clear = 0
+	if was < CLEAN_SWEEP_MIN or pickups.get_count() > 1:
+		return
+	var bonus := maxi(int(Economy.wave_bonus(maxi(director.chapter_wave() - 1, 1), director.loop) * CLEAN_SWEEP_RATIO), 10)
+	nuts += bonus
+	hud.set_nuts(nuts)
+	_on_xp_collected(CLEAN_SWEEP_XP + level)
+	hud.toast("ЧИСТЫЙ СБОР!", "Весь лут подобран: +%d монет и опыт" % bonus, Color("#5cf3ff"))
+	fx.popup(player.global_position + Vector2(0, -100), "+%d" % bonus, Color("#ffd23f"), 30.0)
+
+
+func _on_nuts_collected(amount: int) -> void:
+	nuts += int(amount * events.coin_mult + randf()) if events.coin_mult > 1.0 else amount
+	hud.set_nuts(nuts)
+	hud.punch_nuts()
+	_combo = mini(_combo + 1, 14)
+	_combo_timer = PICKUP_COMBO_WINDOW
+	SoundManager.play_pitched(&"nut_pickup", 1.0 + 0.045 * _combo)
+	player.visual.pickup_pop()
+
+
+func _on_xp_collected(amount: int) -> void:
+	hud.flash_xp()
+	fx.ring(player.global_position + Vector2(0, 10), Color("#00f5ff"), 30.0)
+	SoundManager.play_pitched(&"nut_pickup", 1.35 + 0.03 * _combo, -4.0)
+	_gain_xp(amount)
+
+
+# --- Опыт и прокачка -----------------------------------------------------------------------------
+
+func _gain_xp(amount: int) -> void:
+	if finished:
+		return
+	xp += amount
+	var needed := _xp_needed(level)
+	var leveled := false
+	while xp >= needed:
+		xp -= needed
+		level += 1
+		_pending_levelups += 1
+		needed = _xp_needed(level)
+		leveled = true
+	hud.set_xp(xp, needed, level)
+	if leveled:
+		_celebrate_level_up()
+	if _pending_levelups > 0 and not _level_up_open:
+		_level_up_open = true
+		get_tree().create_timer(LEVEL_UP_DELAY, false).timeout.connect(_open_level_up)
+
+
+## Яркий момент левел-апа до паузы: вспышка, кольца, конфетти и надпись над Енотом.
+func _celebrate_level_up() -> void:
+	if player != null and not player.is_dead:
+		player.visual.cheer()
+	var at := player.global_position
+	atmosphere.flash(Color(0.6, 1.0, 1.0), 0.35, 0.45)
+	fx.ring(at, Color("#00f5ff"), 120.0)
+	fx.ring(at, Color.WHITE, 70.0)
+	fx.burst(at + Vector2(0, -30), Color("#00f5ff"), 30, 380.0, 4.5)
+	fx.confetti(at + Vector2(0, -30), 30)
+	fx.popup(at + Vector2(0, -110), "УРОВЕНЬ %d!" % level, Color("#7df9ff"), 42.0)
+	SoundManager.play(&"level_up", 0.0, false)
+
+
+func _xp_needed(for_level: int) -> int:
+	return XP_BASE + XP_STEP * for_level
+
+
+func _open_level_up() -> void:
+	if finished or _pending_levelups <= 0 or player.is_dead:
+		_level_up_open = false
+		return
+	var bonus := _bonus_choices > 0
+	var luck := clampf(float(level) * 0.015, 0.0, 0.35) + (0.3 if bonus else 0.0)
+	var choices := stats.roll_choices(ContentDB.get_upgrades(), 3, luck, 1 if bonus else 0)
+	if choices.is_empty():
+		_pending_levelups = 0
+		_level_up_open = false
+		return
+	get_tree().paused = true
+	_show_choices(choices, bonus)
+	if bonus:
+		_bonus_choices -= 1
+
+
+func _reroll_cost() -> int:
+	var early := clampf(1.2 - float(level) * 0.025, 0.55, 1.2)
+	var haggle := 1.0 - SaveService.get_perk_bonus("haggle")
+	var deal := 0.5 if _reroll_deal else 1.0
+	return maxi(int(round(REROLL_BASE_COST * pow(REROLL_GROWTH, _rerolls_paid) * early * haggle * deal / 5.0)) * 5, 5)
+
+
+func _reroll_label() -> String:
+	if _rerolls_free > 0:
+		return "РЕРОЛЛ  ·  бесплатно ×%d  (R)" % _rerolls_free
+	return "РЕРОЛЛ  ·  %d орехов%s  (R)" % [_reroll_cost(), " -50%" if _reroll_deal else ""]
+
+
+func _show_choices(choices: Array[UpgradeData], bonus: bool) -> void:
+	_current_bonus = bonus
+	_last_choices.clear()
+	for u in choices:
+		_last_choices.append(u.id)
+	hud.show_level_up(choices, level - _pending_levelups + 1, stats, bonus, _reroll_label(), _rerolls_free > 0 or nuts >= _reroll_cost())
+
+
+func _on_reroll_requested() -> void:
+	if not _level_up_open:
+		return
+	if _rerolls_free > 0:
+		_rerolls_free -= 1
+	else:
+		var cost := _reroll_cost()
+		if nuts < cost:
+			SoundManager.play(&"ui_click", -4.0)
+			return
+		nuts -= cost
+		_rerolls_paid += 1
+		_reroll_deal = false
+		hud.set_nuts(nuts)
+	SoundManager.play(&"merge", -4.0, false)
+	var luck := clampf(float(level) * 0.015, 0.0, 0.35) + (0.3 if _current_bonus else 0.0)
+	var choices := stats.roll_choices(ContentDB.get_upgrades(), 3, luck, 1 if _current_bonus else 0, _last_choices)
+	if not choices.is_empty():
+		_show_choices(choices, _current_bonus)
+
+
+func _on_upgrade_chosen(upgrade: UpgradeData) -> void:
+	SaveService.add_stat("picks", 1, false)
+	SoundManager.play(&"ui_confirm")
+	stats.apply(upgrade)
+	if upgrade.stat == &"heal_pct":
+		player.heal(player.max_hp * upgrade.value)
+	player.apply_run_stats(stats)
+	_sync_drones()
+	_pending_levelups -= 1
+	if _pending_levelups > 0:
+		_open_level_up()
+	else:
+		_level_up_open = false
+		get_tree().paused = false
+
+
+func _sync_drones() -> void:
+	var wanted := int(stats.get_stat(&"drone_count"))
+	while _drones.size() < wanted:
+		var drone := JunkDrone.new()
+		drone.setup(player, enemies, stats, _drones.size())
+		drone.global_position = player.global_position
+		layers.fx.add_child(drone)
+		_drones.append(drone)
+
+
+func _on_player_dashed() -> void:
+	super._on_player_dashed()
+	if SaveService.get_character_id() == "night":
+		if _shadow_left <= 0.0:
+			stats.add_flat(&"damage_mult", SHADOW_BONUS)
+			player.apply_run_stats(stats)
+		_shadow_left = SHADOW_TIME
+	SaveService.add_stat("dashes", 1, false)
+
+
+func _on_achievement(achievement: Dictionary) -> void:
+	var reward := "+" + SaveService.format_coins(int(achievement["nuts"])) if int(achievement["nuts"]) > 0 else "+" + Economy.format_gems(int(achievement["dust"]))
+	hud.toast("АЧИВКА: %s" % achievement["title"], "%s · %s" % [achievement["description"], reward], UiStyle.GOLD)
+	SoundManager.play(&"achievement", 0.0, false)
+
+
+# --- Смерть, возрождение, конец забега -----------------------------------------------------------
+
+func _on_player_died() -> void:
+	fx.burst(player.global_position, UiStyle.DANGER, 50, 380.0, 5.0)
+	fx.chunks(player.global_position, Color("#8e8aa6"), 14, 260.0, 5.0)
+	add_shake(1.0)
+	atmosphere.flash(Color(1.0, 0.1, 0.1), 0.5, 0.8)
+	get_tree().create_timer(DEATH_DELAY, false).timeout.connect(_offer_revive)
+
+
+## Окно второго шанса: 10 секунд, реклама (раз за забег) или неонит (цена растёт).
+func _offer_revive() -> void:
+	if finished:
+		return
+	get_tree().paused = true
+	hud.show_revive(Economy.revive_cost(revives_used), SaveService.get_gems(), revives_used == 0, _run_summary())
+
+
+func _on_revive_requested(with_ad: bool) -> void:
+	if with_ad:
+		Platform.show_rewarded_ad(func(ok: bool) -> void:
+			if ok:
+				_revive()
+			else:
+				hud.revive_failed("Реклама не досмотрена"))
+		return
+	if SaveService.spend_gems(Economy.revive_cost(revives_used)):
+		_revive()
+	else:
+		hud.revive_failed("Не хватает неонита")
+
+
+func _revive() -> void:
+	revives_used += 1
+	hud.hide_revive()
+	get_tree().paused = false
+	player.revive(REVIVE_HP, REVIVE_INVULN)
+	BulletPool.release_all()
+	lobs.clear()
+	traps.clear()
+	BulletPool.explode(player.global_position, REVIVE_BLAST, 0.0, Bullet.Team.PLAYER, Color("#7df9ff"), 2.4)
+	fx.ring(player.global_position, Color("#7df9ff"), REVIVE_BLAST)
+	fx.confetti(player.global_position + Vector2(0, -30), 50)
+	atmosphere.flash(Color(0.6, 1.0, 1.0), 0.5, 0.6)
+	SoundManager.play(&"level_up", 0.0, false)
+	hud.toast("ВТОРОЙ ШАНС!", "60% здоровья и 2.5 с неуязвимости", Color("#7df9ff"))
+
+
+func _on_menu_pressed() -> void:
+	_record()
+	super._on_menu_pressed()
+
+
+func _waves_cleared() -> int:
+	return maxi(director.wave_number - (0 if director.phase == WaveDirector.Phase.INTERMISSION or director.phase == WaveDirector.Phase.PORTAL else 1), 0)
+
+
+func _record() -> Dictionary:
+	if _recorded:
+		return {}
+	_recorded = true
+	return SaveService.record_run({
+		"nuts": nuts,
+		"time": director.elapsed,
+		"wave": _waves_cleared(),
+		"kills": kills,
+		"loot": run_loot,
+		"gems": run_gems,
+		"blueprints": run_blueprints,
+		"bosses": bosses_killed,
+	})
+
+
+func _finish() -> void:
+	if finished:
+		return
+	hud.hide_revive()
+	var summary := _run_summary()
+	summary["tip"] = _death_tip()
+	var result := _record()
+	summary["record"] = result.get("record", false)
+	summary["total_coins"] = SaveService.get_coins()
+	finished = true
+	Engine.time_scale = 1.0
+	get_tree().paused = true
+	SoundManager.stop_all_loops()
+	SoundManager.stop_ambient()
+	SoundManager.stop_music()
+	SoundManager.play(&"victory" if bosses_killed > 0 else &"defeat", 0.0, false)
+	hud.show_run_result(summary)
+
+
+func _make_glow() -> WorldEnvironment:
+	var node := WorldEnvironment.new()
+	var env := RaidEnvironment.build_environment()
+	env.glow_hdr_threshold = 0.72
+	env.glow_intensity = 1.25
+	env.glow_strength = 1.0
+	node.environment = env
+	return node
+
+
+## Неоновая стрелка у края экрана к боссу или открытому порталу.
+class TargetArrow:
+	extends Node2D
+
+	const EDGE_MARGIN := 64.0
+	const COLOR := Color("#ff2ea6")
+
+	var _pulse := 0.0
+
+	func track(screen_center: Vector2, view_size: Vector2, target: Node2D) -> void:
+		if target == null or not is_instance_valid(target):
+			visible = false
+			return
+		var half := view_size * 0.5 - Vector2.ONE * EDGE_MARGIN
+		var offset := target.global_position - screen_center
+		if absf(offset.x) < half.x + EDGE_MARGIN and absf(offset.y) < half.y + EDGE_MARGIN:
+			visible = false
+			return
+		var scale_to_edge := minf(half.x / maxf(absf(offset.x), 0.001), half.y / maxf(absf(offset.y), 0.001))
+		global_position = screen_center + offset * scale_to_edge
+		rotation = offset.angle()
+		modulate = Color("#b8f0ff") if target is Portal else Color.WHITE
+		visible = true
+
+	func _process(delta: float) -> void:
+		if visible:
+			_pulse += delta * 6.0
+			queue_redraw()
+
+	func _draw() -> void:
+		var grow := 1.0 + 0.12 * sin(_pulse)
+		var tip := PackedVector2Array([Vector2(26, 0) * grow, Vector2(-14, -18) * grow, Vector2(-6, 0) * grow, Vector2(-14, 18) * grow])
+		draw_colored_polygon(tip, Color(COLOR, 0.35))
+		draw_polyline(PackedVector2Array([tip[0], tip[1], tip[2], tip[3], tip[0]]), COLOR, 4.0, true)
+		draw_circle(Vector2(-26, 0), 7.0, Color(COLOR, 0.8))

@@ -1,0 +1,815 @@
+{
+  "version": 1,
+  "upgrades": [
+    {
+      "upgrade_id": "damage_up",
+      "title": "Заточка",
+      "description": "+25% урона",
+      "stat": "damage_mult",
+      "value": 0.25,
+      "max_stacks": 8,
+      "color": "#FF4D6D",
+      "category": "weapon",
+      "rarity": "common"
+    },
+    {
+      "upgrade_id": "fire_rate_up",
+      "title": "Турбо-спуск",
+      "description": "+20% скорострельности",
+      "stat": "fire_rate_mult",
+      "value": 0.2,
+      "max_stacks": 8,
+      "color": "#FFB23F",
+      "category": "weapon",
+      "rarity": "common"
+    },
+    {
+      "upgrade_id": "crit",
+      "title": "Меткий глаз",
+      "description": "+8% шанс крита",
+      "stat": "crit_chance_add",
+      "value": 0.08,
+      "max_stacks": 4,
+      "color": "#FF7A3D",
+      "category": "weapon",
+      "rarity": "common"
+    },
+    {
+      "upgrade_id": "reach",
+      "title": "Разгон",
+      "description": "+20% скорости и дальности снарядов",
+      "stat": "range_mult",
+      "value": 0.2,
+      "max_stacks": 3,
+      "color": "#40C4FF",
+      "category": "weapon",
+      "rarity": "common"
+    },
+    {
+      "upgrade_id": "multishot",
+      "title": "Лишний ствол",
+      "description": "+1 снаряд за выстрел",
+      "stat": "extra_projectiles",
+      "value": 1,
+      "max_stacks": 4,
+      "color": "#00E5FF",
+      "category": "weapon",
+      "rarity": "rare"
+    },
+    {
+      "upgrade_id": "ricochet",
+      "title": "Рикошет",
+      "description": "+1 отскок к следующему врагу",
+      "stat": "extra_ricochets",
+      "value": 1,
+      "max_stacks": 4,
+      "color": "#7C4DFF",
+      "category": "weapon",
+      "rarity": "rare"
+    },
+    {
+      "upgrade_id": "piercing",
+      "title": "Бронебой",
+      "description": "Снаряды прошивают врагов насквозь",
+      "stat": "piercing",
+      "value": 1,
+      "max_stacks": 1,
+      "color": "#B6FF00",
+      "category": "weapon",
+      "rarity": "rare"
+    },
+    {
+      "upgrade_id": "poison_shots",
+      "title": "Кислотные патроны",
+      "description": "+22% шанс отравить. Яд складывается до 6 раз",
+      "stat": "poison_chance",
+      "value": 0.22,
+      "max_stacks": 4,
+      "color": "#7CFF3D",
+      "category": "weapon",
+      "rarity": "rare"
+    },
+    {
+      "upgrade_id": "poison_power",
+      "title": "Концентрат",
+      "description": "+35% урона яда",
+      "stat": "poison_power",
+      "value": 0.35,
+      "max_stacks": 4,
+      "color": "#A6FF5C",
+      "category": "weapon",
+      "rarity": "common",
+      "requires": [
+        "poison_shots"
+      ]
+    },
+    {
+      "upgrade_id": "explosive_rounds",
+      "title": "Взрывные пульки",
+      "description": "+14% шанс мини-взрыва, враги иногда рвутся при смерти",
+      "stat": "explosive_chance",
+      "value": 0.14,
+      "max_stacks": 4,
+      "color": "#FF8A1F",
+      "category": "weapon",
+      "rarity": "rare"
+    },
+    {
+      "upgrade_id": "blast_radius",
+      "title": "Тротиловый заряд",
+      "description": "+25% радиус и урон взрывов",
+      "stat": "blast_power",
+      "value": 0.25,
+      "max_stacks": 4,
+      "color": "#FFB347",
+      "category": "weapon",
+      "rarity": "common",
+      "requires": [
+        "explosive_rounds"
+      ]
+    },
+    {
+      "upgrade_id": "shock",
+      "title": "Дуговой разряд",
+      "description": "+12% шанс цепной молнии на 2 цели",
+      "stat": "shock_chance",
+      "value": 0.12,
+      "max_stacks": 4,
+      "color": "#35E6FF",
+      "category": "weapon",
+      "rarity": "rare"
+    },
+    {
+      "upgrade_id": "tesla_coil",
+      "title": "Катушка Теслы",
+      "description": "Молния перескакивает на +1 цель",
+      "stat": "shock_jumps",
+      "value": 1,
+      "max_stacks": 3,
+      "color": "#8DF3FF",
+      "category": "weapon",
+      "rarity": "common",
+      "requires": [
+        "shock"
+      ]
+    },
+    {
+      "upgrade_id": "bleed",
+      "title": "Зазубренные жала",
+      "description": "+15% шанс кровотечения, криты — всегда",
+      "stat": "bleed_chance",
+      "value": 0.15,
+      "max_stacks": 3,
+      "color": "#FF3B5C",
+      "category": "weapon",
+      "rarity": "rare"
+    },
+    {
+      "upgrade_id": "frost",
+      "title": "Ледяная пыль",
+      "description": "+20% шанс замедлить врага на 35%",
+      "stat": "slow_chance",
+      "value": 0.2,
+      "max_stacks": 3,
+      "color": "#9AD8FF",
+      "category": "weapon",
+      "rarity": "rare"
+    },
+    {
+      "upgrade_id": "max_hp",
+      "title": "Толстая шкура",
+      "description": "+25 к максимуму здоровья",
+      "stat": "max_hp_add",
+      "value": 25,
+      "max_stacks": 4,
+      "color": "#FF8A80",
+      "category": "hero",
+      "rarity": "common"
+    },
+    {
+      "upgrade_id": "move_speed",
+      "title": "Кеды-скороходы",
+      "description": "+12% скорости бега",
+      "stat": "move_speed_mult",
+      "value": 0.12,
+      "max_stacks": 6,
+      "color": "#69F0AE",
+      "category": "hero",
+      "rarity": "common"
+    },
+    {
+      "upgrade_id": "regen",
+      "title": "Регенерация помойки",
+      "description": "+0.6 HP в секунду",
+      "stat": "regen",
+      "value": 0.6,
+      "max_stacks": 4,
+      "color": "#7CFFCB",
+      "category": "hero",
+      "rarity": "common"
+    },
+    {
+      "upgrade_id": "resist",
+      "title": "Броня из покрышек",
+      "description": "-7% получаемого урона",
+      "stat": "damage_resist",
+      "value": 0.07,
+      "max_stacks": 4,
+      "color": "#C0C8E0",
+      "category": "hero",
+      "rarity": "common"
+    },
+    {
+      "upgrade_id": "vampirism",
+      "title": "Вампирские клыки",
+      "description": "+1% урона возвращается здоровьем (макс. 5%), криты — вдвое",
+      "stat": "vampirism",
+      "value": 0.01,
+      "max_stacks": 5,
+      "color": "#FF2E6E",
+      "category": "hero",
+      "rarity": "rare"
+    },
+    {
+      "upgrade_id": "kill_heal",
+      "title": "Кровавый вал",
+      "description": "+0.4 HP за каждого убитого врага",
+      "stat": "kill_heal",
+      "value": 0.4,
+      "max_stacks": 4,
+      "color": "#FF4D6D",
+      "category": "hero",
+      "rarity": "rare"
+    },
+    {
+      "upgrade_id": "shield",
+      "title": "Неоновый щит",
+      "description": "+1 заряд щита, восстанавливается сам",
+      "stat": "shield_max",
+      "value": 1,
+      "max_stacks": 3,
+      "color": "#4DE1FF",
+      "category": "hero",
+      "rarity": "rare"
+    },
+    {
+      "upgrade_id": "magnet",
+      "title": "Магнит для монет",
+      "description": "+40% радиус сбора",
+      "stat": "magnet_mult",
+      "value": 0.4,
+      "max_stacks": 3,
+      "color": "#FFD740",
+      "category": "utility",
+      "rarity": "common"
+    },
+    {
+      "upgrade_id": "double_drop",
+      "title": "Двойная добыча",
+      "description": "+12% шанс удвоить монеты",
+      "stat": "double_drop",
+      "value": 0.12,
+      "max_stacks": 4,
+      "color": "#FFE14D",
+      "category": "utility",
+      "rarity": "common"
+    },
+    {
+      "upgrade_id": "heal",
+      "title": "Бутер из мусорки",
+      "description": "Восстановить 40% здоровья",
+      "stat": "heal_pct",
+      "value": 0.4,
+      "max_stacks": 0,
+      "color": "#A5D6A7",
+      "category": "utility",
+      "rarity": "common",
+      "weight": 0.7
+    },
+    {
+      "upgrade_id": "status_power",
+      "title": "Усилитель эффектов",
+      "description": "+30% к силе и длительности ядов, ран и холода",
+      "stat": "status_power",
+      "value": 0.3,
+      "max_stacks": 3,
+      "color": "#E07CFF",
+      "category": "utility",
+      "rarity": "rare"
+    },
+    {
+      "upgrade_id": "drone",
+      "title": "Мусорный дрон",
+      "description": "Летающий помощник из хлама стреляет сам",
+      "stat": "drone_count",
+      "value": 1,
+      "max_stacks": 3,
+      "color": "#FFD257",
+      "category": "utility",
+      "rarity": "epic"
+    },
+    {
+      "upgrade_id": "toxic_burst",
+      "title": "Токсичный взрыв",
+      "description": "Отравленные враги взрываются ядовитым облаком",
+      "stat": "evo_toxic_burst",
+      "value": 1,
+      "max_stacks": 1,
+      "color": "#9DFF2E",
+      "category": "evolution",
+      "rarity": "epic",
+      "requires": [
+        "poison_shots",
+        "explosive_rounds"
+      ]
+    },
+    {
+      "upgrade_id": "vamp_poison",
+      "title": "Кровопийца",
+      "description": "Яд лечит тебя: вампиризм работает с ядовитого урона",
+      "stat": "evo_vamp_poison",
+      "value": 1,
+      "max_stacks": 1,
+      "color": "#FF2EA6",
+      "category": "evolution",
+      "rarity": "epic",
+      "requires": [
+        "vampirism",
+        "poison_shots"
+      ]
+    },
+    {
+      "upgrade_id": "static_freeze",
+      "title": "Шоковая заморозка",
+      "description": "Молния замораживает цели и бьёт замедленных вдвое сильнее",
+      "stat": "evo_static_freeze",
+      "value": 1,
+      "max_stacks": 1,
+      "color": "#6EF0FF",
+      "category": "evolution",
+      "rarity": "epic",
+      "requires": [
+        "shock",
+        "frost"
+      ]
+    },
+    {
+      "upgrade_id": "dash_haste",
+      "title": "Реактивный хвост",
+      "description": "Рывок восстанавливается на 30% быстрее",
+      "stat": "dash_haste",
+      "value": 0.3,
+      "max_stacks": 5,
+      "color": "#35E6FF",
+      "category": "dash",
+      "rarity": "common"
+    },
+    {
+      "upgrade_id": "dash_range",
+      "title": "Длинный прыжок",
+      "description": "+25% дальности рывка",
+      "stat": "dash_range",
+      "value": 0.25,
+      "max_stacks": 5,
+      "color": "#35E6FF",
+      "category": "dash",
+      "rarity": "common"
+    },
+    {
+      "upgrade_id": "dash_double",
+      "title": "Двойной рывок",
+      "description": "+1 заряд рывка: два прыжка подряд",
+      "stat": "dash_charges",
+      "value": 1,
+      "max_stacks": 1,
+      "color": "#5CFFF0",
+      "category": "dash",
+      "rarity": "rare"
+    },
+    {
+      "upgrade_id": "dash_triple",
+      "title": "Тройной, блин!",
+      "description": "+1 заряд рывка (до 4 подряд)",
+      "stat": "dash_charges",
+      "value": 1,
+      "max_stacks": 2,
+      "color": "#5CFFF0",
+      "category": "dash",
+      "rarity": "epic",
+      "requires": [
+        "dash_double"
+      ]
+    },
+    {
+      "upgrade_id": "dash_hit",
+      "title": "Таран",
+      "description": "Рывок бьёт крыс на пути: +45 урона",
+      "stat": "dash_damage",
+      "value": 45,
+      "max_stacks": 6,
+      "color": "#FF6A3D",
+      "category": "dash",
+      "rarity": "common"
+    },
+    {
+      "upgrade_id": "dash_poison",
+      "title": "Токсичный след",
+      "description": "Рывок оставляет ядовитую лужу",
+      "stat": "dash_poison",
+      "value": 1,
+      "max_stacks": 3,
+      "color": "#7CFF3D",
+      "category": "dash",
+      "rarity": "rare"
+    },
+    {
+      "upgrade_id": "dash_fire",
+      "title": "Горелый хвост",
+      "description": "Рывок оставляет огненный след",
+      "stat": "dash_fire",
+      "value": 1,
+      "max_stacks": 3,
+      "color": "#FF8A1F",
+      "category": "dash",
+      "rarity": "rare"
+    },
+    {
+      "upgrade_id": "dash_blast",
+      "title": "Бум-рывок",
+      "description": "Взрыв в начале и в конце рывка",
+      "stat": "dash_blast",
+      "value": 1,
+      "max_stacks": 3,
+      "color": "#FFB62E",
+      "category": "dash",
+      "rarity": "epic",
+      "requires": [
+        "dash_hit"
+      ]
+    },
+    {
+      "upgrade_id": "dash_refund",
+      "title": "Кровь ускоряет",
+      "description": "Каждое убийство в рывке возвращает 0,5 с перезарядки",
+      "stat": "dash_refund",
+      "value": 0.5,
+      "max_stacks": 3,
+      "color": "#FF3B5C",
+      "category": "dash",
+      "rarity": "rare",
+      "requires": [
+        "dash_hit"
+      ]
+    },
+    {
+      "upgrade_id": "dash_boost",
+      "title": "Афтербёрнер",
+      "description": "После рывка +25% скорости на 2 с",
+      "stat": "dash_boost",
+      "value": 0.25,
+      "max_stacks": 4,
+      "color": "#00E5FF",
+      "category": "dash",
+      "rarity": "rare"
+    },
+    {
+      "upgrade_id": "speed_tires",
+      "title": "Кроссовки из шин",
+      "description": "+12% скорости бега",
+      "stat": "move_speed_mult",
+      "value": 0.12,
+      "max_stacks": 6,
+      "color": "#69F0AE",
+      "category": "hero",
+      "rarity": "common",
+      "requires": [
+        "move_speed"
+      ]
+    },
+    {
+      "upgrade_id": "barrel_rack",
+      "title": "Ствольная стойка",
+      "description": "+2 снаряда за выстрел",
+      "stat": "extra_projectiles",
+      "value": 2,
+      "max_stacks": 3,
+      "color": "#00E5FF",
+      "category": "weapon",
+      "rarity": "rare",
+      "requires": [
+        "multishot"
+      ]
+    },
+    {
+      "upgrade_id": "trash_storm",
+      "title": "Мусорный шторм",
+      "description": "+3 снаряда за выстрел",
+      "stat": "extra_projectiles",
+      "value": 3,
+      "max_stacks": 2,
+      "color": "#00E5FF",
+      "category": "weapon",
+      "rarity": "epic",
+      "requires": [
+        "barrel_rack"
+      ]
+    },
+    {
+      "upgrade_id": "chain_rust",
+      "title": "Цепная ржавчина",
+      "description": "+2 рикошета: пули скачут по стае",
+      "stat": "extra_ricochets",
+      "value": 2,
+      "max_stacks": 3,
+      "color": "#7C4DFF",
+      "category": "weapon",
+      "rarity": "epic",
+      "requires": [
+        "ricochet"
+      ]
+    },
+    {
+      "upgrade_id": "hair_trigger",
+      "title": "Хлам-спуск",
+      "description": "+15% скорострельности (сверх лимита пуль — в урон)",
+      "stat": "fire_rate_mult",
+      "value": 0.15,
+      "max_stacks": 8,
+      "color": "#FFB23F",
+      "category": "weapon",
+      "rarity": "common",
+      "requires": [
+        "fire_rate_up"
+      ]
+    },
+    {
+      "upgrade_id": "sharpen_pro",
+      "title": "Заточка Про",
+      "description": "+18% урона",
+      "stat": "damage_mult",
+      "value": 0.18,
+      "max_stacks": 10,
+      "color": "#FF4D6D",
+      "category": "weapon",
+      "rarity": "common",
+      "requires": [
+        "damage_up"
+      ]
+    },
+    {
+      "upgrade_id": "crit_pro",
+      "title": "Глаз-алмаз",
+      "description": "+6% шанс крита",
+      "stat": "crit_chance_add",
+      "value": 0.06,
+      "max_stacks": 4,
+      "color": "#FF7A3D",
+      "category": "weapon",
+      "rarity": "rare",
+      "requires": [
+        "crit"
+      ]
+    },
+    {
+      "upgrade_id": "flame_reach",
+      "title": "Длинная струя",
+      "description": "+25% дальности ближних стволов",
+      "stat": "close_reach",
+      "value": 0.25,
+      "max_stacks": 4,
+      "color": "#FF6A1F",
+      "category": "close",
+      "rarity": "common",
+      "close_only": true
+    },
+    {
+      "upgrade_id": "flame_width",
+      "title": "Широкий выхлоп",
+      "description": "+25% ширины струи и картечи",
+      "stat": "close_width",
+      "value": 0.25,
+      "max_stacks": 3,
+      "color": "#FF8A3D",
+      "category": "close",
+      "rarity": "common",
+      "close_only": true
+    },
+    {
+      "upgrade_id": "close_contact",
+      "title": "Ближний контакт",
+      "description": "+30% урона ближних стволов",
+      "stat": "close_damage",
+      "value": 0.3,
+      "max_stacks": 5,
+      "color": "#FF4D6D",
+      "category": "close",
+      "rarity": "rare",
+      "close_only": true
+    },
+    {
+      "upgrade_id": "arsonist",
+      "title": "Поджигатель",
+      "description": "Пули поджигают: +30% шанс горения",
+      "stat": "burn_chance",
+      "value": 0.3,
+      "max_stacks": 3,
+      "color": "#FF6A1F",
+      "category": "close",
+      "rarity": "rare"
+    },
+    {
+      "upgrade_id": "burn_vamp",
+      "title": "Жар-вампир",
+      "description": "Лечит с ударов по горящим крысам",
+      "stat": "burn_vamp",
+      "value": 0.04,
+      "max_stacks": 3,
+      "color": "#FF3B5C",
+      "category": "close",
+      "rarity": "rare",
+      "requires": [
+        "arsonist"
+      ]
+    },
+    {
+      "upgrade_id": "finisher",
+      "title": "Взрыв на выдохе",
+      "description": "Струя и картечь взрываются в конце полёта",
+      "stat": "close_finisher",
+      "value": 1,
+      "max_stacks": 4,
+      "color": "#FFB62E",
+      "category": "close",
+      "rarity": "epic",
+      "close_only": true
+    },
+    {
+      "upgrade_id": "scrap_temper",
+      "title": "Ржавая закалка",
+      "description": "+6% урона. Навсегда.",
+      "stat": "damage_mult",
+      "value": 0.06,
+      "max_stacks": 0,
+      "color": "#FF4D6D",
+      "category": "endless",
+      "rarity": "common",
+      "weight": 0.55
+    },
+    {
+      "upgrade_id": "scrap_legs",
+      "title": "Лёгкие ноги",
+      "description": "+4% скорости бега",
+      "stat": "move_speed_mult",
+      "value": 0.04,
+      "max_stacks": 0,
+      "color": "#69F0AE",
+      "category": "endless",
+      "rarity": "common",
+      "weight": 0.5
+    },
+    {
+      "upgrade_id": "scrap_tail",
+      "title": "Бодрый хвост",
+      "description": "Рывок быстрее на 6%",
+      "stat": "dash_haste",
+      "value": 0.06,
+      "max_stacks": 0,
+      "color": "#35E6FF",
+      "category": "endless",
+      "rarity": "common",
+      "weight": 0.5
+    },
+    {
+      "upgrade_id": "scrap_fat",
+      "title": "Ещё жирок",
+      "description": "+15 к максимальному здоровью",
+      "stat": "max_hp_add",
+      "value": 15,
+      "max_stacks": 0,
+      "color": "#FFB23F",
+      "category": "endless",
+      "rarity": "common",
+      "weight": 0.5
+    },
+    {
+      "upgrade_id": "scrap_trigger",
+      "title": "Смазка для спуска",
+      "description": "+5% скорострельности",
+      "stat": "fire_rate_mult",
+      "value": 0.05,
+      "max_stacks": 0,
+      "color": "#FFB23F",
+      "category": "endless",
+      "rarity": "common",
+      "weight": 0.5
+    },
+    {
+      "upgrade_id": "scrap_eye",
+      "title": "Мутный прицел",
+      "description": "+3% шанс крита",
+      "stat": "crit_chance_add",
+      "value": 0.03,
+      "max_stacks": 0,
+      "color": "#FF7A3D",
+      "category": "endless",
+      "rarity": "common",
+      "weight": 0.45
+    },
+    {
+      "upgrade_id": "scrap_pull",
+      "title": "Мусорный пылесос",
+      "description": "+15% радиус сбора",
+      "stat": "magnet_mult",
+      "value": 0.15,
+      "max_stacks": 0,
+      "color": "#40C4FF",
+      "category": "endless",
+      "rarity": "common",
+      "weight": 0.4
+    },
+    {
+      "upgrade_id": "scrap_juice",
+      "title": "Кислотные соки",
+      "description": "+8% силы ядов и горения",
+      "stat": "status_power",
+      "value": 0.08,
+      "max_stacks": 0,
+      "color": "#7CFF3D",
+      "category": "endless",
+      "rarity": "common",
+      "weight": 0.4
+    },
+    {
+      "upgrade_id": "scrap_skin",
+      "title": "Дублёная шкура",
+      "description": "+2% сопротивления урону",
+      "stat": "damage_resist",
+      "value": 0.02,
+      "max_stacks": 0,
+      "color": "#40C4FF",
+      "category": "endless",
+      "rarity": "common",
+      "weight": 0.35
+    },
+    {
+      "upgrade_id": "rail_ramp",
+      "title": "Кассовый множитель",
+      "description": "Каждый пробитый враг: ещё +10% урона луча",
+      "stat": "rail_ramp",
+      "value": 0.1,
+      "max_stacks": 4,
+      "color": "#FFC93C",
+      "category": "rail",
+      "rarity": "rare",
+      "rail_only": true
+    },
+    {
+      "upgrade_id": "rail_beams",
+      "title": "Второй кассир",
+      "description": "+1 луч за выстрел веером",
+      "stat": "rail_beams",
+      "value": 1,
+      "max_stacks": 3,
+      "color": "#FFC93C",
+      "category": "rail",
+      "rarity": "epic",
+      "rail_only": true
+    },
+    {
+      "upgrade_id": "rail_overdrive",
+      "title": "Овердрайв рывка",
+      "description": "Заряженный рывком выстрел бьёт сильнее (+0,75×)",
+      "stat": "rail_overdrive",
+      "value": 1,
+      "max_stacks": 3,
+      "color": "#FFE27A",
+      "category": "rail",
+      "rarity": "rare",
+      "rail_only": true
+    },
+    {
+      "upgrade_id": "rail_boom",
+      "title": "Золотой бум",
+      "description": "Луч взрывается в конце пути",
+      "stat": "rail_boom",
+      "value": 1,
+      "max_stacks": 3,
+      "color": "#FF8A1F",
+      "category": "rail",
+      "rarity": "epic",
+      "rail_only": true
+    },
+    {
+      "upgrade_id": "rail_rate",
+      "title": "Батарейки из ларька",
+      "description": "+20% скорости зарядки рельсотрона",
+      "stat": "rail_rate",
+      "value": 0.2,
+      "max_stacks": 4,
+      "color": "#35E6FF",
+      "category": "rail",
+      "rarity": "common",
+      "rail_only": true
+    }
+  ]
+}

@@ -1,0 +1,882 @@
+class_name Hud
+extends CanvasLayer
+## Боевой интерфейс. PROCESS_MODE_ALWAYS — чтобы окна прокачки, паузы и результата
+## работали, пока дерево на паузе. Джойстик внутри явно PAUSABLE.
+## Раскладка под портрет: сверху HP/XP, волна по центру, монеты и пауза справа (+ мини-карта);
+## снизу слева — джойстик, справа — полупрозрачные кнопки РЫВОК и карточка ствола.
+
+signal upgrade_chosen(upgrade: UpgradeData)
+signal reroll_requested
+signal upgrade_pressed
+signal restart_pressed
+signal menu_pressed
+signal dash_pressed
+signal slot_pressed(index: int)
+signal interact_pressed
+signal weapon_swiped
+signal pause_pressed
+signal resume_pressed
+signal revive_requested(with_ad: bool)
+signal revive_declined
+
+var joystick: VirtualJoystick
+
+var _root: Control
+var _hp_bar: ProgressBar
+var _hp_label: Label
+var _hp_last := -1.0
+var _hp_flash := 0.0
+var _xp_bar: ProgressBar
+var _xp_row: HBoxContainer
+var _level_label: Label
+var _xp_label: Label
+var _nuts_label: Label
+var _nuts_row: HBoxContainer
+var _time_label: Label
+var _kills_label: Label
+var _loot_label: Label
+var _fps_label: Label
+var _wave_label: Label
+var _wave_box: PanelContainer
+var _boss_bar: BossBar
+var _banner: Label
+var _wave_title: Label
+var _wave_sub: Label
+var _countdown: Label
+var _toast: PanelContainer
+var _toast_title: Label
+var _toast_text: Label
+var _weapon_chip: PanelContainer
+var _weapon_icon: WeaponIcons.IconRect
+var _weapon_name: Label
+var _dash: DashButton
+var _rail_combo: Label
+var _slot_bar: BattleControls.SlotBar
+var _interact: BattleControls.InteractButton
+var _layout_revision := -1
+var _minimap_slot: Control
+var _level_up: LevelUpPanel
+var _result: ResultPanel
+var _thermos: Button
+var _pause: PausePanel
+var _revive: BattlePanels.RevivePanel
+var _run_result: BattlePanels.RunResultPanel
+var _chapter_card: BattlePanels.ChapterCard
+var _toast_queue: Array = []
+var _toast_busy := false
+
+
+func _init() -> void:
+	layer = 10
+	process_mode = Node.PROCESS_MODE_ALWAYS
+
+
+func build(currency_icon: Texture2D, weapon: WeaponData) -> void:
+	_root = Control.new()
+	_root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_root)
+
+	joystick = VirtualJoystick.new()
+	_root.add_child(joystick)
+
+	_root.add_child(_build_top_bar(currency_icon))
+	_root.add_child(_build_wave_chip())
+	_root.add_child(_build_boss_bar())
+	_root.add_child(_build_banner())
+	_root.add_child(_build_wave_titles())
+	_root.add_child(_build_minimap_slot())
+	_rail_combo = UiStyle.label("", 46, UiStyle.GOLD, 12)
+	_rail_combo.anchor_left = 0.0
+	_rail_combo.anchor_right = 1.0
+	_rail_combo.offset_top = 250.0
+	_rail_combo.offset_bottom = 320.0
+	_rail_combo.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_rail_combo.visible = false
+	_root.add_child(_rail_combo)
+	_root.add_child(_build_weapon_chip(weapon))
+	_weapon_chip.visible = false
+	var swipe := BattleControls.SwipeSwitch.new()
+	swipe.swiped.connect(func() -> void: weapon_swiped.emit())
+	_root.add_child(swipe)
+	_dash = DashButton.new()
+	_dash.pressed.connect(func() -> void: dash_pressed.emit())
+	_root.add_child(_dash)
+	_slot_bar = BattleControls.SlotBar.new()
+	_slot_bar.slot_pressed.connect(func(i: int) -> void: slot_pressed.emit(i))
+	_root.add_child(_slot_bar)
+	_interact = BattleControls.InteractButton.new()
+	_interact.pressed.connect(func() -> void: interact_pressed.emit())
+	_root.add_child(_interact)
+	_root.resized.connect(apply_layout)
+	_root.add_child(_build_toast())
+	_chapter_card = BattlePanels.ChapterCard.new()
+	_root.add_child(_chapter_card)
+
+	_level_up = LevelUpPanel.new()
+	_level_up.chosen.connect(func(u: UpgradeData) -> void: upgrade_chosen.emit(u))
+	_level_up.reroll_requested.connect(func() -> void: reroll_requested.emit())
+	_root.add_child(_level_up)
+
+	_pause = PausePanel.new()
+	_pause.resumed.connect(func() -> void: resume_pressed.emit())
+	_pause.exit_pressed.connect(func() -> void: menu_pressed.emit())
+	_pause.restart_pressed.connect(func() -> void: restart_pressed.emit())
+	_root.add_child(_pause)
+
+	_result = ResultPanel.new()
+	_result.restart_pressed.connect(func() -> void: restart_pressed.emit())
+	_result.menu_pressed.connect(func() -> void: menu_pressed.emit())
+	_root.add_child(_result)
+
+	_revive = BattlePanels.RevivePanel.new()
+	_revive.revive.connect(func(with_ad: bool) -> void: revive_requested.emit(with_ad))
+	_revive.expired.connect(func() -> void: revive_declined.emit())
+	_revive.exit_pressed.connect(func() -> void: menu_pressed.emit())
+	_root.add_child(_revive)
+
+	_run_result = BattlePanels.RunResultPanel.new(currency_icon)
+	_run_result.restart_pressed.connect(func() -> void: restart_pressed.emit())
+	_run_result.menu_pressed.connect(func() -> void: menu_pressed.emit())
+	_run_result.upgrade_pressed.connect(func() -> void: upgrade_pressed.emit())
+	_root.add_child(_run_result)
+	_fps_label.visible = bool(SaveService.data["show_fps"])
+
+
+# --- Показатели ------------------------------------------------------------------------------
+
+func set_health(hp: float, max_hp: float) -> void:
+	_hp_bar.max_value = max_hp
+	if _hp_last >= 0.0 and hp > _hp_last + 0.3 and hp < max_hp + 0.01:
+		_hp_flash = maxf(_hp_flash, clampf((hp - _hp_last) / 6.0, 0.35, 1.0))
+	_hp_last = hp
+	_hp_bar.value = hp
+	_hp_label.text = "%d / %d" % [ceili(hp), roundi(max_hp)]
+
+
+func set_xp(xp: int, needed: int, level: int) -> void:
+	_xp_bar.max_value = needed
+	_xp_bar.value = xp
+	_level_label.text = "УР %d" % level
+	_xp_label.text = "%d/%d" % [xp, needed]
+
+
+func set_nuts(amount: int) -> void:
+	_nuts_label.text = str(amount)
+
+
+## Счётчик монет «подпрыгивает» при подборе.
+func punch_nuts() -> void:
+	UiStyle.keep_pivot_centered(_nuts_row)
+	var tween := _nuts_row.create_tween()
+	tween.tween_property(_nuts_row, "scale", Vector2.ONE * 1.25, 0.06)
+	tween.tween_property(_nuts_row, "scale", Vector2.ONE, 0.14).set_trans(Tween.TRANS_BACK)
+
+
+func flash_xp() -> void:
+	var tween := _xp_bar.create_tween()
+	_xp_bar.modulate = Color(1.8, 1.8, 1.8)
+	tween.tween_property(_xp_bar, "modulate", Color.WHITE, 0.25)
+
+
+func set_time(seconds: float) -> void:
+	_time_label.text = BattleBase.format_time(seconds)
+
+
+func set_time_text(text: String, color: Color = UiStyle.TEXT) -> void:
+	_time_label.text = text
+	_time_label.add_theme_color_override("font_color", color)
+
+
+## Налёт: без опыта, волн, мини-карты и счётчика крыс.
+func configure_for_raid() -> void:
+	_xp_row.visible = false
+	_kills_label.visible = false
+	_wave_box.visible = false
+	_minimap_slot.visible = false
+
+
+func set_loot_left(count: int) -> void:
+	_loot_label.visible = count > 0
+	if count > 0:
+		_loot_label.text = "Лут на карте: %d" % count
+
+
+func set_kills(kills: int) -> void:
+	_kills_label.text = "Врагов: %d" % kills
+
+
+func set_wave(number: int, enemies_left: int) -> void:
+	_wave_label.text = "ВОЛНА %d · %d" % [number, enemies_left] if enemies_left > 0 else "ВОЛНА %d" % number
+
+
+func set_weapon(weapon: WeaponData) -> void:
+	_weapon_icon.set_weapon(weapon.icon, weapon.effect_color)
+	_weapon_name.text = weapon.get_title()
+	_weapon_name.add_theme_color_override("font_color", weapon.get_rarity_color())
+	_weapon_chip.add_theme_stylebox_override("panel", UiStyle.box(Color(0.08, 0.05, 0.15, 0.55), Color(weapon.get_rarity_color(), 0.8), 3, 16))
+	UiStyle.pop_in(_weapon_chip, 0.4)
+
+
+func set_slots(weapons: Array, active: int, count: int) -> void:
+	_slot_bar.set_slots(weapons, active, count)
+	apply_layout()
+
+
+func set_interact(weapon: WeaponData, note: String = "") -> void:
+	_interact.show_for(weapon, note)
+
+
+func apply_layout() -> void:
+	if _root == null or _slot_bar == null:
+		return
+	var area := _root.size
+	Controls.place(_dash, "dash", area)
+	Controls.place(_slot_bar, "slots", area, BattleControls.slots_base_size(_slot_bar.count))
+	Controls.place(_interact, "interact", area)
+	var opacity := clampf(float(Controls.get_value("opacity")), 0.3, 1.0)
+	for item in [_dash, _slot_bar]:
+		item.modulate.a = opacity
+	joystick.modulate.a = opacity
+	_layout_revision = Controls.revision
+
+
+func set_dash_cooldown(fraction: float) -> void:
+	_dash.cooldown = clampf(fraction, 0.0, 1.0)
+
+
+## Рельс-комбо для рельсотрона: 0 — скрыть. Цвет от золотого к розовому по мере роста.
+func set_rail_combo(count: int) -> void:
+	if count <= 0:
+		_rail_combo.visible = false
+		return
+	_rail_combo.visible = true
+	_rail_combo.text = "РЕЛЬС-КОМБО ×%d" % count
+	var heat := clampf(float(count) / 60.0, 0.0, 1.0)
+	_rail_combo.add_theme_color_override("font_color", UiStyle.GOLD.lerp(Color("#ff4fd8"), heat))
+	_rail_combo.pivot_offset = _rail_combo.size * 0.5
+	_rail_combo.scale = Vector2.ONE * (1.18 + 0.1 * heat)
+	create_tween().tween_property(_rail_combo, "scale", Vector2.ONE, 0.18)
+
+
+func set_dash_charges(charges: int, max_charges: int) -> void:
+	_dash.set_charges(charges, max_charges)
+
+
+func set_minimap(minimap: Control) -> void:
+	minimap.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_minimap_slot.add_child(minimap)
+	minimap.visible = SaveService.is_minimap_enabled()
+	_minimap_slot.visible = minimap.visible
+
+
+# --- Босс, баннеры, заставки ------------------------------------------------------------------
+
+func show_boss(boss_name: String, hp: float, max_hp: float, winged: bool = false) -> void:
+	_boss_bar.configure(boss_name, winged)
+	update_boss(hp, max_hp)
+	_boss_bar.visible = true
+	UiStyle.pop_in(_boss_bar, 0.5)
+
+
+func update_boss(hp: float, max_hp: float) -> void:
+	_boss_bar.set_health(hp, max_hp)
+
+
+func set_boss_title(text: String) -> void:
+	_boss_bar.set_title(text)
+
+
+## Кнопка лечебного термоса налёта у правого края экрана.
+func add_thermos(callback: Callable) -> Button:
+	var button := UiStyle.button("ТЕРМОС ×2", Color("#d9782a"), 22, Vector2(150, 96))
+	button.anchor_left = 1.0
+	button.anchor_right = 1.0
+	button.anchor_top = 0.5
+	button.anchor_bottom = 0.5
+	button.offset_left = -180.0
+	button.offset_right = -24.0
+	button.offset_top = -48.0
+	button.offset_bottom = 48.0
+	button.focus_mode = Control.FOCUS_NONE
+	button.pressed.connect(callback)
+	_root.add_child(button)
+	_thermos = button
+	return button
+
+
+func _hide_thermos() -> void:
+	if _thermos != null:
+		_thermos.visible = false
+
+
+func set_boss_fury() -> void:
+	_boss_bar.set_fury()
+
+
+func hide_boss() -> void:
+	_boss_bar.visible = false
+
+
+func show_banner(text: String, color: Color, duration: float = 2.2) -> void:
+	_banner.text = text
+	_banner.add_theme_color_override("font_color", color)
+	_banner.visible = true
+	_banner.modulate.a = 1.0
+	UiStyle.pop_in(_banner, 0.5)
+	var tween := _banner.create_tween()
+	tween.tween_interval(duration)
+	tween.tween_property(_banner, "modulate:a", 0.0, 0.3)
+	tween.tween_callback(func() -> void: _banner.visible = false)
+
+
+## Заставка волны: крупное «ВОЛНА N» влетает сверху, подзаголовок — снизу.
+func show_wave_intro(number: int, title: String, is_boss: bool) -> void:
+	_wave_title.text = "ВОЛНА %d" % number
+	_wave_title.add_theme_color_override("font_color", UiStyle.DANGER if is_boss else UiStyle.GOLD)
+	_wave_sub.text = ("БОСС: " + title) if is_boss else title
+	_animate_titles(1.6)
+
+
+func show_wave_cleared(bonus_nuts: int) -> void:
+	_wave_title.text = "ВОЛНА ОЧИЩЕНА!"
+	_wave_title.add_theme_color_override("font_color", Color("#7cff6b"))
+	_wave_sub.text = "+%s · лечение +15%%" % SaveService.format_coins(bonus_nuts)
+	_animate_titles(1.5)
+
+
+func show_countdown(seconds: int) -> void:
+	_countdown.text = "Следующая волна через %d" % seconds
+	_countdown.visible = true
+	_countdown.modulate.a = 1.0
+	UiStyle.keep_pivot_centered(_countdown)
+	_countdown.scale = Vector2.ONE * 1.3
+	var tween := _countdown.create_tween()
+	tween.tween_property(_countdown, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_BACK)
+	tween.tween_interval(0.55)
+	tween.tween_property(_countdown, "modulate:a", 0.0, 0.2)
+
+
+func toast(title: String, text: String, color: Color = UiStyle.GOLD) -> void:
+	_toast_queue.append([title, text, color])
+	if not _toast_busy:
+		_next_toast()
+
+
+func show_level_up(choices: Array[UpgradeData], level: int, stats: RunStats, bonus: bool = false, reroll_text: String = "", reroll_ok: bool = false) -> void:
+	_level_up.open(choices, level, stats, bonus, reroll_text, reroll_ok)
+
+
+func show_result(victory: bool, lines: PackedStringArray, title: String = "") -> void:
+	_pause.visible = false
+	_hide_thermos()
+	_result.open(victory, lines, title)
+
+
+func show_chapter(subtitle: String, title: String, accent: Color = UiStyle.NEON) -> void:
+	_chapter_card.play(subtitle, title, accent)
+
+
+func show_revive(cost: int, gems: int, ad_available: bool, summary: Dictionary) -> void:
+	_pause.visible = false
+	_level_up.visible = false
+	_revive.open(cost, gems, ad_available, summary)
+
+
+func hide_revive() -> void:
+	_revive.close()
+
+
+func revive_failed(message: String) -> void:
+	_revive.fail(message)
+
+
+func show_run_result(summary: Dictionary) -> void:
+	_pause.visible = false
+	_hide_thermos()
+	_revive.close()
+	_run_result.open(summary)
+
+
+func show_pause(lines: PackedStringArray) -> void:
+	_pause.open(lines)
+
+
+func is_pause_open() -> bool:
+	return _pause.visible
+
+
+func _process(delta: float) -> void:
+	if _layout_revision != Controls.revision:
+		apply_layout()
+	if _hp_flash > 0.0:
+		_hp_flash = maxf(_hp_flash - delta * 3.0, 0.0)
+		_hp_bar.modulate = Color.WHITE.lerp(Color(0.6, 1.6, 0.75), _hp_flash)
+	if _fps_label.visible:
+		_fps_label.text = "%d FPS" % Engine.get_frames_per_second()
+
+
+func _animate_titles(hold: float) -> void:
+	for label in [_wave_title, _wave_sub]:
+		label.visible = true
+		label.modulate.a = 0.0
+	UiStyle.keep_pivot_centered(_wave_title)
+	_wave_title.scale = Vector2.ONE * 2.2
+	var tween := _wave_title.create_tween().set_parallel(true)
+	tween.tween_property(_wave_title, "scale", Vector2.ONE, 0.45).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_property(_wave_title, "modulate:a", 1.0, 0.2)
+	tween.tween_property(_wave_sub, "modulate:a", 1.0, 0.3).set_delay(0.2)
+	tween.chain().tween_interval(hold)
+	tween.chain().tween_property(_wave_title, "modulate:a", 0.0, 0.35)
+	tween.parallel().tween_property(_wave_sub, "modulate:a", 0.0, 0.35)
+
+
+func _next_toast() -> void:
+	if _toast_queue.is_empty():
+		_toast_busy = false
+		return
+	_toast_busy = true
+	var item: Array = _toast_queue.pop_front()
+	_toast_title.text = item[0]
+	_toast_text.text = item[1]
+	_toast_title.add_theme_color_override("font_color", item[2])
+	_toast.visible = true
+	_toast.position.y = -140.0
+	var tween := _toast.create_tween()
+	tween.tween_property(_toast, "position:y", 168.0, 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_interval(2.2)
+	tween.tween_property(_toast, "position:y", -140.0, 0.3).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	tween.tween_callback(func() -> void:
+		_toast.visible = false
+		_next_toast())
+
+
+# --- Построение ----------------------------------------------------------------------------------
+
+func _build_top_bar(currency_icon: Texture2D) -> Control:
+	var margin := MarginContainer.new()
+	margin.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	margin.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for side in ["left", "right", "top"]:
+		margin.add_theme_constant_override("margin_" + side, 18)
+
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 14)
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	margin.add_child(row)
+
+	var left := VBoxContainer.new()
+	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	left.add_theme_constant_override("separation", 6)
+	row.add_child(left)
+
+	var hp_stack := Control.new()
+	hp_stack.custom_minimum_size = Vector2(0, 40)
+	left.add_child(hp_stack)
+	_hp_bar = UiStyle.progress_bar(Color("#ff3b5c"), 40)
+	_hp_bar.set_anchors_preset(Control.PRESET_FULL_RECT)
+	hp_stack.add_child(_hp_bar)
+	_hp_label = UiStyle.label("", 22, UiStyle.TEXT, 6)
+	_hp_label.set_anchors_preset(Control.PRESET_FULL_RECT)
+	hp_stack.add_child(_hp_label)
+
+	_xp_row = HBoxContainer.new()
+	_xp_row.add_theme_constant_override("separation", 8)
+	left.add_child(_xp_row)
+	_level_label = UiStyle.label("УР 1", 22, UiStyle.NEON, 6)
+	_level_label.custom_minimum_size = Vector2(76, 0)
+	_xp_row.add_child(_level_label)
+	var xp_stack := Control.new()
+	xp_stack.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	xp_stack.custom_minimum_size = Vector2(0, 26)
+	_xp_row.add_child(xp_stack)
+	_xp_bar = UiStyle.progress_bar(UiStyle.NEON, 26)
+	_xp_bar.set_anchors_preset(Control.PRESET_FULL_RECT)
+	xp_stack.add_child(_xp_bar)
+	_xp_label = UiStyle.label("0/10", 17, UiStyle.TEXT, 5)
+	_xp_label.set_anchors_preset(Control.PRESET_FULL_RECT)
+	xp_stack.add_child(_xp_label)
+
+	var right := VBoxContainer.new()
+	right.custom_minimum_size = Vector2(180, 0)
+	right.add_theme_constant_override("separation", 2)
+	row.add_child(right)
+
+	var top_right := HBoxContainer.new()
+	top_right.alignment = BoxContainer.ALIGNMENT_END
+	top_right.add_theme_constant_override("separation", 10)
+	right.add_child(top_right)
+	_nuts_row = HBoxContainer.new()
+	_nuts_row.add_theme_constant_override("separation", 4)
+	top_right.add_child(_nuts_row)
+	var icon := TextureRect.new()
+	icon.texture = currency_icon
+	icon.custom_minimum_size = Vector2(34, 34)
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_nuts_row.add_child(icon)
+	_nuts_label = UiStyle.label("0", 32, UiStyle.GOLD, 8)
+	_nuts_row.add_child(_nuts_label)
+	var pause := UiStyle.button("", UiStyle.GOLD, 26, Vector2(72, 72))
+	var pause_icon := BattlePanels.icon_rect(BattlePanels.icon("pause"), 40)
+	pause_icon.set_anchors_preset(Control.PRESET_CENTER)
+	pause_icon.offset_left = -20
+	pause_icon.offset_right = 20
+	pause_icon.offset_top = -24
+	pause_icon.offset_bottom = 16
+	pause.add_child(pause_icon)
+	pause.pressed.connect(func() -> void: pause_pressed.emit())
+	top_right.add_child(pause)
+
+	_time_label = UiStyle.label("0:00", 26, UiStyle.TEXT, 6)
+	_time_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	right.add_child(_time_label)
+	_kills_label = UiStyle.label("Врагов: 0", 20, UiStyle.TEXT_DIM, 5)
+	_kills_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	right.add_child(_kills_label)
+	_loot_label = UiStyle.label("", 20, UiStyle.GOLD, 5)
+	_loot_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_loot_label.visible = false
+	right.add_child(_loot_label)
+	_fps_label = UiStyle.label("", 16, UiStyle.TEXT_DIM, 4)
+	_fps_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	right.add_child(_fps_label)
+	return margin
+
+
+func _build_wave_chip() -> Control:
+	_wave_box = PanelContainer.new()
+	_wave_box.add_theme_stylebox_override("panel", UiStyle.box(Color(0.08, 0.05, 0.15, 0.6), Color(UiStyle.GOLD, 0.7), 3, 20))
+	_wave_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	UiStyle.anchor(_wave_box, Vector2(0.5, 0.0), Rect2(-130, 104, 260, 44))
+	_wave_label = UiStyle.label("ВОЛНА 1", 22, UiStyle.GOLD, 6)
+	_wave_box.add_child(_wave_label)
+	return _wave_box
+
+
+func _build_boss_bar() -> Control:
+	_boss_bar = BossBar.new()
+	UiStyle.anchor(_boss_bar, Vector2(0.5, 0.0), Rect2(-300, 158, 600, 70))
+	_boss_bar.visible = false
+	return _boss_bar
+
+
+func _build_banner() -> Control:
+	_banner = UiStyle.label("", 44, UiStyle.DANGER, 12)
+	UiStyle.anchor(_banner, Vector2(0.5, 0.5), Rect2(-350, -380, 700, 110))
+	_banner.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_banner.visible = false
+	return _banner
+
+
+func _build_wave_titles() -> Control:
+	var box := Control.new()
+	box.set_anchors_preset(Control.PRESET_FULL_RECT)
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_wave_title = UiStyle.label("", 78, UiStyle.GOLD, 16)
+	UiStyle.anchor(_wave_title, Vector2(0.5, 0.5), Rect2(-360, -250, 720, 110))
+	_wave_title.visible = false
+	box.add_child(_wave_title)
+	_wave_sub = UiStyle.label("", 30, UiStyle.TEXT, 8)
+	UiStyle.anchor(_wave_sub, Vector2(0.5, 0.5), Rect2(-360, -150, 720, 50))
+	_wave_sub.visible = false
+	box.add_child(_wave_sub)
+	_countdown = UiStyle.label("", 30, UiStyle.NEON, 8)
+	UiStyle.anchor(_countdown, Vector2(0.5, 0.5), Rect2(-360, -60, 720, 50))
+	_countdown.visible = false
+	box.add_child(_countdown)
+	return box
+
+
+func _build_minimap_slot() -> Control:
+	_minimap_slot = Control.new()
+	_minimap_slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	UiStyle.anchor(_minimap_slot, Vector2(1.0, 0.0), Rect2(-176, 214, 158, 158))
+	return _minimap_slot
+
+
+func _build_weapon_chip(weapon: WeaponData) -> Control:
+	_weapon_chip = PanelContainer.new()
+	_weapon_chip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	UiStyle.anchor(_weapon_chip, Vector2(1.0, 1.0), Rect2(-250, -350, 232, 84))
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 0)
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_weapon_chip.add_child(column)
+	_weapon_icon = WeaponIcons.IconRect.new(weapon.icon, weapon.effect_color, Vector2(200, 44))
+	column.add_child(_weapon_icon)
+	_weapon_name = UiStyle.label("", 18, UiStyle.TEXT, 5)
+	column.add_child(_weapon_name)
+	set_weapon(weapon)
+	return _weapon_chip
+
+
+func _build_toast() -> Control:
+	_toast = PanelContainer.new()
+	_toast.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_toast.add_theme_stylebox_override("panel", UiStyle.box(Color(0.1, 0.06, 0.2, 0.92), UiStyle.GOLD, 4, 22))
+	_toast.anchor_left = 0.5
+	_toast.anchor_right = 0.5
+	_toast.offset_left = -300.0
+	_toast.offset_right = 300.0
+	_toast.visible = false
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 2)
+	_toast.add_child(column)
+	_toast_title = UiStyle.label("", 28, UiStyle.GOLD, 8)
+	column.add_child(_toast_title)
+	_toast_text = UiStyle.label("", 20, UiStyle.TEXT, 5)
+	column.add_child(_toast_text)
+	return _toast
+
+
+## Полупрозрачная круглая кнопка рывка с сектором перезарядки. Слушает сырые касания
+## (ScreenTouch), а не GUI: второй палец при зажатом джойстике GUI не получает.
+class DashButton:
+	extends Control
+	signal pressed
+
+	var cooldown := 0.0:
+		set(value):
+			if not is_equal_approx(value, cooldown):
+				cooldown = value
+				queue_redraw()
+	var _press := 0.0
+	var _charges := 1
+	var _max_charges := 1
+
+	func _init() -> void:
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	func set_charges(charges: int, max_charges: int) -> void:
+		if charges != _charges or max_charges != _max_charges:
+			_charges = charges
+			_max_charges = max_charges
+			queue_redraw()
+
+	func _input(event: InputEvent) -> void:
+		if not is_visible_in_tree() or get_tree().paused:
+			return
+		if event is InputEventScreenTouch and event.pressed:
+			var center := get_global_rect().get_center()
+			if (event as InputEventScreenTouch).position.distance_to(center) < size.x * 0.55:
+				_press = 1.0
+				queue_redraw()
+				pressed.emit()
+				get_viewport().set_input_as_handled()
+
+	func _process(delta: float) -> void:
+		if _press > 0.0:
+			_press = maxf(_press - delta * 5.0, 0.0)
+			queue_redraw()
+
+	func _draw() -> void:
+		var c := size * 0.5
+		var r := size.x * 0.46 * (1.0 - 0.08 * _press)
+		var ready := cooldown <= 0.001
+		draw_circle(c, r, Color(0.06, 0.03, 0.12, 0.42))
+		draw_arc(c, r, 0.0, TAU, 48, Color(UiStyle.NEON, 0.75 if ready else 0.3), 5.0, true)
+		if not ready:
+			var sweep := PackedVector2Array([c])
+			var steps := 32
+			for i in steps + 1:
+				sweep.append(c + Vector2.from_angle(-PI * 0.5 + TAU * cooldown * i / steps) * r)
+			draw_colored_polygon(sweep, Color(0, 0, 0, 0.45))
+		var alpha := 0.95 if ready else 0.45
+		if _max_charges > 1:
+			for i in _max_charges:
+				var dot := c + Vector2((i - (_max_charges - 1) * 0.5) * 22.0, r * 0.66)
+				draw_circle(dot, 7.0, Color(0.5, 1.0, 1.0, 0.95) if i < _charges else Color(0.1, 0.2, 0.3, 0.7))
+		var tip := c + Vector2(30, 0)
+		var arrow := PackedVector2Array([tip, c + Vector2(4, -22), c + Vector2(4, -9), c + Vector2(-20, -9), c + Vector2(-20, 9), c + Vector2(4, 9), c + Vector2(4, 22)])
+		draw_colored_polygon(arrow, Color(1, 1, 1, alpha))
+		for k in 3:
+			var y := -14.0 + k * 14.0
+			draw_line(c + Vector2(-44, y), c + Vector2(-28, y), Color(UiStyle.NEON, alpha), 4.0)
+		var font := ThemeDB.fallback_font
+		draw_string_outline(font, Vector2(0, size.y + 4), "РЫВОК", HORIZONTAL_ALIGNMENT_CENTER, size.x, 18, 6, Color(0.05, 0.02, 0.1, 0.8))
+		draw_string(font, Vector2(0, size.y + 4), "РЫВОК", HORIZONTAL_ALIGNMENT_CENTER, size.x, 18, Color(1, 1, 1, alpha))
+
+
+## Пауза: плашки статистики, громкость, вибрация, крупное «Продолжить», ниже «Заново» / «В хаб».
+class PausePanel:
+	extends Control
+	signal resumed
+	signal exit_pressed
+	signal restart_pressed
+
+	var _panel: PanelContainer
+	var _chips: VBoxContainer
+	var _settings: MenuPopups.Settings
+	var _editor: ControlEditor
+	var _tester: TesterPopup
+
+	func _init() -> void:
+		set_anchors_preset(Control.PRESET_FULL_RECT)
+		mouse_filter = Control.MOUSE_FILTER_STOP
+		visible = false
+		add_child(BattlePanels.dim())
+		var center := CenterContainer.new()
+		center.set_anchors_preset(Control.PRESET_FULL_RECT)
+		add_child(center)
+		_panel = PanelContainer.new()
+		var style := UiStyle.box(UiStyle.PANEL, UiStyle.OUTLINE, 6, 32)
+		style.set_content_margin_all(26)
+		_panel.add_theme_stylebox_override("panel", style)
+		center.add_child(_panel)
+		var box := VBoxContainer.new()
+		box.custom_minimum_size = Vector2(600, 0)
+		box.add_theme_constant_override("separation", 14)
+		_panel.add_child(box)
+
+		var head := HBoxContainer.new()
+		head.alignment = BoxContainer.ALIGNMENT_CENTER
+		head.add_theme_constant_override("separation", 12)
+		head.add_child(BattlePanels.icon_rect(BattlePanels.icon("pause"), 46))
+		head.add_child(UiStyle.label("ПАУЗА", 56, UiStyle.TEXT, 14))
+		box.add_child(head)
+
+		_chips = VBoxContainer.new()
+		_chips.add_theme_constant_override("separation", 6)
+		box.add_child(_chips)
+
+		var sound := PanelContainer.new()
+		var sound_style := UiStyle.box(Color("#1f1738"), Color(UiStyle.NEON, 0.35), 3, 18)
+		sound_style.set_content_margin_all(14)
+		sound.add_theme_stylebox_override("panel", sound_style)
+		box.add_child(sound)
+		var sound_box := VBoxContainer.new()
+		sound_box.add_theme_constant_override("separation", 8)
+		sound.add_child(sound_box)
+		sound_box.add_child(VolumeSlider.new("Музыка", "music"))
+		sound_box.add_child(VolumeSlider.new("Эффекты", "sfx"))
+
+		var tools := HBoxContainer.new()
+		tools.add_theme_constant_override("separation", 10)
+		box.add_child(tools)
+		tools.add_child(_tool_button("ГРАФИКА", Color("#2a86c9"), func() -> void: _open_settings()))
+		tools.add_child(_tool_button("УПРАВЛЕНИЕ", Color("#8a4fd6"), func() -> void: _open_editor()))
+		tools.add_child(_tool_button("ТЕСТЕР", Color("#c98b1a"), func() -> void: _open_tester()))
+
+		var resume := BattlePanels.icon_button(BattlePanels.icon("play"), "ПРОДОЛЖИТЬ", "", Color("#35c46a"), 100)
+		resume.pressed.connect(_resume)
+		box.add_child(resume)
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 12)
+		box.add_child(row)
+		var again := UiStyle.button("ЗАНОВО", UiStyle.HOT, 26, Vector2(0, 76))
+		again.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		again.pressed.connect(func() -> void:
+			visible = false
+			restart_pressed.emit())
+		row.add_child(again)
+		var leave := UiStyle.button("НА БАЗУ", UiStyle.PANEL_LIGHT, 26, Vector2(0, 76))
+		leave.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		leave.pressed.connect(func() -> void:
+			visible = false
+			exit_pressed.emit())
+		row.add_child(leave)
+
+	func _tool_button(caption: String, color: Color, action: Callable) -> Button:
+		var button := UiStyle.button(caption, color, 22, Vector2(0, 72))
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.pressed.connect(action)
+		return button
+
+	## Окна открываются поверх паузы и создаются при первом нажатии, чтобы не тормозить старт боя.
+	func _open_settings() -> void:
+		if _settings == null:
+			_settings = MenuPopups.Settings.new()
+			_settings.editor_requested.connect(_open_editor)
+			add_child(_settings)
+		_settings.open()
+
+	func _open_editor() -> void:
+		if _editor == null:
+			_editor = ControlEditor.new()
+			add_child(_editor)
+		_editor.open()
+
+	func _open_tester() -> void:
+		if _tester == null:
+			_tester = TesterPopup.new()
+			add_child(_tester)
+		_tester.open()
+
+	func open(lines: PackedStringArray) -> void:
+		for child in _chips.get_children():
+			child.queue_free()
+		for line in lines:
+			var row := HBoxContainer.new()
+			row.add_theme_constant_override("separation", 8)
+			var parts := line.split(" · ")
+			for part in parts:
+				var chip := PanelContainer.new()
+				chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+				chip.add_theme_stylebox_override("panel", UiStyle.box(Color("#1f1738"), Color(UiStyle.GOLD, 0.55), 3, 14))
+				chip.add_child(UiStyle.label(part, 22 if parts.size() > 1 else 24, UiStyle.TEXT, 5))
+				row.add_child(chip)
+			_chips.add_child(row)
+		visible = true
+		UiStyle.pop_in(_panel, 0.45)
+
+	func _resume() -> void:
+		visible = false
+		SaveService.save_data()
+		resumed.emit()
+
+
+## Ползунок громкости (музыка / эффекты): 0–100%, сохраняется при отпускании.
+class VolumeSlider:
+	extends HBoxContainer
+	var _channel := ""
+	var _value_label: Label
+
+	func _init(caption: String, channel: String) -> void:
+		_channel = channel
+		add_theme_constant_override("separation", 14)
+		var name_label := UiStyle.label(caption, 26, UiStyle.TEXT, 6)
+		name_label.custom_minimum_size = Vector2(150, 0)
+		name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		add_child(name_label)
+		var slider := HSlider.new()
+		slider.min_value = 0.0
+		slider.max_value = 1.0
+		slider.step = 0.05
+		slider.value = SoundManager.get_volume(channel)
+		slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		slider.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		slider.custom_minimum_size = Vector2(0, 44)
+		slider.focus_mode = Control.FOCUS_NONE
+		var track := UiStyle.box(Color("#140f24"), UiStyle.OUTLINE, 3, 10)
+		track.content_margin_top = 6
+		track.content_margin_bottom = 6
+		slider.add_theme_stylebox_override("slider", track)
+		var filled := UiStyle.box(UiStyle.NEON, UiStyle.OUTLINE, 3, 10)
+		slider.add_theme_stylebox_override("grabber_area", filled)
+		slider.add_theme_stylebox_override("grabber_area_highlight", filled)
+		slider.add_theme_icon_override("grabber", _knob(Color.WHITE))
+		slider.add_theme_icon_override("grabber_highlight", _knob(UiStyle.GOLD))
+		slider.value_changed.connect(_on_changed)
+		slider.drag_ended.connect(func(_changed: bool) -> void: SaveService.save_data())
+		add_child(slider)
+		_value_label = UiStyle.label("%d%%" % roundi(slider.value * 100.0), 22, UiStyle.TEXT_DIM, 5)
+		_value_label.custom_minimum_size = Vector2(70, 0)
+		add_child(_value_label)
+
+	func _on_changed(value: float) -> void:
+		SoundManager.set_volume(_channel, value)
+		_value_label.text = "%d%%" % roundi(value * 100.0)
+		if _channel == "sfx":
+			SoundManager.play(&"ui_click")
+
+	static func _knob(color: Color) -> ImageTexture:
+		var size := 36
+		var image := Image.create(size, size, false, Image.FORMAT_RGBA8)
+		var c := Vector2(size, size) * 0.5
+		for y in size:
+			for x in size:
+				var d := Vector2(x + 0.5, y + 0.5).distance_to(c)
+				if d <= 17.0:
+					image.set_pixel(x, y, UiStyle.OUTLINE if d > 13.0 else color)
+		return ImageTexture.create_from_image(image)

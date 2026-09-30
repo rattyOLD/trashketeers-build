@@ -1,0 +1,185 @@
+class_name Controls
+extends RefCounted
+## Настройки управления: раскладка кнопок на экране (положение и размер), сторона джойстика,
+## жесты, переназначение клавиш и пять пресетов. Хранится в SaveService.data["controls"].
+
+const ELEMENTS := ["dash", "slots", "interact"]
+const ELEMENT_TITLES := {"dash": "РЫВОК", "slots": "СЛОТЫ ОРУЖИЯ", "interact": "ВЗЯТЬ"}
+const ELEMENT_SIZE := {"dash": Vector2(160, 160), "slots": Vector2(132, 100), "interact": Vector2(250, 96)}
+const PRESET_SLOTS := 3
+
+const KEY_ACTIONS := [
+	[&"move_up", "Вверх"],
+	[&"move_down", "Вниз"],
+	[&"move_left", "Влево"],
+	[&"move_right", "Вправо"],
+	[&"dash", "Рывок"],
+	[&"interact", "Подобрать ствол"],
+	[&"weapon_next", "Следующий ствол"],
+	[&"weapon_1", "Слот 1"],
+	[&"weapon_2", "Слот 2"],
+	[&"weapon_3", "Слот 3"],
+]
+const DEFAULT_KEYS := {
+	&"move_left": [KEY_A, KEY_LEFT],
+	&"move_right": [KEY_D, KEY_RIGHT],
+	&"move_up": [KEY_W, KEY_UP],
+	&"move_down": [KEY_S, KEY_DOWN],
+	&"dash": [KEY_SPACE, KEY_SHIFT],
+	&"interact": [KEY_E, KEY_F],
+	&"weapon_next": [KEY_Q, KEY_TAB],
+	&"weapon_1": [KEY_1],
+	&"weapon_2": [KEY_2],
+	&"weapon_3": [KEY_3],
+}
+
+static var revision := 0
+
+
+static func default_config(left_handed: bool = false) -> Dictionary:
+	var cx := 0.87 if not left_handed else 0.13
+	return {
+		"left_handed": left_handed,
+		"joystick_scale": 1.0,
+		"joystick_fixed": false,
+		"opacity": 1.0,
+		"swipe_switch": true,
+		"auto_pick": false,
+		"weapon_slots": 2,
+		"layout": {
+			"dash": {"x": cx, "y": 0.83, "s": 1.0},
+			"slots": {"x": cx, "y": 0.62, "s": 1.0},
+			"interact": {"x": 0.5, "y": 0.66, "s": 1.0},
+		},
+		"keys": {},
+		"presets": {},
+	}
+
+
+static func config() -> Dictionary:
+	var stored: Dictionary = SaveService.data.get("controls", {})
+	if stored.is_empty():
+		stored = default_config(false)
+		SaveService.data["controls"] = stored
+	var base := default_config(bool(stored.get("left_handed", false)))
+	for key in base:
+		if not stored.has(key):
+			stored[key] = base[key]
+	var layout: Dictionary = stored["layout"]
+	for id in ELEMENTS:
+		if not layout.has(id):
+			layout[id] = (base["layout"] as Dictionary)[id]
+	return stored
+
+
+static func save() -> void:
+	revision += 1
+	SaveService.save_data()
+
+
+static func element(id: String) -> Dictionary:
+	return (config()["layout"] as Dictionary)[id]
+
+
+static func set_element(id: String, x: float, y: float, scale: float) -> void:
+	var e := element(id)
+	e["x"] = clampf(x, 0.06, 0.94)
+	e["y"] = clampf(y, 0.14, 0.94)
+	e["s"] = clampf(scale, 0.6, 1.6)
+
+
+static func get_value(key: String) -> Variant:
+	return config()[key]
+
+
+static func set_value(key: String, value: Variant) -> void:
+	config()[key] = value
+	save()
+
+
+static func weapon_slot_count() -> int:
+	if not SaveService.has_slot3():
+		return 2
+	return clampi(int(config()["weapon_slots"]), 2, 3)
+
+
+static func apply_preset(left_handed: bool) -> void:
+	var keep_presets: Dictionary = config()["presets"]
+	var keep_keys: Dictionary = config()["keys"]
+	var fresh := default_config(left_handed)
+	for key in ["joystick_scale", "joystick_fixed", "opacity", "swipe_switch", "auto_pick", "weapon_slots"]:
+		fresh[key] = config()[key]
+	fresh["presets"] = keep_presets
+	fresh["keys"] = keep_keys
+	SaveService.data["controls"] = fresh
+	save()
+
+
+static func save_preset(slot: int) -> void:
+	var cfg := config()
+	var snapshot := cfg.duplicate(true)
+	snapshot.erase("presets")
+	(cfg["presets"] as Dictionary)[str(slot)] = snapshot
+	save()
+
+
+static func has_preset(slot: int) -> bool:
+	return (config()["presets"] as Dictionary).has(str(slot))
+
+
+static func load_preset(slot: int) -> bool:
+	var cfg := config()
+	var presets: Dictionary = cfg["presets"]
+	if not presets.has(str(slot)):
+		return false
+	var snapshot: Dictionary = (presets[str(slot)] as Dictionary).duplicate(true)
+	snapshot["presets"] = presets
+	SaveService.data["controls"] = snapshot
+	apply_keys()
+	save()
+	return true
+
+
+static func keys_for(action: StringName) -> Array:
+	var custom: Dictionary = config()["keys"]
+	if custom.has(str(action)):
+		return custom[str(action)]
+	return DEFAULT_KEYS.get(action, [])
+
+
+static func set_key(action: StringName, keycode: int) -> void:
+	config()["keys"][str(action)] = [keycode]
+	apply_keys()
+	save()
+
+
+static func reset_keys() -> void:
+	config()["keys"] = {}
+	apply_keys()
+	save()
+
+
+static func key_title(keycode: int) -> String:
+	return OS.get_keycode_string(keycode)
+
+
+## Пересобирает события InputMap из сохранённых клавиш.
+static func apply_keys() -> void:
+	for action in DEFAULT_KEYS:
+		if not InputMap.has_action(action):
+			InputMap.add_action(action, 0.2)
+		InputMap.action_erase_events(action)
+		for keycode in keys_for(action):
+			var event := InputEventKey.new()
+			event.physical_keycode = int(keycode) as Key
+			InputMap.action_add_event(action, event)
+
+
+## Положение центра элемента в пикселях области viewport и его размер.
+static func place(control: Control, id: String, area: Vector2, base_override: Vector2 = Vector2.ZERO) -> void:
+	var e := element(id)
+	var s: float = float(e["s"])
+	var base: Vector2 = base_override if base_override != Vector2.ZERO else ELEMENT_SIZE[id]
+	var size := base * s
+	control.size = size
+	control.position = Vector2(float(e["x"]) * area.x, float(e["y"]) * area.y) - size * 0.5

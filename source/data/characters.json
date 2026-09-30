@@ -1,0 +1,393 @@
+{
+ "version": 1,
+ "characters": [
+  {
+   "id": "raccoon",
+   "title": "Енот Бродяга",
+   "description": "Классический налётчик. Без слабых мест.",
+   "currency": "nuts",
+   "price": 0,
+   "recolor": {},
+   "proportions": {},
+   "stats": {
+    "speed": 0.0,
+    "hp": 0.0,
+    "dash": 0.0,
+    "crit": 0.0
+   },
+   "traits": "Сбалансирован",
+   "portrait": "res://assets/ui/portraits/vagabond.png",
+   "passive": {
+    "title": "Чутьё мусорщика",
+    "text": "Радиус подбора добычи +25%"
+   },
+   "role": "Универсал",
+   "lore": "Родился на Неоновой Свалке и знает в ней каждую щель. Тащит всё, что плохо лежит, и стреляет из всего, что стреляет. Крысы зовут его Бродягой - и делают это шёпотом.",
+   "sprite": {
+    "path": "res://assets/heroes/raccoon_hero.png",
+    "cells": 4,
+    "cell_w": 384,
+    "cell_h": 288,
+    "run": [
+     1,
+     2
+    ],
+    "shoulder": [
+     8,
+     -126
+    ],
+    "arm": "res://assets/heroes/raccoon_hero_arm.png",
+    "arm_scale": 0.26,
+    "arm_len": 100,
+    "arm_pivot_y": 51,
+    "classic_only": true
+   },
+   "quote": "Мусор для одних, сокровище для других. Поехали."
+  },
+  {
+   "id": "red_panda",
+   "title": "Рыжий Фитиль",
+   "description": "Рыжая красная панда: быстрее всех, но хрупкая.",
+   "currency": "nuts",
+   "price": 3500,
+   "recolor": {
+    "fur": [
+     "#2a0d06",
+     "#b8461a",
+     "#fff1e2",
+     1.0,
+     0.07,
+     0.9
+    ],
+    "iris": [
+     "#1c0a03",
+     "#7a3a10",
+     "#f2b36a",
+     1.0,
+     0.06,
+     0.83
+    ]
+   },
+   "proportions": {
+    "head": [
+     0.05,
+     0.05
+    ],
+    "tail": [
+     0.12,
+     0.04
+    ],
+    "ears": [
+     0.12,
+     0.1
+    ]
+   },
+   "stats": {
+    "speed": 0.1,
+    "hp": -0.1,
+    "dash": -0.15,
+    "crit": 0.0
+   },
+   "traits": "+10% скорость, рывок чаще, -10% здоровья",
+   "portrait": "res://assets/ui/portraits/red_panda.png",
+   "sprite": {
+    "path": "res://assets/heroes/red_panda.png",
+    "cells": 4,
+    "cell_w": 384,
+    "cell_h": 288,
+    "run": [
+     1,
+     2
+    ],
+    "shoulder": [
+     -2,
+     -138
+    ],
+    "arm": "res://assets/heroes/red_panda_arm.png",
+    "arm_scale": 0.26,
+    "arm_len": 100,
+    "arm_pivot_y": 55
+   },
+   "passive": {
+    "title": "Искры",
+    "text": "Рывок оставляет огненный след, поджигающий врагов"
+   },
+   "role": "Штурмовик",
+   "lore": "Бывший инженер-пиротехник городской свалки. Собрал экзокостюм из обломков реактора и теперь жжёт всё на своём пути. Быстрая, злая и слегка хрупкая - зато красиво горит всё вокруг.",
+   "quote": "Искру ловит тот, кто не боится обжечься."
+  },
+  {
+   "id": "snow",
+   "title": "Капитан Пломбир",
+   "description": "Енот-альбинос: крепкий и упрямый, но тяжеловат.",
+   "currency": "nuts",
+   "price": 4000,
+   "recolor": {
+    "fur": [
+     "#4f5468",
+     "#c4c9d8",
+     "#ffffff",
+     1.0,
+     0.07,
+     0.9
+    ],
+    "iris": [
+     "#3a0012",
+     "#e0355a",
+     "#ffc2d0",
+     1.0,
+     0.06,
+     0.83
+    ]
+   },
+   "proportions": {
+    "torso": [
+     0.07,
+     0.02
+    ],
+    "head": [
+     0.02,
+     0.0
+    ],
+    "tail": [
+     0.0,
+     0.08
+    ]
+   },
+   "stats": {
+    "speed": -0.05,
+    "hp": 0.2,
+    "dash": 0.0,
+    "crit": 0.0
+   },
+   "traits": "+20% здоровья, -5% скорости",
+   "portrait": "res://assets/ui/portraits/snow.png",
+   "sprite": {
+    "path": "res://assets/heroes/snow.png",
+    "cells": 4,
+    "cell_w": 384,
+    "cell_h": 288,
+    "run": [
+     1,
+     2
+    ],
+    "shoulder": [
+     -6,
+     -146
+    ],
+    "arm": "res://assets/heroes/snow_arm.png",
+    "arm_scale": 0.26,
+    "arm_len": 100,
+    "arm_pivot_y": 54.5
+   },
+   "passive": {
+    "title": "Вечная мерзлота",
+    "text": "Враги рядом (170 px) постоянно замедлены на 28%"
+   },
+   "role": "Танк",
+   "lore": "Енот-альбинос из вечной мерзлоты под старым холодильным заводом. Медленный и упрямый: пока враги замедляются рядом с ним, он спокойно доедает свой пломбир.",
+   "quote": "Холодный расчёт. Горячие пули."
+  },
+  {
+   "id": "night",
+   "title": "Полуночный Шнырь",
+   "description": "Чёрный как асфальт. Бьёт точно, живёт недолго.",
+   "currency": "nuts",
+   "price": 4500,
+   "recolor": {
+    "fur": [
+     "#060509",
+     "#393247",
+     "#bdb3d0",
+     1.0,
+     0.07,
+     0.9
+    ],
+    "iris": [
+     "#1a2a00",
+     "#a8ff2e",
+     "#f2ffc8",
+     1.0,
+     0.06,
+     0.83
+    ]
+   },
+   "proportions": {
+    "head": [
+     -0.04,
+     -0.03
+    ],
+    "legs": [
+     0.0,
+     0.1
+    ],
+    "ears": [
+     0.0,
+     0.15
+    ]
+   },
+   "stats": {
+    "speed": 0.05,
+    "hp": -0.05,
+    "dash": 0.0,
+    "crit": 0.06
+   },
+   "traits": "+6% шанс крита, +5% скорость",
+   "portrait": "res://assets/ui/portraits/night.png",
+   "sprite": {
+    "path": "res://assets/heroes/night.png",
+    "cells": 4,
+    "cell_w": 384,
+    "cell_h": 288,
+    "run": [
+     1,
+     2
+    ],
+    "shoulder": [
+     4,
+     -128
+    ],
+    "arm": "res://assets/heroes/night_arm.png",
+    "arm_scale": 0.26,
+    "arm_len": 100,
+    "arm_pivot_y": 60
+   },
+   "passive": {
+    "title": "Из тени",
+    "text": "После рывка 3 с: +35% урона"
+   },
+   "role": "Убийца",
+   "lore": "Чёрный как мокрый асфальт. Появляется из тени после рывка и исчезает раньше, чем крысы успеют пискнуть. Живёт быстро и недолго - но каждый выстрел точен.",
+   "quote": "Ты меня не видел. Ты меня и не увидишь."
+  },
+  {
+   "id": "neon_hopper",
+   "title": "Косой Турбо",
+   "description": "Кролик-спидстер с неоновыми клинками и ховер-рельсой.",
+   "currency": "nuts",
+   "price": 9000,
+   "portrait": "res://assets/ui/heroes/neon_hopper.png",
+   "recolor": {},
+   "proportions": {},
+   "stats": {
+    "speed": 0.12,
+    "hp": -0.1,
+    "dash": -0.25,
+    "crit": 0.0
+   },
+   "traits": "+12% скорость, рывок чаще, -10% здоровья",
+   "passive": {
+    "title": "Неоновые клинки",
+    "text": "Рывок режет всех врагов на пути (45+ урона)"
+   },
+   "sprite": {
+    "path": "res://assets/heroes/neon_hopper.png",
+    "cells": 4,
+    "cell_w": 384,
+    "cell_h": 288,
+    "run": [
+     1,
+     2
+    ],
+    "shoulder": [
+     15,
+     -126
+    ],
+    "arm_len": 100,
+    "arm_color": "#4a4a55",
+    "arm": "res://assets/heroes/neon_hopper_arm.png",
+    "arm_scale": 0.26,
+    "arm_pivot_y": 54
+   },
+   "role": "Спидстер",
+   "lore": "Кролик, выигравший три подпольные гонки на ховер-рельсе. Носит на сапогах неоновые клинки и не умеет стоять на месте. Говорят, он выбегает из боя раньше, чем в него успевают попасть.",
+   "quote": "Быстрее пули? Нет. Просто пуля в пробке."
+  },
+  {
+   "id": "fluffy_chemist",
+   "title": "Доктор Пушок",
+   "description": "Кот-учёный: токсичные колбы, урон по площади, поддержка.",
+   "currency": "nuts",
+   "price": 9000,
+   "portrait": "res://assets/ui/heroes/fluffy_chemist.png",
+   "recolor": {},
+   "proportions": {},
+   "stats": {
+    "speed": 0.0,
+    "hp": 0.05,
+    "dash": 0.0,
+    "crit": 0.0
+   },
+   "traits": "+5% здоровья, яды по умолчанию",
+   "passive": {
+    "title": "Токсичный след",
+    "text": "Рывок оставляет ядовитые лужи; 20% попаданий отравляют, яд сильнее на 30%"
+   },
+   "sprite": {
+    "path": "res://assets/heroes/fluffy_chemist.png",
+    "cells": 4,
+    "cell_w": 384,
+    "cell_h": 288,
+    "run": [
+     1,
+     2
+    ],
+    "shoulder": [
+     20,
+     -108
+    ],
+    "arm_len": 100,
+    "arm_color": "#4a4a55",
+    "arm": "res://assets/heroes/fluffy_chemist_arm.png",
+    "arm_scale": 0.26,
+    "arm_pivot_y": 48.5
+   },
+   "role": "Поддержка",
+   "lore": "Кот-учёный, которого выгнали из лаборатории за слишком яркие эксперименты. Носит за спиной баллон с зелёной жижей и искренне верит, что яд - это лекарство. Просто в очень большой дозе.",
+   "quote": "Не дыши глубоко. Или дыши, мне нужны данные."
+  },
+  {
+   "id": "pigeon_mafioso",
+   "title": "Крёстный Голубь",
+   "description": "Небесный босс с томми-ганом и бомбовым дроном.",
+   "currency": "nuts",
+   "price": 9000,
+   "portrait": "res://assets/ui/heroes/pigeon_mafioso.png",
+   "recolor": {},
+   "proportions": {},
+   "stats": {
+    "speed": -0.05,
+    "hp": 0.15,
+    "dash": 0.0,
+    "crit": 0.1
+   },
+   "traits": "+15% здоровья, +10% крит, -5% скорости",
+   "passive": {
+    "title": "Контрольный выстрел",
+    "text": "Крит мгновенно убивает врага с здоровьем ниже 25% (кроме боссов)"
+   },
+   "sprite": {
+    "path": "res://assets/heroes/pigeon_mafioso.png",
+    "cells": 4,
+    "cell_w": 384,
+    "cell_h": 288,
+    "run": [
+     1,
+     2
+    ],
+    "shoulder": [
+     20,
+     -108
+    ],
+    "arm_len": 100,
+    "arm_color": "#4a4a55",
+    "arm": "res://assets/heroes/pigeon_mafioso_arm.png",
+    "arm_scale": 0.26,
+    "arm_pivot_y": 46.5
+   },
+   "role": "Стрелок",
+   "lore": "Небесный босс пригородных крыш. Сыт по горло крысиными налётами, поэтому вышел на дело с томми-ганом и в шляпе. Не любит свидетелей и выжившей мелочи.",
+   "quote": "Предложение, от которого нельзя улететь."
+  }
+ ]
+}

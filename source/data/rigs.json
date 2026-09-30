@@ -1,0 +1,1761 @@
+{
+ "version": 1,
+ "rigs": [
+  {
+   "id": "raccoon",
+   "texture": "res://assets/player/raccoon_body.png",
+   "weights": [
+    "res://assets/rigs/raccoon_w0.png",
+    "res://assets/rigs/raccoon_w1.png",
+    "res://assets/rigs/raccoon_w2.png"
+   ],
+   "regions": [
+    "res://assets/rigs/raccoon_body_r0.png",
+    "res://assets/rigs/raccoon_body_r1.png"
+   ],
+   "pivot": [
+    210.0,
+    247.2
+   ],
+   "grid": 10,
+   "bones": [
+    [
+     -35.0,
+     -132.5
+    ],
+    [
+     31.2,
+     -146.2
+    ],
+    [
+     0.0,
+     -67.5
+    ],
+    [
+     -57.5,
+     -95.0
+    ],
+    [
+     -45.0,
+     -60.0
+    ],
+    [
+     -5.0,
+     0.0
+    ],
+    [
+     -155.0,
+     -57.5
+    ],
+    [
+     -105.0,
+     -25.0
+    ],
+    [
+     -40.0,
+     -10.0
+    ],
+    [
+     5.0,
+     -7.5
+    ],
+    [
+     -22.5,
+     -5.0
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "bone_names": [
+    "ear_l",
+    "ear_r",
+    "head",
+    "scarf",
+    "fist",
+    "torso",
+    "tail_tip",
+    "tail_mid",
+    "tail_base",
+    "leg_f",
+    "leg_b",
+    "spare"
+   ],
+   "eyes": [
+    [
+     0.6004,
+     0.4518,
+     0.0299,
+     0.0291
+    ],
+    [
+     0.7087,
+     0.4327,
+     0.0185,
+     0.0291
+    ]
+   ],
+   "extra": {
+    "shoulder": [
+     41.2,
+     -52.0
+    ],
+    "paw": [
+     63.2,
+     3.5
+    ],
+    "arm_tex_pivot": [
+     13.2,
+     28.2
+    ],
+    "avatar_rect": [
+     145,
+     60,
+     135,
+     135
+    ],
+    "full_texture": "res://assets/player/raccoon.png",
+    "arm_texture": "res://assets/player/raccoon_arm.png",
+    "arm_regions": [
+     "res://assets/rigs/raccoon_arm_r0.png",
+     "res://assets/rigs/raccoon_arm_r1.png"
+    ]
+   }
+  },
+  {
+   "id": "banker_mech",
+   "texture": "res://assets/bosses/banker_mech.png",
+   "weights": [
+    "res://assets/rigs/banker_mech_w0.png",
+    "res://assets/rigs/banker_mech_w1.png",
+    "res://assets/rigs/banker_mech_w2.png"
+   ],
+   "regions": [],
+   "pivot": [
+    185.0,
+    333.0
+   ],
+   "grid": 14,
+   "bones": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -185.0,
+     -329.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     -105.3
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -51.0,
+     -105.3
+    ],
+    [
+     51.0,
+     -105.3
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "bone_names": [
+    "ear_l",
+    "ear_r",
+    "head",
+    "weapon",
+    "fist",
+    "torso",
+    "tail_tip",
+    "tail_mid",
+    "tail_base",
+    "leg_f",
+    "leg_b",
+    "spare"
+   ],
+   "eyes": [],
+   "extra": {
+    "grounded": true,
+    "auto": true,
+    "height": 329.0,
+    "width": 364.0
+   }
+  },
+  {
+   "id": "banker_pig",
+   "texture": "res://assets/bosses/banker_pig.png",
+   "weights": [
+    "res://assets/rigs/banker_pig_w0.png",
+    "res://assets/rigs/banker_pig_w1.png",
+    "res://assets/rigs/banker_pig_w2.png"
+   ],
+   "regions": [],
+   "pivot": [
+    158.5,
+    291.0
+   ],
+   "grid": 14,
+   "bones": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     1.2,
+     -157.1
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     -46.6
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -41.9,
+     -46.6
+    ],
+    [
+     41.9,
+     -46.6
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "bone_names": [
+    "ear_l",
+    "ear_r",
+    "head",
+    "weapon",
+    "fist",
+    "torso",
+    "tail_tip",
+    "tail_mid",
+    "tail_base",
+    "leg_f",
+    "leg_b",
+    "spare"
+   ],
+   "eyes": [],
+   "extra": {
+    "grounded": true,
+    "auto": true,
+    "height": 291.0,
+    "width": 299.0
+   }
+  },
+  {
+   "id": "bruiser",
+   "texture": "res://assets/enemies/bruiser.png",
+   "weights": [
+    "res://assets/rigs/bruiser_w0.png",
+    "res://assets/rigs/bruiser_w1.png",
+    "res://assets/rigs/bruiser_w2.png"
+   ],
+   "regions": [],
+   "pivot": [
+    163.0,
+    187.0
+   ],
+   "grid": 10,
+   "bones": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -32.2,
+     -107.9
+    ],
+    [
+     21.7,
+     -83.7
+    ],
+    [
+     -104.6,
+     -70.7
+    ],
+    [
+     0.0,
+     -33.5
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -40.2,
+     -33.5
+    ],
+    [
+     40.2,
+     -33.5
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "bone_names": [
+    "ear_l",
+    "ear_r",
+    "head",
+    "weapon",
+    "fist",
+    "torso",
+    "tail_tip",
+    "tail_mid",
+    "tail_base",
+    "leg_f",
+    "leg_b",
+    "spare"
+   ],
+   "eyes": [],
+   "extra": {
+    "grounded": true,
+    "auto": true,
+    "height": 186.0,
+    "width": 287.0
+   }
+  },
+  {
+   "id": "croupier",
+   "texture": "res://assets/enemies/croupier.png",
+   "weights": [
+    "res://assets/rigs/croupier_w0.png",
+    "res://assets/rigs/croupier_w1.png",
+    "res://assets/rigs/croupier_w2.png"
+   ],
+   "regions": [],
+   "pivot": [
+    67.0,
+    221.0
+   ],
+   "grid": 10,
+   "bones": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -4.5,
+     -122.6
+    ],
+    [
+     20.0,
+     -109.5
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     -52.6
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -17.5,
+     -52.6
+    ],
+    [
+     17.5,
+     -52.6
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "bone_names": [
+    "ear_l",
+    "ear_r",
+    "head",
+    "weapon",
+    "fist",
+    "torso",
+    "tail_tip",
+    "tail_mid",
+    "tail_base",
+    "leg_f",
+    "leg_b",
+    "spare"
+   ],
+   "eyes": [],
+   "extra": {
+    "grounded": true,
+    "auto": true,
+    "height": 219.0,
+    "width": 125.0
+   }
+  },
+  {
+   "id": "dropper",
+   "texture": "res://assets/enemies/dropper.png",
+   "weights": [
+    "res://assets/rigs/dropper_w0.png",
+    "res://assets/rigs/dropper_w1.png",
+    "res://assets/rigs/dropper_w2.png"
+   ],
+   "regions": [],
+   "pivot": [
+    123.5,
+    223.0
+   ],
+   "grid": 10,
+   "bones": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     26.2,
+     -154.7
+    ],
+    [
+     54.3,
+     -141.4
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     -84.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -34.6,
+     -84.0
+    ],
+    [
+     34.6,
+     -84.0
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "bone_names": [
+    "ear_l",
+    "ear_r",
+    "head",
+    "weapon",
+    "fist",
+    "torso",
+    "tail_tip",
+    "tail_mid",
+    "tail_base",
+    "leg_f",
+    "leg_b",
+    "spare"
+   ],
+   "eyes": [],
+   "extra": {
+    "grounded": true,
+    "auto": true,
+    "height": 221.0,
+    "width": 247.0
+   }
+  },
+  {
+   "id": "overlord",
+   "texture": "res://assets/bosses/overlord_body.png",
+   "weights": [
+    "res://assets/rigs/overlord_w0.png",
+    "res://assets/rigs/overlord_w1.png",
+    "res://assets/rigs/overlord_w2.png"
+   ],
+   "regions": [],
+   "pivot": [
+    203.5,
+    427.0
+   ],
+   "grid": 14,
+   "bones": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -7.2,
+     -253.8
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     -67.7
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -56.6,
+     -67.7
+    ],
+    [
+     56.6,
+     -67.7
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "bone_names": [
+    "ear_l",
+    "ear_r",
+    "head",
+    "weapon",
+    "fist",
+    "torso",
+    "tail_tip",
+    "tail_mid",
+    "tail_base",
+    "leg_f",
+    "leg_b",
+    "spare"
+   ],
+   "eyes": [],
+   "extra": {
+    "grounded": true,
+    "auto": true,
+    "height": 423.0,
+    "width": 404.0
+   }
+  },
+  {
+   "id": "pig_angry",
+   "texture": "res://assets/enemies/pig_angry.png",
+   "weights": [
+    "res://assets/rigs/pig_angry_w0.png",
+    "res://assets/rigs/pig_angry_w1.png",
+    "res://assets/rigs/pig_angry_w2.png"
+   ],
+   "regions": [],
+   "pivot": [
+    122.5,
+    203.0
+   ],
+   "grid": 10,
+   "bones": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -10.8,
+     -116.0
+    ],
+    [
+     41.2,
+     -90.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     -40.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -28.8,
+     -40.0
+    ],
+    [
+     28.8,
+     -40.0
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "bone_names": [
+    "ear_l",
+    "ear_r",
+    "head",
+    "weapon",
+    "fist",
+    "torso",
+    "tail_tip",
+    "tail_mid",
+    "tail_base",
+    "leg_f",
+    "leg_b",
+    "spare"
+   ],
+   "eyes": [],
+   "extra": {
+    "grounded": true,
+    "auto": true,
+    "height": 200.0,
+    "width": 206.0
+   }
+  },
+  {
+   "id": "pig_default",
+   "texture": "res://assets/enemies/pig_default.png",
+   "weights": [
+    "res://assets/rigs/pig_default_w0.png",
+    "res://assets/rigs/pig_default_w1.png",
+    "res://assets/rigs/pig_default_w2.png"
+   ],
+   "regions": [],
+   "pivot": [
+    103.0,
+    180.0
+   ],
+   "grid": 10,
+   "bones": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.2,
+     -102.1
+    ],
+    [
+     26.4,
+     -79.2
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     -38.7
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -27.4,
+     -38.7
+    ],
+    [
+     27.4,
+     -38.7
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "bone_names": [
+    "ear_l",
+    "ear_r",
+    "head",
+    "weapon",
+    "fist",
+    "torso",
+    "tail_tip",
+    "tail_mid",
+    "tail_base",
+    "leg_f",
+    "leg_b",
+    "spare"
+   ],
+   "eyes": [],
+   "extra": {
+    "grounded": true,
+    "auto": true,
+    "height": 176.0,
+    "width": 196.0
+   }
+  },
+  {
+   "id": "pig_heavy",
+   "texture": "res://assets/enemies/pig_heavy.png",
+   "weights": [
+    "res://assets/rigs/pig_heavy_w0.png",
+    "res://assets/rigs/pig_heavy_w1.png",
+    "res://assets/rigs/pig_heavy_w2.png"
+   ],
+   "regions": [],
+   "pivot": [
+    120.5,
+    201.0
+   ],
+   "grid": 10,
+   "bones": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -6.6,
+     -113.7
+    ],
+    [
+     24.6,
+     -88.2
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     -39.2
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -28.4,
+     -39.2
+    ],
+    [
+     28.4,
+     -39.2
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "bone_names": [
+    "ear_l",
+    "ear_r",
+    "head",
+    "weapon",
+    "fist",
+    "torso",
+    "tail_tip",
+    "tail_mid",
+    "tail_base",
+    "leg_f",
+    "leg_b",
+    "spare"
+   ],
+   "eyes": [],
+   "extra": {
+    "grounded": true,
+    "auto": true,
+    "height": 196.0,
+    "width": 203.0
+   }
+  },
+  {
+   "id": "pig_redtie",
+   "texture": "res://assets/enemies/pig_redtie.png",
+   "weights": [
+    "res://assets/rigs/pig_redtie_w0.png",
+    "res://assets/rigs/pig_redtie_w1.png",
+    "res://assets/rigs/pig_redtie_w2.png"
+   ],
+   "regions": [],
+   "pivot": [
+    114.0,
+    174.0
+   ],
+   "grid": 10,
+   "bones": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -5.3,
+     -99.2
+    ],
+    [
+     16.4,
+     -76.9
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     -37.6
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -27.0,
+     -37.6
+    ],
+    [
+     27.0,
+     -37.6
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "bone_names": [
+    "ear_l",
+    "ear_r",
+    "head",
+    "weapon",
+    "fist",
+    "torso",
+    "tail_tip",
+    "tail_mid",
+    "tail_base",
+    "leg_f",
+    "leg_b",
+    "spare"
+   ],
+   "eyes": [],
+   "extra": {
+    "grounded": true,
+    "auto": true,
+    "height": 171.0,
+    "width": 193.0
+   }
+  },
+  {
+   "id": "pig_royal",
+   "texture": "res://assets/enemies/pig_royal.png",
+   "weights": [
+    "res://assets/rigs/pig_royal_w0.png",
+    "res://assets/rigs/pig_royal_w1.png",
+    "res://assets/rigs/pig_royal_w2.png"
+   ],
+   "regions": [],
+   "pivot": [
+    120.0,
+    208.0
+   ],
+   "grid": 10,
+   "bones": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -2.6,
+     -114.8
+    ],
+    [
+     34.5,
+     -86.1
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     -36.9
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -30.1,
+     -36.9
+    ],
+    [
+     30.1,
+     -36.9
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "bone_names": [
+    "ear_l",
+    "ear_r",
+    "head",
+    "weapon",
+    "fist",
+    "torso",
+    "tail_tip",
+    "tail_mid",
+    "tail_base",
+    "leg_f",
+    "leg_b",
+    "spare"
+   ],
+   "eyes": [],
+   "extra": {
+    "grounded": true,
+    "auto": true,
+    "height": 205.0,
+    "width": 215.0
+   }
+  },
+  {
+   "id": "pig_security",
+   "texture": "res://assets/enemies/pig_security.png",
+   "weights": [
+    "res://assets/rigs/pig_security_w0.png",
+    "res://assets/rigs/pig_security_w1.png",
+    "res://assets/rigs/pig_security_w2.png"
+   ],
+   "regions": [],
+   "pivot": [
+    113.5,
+    192.0
+   ],
+   "grid": 10,
+   "bones": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -6.9,
+     -105.3
+    ],
+    [
+     27.0,
+     -84.6
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     -37.6
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -26.7,
+     -37.6
+    ],
+    [
+     26.7,
+     -37.6
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "bone_names": [
+    "ear_l",
+    "ear_r",
+    "head",
+    "weapon",
+    "fist",
+    "torso",
+    "tail_tip",
+    "tail_mid",
+    "tail_base",
+    "leg_f",
+    "leg_b",
+    "spare"
+   ],
+   "eyes": [],
+   "extra": {
+    "grounded": true,
+    "auto": true,
+    "height": 188.0,
+    "width": 191.0
+   }
+  },
+  {
+   "id": "rat_gang",
+   "texture": "res://assets/enemies/rat_gang.png",
+   "weights": [
+    "res://assets/rigs/rat_gang_w0.png",
+    "res://assets/rigs/rat_gang_w1.png",
+    "res://assets/rigs/rat_gang_w2.png"
+   ],
+   "regions": [],
+   "pivot": [
+    84.0,
+    190.0
+   ],
+   "grid": 10,
+   "bones": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     9.7,
+     -93.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     -48.4
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -26.9,
+     -48.4
+    ],
+    [
+     26.9,
+     -48.4
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "bone_names": [
+    "ear_l",
+    "ear_r",
+    "head",
+    "weapon",
+    "fist",
+    "torso",
+    "tail_tip",
+    "tail_mid",
+    "tail_base",
+    "leg_f",
+    "leg_b",
+    "spare"
+   ],
+   "eyes": [],
+   "extra": {
+    "grounded": true,
+    "auto": true,
+    "height": 186.0,
+    "width": 192.0
+   }
+  },
+  {
+   "id": "rat_mad",
+   "texture": "res://assets/enemies/rat_mad.png",
+   "weights": [
+    "res://assets/rigs/rat_mad_w0.png",
+    "res://assets/rigs/rat_mad_w1.png",
+    "res://assets/rigs/rat_mad_w2.png"
+   ],
+   "regions": [],
+   "pivot": [
+    70.5,
+    204.0
+   ],
+   "grid": 10,
+   "bones": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     6.1,
+     -100.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     -52.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -25.6,
+     -52.0
+    ],
+    [
+     25.6,
+     -52.0
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "bone_names": [
+    "ear_l",
+    "ear_r",
+    "head",
+    "weapon",
+    "fist",
+    "torso",
+    "tail_tip",
+    "tail_mid",
+    "tail_base",
+    "leg_f",
+    "leg_b",
+    "spare"
+   ],
+   "eyes": [],
+   "extra": {
+    "grounded": true,
+    "auto": true,
+    "height": 200.0,
+    "width": 183.0
+   }
+  },
+  {
+   "id": "rat_toxic",
+   "texture": "res://assets/enemies/rat_toxic.png",
+   "weights": [
+    "res://assets/rigs/rat_toxic_w0.png",
+    "res://assets/rigs/rat_toxic_w1.png",
+    "res://assets/rigs/rat_toxic_w2.png"
+   ],
+   "regions": [],
+   "pivot": [
+    83.5,
+    202.0
+   ],
+   "grid": 10,
+   "bones": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     9.4,
+     -99.5
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     -51.7
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -24.8,
+     -51.7
+    ],
+    [
+     24.8,
+     -51.7
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "bone_names": [
+    "ear_l",
+    "ear_r",
+    "head",
+    "weapon",
+    "fist",
+    "torso",
+    "tail_tip",
+    "tail_mid",
+    "tail_base",
+    "leg_f",
+    "leg_b",
+    "spare"
+   ],
+   "eyes": [],
+   "extra": {
+    "grounded": true,
+    "auto": true,
+    "height": 199.0,
+    "width": 177.0
+   }
+  },
+  {
+   "id": "shank",
+   "texture": "res://assets/enemies/shank.png",
+   "weights": [
+    "res://assets/rigs/shank_w0.png",
+    "res://assets/rigs/shank_w1.png",
+    "res://assets/rigs/shank_w2.png"
+   ],
+   "regions": [],
+   "pivot": [
+    96.5,
+    246.0
+   ],
+   "grid": 10,
+   "bones": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -2.8,
+     -132.8
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     -64.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -26.3,
+     -64.0
+    ],
+    [
+     26.3,
+     -64.0
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "bone_names": [
+    "ear_l",
+    "ear_r",
+    "head",
+    "weapon",
+    "fist",
+    "torso",
+    "tail_tip",
+    "tail_mid",
+    "tail_base",
+    "leg_f",
+    "leg_b",
+    "spare"
+   ],
+   "eyes": [],
+   "extra": {
+    "grounded": true,
+    "auto": true,
+    "height": 246.0,
+    "width": 188.0
+   }
+  },
+  {
+   "id": "spark_rat",
+   "texture": "res://assets/enemies/spark_rat.png",
+   "weights": [
+    "res://assets/rigs/spark_rat_w0.png",
+    "res://assets/rigs/spark_rat_w1.png",
+    "res://assets/rigs/spark_rat_w2.png"
+   ],
+   "regions": [],
+   "pivot": [
+    96.0,
+    204.0
+   ],
+   "grid": 10,
+   "bones": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -0.9,
+     -121.2
+    ],
+    [
+     2.5,
+     -90.9
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     -56.6
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -27.6,
+     -56.6
+    ],
+    [
+     27.6,
+     -56.6
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "bone_names": [
+    "ear_l",
+    "ear_r",
+    "head",
+    "weapon",
+    "fist",
+    "torso",
+    "tail_tip",
+    "tail_mid",
+    "tail_base",
+    "leg_f",
+    "leg_b",
+    "spare"
+   ],
+   "eyes": [],
+   "extra": {
+    "grounded": true,
+    "auto": true,
+    "height": 202.0,
+    "width": 197.0
+   }
+  },
+  {
+   "id": "trapper",
+   "texture": "res://assets/enemies/trapper.png",
+   "weights": [
+    "res://assets/rigs/trapper_w0.png",
+    "res://assets/rigs/trapper_w1.png",
+    "res://assets/rigs/trapper_w2.png"
+   ],
+   "regions": [],
+   "pivot": [
+    88.0,
+    214.0
+   ],
+   "grid": 10,
+   "bones": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -19.8,
+     -126.6
+    ],
+    [
+     11.0,
+     -105.5
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     -54.9
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -20.6,
+     -54.9
+    ],
+    [
+     20.6,
+     -54.9
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "bone_names": [
+    "ear_l",
+    "ear_r",
+    "head",
+    "weapon",
+    "fist",
+    "torso",
+    "tail_tip",
+    "tail_mid",
+    "tail_base",
+    "leg_f",
+    "leg_b",
+    "spare"
+   ],
+   "eyes": [],
+   "extra": {
+    "grounded": true,
+    "auto": true,
+    "height": 211.0,
+    "width": 147.0
+   }
+  },
+  {
+   "id": "vault_pig",
+   "texture": "res://assets/enemies/vault_pig.png",
+   "weights": [
+    "res://assets/rigs/vault_pig_w0.png",
+    "res://assets/rigs/vault_pig_w1.png",
+    "res://assets/rigs/vault_pig_w2.png"
+   ],
+   "regions": [],
+   "pivot": [
+    128.5,
+    250.0
+   ],
+   "grid": 10,
+   "bones": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.9,
+     -163.7
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     81.0,
+     -158.7
+    ],
+    [
+     0.0,
+     -54.6
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ],
+    [
+     -34.6,
+     -54.6
+    ],
+    [
+     34.6,
+     -54.6
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "bone_names": [
+    "ear_l",
+    "ear_r",
+    "head",
+    "weapon",
+    "fist",
+    "torso",
+    "tail_tip",
+    "tail_mid",
+    "tail_base",
+    "leg_f",
+    "leg_b",
+    "spare"
+   ],
+   "eyes": [],
+   "extra": {
+    "grounded": true,
+    "auto": true,
+    "height": 248.0,
+    "width": 247.0
+   }
+  }
+ ]
+}

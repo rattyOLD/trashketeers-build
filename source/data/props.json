@@ -1,0 +1,695 @@
+{
+  "version": 1,
+  "props": {
+    "container": {
+      "texture": "res://assets/props/ch1/container.png",
+      "width": 230,
+      "footprint": [
+        206,
+        62
+      ],
+      "shadow": 70,
+      "flip": true
+    },
+    "junk_pile": {
+      "texture": "res://assets/props/ch1/junk_pile.png",
+      "width": 190,
+      "footprint": [
+        160,
+        60
+      ],
+      "shadow": 60,
+      "flip": true
+    },
+    "crt_terminal": {
+      "texture": "res://assets/props/ch1/crt_terminal.png",
+      "width": 110,
+      "footprint": [
+        88,
+        38
+      ],
+      "shadow": 40,
+      "flip": true,
+      "light": {
+        "color": "#5dffc0",
+        "radius": 150,
+        "energy": 0.35,
+        "offset": [
+          0,
+          -80
+        ],
+        "flicker": 0.25
+      }
+    },
+    "generator": {
+      "texture": "res://assets/props/ch1/generator.png",
+      "width": 150,
+      "footprint": [
+        128,
+        52
+      ],
+      "shadow": 50,
+      "flip": true,
+      "light": {
+        "color": "#4da6ff",
+        "radius": 170,
+        "energy": 0.35,
+        "offset": [
+          0,
+          -75
+        ],
+        "flicker": 0.15
+      },
+      "smoke": [
+        34,
+        -158
+      ]
+    },
+    "floodlight": {
+      "texture": "res://assets/props/ch1/floodlight.png",
+      "width": 105,
+      "footprint": [
+        50,
+        28
+      ],
+      "shadow": 90,
+      "light": {
+        "color": "#ffc27a",
+        "radius": 380,
+        "energy": 0.95,
+        "offset": [
+          0,
+          -158
+        ],
+        "flicker": 0.05,
+        "cast": [
+          0,
+          170
+        ]
+      }
+    },
+    "fence": {
+      "texture": "res://assets/props/ch1/fence.png",
+      "width": 170,
+      "footprint": [
+        156,
+        34
+      ],
+      "shadow": 60,
+      "flip": true
+    },
+    "oil_barrels": {
+      "texture": "res://assets/props/ch1/oil_barrels.png",
+      "width": 126,
+      "footprint": [
+        104,
+        44
+      ],
+      "shadow": 40,
+      "flip": true
+    },
+    "tire_stack": {
+      "texture": "res://assets/props/ch1/tire_stack.png",
+      "width": 90,
+      "footprint": [
+        76,
+        40
+      ],
+      "shadow": 40,
+      "flip": true
+    },
+    "toxic_bags": {
+      "texture": "res://assets/props/ch1/toxic_bags.png",
+      "width": 110,
+      "footprint": [
+        90,
+        40
+      ],
+      "shadow": 36,
+      "flip": true
+    },
+    "dumpster": {
+      "texture": "res://assets/props/ch1/dumpster.png",
+      "width": 130,
+      "footprint": [
+        114,
+        50
+      ],
+      "shadow": 50,
+      "flip": true
+    },
+    "d_container": {
+      "texture": "res://assets/props/ch1/container.png",
+      "width": 150,
+      "footprint": [
+        130,
+        48
+      ],
+      "shadow": 50,
+      "flip": true,
+      "destructible": {
+        "hp": 90,
+        "broken": "res://assets/props/ch1/container_broken.png",
+        "broken_width": 162.1,
+        "reward": 6,
+        "effect": "metal",
+        "sound": "obstacle_break"
+      }
+    },
+    "d_barrel": {
+      "texture": "res://assets/props/ch1/barrel_blue.png",
+      "width": 52,
+      "footprint": [
+        42,
+        26
+      ],
+      "shadow": 30,
+      "destructible": {
+        "hp": 30,
+        "broken": "res://assets/props/ch1/barrel_blue_broken.png",
+        "broken_width": 81.0,
+        "reward": 2,
+        "effect": "explode",
+        "sound": "explosion",
+        "explode": [
+          135,
+          70
+        ],
+        "blast": "res://assets/props/ch1/fx_explosion.png"
+      }
+    },
+    "d_crt": {
+      "texture": "res://assets/props/ch1/crt_terminal.png",
+      "width": 80,
+      "footprint": [
+        66,
+        32
+      ],
+      "shadow": 34,
+      "flip": true,
+      "destructible": {
+        "hp": 45,
+        "broken": "res://assets/props/ch1/crt_broken.png",
+        "broken_width": 79.3,
+        "reward": 4,
+        "effect": "sparks",
+        "sound": "crystal_break"
+      }
+    },
+    "d_toxic": {
+      "texture": "res://assets/props/ch1/barrel_toxic.png",
+      "width": 56,
+      "footprint": [
+        48,
+        28
+      ],
+      "shadow": 28,
+      "flip": true,
+      "destructible": {
+        "hp": 25,
+        "broken": "res://assets/props/ch1/barrel_toxic_broken.png",
+        "broken_width": 92.0,
+        "reward": 2,
+        "effect": "toxic",
+        "sound": "acid_splash"
+      }
+    },
+    "pig_statue": {
+      "texture": "res://assets/props/ch2/pig_statue.png",
+      "width": 130,
+      "footprint": [
+        110,
+        50
+      ],
+      "shadow": 70,
+      "flip": true
+    },
+    "vault_door": {
+      "texture": "res://assets/props/ch2/vault_door.png",
+      "width": 130,
+      "footprint": [
+        112,
+        40
+      ],
+      "shadow": 70
+    },
+    "fountain": {
+      "texture": "res://assets/props/ch2/fountain.png",
+      "width": 170,
+      "footprint": [
+        150,
+        66
+      ],
+      "shadow": 50,
+      "flip": true,
+      "light": {
+        "color": "#ff9ad0",
+        "radius": 200,
+        "energy": 0.3,
+        "offset": [
+          0,
+          -50
+        ],
+        "flicker": 0.1
+      }
+    },
+    "railing": {
+      "texture": "res://assets/props/ch2/railing.png",
+      "width": 150,
+      "footprint": [
+        136,
+        28
+      ],
+      "shadow": 40,
+      "flip": true
+    },
+    "railing_low": {
+      "texture": "res://assets/props/ch2/railing_low.png",
+      "width": 150,
+      "footprint": [
+        136,
+        26
+      ],
+      "shadow": 36,
+      "flip": true
+    },
+    "planter": {
+      "texture": "res://assets/props/ch2/planter.png",
+      "width": 100,
+      "footprint": [
+        86,
+        42
+      ],
+      "shadow": 50,
+      "flip": true
+    },
+    "lamp_banner": {
+      "texture": "res://assets/props/ch2/lamp_banner.png",
+      "width": 80,
+      "footprint": [
+        30,
+        22
+      ],
+      "shadow": 80,
+      "flip": true,
+      "light": {
+        "color": "#ffd28a",
+        "radius": 220,
+        "energy": 0.5,
+        "offset": [
+          -8,
+          -128
+        ],
+        "flicker": 0.04
+      }
+    },
+    "picnic_table": {
+      "texture": "res://assets/props/ch2/picnic_table.png",
+      "width": 140,
+      "footprint": [
+        104,
+        46
+      ],
+      "shadow": 50,
+      "flip": true,
+      "destructible": {
+        "hp": 70,
+        "broken": "res://assets/props/ch2/picnic_table_broken.png",
+        "broken_width": 141.0,
+        "reward": 5,
+        "effect": "wood",
+        "sound": "crate_break"
+      }
+    },
+    "cake_cart": {
+      "texture": "res://assets/props/ch2/cake_cart.png",
+      "width": 130,
+      "footprint": [
+        110,
+        46
+      ],
+      "shadow": 50,
+      "flip": true,
+      "destructible": {
+        "hp": 60,
+        "broken": "res://assets/props/ch2/cake_cart_broken.png",
+        "broken_width": 165.5,
+        "reward": 6,
+        "effect": "cake",
+        "sound": "crate_break"
+      }
+    },
+    "umbrella": {
+      "texture": "res://assets/props/ch2/umbrella.png",
+      "width": 100,
+      "footprint": [
+        40,
+        24
+      ],
+      "shadow": 50,
+      "flip": true,
+      "destructible": {
+        "hp": 25,
+        "broken": "res://assets/props/ch2/umbrella_broken.png",
+        "broken_width": 112.0,
+        "reward": 2,
+        "effect": "cloth",
+        "sound": "obstacle_break"
+      }
+    },
+    "cash_pile": {
+      "texture": "res://assets/props/ch2/cash_pile.png",
+      "width": 130,
+      "footprint": [
+        112,
+        42
+      ],
+      "shadow": 30,
+      "flip": true,
+      "destructible": {
+        "hp": 40,
+        "broken": "res://assets/props/ch2/cash_pile_broken.png",
+        "broken_width": 122.0,
+        "reward": 14,
+        "effect": "coins",
+        "sound": "crate_break"
+      }
+    },
+    "crystals": {
+      "texture": "res://assets/props/ch2/crystals.png",
+      "width": 100,
+      "footprint": [
+        84,
+        34
+      ],
+      "shadow": 26,
+      "flip": true,
+      "light": {
+        "color": "#ff5cd6",
+        "radius": 140,
+        "energy": 0.3,
+        "offset": [
+          0,
+          -40
+        ],
+        "flicker": 0.2
+      },
+      "destructible": {
+        "hp": 35,
+        "broken": "res://assets/props/ch2/crystals_broken.png",
+        "broken_width": 115.0,
+        "reward": 7,
+        "effect": "crystal",
+        "sound": "crystal_break"
+      }
+    },
+    "column": {
+      "texture": "res://assets/props/ch2/column.png",
+      "width": 60,
+      "footprint": [
+        36,
+        26
+      ],
+      "shadow": 80,
+      "destructible": {
+        "hp": 60,
+        "broken": "res://assets/props/ch2/column_broken.png",
+        "broken_width": 93.0,
+        "reward": 3,
+        "effect": "stone",
+        "sound": "obstacle_break"
+      }
+    },
+    "d_bags": {
+      "texture": "res://assets/props/ch1/toxic_bags.png",
+      "width": 90,
+      "footprint": [
+        74,
+        34
+      ],
+      "shadow": 30,
+      "flip": true,
+      "destructible": {
+        "hp": 30,
+        "broken": "res://assets/props/ch1/toxic_bags_broken.png",
+        "broken_width": 94.5,
+        "reward": 3,
+        "effect": "toxic",
+        "sound": "acid_splash"
+      }
+    },
+    "d_junk": {
+      "texture": "res://assets/props/ch1/junk_pile.png",
+      "width": 100,
+      "footprint": [
+        84,
+        40
+      ],
+      "shadow": 44,
+      "flip": true,
+      "destructible": {
+        "hp": 40,
+        "broken": "res://assets/props/ch1/junk_broken.png",
+        "broken_width": 100.5,
+        "reward": 5,
+        "effect": "cans",
+        "sound": "obstacle_break"
+      }
+    },
+    "r_fence": {
+      "texture": "res://assets/props/ch1/fence_broken.png",
+      "width": 174.0,
+      "flat": true,
+      "flip": true
+    },
+    "r_floodlight": {
+      "texture": "res://assets/props/ch1/floodlight_broken.png",
+      "width": 110.0,
+      "flat": true,
+      "flip": true
+    },
+    "r_generator": {
+      "texture": "res://assets/props/ch1/generator_broken.png",
+      "width": 155.0,
+      "flat": true,
+      "flip": true
+    },
+    "r_dumpster": {
+      "texture": "res://assets/props/ch1/dumpster_broken.png",
+      "width": 132.0,
+      "flat": true,
+      "flip": true
+    },
+    "r_tires": {
+      "texture": "res://assets/props/ch1/tire_broken.png",
+      "width": 119.0,
+      "flat": true,
+      "flip": true
+    },
+    "d_dumpster": {
+      "texture": "res://assets/props/ch1/dumpster.png",
+      "width": 110,
+      "footprint": [
+        96,
+        42
+      ],
+      "shadow": 46,
+      "flip": true,
+      "destructible": {
+        "hp": 110,
+        "broken": "res://assets/props/ch1/dumpster_broken.png",
+        "broken_width": 111.7,
+        "reward": 12,
+        "effect": "metal",
+        "sound": "obstacle_break",
+        "coins": true
+      }
+    },
+    "cable_spool": {
+      "texture": "res://assets/props/ch1/cable_spool.png",
+      "width": 110,
+      "footprint": [
+        92,
+        40
+      ],
+      "shadow": 36,
+      "flip": true
+    },
+    "scrap_ramp": {
+      "texture": "res://assets/props/ch1/scrap_ramp.png",
+      "width": 200,
+      "flat": true,
+      "flip": true
+    },
+    "d_cans": {
+      "texture": "res://assets/props/ch1/cans.png",
+      "width": 78,
+      "footprint": [
+        60,
+        30
+      ],
+      "shadow": 26,
+      "flip": true,
+      "destructible": {
+        "hp": 30,
+        "broken": "res://assets/props/ch1/cans_broken.png",
+        "broken_width": 87.8,
+        "reward": 5,
+        "effect": "cans",
+        "sound": "obstacle_break"
+      }
+    },
+    "barricade": {
+      "texture": "res://assets/props/ch1/barricade.png",
+      "width": 170,
+      "footprint": [
+        150,
+        44
+      ],
+      "shadow": 50,
+      "flip": true
+    },
+    "d_crates": {
+      "texture": "res://assets/props/ch1/crate_pile.png",
+      "width": 90,
+      "footprint": [
+        74,
+        34
+      ],
+      "shadow": 30,
+      "flip": true,
+      "destructible": {
+        "hp": 40,
+        "broken": "res://assets/props/ch1/crate_pile_broken.png",
+        "broken_width": 103.5,
+        "reward": 5,
+        "effect": "wood",
+        "sound": "crate_break"
+      }
+    },
+    "r_barricade": {
+      "texture": "res://assets/props/ch1/barricade_broken.png",
+      "width": 213.0,
+      "flat": true,
+      "flip": true
+    },
+    "r_railing": {
+      "texture": "res://assets/props/ch2/railing_broken.png",
+      "width": 267.0,
+      "flat": true,
+      "flip": true
+    },
+    "r_fountain": {
+      "texture": "res://assets/props/ch2/fountain_broken.png",
+      "width": 190.5,
+      "flat": true,
+      "flip": true
+    },
+    "r_statue": {
+      "texture": "res://assets/props/ch2/pig_statue_broken.png",
+      "width": 83.5,
+      "flat": true,
+      "flip": true
+    },
+    "outskirts_fence": {
+      "texture": "res://assets/props/ch1/outskirts_fence.png",
+      "width": 150,
+      "footprint": [
+        130,
+        30
+      ],
+      "shadow": 40,
+      "flip": true
+    },
+    "water_tower": {
+      "texture": "res://assets/props/ch1/water_tower.png",
+      "width": 150,
+      "footprint": [
+        76,
+        40
+      ],
+      "shadow": 50,
+      "flip": true
+    },
+    "shed": {
+      "texture": "res://assets/props/ch1/shed.png",
+      "width": 210,
+      "footprint": [
+        170,
+        60
+      ],
+      "shadow": 60,
+      "flip": true
+    },
+    "van": {
+      "texture": "res://assets/props/ch1/van.png",
+      "width": 240,
+      "footprint": [
+        200,
+        60
+      ],
+      "shadow": 65,
+      "flip": true
+    },
+    "spruce": {
+      "texture": "res://assets/props/ch1/spruce.png",
+      "width": 150,
+      "footprint": [
+        54,
+        30
+      ],
+      "shadow": 50,
+      "flip": true
+    },
+    "bush": {
+      "texture": "res://assets/props/ch1/bush.png",
+      "width": 100,
+      "footprint": [
+        70,
+        34
+      ],
+      "shadow": 30,
+      "flip": true
+    },
+    "bush_low": {
+      "texture": "res://assets/props/ch1/bush_low.png",
+      "width": 90,
+      "footprint": [
+        64,
+        30
+      ],
+      "shadow": 28,
+      "flip": true
+    },
+    "rocks": {
+      "texture": "res://assets/props/ch1/rocks.png",
+      "width": 115,
+      "footprint": [
+        90,
+        40
+      ],
+      "shadow": 40,
+      "flip": true
+    },
+    "toxic_pipe": {
+      "texture": "res://assets/props/ch1/toxic_pipe.png",
+      "width": 250,
+      "footprint": [
+        140,
+        60
+      ],
+      "shadow": 45,
+      "flip": true,
+      "light": {
+        "color": "#7dff2e",
+        "radius": 170,
+        "energy": 0.35,
+        "offset": [
+          0,
+          -30
+        ],
+        "flicker": 0.15
+      }
+    }
+  }
+}

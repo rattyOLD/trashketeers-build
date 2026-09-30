@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "scenes": {
+    "trash_row": {
+      "anchor": "side",
+      "items": [["dumpster", 0, 0], ["dumpster", 132, 6], ["toxic_bags", -118, 14], ["junk_pile", 66, -74]],
+      "destr": [["d_cans", -30, 62], ["d_bags", 170, 64]]
+    },
+    "power_station": {
+      "anchor": "back",
+      "items": [["generator", 0, 0], ["cable_spool", 118, 10], ["oil_barrels", -122, 8]],
+      "destr": [["d_barrel", -70, 62], ["d_barrel", -28, 74], ["d_crt", 80, 66]]
+    },
+    "container_yard": {
+      "anchor": "back",
+      "items": [["container", 0, 0], ["container", 224, 4], ["barricade", 112, 96]],
+      "destr": [["d_container", -130, 60], ["d_crates", 330, 70]]
+    },
+    "tire_shop": {
+      "anchor": "open",
+      "items": [["tire_stack", 0, 0], ["tire_stack", 86, 4], ["tire_stack", 43, -42], ["oil_barrels", -112, 10]],
+      "destr": [["d_crates", 40, 74], ["d_barrel", 128, 66]]
+    },
+    "ewaste": {
+      "anchor": "open",
+      "items": [["junk_pile", 0, 0], ["crt_terminal", -125, 10], ["crt_terminal", 128, 14], ["cable_spool", 4, 84]],
+      "destr": [["d_crt", -70, 70], ["d_junk", 80, 90]]
+    },
+    "checkpoint": {
+      "anchor": "lane",
+      "items": [["barricade", 0, 0], ["barricade", 190, 0], ["oil_barrels", -120, 10]],
+      "destr": [["d_barrel", 95, 60]]
+    },
+    "toxic_corner": {
+      "anchor": "front",
+      "items": [["toxic_bags", 0, 0], ["oil_barrels", 112, 6], ["toxic_bags", -108, 12]],
+      "destr": [["d_toxic", -50, 62], ["d_toxic", -8, 76], ["d_bags", 78, 66]]
+    },
+    "watchman": {
+      "anchor": "back",
+      "items": [["shed", 0, 0], ["van", 226, 12], ["bush", -118, 16]],
+      "destr": [["d_crates", 100, 70], ["d_barrel", -60, 64]]
+    },
+    "water_tower": {
+      "anchor": "back",
+      "items": [["water_tower", 0, 0], ["rocks", 116, 12], ["bush_low", -98, 14]],
+      "destr": [["d_barrel", 40, 62]]
+    },
+    "tree_line": {
+      "anchor": "side",
+      "items": [["spruce", 0, 0], ["spruce", 116, -22], ["spruce", 230, 6], ["bush", 60, 26], ["bush_low", 176, 34]],
+      "destr": []
+    },
+    "pipe_yard": {
+      "anchor": "open",
+      "items": [["toxic_pipe", 0, 0], ["toxic_bags", 150, 12], ["oil_barrels", -140, 12]],
+      "destr": [["d_toxic", 40, 74], ["d_toxic", 84, 66]]
+    }
+  }
+}

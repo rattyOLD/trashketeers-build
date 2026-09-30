@@ -1,0 +1,132 @@
+class_name UiStyle
+extends RefCounted
+## Фабрики стилизованных контролов: жирный тёмный контур, скруглённые плашки, неон.
+## Всё строится кодом, чтобы UI не зависел от .tres-тем и легко правился в одном месте.
+
+const OUTLINE := Color("#180e22")
+const PANEL := Color("#2a2046")
+const PANEL_LIGHT := Color("#3a2d60")
+const NEON := Color("#00e5ff")
+const HOT := Color("#ff2ea6")
+const GOLD := Color("#ffd257")
+const DANGER := Color("#ff3b5c")
+const TEXT := Color("#f4f0ff")
+const TEXT_DIM := Color("#b5a9d6")
+
+
+static func box(bg: Color, border: Color = OUTLINE, border_width: int = 4, radius: int = 18) -> StyleBoxFlat:
+	var s := StyleBoxFlat.new()
+	s.bg_color = bg
+	s.border_color = border
+	s.set_border_width_all(border_width)
+	s.set_corner_radius_all(radius)
+	s.content_margin_left = 16
+	s.content_margin_right = 16
+	s.content_margin_top = 10
+	s.content_margin_bottom = 10
+	s.anti_aliasing = true
+	return s
+
+
+static func label(text: String, font_size: int, color: Color = TEXT, outline: int = 8) -> Label:
+	var l := Label.new()
+	l.text = text
+	l.add_theme_font_size_override("font_size", font_size)
+	l.add_theme_color_override("font_color", color)
+	l.add_theme_color_override("font_outline_color", OUTLINE)
+	l.add_theme_constant_override("outline_size", outline)
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return l
+
+
+static func button(text: String, color: Color, font_size: int = 30, min_size: Vector2 = Vector2(0, 84)) -> Button:
+	var b := Button.new()
+	b.text = text
+	b.custom_minimum_size = min_size
+	b.focus_mode = Control.FOCUS_NONE
+	b.add_theme_font_size_override("font_size", font_size)
+	b.add_theme_color_override("font_color", TEXT)
+	b.add_theme_color_override("font_hover_color", TEXT)
+	b.add_theme_color_override("font_pressed_color", TEXT)
+	b.add_theme_color_override("font_hover_pressed_color", TEXT)
+	b.add_theme_color_override("font_outline_color", OUTLINE)
+	b.add_theme_constant_override("outline_size", 8)
+	b.add_theme_color_override("font_disabled_color", Color(TEXT, 0.55))
+	b.add_theme_stylebox_override("normal", button_box(color, false))
+	b.add_theme_stylebox_override("hover", button_box(color.lightened(0.06), false))
+	b.add_theme_stylebox_override("pressed", button_box(color.lightened(0.1), true))
+	b.add_theme_stylebox_override("hover_pressed", button_box(color.lightened(0.1), true))
+	b.add_theme_stylebox_override("disabled", button_box(color.darkened(0.45).lerp(Color("#3a3450"), 0.5), false))
+	b.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+	b.pressed.connect(func() -> void: SoundManager.play(&"ui_click"))
+	return b
+
+
+## Единый стиль кнопок: плашка с тёмным ободком того же оттенка и толстой «губой» снизу;
+## при нажатии губа уходит, текст опускается — кнопка «продавливается».
+static func button_box(color: Color, pressed: bool) -> StyleBoxFlat:
+	var s := StyleBoxFlat.new()
+	s.bg_color = color
+	s.border_color = color.darkened(0.6).lerp(OUTLINE, 0.35)
+	s.set_border_width_all(4)
+	s.border_width_bottom = 5 if pressed else 11
+	s.set_corner_radius_all(20)
+	s.content_margin_left = 16
+	s.content_margin_right = 16
+	s.content_margin_top = 16 if pressed else 10
+	s.content_margin_bottom = 8 if pressed else 14
+	s.expand_margin_top = -6.0 if pressed else 0.0
+	s.anti_aliasing = true
+	return s
+
+
+static func progress_bar(fill: Color, height: float) -> ProgressBar:
+	var bar := ProgressBar.new()
+	bar.show_percentage = false
+	bar.custom_minimum_size = Vector2(0, height)
+	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bar.add_theme_stylebox_override("background", box(Color("#140f24"), OUTLINE, 4, 10))
+	var fill_box := box(fill, OUTLINE, 4, 10)
+	fill_box.set_content_margin_all(0)
+	bar.add_theme_stylebox_override("fill", fill_box)
+	return bar
+
+
+## Якорь в точке anchor (0..1 от родителя) и прямоугольник относительно неё.
+## Задаём offsets напрямую: position у заякоренного контрола зависит от текущего размера родителя.
+static func anchor(control: Control, anchor_point: Vector2, rect: Rect2) -> void:
+	control.anchor_left = anchor_point.x
+	control.anchor_right = anchor_point.x
+	control.anchor_top = anchor_point.y
+	control.anchor_bottom = anchor_point.y
+	control.offset_left = rect.position.x
+	control.offset_top = rect.position.y
+	control.offset_right = rect.end.x
+	control.offset_bottom = rect.end.y
+
+
+static func keep_pivot_centered(control: Control) -> void:
+	control.pivot_offset = control.size * 0.5
+	if control.has_meta(&"pivot_bound"):
+		return
+	control.set_meta(&"pivot_bound", true)
+	control.resized.connect(func() -> void: control.pivot_offset = control.size * 0.5)
+
+
+## Пружинящее появление (Elastic по ТЗ).
+static func pop_in(control: Control, duration: float = 0.6) -> void:
+	keep_pivot_centered(control)
+	control.scale = Vector2(0.55, 0.55)
+	control.modulate.a = 0.0
+	var tween := control.create_tween().set_parallel(true)
+	tween.tween_property(control, "scale", Vector2.ONE, duration).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+	tween.tween_property(control, "modulate:a", 1.0, duration * 0.3)
+
+
+static func pulse(control: Control, amount: float = 0.06, period: float = 0.9) -> void:
+	keep_pivot_centered(control)
+	var tween := control.create_tween().set_loops()
+	tween.tween_property(control, "scale", Vector2.ONE * (1.0 + amount), period * 0.5).set_trans(Tween.TRANS_SINE)
+	tween.tween_property(control, "scale", Vector2.ONE, period * 0.5).set_trans(Tween.TRANS_SINE)

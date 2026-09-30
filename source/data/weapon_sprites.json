@@ -1,0 +1,617 @@
+{
+ "version": 1,
+ "sprites": [
+  {
+   "icon": "pistol",
+   "texture": "res://assets/weapons/pistol.png",
+   "size": [
+    145,
+    111
+   ],
+   "grip": [
+    26.0,
+    75.5
+   ],
+   "muzzle": [
+    144.0,
+    26.5
+   ],
+   "length": 56
+  },
+  {
+   "icon": "revolver",
+   "texture": "res://assets/weapons/revolver.png",
+   "size": [
+    173,
+    113
+   ],
+   "grip": [
+    14.5,
+    76.8
+   ],
+   "muzzle": [
+    172.0,
+    23.6
+   ],
+   "length": 64
+  },
+  {
+   "icon": "smg",
+   "texture": "res://assets/weapons/smg.png",
+   "size": [
+    177,
+    110
+   ],
+   "grip": [
+    66.1,
+    74.8
+   ],
+   "muzzle": [
+    176.0,
+    38.6
+   ],
+   "length": 74
+  },
+  {
+   "icon": "rifle",
+   "texture": "res://assets/weapons/rifle.png",
+   "size": [
+    167,
+    109
+   ],
+   "grip": [
+    38.0,
+    74.1
+   ],
+   "muzzle": [
+    166.0,
+    32.2
+   ],
+   "length": 84
+  },
+  {
+   "icon": "shotgun",
+   "texture": "res://assets/weapons/shotgun.png",
+   "size": [
+    201,
+    89
+   ],
+   "grip": [
+    54.9,
+    60.5
+   ],
+   "muzzle": [
+    200.0,
+    31.0
+   ],
+   "length": 88
+  },
+  {
+   "icon": "sniper",
+   "texture": "res://assets/weapons/sniper.png",
+   "size": [
+    170,
+    110
+   ],
+   "grip": [
+    68.8,
+    74.8
+   ],
+   "muzzle": [
+    169.0,
+    27.9
+   ],
+   "length": 86
+  },
+  {
+   "icon": "lmg",
+   "texture": "res://assets/weapons/lmg.png",
+   "size": [
+    199,
+    85
+   ],
+   "grip": [
+    59.0,
+    57.8
+   ],
+   "muzzle": [
+    198.0,
+    38.2
+   ],
+   "length": 92
+  },
+  {
+   "icon": "rail",
+   "texture": "res://assets/weapons/rail.png",
+   "size": [
+    177,
+    99
+   ],
+   "grip": [
+    31.5,
+    67.3
+   ],
+   "muzzle": [
+    176.0,
+    32.0
+   ],
+   "length": 90
+  },
+  {
+   "icon": "blaster",
+   "texture": "res://assets/weapons/blaster.png",
+   "size": [
+    158,
+    85
+   ],
+   "grip": [
+    42.5,
+    57.8
+   ],
+   "muzzle": [
+    157.0,
+    42.8
+   ],
+   "length": 80
+  },
+  {
+   "icon": "prism",
+   "texture": "res://assets/weapons/prism.png",
+   "size": [
+    137,
+    66
+   ],
+   "grip": [
+    32.8,
+    44.9
+   ],
+   "muzzle": [
+    136.0,
+    30.0
+   ],
+   "length": 84
+  },
+  {
+   "icon": "launcher",
+   "texture": "res://assets/weapons/launcher.png",
+   "size": [
+    140,
+    85
+   ],
+   "grip": [
+    41.5,
+    57.8
+   ],
+   "muzzle": [
+    139.0,
+    47.1
+   ],
+   "length": 82
+  },
+  {
+   "icon": "tommy",
+   "texture": "res://assets/weapons/tommy.png",
+   "size": [
+    157,
+    72
+   ],
+   "grip": [
+    66.5,
+    49.0
+   ],
+   "muzzle": [
+    156.0,
+    16.4
+   ],
+   "length": 84
+  },
+  {
+   "icon": "pump",
+   "texture": "res://assets/weapons/pump.png",
+   "size": [
+    136,
+    54
+   ],
+   "grip": [
+    22.9,
+    36.7
+   ],
+   "muzzle": [
+    135.0,
+    19.0
+   ],
+   "length": 78
+  },
+  {
+   "icon": "coil",
+   "texture": "res://assets/weapons/coil.png",
+   "size": [
+    200,
+    77
+   ],
+   "grip": [
+    60.5,
+    52.4
+   ],
+   "muzzle": [
+    199.0,
+    34.0
+   ],
+   "length": 88
+  },
+  {
+   "icon": "scrap_pistol",
+   "texture": "res://assets/weapons/scrap_pistol.png",
+   "size": [
+    150,
+    100
+   ],
+   "grip": [
+    39.0,
+    68.0
+   ],
+   "muzzle": [
+    149.0,
+    29.5
+   ],
+   "length": 58
+  },
+  {
+   "icon": "magnet",
+   "texture": "res://assets/weapons/magnet.png",
+   "size": [
+    210,
+    57
+   ],
+   "grip": [
+    64.8,
+    38.8
+   ],
+   "muzzle": [
+    209.0,
+    28.3
+   ],
+   "length": 96
+  },
+  {
+   "icon": "casino",
+   "texture": "res://assets/weapons/casino.png",
+   "size": [
+    200,
+    85
+   ],
+   "grip": [
+    38.3,
+    57.8
+   ],
+   "muzzle": [
+    199.0,
+    32.0
+   ],
+   "length": 86
+  },
+  {
+   "icon": "golden_smg",
+   "texture": "res://assets/weapons/golden_smg.png",
+   "size": [
+    190,
+    84
+   ],
+   "grip": [
+    58.5,
+    57.1
+   ],
+   "muzzle": [
+    189.0,
+    31.0
+   ],
+   "length": 78
+  },
+  {
+   "icon": "carbine",
+   "texture": "res://assets/weapons/carbine.png",
+   "size": [
+    180,
+    86
+   ],
+   "grip": [
+    56.4,
+    58.5
+   ],
+   "muzzle": [
+    179.0,
+    29.0
+   ],
+   "length": 82
+  },
+  {
+   "icon": "minigun",
+   "texture": "res://assets/weapons/minigun.png",
+   "size": [
+    200,
+    83
+   ],
+   "grip": [
+    59.5,
+    56.4
+   ],
+   "muzzle": [
+    199.0,
+    52.6
+   ],
+   "length": 94
+  },
+  {
+   "icon": "slingshot",
+   "texture": "res://assets/weapons/slingshot.png",
+   "size": [
+    150,
+    159
+   ],
+   "grip": [
+    44.5,
+    108.1
+   ],
+   "muzzle": [
+    149.0,
+    119.3
+   ],
+   "length": 60
+  },
+  {
+   "icon": "capgun",
+   "texture": "res://assets/weapons/capgun.png",
+   "size": [
+    190,
+    128
+   ],
+   "grip": [
+    78.6,
+    87.0
+   ],
+   "muzzle": [
+    189.0,
+    36.0
+   ],
+   "length": 84
+  },
+  {
+   "icon": "harpoon",
+   "texture": "res://assets/weapons/harpoon.png",
+   "size": [
+    200,
+    101
+   ],
+   "grip": [
+    62.8,
+    68.7
+   ],
+   "muzzle": [
+    199.0,
+    26.5
+   ],
+   "length": 88
+  },
+  {
+   "icon": "mortar",
+   "texture": "res://assets/weapons/mortar.png",
+   "size": [
+    170,
+    158
+   ],
+   "grip": [
+    74.0,
+    107.4
+   ],
+   "muzzle": [
+    169.0,
+    38.5
+   ],
+   "length": 80
+  },
+  {
+   "icon": "toaster",
+   "texture": "res://assets/weapons/toaster.png",
+   "size": [
+    150,
+    130
+   ],
+   "grip": [
+    51.0,
+    88.4
+   ],
+   "muzzle": [
+    149.0,
+    88.3
+   ],
+   "length": 70
+  },
+  {
+   "icon": "railgun",
+   "texture": "res://assets/weapons/railgun.png",
+   "size": [
+    340,
+    122
+   ],
+   "grip": [
+    70.0,
+    97.0
+   ],
+   "muzzle": [
+    334.0,
+    49.0
+   ],
+   "length": 130
+  },
+  {
+   "icon": "melee_crowbar",
+   "texture": "res://assets/weapons/melee_crowbar.png",
+   "size": [
+    240,
+    162
+   ],
+   "grip": [
+    38.0,
+    30.0
+   ],
+   "muzzle": [
+    239.0,
+    32.0
+   ],
+   "length": 82
+  },
+  {
+   "icon": "melee_knife",
+   "texture": "res://assets/weapons/melee_knife.png",
+   "size": [
+    240,
+    117
+   ],
+   "grip": [
+    38.0,
+    23.0
+   ],
+   "muzzle": [
+    239.0,
+    18.5
+   ],
+   "length": 58
+  },
+  {
+   "icon": "melee_fireaxe",
+   "texture": "res://assets/weapons/melee_fireaxe.png",
+   "size": [
+    240,
+    232
+   ],
+   "grip": [
+    38.0,
+    76.0
+   ],
+   "muzzle": [
+    239.0,
+    88.5
+   ],
+   "length": 70
+  },
+  {
+   "icon": "melee_katana",
+   "texture": "res://assets/weapons/melee_katana.png",
+   "size": [
+    240,
+    48
+   ],
+   "grip": [
+    38.0,
+    21.0
+   ],
+   "muzzle": [
+    239.0,
+    19.0
+   ],
+   "length": 98
+  },
+  {
+   "icon": "melee_sledge",
+   "texture": "res://assets/weapons/melee_sledge.png",
+   "size": [
+    240,
+    141
+   ],
+   "grip": [
+    38.0,
+    60.5
+   ],
+   "muzzle": [
+    239.0,
+    77.0
+   ],
+   "length": 70
+  },
+  {
+   "icon": "melee_shield",
+   "texture": "res://assets/weapons/melee_shield.png",
+   "size": [
+    240,
+    141
+   ],
+   "grip": [
+    38.0,
+    69.0
+   ],
+   "muzzle": [
+    239.0,
+    67.0
+   ],
+   "length": 64
+  },
+  {
+   "icon": "melee_iceaxe",
+   "texture": "res://assets/weapons/melee_iceaxe.png",
+   "size": [
+    240,
+    204
+   ],
+   "grip": [
+    38.0,
+    102.14285714285714
+   ],
+   "muzzle": [
+    239.0,
+    111.5
+   ],
+   "length": 76
+  },
+  {
+   "icon": "melee_junkblade",
+   "texture": "res://assets/weapons/melee_junkblade.png",
+   "size": [
+    240,
+    176
+   ],
+   "grip": [
+    38.0,
+    86.75471698113208
+   ],
+   "muzzle": [
+    239.0,
+    114.5
+   ],
+   "length": 104
+  },
+  {
+   "icon": "melee_graviton",
+   "texture": "res://assets/weapons/melee_graviton.png",
+   "size": [
+    240,
+    182
+   ],
+   "grip": [
+    38.0,
+    90.76744186046511
+   ],
+   "muzzle": [
+    239.0,
+    123.0
+   ],
+   "length": 90
+  },
+  {
+   "icon": "melee_pigeon",
+   "texture": "res://assets/weapons/melee_pigeon.png",
+   "size": [
+    240,
+    205
+   ],
+   "grip": [
+    38.0,
+    135.0
+   ],
+   "muzzle": [
+    239.0,
+    139.6
+   ],
+   "length": 56
+  }
+ ]
+}
