@@ -34,7 +34,7 @@ func _init() -> void:
 	center.add_child(_panel)
 
 	_box = VBoxContainer.new()
-	_box.custom_minimum_size = Vector2(720, 0)
+	_box.custom_minimum_size = Vector2(560 if Orient.portrait else 720, 0)
 	_box.add_theme_constant_override("separation", 12)
 	_panel.add_child(_box)
 
@@ -58,12 +58,13 @@ func _init() -> void:
 	_tip_card.add_child(_tip_label)
 	_box.add_child(_tip_card)
 
-	var buttons := HBoxContainer.new()
+	var buttons := BoxContainer.new()
+	buttons.vertical = Orient.portrait
 	buttons.add_theme_constant_override("separation", 14)
 	_box.add_child(buttons)
-	var again := UiStyle.button("ЕЩЁ РАЗ", UiStyle.HOT, 32, Vector2(0, 76))
+	var again := UiStyle.button("ЕЩЁ РАЗ", UiStyle.HOT, 32, Vector2(0, 96 if Orient.portrait else 76))
 	again.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	again.size_flags_stretch_ratio = 1.5
+	again.size_flags_stretch_ratio = 1.0 if Orient.portrait else 1.5
 	again.pressed.connect(func() -> void: restart_pressed.emit())
 	buttons.add_child(again)
 	var menu := UiStyle.button("НА БАЗУ", UiStyle.PANEL_LIGHT, 26, Vector2(0, 76))

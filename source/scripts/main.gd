@@ -55,6 +55,8 @@ func _ready() -> void:
 	# троттлить. Игра рассчитана на 60.
 	Engine.max_fps = 60
 	_handle_unclean_exit()
+	Orient.refresh(get_window())
+	get_window().size_changed.connect(_on_window_resized)
 	SaveService.apply_quality()
 	_register_input()
 	_show_menu()
@@ -74,6 +76,13 @@ func _handle_unclean_exit() -> void:
 		SaveService.set_quality(quality - 1)
 		SaveService.set_flag("crash_downgraded", true)
 	Platform.send_report("unclean_exit", "%s | now quality %d | last: %s | %s" % [info, SaveService.get_quality(), Platform.last_context(), Platform.device_info()])
+
+
+func _on_window_resized() -> void:
+	if not Orient.refresh(get_window()):
+		return
+	if _screen is MainMenuUI:
+		_show_menu()
 
 
 func _register_input() -> void:

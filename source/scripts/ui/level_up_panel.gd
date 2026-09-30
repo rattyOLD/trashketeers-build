@@ -8,7 +8,7 @@ signal reroll_requested
 
 var _box: VBoxContainer
 var _title: Label
-var _cards: HBoxContainer
+var _cards: BoxContainer
 var _choices: Array[UpgradeData] = []
 var _reroll: Button
 const ARCHETYPE_NAMES := {&"dps": "БИЛД: УРОН", &"debuff": "БИЛД: ЭФФЕКТЫ", &"mobility": "БИЛД: РЫВОК"}
@@ -36,7 +36,7 @@ func _init() -> void:
 	_box.add_child(_title)
 	_box.add_child(UiStyle.label("Выбери улучшение", 24, UiStyle.TEXT_DIM, 6))
 
-	_cards = HBoxContainer.new()
+	_cards = BoxContainer.new()
 	_cards.add_theme_constant_override("separation", 14)
 	_box.add_child(_cards)
 	_reroll = UiStyle.button("", Color("#7a3bd1"), 24, Vector2(620, 64))
@@ -50,6 +50,8 @@ func open(choices: Array[UpgradeData], level: int, stats: RunStats, bonus: bool 
 	_choices = choices
 	_title.text = "НАГРАДА БОССА!" if bonus else "УРОВЕНЬ %d!" % level
 	_title.add_theme_color_override("font_color", Color("#ff7ae0") if bonus else UiStyle.GOLD)
+	_cards.vertical = Orient.portrait
+	_reroll.custom_minimum_size = Vector2(620, 84 if Orient.portrait else 64)
 	for child in _cards.get_children():
 		child.queue_free()
 	for i in choices.size():
@@ -63,7 +65,8 @@ func open(choices: Array[UpgradeData], level: int, stats: RunStats, bonus: bool 
 
 func _make_card(upgrade: UpgradeData, index: int, stats: RunStats) -> Button:
 	var accent := upgrade.rarity_color() if upgrade.category != "evolution" else Color("#ff5cf0")
-	var card := UiStyle.button("", UiStyle.PANEL_LIGHT, 28, Vector2(390, 290))
+	var text_width := 560.0 if Orient.portrait else 340.0
+	var card := UiStyle.button("", UiStyle.PANEL_LIGHT, 28, Vector2(620, 170) if Orient.portrait else Vector2(390, 290))
 	var border := 6 if upgrade.rarity_rank > 0 else 4
 	card.add_theme_stylebox_override("normal", UiStyle.box(UiStyle.PANEL_LIGHT.darkened(0.15), accent, border, 22))
 	card.add_theme_stylebox_override("hover", UiStyle.box(UiStyle.PANEL_LIGHT.lightened(0.08), accent.lightened(0.25), border, 22))
@@ -87,19 +90,19 @@ func _make_card(upgrade: UpgradeData, index: int, stats: RunStats) -> Button:
 		tag += "  •  " + archetype
 	var tag_label := UiStyle.label(tag, 17, accent, 5)
 	tag_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	tag_label.custom_minimum_size = Vector2(340, 0)
+	tag_label.custom_minimum_size = Vector2(text_width, 0)
 	tag_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	column.add_child(tag_label)
 	var suffix := "" if upgrade.max_stacks <= 1 else "   %d/%d" % [stacks + 1, upgrade.max_stacks]
 	var title := UiStyle.label("%d. %s%s" % [index + 1, upgrade.title, suffix], 30, upgrade.color, 8)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	title.custom_minimum_size = Vector2(340, 0)
+	title.custom_minimum_size = Vector2(text_width, 0)
 	column.add_child(title)
 	var desc := UiStyle.label(upgrade.description, 22, UiStyle.TEXT, 6)
 	desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	desc.custom_minimum_size = Vector2(340, 0)
+	desc.custom_minimum_size = Vector2(text_width, 0)
 	column.add_child(desc)
 	return card
 

@@ -7,7 +7,6 @@ extends Control
 
 signal closed
 
-const PANEL_WIDTH := 900.0
 const CORNER := 28.0
 const BORDER := Color("#00e5ff")
 
@@ -19,6 +18,10 @@ var _panel: Control
 var _glass: ColorRect
 var _frame: Panel
 var _title: Label
+
+
+static func panel_width() -> float:
+	return 620.0 if Orient.portrait else 900.0
 
 
 func _init(title_text: String) -> void:
@@ -40,7 +43,7 @@ func _init(title_text: String) -> void:
 	# Внешний контейнер без отступов: стекло и рамка растягиваются на всю панель,
 	# а содержимое лежит во внутреннем контейнере с полями.
 	_panel = MarginContainer.new()
-	_panel.custom_minimum_size = Vector2(PANEL_WIDTH, 0)
+	_panel.custom_minimum_size = Vector2(panel_width(), 0)
 	center.add_child(_panel)
 
 	if _glass_shader == null:

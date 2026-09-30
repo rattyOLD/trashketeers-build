@@ -3,12 +3,13 @@ extends RefCounted
 ## Окна хаба на базе GlassPopup: Настройки, Гардероб (герои и наряды), Оружие + Merge, Прокачка, Ачивки.
 ## Длинные списки — в ScrollContainer (на телефоне листаются пальцем).
 
-const LIST_HEIGHT := 400.0
+static func list_height() -> float:
+	return 760.0 if Orient.portrait else 400.0
 
 
 static func scroll_list(parent: Control) -> VBoxContainer:
 	var scroll := DragScroll.new()
-	scroll.custom_minimum_size = Vector2(0, LIST_HEIGHT)
+	scroll.custom_minimum_size = Vector2(0, list_height())
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.scroll_deadzone = 16
 	scroll.follow_focus = true
@@ -69,6 +70,7 @@ class Settings:
 	var _fps: MenuWidgets.PawToggle
 	var _lite: MenuWidgets.PawToggle
 	var _mini: MenuWidgets.PawToggle
+	var _fullscreen: MenuWidgets.PawToggle
 	var _auto_pick: MenuWidgets.PawToggle
 	var _slot_buttons: Array[Button] = []
 	var _slot_hint: Label
@@ -108,6 +110,14 @@ class Settings:
 		_mini = MenuWidgets.PawToggle.new("Мини-карта в бою", SaveService.is_minimap_enabled())
 		_mini.toggled.connect(func(on: bool) -> void: SaveService.set_flag("minimap", on))
 		graphics.add_child(_mini)
+		if Platform.fullscreen_supported():
+			_fullscreen = MenuWidgets.PawToggle.new("На весь экран", Platform.is_fullscreen())
+			_fullscreen.toggled.connect(func(on: bool) -> void: Platform.set_fullscreen(on))
+			graphics.add_child(_fullscreen)
+		else:
+			var fs_hint := UiStyle.label("Браузер iPhone не умеет полный экран. Открой «Поделиться» и выбери «На экран Домой»: игра запустится без адресной строки.", 19, UiStyle.TEXT_DIM, 4)
+			fs_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			graphics.add_child(fs_hint)
 		var controls := MenuPopups.section_card(list, "УПРАВЛЕНИЕ")
 		var controls_row := HBoxContainer.new()
 		controls_row.add_theme_constant_override("separation", 10)
@@ -170,6 +180,8 @@ class Settings:
 		_fps.set_pressed_no_signal(bool(SaveService.data["show_fps"]))
 		_lite.set_pressed_no_signal(SaveService.is_fx_lite())
 		_mini.set_pressed_no_signal(SaveService.is_minimap_enabled())
+		if _fullscreen != null:
+			_fullscreen.set_pressed_no_signal(Platform.is_fullscreen())
 		_auto_pick.set_pressed_no_signal(bool(Controls.get_value("auto_pick")))
 		_slot_buttons[1].text = "3" if SaveService.has_slot3() else "3 · " + Economy.format_gems(SaveService.SLOT3_PRICE)
 		if SaveService.has_slot3():

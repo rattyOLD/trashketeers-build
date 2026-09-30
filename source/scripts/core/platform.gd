@@ -161,6 +161,20 @@ func consume_unclean_exit() -> String:
 	return "" if value == null else str(value)
 
 
+func fullscreen_supported() -> bool:
+	if not is_web:
+		return true
+	return _js_bool("!!(document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen)")
+
+
+func set_fullscreen(on: bool) -> void:
+	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if on else DisplayServer.WINDOW_MODE_WINDOWED)
+
+
+func is_fullscreen() -> bool:
+	return DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
+
+
 func set_context(text: String) -> void:
 	if is_web:
 		_js("window.localStorage.setItem('__trash_ctx', %s);" % JSON.stringify(text))

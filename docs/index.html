@@ -205,9 +205,6 @@ html, body {
 		rgba(13, 10, 28, 0.97);
 	font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
-@media (orientation: portrait) and (pointer: coarse) {
-	#rotate { display: flex; }
-}
 #rotate .phone {
 	position: relative;
 	width: 74px;
@@ -306,7 +303,7 @@ html, body {
 	// index.wasm / index.pck и отдаём ему уже скачанные и распакованные байты.
 	const FILES = {
 		wasm: { parts: [{url:"raccoon.core.0.wasm",bytes:5221065},{url:"raccoon.core.1.wasm",bytes:4165384}] },
-		pck: { parts: [{url:"raccoon.pack.0.wasm",bytes:12013869},{url:"raccoon.pack.1.wasm",bytes:4756217}] },
+		pck: { parts: [{url:"raccoon.pack.0.wasm",bytes:12013879},{url:"raccoon.pack.1.wasm",bytes:4759778}] },
 	};
 	const GODOT_CONFIG = {
 		args: [],
@@ -314,7 +311,7 @@ html, body {
 		ensureCrossOriginIsolationHeaders: false,
 		executable: 'index',
 		experimentalVK: false,
-		fileSizes: { 'index.pck': 17598560, 'index.wasm': 43699190 },
+		fileSizes: { 'index.pck': 17601552, 'index.wasm': 43699190 },
 		focusCanvas: true,
 		gdextensionLibs: [],
 		onPrint: function () {
@@ -375,7 +372,7 @@ html, body {
 	window.trkReport('session_start', navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + (window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio) + ' | screen ' + screen.width + 'x' + screen.height + ' | cores ' + (navigator.hardwareConcurrency || '?'));
 
 	// Вкладка могла висеть со старой версией: при возврате в неё сверяем номер сборки и предлагаем обновиться.
-	const BUILD_ID = '1790756183';
+	const BUILD_ID = '1790757265';
 	function checkVersion() {
 		fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (v) {
 			if (v && v.build && v.build !== BUILD_ID && !document.getElementById('newver')) {
