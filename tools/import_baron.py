@@ -7,9 +7,9 @@ from scipy import ndimage
 
 ROOT = "/home/claude/raccoon"
 HERE = "/home/claude/trashketeers-build"
-CELL_W, CELL_H = 384, 512
-COLS, ROWS = 4, 2
-OLD_SCALE = 1.7
+CELL_W, CELL_H = 768, 512
+NEW_SCALE = 0.5
+OLD_SCALE = 1.7 * NEW_SCALE / 0.5
 PAD = 6
 
 
@@ -62,24 +62,30 @@ def main():
         crop = crop.resize((int(round(w * OLD_SCALE)), int(round(h * OLD_SCALE))), Image.LANCZOS)
         items.append((crop, (px * OLD_SCALE, py * OLD_SCALE)))
         names.append(old_meta["names"][i])
-    for sheet, prefix in (("baron_A1", "a1_"), ("baron_C1", "c1_")):
-        for i, (crop, pivot) in enumerate(cut_sheet(f"{HERE}/tools/src/astra_baron/{sheet}.png")):
-            items.append((crop, pivot))
-            names.append(f"{prefix}{i}")
+    for sheets, prefix in ((("baron_A1a", "baron_A1b"), "a1_"), (("baron_C1a", "baron_C1b"), "c1_")):
+        i = 0
+        for sheet in sheets:
+            for crop, pivot in cut_sheet(f"{HERE}/tools/src/astra_baron/{sheet}.png"):
+                crop = crop.resize((int(round(crop.width * NEW_SCALE)), int(round(crop.height * NEW_SCALE))), Image.LANCZOS)
+                items.append((crop, (pivot[0] * NEW_SCALE, pivot[1] * NEW_SCALE)))
+                names.append(f"{prefix}{i}")
+                i += 1
 
     atlas_w = 2048
     x = y = row_h = PAD
-    placed = []
-    for crop, pivot in items:
-        w, h = crop.size
+    placed = [None] * len(items)
+    order = sorted(range(len(items)), key=lambda k: -items[k][0].height)
+    for k in order:
+        w, h = items[k][0].size
         if x + w + PAD > atlas_w:
             x, y, row_h = PAD, y + row_h + PAD, 0
-        placed.append((x, y))
+        placed[k] = (x, y)
         x += w + PAD
         row_h = max(row_h, h)
     atlas_h = 1
     while atlas_h < y + row_h + PAD:
         atlas_h *= 2
+    assert atlas_h <= 2048, f"atlas overflow {atlas_h}"
     atlas = Image.new("RGBA", (atlas_w, atlas_h), (0, 0, 0, 0))
     frames = []
     for (crop, pivot), (px, py) in zip(items, placed):
