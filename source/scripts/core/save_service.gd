@@ -43,6 +43,7 @@ const DEFAULTS := {
 	"stats": {},
 	"nickname": "",
 	"local_id": "",
+	"insider_no": -1,
 	"weapon_buys": {},
 	"sfx_on": true,
 	"music_on": true,
@@ -256,7 +257,7 @@ func _apply_text(text: String) -> void:
 			push_warning("SaveService: сохранение повреждено, начат новый прогресс")
 	for key in ["nuts", "star_dust", "runs", "boss_kills", "raid_wins", "dragon_kills", "account_xp", "best_wave", "selected_tier",
 			"daily_day", "daily_streak", "quest_day", "invites_sent", "saved_at", "chest_pity", "chest_opens", "ads_day",
-			"ads_coins", "ads_gems", "gift_gem_day", "gift_gem_n", "vip_level", "vip_until"]:
+			"ads_coins", "ads_gems", "gift_gem_day", "gift_gem_n", "vip_level", "vip_until", "insider_no"]:
 		data[key] = int(data[key])
 	_sanitize_arsenal()
 	KnifeProgress.sanitize(data)
@@ -532,8 +533,59 @@ func get_nickname() -> String:
 	return data["nickname"]
 
 
-## ID игрока: Telegram-аккаунт, если запущено в Telegram, иначе постоянный локальный номер.
+## Номер инсайдера (0 — разработчик) или -1.
+func get_insider() -> int:
+	return int(data["insider_no"])
+
+
+func get_badge() -> String:
+	return Insider.badge_of(get_insider())
+
+
+## Ник с плашкой статуса — для меню и таблички над Енотом.
+func get_display_nickname() -> String:
+	var badge := get_badge()
+	return get_nickname() if badge.is_empty() else "%s %s" % [badge, get_nickname()]
+
+
+func activate_insider(code: String) -> bool:
+	var number := Insider.parse(code)
+	if number < 0:
+		return false
+	data["insider_no"] = number
+	save_data()
+	return true
+
+
+## Всё сохранение одной строкой: копируется в буфер и переносится на другое устройство.
+func export_code() -> String:
+	var raw := JSON.stringify(data).to_utf8_buffer()
+	return "TRS1.%d.%s" % [raw.size(), Marshalls.raw_to_base64(raw.compress(FileAccess.COMPRESSION_DEFLATE))]
+
+
+func import_code(code: String) -> bool:
+	var parts := code.strip_edges().split(".")
+	if parts.size() != 3 or parts[0] != "TRS1" or not parts[1].is_valid_int():
+		return false
+	var packed := Marshalls.base64_to_raw(parts[2])
+	if packed.is_empty():
+		return false
+	var raw := packed.decompress(int(parts[1]), FileAccess.COMPRESSION_DEFLATE)
+	if raw.is_empty():
+		return false
+	var text := raw.get_string_from_utf8()
+	if typeof(JSON.parse_string(text)) != TYPE_DICTIONARY:
+		return false
+	_apply_text(text)
+	save_data()
+	reloaded.emit()
+	return true
+
+
+## ID игрока: номер инсайдера, Telegram-аккаунт, если запущено в Telegram, иначе постоянный локальный номер.
 func get_player_id() -> String:
+	if get_insider() >= 0:
+		return "%03d" % get_insider()
 	var uid := Platform.user_id()
 	if not uid.is_empty():
 		return uid

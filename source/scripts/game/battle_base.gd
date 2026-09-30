@@ -82,7 +82,7 @@ func _spawn_player(at: Vector2, weapon: WeaponData, target_finder: Callable) -> 
 	player.setup(target_finder, weapon, stats)
 	player.visual.apply_look(SaveService.get_character(), SaveService.get_skin())
 	var tag := NameTag.new()
-	tag.text = SaveService.get_nickname()
+	tag.text = SaveService.get_display_nickname()
 	player.add_child(tag)
 
 

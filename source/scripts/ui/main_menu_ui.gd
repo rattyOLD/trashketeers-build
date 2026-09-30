@@ -510,7 +510,7 @@ func _on_weapon_changed(_weapon_id: StringName) -> void:
 
 
 func _refresh() -> void:
-	_nick_label.text = SaveService.get_nickname()
+	_nick_label.text = SaveService.get_display_nickname()
 	_level_label.text = "LVL %d" % SaveService.get_account_level() + (" · VIP %d" % Premium.level() if Premium.level() > 0 else "")
 	_xp_bar.value = SaveService.get_level_progress()
 	_nuts_label.text = str(SaveService.get_nuts())

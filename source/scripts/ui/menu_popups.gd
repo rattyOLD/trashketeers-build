@@ -708,6 +708,8 @@ class Profile:
 		content.add_child(grid)
 		content.add_child(_achievements_bar())
 		content.add_child(_chronicle_bar())
+		content.add_child(_section("Тестер и сохранение"))
+		content.add_child(_insider_block())
 
 	func _num(value: int) -> String:
 		return SaveService.format_coins(value) if value >= 10000 else str(value)
@@ -774,6 +776,62 @@ class Profile:
 		info.add_child(id_button)
 		head.add_child(info)
 		return panel
+
+	func _styled_edit(placeholder: String) -> LineEdit:
+		var edit := LineEdit.new()
+		edit.placeholder_text = placeholder
+		edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		edit.custom_minimum_size = Vector2(0, 56)
+		edit.add_theme_font_size_override("font_size", 22)
+		edit.add_theme_color_override("font_color", Color("#1a1030"))
+		edit.add_theme_color_override("font_placeholder_color", Color("#8a82a0"))
+		edit.add_theme_color_override("caret_color", Color("#ff2ea6"))
+		edit.add_theme_stylebox_override("normal", UiStyle.box(Color("#ffffff"), UiStyle.OUTLINE, 4, 16))
+		edit.add_theme_stylebox_override("focus", UiStyle.box(Color("#ffffff"), Color("#ff2ea6"), 4, 16))
+		return edit
+
+	func _insider_block() -> Control:
+		var box := VBoxContainer.new()
+		box.add_theme_constant_override("separation", 10)
+		var status := UiStyle.label("", 22, UiStyle.NEON, 6)
+		status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		var refresh := func() -> void:
+			var number := SaveService.get_insider()
+			status.text = "Статус: %s, номер %03d" % [SaveService.get_badge(), number] if number >= 0 else "Есть код тестера? Введи его и получи плашку возле ника."
+		refresh.call()
+		box.add_child(status)
+		var code_row := HBoxContainer.new()
+		code_row.add_theme_constant_override("separation", 8)
+		var code_edit := _styled_edit("INS-001-XXXX")
+		code_row.add_child(code_edit)
+		var apply := UiStyle.button("ОК", UiStyle.HOT, 24, Vector2(110, 56))
+		apply.pressed.connect(func() -> void:
+			if SaveService.activate_insider(code_edit.text):
+				code_edit.text = ""
+			else:
+				status.text = "Код не подошёл. Проверь буквы и цифры."
+				return
+			refresh.call())
+		code_row.add_child(apply)
+		box.add_child(code_row)
+		var copy := UiStyle.button("Скопировать код сохранения", UiStyle.PANEL_LIGHT, 22, Vector2(0, 56))
+		copy.pressed.connect(func() -> void:
+			DisplayServer.clipboard_set(SaveService.export_code())
+			copy.text = "Код сохранения скопирован")
+		box.add_child(copy)
+		var load_row := HBoxContainer.new()
+		load_row.add_theme_constant_override("separation", 8)
+		var load_edit := _styled_edit("Вставь код сохранения")
+		load_row.add_child(load_edit)
+		var load := UiStyle.button("Загрузить", UiStyle.PANEL_LIGHT, 22, Vector2(170, 56))
+		load.pressed.connect(func() -> void:
+			if SaveService.import_code(load_edit.text):
+				load.text = "Готово"
+			else:
+				load.text = "Не вышло")
+		load_row.add_child(load)
+		box.add_child(load_row)
+		return box
 
 	func _build_nick_editor() -> Control:
 		var row := HBoxContainer.new()
