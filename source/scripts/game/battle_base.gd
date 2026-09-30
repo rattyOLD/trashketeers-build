@@ -10,6 +10,9 @@ signal exit_requested
 signal restart_requested
 
 const CAMERA_SMOOTHING := 9.0
+const HIST_STEP := 5.0
+const HIST_MAX := 24
+const SHOT_STEP := 30.0
 const ADAPT_WINDOW := 5.0
 const ADAPT_FPS := 38.0
 const PERF_SAMPLE_FRAMES := 1500
@@ -42,6 +45,9 @@ var _context_timer := 0.0
 var _spikes_sent := 0
 static var _perfs_sent := 0
 const LANDSCAPE_ZOOM := 1.3
+var _hist_timer := 0.0
+var _shot_timer := 20.0
+var _fps_hist: Array[int] = []
 var _adapt_time := 0.0
 var _adapt_frames := 0
 var _adapt_level := 0
@@ -176,6 +182,7 @@ func _exit_tree() -> void:
 	SoundManager.stop_ambient()
 	Engine.time_scale = 1.0
 	SaveService.apply_quality()
+	Platform.take_snapshot()
 	get_tree().paused = false
 
 
@@ -203,6 +210,7 @@ func _process(delta: float) -> void:
 	_perf_last_usec = now
 	_perf_age += delta
 	_adapt_quality(delta)
+	_history_tick(delta)
 	_context_timer -= delta
 	if _context_timer <= 0.0:
 		_context_timer = 4.0
@@ -220,7 +228,7 @@ func _perf_context() -> String:
 		int(Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME)),
 		int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)),
 		int(Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0),
-		int(OS.get_static_memory_usage() / 1048576.0), _extra_context()]
+		int(OS.get_static_memory_usage() / 1048576.0), _extra_context() + " fpshist=" + ",".join(_fps_hist.map(str))]
 
 
 ## Динамическое качество: если 5 секунд подряд средний FPS ниже порога — упрощаем эффекты, затем снижаем разрешение холста.
@@ -245,6 +253,30 @@ func _adapt_quality(delta: float) -> void:
 		Platform.set_render_cap(1.0)
 	Platform.note_event("adapt level %d at fps %.0f" % [_adapt_level, fps])
 	Platform.send_report("adapt", "level %d fps %.0f | %s" % [_adapt_level, fps, _perf_context()])
+
+
+## История FPS раз в 5 секунд и уменьшенный снимок экрана раз в 30: снимок лежит в localStorage и уходит в отчёт только после вылета.
+func _history_tick(delta: float) -> void:
+	_hist_timer += delta
+	if _hist_timer >= HIST_STEP:
+		_hist_timer = 0.0
+		_fps_hist.append(int(Engine.get_frames_per_second()))
+		if _fps_hist.size() > HIST_MAX:
+			_fps_hist.remove_at(0)
+	_shot_timer -= delta
+	if _shot_timer <= 0.0:
+		_shot_timer = SHOT_STEP
+		_store_snapshot()
+
+
+func _store_snapshot() -> void:
+	if not Platform.is_web or get_tree().paused:
+		return
+	var image := get_viewport().get_texture().get_image()
+	if image == null or image.is_empty():
+		return
+	image.resize(256, int(256.0 * image.get_height() / image.get_width()), Image.INTERPOLATE_NEAREST)
+	Platform.store_snapshot(Marshalls.raw_to_base64(image.save_jpg_to_buffer(0.5)))
 
 
 func _extra_context() -> String:

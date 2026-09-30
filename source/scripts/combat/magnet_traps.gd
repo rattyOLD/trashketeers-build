@@ -95,6 +95,7 @@ func _physics_process(delta: float) -> void:
 		slow = minf(slow, 1.0 - SLOW * (0.5 + 0.5 * k_near))
 		if d < SNAP_RADIUS and not _used[k]:
 			_used[k] = true
+			Player.last_source = &"trap"
 			player.take_damage(_damage[k], Vector2.ZERO)
 			player.snare(SNARE_TIME)
 			_age[k] = FLIGHT + LIFETIME - 0.35

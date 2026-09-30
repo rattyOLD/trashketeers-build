@@ -7,6 +7,9 @@ extends CharacterBody2D
 
 signal health_changed(hp: float, max_hp: float)
 signal damaged(amount: float)
+
+## Кто нанёс последний урон Еноту: уходит в отчёт о забеге.
+static var last_source: StringName = &"?"
 signal died
 signal fell_into_void
 signal dashed

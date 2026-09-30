@@ -624,6 +624,7 @@ func _smash_impact(player: Player) -> void:
 	var hit := not player.is_dead and enemy.global_position.distance_to(player.global_position) < SMASH_RANGE + 40.0
 	if hit:
 		var before := player.hp
+		Player.last_source = enemy.data.id
 		player.take_damage(30.0 * enemy.damage_mult, _leap_dir)
 		if player.hp < before:
 			player.stun(STUN_TIME)

@@ -368,6 +368,7 @@ func _on_prop_smashed(at: Vector2, height: float, tint: Color) -> void:
 
 
 func _on_dragon_died(at: Vector2) -> void:
+	_report_run("win")
 	add_shake(1.0)
 	fx.ring(at, Color.WHITE, 320.0)
 	_win(true)
@@ -422,6 +423,7 @@ func _play_loot_shower(at: Vector2) -> void:
 func _on_player_fell() -> void:
 	if _ending:
 		return
+	_report_run("fell")
 	_ending = true
 	laser.hide_beam()
 	var lines := PackedStringArray([
@@ -434,6 +436,7 @@ func _on_player_fell() -> void:
 
 
 func _on_player_died() -> void:
+	_report_run("died")
 	if _ending or player.is_falling:
 		return
 	_ending = true
@@ -448,3 +451,7 @@ func _on_player_died() -> void:
 		"Совет: в метель вставай в тёплый круг, а после неё бей: дракон выдохся",
 	])
 	get_tree().create_timer(DEFEAT_DELAY, false).timeout.connect(_show_result.bind(false, lines))
+
+
+func _report_run(outcome: String) -> void:
+	Platform.send_report("run", "mode=raid outcome=%s hero=%s weapon=%s survived=%ds dragon_hp=%d/%d phase=%d damage=%d chill=%d" % [outcome, SaveService.get_character_id(), player.weapon_controller.base_weapon.id, int(DURATION - time_left), int(dragon.hp), int(dragon.max_hp), dragon.phase_index, int(damage_dealt), int(chill)])

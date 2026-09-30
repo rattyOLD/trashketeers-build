@@ -281,6 +281,8 @@ func _apply_damage(target: Node2D) -> void:
 		(target as Enemy).take_bullet(amount, velocity.normalized(), weapon.knockback, last_hit_crit, weapon.piercing)
 		Enemy.next_kind = &""
 	elif target.has_method("take_damage"):
+		if target is Player:
+			Player.last_source = &"projectile"
 		target.call("take_damage", amount, velocity.normalized() * weapon.knockback, last_hit_crit)
 	target_hit.emit(self, target)
 

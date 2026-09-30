@@ -207,9 +207,22 @@ func note_event(text: String) -> void:
 		_js("if (window.trkNote) { window.trkNote(%s); }" % JSON.stringify(text))
 
 
-func send_report(kind: String, text: String) -> void:
+func send_report(kind: String, text: String, extra: String = "") -> void:
 	if is_web:
-		_js("if (window.trkReport) { window.trkReport(%s, %s); }" % [JSON.stringify(kind), JSON.stringify(text)])
+		_js("if (window.trkReport) { window.trkReport(%s, %s, %s); }" % [JSON.stringify(kind), JSON.stringify(text), JSON.stringify(extra)])
+
+
+func store_snapshot(base64_jpeg: String) -> void:
+	if is_web:
+		_js("window.localStorage.setItem('__trash_shot', %s);" % JSON.stringify(base64_jpeg))
+
+
+## Последний снимок экрана перед вылетом; забирается один раз.
+func take_snapshot() -> String:
+	if not is_web:
+		return ""
+	var value: Variant = _js("var v = window.localStorage.getItem('__trash_shot'); window.localStorage.removeItem('__trash_shot'); return v;")
+	return "" if value == null else str(value)
 
 
 # --- Реклама за награду ---------------------------------------------------------------------------

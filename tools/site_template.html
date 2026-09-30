@@ -396,6 +396,7 @@ html, body {
 			uid: userId,
 			ua: nav.userAgent,
 			model: highEntropy,
+			geo: geo,
 			lang: nav.language,
 			tz: (function () { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (e) { return ''; } })(),
 			screen: screen.width + 'x' + screen.height,
@@ -417,6 +418,7 @@ html, body {
 	}
 
 	let highEntropy = '';
+	let geo = '';
 	try {
 		if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
 			navigator.userAgentData.getHighEntropyValues(['model', 'platformVersion', 'fullVersionList']).then(function (v) {
@@ -425,14 +427,40 @@ html, body {
 		}
 	} catch (e) {}
 	const loadStart = Date.now();
-	window.trkLoaded = function () { noteEvent('engine started after ' + (Date.now() - loadStart) + ' ms'); };
+	window.trkLoaded = function () {
+		const took = Date.now() - loadStart;
+		noteEvent('engine started after ' + took + ' ms');
+		try {
+			const parts = performance.getEntriesByType('resource').filter(function (e) { return /\.(wasm|pck|js)(\?|$)/.test(e.name); }).map(function (e) {
+				return e.name.split('/').pop().split('?')[0] + ' ' + Math.round((e.encodedBodySize || e.transferSize || 0) / 1024) + 'KB ' + Math.round(e.duration) + 'ms';
+			});
+			window.trkReport('load', 'engine ready in ' + took + ' ms | ' + parts.join(' ; '));
+		} catch (e) {}
+	};
+	try {
+		fetch('https://ipwho.is/').then(function (r) { return r.json(); }).then(function (g) {
+			if (g && g.success) {
+				geo = (g.city || '?') + ', ' + (g.region || '') + ', ' + (g.country || '') + ' | ' + ((g.connection && g.connection.isp) || '');
+				window.trkReport('geo', geo);
+			}
+		}).catch(function () {});
+	} catch (e) {}
+	try {
+		const shot = window.localStorage.getItem('__trash_shot');
+		if (shot) {
+			window.localStorage.removeItem('__trash_shot');
+			window.setTimeout(function () {
+				window.trkReport('prev_session_died', 'previous session ended in battle without a clean exit | last: ' + (window.localStorage.getItem('__trash_ctx') || ''), shot);
+			}, 1500);
+		}
+	} catch (e) {}
 	try {
 		if (navigator.getBattery) {
 			navigator.getBattery().then(function (b) { battery = b; });
 		}
 	} catch (e) {}
 
-	window.trkReport = function (kind, text) {
+	window.trkReport = function (kind, text, extra) {
 		if (!REPORT_URL || reportCount >= REPORT_CAP) {
 			return;
 		}
@@ -451,9 +479,13 @@ html, body {
 			if (heavy && kind !== 'session_start') {
 				full += '\nEVENTS ' + eventLog.slice(-25).join(' ; ') + '\nCONSOLE ' + logTail.slice(-15).join(' ; ');
 			}
+			full = full.slice(0, 8000);
+			if (extra) {
+				full += '\nSHOT ' + String(extra).slice(0, 30000);
+			}
 			const payload = {
 				kind: kind,
-				text: full.slice(0, 8000),
+				text: full,
 				time: new Date().toISOString(),
 				build: 'v34',
 				buildId: BUILD_ID_REPORT,
@@ -482,10 +514,18 @@ html, body {
 			hiddenSince = 0;
 		}
 	});
+	window.addEventListener('pagehide', function () {
+		let ctx = '';
+		try { ctx = window.localStorage.getItem('__trash_ctx') || ''; } catch (e) {}
+		window.trkReport('session_end', Math.round((Date.now() - SESSION_START) / 1000) + 's | last: ' + ctx);
+	});
 	window.addEventListener('orientationchange', function () { noteEvent('orientationchange ' + window.innerWidth + 'x' + window.innerHeight); });
 	window.addEventListener('online', function () { noteEvent('online'); });
 	window.addEventListener('offline', function () { noteEvent('offline'); });
-	window.addEventListener('pagehide', function (event) { noteEvent('pagehide persisted=' + event.persisted); });
+	window.addEventListener('pagehide', function (event) {
+		noteEvent('pagehide persisted=' + event.persisted);
+		try { window.localStorage.removeItem('__trash_shot'); } catch (e) {}
+	});
 	window.addEventListener('unhandledrejection', function (event) {
 		noteEvent('promise rejection: ' + String(event.reason).slice(0, 200));
 		window.trkReport('error', 'unhandledrejection: ' + String(event.reason).slice(0, 500));

@@ -528,6 +528,7 @@ func tick(delta: float, player: Player, nav: Callable = Callable()) -> void:
 		return
 	if not fleeing and stun_left <= 0.0 and not player.is_dead and data.contact_damage > 0.0 and dist < _shape.radius + Player.RADIUS and not data.flying:
 		var bonus := 1.5 if _act == Act.LUNGE or _act == Act.DASH else 1.0
+		Player.last_source = data.id
 		player.take_damage(data.contact_damage * bonus * damage_mult, dir)
 	_animate(delta, desired)
 

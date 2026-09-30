@@ -1153,6 +1153,7 @@ func _finish() -> void:
 	var summary := _run_summary()
 	summary["tip"] = _death_tip()
 	var result := _record()
+	Platform.send_report("run", "mode=survival hero=%s weapon=%s wave=%d chapter=%s level=%d kills=%d time=%ds coins=%d bosses=%d revives=%d killed_by=%s died=%s record=%s" % [SaveService.get_character_id(), player.weapon_controller.base_weapon.id, summary["wave"], summary["chapter"], level, kills, int(director.elapsed), nuts, bosses_killed, revives_used, Player.last_source, player.is_dead, result.get("record", false)])
 	summary["record"] = result.get("record", false)
 	summary["total_coins"] = SaveService.get_coins()
 	finished = true

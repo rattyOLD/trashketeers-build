@@ -203,6 +203,7 @@ func _tick_zones(delta: float) -> void:
 		match _kind[k]:
 			Kind.ACID:
 				if pulse and _inside_circle(_pos[k], ACID_RADIUS):
+					Player.last_source = &"acid"
 					player.take_damage(ACID_DPS_HIT * _damage_mult())
 					fx.burst(player.global_position, COLOR_ACID, 6, 160.0, 3.0)
 				if _fired[k] == 0:
@@ -236,6 +237,7 @@ func _zap(k: int) -> void:
 		fx.bolt(at, at + Vector2.from_angle(angle) * SHOCK_RADIUS * 0.95, COLOR_SHOCK)
 	SoundManager.play_pitched(&"hit", 2.0, -4.0)
 	if _inside_circle(at, SHOCK_RADIUS):
+		Player.last_source = &"shock"
 		player.take_damage(SHOCK_HIT * _damage_mult())
 		player.snare(0.45)
 
@@ -255,6 +257,7 @@ func _beam(k: int) -> void:
 	var along := player.global_position - at
 	var perpendicular := absf(along.dot(direction.orthogonal()))
 	if perpendicular < LASER_WIDTH * 0.5 + Player.RADIUS * 0.6:
+		Player.last_source = &"laser"
 		player.take_damage(LASER_HIT * _damage_mult())
 
 

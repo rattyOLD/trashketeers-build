@@ -70,6 +70,8 @@ func _process(delta: float) -> void:
 		for body in get_overlapping_bodies():
 			if body is Enemy and (body as Enemy).data != null:
 				(body as Enemy).add_slow(SLOW, TICK * 2.0)
+			if body is Player:
+				Player.last_source = &"acid"
 			if body.has_method("take_damage"):
 				body.call("take_damage", DAMAGE, Vector2.ZERO)
 	queue_redraw()
