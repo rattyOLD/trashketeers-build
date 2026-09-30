@@ -51,6 +51,35 @@ def cut_sheet(path, cell_w=CELL_W, cell_h=CELL_H):
     return frames
 
 
+def build_clips(old_meta, names):
+    idx = {n: i for i, n in enumerate(names)}
+    a = [idx[f"a1_{i}"] for i in range(8)]
+    c = [idx[f"c1_{i}"] for i in range(8)]
+    clips = dict(old_meta["clips"])
+    clips["idle"] = {"frames": [a[0], a[1], a[2], a[3], a[2], a[1]], "fps": 6.0, "loop": True}
+    clips["run"] = {"frames": [a[4], a[5], a[6], a[7]], "fps": 9.0, "loop": True}
+    clips["p2_idle"] = {"frames": [a[0], a[1], a[2], a[3], a[2], a[1]], "fps": 8.5, "loop": True}
+    clips["p2_run"] = {"frames": [a[4], a[5], a[6], a[7]], "fps": 12.0, "loop": True}
+    clips["windup"] = {"frames": [c[0], c[1]], "fps": 3.0, "loop": False}
+    clips["p2_windup"] = {"frames": [c[0], c[1]], "fps": 4.0, "loop": False}
+    clips["swing"] = {"frames": [c[2], c[3], c[4]], "fps": 14.0, "loop": False}
+    clips["stun"] = {"frames": [c[5], c[6], c[7], c[6]], "fps": 3.0, "loop": True}
+    clips["aim"] = {"frames": [c[0]], "fps": 1.0, "loop": False}
+    clips["beam"] = {"frames": [c[0], a[0]], "fps": 6.0, "loop": True}
+    clips["vomit"] = {"frames": [c[0], c[1]], "fps": 5.0, "loop": True}
+    clips["strike"] = {"frames": [c[1]], "fps": 1.0, "loop": False}
+    h = [idx[f"h_{i}"] for i in range(2)]
+    d = [idx[f"d_{i}"] for i in range(4)]
+    t = [idx[f"t_{i}"] for i in range(3)]
+    clips["taunt"] = {"frames": [t[0], t[1], t[2], t[1]], "fps": 6.0, "loop": True}
+    clips["hit"] = {"frames": [h[0], h[1]], "fps": 14.0, "loop": False}
+    clips["p2_hit"] = {"frames": [h[0], h[1]], "fps": 14.0, "loop": False}
+    clips["death"] = {"frames": [d[0], d[1], d[2], d[3]], "fps": 5.0, "loop": False}
+    for name in clips:
+        clips[name]["frames"] = [int(f) for f in clips[name]["frames"]]
+    return clips
+
+
 def main():
     old = Image.open(f"{HERE}/tools/src/baron_frames_old.png").convert("RGBA")
     old_meta = json.load(open(f"{HERE}/tools/src/baron_old.json"))
@@ -62,7 +91,7 @@ def main():
         crop = crop.resize((int(round(w * OLD_SCALE)), int(round(h * OLD_SCALE))), Image.LANCZOS)
         items.append((crop, (px * OLD_SCALE, py * OLD_SCALE)))
         names.append(old_meta["names"][i])
-    for sheets, prefix in ((("baron_A1a", "baron_A1b"), "a1_"), (("baron_C1a", "baron_C1b"), "c1_")):
+    for sheets, prefix in ((("baron_A1a", "baron_A1b"), "a1_"), (("baron_C1a", "baron_C1b"), "c1_"), (("baron_hit",), "h_"), (("baron_death",), "d_"), (("baron_taunt",), "t_")):
         i = 0
         for sheet in sheets:
             for crop, pivot in cut_sheet(f"{HERE}/tools/src/astra_baron/{sheet}.png"):
@@ -71,6 +100,11 @@ def main():
                 names.append(f"{prefix}{i}")
                 i += 1
 
+    names_clips = build_clips(old_meta, names)
+    used = sorted({f for c in names_clips.values() for f in c["frames"]})
+    remap = {old_i: new_i for new_i, old_i in enumerate(used)}
+    items = [items[i] for i in used]
+    names = [names[i] for i in used]
     atlas_w = 2048
     x = y = row_h = PAD
     placed = [None] * len(items)
@@ -93,28 +127,7 @@ def main():
         frames.append([px, py, crop.width, crop.height, round(pivot[0], 1), round(pivot[1], 1)])
     atlas.save(f"{ROOT}/assets/bosses/baron_frames.png", optimize=True)
 
-    idx = {n: i for i, n in enumerate(names)}
-    a = [idx[f"a1_{i}"] for i in range(8)]
-    c = [idx[f"c1_{i}"] for i in range(8)]
-    clips = dict(old_meta["clips"])
-    clips["idle"] = {"frames": [a[0], a[1], a[2], a[3], a[2], a[1]], "fps": 6.0, "loop": True}
-    clips["run"] = {"frames": [a[4], a[5], a[6], a[7]], "fps": 9.0, "loop": True}
-    clips["p2_idle"] = {"frames": [a[0], a[1], a[2], a[3], a[2], a[1]], "fps": 8.5, "loop": True}
-    clips["p2_run"] = {"frames": [a[4], a[5], a[6], a[7]], "fps": 12.0, "loop": True}
-    clips["windup"] = {"frames": [c[0], c[1]], "fps": 3.0, "loop": False}
-    clips["p2_windup"] = {"frames": [c[0], c[1]], "fps": 4.0, "loop": False}
-    clips["swing"] = {"frames": [c[2], c[3], c[4]], "fps": 14.0, "loop": False}
-    clips["stun"] = {"frames": [c[5], c[6], c[7], c[6]], "fps": 3.0, "loop": True}
-    clips["aim"] = {"frames": [c[0]], "fps": 1.0, "loop": False}
-    clips["beam"] = {"frames": [c[0], a[0]], "fps": 6.0, "loop": True}
-    clips["vomit"] = {"frames": [c[0], c[1]], "fps": 5.0, "loop": True}
-    clips["strike"] = {"frames": [c[1]], "fps": 1.0, "loop": False}
-    clips["taunt"] = {"frames": [a[0], a[1], a[2], a[3]], "fps": 8.0, "loop": True}
-    clips["hit"] = {"frames": [a[2]], "fps": 1.0, "loop": False}
-    clips["p2_hit"] = {"frames": [a[2]], "fps": 1.0, "loop": False}
-    clips["death"] = {"frames": [c[5], c[6], c[7]], "fps": 4.0, "loop": False}
-    for name in clips:
-        clips[name]["frames"] = [int(f) for f in clips[name]["frames"]]
+    clips = {n: {**c, "frames": [remap[f] for f in c["frames"]]} for n, c in names_clips.items()}
     meta = dict(old_meta)
     meta["frames"] = frames
     meta["names"] = names

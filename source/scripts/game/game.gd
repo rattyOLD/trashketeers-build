@@ -1017,7 +1017,7 @@ func _on_weapon_picked(pickup: WeaponPickup) -> void:
 	else:
 		old = wc.base_weapon
 		wc.set_slot(wc.active_slot, found)
-	if was_loot:
+	if was_loot and story == null:
 		var kept := randf() < Economy.keep_chance(found.rarity)
 		if kept:
 			run_loot.append([String(found.id), found.tier])
