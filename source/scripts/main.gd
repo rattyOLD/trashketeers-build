@@ -153,6 +153,8 @@ func _start_story(weapon_id: StringName) -> void:
 		if _debug_hash == "story:toast":
 			game.hud.toast("ПОЛУЧЕНО: ПИВНАЯ ПРОБКА-КЛЮЧ", "Она откроет Ящик с оружием в Зоне 3, стреляй по ящику", Color("#ffb020"))
 			game.hud.toast("КОРОЛЬ ХЛАМА", "Мои колонки! Они стоили мне трёх мусоровозов!", Color("#ff5a5a"))
+		if _debug_hash.begins_with("story:jump"):
+			game.story.debug_jump(float(_debug_hash.get_slice("=", 1)))
 		_debug_hash = "")
 
 

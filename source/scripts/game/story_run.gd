@@ -6,8 +6,10 @@ extends Node
 
 const DATA_PATH := "res://data/story.json"
 const OPEN_DELAY := 0.8
-const TRIGGER_LEAD := 0.05
-const BARRIER_LEAD := 0.03
+const TRIGGER_LEAD := 0.085
+const EXIT_MARGIN := 0.022
+const ROOM_DEPTH := 220.0
+const ARENA_ENTRY := 110.0
 const PACK_SPREAD := 110.0
 const ZONE_HEAL := 0.3
 const CLEAR_HEAL := 0.1
@@ -33,10 +35,11 @@ var finished_mission := false
 var progress := 0.0
 var zone_index := -1
 var locked := false
-var barrier_y := 0.0
+var gate_key := ""
 var waypoint: Node2D
 var lives := START_LIVES
 var score := 0
+var barrel: HeavyBarrel
 var kills := 0
 var lives_lost := 0
 var rescued := 0
@@ -45,6 +48,7 @@ var checkpoint := Vector2.ZERO
 var _encounters: Array = []
 var _next := 0
 var _next_captive := 0
+var _min_trigger := 0.0
 var _captives: Array = []
 var _enemy_lines: Dictionary = {}
 var _zone_hit := false
@@ -57,9 +61,23 @@ var _queue: Array = []
 var _box: DialogBox
 var _seen := {}
 var _after_queue: Callable = Callable()
-var _barrier: Barrier
 var _start_y := 0.0
 var _end_y := 0.0
+
+
+static func map_chapter(base: Dictionary, mission_id: String) -> Dictionary:
+	var root: Dictionary = ConfigLoader.load_json(DATA_PATH)
+	var chapter := base.duplicate(true)
+	for entry in root.get("missions", []):
+		if str(entry.get("id", "")) != mission_id:
+			continue
+		var doors: Array = []
+		for enc in entry.get("encounters", []):
+			if bool(enc.get("lock", false)) and not (enc.has("boss") and not bool(enc.get("mini", false))):
+				doors.append(float(enc["at"]))
+		chapter["size"] = entry.get("size", [34, 150])
+		chapter["story"] = {"doors": doors, "boss_cells": entry.get("boss_cells", [22, 12])}
+	return chapter
 
 
 func setup(owner_game: Game, mission_id: String) -> bool:
@@ -72,16 +90,23 @@ func setup(owner_game: Game, mission_id: String) -> bool:
 	_encounters = mission.get("encounters", [])
 	_captives = mission.get("captives", [])
 	_enemy_lines = root.get("enemy_lines", {})
+	barrel = HeavyBarrel.new()
+	add_child(barrel)
+	barrel.setup(game.player, game.fx, game.atmosphere)
+	var meter := HeavyBarrel.Meter.new()
+	meter.bind(barrel)
+	meter.position = Vector2(14.0, 52.0)
+	game.hud.add_child(meter)
 	game.player.damaged.connect(func(_amount: float) -> void: _zone_hit = true)
 	_start_y = game.map.player_start.y
 	_end_y = game.map.boss_point.y
 	waypoint = Node2D.new()
 	game.layers.fx.add_child(waypoint)
-	_barrier = Barrier.new()
-	_barrier.bounds = game.map.bounds
-	_barrier.player = game.player
-	_barrier.visible = false
-	game.layers.fx.add_child(_barrier)
+	game.map.open_story_gate("boss")
+	var span := maxf(_start_y - _end_y, 1.0)
+	for enc in _encounters:
+		if enc.has("boss") and not bool(enc.get("mini", false)):
+			enc["at"] = 1.0 - (game.map.boss_rect.size.y * 0.5 - ARENA_ENTRY) / span
 	return not mission.is_empty()
 
 
@@ -114,6 +139,7 @@ func result_lines(victory: bool) -> PackedStringArray:
 	lines.append("Очки: %d" % (score + bonus))
 	lines.append("Врагов: %d" % kills)
 	lines.append("Спасено: %d" % rescued)
+	lines.append("Детали ствола: %d из %d" % [barrel.parts if not barrel.active else HeavyBarrel.TOTAL_PARTS, HeavyBarrel.TOTAL_PARTS])
 	lines.append("Жизни: %d из %d" % [lives, START_LIVES])
 	lines.append("Время: %s" % BattleBase.format_time(game.director.elapsed))
 	if victory:
@@ -147,6 +173,16 @@ func on_start() -> void:
 	_check_zone()
 
 
+func debug_jump(target: float) -> void:
+	game.player.global_position = Vector2(game.player.global_position.x, _y_of(target))
+	while _next < _encounters.size() and float(_encounters[_next]["at"]) < target - 0.02:
+		_next += 1
+	while _next_captive < _captives.size() and float(_captives[_next_captive]["at"]) < target:
+		_next_captive += 1
+	game.camera.global_position = game.player.global_position
+	game.camera.reset_smoothing()
+
+
 func _y_of(p: float) -> float:
 	return lerpf(_start_y, _end_y, p)
 
@@ -164,12 +200,11 @@ func _physics_process(delta: float) -> void:
 	_tick_pending_waves(delta)
 	_tick_captives()
 	if locked:
-		_hold_player()
 		_check_clear()
 		waypoint.global_position = game.player.global_position
 	elif _next < _encounters.size():
 		var enc: Dictionary = _encounters[_next]
-		if progress >= float(enc["at"]) - TRIGGER_LEAD:
+		if progress >= _trigger_at(enc):
 			_begin(enc)
 	_update_waypoint()
 
@@ -253,6 +288,8 @@ func _begin(enc: Dictionary) -> void:
 	_wave_clock = 0.0
 	if enc.has("say"):
 		_say(str(enc["say"]), OPEN_DELAY)
+	if bool(enc.get("arena_part", false)):
+		_drop_part(game.map.boss_point + Vector2(0, game.map.boss_rect.size.y * 0.3))
 	if enc.has("boss"):
 		_spawn_boss(enc)
 	else:
@@ -263,10 +300,9 @@ func _begin(enc: Dictionary) -> void:
 		game.add_shake(0.3)
 	locked = bool(enc.get("lock", false))
 	if locked:
-		barrier_y = _y_of(float(enc["at"]) + BARRIER_LEAD)
-		_barrier.y = barrier_y
-		_barrier.visible = true
-		_barrier.queue_redraw()
+		gate_key = "boss" if enc.has("boss") and not bool(enc.get("mini", false)) else LevelSpawner.door_key(float(enc["at"]))
+		if gate_key == "boss":
+			game.map.close_story_gate(gate_key)
 
 
 func _tick_pending_waves(delta: float) -> void:
@@ -291,7 +327,7 @@ func _spawn_wave(wave: Dictionary, index: int) -> void:
 	if batch.is_empty():
 		return
 	var player_pos := game.player.global_position
-	var top := _y_of(float(_active.get("at", progress)) + BARRIER_LEAD) - 380.0
+	var top := _gate_y(float(_active.get("at", progress))) + ROOM_DEPTH
 	var center := Vector2(player_pos.x + randf_range(-220.0, 220.0), top)
 	if index % 2 == 1:
 		center = player_pos + Vector2(550.0 * (1.0 if randf() < 0.5 else -1.0), -120.0)
@@ -322,7 +358,7 @@ func _spawn_boss(enc: Dictionary) -> void:
 	var mini := bool(enc.get("mini", false))
 	var at := game.map.boss_point
 	if mini:
-		at = game.map.find_spawn_point(Vector2(game.player.global_position.x, _y_of(float(enc["at"]) + BARRIER_LEAD) - 420.0), 0.0, 260.0, data.radius)
+		at = game.map.find_spawn_point(Vector2(game.player.global_position.x, _gate_y(float(enc["at"])) + ROOM_DEPTH + 40.0), 0.0, 260.0, data.radius)
 		if at == Vector2.INF:
 			at = game.map.boss_point
 	var boss := game.enemies.spawn(data, at, float(enc.get("hp", 1.0)) * 0.9, 1.0 + DMG_PER_PROGRESS * progress)
@@ -335,12 +371,14 @@ func _spawn_boss(enc: Dictionary) -> void:
 	game.announce_boss(boss)
 
 
-func _hold_player() -> void:
-	var p := game.player
-	if p.global_position.y < barrier_y:
-		p.global_position.y = barrier_y
-		if p.velocity.y < 0.0:
-			p.velocity.y = 0.0
+func _trigger_at(enc: Dictionary) -> float:
+	if enc.has("boss") and not bool(enc.get("mini", false)):
+		return float(enc["at"])
+	return maxf(float(enc["at"]) - TRIGGER_LEAD, _min_trigger)
+
+
+func _gate_y(at: float) -> float:
+	return _y_of(at + LevelSpawner.DOOR_LEAD) + LevelSpawner.WALL_THICK * LevelSpawner.CELL
 
 
 func _check_clear() -> void:
@@ -353,7 +391,8 @@ func _check_clear() -> void:
 	if _boss_alive:
 		return
 	locked = false
-	_barrier.visible = false
+	game.map.open_story_gate(gate_key)
+	_min_trigger = float(_active.get("at", 0.0)) + LevelSpawner.DOOR_LEAD + EXIT_MARGIN
 	checkpoint = game.player.global_position
 	_give_reward(str(_active.get("reward", "")))
 	game.player.heal(game.player.max_hp * CLEAR_HEAL)
@@ -363,7 +402,23 @@ func _check_clear() -> void:
 
 
 ## Награда за зачищенную засаду: аптечка или ствол (как бонусные капсулы в Contra).
+func _drop_part(at: Vector2) -> void:
+	var box := HeavyBarrel.Case.new()
+	box.player = game.player
+	box.picked.connect(_on_part_picked.bind(box))
+	box.global_position = at
+	game.layers.fx.add_child(box)
+
+
+func _on_part_picked(box: HeavyBarrel.Case) -> void:
+	barrel.collect_part()
+	game.fx.popup(box.global_position + Vector2(0, -70), "ДЕТАЛЬ %d/%d" % [barrel.parts, HeavyBarrel.TOTAL_PARTS] if barrel.active == false else "СТВОЛ СОБРАН!", Color("#ff2ea6"), 34.0)
+	game.fx.ring(box.global_position, Color("#ffb020"), 140.0)
+
+
 func _give_reward(reward: String) -> void:
+	if bool(_active.get("hb", false)):
+		_drop_part(game.player.global_position + Vector2(70, -110))
 	if reward.is_empty():
 		return
 	var at := game.player.global_position + Vector2(0, -90)
@@ -393,7 +448,7 @@ func on_miniboss_killed() -> void:
 func on_king_killed() -> void:
 	_boss_alive = false
 	locked = false
-	_barrier.visible = false
+	game.map.open_story_gate("boss")
 	get_tree().create_timer(2.2, true, false, true).timeout.connect(finish)
 
 
@@ -527,47 +582,3 @@ class Captive:
 		draw_rect(Rect2(-34, 10, 68, 8), Color("#3a3550"), true)
 		var pulse := 0.6 + 0.4 * sin(_time * 6.0)
 		draw_rect(Rect2(-40, -58, 80, 80), Color(1.0, 0.82, 0.3, 0.6 * pulse), false, 3.0)
-
-
-## Приглушённый энергобарьер: виден только вблизи, мерцающие секции вместо ровной линии.
-class Barrier:
-	extends Node2D
-
-	const SHOW_DISTANCE := 380.0
-	const SEGMENT := 34.0
-
-	var bounds := Rect2()
-	var y := 0.0
-	var player: Node2D
-	var _time := 0.0
-
-	func _init() -> void:
-		z_index = 4
-
-	func _process(delta: float) -> void:
-		if visible:
-			_time += delta
-			queue_redraw()
-
-	func _draw() -> void:
-		if player == null:
-			return
-		var dist := absf(player.global_position.y - y)
-		var near := 1.0 - clampf(dist / SHOW_DISTANCE, 0.0, 1.0)
-		if near <= 0.02:
-			return
-		var left := bounds.position.x + 64.0
-		var right := bounds.end.x - 64.0
-		var x := left
-		var index := 0
-		while x < right:
-			var flick := 0.55 + 0.45 * sin(_time * 5.0 + float(index) * 1.7)
-			var gap := fmod(float(index) * 7.0 + floorf(_time * 2.0), 5.0) < 1.0
-			var alpha := near * 0.32 * flick
-			var wave := sin(x * 0.03 + _time * 3.0) * 3.0
-			if not gap:
-				draw_line(Vector2(x, y + wave), Vector2(x + SEGMENT, y + wave), Color(0.85, 0.22, 0.32, alpha), 4.0)
-			if index % 4 == 0:
-				draw_circle(Vector2(x, y), 5.0, Color(0.95, 0.6, 0.3, near * 0.4))
-			x += SEGMENT + 14.0
-			index += 1

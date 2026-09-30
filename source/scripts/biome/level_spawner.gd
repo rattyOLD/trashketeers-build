@@ -41,6 +41,10 @@ const PROP_DENSITY := 0.55
 const SCENE_SPACING := 380.0
 const RIPPLE_INTERVAL := 0.3
 const PUDDLE_COUNT := 9
+const BASE_AREA := 2000.0
+const DOOR_GAP := 6
+const DOOR_LEAD := 0.03
+const WALL_THICK := 2
 
 var chapter: Dictionary = {}
 var layout := "junkyard"
@@ -51,6 +55,8 @@ var destructibles: Array[DestructibleObject] = []
 var player_start := Vector2.ZERO
 var bounds := Rect2()
 var boss_rect := Rect2()
+var story_gates: Dictionary = {}
+var story_cells: Dictionary = {}
 var boss_point := Vector2.ZERO
 var _in_scene := false
 var gate_rects: Array[Rect2] = []
@@ -72,6 +78,11 @@ var _destr_done: Dictionary = {}
 var _puddles: Array = []
 var _ripple_timer := 0.0
 var _portal: Portal
+var _story: Dictionary = {}
+var _boss_cells := Vector2i(12, 6)
+var _area_scale := 1.0
+var _story_clear: Array[Rect2] = []
+var _flow_ready := false
 
 
 func build(layers: BiomeLayers, chapter_def: Dictionary) -> void:
@@ -82,6 +93,10 @@ func build(layers: BiomeLayers, chapter_def: Dictionary) -> void:
 	grid_size = Vector2i(int(size[0]), int(size[1]))
 	_origin = -Vector2(grid_size) * CELL * 0.5
 	bounds = Rect2(_origin, Vector2(grid_size) * CELL)
+	_area_scale = float(grid_size.x * grid_size.y) / BASE_AREA
+	_story = chapter.get("story", {})
+	if _story.has("boss_cells"):
+		_boss_cells = Vector2i(int(_story["boss_cells"][0]), int(_story["boss_cells"][1]))
 	cells.resize(grid_size.x * grid_size.y)
 	cells.fill(CellType.EMPTY)
 	zones.resize(grid_size.x * grid_size.y)
@@ -91,7 +106,10 @@ func build(layers: BiomeLayers, chapter_def: Dictionary) -> void:
 	_build_walls()
 	_build_border()
 	_build_boss_zone()
-	_build_center()
+	if _story.is_empty():
+		_build_center()
+	else:
+		_build_story_walls()
 	_build_gates()
 	_build_lamps()
 	_build_spotlights()
@@ -99,9 +117,11 @@ func build(layers: BiomeLayers, chapter_def: Dictionary) -> void:
 	_build_destructibles()
 	_build_decor()
 	_ensure_connectivity()
+	_seal_story_gates()
 	_build_crate_pool()
 	_place_crate(player_start + Vector2(0, -210))
 	_flow.setup(grid_size, _blocked_mask())
+	_flow_ready = true
 
 
 ## Снос всего построенного (переход в следующую главу).
@@ -292,7 +312,7 @@ func _assign_zones() -> void:
 	var h := grid_size.y
 	var mid_y := h / 2
 	var cx := w / 2
-	boss_rect = _cells_rect(Vector2i(cx - 6, RING_TOP), Vector2i(12, 6))
+	boss_rect = _cells_rect(Vector2i(cx - _boss_cells.x / 2, RING_TOP), _boss_cells)
 	boss_point = boss_rect.get_center() + Vector2(0, -20)
 	for y in h:
 		for x in w:
@@ -302,7 +322,7 @@ func _assign_zones() -> void:
 				zone = Zone.GATE
 			elif x < RING_SIDE or x >= w - RING_SIDE or y < RING_TOP or y >= h - RING_BOTTOM:
 				zone = Zone.EDGE
-			elif x >= cx - 6 and x < cx + 6 and y < RING_TOP + 6:
+			elif x >= cx - _boss_cells.x / 2 and x < cx + _boss_cells.x / 2 and y < RING_TOP + _boss_cells.y:
 				zone = Zone.BOSS
 			elif layout == "bank":
 				zone = _bank_zone(x, y, cx, mid_y)
@@ -602,6 +622,100 @@ func _build_spotlights() -> void:
 		_own(spot, _layers.world)
 
 
+## Сюжетная карта: стены-перегородки с воротами между комнатами засад и закрытый зал босса.
+func _build_story_walls() -> void:
+	var w := grid_size.x
+	var rows: Array = []
+	var index := 0
+	for door in _story.get("doors", []):
+		var y := lerpf(player_start.y, boss_point.y, float(door) + DOOR_LEAD)
+		var gap_x: int = [w / 2 - DOOR_GAP / 2, RING_SIDE + 3, w - RING_SIDE - DOOR_GAP - 3][index % 3]
+		rows.append([world_to_cell(Vector2(0.0, y)).y, door_key(float(door)), gap_x])
+		index += 1
+	rows.append([RING_TOP + _boss_cells.y, "boss", w / 2 - DOOR_GAP / 2])
+	var body := StaticBody2D.new()
+	body.collision_layer = PhysicsLayers.WORLD
+	for entry in rows:
+		var row: int = entry[0]
+		var gap_x: int = entry[2]
+		_wall_block(body, Rect2i(RING_SIDE, row, gap_x - RING_SIDE, WALL_THICK))
+		_wall_block(body, Rect2i(gap_x + DOOR_GAP, row, w - RING_SIDE - gap_x - DOOR_GAP, WALL_THICK))
+		var gate_cells := Rect2i(gap_x, row, DOOR_GAP, WALL_THICK)
+		var gate := StoryGate.new()
+		gate.setup(_cells_rect(gate_cells.position, gate_cells.size))
+		_own(gate, _layers.world)
+		story_gates[entry[1]] = gate
+		story_cells[entry[1]] = gate_cells
+		_story_clear.append(_cells_rect(Vector2i(gap_x - 1, row - 4), Vector2i(DOOR_GAP + 2, WALL_THICK + 8)))
+	var half := _boss_cells.x / 2
+	_wall_block(body, Rect2i(RING_SIDE, RING_TOP, w / 2 - half - RING_SIDE, _boss_cells.y))
+	_wall_block(body, Rect2i(w / 2 + half, RING_TOP, w - RING_SIDE - w / 2 - half, _boss_cells.y))
+	_own(body, self)
+
+
+func _wall_block(body: StaticBody2D, block: Rect2i) -> void:
+	if block.size.x <= 0 or block.size.y <= 0:
+		return
+	var shape := RectangleShape2D.new()
+	shape.size = Vector2(block.size) * CELL
+	var collision := CollisionShape2D.new()
+	collision.shape = shape
+	collision.position = _origin + (Vector2(block.position) + Vector2(block.size) * 0.5) * CELL
+	body.add_child(collision)
+	for y in range(block.position.y, block.end.y):
+		for x in range(block.position.x, block.end.x):
+			var i := _index(Vector2i(x, y))
+			cells[i] = CellType.WALL
+			zones[i] = Zone.EDGE
+	var ids: Array = (chapter.get("border", []) as Array).filter(func(id: String) -> bool: return id == "container" or id == "junk_pile" or id == "dumpster")
+	if ids.is_empty():
+		return
+	var rect := _cells_rect(block.position, block.size)
+	var vertical := block.size.y > block.size.x
+	var at := rect.position + Vector2(20.0, rect.size.y * 0.5 + 12.0)
+	if vertical:
+		at = Vector2(rect.get_center().x, rect.position.y + 50.0)
+	while (at.y < rect.end.y + 30.0) if vertical else (at.x < rect.end.x):
+		var id: String = ids.pick_random()
+		var size := ArenaProp.visual_size(id)
+		if vertical:
+			_decor_prop(at, id, 1 if randf() < 0.5 else -1)
+			at.y += maxf(size.y * 0.5, 70.0)
+		else:
+			_decor_prop(at + Vector2(size.x * 0.5, 0.0), id, 1 if randf() < 0.5 else -1)
+			at.x += size.x * 0.82
+
+
+static func door_key(at: float) -> String:
+	return "g%d" % roundi(at * 1000.0)
+
+
+func _seal_story_gates() -> void:
+	for key in story_cells:
+		_set_gate_cells(story_cells[key], CellType.WALL)
+
+
+func _set_gate_cells(gate_cells: Rect2i, kind: CellType) -> void:
+	for y in range(gate_cells.position.y, gate_cells.end.y):
+		for x in range(gate_cells.position.x, gate_cells.end.x):
+			var cell := Vector2i(x, y)
+			cells[_index(cell)] = kind
+			if _flow_ready:
+				_flow.set_blocked(cell, kind != CellType.EMPTY)
+
+
+func open_story_gate(key: String) -> void:
+	if story_gates.has(key):
+		(story_gates[key] as StoryGate).open()
+		_set_gate_cells(story_cells[key], CellType.EMPTY)
+
+
+func close_story_gate(key: String) -> void:
+	if story_gates.has(key):
+		(story_gates[key] as StoryGate).close()
+		_set_gate_cells(story_cells[key], CellType.WALL)
+
+
 func _build_center() -> void:
 	var center := Vector2(0, _origin.y + grid_size.y * 0.5 * CELL)
 	if layout == "bank":
@@ -705,6 +819,9 @@ func _cover_allowed(p: Vector2, margin: float) -> bool:
 	for r in gate_rects:
 		if r.grow(170.0 + margin).has_point(p):
 			return false
+	for r in _story_clear:
+		if r.has_point(p):
+			return false
 	return true
 
 
@@ -718,7 +835,7 @@ func _build_cover() -> void:
 		return
 	var area := _interior_rect()
 	for attempt in 500:
-		if _cover_spots.size() >= COVER_SPOTS:
+		if _cover_spots.size() >= int(COVER_SPOTS * _area_scale):
 			break
 		var p := Vector2(randf_range(area.position.x, area.end.x), randf_range(area.position.y, area.end.y))
 		if not _cover_allowed(p, 0.0):
@@ -761,8 +878,8 @@ func _build_scenes() -> void:
 		if scene.is_empty():
 			continue
 		var done := 0
-		for attempt in 120:
-			if done >= maxi(int(round(float(entry[1]) * PROP_DENSITY)), 1):
+		for attempt in int(120 * _area_scale):
+			if done >= maxi(int(round(float(entry[1]) * PROP_DENSITY * _area_scale)), 1):
 				break
 			var p := _scene_point(str(scene.get("anchor", "open")), area)
 			if p == Vector2.INF or not _scene_spacing_ok(p):
@@ -814,6 +931,9 @@ func _scene_blocked(p: Vector2) -> bool:
 	for r in gate_rects:
 		if r.grow(110.0).has_point(p):
 			return true
+	for r in _story_clear:
+		if r.has_point(p):
+			return true
 	return false
 
 
@@ -850,7 +970,7 @@ func _build_destructibles() -> void:
 	var area := _interior_rect()
 	var placed: Array[Vector2] = []
 	for prop_id in table:
-		var need := int(round(float(table[prop_id]) * PROP_DENSITY)) - int(_destr_done.get(prop_id, 0))
+		var need := int(round(float(table[prop_id]) * PROP_DENSITY * _area_scale)) - int(_destr_done.get(prop_id, 0))
 		var done := 0
 		for attempt in need * 40:
 			if done >= need:
@@ -889,12 +1009,12 @@ func _build_decor() -> void:
 	if layout == "bank":
 		return
 	var stains := ArenaDecor.Stains.new()
-	for i in 16:
+	for i in int(16 * _area_scale):
 		stains.spots.append([Vector2(randf_range(area.position.x, area.end.x), randf_range(area.position.y, area.end.y)), randf_range(26.0, 64.0), randf_range(-0.6, 0.6)])
 	_own(stains, _layers.decals)
 	var puddles := ArenaDecor.Puddles.new()
-	for attempt in PUDDLE_COUNT * 8:
-		if _puddles.size() >= PUDDLE_COUNT:
+	for attempt in int(PUDDLE_COUNT * 8 * _area_scale):
+		if _puddles.size() >= int(PUDDLE_COUNT * _area_scale):
 			break
 		var p := Vector2(randf_range(area.position.x, area.end.x), randf_range(area.position.y, area.end.y))
 		if is_walkable(p) and zone_at(p) != Zone.BOSS:

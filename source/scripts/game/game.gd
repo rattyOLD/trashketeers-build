@@ -110,6 +110,8 @@ func start(_weapon_id: StringName = &"") -> void:
 	pickups = PickupManager.new()
 	layers.decals.add_child(pickups)
 	var chapter := ContentDB.get_chapter(0)
+	if not story_mission.is_empty():
+		chapter = StoryRun.map_chapter(chapter, story_mission)
 	map.build(layers, chapter)
 
 	_spawn_player(map.player_start, SaveService.get_loadout(), _find_target)
@@ -1017,6 +1019,8 @@ func _on_overdrive_fired() -> void:
 
 
 func _on_weapon_picked(pickup: WeaponPickup) -> void:
+	if story != null and story.barrel.active:
+		return
 	var wc := player.weapon_controller
 	var found := pickup.weapon
 	var was_loot := pickup.is_loot

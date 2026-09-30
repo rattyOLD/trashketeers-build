@@ -182,17 +182,17 @@
      "say": "intro"
     },
     {
-     "from": 0.22,
+     "from": 0.25,
      "name": "ЗОНА 2 · ЗАВОД ТОКСИКОВ",
      "say": "gate"
     },
     {
-     "from": 0.52,
+     "from": 0.57,
      "name": "ЗОНА 3 · СВАЛКА ИСКРУНОВ",
      "crate": true
     },
     {
-     "from": 0.87,
+     "from": 0.895,
      "name": "ЗОНА 4 · ТРОН КОРОЛЯ ХЛАМА"
     }
    ],
@@ -210,7 +210,7 @@
      ]
     },
     {
-     "at": 0.13,
+     "at": 0.12,
      "lock": true,
      "waves": [
       {
@@ -229,7 +229,7 @@
      "reward": "medkit"
     },
     {
-     "at": 0.19,
+     "at": 0.22,
      "lock": true,
      "waves": [
       {
@@ -245,10 +245,11 @@
        }
       }
      ],
-     "reward": "weapon:rare"
+     "reward": "weapon:rare",
+     "hb": true
     },
     {
-     "at": 0.27,
+     "at": 0.29,
      "lock": false,
      "waves": [
       {
@@ -261,7 +262,7 @@
      ]
     },
     {
-     "at": 0.33,
+     "at": 0.34,
      "lock": true,
      "say": "toxic",
      "waves": [
@@ -279,10 +280,11 @@
        }
       }
      ],
-     "reward": "medkit"
+     "reward": "medkit",
+     "hb": true
     },
     {
-     "at": 0.41,
+     "at": 0.44,
      "lock": true,
      "waves": [
       {
@@ -303,14 +305,15 @@
      "reward": "weapon:epic"
     },
     {
-     "at": 0.48,
+     "at": 0.54,
      "lock": true,
      "boss": "beer_baron",
      "mini": true,
-     "hp": 1.4
+     "hp": 1.4,
+     "hb": true
     },
     {
-     "at": 0.58,
+     "at": 0.6,
      "lock": false,
      "waves": [
       {
@@ -323,7 +326,7 @@
      ]
     },
     {
-     "at": 0.65,
+     "at": 0.66,
      "lock": true,
      "waves": [
       {
@@ -340,10 +343,11 @@
        }
       }
      ],
-     "reward": "medkit"
+     "reward": "medkit",
+     "hb": true
     },
     {
-     "at": 0.72,
+     "at": 0.76,
      "lock": true,
      "waves": [
       {
@@ -361,10 +365,11 @@
        }
       }
      ],
-     "reward": "weapon:epic"
+     "reward": "weapon:epic",
+     "hb": true
     },
     {
-     "at": 0.8,
+     "at": 0.86,
      "lock": true,
      "waves": [
       {
@@ -398,22 +403,31 @@
      "boss": "junk_overlord",
      "mini": false,
      "hp": 1.6,
-     "say": "king_pre"
+     "say": "king_pre",
+     "arena_part": true
     }
    ],
    "captives": [
     {
-     "at": 0.23,
+     "at": 0.18,
      "side": -1
     },
     {
-     "at": 0.55,
+     "at": 0.5,
      "side": 1
     },
     {
-     "at": 0.76,
+     "at": 0.71,
      "side": -1
     }
+   ],
+   "size": [
+    34,
+    190
+   ],
+   "boss_cells": [
+    22,
+    12
    ]
   }
  ],
