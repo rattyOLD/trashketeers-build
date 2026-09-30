@@ -275,7 +275,7 @@ func _add_capsule(row: HBoxContainer, icon_texture: Texture2D, kind: String) -> 
 # --- Логотип и Енот на надписи ----------------------------------------------------------------
 
 ## Боковая кнопка сцены: иконка без подписи; подпись и красная точка появляются, только когда есть что забрать.
-func _make_side_button(key: String, icon_path: String, caption_text: String, right: bool, y: float, action: Callable) -> Button:
+func _make_side_button(key: String, icon_path: String, caption_text: String, right: bool, y: float, action: Callable, column: int = 0) -> Button:
 	var button := Button.new()
 	button.flat = true
 	button.focus_mode = Control.FOCUS_NONE
@@ -287,8 +287,8 @@ func _make_side_button(key: String, icon_path: String, caption_text: String, rig
 		button.offset_left = -100.0
 		button.offset_right = -4.0
 	else:
-		button.offset_left = 4.0
-		button.offset_right = 100.0
+		button.offset_left = 4.0 + column * 104.0
+		button.offset_right = 100.0 + column * 104.0
 	button.offset_top = y
 	button.offset_bottom = y + 96.0
 	button.pressed.connect(func() -> void:
@@ -382,9 +382,14 @@ func _build_stage() -> Control:
 	stage.add_child(_preview)
 	stage.add_child(_make_side_button("gift", "res://assets/ui/hub/daily_gift.png", "ПОДАРОК", false, 8.0, func() -> void: _daily.open()))
 	stage.add_child(_make_side_button("chest", "res://assets/ui/hub/chest_free.png", "БЕСПЛАТНО", false, 132.0, func() -> void: _chests.open()))
-	stage.add_child(_make_side_button("news", "res://assets/ui/hub/news.png", "НОВОЕ", true, 8.0, func() -> void: _changelog.open()))
-	stage.add_child(_make_side_button("pass", "res://assets/ui/hub/pass.png", "ПРОПУСК", true, 124.0, func() -> void: _pass.open()))
-	stage.add_child(_make_side_button("vip", "res://assets/ui/hub/vip.png", "VIP", true, 224.0, func() -> void: _vip.open()))
+	if Orient.portrait:
+		stage.add_child(_make_side_button("news", "res://assets/ui/hub/news.png", "НОВОЕ", true, 8.0, func() -> void: _changelog.open()))
+		stage.add_child(_make_side_button("pass", "res://assets/ui/hub/pass.png", "ПРОПУСК", true, 124.0, func() -> void: _pass.open()))
+		stage.add_child(_make_side_button("vip", "res://assets/ui/hub/vip.png", "VIP", true, 224.0, func() -> void: _vip.open()))
+	else:
+		stage.add_child(_make_side_button("news", "res://assets/ui/hub/news.png", "НОВОЕ", false, 8.0, func() -> void: _changelog.open(), 1))
+		stage.add_child(_make_side_button("pass", "res://assets/ui/hub/pass.png", "ПРОПУСК", false, 124.0, func() -> void: _pass.open(), 1))
+		stage.add_child(_make_side_button("vip", "res://assets/ui/hub/vip.png", "VIP", false, 240.0, func() -> void: _vip.open(), 1))
 	for key in ["pass", "vip"]:
 		(_side_buttons[key]["caption"] as Label).visible = true
 	stage.add_child(_build_tester_button())

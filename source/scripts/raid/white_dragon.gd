@@ -37,6 +37,8 @@ enum Attack { COLD_BLAST, BEAM, COMET_VOLLEY, TAIL_SWEEP, ULTIMATE }
 enum Phase { GAP, WINDUP, ACTIVE }
 
 const MAX_HP := 4200.0
+const HP_PER_DPS := 70.0
+const HP_CAP := 90000.0
 const FURY_THRESHOLD := 0.3
 const PHASE2_THRESHOLD := 0.65
 const PHASE_TITLES := ["Хозяин Озера", "Гнев Метели", "Абсолютная Стужа"]
@@ -123,6 +125,7 @@ const SPRITE_SCALE := 1.0
 const SPRITE_TORSO_OFFSET := Vector2(0, -24)
 const SHOCKWAVES := 3
 
+var max_hp := MAX_HP
 var hp := MAX_HP
 var state: State = State.INTRO
 var facing := PI * 0.5
@@ -230,6 +233,12 @@ func setup(player: Player, arena: DragonArena, comets: CometPool, laser: WhiteDr
 	SoundManager.play(&"dragon_roar", 0.0, false)
 
 
+## Здоровье масштабируется под урон в секунду оружия игрока: сильный ствол не должен снимать босса за пару секунд.
+func scale_health(weapon_dps: float) -> void:
+	max_hp = clampf(weapon_dps * HP_PER_DPS, MAX_HP, HP_CAP)
+	hp = max_hp
+
+
 func is_targetable() -> bool:
 	return hp > 0.0 and (state == State.LANDED_ATTACK or state == State.FURY)
 
@@ -251,13 +260,13 @@ func take_damage(amount: float, _direction: Vector2 = Vector2.ZERO, _is_crit: bo
 		return
 	hp = maxf(hp - amount * (EXHAUST_DAMAGE_MULT if exhausted else 1.0), 0.0)
 	_flash = 0.07
-	health_changed.emit(hp, MAX_HP)
+	health_changed.emit(hp, max_hp)
 	if hp <= 0.0:
 		_die()
 		return
-	if phase_index == 1 and hp <= MAX_HP * PHASE2_THRESHOLD:
+	if phase_index == 1 and hp <= max_hp * PHASE2_THRESHOLD:
 		_start_phase2()
-	if not is_fury and hp <= MAX_HP * FURY_THRESHOLD:
+	if not is_fury and hp <= max_hp * FURY_THRESHOLD:
 		_start_fury()
 
 

@@ -444,7 +444,7 @@ class NavButton:
 		pressed.connect(func() -> void: SoundManager.play(&"ui_click"))
 
 	func _draw() -> void:
-		var captioned := badge or is_pressed() or is_hovered()
+		var captioned := not Orient.portrait or badge or is_pressed() or is_hovered()
 		var c := Vector2(size.x * 0.5, size.y * (0.4 if captioned else 0.5))
 		if icon_texture != null:
 			var side := minf(size.x * 0.72, size.y * (0.62 if captioned else 0.78))
@@ -496,12 +496,12 @@ class NavButton:
 		if badge:
 			draw_circle(Vector2(size.x - 18, 18), 10.0, LINE)
 			draw_circle(Vector2(size.x - 18, 18), 7.0, UiStyle.DANGER)
-		if not (badge or is_pressed() or is_hovered()):
+		if not (not Orient.portrait or badge or is_pressed() or is_hovered()):
 			return
 		var font := ThemeDB.fallback_font
-		var pos := Vector2(0, size.y - 16)
-		draw_string_outline(font, pos, caption, HORIZONTAL_ALIGNMENT_CENTER, size.x, 18, 6, LINE)
-		draw_string(font, pos, caption, HORIZONTAL_ALIGNMENT_CENTER, size.x, 18, UiStyle.TEXT)
+		var pos := Vector2(0, size.y - 12)
+		draw_string_outline(font, pos, caption, HORIZONTAL_ALIGNMENT_CENTER, size.x, 20, 6, LINE)
+		draw_string(font, pos, caption, HORIZONTAL_ALIGNMENT_CENTER, size.x, 20, accent.lightened(0.55) if not is_pressed() else Color.WHITE)
 
 
 ## Кубик — случайный ник.

@@ -95,7 +95,8 @@ func start(_weapon_id: StringName = &"") -> void:
 
 	hud.configure_for_raid()
 	hud.set_nuts(SaveService.get_star_dust())
-	hud.show_boss("Хладгор · Хозяин Озера", dragon.hp, WhiteDragon.MAX_HP, true)
+	dragon.scale_health(player.weapon_controller.base_weapon.get_dps())
+	hud.show_boss("Хладгор · Хозяин Озера", dragon.hp, dragon.max_hp, true)
 	hud.show_banner("ЛЕДЯНОЙ НАЛЁТ: ХЛАДГОР", Color("#bff6ff"), 2.4)
 	_thermos_button = hud.add_thermos(_use_thermos)
 	_update_thermos()
@@ -337,7 +338,7 @@ func _on_comet_impacted(at: Vector2, color: Color) -> void:
 
 
 func _on_dragon_health_changed(hp: float, max_hp: float) -> void:
-	var dealt := WhiteDragon.MAX_HP - hp
+	var dealt := dragon.max_hp - hp
 	if dealt > damage_dealt:
 		fx.number(dragon.global_position + Vector2(randf_range(-40, 40), -110), dealt - damage_dealt)
 	damage_dealt = dealt
@@ -426,7 +427,7 @@ func _on_player_fell() -> void:
 	var lines := PackedStringArray([
 		"Енот провалился под лёд",
 		"Продержался: %s из %s" % [BattleBase.format_time(DURATION - time_left), BattleBase.format_time(DURATION)],
-		"Урон по дракону: %d из %d" % [roundi(damage_dealt), roundi(WhiteDragon.MAX_HP)],
+		"Урон по дракону: %d из %d" % [roundi(damage_dealt), roundi(dragon.max_hp)],
 		"Лёд по краю трескается по фазам: держись ближе к центру",
 	])
 	get_tree().create_timer(FALL_DEFEAT_DELAY, false).timeout.connect(_show_result.bind(false, lines))
@@ -443,7 +444,7 @@ func _on_player_died() -> void:
 	var lines := PackedStringArray([
 		"Хладгор оказался сильнее",
 		"Продержался: %s из %s" % [BattleBase.format_time(survived), BattleBase.format_time(DURATION)],
-		"Урон по дракону: %d из %d" % [roundi(damage_dealt), roundi(WhiteDragon.MAX_HP)],
+		"Урон по дракону: %d из %d" % [roundi(damage_dealt), roundi(dragon.max_hp)],
 		"Совет: в метель вставай в тёплый круг, а после неё бей: дракон выдохся",
 	])
 	get_tree().create_timer(DEFEAT_DELAY, false).timeout.connect(_show_result.bind(false, lines))
