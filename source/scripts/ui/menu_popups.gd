@@ -118,6 +118,13 @@ class Settings:
 			var fs_hint := UiStyle.label("Браузер iPhone не умеет полный экран. Открой «Поделиться» и выбери «На экран Домой»: игра запустится без адресной строки.", 19, UiStyle.TEXT_DIM, 4)
 			fs_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			graphics.add_child(fs_hint)
+		if Platform.can_install() and not Platform.is_standalone():
+			var install := UiStyle.button("УСТАНОВИТЬ ИГРУ НА ТЕЛЕФОН", UiStyle.PANEL_LIGHT, 22, Vector2(0, 72))
+			install.pressed.connect(Platform.install_app)
+			graphics.add_child(install)
+			var install_hint := UiStyle.label("Игра встанет иконкой на экран и будет открываться сразу на весь экран, без адресной строки.", 19, UiStyle.TEXT_DIM, 4)
+			install_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			graphics.add_child(install_hint)
 		var controls := MenuPopups.section_card(list, "УПРАВЛЕНИЕ")
 		var controls_row := HBoxContainer.new()
 		controls_row.add_theme_constant_override("separation", 10)

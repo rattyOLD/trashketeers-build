@@ -178,11 +178,24 @@ func fullscreen_supported() -> bool:
 func set_fullscreen(on: bool) -> void:
 	if is_web:
 		if on:
-			_js("var e = document.documentElement; var f = e.requestFullscreen || e.webkitRequestFullscreen; if (f) { var r = f.call(e, {navigationUI: 'hide'}); if (r && r.catch) r.catch(function () {}); }")
+			_js("var e = document.documentElement; var f = e.requestFullscreen || e.webkitRequestFullscreen; if (f) { var r = f.call(e, {navigationUI: 'hide'}); if (r && r.then) { r.then(function () { try { screen.orientation.lock('landscape').catch(function () {}); } catch (x) {} }).catch(function () {}); } }")
 		else:
 			_js("var f = document.exitFullscreen || document.webkitExitFullscreen; if (f) f.call(document);")
 		return
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if on else DisplayServer.WINDOW_MODE_WINDOWED)
+
+
+func can_install() -> bool:
+	return is_web and _js_bool("return !!window.__trash_install_evt;")
+
+
+func is_standalone() -> bool:
+	return is_web and _js_bool("return !!(window.matchMedia('(display-mode: standalone)').matches || window.matchMedia('(display-mode: fullscreen)').matches || navigator.standalone);")
+
+
+func install_app() -> void:
+	if is_web:
+		_js("if (window.__trash_install) window.__trash_install();")
 
 
 func is_fullscreen() -> bool:

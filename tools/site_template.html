@@ -331,6 +331,17 @@ html, body {
 window.__trash_build = {label: '__BUILD_LABEL__', time: '__BUILD_TIME__'};
 document.getElementById('ver').textContent = 'Версия ' + window.__trash_build.label + ' · сборка от ' + window.__trash_build.time;
 </script>
+<script>
+window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); window.__trash_install_evt = e; });
+window.__trash_install = function () {
+	var e = window.__trash_install_evt;
+	if (!e) { return false; }
+	window.__trash_install_evt = null;
+	e.prompt();
+	return true;
+};
+if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(function () {}); }
+</script>
 <script src="audio_unlock.js"></script>
 <script src="index.js"></script>
 <script>
