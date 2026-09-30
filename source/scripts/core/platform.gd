@@ -161,6 +161,18 @@ func consume_unclean_exit() -> String:
 	return "" if value == null else str(value)
 
 
+func set_context(text: String) -> void:
+	if is_web:
+		_js("window.localStorage.setItem('__trash_ctx', %s);" % JSON.stringify(text))
+
+
+func last_context() -> String:
+	if not is_web:
+		return ""
+	var value: Variant = _js("return window.localStorage.getItem('__trash_ctx');")
+	return "" if value == null else str(value)
+
+
 func device_info() -> String:
 	if not is_web:
 		return OS.get_name()

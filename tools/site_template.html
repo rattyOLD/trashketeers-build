@@ -247,6 +247,9 @@ html, body {
 			keepLog('err', arguments);
 			console.error.apply(console, arguments);
 			const text = Array.prototype.join.call(arguments, ' ');
+			if (/ERROR|Error/.test(text) && window.trkReport) {
+				window.trkReport('error', text);
+			}
 			if (/Aborted|abort\(|out of memory|Cannot enlarge memory|memory access out of bounds|unreachable/i.test(text)) {
 				crash(text);
 			}
@@ -255,12 +258,24 @@ html, body {
 
 	// Адрес сбора отчётов о вылетах (Google Apps Script / Supabase и т.п.); пусто — отчёты не отправляются.
 	const REPORT_URL = 'https://script.google.com/macros/s/AKfycbxVyy-SnRANW0Im-1Blne2TcUbca93WqzyBulpADwWWD7YH6x3KIygBYImTe8VfP5pp/exec';
+	const SESSION_ID = Math.random().toString(36).slice(2, 8);
+	const SESSION_START = Date.now();
+	const REPORT_CAP = 60;
+	const sentKeys = {};
+	let reportCount = 0;
 	window.trkReport = function (kind, text) {
-		if (!REPORT_URL) {
+		if (!REPORT_URL || reportCount >= REPORT_CAP) {
 			return;
 		}
 		try {
-			const body = JSON.stringify({ kind: kind, text: String(text).slice(0, 3000), time: new Date().toISOString(), build: 'v34' });
+			text = String(text);
+			const key = kind + text.slice(0, 100);
+			if (sentKeys[key]) {
+				return;
+			}
+			sentKeys[key] = true;
+			reportCount += 1;
+			const body = JSON.stringify({ kind: kind, text: '[' + SESSION_ID + ' +' + Math.round((Date.now() - SESSION_START) / 1000) + 's] ' + text.slice(0, 3000), time: new Date().toISOString(), build: 'v34' });
 			if (navigator.sendBeacon) {
 				navigator.sendBeacon(REPORT_URL, body);
 			} else {
@@ -269,9 +284,17 @@ html, body {
 		} catch (e) {}
 	};
 
+	window.addEventListener('pagehide', function () {
+		let ctx = '';
+		try { ctx = window.localStorage.getItem('__trash_ctx') || ''; } catch (e) {}
+		window.trkReport('session_end', Math.round((Date.now() - SESSION_START) / 1000) + 's | last: ' + ctx);
+	});
+
 	if (window.location.hash === '#reporttest') {
 		window.trkReport('test', 'Проверка связи: ' + navigator.userAgent);
 	}
+
+	window.trkReport('session_start', navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + (window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio) + ' | screen ' + screen.width + 'x' + screen.height + ' | cores ' + (navigator.hardwareConcurrency || '?'));
 
 	const logTail = [];
 	let started = false;

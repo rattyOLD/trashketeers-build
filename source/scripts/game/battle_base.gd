@@ -11,6 +11,9 @@ signal restart_requested
 
 const CAMERA_SMOOTHING := 9.0
 const PERF_SAMPLE_FRAMES := 3000
+const SPIKE_MS := 140.0
+const MAX_SPIKE_REPORTS := 3
+const MAX_PERF_REPORTS := 4
 const HITSTOP_SCALE := 0.05
 const HITSTOP_COOLDOWN := 0.12
 const CAMERA_KICK_DECAY := 16.0
@@ -31,8 +34,10 @@ var fx: FxManager
 var hero_skills: HeroSkills
 var _perf_last_usec := 0
 var _perf_frames: PackedFloat32Array = PackedFloat32Array()
-var _perf_sent := false
-static var _perf_reported := false
+var _perf_age := 0.0
+var _context_timer := 0.0
+var _spikes_sent := 0
+static var _perfs_sent := 0
 var camera: Camera2D
 var hud: Hud
 var atmosphere: AtmosphereFX
@@ -159,29 +164,48 @@ func _exit_tree() -> void:
 	get_tree().paused = false
 
 
-func _process(_delta: float) -> void:
-	if _perf_sent or _perf_reported or get_tree().paused:
+func _process(delta: float) -> void:
+	if get_tree().paused:
 		_perf_last_usec = 0
 		return
 	var now := Time.get_ticks_usec()
 	if _perf_last_usec > 0:
-		_perf_frames.append((now - _perf_last_usec) / 1000.0)
+		var ms := (now - _perf_last_usec) / 1000.0
+		_perf_frames.append(ms)
+		if ms > SPIKE_MS and _spikes_sent < MAX_SPIKE_REPORTS and _perf_age > 5.0:
+			_spikes_sent += 1
+			Platform.send_report("spike", "%.0f ms | %s" % [ms, _perf_context()])
 	_perf_last_usec = now
+	_perf_age += delta
+	_context_timer -= delta
+	if _context_timer <= 0.0:
+		_context_timer = 4.0
+		Platform.set_context(_perf_context())
 	if _perf_frames.size() >= PERF_SAMPLE_FRAMES:
 		_send_perf_report()
 
 
+func _perf_context() -> String:
+	return "%s hero=%s q=%d lite=%s t=%.0fs nodes=%d objs=%d draws=%d mem=%dMB" % [
+		get_script().get_global_name(), SaveService.get_character_id(), SaveService.get_quality(), SaveService.is_fx_lite(), _perf_age,
+		int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT)),
+		int(Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME)),
+		int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)),
+		int(Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0)]
+
+
 func _send_perf_report() -> void:
-	_perf_sent = true
-	_perf_reported = true
 	var sorted := Array(_perf_frames)
+	_perf_frames.clear()
 	sorted.sort()
 	var total := 0.0
 	for ms: float in sorted:
 		total += ms
 	var avg_ms := total / sorted.size()
 	var worst_ms: float = sorted[int(sorted.size() * 0.99)]
-	Platform.send_report("perf", "%s q=%d lite=%s | fps avg %.0f, 1%% low %.0f | %s" % [get_script().get_global_name(), SaveService.get_quality(), SaveService.is_fx_lite(), 1000.0 / avg_ms, 1000.0 / worst_ms, Platform.device_info()])
+	if _perfs_sent < MAX_PERF_REPORTS:
+		_perfs_sent += 1
+		Platform.send_report("perf", "fps avg %.0f, 1%% low %.0f | %s | %s" % [1000.0 / avg_ms, 1000.0 / worst_ms, _perf_context(), Platform.device_info()])
 
 
 func _physics_process(delta: float) -> void:

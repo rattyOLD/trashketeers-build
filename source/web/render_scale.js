@@ -40,6 +40,9 @@
 	window.addEventListener('webglcontextlost', function (event) {
 		try {
 			event.preventDefault();
+			if (window.trkReport) {
+				window.trkReport('webgl_context_lost', window.localStorage.getItem('__trash_ctx') || '');
+			}
 			var last = Number(sessionStorage.getItem('__trash_ctx_reload') || 0);
 			if (Date.now() - last < 20000) {
 				return;

@@ -70,7 +70,7 @@ func _handle_unclean_exit() -> void:
 	if quality > 0:
 		SaveService.set_quality(quality - 1)
 		SaveService.set_flag("crash_downgraded", true)
-	Platform.send_report("unclean_exit", "%s | now quality %d | %s" % [info, SaveService.get_quality(), Platform.device_info()])
+	Platform.send_report("unclean_exit", "%s | now quality %d | last: %s | %s" % [info, SaveService.get_quality(), Platform.last_context(), Platform.device_info()])
 
 
 func _register_input() -> void:
