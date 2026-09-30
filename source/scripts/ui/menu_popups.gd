@@ -214,12 +214,18 @@ class Shop:
 
 	var _skins_mode := false
 	var _balance: Label
+	var _query := ""
 
 	func _init(skins_mode: bool = false) -> void:
 		super("СКИНЫ" if skins_mode else "ГЕРОИ")
 		_skins_mode = skins_mode
 		_balance = UiStyle.label("", 24, UiStyle.GOLD, 6)
 		content.add_child(_balance)
+		var search := SearchBar.new("Найти скин по названию" if skins_mode else "Найти героя по имени")
+		search.changed.connect(func(query: String) -> void:
+			_query = query
+			_refresh())
+		content.add_child(search)
 		_list = MenuPopups.scroll_list(content)
 
 	func _refresh() -> void:
@@ -227,7 +233,8 @@ class Shop:
 		MenuPopups.clear(_list)
 		if not _skins_mode:
 			for character in CharacterDB.all():
-				_list.add_child(_make_character_row(character))
+				if SearchBar.matches(_query, "%s %s" % [character["title"], character.get("description", "")]):
+					_list.add_child(_make_character_row(character))
 			return
 		var hint := UiStyle.label("Скин меняет внешний вид выбранного героя. Купленные скины остаются навсегда.", 18, UiStyle.TEXT_DIM, 4)
 		hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -239,7 +246,9 @@ class Shop:
 		grid.add_theme_constant_override("v_separation", 12)
 		_list.add_child(grid)
 		for skin_id in SaveService.SKINS:
-			grid.add_child(_make_skin_card(skin_id))
+			var skin: Dictionary = SaveService.SKINS[skin_id]
+			if SearchBar.matches(_query, "%s %s" % [skin["title"], skin["description"]]):
+				grid.add_child(_make_skin_card(skin_id))
 
 	func _section(title: String) -> Control:
 		var label := UiStyle.label(title, 26, UiStyle.NEON, 6)
@@ -382,6 +391,7 @@ class Armory:
 	signal weapon_changed(weapon_id: StringName)
 	var _list: VBoxContainer
 	var _balance: Label
+	var _query := ""
 
 	func _init() -> void:
 		super("ОРУЖИЕ + MERGE")
@@ -390,6 +400,11 @@ class Armory:
 		var hint := UiStyle.label("Купить ствол — за монеты, легендарные — только за неонит. Из ящиков забега ствол остаётся навсегда не всегда. 2 одинаковых = тир выше (у легендарных тиров нет: они сильнее всех).", 18, UiStyle.TEXT_DIM, 4)
 		hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		content.add_child(hint)
+		var search := SearchBar.new("Найти оружие по названию")
+		search.changed.connect(func(query: String) -> void:
+			_query = query
+			_refresh())
+		content.add_child(search)
 		_list = MenuPopups.scroll_list(content)
 
 	func _refresh() -> void:
@@ -398,6 +413,8 @@ class Armory:
 		var owned: Array[WeaponData] = []
 		var locked: Array[WeaponData] = []
 		for weapon in WeaponDB.get_player_weapons():
+			if not SearchBar.matches(_query, "%s %s %s" % [weapon.get_title(), weapon.short_name, WeaponData.RARITY_NAMES[weapon.rarity]]):
+				continue
 			if SaveService.owns_weapon(weapon.id):
 				owned.append(weapon)
 			else:
@@ -802,12 +819,8 @@ class Profile:
 		edit.placeholder_text = placeholder
 		edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		edit.custom_minimum_size = Vector2(0, 56)
-		edit.add_theme_font_size_override("font_size", 22)
-		edit.add_theme_color_override("font_color", Color("#1a1030"))
-		edit.add_theme_color_override("font_placeholder_color", Color("#8a82a0"))
-		edit.add_theme_color_override("caret_color", Color("#ff2ea6"))
-		edit.add_theme_stylebox_override("normal", UiStyle.box(Color("#ffffff"), UiStyle.OUTLINE, 4, 16))
-		edit.add_theme_stylebox_override("focus", UiStyle.box(Color("#ffffff"), Color("#ff2ea6"), 4, 16))
+		SearchBar.style(edit, 22)
+		SearchBar.attach_touch_input(edit, "Код тестера")
 		return edit
 
 	func _insider_block() -> Control:
@@ -862,12 +875,8 @@ class Profile:
 		edit.max_length = SaveService.NICKNAME_MAX
 		edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		edit.custom_minimum_size = Vector2(0, 56)
-		edit.add_theme_font_size_override("font_size", 26)
-		edit.add_theme_color_override("font_color", Color("#1a1030"))
-		edit.add_theme_color_override("font_placeholder_color", Color("#8a82a0"))
-		edit.add_theme_color_override("caret_color", Color("#ff2ea6"))
-		edit.add_theme_stylebox_override("normal", UiStyle.box(Color("#ffffff"), UiStyle.OUTLINE, 4, 16))
-		edit.add_theme_stylebox_override("focus", UiStyle.box(Color("#ffffff"), Color("#ff2ea6"), 4, 16))
+		SearchBar.style(edit, 26)
+		SearchBar.attach_touch_input(edit, "Твой ник")
 		var save := func() -> void:
 			if edit.text.strip_edges() != SaveService.get_nickname():
 				SaveService.set_nickname(edit.text)

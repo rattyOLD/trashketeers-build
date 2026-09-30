@@ -415,6 +415,13 @@ func _on_js_back(_args: Array) -> void:
 	back_pressed.emit()
 
 
+## Системный диалог ввода браузера (единственный надёжный способ открыть клавиатуру на iOS); null — отмена.
+func prompt_text(title: String, current: String) -> Variant:
+	if not OS.has_feature("web"):
+		return null
+	return _js("return window.prompt(%s, %s);" % [JSON.stringify(title), JSON.stringify(current)])
+
+
 func _js(body: String) -> Variant:
 	return JavaScriptBridge.eval("(function(){ try { %s } catch (e) { return null; } })()" % body, true)
 

@@ -23,12 +23,26 @@ func _init() -> void:
 	super("ГЕРОИ")
 	_balance = UiStyle.label("", 24, UiStyle.GOLD, 6)
 	content.add_child(_balance)
+	var search := SearchBar.new("Найти героя по имени")
+	search.changed.connect(_on_search)
+	content.add_child(search)
 	_list = MenuPopups.scroll_list(content)
 	_action_box = VBoxContainer.new()
 	_action_box.add_theme_constant_override("separation", 10)
 	content.add_child(_action_box)
 	_reveal = UnlockReveal.new()
 	add_child(_reveal)
+
+
+func _on_search(query: String) -> void:
+	if query.is_empty():
+		return
+	var all := CharacterDB.all()
+	for i in all.size():
+		if SearchBar.matches(query, "%s %s" % [all[i]["title"], all[i]["id"]]):
+			_index = i
+			_refresh()
+			return
 
 
 func open() -> void:
