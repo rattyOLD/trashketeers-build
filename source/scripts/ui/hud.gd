@@ -302,6 +302,10 @@ func update_boss(hp: float, max_hp: float) -> void:
 	_boss_bar.set_health(hp, max_hp)
 
 
+func set_boss_posture(fraction: float, broken: bool) -> void:
+	_boss_bar.set_posture(fraction, broken)
+
+
 func set_boss_title(text: String) -> void:
 	_boss_bar.set_title(text)
 
@@ -575,7 +579,7 @@ func _build_wave_chip() -> Control:
 
 func _build_boss_bar() -> Control:
 	_boss_bar = BossBar.new()
-	UiStyle.anchor(_boss_bar, Vector2(0.5, 0.0), Rect2(-300, 158, 600, 70))
+	UiStyle.anchor(_boss_bar, Vector2(0.5, 0.0), Rect2(-300, 158, 600, 96))
 	_boss_bar.visible = false
 	return _boss_bar
 

@@ -36,6 +36,8 @@ var run_loot: Array = []
 var run_gems := 0
 var run_blueprints: Array = []
 var revives_used := 0
+var _damage_acc := {}
+const DAMAGE_MERGE_TIME := 0.07
 
 var map: LevelSpawner
 var pickups: PickupManager
@@ -240,6 +242,7 @@ func _physics_process(delta: float) -> void:
 			_rail_combo = 0
 			hud.set_rail_combo(0)
 	_number_budget = minf(_number_budget + DAMAGE_NUMBERS_PER_SEC * _fx_scale * delta, DAMAGE_NUMBERS_PER_SEC * 0.5)
+	_flush_damage_numbers(delta)
 	if player == null or player.is_dead:
 		return
 	_update_interact()
@@ -247,6 +250,8 @@ func _physics_process(delta: float) -> void:
 	var target: Node2D = director.boss if director.boss != null and director.boss.is_alive() else null
 	if target == null and _portal != null and _portal.visible:
 		target = _portal
+	if target != null and target is Enemy:
+		hud.set_boss_posture((target as Enemy).posture_fraction(), (target as Enemy).posture_stun > 0.0)
 	_arrow.track(camera.get_screen_center_position(), get_viewport_rect().size / camera.zoom, target)
 	_combo_timer -= delta
 	if _combo_timer <= 0.0:
@@ -449,10 +454,32 @@ func _on_enemy_status(enemy: Enemy, amount: float, kind: String) -> void:
 		hud.update_boss(maxf(enemy.hp, 0.0), enemy.max_hp)
 
 
+## Урон по одному врагу за 0.07 с складывается в одну цифру: залп дробовика показывает сумму, а не одну дробинку.
+func _flush_damage_numbers(delta: float, force: bool = false) -> void:
+	if _damage_acc.is_empty():
+		return
+	for key in _damage_acc.keys():
+		var enemy: Enemy = key if is_instance_valid(key) else null
+		var acc: Dictionary = _damage_acc[key]
+		acc["age"] += delta
+		if acc["age"] < DAMAGE_MERGE_TIME and not force:
+			continue
+		_damage_acc.erase(key)
+		if enemy == null or enemy.data == null:
+			continue
+		if _number_budget >= 1.0 or acc["crit"]:
+			_number_budget -= 1.0
+			var jitter := Vector2(randf_range(-enemy.data.radius, enemy.data.radius) * 0.6, 0.0)
+			fx.number(enemy.get_aim_point() + Vector2(0, -enemy.data.radius * 1.6) + jitter, acc["amount"], FxManager.kind_color(acc["kind"]), acc["crit"], FxManager.kind_scale(acc["kind"]))
+
+
 func _on_enemy_damaged(enemy: Enemy, amount: float, is_crit: bool, kind: StringName) -> void:
-	if _number_budget >= 1.0 or is_crit:
-		_number_budget -= 1.0
-		fx.number(enemy.get_aim_point() + Vector2(0, -enemy.data.radius * 1.6), amount, FxManager.kind_color(kind), is_crit, FxManager.kind_scale(kind))
+	var acc: Dictionary = _damage_acc.get(enemy, {})
+	if acc.is_empty():
+		acc = {"amount": 0.0, "crit": false, "kind": kind, "age": 0.0}
+		_damage_acc[enemy] = acc
+	acc["amount"] += amount
+	acc["crit"] = acc["crit"] or is_crit
 	if is_crit:
 		SaveService.add_stat("crits", 1, false)
 	if enemy.data.is_boss():
@@ -580,9 +607,19 @@ func _on_enemy_exploded(_enemy: Enemy, at: Vector2, radius: float, damage: float
 	BulletPool.explode(at, radius, damage, Bullet.Team.ENEMY, Color("#b6ff00"), 1.2)
 
 
+func _on_posture_broken(boss: Enemy) -> void:
+	fx.popup(boss.global_position + Vector2(0, -boss.data.radius * 2.0), "ВЫДЕРЖКА СЛОМЛЕНА", Color("#ffe27a"), 34.0)
+	fx.ring(boss.global_position, Color("#ffe27a"), boss.data.radius * 2.2)
+	add_shake(0.5)
+	Platform.haptic("medium")
+	SoundManager.play(&"boss_spawn", -4.0, false)
+
+
 func _on_boss_spawned(boss: Enemy) -> void:
 	Platform.note_event("boss spawned")
 	hud.show_boss(boss.data.display_name, boss.hp, boss.max_hp)
+	if not boss.posture_broken.is_connected(_on_posture_broken):
+		boss.posture_broken.connect(_on_posture_broken)
 	hud.show_banner("БОСС: %s!" % boss.data.display_name.to_upper(), UiStyle.DANGER)
 	var passive := BossBrain.passive_text(boss.data.boss_pattern)
 	if not passive.is_empty():

@@ -25,6 +25,14 @@ func _init() -> void:
 	process_mode = Node.PROCESS_MODE_PAUSABLE
 
 
+func owns(touch_index: int) -> bool:
+	return _touch_index == touch_index
+
+
+func in_zone(point: Vector2) -> bool:
+	return _in_zone(point)
+
+
 func is_active() -> bool:
 	return _touch_index != -1
 
@@ -37,6 +45,11 @@ func _notification(what: int) -> void:
 func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
 		var touch := event as InputEventScreenTouch
+		if touch.canceled and touch.index == _touch_index:
+			_reset()
+			return
+		if touch.pressed and _in_zone(touch.position) and _touch_index != -1 and touch.index != _touch_index:
+			_reset()
 		if touch.pressed and _touch_index == -1 and _in_zone(touch.position):
 			var scale := float(Controls.get_value("joystick_scale"))
 			BASE_RADIUS = BASE_RADIUS_DEFAULT * scale

@@ -39,6 +39,12 @@ const STUN_TIME_BOSS := 0.6
 const STUN_BOSS_COOLDOWN := 8.0
 const STUN_DAMAGE_MULT := 1.5
 const STAGGER_DECAY := 8.0
+## Выдержка босса (как в Sekiro): любой урон наполняет шкалу, на пороге босс замирает и получает ×1.5.
+const POSTURE_FRACTION := 0.10
+const POSTURE_DECAY := 0.02
+const POSTURE_STUN := 2.5
+const POSTURE_COOLDOWN := 12.0
+signal posture_broken(enemy: Enemy)
 const STAGGER_BOSS_RESIST := 0.25
 const FLASH_GAP_BOSS := 0.18
 const KNOCKBACK_FORCE := 260.0
@@ -125,6 +131,9 @@ var slow_amount := 0.0
 ## Шкала «выдержки» (ближний бой): на пороге враг оглушён и получает ×1.5 урона.
 var stagger := 0.0
 var stun_left := 0.0
+var posture := 0.0
+var posture_stun := 0.0
+var _posture_cd := 0.0
 var _stun_cd := 0.0
 var _status_tick := 0.0
 var _status_key := 0
@@ -225,6 +234,9 @@ func activate(enemy_data: EnemyData, at: Vector2, hp_mult: float = 1.0, dmg_mult
 	bleed_left = 0.0
 	slow_left = 0.0
 	stagger = 0.0
+	posture = 0.0
+	posture_stun = 0.0
+	_posture_cd = 0.0
 	stun_left = 0.0
 	_stun_cd = 0.0
 	_status_tick = 0.0
@@ -485,7 +497,7 @@ func tick(delta: float, player: Player, nav: Callable = Callable()) -> void:
 	_block_cooldown -= delta
 	_charge_cd -= delta
 	_blink_cd -= delta
-	if _status_key != 0 or poison_left > 0.0 or bleed_left > 0.0 or slow_left > 0.0 or stagger > 0.0 or stun_left > 0.0 or _stun_cd > 0.0:
+	if _status_key != 0 or poison_left > 0.0 or bleed_left > 0.0 or slow_left > 0.0 or stagger > 0.0 or stun_left > 0.0 or posture_stun > 0.0 or posture > 0.0 or _posture_cd > 0.0 or _stun_cd > 0.0:
 		_tick_status(delta)
 		if data == null:
 			return
@@ -580,11 +592,13 @@ func take_damage(amount: float, direction: Vector2 = Vector2.ZERO, is_crit: bool
 	if _brain != null and _brain.is_invulnerable():
 		return
 	amount *= 1.0 - data.armor
-	if stun_left > 0.0:
+	if stun_left > 0.0 or posture_stun > 0.0:
 		amount *= STUN_DAMAGE_MULT
 	if _brain != null:
 		amount *= _brain.damage_taken_mult()
 	hp -= amount
+	if hp > 0.0 and data.is_boss():
+		_add_posture(amount)
 	if data.blink_distance > 0.0 and _blink_cd <= 0.0 and hp > 0.0 and hp < max_hp * 0.8:
 		_blink_pending = true
 		_blink_cd = BLINK_COOLDOWN
@@ -601,6 +615,24 @@ func take_damage(amount: float, direction: Vector2 = Vector2.ZERO, is_crit: bool
 		if data.behavior == EnemyData.Behavior.EXPLODER:
 			exploded.emit(self, global_position, data.explode_radius, data.explode_damage * damage_mult)
 		died.emit(self)
+
+
+func _add_posture(amount: float) -> void:
+	if posture_stun > 0.0 or _posture_cd > 0.0:
+		return
+	posture += amount
+	if posture >= max_hp * POSTURE_FRACTION:
+		posture = 0.0
+		posture_stun = POSTURE_STUN
+		_posture_cd = POSTURE_COOLDOWN
+		_status_key = -1
+		posture_broken.emit(self)
+
+
+func posture_fraction() -> float:
+	if posture_stun > 0.0:
+		return 1.0
+	return clampf(posture / maxf(max_hp * POSTURE_FRACTION, 1.0), 0.0, 1.0)
 
 
 ## Удар ближнего боя отнимает выдержку. force_stun — финишер комбо, тяжёлый удар и парирование оглушают сразу.
@@ -676,6 +708,11 @@ func _tick_status(delta: float) -> void:
 	elif stagger > 0.0:
 		stagger = maxf(stagger - STAGGER_DECAY * delta, 0.0)
 	_stun_cd = maxf(_stun_cd - delta, 0.0)
+	if data != null and data.is_boss():
+		posture_stun = maxf(posture_stun - delta, 0.0)
+		_posture_cd = maxf(_posture_cd - delta, 0.0)
+		if posture_stun <= 0.0 and posture > 0.0:
+			posture = maxf(posture - max_hp * POSTURE_DECAY * delta, 0.0)
 	_status_tick -= delta
 	if _status_tick <= 0.0:
 		_status_tick = STATUS_TICK
@@ -685,7 +722,7 @@ func _tick_status(delta: float) -> void:
 			_take_dot(bleed_dps * STATUS_TICK, "burn" if bleed_is_burn else "bleed")
 		if data == null:
 			return
-	var key := (1 if poison_stacks > 0 else 0) | (2 if bleed_left > 0.0 else 0) | (4 if slow_left > 0.0 else 0) | (8 if stun_left > 0.0 else 0)
+	var key := (1 if poison_stacks > 0 else 0) | (2 if bleed_left > 0.0 else 0) | (4 if slow_left > 0.0 else 0) | (8 if stun_left > 0.0 or posture_stun > 0.0 else 0)
 	if key != _status_key:
 		_status_key = key
 		var tint := data.sprite_modulate

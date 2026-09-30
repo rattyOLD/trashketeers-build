@@ -16,6 +16,8 @@ const FLASH_TIME := 0.5
 var winged := false
 var title := ""
 var value := 1.0
+var posture := -1.0
+var broken := false
 
 var _fury := false
 var _flash := 0.0
@@ -24,7 +26,7 @@ var _font: Font
 
 
 func _init() -> void:
-	custom_minimum_size = Vector2(560, 64)
+	custom_minimum_size = Vector2(560, 84)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_font = ThemeDB.fallback_font
 
@@ -34,6 +36,8 @@ func configure(boss_title: String, is_winged: bool) -> void:
 	winged = is_winged
 	_fury = false
 	value = 1.0
+	posture = -1.0
+	broken = false
 	queue_redraw()
 
 
@@ -44,6 +48,15 @@ func set_title(boss_title: String) -> void:
 
 func set_health(hp: float, max_hp: float) -> void:
 	value = clampf(hp / maxf(max_hp, 1.0), 0.0, 1.0)
+	queue_redraw()
+
+
+## Выдержка босса: -1 — у этого босса шкалы нет (Хладгор), иначе доля 0…1; broken — босс оглушён.
+func set_posture(fraction: float, is_broken: bool) -> void:
+	if is_equal_approx(fraction, posture) and is_broken == broken:
+		return
+	posture = fraction
+	broken = is_broken
 	queue_redraw()
 
 
@@ -80,6 +93,15 @@ func _draw() -> void:
 	var fill := Rect2(bar_rect.position, Vector2(bar_rect.size.x * value, bar_rect.size.y))
 	draw_rect(fill, fill_color)
 	draw_rect(Rect2(fill.position, Vector2(fill.size.x, 5.0)), Color(1, 1, 1, 0.35))
+	if posture >= 0.0:
+		var pr := Rect2(bar_rect.position + Vector2(bar_rect.size.x * 0.15, bar_rect.size.y + 9.0), Vector2(bar_rect.size.x * 0.7, 9.0))
+		draw_rect(pr.grow(3.0), OUTLINE)
+		draw_rect(pr, Color("#140f24"))
+		var pcolor := Color("#ffe27a") if broken else Color("#5cf3ff").lerp(Color("#ffffff"), posture * 0.6)
+		draw_rect(Rect2(pr.position, Vector2(pr.size.x * posture, pr.size.y)), pcolor)
+		if broken:
+			draw_string_outline(_font, Vector2(0, pr.end.y + 22.0), "ОГЛУШЁН", HORIZONTAL_ALIGNMENT_CENTER, size.x, 20, 6, OUTLINE)
+			draw_string(_font, Vector2(0, pr.end.y + 22.0), "ОГЛУШЁН", HORIZONTAL_ALIGNMENT_CENTER, size.x, 20, Color("#ffe27a"))
 	if _flash > 0.0:
 		draw_rect(bar_rect.grow(6.0), Color(1, 1, 1, _flash / FLASH_TIME * 0.9))
 

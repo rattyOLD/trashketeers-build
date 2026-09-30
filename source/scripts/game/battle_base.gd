@@ -45,6 +45,7 @@ var _context_timer := 0.0
 var _spikes_sent := 0
 static var _perfs_sent := 0
 const LANDSCAPE_ZOOM := 1.3
+var _aim_touch := -1
 var _hist_timer := 0.0
 var _shot_timer := 20.0
 var _fps_hist: Array[int] = []
@@ -319,10 +320,62 @@ func _physics_process(delta: float) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if _handle_aim_input(event):
+		return
 	if event.is_action_pressed(&"dash"):
 		_request_dash()
 	elif event.is_action_pressed(&"ui_cancel") and not finished:
 		_open_pause()
+
+
+## Ручной прицел: палец (или левая кнопка мыши) вне джойстика и кнопок задаёт направление стрельбы, отпустил — снова автоприцел.
+func _handle_aim_input(event: InputEvent) -> bool:
+	if player == null or hud == null or player.is_dead:
+		return false
+	var point := Vector2.ZERO
+	var pressed := false
+	var released := false
+	var moving := false
+	if event is InputEventScreenTouch:
+		var touch := event as InputEventScreenTouch
+		if hud.joystick.owns(touch.index) or (touch.pressed and hud.joystick.in_zone(touch.position)):
+			return false
+		if touch.pressed:
+			pressed = true
+			_aim_touch = touch.index
+		elif touch.index == _aim_touch:
+			released = true
+		else:
+			return false
+		point = touch.position
+	elif event is InputEventScreenDrag:
+		var drag := event as InputEventScreenDrag
+		if drag.index != _aim_touch:
+			return false
+		moving = true
+		point = drag.position
+	elif event is InputEventMouseButton and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT and not Platform.is_touch():
+		var click := event as InputEventMouseButton
+		point = click.position
+		pressed = click.pressed
+		released = not click.pressed
+		_aim_touch = -2 if pressed else -1
+	elif event is InputEventMouseMotion and _aim_touch == -2:
+		moving = true
+		point = (event as InputEventMouseMotion).position
+	else:
+		return false
+	if released:
+		_aim_touch = -1
+		player.weapon_controller.manual_aim = Vector2.ZERO
+		return true
+	if pressed or moving:
+		var from := get_viewport().get_canvas_transform() * player.global_position
+		var offset := point - from
+		if offset.length() > 24.0:
+			player.weapon_controller.manual_aim = offset.normalized()
+		return true
+	return false
 
 
 func add_shake(amount: float) -> void:

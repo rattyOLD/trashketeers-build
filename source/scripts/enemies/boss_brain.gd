@@ -195,6 +195,8 @@ func _tempo() -> float:
 
 ## Желаемая скорость босса на этот кадр.
 func tick(player: Player, dir: Vector2, path_dir: Vector2, dist: float, delta: float) -> Vector2:
+	if enemy.posture_stun > 0.0:
+		return Vector2.ZERO
 	state_time += delta
 	_flash_clip = maxf(_flash_clip - delta, 0.0)
 	windup = move_toward(windup, 0.0, delta * 2.0)

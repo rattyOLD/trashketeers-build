@@ -30,6 +30,8 @@ var active_slot := 0
 var slot_count := 2
 var weapon: WeaponData
 var aim_direction := Vector2.RIGHT
+## Ручной прицел: направление от пальца/мыши, пока он зажат; ZERO — работает автоприцел.
+var manual_aim := Vector2.ZERO
 var has_target := false
 ## Callable(direction: Vector2) -> Vector2: глобальная точка дула нарисованного ствола.
 var muzzle_provider: Callable
@@ -143,12 +145,17 @@ func _physics_process(delta: float) -> void:
 		_melee_step(delta)
 		return
 
-	has_target = _target != null
+	var manual := manual_aim != Vector2.ZERO
+	has_target = _target != null or manual
 	if not has_target:
 		_spin_up = maxf(_spin_up - delta * 0.8, 0.0)
 		return
 
-	var aim_point: Vector2 = _target.call("get_aim_point") if _target.has_method("get_aim_point") else _target.global_position
+	var aim_point: Vector2
+	if manual:
+		aim_point = global_position + manual_aim * minf(weapon.max_distance, 520.0)
+	else:
+		aim_point = _target.call("get_aim_point") if _target.has_method("get_aim_point") else _target.global_position
 	aim_direction = global_position.direction_to(aim_point)
 	if _cooldown > 0.0:
 		return

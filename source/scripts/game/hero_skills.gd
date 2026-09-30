@@ -95,6 +95,16 @@ func _enemies_in(center: Vector2, radius: float) -> Array[Enemy]:
 	return found
 
 
+## Направление рывка-навыка: куда игрок ведёт джойстик; без него — ручной прицел или взгляд, автоприцел не перехватывает управление.
+func _steer_dir() -> Vector2:
+	if _player.move_input.length() > 0.2:
+		return _player.move_input.normalized()
+	var wc := _player.weapon_controller
+	if wc.manual_aim != Vector2.ZERO:
+		return wc.manual_aim
+	return wc.aim_direction.normalized() if wc.aim_direction.length() > 0.1 else Vector2.RIGHT
+
+
 func _aim() -> Vector2:
 	var dir := _player.weapon_controller.aim_direction
 	if _player.weapon_controller.has_target and dir.length() > 0.1:
@@ -153,7 +163,7 @@ func _assassin_hour() -> void:
 
 
 func _rail_dash() -> void:
-	var dir := _aim()
+	var dir := _steer_dir()
 	var start := _player.global_position
 	var color := Color("#5cf3ff")
 	_player.grant_invuln(1.0)
