@@ -210,6 +210,10 @@ func _build_top_bar() -> Control:
 
 	_nuts_label = _add_capsule(row, ArenaProp.texture_of("res://assets/ui/hub/coin.png"), "coins")
 	_dust_label = _add_capsule(row, ArenaProp.texture_of("res://assets/ui/hub/neonite.png"), "gems")
+	if Platform.fullscreen_supported():
+		var full := MenuWidgets.FullscreenButton.new()
+		full.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(full)
 	var gear := MenuWidgets.GearButton.new()
 	gear.custom_minimum_size = Vector2(64, 64)
 	gear.size_flags_vertical = Control.SIZE_SHRINK_CENTER

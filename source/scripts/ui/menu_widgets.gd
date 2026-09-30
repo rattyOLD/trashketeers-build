@@ -103,6 +103,37 @@ class GearButton:
 		draw_circle(c, 6.0, Color("#3a3552"))
 
 
+## Кнопка «на весь экран»: четыре уголка, при включённом режиме уголки смотрят внутрь.
+class FullscreenButton:
+	extends Button
+
+	func _init() -> void:
+		custom_minimum_size = Vector2(64, 64)
+		focus_mode = Control.FOCUS_NONE
+		flat = true
+		pressed.connect(func() -> void:
+			SoundManager.play(&"ui_click")
+			Platform.set_fullscreen(not Platform.is_fullscreen())
+			get_tree().create_timer(0.4).timeout.connect(queue_redraw))
+
+	func _draw() -> void:
+		var inside := Platform.is_fullscreen()
+		var box := Rect2(size * 0.22, size * 0.56)
+		var arm := 11.0
+		draw_rect(Rect2(Vector2.ZERO, size).grow(-4.0), Color(0.08, 0.06, 0.16, 0.85), true)
+		draw_rect(Rect2(Vector2.ZERO, size).grow(-4.0), Color("#7b6ad8"), false, 3.0)
+		for corner in 4:
+			var origin := box.position + Vector2(box.size.x * (corner % 2), box.size.y * (corner / 2))
+			var sx := 1.0 if corner % 2 == 0 else -1.0
+			var sy := 1.0 if corner / 2 == 0 else -1.0
+			if inside:
+				sx = -sx
+				sy = -sy
+				origin -= Vector2(sx, sy) * arm
+			draw_line(origin, origin + Vector2(sx * arm, 0), Color("#ffe27a"), 4.0)
+			draw_line(origin, origin + Vector2(0, sy * arm), Color("#ffe27a"), 4.0)
+
+
 ## Тумблер в виде енотовой лапки: включён — светлая лапка с неоновыми подушечками.
 class PawToggle:
 	extends Button

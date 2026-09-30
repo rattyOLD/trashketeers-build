@@ -167,11 +167,20 @@ func fullscreen_supported() -> bool:
 	return _js_bool("!!(document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen)")
 
 
+## В вебе запрос идёт напрямую из обработчика тапа: браузер разрешает полноэкранный режим только по жесту пользователя.
 func set_fullscreen(on: bool) -> void:
+	if is_web:
+		if on:
+			_js("var e = document.documentElement; var f = e.requestFullscreen || e.webkitRequestFullscreen; if (f) { var r = f.call(e, {navigationUI: 'hide'}); if (r && r.catch) r.catch(function () {}); }")
+		else:
+			_js("var f = document.exitFullscreen || document.webkitExitFullscreen; if (f) f.call(document);")
+		return
 	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if on else DisplayServer.WINDOW_MODE_WINDOWED)
 
 
 func is_fullscreen() -> bool:
+	if is_web:
+		return _js_bool("return !!(document.fullscreenElement || document.webkitFullscreenElement);")
 	return DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
 
 
