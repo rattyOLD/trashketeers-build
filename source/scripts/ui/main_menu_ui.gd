@@ -312,6 +312,9 @@ func _make_side_button(key: String, icon_path: String, caption_text: String, rig
 	dot.position = Vector2(px - 26.0, 0)
 	dot.visible = false
 	button.add_child(dot)
+	if key == "news":
+		caption.add_theme_font_size_override("font_size", 13 if px >= 90.0 else 9)
+		caption.visible = true
 	_side_buttons[key] = {"caption": caption, "dot": dot, "icon": icon}
 	return button
 
@@ -343,6 +346,9 @@ func _set_side_alert(key: String, alert: bool, caption_text: String = "") -> voi
 	(entry["dot"] as Control).visible = alert
 	var caption := entry["caption"] as Label
 	if caption == null or key == "pass" or key == "vip":
+		return
+	if key == "news":
+		caption.visible = true
 		return
 	caption.visible = alert
 	if alert and not caption_text.is_empty():
@@ -384,14 +390,14 @@ func _build_stage() -> Control:
 	if Orient.portrait:
 		stage.add_child(_make_side_button("gift", "res://assets/ui/hub/daily_gift.png", "ПОДАРОК", false, 8.0, func() -> void: _daily.open()))
 		stage.add_child(_make_side_button("chest", "res://assets/ui/hub/chest_free.png", "БЕСПЛАТНО", false, 132.0, func() -> void: _chests.open()))
-		stage.add_child(_make_side_button("news", "res://assets/ui/hub/news.png", "НОВОЕ", true, 8.0, func() -> void: _changelog.open()))
+		stage.add_child(_make_side_button("news", "res://assets/ui/hub/news.png", "ОБНОВЛЕНИЯ", true, 8.0, func() -> void: _changelog.open()))
 		stage.add_child(_make_side_button("pass", "res://assets/ui/hub/pass.png", "ПРОПУСК", true, 124.0, func() -> void: _pass.open()))
 		stage.add_child(_make_side_button("vip", "res://assets/ui/hub/vip.png", "VIP", true, 224.0, func() -> void: _vip.open()))
 	else:
 		var row := [
 			["gift", "res://assets/ui/hub/daily_gift.png", "ПОДАРОК", func() -> void: _daily.open()],
 			["chest", "res://assets/ui/hub/chest_free.png", "БЕСПЛАТНО", func() -> void: _chests.open()],
-			["news", "res://assets/ui/hub/news.png", "НОВОЕ", func() -> void: _changelog.open()],
+			["news", "res://assets/ui/hub/news.png", "ОБНОВЛЕНИЯ", func() -> void: _changelog.open()],
 			["pass", "res://assets/ui/hub/pass.png", "ПРОПУСК", func() -> void: _pass.open()],
 			["vip", "res://assets/ui/hub/vip.png", "VIP", func() -> void: _vip.open()],
 		]
