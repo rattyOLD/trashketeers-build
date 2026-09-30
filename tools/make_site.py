@@ -46,6 +46,7 @@ with open(os.path.join(build, "index.wasm"), "rb") as src:
 shutil.copy("/home/claude/raccoon/web/audio_unlock.js", os.path.join(site, "audio_unlock.js"))
 shutil.copy("/home/claude/raccoon/web/render_scale.js", os.path.join(site, "render_scale.js"))
 page = open(os.path.join(scratch, "site_template.html"), encoding="utf-8").read()
+assert \'id="rotate"\' in page, "в шаблоне пропало предупреждение о повороте экрана"
 page = page.replace("__WASM_PARTS__", write_parts(raw, "raccoon.core", 24 * 1024 * 1024))
 page = page.replace("__PCK_PARTS__", write_parts(pck_raw, "raccoon.pack", 12 * 1024 * 1024))
 page = page.replace("__PCK_SIZE__", str(len(pck_raw)))

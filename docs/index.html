@@ -188,12 +188,90 @@ html, body {
 }
 #crash button.alt { background: #3a2d60; }
 #retry:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+#rotate {
+	position: fixed;
+	inset: 0;
+	z-index: 8;
+	display: none;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 26px;
+	padding: 24px;
+	text-align: center;
+	background:
+		radial-gradient(90% 50% at 50% 40%, rgba(0, 245, 255, 0.16), transparent 65%),
+		radial-gradient(120% 60% at 50% 110%, rgba(255, 46, 166, 0.28), transparent 60%),
+		rgba(13, 10, 28, 0.97);
+	font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (orientation: portrait) and (pointer: coarse) {
+	#rotate { display: flex; }
+}
+#rotate .phone {
+	position: relative;
+	width: 74px;
+	height: 128px;
+	border-radius: 16px;
+	border: 4px solid var(--cyan);
+	box-shadow: 0 0 22px rgba(0, 245, 255, 0.55), inset 0 0 14px rgba(0, 245, 255, 0.25);
+	background: rgba(0, 245, 255, 0.06);
+	animation: turn 2.6s cubic-bezier(0.6, 0, 0.3, 1) infinite;
+}
+#rotate .phone::before {
+	content: "";
+	position: absolute;
+	top: 8px;
+	left: 50%;
+	width: 22px;
+	height: 5px;
+	margin-left: -11px;
+	border-radius: 3px;
+	background: var(--cyan);
+	opacity: 0.8;
+}
+#rotate .phone::after {
+	content: "";
+	position: absolute;
+	left: 50%;
+	bottom: 14px;
+	width: 26px;
+	height: 26px;
+	margin-left: -13px;
+	border-radius: 50%;
+	background: radial-gradient(circle, var(--pink) 30%, transparent 70%);
+	animation: pulse 1.3s ease-in-out infinite;
+}
+@keyframes turn {
+	0%, 18% { transform: rotate(0deg); }
+	52%, 82% { transform: rotate(-90deg); }
+	100% { transform: rotate(0deg); }
+}
+@keyframes pulse { 0%, 100% { opacity: 0.45; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.15); } }
+#rotate h2 {
+	margin: 0;
+	font-family: "Russo One", "Arial Black", Impact, sans-serif;
+	font-weight: 400;
+	font-size: clamp(26px, 8vw, 40px);
+	color: #fff;
+	text-shadow: 0 0 6px var(--pink), 0 0 22px rgba(255, 46, 166, 0.7);
+}
+#rotate p { margin: 0; max-width: 300px; font-size: 15px; line-height: 1.4; color: var(--muted); }
+#rotate p b { color: var(--cyan); font-weight: 600; }
 @media (prefers-reduced-motion: reduce) {
+	#rotate .phone, #rotate .phone::after { animation: none; }
 	#boot, .bar i { transition: none; }
 }
 </style>
 
 <canvas id="canvas" tabindex="0">Браузер не поддерживает canvas.</canvas>
+
+<div id="rotate">
+	<div class="phone"></div>
+	<h2>Поверни телефон</h2>
+	<p>Игра создана для <b>горизонтального</b> режима. Включи автоповорот экрана и переверни телефон.</p>
+	<p>Rotate your phone to landscape to play.</p>
+</div>
 
 <div id="boot">
 	<p class="tag">Неоновая Свалка</p>
@@ -228,7 +306,7 @@ html, body {
 	// index.wasm / index.pck и отдаём ему уже скачанные и распакованные байты.
 	const FILES = {
 		wasm: { parts: [{url:"raccoon.core.0.wasm",bytes:5221065},{url:"raccoon.core.1.wasm",bytes:4165384}] },
-		pck: { parts: [{url:"raccoon.pack.0.wasm",bytes:12013901},{url:"raccoon.pack.1.wasm",bytes:4755832}] },
+		pck: { parts: [{url:"raccoon.pack.0.wasm",bytes:12013890},{url:"raccoon.pack.1.wasm",bytes:4755820}] },
 	};
 	const GODOT_CONFIG = {
 		args: [],
@@ -236,7 +314,7 @@ html, body {
 		ensureCrossOriginIsolationHeaders: false,
 		executable: 'index',
 		experimentalVK: false,
-		fileSizes: { 'index.pck': 17598128, 'index.wasm': 43699190 },
+		fileSizes: { 'index.pck': 17598192, 'index.wasm': 43699190 },
 		focusCanvas: true,
 		gdextensionLibs: [],
 		onPrint: function () {
