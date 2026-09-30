@@ -6,7 +6,7 @@ extends Node
 ## внезапно исчезнувший враг — это баг для игрока, поэтому спавн просто пропускается.
 
 signal enemy_died(enemy: Enemy)
-signal enemy_damaged(enemy: Enemy, amount: float, is_crit: bool)
+signal enemy_damaged(enemy: Enemy, amount: float, is_crit: bool, kind: StringName)
 signal enemy_exploded(enemy: Enemy, at: Vector2, radius: float, damage: float)
 signal enemy_blocked(enemy: Enemy, at: Vector2)
 signal enemy_blinked(enemy: Enemy, from: Vector2, to: Vector2)
@@ -137,8 +137,8 @@ func get_active() -> Array[Enemy]:
 	return _active
 
 
-func _on_enemy_damaged(enemy: Enemy, amount: float, is_crit: bool) -> void:
-	enemy_damaged.emit(enemy, amount, is_crit)
+func _on_enemy_damaged(enemy: Enemy, amount: float, is_crit: bool, kind: StringName) -> void:
+	enemy_damaged.emit(enemy, amount, is_crit, kind)
 
 
 ## Взрыв обрабатывается отложенно: он наносит урон соседям, а мы можем быть внутри

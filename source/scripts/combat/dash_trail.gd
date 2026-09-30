@@ -157,7 +157,7 @@ func _physics_process(delta: float) -> void:
 			if _kind[i] == KIND_POISON:
 				enemy.add_poison((6.0 + 5.0 * poison_stacks) * power, 3.0, 6)
 			else:
-				enemy.add_bleed((12.0 + 9.0 * fire_stacks) * power, 2.0)
+				enemy.add_bleed((12.0 + 9.0 * fire_stacks) * power, 2.0, true)
 			break
 
 

@@ -193,7 +193,7 @@ func _on_bullet_detonated(bullet: Bullet) -> void:
 ## Взрыв по площади: урон спадает от 100% в центре до 50% на краю, всех отбрасывает наружу.
 ## Взрыв игрока бьёт крыс и разрушаемые объекты; взрыв Бомбо-Крысы — Енота и самих крыс
 ## (цепные реакции — приятный бонус игроку). Вызывается вне физических сигналов.
-func explode(at: Vector2, radius: float, damage: float, team: Bullet.Team, color: Color, knockback: float = 1.0) -> void:
+func explode(at: Vector2, radius: float, damage: float, team: Bullet.Team, color: Color, knockback: float = 1.0, kind: StringName = &"blast") -> void:
 	if radius <= 0.0 or not is_inside_tree():
 		return
 	var query := _get_blast_query()
@@ -211,7 +211,9 @@ func explode(at: Vector2, radius: float, damage: float, team: Bullet.Team, color
 		var offset := target.global_position - at
 		var falloff := lerpf(1.0, 0.5, clampf(offset.length() / radius, 0.0, 1.0))
 		var push := offset.normalized() * EXPLOSION_KNOCKBACK * knockback if offset.length_squared() > 1.0 else Vector2.ZERO
+		Enemy.next_kind = kind
 		target.call("take_damage", damage * falloff, push, false)
+		Enemy.next_kind = &""
 		if target is Player:
 			(target as Player).apply_knockback(push * 260.0)
 

@@ -277,7 +277,9 @@ func _apply_damage(target: Node2D) -> void:
 		amount *= 1.0 + weapon.pierce_ramp * pierced
 		pierced += 1
 	if target is Enemy:
+		Enemy.next_kind = &"fire" if weapon.burn > 0.0 else &""
 		(target as Enemy).take_bullet(amount, velocity.normalized(), weapon.knockback, last_hit_crit, weapon.piercing)
+		Enemy.next_kind = &""
 	elif target.has_method("take_damage"):
 		target.call("take_damage", amount, velocity.normalized() * weapon.knockback, last_hit_crit)
 	target_hit.emit(self, target)

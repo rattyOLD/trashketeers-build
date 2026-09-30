@@ -116,9 +116,9 @@ func _fire_ring() -> void:
 			if is_instance_valid(_player):
 				_fx.ring(at, color.lerp(Color("#ffe27a"), 0.3 * k), 260.0 + 60.0 * k))
 	_fx.burst(at, Color("#ffb347"), 38, 460.0, 5.0)
-	BulletPool.explode(at, 300.0, 70.0 * _power(), Bullet.Team.PLAYER, color, 1.6)
+	BulletPool.explode(at, 300.0, 70.0 * _power(), Bullet.Team.PLAYER, color, 1.6, &"fire")
 	for enemy in _enemies_in(at, 320.0):
-		enemy.add_bleed(16.0 * _power(), 4.0)
+		enemy.add_bleed(16.0 * _power(), 4.0, true)
 	_player.grant_invuln(0.25)
 
 
@@ -161,7 +161,7 @@ func _rail_dash() -> void:
 	for step in range(1, 8):
 		var at := start + dir * (70.0 * step)
 		_later(0.03 * step, func() -> void:
-			BulletPool.explode(at, 95.0, 95.0 * _power(), Bullet.Team.PLAYER, color, 0.8)
+			BulletPool.explode(at, 95.0, 95.0 * _power(), Bullet.Team.PLAYER, color, 0.8, &"shock")
 			_fx.burst(at, color, 6, 240.0, 3.5))
 	_fx.ring(start, color, 120.0)
 

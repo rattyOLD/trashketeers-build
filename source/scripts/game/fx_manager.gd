@@ -294,12 +294,34 @@ func ring(at: Vector2, color: Color, radius: float) -> void:
 
 
 ## Цифра урона: обычная — светлая, крит — крупнее, красно-оранжевая, с «!».
-func number(at: Vector2, value: float, color: Color = DAMAGE_COLOR, is_crit: bool = false) -> void:
+func number(at: Vector2, value: float, color: Color = DAMAGE_COLOR, is_crit: bool = false, size_scale: float = 1.0) -> void:
 	var text := str(int(round(value)))
 	if is_crit:
-		_text(at + Vector2(randf_range(-14, 14), -26), text + "!", CRIT_COLOR, 40.0)
+		_text(at + Vector2(randf_range(-14, 14), -26), text + "!", CRIT_COLOR, 40.0 * maxf(size_scale, 1.0))
 	else:
-		_text(at + Vector2(randf_range(-12, 12), -20), text, color, 28.0)
+		_text(at + Vector2(randf_range(-12, 12), -20), text, color, 28.0 * size_scale)
+
+
+## Цвет цифры по типу урона: огонь — оранжевый, шок — голубой, яд — зелёный, взрыв — золотой.
+static func kind_color(kind: StringName) -> Color:
+	match kind:
+		&"fire", &"burn":
+			return Color("#ff8a1f")
+		&"shock":
+			return Color("#35e6ff")
+		&"poison":
+			return Color("#7cff3d")
+		&"bleed":
+			return Color("#ff3b5c")
+		&"blast":
+			return Color("#ffd23f")
+		&"ice":
+			return Color("#9ad8ff")
+	return DAMAGE_COLOR
+
+
+static func kind_scale(kind: StringName) -> float:
+	return 1.35 if kind == &"blast" else 1.0
 
 
 func popup(at: Vector2, text: String, color: Color, font_size: float = 34.0) -> void:

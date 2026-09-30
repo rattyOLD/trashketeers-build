@@ -18,7 +18,7 @@ extends CharacterBody2D
 ## опущен во время атаки — обходи сбоку, бей после замаха.
 
 signal died(enemy: Enemy)
-signal damaged(enemy: Enemy, amount: float, is_crit: bool)
+signal damaged(enemy: Enemy, amount: float, is_crit: bool, kind: StringName)
 signal exploded(enemy: Enemy, at: Vector2, radius: float, damage: float)
 signal blocked(enemy: Enemy, at: Vector2)
 signal blinked(enemy: Enemy, from: Vector2, to: Vector2)
@@ -119,6 +119,7 @@ var poison_left := 0.0
 var poison_dps := 0.0
 var bleed_left := 0.0
 var bleed_dps := 0.0
+var bleed_is_burn := false
 var slow_left := 0.0
 var slow_amount := 0.0
 ## Шкала «выдержки» (ближний бой): на пороге враг оглушён и получает ×1.5 урона.
@@ -129,6 +130,8 @@ var _status_tick := 0.0
 var _status_key := 0
 ## Приёмник урона от статусов (обновляет цифры, лечение вампиризмом, полоску босса).
 static var status_sink: Callable
+## Тип урона следующего take_damage (fire, shock, poison, blast, ...): выставляет источник урона, враг сбрасывает.
+static var next_kind: StringName = &""
 ## Общий множитель скорости крыс (набирается с волнами и включается на кемперов).
 static var global_speed_mult := 1.0
 var _pop := 0.0
@@ -569,6 +572,8 @@ func take_bullet(amount: float, direction: Vector2, knockback: float, is_crit: b
 
 
 func take_damage(amount: float, direction: Vector2 = Vector2.ZERO, is_crit: bool = false) -> void:
+	var kind := next_kind
+	next_kind = &""
 	if not is_alive():
 		return
 	if _brain != null and _brain.is_invulnerable():
@@ -590,7 +595,7 @@ func take_damage(amount: float, direction: Vector2 = Vector2.ZERO, is_crit: bool
 	if _framed:
 		_hit_variant = randi() % maxi(FrameDB.clip_length(_sprite.frame_sheet, "hit"), 1)
 	_knockback += direction * KNOCKBACK_FORCE * (1.0 - data.knockback_resist)
-	damaged.emit(self, amount, is_crit)
+	damaged.emit(self, amount, is_crit, kind)
 	if hp <= 0.0:
 		if data.behavior == EnemyData.Behavior.EXPLODER:
 			exploded.emit(self, global_position, data.explode_radius, data.explode_damage * damage_mult)
@@ -640,7 +645,8 @@ func add_poison(dps_per_stack: float, duration: float, max_stacks: int) -> void:
 	poison_left = maxf(poison_left, duration)
 
 
-func add_bleed(dps: float, duration: float) -> void:
+func add_bleed(dps: float, duration: float, burn: bool = false) -> void:
+	bleed_is_burn = burn
 	bleed_dps = maxf(bleed_dps, dps)
 	bleed_left = maxf(bleed_left, duration)
 
@@ -675,7 +681,7 @@ func _tick_status(delta: float) -> void:
 		if poison_stacks > 0:
 			_take_dot(poison_stacks * poison_dps * STATUS_TICK, "poison")
 		if is_alive() and bleed_left > 0.0:
-			_take_dot(bleed_dps * STATUS_TICK, "bleed")
+			_take_dot(bleed_dps * STATUS_TICK, "burn" if bleed_is_burn else "bleed")
 		if data == null:
 			return
 	var key := (1 if poison_stacks > 0 else 0) | (2 if bleed_left > 0.0 else 0) | (4 if slow_left > 0.0 else 0) | (8 if stun_left > 0.0 else 0)

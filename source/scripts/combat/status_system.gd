@@ -127,7 +127,7 @@ func on_player_hit(bullet: Bullet, enemy: Enemy) -> void:
 	if burn_chance > 0.0 and randf() < burn_chance:
 		ignite += BURN_CHANCE_RATIO
 	if ignite > 0.0:
-		enemy.add_bleed(damage * ignite * p, BURN_DURATION * (1.0 + 0.25 * (p - 1.0)))
+		enemy.add_bleed(damage * ignite * p, BURN_DURATION * (1.0 + 0.25 * (p - 1.0)), true)
 		if randf() < 0.12:
 			fx.burst(at, COLOR_BLAST, 2, 120.0, 3.0)
 
@@ -214,13 +214,15 @@ func _chain(origin: Enemy, damage: float) -> void:
 				amount *= 2.0
 			target.add_slow(SLOW_AMOUNT, 1.6 * power())
 		fx.burst(target.get_aim_point(), COLOR_SHOCK, 5, 200.0, 3.0)
+		Enemy.next_kind = &"ice" if freeze else &"shock"
 		target.take_damage(amount, Vector2.ZERO, false)
+		Enemy.next_kind = &""
 	_hit_buffer.clear()
 
 
 ## Состояние нанесло урон: цифры, пузырьки, лечение вампиризмом от яда (эволюция).
 func on_status_damage(enemy: Enemy, amount: float, kind: String) -> void:
-	var color := COLOR_POISON if kind == "poison" else COLOR_BLEED
+	var color := COLOR_POISON if kind == "poison" else (COLOR_BLAST if kind == "burn" else COLOR_BLEED)
 	var at := enemy.get_aim_point()
 	if _number_budget >= 1.0:
 		_number_budget -= 1.0
@@ -265,5 +267,7 @@ func _toxic_cloud(at: Vector2) -> void:
 			continue
 		for i in 3:
 			candidate.add_poison(per_stack, POISON_DURATION * power(), POISON_MAX_STACKS)
+		Enemy.next_kind = &"poison"
 		candidate.take_damage(damage, (candidate.global_position - at).normalized() * 0.6, false)
+		Enemy.next_kind = &""
 	_blast_depth -= 1

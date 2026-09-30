@@ -446,10 +446,10 @@ func _on_enemy_status(enemy: Enemy, amount: float, kind: String) -> void:
 		hud.update_boss(maxf(enemy.hp, 0.0), enemy.max_hp)
 
 
-func _on_enemy_damaged(enemy: Enemy, amount: float, is_crit: bool) -> void:
+func _on_enemy_damaged(enemy: Enemy, amount: float, is_crit: bool, kind: StringName) -> void:
 	if _number_budget >= 1.0 or is_crit:
 		_number_budget -= 1.0
-		fx.number(enemy.get_aim_point() + Vector2(0, -enemy.data.radius * 1.6), amount, FxManager.DAMAGE_COLOR, is_crit)
+		fx.number(enemy.get_aim_point() + Vector2(0, -enemy.data.radius * 1.6), amount, FxManager.kind_color(kind), is_crit, FxManager.kind_scale(kind))
 	if is_crit:
 		SaveService.add_stat("crits", 1, false)
 	if enemy.data.is_boss():
