@@ -15,6 +15,8 @@ const HIST_MAX := 24
 const SHOT_STEP := 30.0
 const ADAPT_WINDOW := 5.0
 const ADAPT_FPS := 38.0
+const ADAPT_MAX := 4
+const ADAPT_HARD_FPS := 26.0
 const PERF_SAMPLE_FRAMES := 1500
 const SPIKE_MS := 140.0
 const MAX_SPIKE_REPORTS := 3
@@ -235,7 +237,7 @@ func _perf_context() -> String:
 ## Динамическое качество: если 5 секунд подряд средний FPS ниже порога — упрощаем эффекты, затем снижаем разрешение холста.
 ## Изменения действуют только в этом бою; настройки игрока не трогаем.
 func _adapt_quality(delta: float) -> void:
-	if _perf_age < 8.0 or _adapt_level >= 2:
+	if _perf_age < 8.0 or _adapt_level >= ADAPT_MAX:
 		return
 	_adapt_time += delta
 	_adapt_frames += 1
@@ -244,14 +246,20 @@ func _adapt_quality(delta: float) -> void:
 	var fps := _adapt_frames / _adapt_time
 	_adapt_time = 0.0
 	_adapt_frames = 0
-	if fps >= ADAPT_FPS:
+	if fps >= (ADAPT_FPS if _adapt_level < 2 else ADAPT_HARD_FPS):
 		return
 	_adapt_level += 1
-	if _adapt_level == 1:
-		_fx_scale = 0.5
-		SoftGlow.lite = true
-	else:
-		Platform.set_render_cap(1.0)
+	match _adapt_level:
+		1:
+			_fx_scale = 0.5
+			SoftGlow.lite = true
+		2:
+			Platform.set_render_cap(1.0)
+		3:
+			_fx_scale = 0.25
+			Engine.max_fps = 30
+		_:
+			Platform.set_render_cap(0.7)
 	Platform.note_event("adapt level %d at fps %.0f" % [_adapt_level, fps])
 	Platform.send_report("adapt", "level %d fps %.0f | %s" % [_adapt_level, fps, _perf_context()])
 

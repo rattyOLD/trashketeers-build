@@ -403,6 +403,22 @@ func share(text: String, url: String) -> String:
 	return "Ссылка скопирована"
 
 
+## Отправка картинки (PNG в base64): меню «Поделиться» с файлом, иначе скачивание. Вызывать из обработчика нажатия.
+func share_image(base64_png: String, file_name: String, text: String) -> String:
+	if not is_web or base64_png.is_empty():
+		return ""
+	var body := "var b = atob(%s); var a = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) a[i] = b.charCodeAt(i);" % JSON.stringify(base64_png)
+	body += " var f = new File([a], %s, {type: 'image/png'});" % JSON.stringify(file_name)
+	body += " if (navigator.canShare && navigator.canShare({files: [f]})) { navigator.share({files: [f], text: %s}).catch(function(){}); return 'share'; }" % JSON.stringify(text)
+	body += " var u = URL.createObjectURL(f); var l = document.createElement('a'); l.href = u; l.download = %s; document.body.appendChild(l); l.click(); document.body.removeChild(l); setTimeout(function(){ URL.revokeObjectURL(u); }, 4000); return 'save';" % JSON.stringify(file_name)
+	var mode: Variant = _js(body)
+	if mode == "share":
+		return "Выбери, куда отправить"
+	if mode == "save":
+		return "Визитка сохранена в загрузки"
+	return ""
+
+
 ## Нативная кнопка «Назад» Telegram в шапке; нажатие — сигнал back_pressed.
 func set_back_button(visible: bool) -> void:
 	if not is_telegram or visible == _back_visible:

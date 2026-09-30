@@ -25,7 +25,7 @@
 			get: function () {
 				var r = real();
 				var cap = window.__trash_dpr_cap || r;
-				return Math.max(1, Math.min(r, cap));
+				return Math.max(0.6, Math.min(r, cap));
 			}
 		});
 	} catch (e) {

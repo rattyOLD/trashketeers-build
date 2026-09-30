@@ -59,7 +59,7 @@ func reload() -> bool:
 func get_enemy(enemy_id: StringName) -> EnemyData:
 	var enemy: EnemyData = _enemies.get(enemy_id)
 	if enemy == null:
-		push_error("ContentDB: враг '%s' не найден" % enemy_id)
+		push_error("ContentDB: враг '%s' не найден | %s" % [enemy_id, Platform.last_context()])
 	return enemy
 
 

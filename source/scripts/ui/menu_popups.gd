@@ -105,6 +105,14 @@ class Settings:
 		var lite_hint := UiStyle.label("Меньше частиц, вспышек и цифр урона, без свечения. Для слабых телефонов.", 19, UiStyle.TEXT_DIM, 4)
 		lite_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		graphics.add_child(lite_hint)
+		var eco := MenuWidgets.PawToggle.new("Экономия заряда (30 FPS)", bool(SaveService.data.get("eco_fps", false)))
+		eco.toggled.connect(func(on: bool) -> void:
+			SaveService.set_flag("eco_fps", on)
+			SaveService.apply_quality())
+		graphics.add_child(eco)
+		var eco_hint := UiStyle.label("Телефон меньше греется и дольше держит заряд. Включи, если игра лагает или нагревает телефон.", 19, UiStyle.TEXT_DIM, 4)
+		eco_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		graphics.add_child(eco_hint)
 		_fps = MenuWidgets.PawToggle.new("Счётчик FPS", bool(SaveService.data["show_fps"]))
 		_fps.toggled.connect(func(on: bool) -> void: SaveService.set_flag("show_fps", on))
 		graphics.add_child(_fps)
@@ -704,6 +712,7 @@ class Profile:
 
 	signal achievements_requested
 	signal chronicle_requested
+	signal friends_requested
 
 	const ICON_DIR := "res://assets/ui/icons/"
 	const RANKS := [
@@ -752,6 +761,7 @@ class Profile:
 		list.add_child(grid)
 		list.add_child(_achievements_bar())
 		list.add_child(_chronicle_bar())
+		list.add_child(_friends_bar())
 		list.add_child(_section("Тестер и сохранение"))
 		list.add_child(_insider_block())
 
@@ -962,6 +972,25 @@ class Profile:
 		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 		head.add_child(title)
 		head.add_child(UiStyle.label("%d / %d" % [opened, ChroniclePopup.entries().size()], 28, UiStyle.NEON, 8))
+		panel.add_child(head)
+		return panel
+
+	func _friends_bar() -> Control:
+		var panel := PanelContainer.new()
+		panel.mouse_filter = Control.MOUSE_FILTER_STOP
+		panel.gui_input.connect(func(event: InputEvent) -> void:
+			var tapped: bool = (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT) or (event is InputEventScreenTouch and event.pressed)
+			if tapped:
+				SoundManager.play(&"ui_click")
+				friends_requested.emit())
+		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#2f2452"), Color(UiStyle.HOT, 0.7), 3, 16))
+		var head := HBoxContainer.new()
+		head.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var title := UiStyle.label("Друзья и визитка - открыть", 24, UiStyle.TEXT, 6)
+		title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		head.add_child(title)
+		head.add_child(UiStyle.label(str(SaveService.get_friends().size()), 28, UiStyle.HOT, 8))
 		panel.add_child(head)
 		return panel
 

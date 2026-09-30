@@ -191,6 +191,8 @@ func result_lines(victory: bool) -> PackedStringArray:
 	lines.append("Время: %s" % BattleBase.format_time(game.director.elapsed))
 	if victory:
 		lines.append("Ранг: %s" % rank())
+	elif not str(mission.get("fail_line", "")).is_empty():
+		lines.append(str(mission["fail_line"]))
 	return lines
 
 
@@ -209,6 +211,10 @@ func try_respawn() -> bool:
 	lives -= 1
 	lives_lost += 1
 	game.hud.show_banner("ЖИЗНЬ ПОТЕРЯНА · ОСТАЛОСЬ %d" % lives, UiStyle.DANGER, 1.6)
+	var quips: Array = mission.get("death_lines", [])
+	if not quips.is_empty():
+		var quip := str(quips[mini(lives_lost, quips.size()) - 1])
+		get_tree().create_timer(1.7, false).timeout.connect(func() -> void: game.hud.show_banner(quip, UiStyle.NEON, 2.6))
 	get_tree().create_timer(1.3, false).timeout.connect(func() -> void: game.story_respawn(checkpoint))
 	return true
 

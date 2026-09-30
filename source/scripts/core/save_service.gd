@@ -31,6 +31,9 @@ const DEFAULTS := {
 	"runs": 0,
 	"boss_kills": 0,
 	"story": {},
+	"friends": {},
+	"invite_used": "",
+	"invite_paid": [],
 	"raid_wins": 0,
 	"dragon_kills": 0,
 	"blueprints": [],
@@ -50,6 +53,7 @@ const DEFAULTS := {
 	"music_on": true,
 	"glow_on": true,
 	"fx_lite": false,
+	"eco_fps": false,
 	"minimap": true,
 	"show_fps": false,
 	"tips_off": false,
@@ -395,6 +399,7 @@ func set_quality(q: int) -> void:
 func apply_quality() -> void:
 	var caps := [1.25, 1.75, 2.5] if Platform.is_touch() else [1.25, 2.0, 3.0]
 	Platform.set_render_cap(caps[get_quality()])
+	Engine.max_fps = 30 if bool(data.get("eco_fps", false)) else 60
 
 
 func is_minimap_enabled() -> bool:
@@ -529,6 +534,107 @@ func claim_welcome_bonus() -> int:
 func mark_invite_sent() -> void:
 	data["invites_sent"] = int(data["invites_sent"]) + 1
 	save_data()
+
+
+# --- Друзья: визитки без сервера ---------------------------------------------------------------------
+
+const INVITE_PREFIX := "INV-"
+const INVITE_COINS := 300
+const INVITE_GEMS := 15
+const INVITE_PAID_MAX := 10
+const FRIENDS_MAX := 50
+
+
+func story_done_ids() -> Array:
+	var ids: Array = []
+	for mission_id in (data["story"] as Dictionary):
+		if story_done(str(mission_id)):
+			ids.append(str(mission_id))
+	ids.sort()
+	return ids
+
+
+func invite_code() -> String:
+	return INVITE_PREFIX + get_player_id()
+
+
+func card_info() -> Dictionary:
+	return {
+		"id": get_player_id(), "n": get_nickname(), "c": get_character_id(), "s": get_selected_skin(),
+		"lv": get_account_level(), "w": get_stat("best_wave"), "sh": story_shards(), "m": story_done_ids(),
+		"bk": int(data["boss_kills"]), "ins": get_insider(), "inv": str(data["invite_used"]),
+	}
+
+
+func card_code() -> String:
+	var raw := JSON.stringify(card_info()).to_utf8_buffer()
+	return "TRF1.%d.%s" % [raw.size(), Marshalls.raw_to_base64(raw.compress(FileAccess.COMPRESSION_DEFLATE))]
+
+
+func get_friends() -> Array:
+	var list: Array = (data["friends"] as Dictionary).values()
+	list.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a.get("added", 0)) > int(b.get("added", 0)))
+	return list
+
+
+func remove_friend(friend_id: String) -> void:
+	(data["friends"] as Dictionary).erase(friend_id)
+	save_data()
+
+
+## "ok", "bonus" (друг пришёл по твоему приглашению, награда выдана), "self", "bad".
+func add_friend(code: String) -> String:
+	var parts := code.strip_edges().split(".")
+	if parts.size() != 3 or parts[0] != "TRF1" or not parts[1].is_valid_int():
+		return "bad"
+	var packed := Marshalls.base64_to_raw(parts[2])
+	if packed.is_empty() or int(parts[1]) <= 0 or int(parts[1]) > 4096:
+		return "bad"
+	var raw := packed.decompress(int(parts[1]), FileAccess.COMPRESSION_DEFLATE)
+	var parsed: Variant = JSON.parse_string(raw.get_string_from_utf8()) if not raw.is_empty() else null
+	if typeof(parsed) != TYPE_DICTIONARY:
+		return "bad"
+	var card: Dictionary = parsed
+	var friend_id := str(card.get("id", "")).substr(0, 24)
+	if friend_id.is_empty():
+		return "bad"
+	if friend_id == get_player_id():
+		return "self"
+	var friends: Dictionary = data["friends"]
+	if not friends.has(friend_id) and friends.size() >= FRIENDS_MAX:
+		return "bad"
+	var clean := {
+		"id": friend_id, "n": str(card.get("n", "Енот")).substr(0, 16), "c": str(card.get("c", "")), "s": str(card.get("s", "classic")),
+		"lv": int(card.get("lv", 1)), "w": int(card.get("w", 0)), "sh": int(card.get("sh", 0)), "bk": int(card.get("bk", 0)),
+		"ins": int(card.get("ins", -1)), "m": card.get("m", []) if typeof(card.get("m", [])) == TYPE_ARRAY else [],
+		"added": int((friends.get(friend_id, {}) as Dictionary).get("added", Time.get_unix_time_from_system())),
+	}
+	friends[friend_id] = clean
+	var result := "ok"
+	var paid: Array = data["invite_paid"]
+	if str(card.get("inv", "")) == invite_code() and not paid.has(friend_id) and paid.size() < INVITE_PAID_MAX:
+		paid.append(friend_id)
+		add_coins(INVITE_COINS)
+		add_gems(INVITE_GEMS, false)
+		result = "bonus"
+	save_data()
+	return result
+
+
+## "ok", "used" (приглашение уже принято), "self", "bad".
+func use_invite(code: String) -> String:
+	var clean := code.strip_edges().to_upper()
+	if not clean.begins_with(INVITE_PREFIX) or clean.length() <= INVITE_PREFIX.length() or clean.length() > 32:
+		return "bad"
+	if not str(data["invite_used"]).is_empty():
+		return "used"
+	if clean == invite_code():
+		return "self"
+	data["invite_used"] = clean
+	add_coins(INVITE_COINS)
+	add_gems(INVITE_GEMS, false)
+	save_data()
+	return "ok"
 
 
 # --- Ник ------------------------------------------------------------------------------------------

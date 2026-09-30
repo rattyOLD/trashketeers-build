@@ -52,6 +52,7 @@ var _armory: MenuPopups.Armory
 var _upgrades: MenuPopups.Upgrades
 var _achievements: MenuPopups.Achievements
 var _chronicle: ChroniclePopup
+var _friends: FriendsPopup
 var _backdrop: MenuBackdrop
 ## Кнопка «Прокачаться» на экране смерти: хаб сразу открывает Прокачку.
 static var open_upgrades_next := false
@@ -97,6 +98,10 @@ func _build() -> void:
 	_profile.chronicle_requested.connect(func() -> void:
 		_profile.close()
 		_chronicle.open())
+	_friends = FriendsPopup.new()
+	_profile.friends_requested.connect(func() -> void:
+		_profile.close()
+		_friends.open())
 	_tester = TesterPopup.new()
 	_chests = ChestsPopup.new()
 	_chests.changed.connect(_refresh)
@@ -115,7 +120,7 @@ func _build() -> void:
 	_editor = ControlEditor.new()
 	add_child(_editor)
 	_settings.editor_requested.connect(func() -> void: _editor.open())
-	for popup in [_settings, _shop, _skins, _armory, _upgrades, _achievements, _profile, _chronicle, _tester, _chests, _changelog, _daily, _currency, _vip, _pass, _odds]:
+	for popup in [_settings, _shop, _skins, _armory, _upgrades, _achievements, _profile, _chronicle, _friends, _tester, _chests, _changelog, _daily, _currency, _vip, _pass, _odds]:
 		add_child(popup)
 		popup.closed.connect(_refresh)
 	_refresh()
@@ -390,6 +395,7 @@ func _build_stage() -> Control:
 	if Orient.portrait:
 		stage.add_child(_make_side_button("gift", "res://assets/ui/hub/daily_gift.png", "ПОДАРОК", false, 8.0, func() -> void: _daily.open()))
 		stage.add_child(_make_side_button("chest", "res://assets/ui/hub/chest_free.png", "БЕСПЛАТНО", false, 132.0, func() -> void: _chests.open()))
+		stage.add_child(_make_side_button("friends", "res://assets/ui/hub/friends.png", "ДРУЗЬЯ", false, 256.0, func() -> void: _friends.open()))
 		stage.add_child(_make_side_button("news", "res://assets/ui/hub/news.png", "ОБНОВЛЕНИЯ", true, 8.0, func() -> void: _changelog.open()))
 		stage.add_child(_make_side_button("pass", "res://assets/ui/hub/pass.png", "ПРОПУСК", true, 124.0, func() -> void: _pass.open()))
 		stage.add_child(_make_side_button("vip", "res://assets/ui/hub/vip.png", "VIP", true, 224.0, func() -> void: _vip.open()))
@@ -400,11 +406,12 @@ func _build_stage() -> Control:
 			["news", "res://assets/ui/hub/news.png", "ОБНОВЛЕНИЯ", func() -> void: _changelog.open()],
 			["pass", "res://assets/ui/hub/pass.png", "ПРОПУСК", func() -> void: _pass.open()],
 			["vip", "res://assets/ui/hub/vip.png", "VIP", func() -> void: _vip.open()],
+			["friends", "res://assets/ui/hub/friends.png", "ДРУЗЬЯ", func() -> void: _friends.open()],
 		]
 		for i in row.size():
 			var spec: Array = row[i]
 			stage.add_child(_make_side_button(spec[0], spec[1], spec[2], false, 6.0, spec[3], i, 76.0))
-	for key in (["pass", "vip"] if Orient.portrait else ["gift", "chest", "news", "pass", "vip"]):
+	for key in (["pass", "vip", "friends"] if Orient.portrait else ["gift", "chest", "news", "pass", "vip", "friends"]):
 		(_side_buttons[key]["caption"] as Label).visible = true
 	stage.add_child(_build_tester_button())
 	stage.gui_input.connect(func(event: InputEvent) -> void:

@@ -621,10 +621,32 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	let started = false;
 	let crashed = false;
 
+	// Android после сворачивания вкладки теряет шейдеры: экран остаётся чёрным или без спрайтов. Перезагрузка лечит, не чаще раза в 20 с.
+	function recoverGraphics() {
+		try {
+			const last = Number(sessionStorage.getItem('__trash_ctx_reload') || 0);
+			if (Date.now() - last < 20000) {
+				return;
+			}
+			const count = Number(sessionStorage.getItem('__trash_shader_reloads') || 0);
+			if (count >= 2) {
+				return;
+			}
+			sessionStorage.setItem('__trash_shader_reloads', String(count + 1));
+			sessionStorage.setItem('__trash_ctx_reload', String(Date.now()));
+			window.trkReport('shader_reload', logTail.slice(-6).join(' ; '));
+		} catch (e) {}
+		setTimeout(function () { window.location.reload(); }, 500);
+	}
+
 	function keepLog(kind, args) {
-		logTail.push(kind + ': ' + Array.prototype.join.call(args, ' ').slice(0, 300));
+		const line = Array.prototype.join.call(args, ' ').slice(0, 300);
+		logTail.push(kind + ': ' + line);
 		if (logTail.length > 30) {
 			logTail.shift();
+		}
+		if (started && line.indexOf('shader compilation failed') !== -1) {
+			recoverGraphics();
 		}
 	}
 
