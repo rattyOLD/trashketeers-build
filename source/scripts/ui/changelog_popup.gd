@@ -63,6 +63,16 @@ func _make_entry(entry: Dictionary) -> Control:
 	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	title.custom_minimum_size = Vector2(520, 0)
 	column.add_child(title)
+	for block in entry.get("blocks", []):
+		var caption := UiStyle.label(str((block as Dictionary).get("name", "")), 21, UiStyle.HOT, 5)
+		caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		column.add_child(caption)
+		for item in (block as Dictionary).get("lines", []):
+			var row := UiStyle.label("• " + str(item), 19, UiStyle.TEXT, 4)
+			row.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+			row.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			row.custom_minimum_size = Vector2(520, 0)
+			column.add_child(row)
 	for item in entry.get("items", []):
 		var line := UiStyle.label("• " + str(item), 19, UiStyle.TEXT, 4)
 		line.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
