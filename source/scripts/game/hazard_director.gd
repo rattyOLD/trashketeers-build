@@ -283,17 +283,8 @@ func _draw_acid(k: int, warming: bool, t: float, clock: float) -> void:
 		_draw_ring_zone(at, ACID_RADIUS, t, COLOR_ACID, true, clock)
 		return
 	var fade := clampf(_life[k] / 1.2, 0.0, 1.0)
-	SoftGlow.pool(self, at, ACID_RADIUS * 1.05, 0.6, Color(0.05, 0.2, 0.03, 0.5 * fade))
-	SoftGlow.pool(self, at, ACID_RADIUS * 0.85, 0.6, Color(COLOR_ACID, 0.34 * fade))
-	SoftGlow.pool(self, at, ACID_RADIUS * 0.45, 0.6, Color(COLOR_ACID.lightened(0.3), 0.2 * fade))
-	SoftGlow.rim(self, at, ACID_RADIUS * 1.1, 0.6, Color(COLOR_ACID, 0.4 * fade))
-	draw_set_transform(at, 0.0, Vector2(1.0, 0.6))
-	for b in 7:
-		var phase := fmod(clock * 0.8 + b * 0.37, 1.0)
-		var a: float = b * 2.4 + floor(clock * 0.8 + b * 0.37)
-		var p := Vector2.from_angle(a) * ACID_RADIUS * (0.15 + 0.6 * fmod(b * 0.31, 1.0))
-		draw_circle(p, 4.0 + 5.0 * phase, Color(COLOR_ACID.lightened(0.4), (1.0 - phase) * 0.45 * fade))
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	SoftGlow.pool(self, at, ACID_RADIUS * 1.15, 0.6, Color(COLOR_ACID, 0.16 * fade))
+	LiquidDraw.puddle(self, at, ACID_RADIUS, COLOR_ACID.darkened(0.15), k, clock, fade)
 
 
 func _draw_ring_zone(at: Vector2, radius: float, t: float, color: Color, warming: bool, clock: float) -> void:

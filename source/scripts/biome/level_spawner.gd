@@ -215,7 +215,13 @@ func is_area_clear(point: Vector2, clearance: float) -> bool:
 
 ## Направление обхода стен к Еноту (ZERO — поле тут не посчитано, бежать напрямую).
 func nav_direction(from: Vector2) -> Vector2:
-	return _flow.direction_at(world_to_cell(from))
+	var cell := world_to_cell(from)
+	var step := _flow.direction_at(cell)
+	if step == Vector2.ZERO:
+		return step
+	var next := cell + Vector2i(roundi(step.x * 1.4142), roundi(step.y * 1.4142))
+	var to_center := cell_to_world(next) - from
+	return to_center.normalized() if to_center.length() > 4.0 else step
 
 
 func find_nearest_destructible(from: Vector2, max_distance: float) -> DestructibleObject:

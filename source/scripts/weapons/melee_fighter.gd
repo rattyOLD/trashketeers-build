@@ -222,6 +222,8 @@ func _resolve_hit(origin: Vector2, echo_scale: float, echo: bool) -> void:
 		var knock := weapon.knockback * (2.2 if strong else 1.0)
 		if target is Enemy:
 			var enemy := target as Enemy
+			if enemy.is_alive():
+				Enemy.next_kind = &"melee"
 			enemy.take_bullet(amount, push, knock, crit, PIERCING_CLASSES.has(weapon.melee_class) or strong)
 			if enemy.is_alive():
 				enemy.add_stagger(weapon.stagger * CLASS_STAGGER.get(weapon.melee_class, 1.0) * (1.6 if _heavy else 1.0) * echo_scale, strong)

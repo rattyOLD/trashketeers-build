@@ -321,7 +321,9 @@ static func kind_color(kind: StringName) -> Color:
 
 
 static func kind_scale(kind: StringName) -> float:
-	return 1.35 if kind == &"blast" else 1.0
+	if kind == &"blast":
+		return 1.35
+	return 1.25 if kind == &"melee" else 1.0
 
 
 func popup(at: Vector2, text: String, color: Color, font_size: float = 34.0) -> void:

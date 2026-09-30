@@ -51,6 +51,7 @@ const KNOCKBACK_FORCE := 260.0
 const KNOCKBACK_DECAY := 9.0
 const RANGED_BAND := 60.0
 const NAV_DIRECT_DISTANCE := 72.0
+const HOP_HEIGHT := 7.0
 const LUNGE_TRIGGER := 125.0
 const LUNGE_WINDUP := 0.36
 const LUNGE_TIME := 0.22
@@ -77,7 +78,7 @@ const BLINK_COOLDOWN := 3.0
 const TELEGRAPH := Color("#ff2e4d")
 const RIG_MARGIN := 8.0
 const STUCK_SPEED_RATIO := 0.2
-const STUCK_TRIGGER := 0.45
+const STUCK_TRIGGER := 0.3
 const DETOUR_TIME := 0.8
 const BONE_HEAD := 2
 const BONE_WEAPON := 3
@@ -486,6 +487,9 @@ func tick(delta: float, player: Player, nav: Callable = Callable()) -> void:
 		var step: Vector2 = nav.call(global_position)
 		if step != Vector2.ZERO:
 			path_dir = step
+		elif dist > 160.0 and (data.behavior == EnemyData.Behavior.CHASER or data.behavior == EnemyData.Behavior.DASHER) and data.move_speed > 1.0:
+			var lead := clampf(dist / data.move_speed, 0.0, 0.7)
+			path_dir = ((player.global_position + player.velocity * lead - global_position).normalized() * 0.7 + dir * 0.3).normalized()
 	if _flank != 0.0 and dist > FLANK_RELEASE:
 		path_dir = path_dir.rotated(_flank * FLANK_ANGLE).normalized()
 	if _detour_time > 0.0:
@@ -1011,7 +1015,9 @@ func _animate(delta: float, desired: Vector2) -> void:
 	_time += delta
 	_move_amount = move_toward(_move_amount, clampf(speed / maxf(data.move_speed, 1.0), 0.0, 1.0) if moving else 0.0, delta * 5.0)
 	_gait += delta * (4.0 + 9.0 * _move_amount) * clampf(speed / 110.0, 0.6, 2.0)
-	var squash := 1.0 + sin(_gait * 2.0) * 0.03 * _move_amount + sin(_time * 2.2) * 0.015 * (1.0 - _move_amount)
+	var step_wave := absf(sin(_gait))
+	var hop := step_wave * HOP_HEIGHT * _move_amount * (0.5 if data.is_boss() else 1.0)
+	var squash := 1.0 + (0.5 - step_wave) * 0.11 * _move_amount + sin(_time * 2.2) * 0.02 * (1.0 - _move_amount)
 	var lean := 0.0
 	var windup := 0.0
 	var strike := 0.0
@@ -1034,7 +1040,7 @@ func _animate(delta: float, desired: Vector2) -> void:
 		squash = 1.0 - 0.06 * _brain.windup + 0.05 * _brain.strike + sin(_time * 1.8) * 0.012
 	_pop = maxf(_pop - delta, 0.0)
 	var hurt := _pop / HIT_POP
-	var pop := 1.0 + hurt * 0.12
+	var pop := 1.0 + hurt * 0.2
 	_recoil = move_toward(_recoil, 0.0, delta * 4.0)
 
 	if data.shield:
@@ -1044,8 +1050,10 @@ func _animate(delta: float, desired: Vector2) -> void:
 	elif absf(desired.x) > 5.0 and _act != Act.WINDUP:
 		_facing_left = desired.x < 0.0
 	var hover_bob := sin(_time * 3.4) * 5.0 if data.flying else 0.0
-	_sprite.position = Vector2(0, _sprite_base_y() + hover_bob)
-	var sway := 0.0 if (_framed or _auto) else sin(_gait) * 0.05 * _move_amount
+	_sprite.position = Vector2(0, _sprite_base_y() + hover_bob - (0.0 if data.flying else hop))
+	var sway := sin(_gait) * (0.025 if (_framed or _auto) else 0.06) * _move_amount
+	if _act == Act.MOVE:
+		lean += 0.16 * _move_amount
 	if _framed:
 		lean *= 0.5
 		squash = 1.0 + (squash - 1.0) * 0.6

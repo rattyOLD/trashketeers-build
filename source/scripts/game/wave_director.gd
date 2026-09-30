@@ -20,7 +20,9 @@ const FIRST_WAVE_DELAY := 0.8
 const INTRO_TIME := 2.0
 const SPAWN_MARGIN := 90.0
 const SPAWN_DEPTH := 260.0
-const GATE_SHARE := 0.55
+const GATE_SHARE := 0.45
+const AHEAD_SHARE := 0.5
+const PACK_SPREAD := 110.0
 const GATE_MIN_DISTANCE := 520.0
 const ESCORT_GAP := 60.0
 const BOSS_RETRY_DELAY := 0.5
@@ -222,19 +224,51 @@ func _tick_spawns(delta: float) -> void:
 		remaining_to_spawn = 0
 		return
 	var radius := _offscreen_radius()
-	var clearance := _max_enemy_radius(weights)
+	var batch: Array[EnemyData] = []
 	for i in int(_wave["batch"]):
-		if remaining_to_spawn <= 0 or _enemies.get_active_count() >= _max_alive:
-			return
-		var at := Vector2.INF
-		if randf() < GATE_SHARE:
-			at = _level.gate_spawn_point(_player.global_position, GATE_MIN_DISTANCE, clearance)
-		if at == Vector2.INF:
-			at = _level.find_spawn_point(_player.global_position, radius, radius + SPAWN_DEPTH, clearance)
-		if at == Vector2.INF:
-			continue
-		if _enemies.spawn(ContentDB.get_enemy(_pick_weighted(weights)), at, _hp_mult, _dmg_mult) != null:
+		if remaining_to_spawn - batch.size() <= 0 or _enemies.get_active_count() + batch.size() >= _max_alive:
+			break
+		var data := ContentDB.get_enemy(_pick_weighted(weights))
+		if data != null:
+			batch.append(data)
+	if batch.is_empty():
+		return
+	var ranged := 0
+	var clearance := 20.0
+	for data in batch:
+		if data.behavior == EnemyData.Behavior.RANGED:
+			ranged += 1
+		clearance = maxf(clearance, data.radius * 1.4 + 6.0)
+	var anchor := _pick_pack_anchor(radius, clearance, ranged * 2 > batch.size())
+	if anchor == Vector2.INF:
+		return
+	for i in batch.size():
+		var data := batch[i]
+		var at := anchor
+		if i > 0:
+			at = _level.find_spawn_point(anchor, 30.0, PACK_SPREAD, clearance)
+			if at == Vector2.INF:
+				continue
+		if _enemies.spawn(data, at, _hp_mult, _dmg_mult) != null:
 			remaining_to_spawn -= 1
+
+
+## Волна приходит стаей: одна точка, вокруг неё группа. Стрелки заходят дальше и с более открытых мест,
+## бойцы — из ворот и по ходу движения Енота, чтобы давление шло спереди, а не из-за спины.
+func _pick_pack_anchor(radius: float, clearance: float, ranged_pack: bool) -> Vector2:
+	var from := _player.global_position
+	var ring := radius * (1.25 if ranged_pack else 1.0)
+	if not ranged_pack and randf() < GATE_SHARE:
+		var gate := _level.gate_spawn_point(from, GATE_MIN_DISTANCE, clearance)
+		if gate != Vector2.INF:
+			return gate
+	if _player.velocity.length() > 60.0 and randf() < AHEAD_SHARE:
+		var ahead := from + _player.velocity.normalized() * ring * 0.55
+		for attempt in 4:
+			var p := _level.find_spawn_point(ahead, ring * 0.55, ring * 0.55 + SPAWN_DEPTH, clearance)
+			if p != Vector2.INF and p.distance_to(from) >= ring:
+				return p
+	return _level.find_spawn_point(from, ring, ring + SPAWN_DEPTH, clearance)
 
 
 ## Босс выходит на свой помост; эскорт подводится из ворот по таймеру главы.
@@ -387,16 +421,6 @@ func _pick_weighted(weights: Dictionary) -> StringName:
 	return StringName(weights.keys().back())
 
 
-func _max_enemy_radius(weights: Dictionary) -> float:
-	var radius := 20.0
-	for key in weights:
-		var e := ContentDB.get_enemy(StringName(key))
-		if e != null:
-			radius = maxf(radius, e.radius)
-	return radius
-
-
-## Радиус кольца спавна — чуть больше половины диагонали экрана: враг появляется за кадром.
 func _offscreen_radius() -> float:
 	var zoom := 1.0 if Orient.portrait else BattleBase.LANDSCAPE_ZOOM
 	return get_viewport().get_visible_rect().size.length() * 0.5 / zoom + SPAWN_MARGIN

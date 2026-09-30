@@ -467,7 +467,7 @@ func _flush_damage_numbers(delta: float, force: bool = false) -> void:
 		_damage_acc.erase(key)
 		if enemy == null or enemy.data == null:
 			continue
-		if _number_budget >= 1.0 or acc["crit"]:
+		if _number_budget >= 1.0 or acc["crit"] or acc["kind"] == &"melee":
 			_number_budget -= 1.0
 			var jitter := Vector2(randf_range(-enemy.data.radius, enemy.data.radius) * 0.6, 0.0)
 			fx.number(enemy.get_aim_point() + Vector2(0, -enemy.data.radius * 1.6) + jitter, acc["amount"], FxManager.kind_color(acc["kind"]), acc["crit"], FxManager.kind_scale(acc["kind"]))

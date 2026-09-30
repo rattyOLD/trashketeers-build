@@ -786,6 +786,9 @@
     {
       "weapon_id": "beer_jet_v1",
       "display_name": "Пивная струя",
+      "bullet_sprite": "res://assets/bullets/beer_glob.png",
+      "bullet_scale": 0.55,
+      "tint_bullet": false,
       "enemy_only": true,
       "damage": 8,
       "fire_rate": 0.05,
@@ -800,6 +803,9 @@
     {
       "weapon_id": "puke_v1",
       "display_name": "Рвота",
+      "bullet_sprite": "res://assets/bullets/puke_glob.png",
+      "bullet_scale": 0.7,
+      "tint_bullet": false,
       "enemy_only": true,
       "damage": 10,
       "fire_rate": 0.05,
