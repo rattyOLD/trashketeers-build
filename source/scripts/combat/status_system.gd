@@ -154,7 +154,7 @@ func on_player_hit(bullet: Bullet, enemy: Enemy) -> void:
 
 
 func _vampirism(damage: float, crit: bool) -> void:
-	var vamp := minf(stats.get_stat(&"vampirism"), 0.05)
+	var vamp := minf(stats.get_stat(&"vampirism"), 0.005)
 	if vamp <= 0.0:
 		return
 	_heal(damage * vamp * (2.0 if crit else 1.0))
@@ -227,7 +227,7 @@ func on_status_damage(enemy: Enemy, amount: float, kind: String) -> void:
 		fx.status_number(at + Vector2(0, -enemy.data.radius * 1.2), amount, color)
 	fx.burst(at, color, 2, 70.0, 2.5)
 	if kind == "poison" and stats.get_stat(&"evo_vamp_poison") > 0.0:
-		_heal(amount * clampf(stats.get_stat(&"vampirism"), 0.02, 0.05) * 3.0)
+		_heal(amount * clampf(stats.get_stat(&"vampirism"), 0.002, 0.005) * 3.0)
 
 
 ## Враг погиб (любой причиной). at — где он стоял.

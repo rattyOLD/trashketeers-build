@@ -1,19 +1,19 @@
 class_name MainMenuUI
 extends Control
-## Хаб в стиле .io-игр (портрет):
+## Хаб в стиле .io-игр (альбомный):
 ##   фон — живая Неоновая Свалка (MenuBackdrop) под тёмным градиентом;
 ##   верх — аватарка, уровень, валюты, шестерёнка;
 ##   логотип Trashketeers.io, на надписи сидит Енот в текущем скине;
 ##   поле ника с кубиком случайного имени, большая зелёная [ ИГРАТЬ ], выбор режима;
 ##   низ — ПРОКАЧКА · ОРУЖИЕ + MERGE · ГЕРОИ (гардероб) · АЧИВКИ.
-## Колонка ограничена COLUMN_WIDTH и центрирована: в альбомной ориентации по бокам просто фон.
+## Альбомная раскладка: слева сцена с Енотом и боковыми кнопками, справа логотип, ствол, режим и ИГРАТЬ, снизу дока.
 
 signal start_requested(weapon_id: StringName)
 signal raid_requested(weapon_id: StringName)
 
 enum Mode { SURVIVAL, RAID }
 
-const COLUMN_WIDTH := 680.0
+const RIGHT_WIDTH := 540.0
 const PLAY_GREEN := Color("#7ed321")
 const LOGO_FONT := "res://assets/fonts/LilitaOne-Regular.ttf"
 const CAPSULE := Color("#c9c3d6")
@@ -76,26 +76,35 @@ func _build() -> void:
 	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(shade)
 
+	var margin := MarginContainer.new()
+	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
+	margin.add_theme_constant_override("margin_left", 30)
+	margin.add_theme_constant_override("margin_right", 30)
+	margin.add_theme_constant_override("margin_top", 14)
+	margin.add_theme_constant_override("margin_bottom", 12)
+	add_child(margin)
 	var column := VBoxContainer.new()
-	column.anchor_left = 0.5
-	column.anchor_right = 0.5
-	column.anchor_bottom = 1.0
-	column.offset_left = -COLUMN_WIDTH * 0.5
-	column.offset_right = COLUMN_WIDTH * 0.5
-	column.offset_top = 20.0
-	column.offset_bottom = -20.0
-	column.add_theme_constant_override("separation", 12)
-	add_child(column)
+	column.add_theme_constant_override("separation", 8)
+	margin.add_child(column)
 
 	column.add_child(_build_top_bar())
-	column.add_child(_build_logo())
-	column.add_child(_build_stage())
-	column.add_child(_build_weapon_chip())
-	column.add_child(_build_modes())
-	column.add_child(_build_play())
+	var middle := HBoxContainer.new()
+	middle.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	middle.add_theme_constant_override("separation", 26)
+	column.add_child(middle)
+	var stage := _build_stage()
+	stage.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	middle.add_child(stage)
+	var side := VBoxContainer.new()
+	side.custom_minimum_size = Vector2(RIGHT_WIDTH, 0)
+	side.alignment = BoxContainer.ALIGNMENT_CENTER
+	side.add_theme_constant_override("separation", 10)
+	middle.add_child(side)
+	side.add_child(_build_logo())
+	side.add_child(_build_weapon_chip())
+	side.add_child(_build_modes())
+	side.add_child(_build_play())
 	column.add_child(_build_dock())
-	var footer := UiStyle.label("Trashketeers.io · Неоновая Свалка", 16, Color(UiStyle.TEXT_DIM, 0.7), 4)
-	column.add_child(footer)
 
 	_settings = MenuPopups.Settings.new()
 	_shop = HeroPopup.new()
@@ -323,7 +332,7 @@ func _build_tester_button() -> Button:
 
 func _build_logo() -> Control:
 	var holder := Control.new()
-	holder.custom_minimum_size = Vector2(0, 150)
+	holder.custom_minimum_size = Vector2(0, 118)
 	var logo := LogoText.new()
 	logo.set_anchors_preset(Control.PRESET_FULL_RECT)
 	logo.font = load(LOGO_FONT) if ResourceLoader.exists(LOGO_FONT) else ThemeDB.fallback_font
@@ -335,7 +344,7 @@ func _build_logo() -> Control:
 func _build_stage() -> Control:
 	var stage := HeroStage.new()
 	stage.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	stage.custom_minimum_size = Vector2(0, 300)
+	stage.custom_minimum_size = Vector2(0, 260)
 	_preview = MenuWidgets.RaccoonPreview.new(SaveService.get_skin(), 2.5)
 	_preview.set_anchors_preset(Control.PRESET_FULL_RECT)
 	stage.add_child(_preview)
@@ -360,9 +369,9 @@ func _build_stage() -> Control:
 func _build_play() -> Control:
 	var play := Button.new()
 	play.text = "ИГРАТЬ"
-	play.custom_minimum_size = Vector2(0, 136)
+	play.custom_minimum_size = Vector2(0, 108)
 	play.focus_mode = Control.FOCUS_NONE
-	play.add_theme_font_size_override("font_size", 60)
+	play.add_theme_font_size_override("font_size", 54)
 	for state in ["font_color", "font_hover_color", "font_pressed_color"]:
 		play.add_theme_color_override(state, Color.WHITE)
 	play.add_theme_color_override("font_outline_color", Color("#2c5a07"))
@@ -387,7 +396,7 @@ func _build_modes() -> Control:
 	row.add_theme_constant_override("separation", 12)
 	var titles := ["ВЫЖИВАНИЕ", "ЛЕДЯНОЙ НАЛЁТ"]
 	for i in 2:
-		var button := UiStyle.button(titles[i], UiStyle.PANEL, 26, Vector2(0, 68))
+		var button := UiStyle.button(titles[i], UiStyle.PANEL, 22, Vector2(0, 60))
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.toggle_mode = true
 		button.pressed.connect(_select_mode.bind(i))
@@ -416,7 +425,7 @@ func _select_mode(mode: int) -> void:
 
 func _build_weapon_chip() -> Control:
 	var chip := Button.new()
-	chip.custom_minimum_size = Vector2(0, 84)
+	chip.custom_minimum_size = Vector2(0, 78)
 	chip.focus_mode = Control.FOCUS_NONE
 	var normal := UiStyle.box(Color(0.1, 0.07, 0.2, 0.88), Color("#ffb020"), 3, 20)
 	chip.add_theme_stylebox_override("normal", normal)
@@ -437,10 +446,12 @@ func _build_weapon_chip() -> Control:
 	texts.alignment = BoxContainer.ALIGNMENT_CENTER
 	texts.add_theme_constant_override("separation", 0)
 	_weapon_holder.add_child(texts)
-	_weapon_title = UiStyle.label("", 26, UiStyle.TEXT, 6)
+	_weapon_title = UiStyle.label("", 22, UiStyle.TEXT, 6)
+	_weapon_title.clip_text = true
 	_weapon_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	texts.add_child(_weapon_title)
-	_record_label = UiStyle.label("", 18, UiStyle.TEXT_DIM, 4)
+	_record_label = UiStyle.label("", 16, UiStyle.TEXT_DIM, 4)
+	_record_label.clip_text = true
 	_record_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	texts.add_child(_record_label)
 	var change := UiStyle.label("СМЕНИТЬ", 18, Color("#ffb020"), 4)
@@ -454,8 +465,8 @@ func _build_dock() -> Control:
 	var style := UiStyle.box(Color(0.05, 0.03, 0.12, 0.88), Color("#3a2d60"), 3, 28)
 	style.content_margin_left = 10
 	style.content_margin_right = 10
-	style.content_margin_top = 10
-	style.content_margin_bottom = 10
+	style.content_margin_top = 6
+	style.content_margin_bottom = 6
 	dock.add_theme_stylebox_override("panel", style)
 	dock.add_child(_build_nav())
 	return dock
@@ -473,6 +484,7 @@ func _build_nav() -> Control:
 	for item in items:
 		var button := MenuWidgets.NavButton.new(item[0], item[1], item[2], ArenaProp.texture_of("res://assets/ui/hub/%s.png" % item[4]))
 		button.pressed.connect(item[3])
+		button.custom_minimum_size = Vector2(0, 88)
 		row.add_child(button)
 		if item[0] == MenuWidgets.NavButton.Kind.UPGRADES:
 			_nav_upgrades = button
@@ -521,7 +533,7 @@ func _refresh() -> void:
 	_record_label.text = "Рекорд: волна %d" % best if best > 0 else "Рекорда пока нет - вперёд!"
 	if _weapon_icon != null:
 		_weapon_icon.queue_free()
-	_weapon_icon = WeaponIcons.IconRect.new(weapon.icon, weapon.effect_color, Vector2(120, 54))
+	_weapon_icon = WeaponIcons.IconRect.new(weapon.icon, weapon.effect_color, Vector2(96, 46))
 	_weapon_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_weapon_holder.add_child(_weapon_icon)
 	_weapon_holder.move_child(_weapon_icon, 0)

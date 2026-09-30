@@ -34,36 +34,42 @@ func _init() -> void:
 	center.add_child(_panel)
 
 	_box = VBoxContainer.new()
-	_box.custom_minimum_size = Vector2(560, 0)
-	_box.add_theme_constant_override("separation", 20)
+	_box.custom_minimum_size = Vector2(720, 0)
+	_box.add_theme_constant_override("separation", 12)
 	_panel.add_child(_box)
 
-	_title = UiStyle.label("", 56, UiStyle.GOLD, 12)
+	_title = UiStyle.label("", 46, UiStyle.GOLD, 11)
 	_box.add_child(_title)
-	_subtitle = UiStyle.label("", 26, UiStyle.TEXT, 6)
+	_subtitle = UiStyle.label("", 22, UiStyle.TEXT, 6)
 	_subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_box.add_child(_subtitle)
 
 	_stats_card = PanelContainer.new()
 	_stats_card.add_theme_stylebox_override("panel", UiStyle.box(UiStyle.PANEL_LIGHT, UiStyle.OUTLINE, 3, 20))
 	_stats_rows = VBoxContainer.new()
-	_stats_rows.add_theme_constant_override("separation", 10)
+	_stats_rows.add_theme_constant_override("separation", 6)
 	_stats_card.add_child(_stats_rows)
 	_box.add_child(_stats_card)
 
 	_tip_card = PanelContainer.new()
 	_tip_card.add_theme_stylebox_override("panel", UiStyle.box(Color(0.16, 0.1, 0.05, 0.95), Color("#ff9a3d"), 4, 18))
-	_tip_label = UiStyle.label("", 22, Color("#ffe2b8"), 5)
+	_tip_label = UiStyle.label("", 19, Color("#ffe2b8"), 5)
 	_tip_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_tip_card.add_child(_tip_label)
 	_box.add_child(_tip_card)
 
-	var again := UiStyle.button("ЕЩЁ РАЗ", UiStyle.HOT, 36, Vector2(0, 96))
+	var buttons := HBoxContainer.new()
+	buttons.add_theme_constant_override("separation", 14)
+	_box.add_child(buttons)
+	var again := UiStyle.button("ЕЩЁ РАЗ", UiStyle.HOT, 32, Vector2(0, 76))
+	again.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	again.size_flags_stretch_ratio = 1.5
 	again.pressed.connect(func() -> void: restart_pressed.emit())
-	_box.add_child(again)
-	var menu := UiStyle.button("НА БАЗУ", UiStyle.PANEL_LIGHT, 28, Vector2(0, 76))
+	buttons.add_child(again)
+	var menu := UiStyle.button("НА БАЗУ", UiStyle.PANEL_LIGHT, 26, Vector2(0, 76))
+	menu.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	menu.pressed.connect(func() -> void: menu_pressed.emit())
-	_box.add_child(menu)
+	buttons.add_child(menu)
 
 
 ## Первая строка - заголовок-причина, «ключ: значение» - строки статистики, остальное - совет в отдельной плашке.

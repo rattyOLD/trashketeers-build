@@ -352,6 +352,10 @@ func stun(time: float) -> void:
 	_stun = maxf(_stun, time)
 
 
+func grant_invuln(time: float) -> void:
+	_invuln = maxf(_invuln, time)
+
+
 func is_stunned() -> bool:
 	return _stun > 0.0
 

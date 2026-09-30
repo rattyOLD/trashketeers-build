@@ -7,7 +7,7 @@ extends Control
 
 signal closed
 
-const PANEL_WIDTH := 620.0
+const PANEL_WIDTH := 900.0
 const CORNER := 28.0
 const BORDER := Color("#00e5ff")
 
@@ -67,19 +67,19 @@ func _init(title_text: String) -> void:
 
 	var inner := MarginContainer.new()
 	for side in ["left", "right", "top", "bottom"]:
-		inner.add_theme_constant_override("margin_" + side, 30)
+		inner.add_theme_constant_override("margin_" + side, 22)
 	_panel.add_child(inner)
 	content = VBoxContainer.new()
-	content.add_theme_constant_override("separation", 16)
+	content.add_theme_constant_override("separation", 12)
 	inner.add_child(content)
 
 	var header := HBoxContainer.new()
 	content.add_child(header)
-	_title = UiStyle.label(title_text, 40, UiStyle.TEXT, 10)
+	_title = UiStyle.label(title_text, 34, UiStyle.TEXT, 9)
 	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(_title)
-	var close_button := UiStyle.button("X", UiStyle.PANEL_LIGHT, 30, Vector2(64, 64))
+	var close_button := UiStyle.button("X", UiStyle.PANEL_LIGHT, 28, Vector2(56, 56))
 	close_button.pressed.connect(close)
 	header.add_child(close_button)
 

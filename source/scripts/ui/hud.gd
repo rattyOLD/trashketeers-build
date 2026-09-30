@@ -11,6 +11,7 @@ signal upgrade_pressed
 signal restart_pressed
 signal menu_pressed
 signal dash_pressed
+signal skill_pressed
 signal slot_pressed(index: int)
 signal interact_pressed
 signal weapon_swiped
@@ -50,6 +51,7 @@ var _weapon_chip: PanelContainer
 var _weapon_icon: WeaponIcons.IconRect
 var _weapon_name: Label
 var _dash: DashButton
+var _skill: SkillButton
 var _rail_combo: Label
 var _slot_bar: BattleControls.SlotBar
 var _interact: BattleControls.InteractButton
@@ -102,6 +104,10 @@ func build(currency_icon: Texture2D, weapon: WeaponData) -> void:
 	_dash = DashButton.new()
 	_dash.pressed.connect(func() -> void: dash_pressed.emit())
 	_root.add_child(_dash)
+	_skill = SkillButton.new()
+	_skill.visible = false
+	_skill.pressed.connect(func() -> void: skill_pressed.emit())
+	_root.add_child(_skill)
 	_slot_bar = BattleControls.SlotBar.new()
 	_slot_bar.slot_pressed.connect(func(i: int) -> void: slot_pressed.emit(i))
 	_root.add_child(_slot_bar)
@@ -232,13 +238,26 @@ func apply_layout() -> void:
 		return
 	var area := _root.size
 	Controls.place(_dash, "dash", area)
+	Controls.place(_skill, "dash", area)
 	Controls.place(_slot_bar, "slots", area, BattleControls.slots_base_size(_slot_bar.count))
 	Controls.place(_interact, "interact", area)
 	var opacity := clampf(float(Controls.get_value("opacity")), 0.3, 1.0)
-	for item in [_dash, _slot_bar]:
+	for item in [_dash, _slot_bar, _skill]:
 		item.modulate.a = opacity
 	joystick.modulate.a = opacity
 	_layout_revision = Controls.revision
+
+
+func set_skill(title: String, color: Color) -> void:
+	_skill.visible = not title.is_empty()
+	_dash.visible = title.is_empty()
+	_skill.title = title
+	_skill.accent = color
+	_skill.queue_redraw()
+
+
+func set_skill_cooldown(fraction: float) -> void:
+	_skill.cooldown = clampf(fraction, 0.0, 1.0)
 
 
 func set_dash_cooldown(fraction: float) -> void:
@@ -632,6 +651,59 @@ func _build_toast() -> Control:
 
 ## Полупрозрачная круглая кнопка рывка с сектором перезарядки. Слушает сырые касания
 ## (ScreenTouch), а не GUI: второй палец при зажатом джойстике GUI не получает.
+class SkillButton:
+	extends Control
+	signal pressed
+
+	var title := ""
+	var accent := UiStyle.GOLD
+	var cooldown := 0.0:
+		set(value):
+			if not is_equal_approx(value, cooldown):
+				cooldown = value
+				queue_redraw()
+	var _press := 0.0
+	var _time := 0.0
+
+	func _init() -> void:
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	func _input(event: InputEvent) -> void:
+		if not is_visible_in_tree() or get_tree().paused:
+			return
+		if event is InputEventScreenTouch and event.pressed:
+			if (event as InputEventScreenTouch).position.distance_to(get_global_rect().get_center()) < size.x * 0.55:
+				_press = 1.0
+				pressed.emit()
+				get_viewport().set_input_as_handled()
+
+	func _process(delta: float) -> void:
+		_time += delta
+		if _press > 0.0:
+			_press = maxf(_press - delta * 5.0, 0.0)
+		if is_visible_in_tree() and (cooldown <= 0.001 or _press > 0.0):
+			queue_redraw()
+
+	func _draw() -> void:
+		var c := size * 0.5
+		var r := size.x * 0.46 * (1.0 - 0.08 * _press)
+		var ready := cooldown <= 0.001
+		var pulse := 0.5 + 0.5 * sin(_time * 5.0)
+		draw_circle(c, r, Color(0.06, 0.03, 0.12, 0.5))
+		draw_arc(c, r, 0.0, TAU, 48, Color(accent, (0.65 + 0.3 * pulse) if ready else 0.3), 5.0, true)
+		if not ready:
+			var sweep := PackedVector2Array([c])
+			for i in 33:
+				sweep.append(c + Vector2.from_angle(-PI * 0.5 + TAU * cooldown * i / 32.0) * r)
+			draw_colored_polygon(sweep, Color(0, 0, 0, 0.5))
+		var font := ThemeDB.fallback_font
+		var alpha := 1.0 if ready else 0.5
+		draw_string_outline(font, Vector2(0, c.y - 4.0), "НАВЫК", HORIZONTAL_ALIGNMENT_CENTER, size.x, int(size.x * 0.2), 6, Color(0.06, 0.03, 0.1))
+		draw_string(font, Vector2(0, c.y - 4.0), "НАВЫК", HORIZONTAL_ALIGNMENT_CENTER, size.x, int(size.x * 0.2), Color(accent, alpha))
+		draw_string_outline(font, Vector2(6, c.y + size.x * 0.2), title, HORIZONTAL_ALIGNMENT_CENTER, size.x - 12.0, int(size.x * 0.12), 4, Color(0.06, 0.03, 0.1))
+		draw_string(font, Vector2(6, c.y + size.x * 0.2), title, HORIZONTAL_ALIGNMENT_CENTER, size.x - 12.0, int(size.x * 0.12), Color(1, 1, 1, alpha * 0.85))
+
+
 class DashButton:
 	extends Control
 	signal pressed

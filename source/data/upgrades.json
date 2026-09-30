@@ -222,9 +222,9 @@
     {
       "upgrade_id": "vampirism",
       "title": "Вампирские клыки",
-      "description": "+1% урона возвращается здоровьем (макс. 5%), криты — вдвое",
+      "description": "+0,1% урона возвращается здоровьем (макс. 0,5%), криты — вдвое",
       "stat": "vampirism",
-      "value": 0.01,
+      "value": 0.001,
       "max_stacks": 5,
       "color": "#FF2E6E",
       "category": "hero",

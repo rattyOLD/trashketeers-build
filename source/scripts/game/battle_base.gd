@@ -27,6 +27,7 @@ var layers: BiomeLayers
 var entities: Node2D
 var player: Player
 var fx: FxManager
+var hero_skills: HeroSkills
 var camera: Camera2D
 var hud: Hud
 var atmosphere: AtmosphereFX
@@ -71,11 +72,12 @@ func _spawn_player(at: Vector2, weapon: WeaponData, target_finder: Callable) -> 
 		"raccoon":
 			stats.add_flat(&"magnet_mult", 0.25)
 		"red_panda":
-			stats.add_flat(&"dash_fire", 1.0)
+			stats.add_flat(&"burn_chance", 0.25)
+		"night":
+			stats.add_flat(&"crit_chance_add", 0.1)
 		"neon_hopper":
-			stats.add_flat(&"dash_damage", 45.0)
+			stats.add_flat(&"fire_rate_mult", 0.12)
 		"fluffy_chemist":
-			stats.add_flat(&"dash_poison", 1.0)
 			stats.add_flat(&"poison_chance", 0.2)
 			stats.add_flat(&"poison_power", 0.3)
 	entities.add_child(player)
@@ -117,6 +119,11 @@ func _setup_common(camera_bounds: Rect2, currency_icon: Texture2D) -> void:
 	BulletPool.bullet_hit.connect(_on_bullet_hit)
 	BulletPool.exploded.connect(_on_explosion)
 	hud.dash_pressed.connect(_request_dash)
+	hud.skill_pressed.connect(_request_dash)
+	hero_skills = HeroSkills.new()
+	add_child(hero_skills)
+	hero_skills.setup(SaveService.get_character_id(), player, fx, stats, add_shake)
+	hud.set_skill(hero_skills.title() if hero_skills.has_skill() else "", Color(str(hero_skills.skill.get("color", "#ffcf3d"))))
 	hud.pause_pressed.connect(_open_pause)
 	hud.resume_pressed.connect(_close_pause)
 	hud.restart_pressed.connect(func() -> void: restart_requested.emit())
@@ -155,6 +162,7 @@ func _physics_process(delta: float) -> void:
 	player.move_input = input
 	camera.global_position = player.global_position
 	hud.set_dash_cooldown(player.dash_fraction())
+	hud.set_skill_cooldown(hero_skills.fraction())
 	hud.set_dash_charges(player.dash_charges, player.dash_max_charges)
 
 	_hud_timer -= delta
@@ -228,8 +236,13 @@ func _update_shake(delta: float) -> void:
 
 
 func _request_dash() -> void:
-	if player != null and not finished and not get_tree().paused:
+	if player == null or finished or get_tree().paused:
+		return
+	if hero_skills != null and hero_skills.has_skill():
+		hero_skills.try_use()
+	else:
 		player.request_dash()
+
 
 
 func _open_pause() -> void:

@@ -167,6 +167,21 @@ func _build_passive(character: Dictionary, accent: Color) -> Control:
 	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	text.custom_minimum_size = Vector2(500, 0)
 	column.add_child(text)
+	var skill: Dictionary = character.get("skill", {})
+	if not skill.is_empty():
+		var skill_color := Color(str(skill.get("color", "#ffcf3d")))
+		var skill_head := UiStyle.label("НАВЫК вместо рывка: %s · %d с" % [str(skill.get("title", "")).to_upper(), int(skill.get("cooldown", 0))], 21, skill_color, 5)
+		skill_head.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		column.add_child(skill_head)
+		var skill_text := UiStyle.label(str(skill.get("text", "")), 18, UiStyle.TEXT, 4)
+		skill_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		skill_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		skill_text.custom_minimum_size = Vector2(500, 0)
+		column.add_child(skill_text)
+	else:
+		var none := UiStyle.label("НАВЫК: рывок. Универсал без лишних фокусов", 19, UiStyle.TEXT_DIM, 4)
+		none.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		column.add_child(none)
 	return panel
 
 

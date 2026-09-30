@@ -3,7 +3,7 @@ extends RefCounted
 ## Окна хаба на базе GlassPopup: Настройки, Гардероб (герои и наряды), Оружие + Merge, Прокачка, Ачивки.
 ## Длинные списки — в ScrollContainer (на телефоне листаются пальцем).
 
-const LIST_HEIGHT := 760.0
+const LIST_HEIGHT := 400.0
 
 
 static func scroll_list(parent: Control) -> VBoxContainer:
