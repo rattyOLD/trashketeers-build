@@ -1222,6 +1222,11 @@ func request_fx(kind: String, radius: float = 0.0, at: Vector2 = Vector2.INF) ->
 	fx_requested.emit(self, kind, global_position if at == Vector2.INF else at, radius)
 
 
+func attach_speakers(list: Array[Enemy]) -> void:
+	if _brain != null:
+		_brain.speakers = list
+
+
 func phase_changed() -> void:
 	boss_phase.emit(self, _brain.phase if _brain != null else 1)
 

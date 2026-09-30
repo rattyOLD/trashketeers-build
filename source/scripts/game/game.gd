@@ -530,6 +530,22 @@ func _on_enemy_fx(_enemy: Enemy, kind: String, at: Vector2, radius: float) -> vo
 			fx.ring(at, Color("#ffd257"), 200.0)
 			fx.dust(at, 14, 160.0)
 			hud.show_banner("ПОДМОГА!", Color("#ffd257"), 1.4)
+		"speakers":
+			var list := director.spawn_speakers(int(radius))
+			_enemy.attach_speakers(list)
+			for speaker in list:
+				fx.ring(speaker.global_position, Color("#ffd257"), 120.0)
+				fx.dust(speaker.global_position, 8, 90.0)
+			hud.show_banner("ЛОМАЙ КОЛОНКИ ТРОНА!", Color("#ffd257"), 2.0)
+		"bass":
+			fx.ring(at, Color("#ff2e4d"), radius)
+			add_shake(0.18)
+		"speaker_down":
+			hud.show_banner("КОЛОНКА РАЗБИТА · ОСТАЛОСЬ %d" % int(radius), Color("#ffd257"), 1.2)
+		"muted":
+			hud.show_banner("ОГЛУШЕНИЕ МУЗЫКОЙ! БЕЙ КОРОЛЯ", Color("#5ff2ff"), 2.4)
+			atmosphere.flash(Color("#5ff2ff"), 0.3, 0.4)
+			add_shake(0.5)
 		"repair":
 			var healer := _enemy
 			var healed := 0
@@ -628,6 +644,7 @@ func debug_boss(enemy_id: StringName) -> void:
 	player.hp = 99999.0
 	var boss := enemies.spawn(data, player.global_position + Vector2(260, -40), 1.0, 1.0)
 	if boss != null:
+		director.boss = boss
 		_on_boss_spawned(boss)
 
 

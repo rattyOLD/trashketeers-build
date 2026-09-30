@@ -21,11 +21,17 @@ extends RefCounted
 enum State { WALK, ROCKETS, RING_CHARGE, RING_FIRE, LEAP_WINDUP, LEAP, GATLING_SPIN, GATLING, RAIN, STOMP_WINDUP,
 	TRANSFORM, DASH_WINDUP, DASH, FAN, SUMMON, SPIRAL, CARPET,
 	BEAM_WINDUP, BEAM, PRESS_WINDUP, PRESS, SMASH_WINDUP, SMASH_LUNGE, VOMIT_WINDUP, VOMIT,
-	BOLT_WINDUP, BOLT, GRID, ARC_WINDUP }
+	BOLT_WINDUP, BOLT, GRID, ARC_WINDUP, BASS_WINDUP, BASS }
 
 const TELEGRAPH := Color("#ff2e4d")
 ## Пассивки боссов: Король — «Свита» (регулярно зовёт подручных), Магнат — «Золотая корка»
 ## (на 75/50/25% здоровья покрывается золотом и несколько секунд получает вдвое меньше урона).
+const SPEAKER_COUNT := 3
+const SPEAKER_MULT := 0.4
+const BASS_INTERVAL := 8.0
+const BASS_WINDUP_TIME := 0.9
+const BASS_BULLETS := 12
+const MUTE_TIME := 4.0
 const SUITE_INTERVAL := 12.0
 const SUITE_COUNT := 2.0
 const GOLD_SHELL_TIME := 4.0
@@ -103,6 +109,10 @@ var _smash_hit := false
 var _aim_dir := Vector2.RIGHT
 var _grid_points: Array[Vector2] = []
 var _shaman_bolt: WeaponData
+var speakers: Array[Enemy] = []
+var _speakers_spawned := false
+var _speakers_alive := 0
+var _bass_cd := 5.0
 
 
 func setup(owner: Enemy) -> void:
@@ -132,6 +142,10 @@ func setup(owner: Enemy) -> void:
 	_shaman_bolt = WeaponDB.get_weapon(&"shaman_bolt_v1")
 	_grid_points.clear()
 	_smash_hit = false
+	speakers = []
+	_speakers_spawned = false
+	_speakers_alive = 0
+	_bass_cd = 5.0
 
 
 ## Порог второй фазы (доля HP).
@@ -151,7 +165,7 @@ func is_invulnerable() -> bool:
 static func passive_text(boss_pattern: String) -> String:
 	match boss_pattern:
 		"overlord":
-			return "Свита: каждые %d с зовёт подручных" % int(SUITE_INTERVAL)
+			return "Колонки трона: пока стоят, Король получает на 60%% меньше урона. Свита: каждые %d с зовёт подручных" % int(SUITE_INTERVAL)
 		"magnate":
 			return "Золотая корка: на 75/50/25%% здоровья получает вдвое меньше урона %d с" % int(GOLD_SHELL_TIME)
 		"baron":
@@ -163,11 +177,14 @@ static func passive_text(boss_pattern: String) -> String:
 func damage_taken_mult() -> float:
 	if pattern == "baron" and (state == State.BEAM or state == State.PRESS):
 		return FOAM_MULT
+	if pattern == "overlord" and _speakers_alive > 0:
+		return SPEAKER_MULT
 	return GOLD_SHELL_MULT if shell_left > 0.0 else 1.0
 
 
 func _tick_passive(delta: float) -> void:
 	if pattern == "overlord":
+		_tick_speakers(delta)
 		_suite_timer -= delta
 		if _suite_timer <= 0.0 and state == State.WALK:
 			_suite_timer = SUITE_INTERVAL * _tempo()
@@ -178,6 +195,47 @@ func _tick_passive(delta: float) -> void:
 			_shell_step += 1
 			shell_left = GOLD_SHELL_TIME
 			enemy.request_fx("stomp", 120.0)
+
+
+func _is_speaker(speaker: Enemy) -> bool:
+	return is_instance_valid(speaker) and speaker.pool_index >= 0 and speaker.data != null and speaker.data.id == &"throne_speaker" and speaker.hp > 0.0
+
+
+func _count_speakers() -> int:
+	var alive := 0
+	for speaker in speakers:
+		if _is_speaker(speaker):
+			alive += 1
+	return alive
+
+
+## Колонки трона: пока хоть одна стоит, Король защищён; последняя упала — оглушение музыкой.
+func _tick_speakers(delta: float) -> void:
+	_bass_cd = maxf(_bass_cd - delta, 0.0)
+	if phase != 1:
+		_speakers_alive = 0
+		return
+	if not _speakers_spawned:
+		_speakers_spawned = true
+		enemy.request_fx("speakers", float(SPEAKER_COUNT))
+		_speakers_alive = _count_speakers()
+		return
+	var alive := _count_speakers()
+	if alive < _speakers_alive:
+		if alive == 0:
+			enemy.posture_stun = MUTE_TIME
+			enemy.request_fx("muted")
+		else:
+			enemy.request_fx("speaker_down", float(alive))
+	_speakers_alive = alive
+
+
+func _break_speakers() -> void:
+	for speaker in speakers:
+		if _is_speaker(speaker):
+			speaker.take_damage(speaker.max_hp * 2.0)
+	speakers.clear()
+	_speakers_alive = 0
 
 
 func fury() -> bool:
@@ -247,6 +305,17 @@ func tick(player: Player, dir: Vector2, path_dir: Vector2, dist: float, delta: f
 				else:
 					_rest()
 			return path_dir * speed() * 0.2
+		State.BASS_WINDUP:
+			windup = clampf(state_time / BASS_WINDUP_TIME, 0.0, 1.0)
+			enemy.queue_redraw()
+			if state_time >= BASS_WINDUP_TIME:
+				_fire_bass()
+				_enter(State.BASS)
+			return Vector2.ZERO
+		State.BASS:
+			if state_time >= 0.5:
+				_rest(0.4)
+			return Vector2.ZERO
 		State.RING_CHARGE:
 			windup = clampf(state_time / 0.8, 0.0, 1.0)
 			enemy.queue_redraw()
@@ -488,6 +557,7 @@ func tick(player: Player, dir: Vector2, path_dir: Vector2, dist: float, delta: f
 
 
 func _begin_transform() -> void:
+	_break_speakers()
 	_enter(State.TRANSFORM)
 	windup = 0.0
 	strike = 1.0
@@ -504,6 +574,11 @@ func _next_attack(dist: float) -> void:
 		return
 	if pattern == "shaman":
 		_next_shaman_attack(dist)
+		return
+	if pattern == "overlord" and phase == 1 and _speakers_alive > 0 and _bass_cd <= 0.0:
+		_bass_cd = BASS_INTERVAL * _tempo()
+		_enter(State.BASS_WINDUP)
+		SoundManager.play(&"beam_charge", -2.0)
 		return
 	# Каждая пятая атака — общая «специальная»: призыв, спираль или ковёр по очереди.
 	if _step % 5 == 0:
@@ -739,6 +814,24 @@ func _throw_coin_bag(player: Player, exact: bool) -> void:
 	LobPool.active.throw(from, target, 1.05, 260.0, 84.0, 24.0 * enemy.damage_mult, Color("#ffd257"), _bag_tex, _blast_tex, 44.0, 5.0)
 
 
+func _fire_bass() -> void:
+	if _ring_bullet == null:
+		return
+	_ring_offset += 0.35
+	for speaker in speakers:
+		if not _is_speaker(speaker):
+			continue
+		var origin := speaker.global_position + Vector2(0, -20)
+		for i in BASS_BULLETS:
+			var bullet := BulletPool.spawn(_ring_bullet, origin, Vector2.from_angle(_ring_offset + TAU * float(i) / BASS_BULLETS), Bullet.Team.ENEMY)
+			if bullet != null:
+				bullet.damage_scale = enemy.damage_mult
+		enemy.request_fx("bass", 160.0, speaker.global_position)
+	SoundManager.play(&"enemy_shot")
+	strike = 1.0
+	_flash_clip = 0.12
+
+
 func _fire_ring(count: int) -> void:
 	if _ring_bullet == null:
 		return
@@ -808,6 +901,8 @@ func clip(moving: bool, hurt: float) -> Array:
 			return ["hit" if pattern == "overlord" else "wreck", 0.0]
 		State.ROCKETS:
 			return ["strike" if _flash_clip > 0.0 else "aim", 0.0]
+		State.BASS_WINDUP, State.BASS:
+			return ["windup" if state == State.BASS_WINDUP else "strike", 0.0]
 		State.RING_CHARGE, State.GATLING_SPIN, State.STOMP_WINDUP:
 			return ["p2_windup" if p2 else "windup", 0.0]
 		State.LEAP_WINDUP, State.DASH_WINDUP:
@@ -909,9 +1004,29 @@ func _draw_zone(canvas: Node2D, at: Vector2, radius: float, t: float) -> void:
 	canvas.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
+## Золотые нити от Короля к колонкам: видно, что именно даёт ему защиту.
+func _draw_speaker_links(canvas: Node2D) -> void:
+	var pulse := 0.35 + 0.2 * sin(Time.get_ticks_msec() * 0.006)
+	var from := Vector2(0, -enemy.data.radius)
+	for speaker in speakers:
+		if _is_speaker(speaker):
+			var to := canvas.to_local(speaker.global_position) + Vector2(0, -24)
+			canvas.draw_line(from, to, Color(1.0, 0.82, 0.25, pulse), 3.0)
+			canvas.draw_circle(to, 7.0, Color(1.0, 0.82, 0.25, pulse + 0.2))
+
+
 ## Телеграфы в локальных координатах врага (Enemy._draw вызывает под спрайтом).
 func draw(canvas: Node2D) -> void:
+	if pattern == "overlord" and _speakers_alive > 0:
+		_draw_speaker_links(canvas)
 	match state:
+		State.BASS_WINDUP:
+			var t := clampf(state_time / BASS_WINDUP_TIME, 0.0, 1.0)
+			for speaker in speakers:
+				if _is_speaker(speaker):
+					var at := canvas.to_local(speaker.global_position)
+					canvas.draw_arc(at, 50.0 + 120.0 * t, 0.0, TAU, 40, Color(TELEGRAPH, 0.3 + 0.6 * t), 5.0, true)
+					canvas.draw_arc(at, 50.0, 0.0, TAU, 24, Color(1.0, 0.92, 0.35, 0.8), 3.0, true)
 		State.RING_CHARGE:
 			var t := clampf(state_time / 0.8, 0.0, 1.0)
 			canvas.draw_arc(Vector2.ZERO, enemy.data.radius * (1.1 + 0.9 * t), 0.0, TAU, 48, Color(TELEGRAPH, 0.35 + 0.5 * t), 6.0, true)

@@ -22,6 +22,8 @@ const SPAWN_MARGIN := 90.0
 const SPAWN_DEPTH := 260.0
 const GATE_SHARE := 0.45
 const AHEAD_SHARE := 0.5
+const SPEAKER_RING := 170.0
+const SPEAKER_HP_SHARE := 0.06
 const PACK_SPREAD := 110.0
 const GATE_MIN_DISTANCE := 520.0
 const ESCORT_GAP := 60.0
@@ -355,6 +357,31 @@ func summon_minions(count: int) -> void:
 		var at := _level.find_spawn_point(boss.global_position, ring, ring + 160.0, data.radius)
 		if at != Vector2.INF:
 			_enemies.spawn(data, at, _hp_mult, _dmg_mult)
+
+
+## Колонки трона Короля Хлама: стоят вокруг босса, HP — доля от HP босса.
+func spawn_speakers(count: int) -> Array[Enemy]:
+	var list: Array[Enemy] = []
+	if boss == null or not boss.is_alive():
+		return list
+	var data := ContentDB.get_enemy(&"throne_speaker")
+	if data == null:
+		return list
+	var base := randf() * TAU
+	for i in count:
+		var angle := base + TAU * float(i) / count
+		var ring := boss.data.radius + SPEAKER_RING
+		var want := boss.global_position + Vector2.from_angle(angle) * ring
+		var at := _level.find_spawn_point(want, 0.0, 120.0, data.radius)
+		if at == Vector2.INF:
+			continue
+		var speaker := _enemies.spawn(data, at, 1.0, 1.0)
+		if speaker == null:
+			continue
+		speaker.max_hp = boss.max_hp * SPEAKER_HP_SHARE
+		speaker.hp = speaker.max_hp
+		list.append(speaker)
+	return list
 
 
 ## Страховка от вечной волны: на арене никого, а «остались» враги или босс, и они не появляются 15 секунд.

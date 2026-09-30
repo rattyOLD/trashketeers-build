@@ -105,6 +105,16 @@ def main():
     clips["p2_windup"] = {"frames": [c[0], c[1]], "fps": 4.0, "loop": False}
     clips["swing"] = {"frames": [c[2], c[3], c[4]], "fps": 14.0, "loop": False}
     clips["stun"] = {"frames": [c[5], c[6], c[7], c[6]], "fps": 3.0, "loop": True}
+    clips["aim"] = {"frames": [c[0]], "fps": 1.0, "loop": False}
+    clips["beam"] = {"frames": [c[0], a[0]], "fps": 6.0, "loop": True}
+    clips["vomit"] = {"frames": [c[0], c[1]], "fps": 5.0, "loop": True}
+    clips["strike"] = {"frames": [c[1]], "fps": 1.0, "loop": False}
+    clips["taunt"] = {"frames": [a[0], a[1], a[2], a[3]], "fps": 8.0, "loop": True}
+    clips["hit"] = {"frames": [a[2]], "fps": 1.0, "loop": False}
+    clips["p2_hit"] = {"frames": [a[2]], "fps": 1.0, "loop": False}
+    clips["death"] = {"frames": [c[5], c[6], c[7]], "fps": 4.0, "loop": False}
+    for name in clips:
+        clips[name]["frames"] = [int(f) for f in clips[name]["frames"]]
     meta = dict(old_meta)
     meta["frames"] = frames
     meta["names"] = names

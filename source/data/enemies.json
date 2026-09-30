@@ -637,6 +637,29 @@
           -92
         ]
       ]
+    },
+    {
+      "enemy_id": "throne_speaker",
+      "display_name": "Колонка трона",
+      "behavior": "chaser",
+      "max_hp": 600,
+      "move_speed": 0,
+      "contact_damage": 0,
+      "radius": 34,
+      "sprite": "res://assets/enemies/throne_speaker.png",
+      "sprite_scale": 0.62,
+      "sprite_faces_right": true,
+      "outline_world": 2.5,
+      "knockback_resist": 1.0,
+      "xp": 0,
+      "nut_drop": 0,
+      "nut_drop_chance": 0.0,
+      "fx_color": "#FFD23F",
+      "size_variance": 0.0,
+      "accessories": [],
+      "lunge": false,
+      "flank_chance": 0.0,
+      "accent_variants": []
     }
   ]
 }
