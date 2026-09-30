@@ -268,7 +268,18 @@ func _physics_process(delta: float) -> void:
 
 # --- Зоны пола ---------------------------------------------------------------------------------
 
+var _lane_shift := 0
+var _lane_wide := 0.0
+
+
+## Каждый забег двигает и утолщает дорожки, поэтому даже одна и та же глава каждый раз выглядит иначе.
+func _roll_run_twist() -> void:
+	_lane_shift = randi_range(-2, 2)
+	_lane_wide = randf_range(-0.4, 1.0)
+
+
 func _assign_zones() -> void:
+	_roll_run_twist()
 	var w := grid_size.x
 	var h := grid_size.y
 	var mid_y := h / 2
@@ -295,20 +306,25 @@ func _assign_zones() -> void:
 
 ## Рисунок дорожек свалки по варианту локации: крест, кольцо, диагонали, три полосы.
 func _junk_lane(x: int, y: int, cx: int, mid_y: int) -> bool:
+	var width := 2.0 + _lane_wide
 	match int(chapter.get("variant", 0)):
 		1:
-			var ring_x := absi(absi(x - cx) - 11)
-			var ring_y := absi(absi(y - mid_y) - 12)
-			var inside_x := absi(x - cx) <= 13
-			var inside_y := absi(y - mid_y) <= 14
-			return (ring_x < 2 and inside_y) or (ring_y < 2 and inside_x)
+			var radius_x := 11 + _lane_shift
+			var radius_y := 12 + _lane_shift
+			var ring_x := absi(absi(x - cx) - radius_x)
+			var ring_y := absi(absi(y - mid_y) - radius_y)
+			var inside_x := absi(x - cx) <= radius_x + 2
+			var inside_y := absi(y - mid_y) <= radius_y + 2
+			return (ring_x < width and inside_y) or (ring_y < width and inside_x)
 		2:
 			var dx := float(x - cx) + 0.5
-			var dy := float(y - mid_y) * 0.8
-			return absf(absf(dx) - absf(dy)) < 2.2 and y >= RING_TOP + 6
+			var dy := float(y - mid_y + _lane_shift) * 0.8
+			return absf(absf(dx) - absf(dy)) < 2.2 + _lane_wide and y >= RING_TOP + 6
 		3:
-			return absi(y - mid_y) < 2 or absi(y - mid_y - 12) < 2 or absi(y - mid_y + 12) < 2
-	return absi(y - mid_y) < 2 or (absi(x - cx + 0.5) < 2.0 and y >= RING_TOP + 6)
+			var gap := 12 + _lane_shift
+			var mid := absi(y - mid_y - _lane_shift) < width
+			return mid or absi(y - mid_y - gap) < width or absi(y - mid_y + gap) < width
+	return absi(y - mid_y - _lane_shift) < width or (absi(x - cx + 0.5 + _lane_shift) < width and y >= RING_TOP + 6)
 
 
 ## Банк: крест площади по центру, газоны по четвертям, розовые дорожки у боковых стен,
