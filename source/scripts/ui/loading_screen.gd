@@ -215,6 +215,15 @@ func _init() -> void:
 	tip.offset_bottom = 120.0
 	_root.add_child(tip)
 
+	var build := UiStyle.label("Версия %s" % Platform.build_label(), 18, Color("#8f84b8"), 4)
+	build.anchor_left = 0.0
+	build.anchor_right = 1.0
+	build.anchor_top = 1.0
+	build.anchor_bottom = 1.0
+	build.offset_top = -44.0
+	build.offset_bottom = -10.0
+	_root.add_child(build)
+
 	_flash = ColorRect.new()
 	_flash.color = Color(1, 1, 1, 0)
 	_flash.set_anchors_preset(Control.PRESET_FULL_RECT)

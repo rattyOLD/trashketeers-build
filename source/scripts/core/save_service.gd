@@ -390,7 +390,7 @@ func set_quality(q: int) -> void:
 
 
 func apply_quality() -> void:
-	var caps := [1.5, 2.0, 2.0] if Platform.is_touch() else [1.5, 2.0, 3.0]
+	var caps := [1.0, 1.5, 2.0] if Platform.is_touch() else [1.25, 2.0, 3.0]
 	Platform.set_render_cap(caps[get_quality()])
 
 
@@ -399,7 +399,7 @@ func is_minimap_enabled() -> bool:
 
 
 func is_fx_lite() -> bool:
-	return bool(data.get("fx_lite", false))
+	return get_quality() == 0 or bool(data.get("fx_lite", false))
 
 
 func is_glow_enabled() -> bool:

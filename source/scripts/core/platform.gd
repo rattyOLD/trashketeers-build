@@ -161,6 +161,13 @@ func consume_unclean_exit() -> String:
 	return "" if value == null else str(value)
 
 
+func build_label() -> String:
+	if not is_web:
+		return "редактор"
+	var value: Variant = _js("return window.__trash_build ? window.__trash_build.label + ' · ' + window.__trash_build.time : '';")
+	return "" if value == null else str(value)
+
+
 func fullscreen_supported() -> bool:
 	if not is_web:
 		return true

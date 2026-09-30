@@ -201,6 +201,7 @@ func _start_wave(number: int) -> void:
 	remaining_to_spawn = int(ceil(float(_wave["count"]) * pow(float(d["loop_count"]), loop) * float(_chapter.get("count_mult", 1.0))))
 	_interval = maxf(float(_wave["spawn_interval"]) * pow(float(d["loop_interval"]), loop), 0.25)
 	_max_alive = int(_wave["max_alive"]) + int(d["loop_max_alive"]) * loop
+	_boss_pending = false
 	phase = Phase.INTRO
 	_phase_time = INTRO_TIME
 	var title: String = _wave["title"]
@@ -241,6 +242,10 @@ func _tick_boss(delta: float) -> void:
 	if _boss_pending:
 		_boss_retry -= delta
 		if _boss_retry > 0.0:
+			return
+		if _boss_key().is_empty():
+			Platform.send_report("softlock", "boss pending without key wave=%d chapter=%d phase=%d" % [wave_number, chapter_index, phase])
+			_boss_pending = false
 			return
 		var boss_data := ContentDB.get_enemy(StringName(_boss_key()))
 		if boss_data == null:
@@ -369,6 +374,8 @@ func _tick_leash(delta: float) -> void:
 
 
 func _pick_weighted(weights: Dictionary) -> StringName:
+	if weights.is_empty():
+		return &"rat_punk"
 	var total := 0.0
 	for key in weights:
 		total += weights[key]

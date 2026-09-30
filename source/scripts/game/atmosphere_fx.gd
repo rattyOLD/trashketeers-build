@@ -70,7 +70,7 @@ func build(parent: Node) -> void:
 	parent.add_child(_weather_layer)
 
 	_weather = WeatherDraw.new()
-	_weather.density = 1.0 if SaveService.get_quality() >= 1 else 0.45
+	_weather.density = 1.0 if SaveService.get_quality() >= 1 else 0.3
 	_weather.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_weather_layer.add_child(_weather)
 

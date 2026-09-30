@@ -14,6 +14,10 @@ func _init() -> void:
 	var gift := GiftBox.new("news")
 	gift.claimed.connect(func() -> void: changed.emit())
 	content.add_child(gift)
+	var build_panel := PanelContainer.new()
+	build_panel.add_theme_stylebox_override("panel", UiStyle.box(Color(0.05, 0.02, 0.12, 0.85), UiStyle.NEON, 3, 16))
+	build_panel.add_child(UiStyle.label("Установлена версия: %s" % Platform.build_label(), 22, UiStyle.NEON, 6))
+	content.add_child(build_panel)
 	_list = MenuPopups.scroll_list(content)
 
 

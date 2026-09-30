@@ -421,6 +421,8 @@ func _add_macro_overlay(strength: float) -> void:
 
 ## Узлы теней по секторам — первыми детьми слоя декалей, чтобы тени лежали под светом.
 func _build_shadow_layers() -> void:
+	if SaveService.get_quality() == 0:
+		return
 	for sy in ceili(float(grid_size.y) / SECTOR):
 		for sx in ceili(float(grid_size.x) / SECTOR):
 			var node := ShadowDecals.new()

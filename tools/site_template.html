@@ -109,6 +109,13 @@ html, body {
 	text-shadow: 0 0 10px rgba(0, 245, 255, 0.7);
 	font-variant-numeric: tabular-nums;
 }
+#boot .ver {
+	margin-top: 18px;
+	font-size: 12px;
+	letter-spacing: 1.5px;
+	color: #8f84b8;
+	opacity: 0.85;
+}
 #tip {
 	margin: 0;
 	max-width: 320px;
@@ -277,6 +284,7 @@ html, body {
 	<p id="pct">0%</p>
 	<p id="status">Подключаемся к свалке…</p>
 	<p id="tip"></p>
+	<p class="ver" id="ver"></p>
 	<p id="error" hidden></p>
 	<button id="retry" type="button" hidden>Попробовать ещё раз</button>
 </div>
@@ -306,6 +314,10 @@ html, body {
 })();
 </script>
 
+<script>
+window.__trash_build = {label: '__BUILD_LABEL__', time: '__BUILD_TIME__'};
+document.getElementById('ver').textContent = 'Версия ' + window.__trash_build.label + ' · сборка от ' + window.__trash_build.time;
+</script>
 <script src="audio_unlock.js"></script>
 <script src="index.js"></script>
 <script>
@@ -487,7 +499,7 @@ html, body {
 				kind: kind,
 				text: full,
 				time: new Date().toISOString(),
-				build: 'v34',
+				build: window.__trash_build.label,
 				buildId: BUILD_ID_REPORT,
 				session: SESSION_ID,
 				env: env
@@ -571,6 +583,16 @@ html, body {
 		}
 	});
 	setTimeout(checkVersion, 8000);
+	// Закэшированная страница старой сборки: один раз принудительно перезагружаемся на свежую.
+	fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (v) {
+		if (v && v.build && v.build !== BUILD_ID) {
+			let tries = 0;
+			try { tries = Number(sessionStorage.getItem('trk_reload') || 0); sessionStorage.setItem('trk_reload', String(tries + 1)); } catch (e) {}
+			if (tries < 2) {
+				window.location.replace(window.location.pathname + '?v=' + v.build);
+			}
+		}
+	}).catch(function () {});
 
 	let started = false;
 	let crashed = false;

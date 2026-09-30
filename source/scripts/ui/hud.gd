@@ -241,11 +241,24 @@ func apply_layout() -> void:
 	Controls.place(_skill, "dash", area)
 	Controls.place(_slot_bar, "slots", area, BattleControls.slots_base_size(_slot_bar.count))
 	Controls.place(_interact, "interact", area)
+	_resolve_button_overlap(area)
 	var opacity := clampf(float(Controls.get_value("opacity")), 0.3, 1.0)
 	for item in [_dash, _slot_bar, _skill]:
 		item.modulate.a = opacity
 	joystick.modulate.a = opacity
 	_layout_revision = Controls.revision
+
+
+func _resolve_button_overlap(area: Vector2) -> void:
+	var main_btn: Control = _skill if _skill.visible else _dash
+	var slot_rect := Rect2(_slot_bar.position, _slot_bar.size).grow(6.0)
+	if not slot_rect.intersects(Rect2(main_btn.position, main_btn.size)):
+		return
+	var gap := 14.0
+	var left_side := main_btn.position.x + main_btn.size.x * 0.5 > area.x * 0.5
+	var x := main_btn.position.x - gap - _slot_bar.size.x if left_side else main_btn.position.x + main_btn.size.x + gap
+	var y := main_btn.position.y + main_btn.size.y - _slot_bar.size.y
+	_slot_bar.position = Vector2(clampf(x, 4.0, area.x - _slot_bar.size.x - 4.0), maxf(y, 4.0))
 
 
 func set_skill(title: String, color: Color) -> void:
