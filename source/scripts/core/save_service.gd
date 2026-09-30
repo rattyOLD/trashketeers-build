@@ -268,7 +268,8 @@ func _apply_text(text: String) -> void:
 		data[key] = int(data[key])
 	_sanitize_arsenal()
 	KnifeProgress.sanitize(data)
-	if data["nickname"] == "":
+	data["nickname"] = clean_nickname(str(data["nickname"]))
+	if str(data["nickname"]).length() < 2:
 		data["nickname"] = random_nickname()
 
 
@@ -397,7 +398,7 @@ func set_quality(q: int) -> void:
 
 
 func apply_quality() -> void:
-	var caps := [1.25, 1.75, 2.5] if Platform.is_touch() else [1.25, 2.0, 3.0]
+	var caps := [1.5, 2.0, 2.5] if Platform.is_touch() else [1.25, 2.0, 3.0]
 	Platform.set_render_cap(caps[get_quality()])
 	Engine.max_fps = 30 if bool(data.get("eco_fps", false)) else 60
 
@@ -717,14 +718,28 @@ func get_biomes_cleared() -> int:
 	return seen.size()
 
 
+## Ник: только буквы, цифры, «_», «-» и «.», без пробелов, не длиннее NICKNAME_MAX.
+static func clean_nickname(nick: String) -> String:
+	var out := ""
+	for i in nick.length():
+		var ch := nick.substr(i, 1)
+		var code := ch.unicode_at(0)
+		var is_letter := (code >= 48 and code <= 57) or (code >= 65 and code <= 90) or (code >= 97 and code <= 122) or (code >= 0x410 and code <= 0x44F) or code == 0x401 or code == 0x451 or code == 0x406 or code == 0x456 or code == 0x404 or code == 0x454 or code == 0x407 or code == 0x457
+		if is_letter or ch == "_" or ch == "-" or ch == ".":
+			out += ch
+		if out.length() >= NICKNAME_MAX:
+			break
+	return out
+
+
 func set_nickname(nick: String) -> void:
-	var clean := nick.strip_edges().left(NICKNAME_MAX)
-	data["nickname"] = clean if not clean.is_empty() else random_nickname()
+	var clean := clean_nickname(nick)
+	data["nickname"] = clean if clean.length() >= 2 else random_nickname()
 	save_data()
 
 
 static func random_nickname() -> String:
-	return "%s%s%d" % [NICK_PREFIXES.pick_random(), NICK_ROOTS.pick_random(), randi_range(1, 99)]
+	return ("%s%s%d" % [NICK_PREFIXES.pick_random(), NICK_ROOTS.pick_random(), randi_range(1, 99)]).left(NICKNAME_MAX)
 
 
 # --- Уровень аккаунта ----------------------------------------------------------------------------

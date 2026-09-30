@@ -130,3 +130,16 @@ static func pulse(control: Control, amount: float = 0.06, period: float = 0.9) -
 	var tween := control.create_tween().set_loops()
 	tween.tween_property(control, "scale", Vector2.ONE * (1.0 + amount), period * 0.5).set_trans(Tween.TRANS_SINE)
 	tween.tween_property(control, "scale", Vector2.ONE, period * 0.5).set_trans(Tween.TRANS_SINE)
+
+
+## Телефон уменьшает холст 1280×720 (или 720×1280) вдвое: мелкие подписи HUD становятся нечитаемыми.
+## Поднимаем размер и контур у небольших Label внутри переданных узлов; крупные баннеры не трогаем.
+static func boost_labels(node: Node, factor: float, max_size: int = 30) -> void:
+	if node is Label:
+		var label := node as Label
+		var current := label.get_theme_font_size("font_size")
+		if current > 0 and current <= max_size:
+			label.add_theme_font_size_override("font_size", roundi(current * factor))
+			label.add_theme_constant_override("outline_size", label.get_theme_constant("outline_size") + 2)
+	for child in node.get_children():
+		boost_labels(child, factor, max_size)

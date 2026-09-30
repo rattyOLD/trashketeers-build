@@ -904,10 +904,16 @@ class Profile:
 		edit.max_length = SaveService.NICKNAME_MAX
 		edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		edit.custom_minimum_size = Vector2(0, 56)
-		SearchBar.style(edit, 26)
-		SearchBar.attach_touch_input(edit, "Твой ник")
+		SearchBar.style(edit, 24)
+		SearchBar.attach_touch_input(edit, "Ник: до 16 символов, без пробелов")
+		edit.text_changed.connect(func(text: String) -> void:
+			var cleaned := SaveService.clean_nickname(text)
+			if cleaned != text:
+				var caret := mini(edit.caret_column, cleaned.length())
+				edit.text = cleaned
+				edit.caret_column = caret)
 		var save := func() -> void:
-			if edit.text.strip_edges() != SaveService.get_nickname():
+			if edit.text != SaveService.get_nickname():
 				SaveService.set_nickname(edit.text)
 				edit.text = SaveService.get_nickname()
 		edit.text_submitted.connect(func(_t: String) -> void:

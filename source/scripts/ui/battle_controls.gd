@@ -93,16 +93,16 @@ class SlotBar:
 			draw_style_box(BattleControls.button_style(fill, border, 6 if is_active else 3), rect)
 			if is_active and _flash > 0.0:
 				draw_style_box(BattleControls.button_style(Color(1, 1, 1, 0.35 * _flash), Color(1, 1, 1, 0), 0), rect)
-			draw_string_outline(font, rect.position + Vector2(10, 24), str(i + 1), HORIZONTAL_ALIGNMENT_LEFT, 30, 22, 6, Color(0.06, 0.03, 0.1))
-			draw_string(font, rect.position + Vector2(10, 24), str(i + 1), HORIZONTAL_ALIGNMENT_LEFT, 30, 22, Color(1, 1, 1, 0.95 if is_active else 0.6))
+			draw_string_outline(font, rect.position + Vector2(10, 26), str(i + 1), HORIZONTAL_ALIGNMENT_LEFT, 30, 26, 7, Color(0.06, 0.03, 0.1))
+			draw_string(font, rect.position + Vector2(10, 26), str(i + 1), HORIZONTAL_ALIGNMENT_LEFT, 30, 26, Color(1, 1, 1, 0.95 if is_active else 0.6))
 			if weapon == null:
 				draw_string(font, rect.position + Vector2(0, 62), "ПУСТО", HORIZONTAL_ALIGNMENT_CENTER, SLOT_W, 18, Color(1, 1, 1, 0.3))
 				continue
 			var tilt := 0.0
 			WeaponIcons.draw(self, weapon.icon, rect.position + Vector2(SLOT_W * 0.5 + 6, 44), 0.62 if is_active else 0.52, tilt, weapon.effect_color)
 			var label := weapon.short_name
-			draw_string_outline(font, rect.position + Vector2(4, 90), label, HORIZONTAL_ALIGNMENT_CENTER, SLOT_W - 8, 16, 5, Color(0.06, 0.03, 0.1))
-			draw_string(font, rect.position + Vector2(4, 90), label, HORIZONTAL_ALIGNMENT_CENTER, SLOT_W - 8, 16, Color(accent, 1.0 if is_active else 0.7))
+			draw_string_outline(font, rect.position + Vector2(4, 90), label, HORIZONTAL_ALIGNMENT_CENTER, SLOT_W - 8, 20, 6, Color(0.06, 0.03, 0.1))
+			draw_string(font, rect.position + Vector2(4, 90), label, HORIZONTAL_ALIGNMENT_CENTER, SLOT_W - 8, 20, Color(accent, 1.0 if is_active else 0.88))
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 

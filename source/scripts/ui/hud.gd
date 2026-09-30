@@ -51,6 +51,7 @@ var _weapon_chip: PanelContainer
 var _weapon_icon: WeaponIcons.IconRect
 var _weapon_name: Label
 var _dash: DashButton
+const HUD_TEXT_BOOST := 1.3
 var _skill: SkillButton
 var _rail_combo: Label
 var _slot_bar: BattleControls.SlotBar
@@ -154,6 +155,11 @@ func build(currency_icon: Texture2D, weapon: WeaponData) -> void:
 	_fps_label.visible = bool(SaveService.data["show_fps"])
 	_hint = HintBubble.new()
 	_root.add_child(_hint)
+	if Platform.is_touch():
+		var panels: Array[Node] = [_level_up, _pause, _result, _revive, _run_result, _chapter_card, _hint]
+		for child in _root.get_children():
+			if not panels.has(child):
+				UiStyle.boost_labels(child, HUD_TEXT_BOOST)
 	_wire_hints()
 	_dash.held.connect(func() -> void: _hint.show_for(_dash, "Рывок: быстрый бросок в сторону движения, чтобы уйти от удара. Перезаряжается."))
 	_slot_bar.slot_held.connect(_on_slot_held)
@@ -801,8 +807,8 @@ class SkillButton:
 		var alpha := 1.0 if ready else 0.5
 		draw_string_outline(font, Vector2(0, c.y - 4.0), "НАВЫК", HORIZONTAL_ALIGNMENT_CENTER, size.x, int(size.x * 0.2), 6, Color(0.06, 0.03, 0.1))
 		draw_string(font, Vector2(0, c.y - 4.0), "НАВЫК", HORIZONTAL_ALIGNMENT_CENTER, size.x, int(size.x * 0.2), Color(accent, alpha))
-		draw_string_outline(font, Vector2(6, c.y + size.x * 0.2), title, HORIZONTAL_ALIGNMENT_CENTER, size.x - 12.0, int(size.x * 0.12), 4, Color(0.06, 0.03, 0.1))
-		draw_string(font, Vector2(6, c.y + size.x * 0.2), title, HORIZONTAL_ALIGNMENT_CENTER, size.x - 12.0, int(size.x * 0.12), Color(1, 1, 1, alpha * 0.85))
+		draw_string_outline(font, Vector2(6, c.y + size.x * 0.2), title, HORIZONTAL_ALIGNMENT_CENTER, size.x - 12.0, int(size.x * 0.15), 5, Color(0.06, 0.03, 0.1))
+		draw_string(font, Vector2(6, c.y + size.x * 0.2), title, HORIZONTAL_ALIGNMENT_CENTER, size.x - 12.0, int(size.x * 0.15), Color(1, 1, 1, alpha * 0.85))
 
 
 class DashButton:
