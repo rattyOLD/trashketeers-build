@@ -49,6 +49,10 @@ pointing/emulate_touch_from_mouse=true
 2d_physics/layer_7="shield"
 2d_physics/layer_8="prop"
 
+[physics]
+
+common/physics_interpolation=true
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"

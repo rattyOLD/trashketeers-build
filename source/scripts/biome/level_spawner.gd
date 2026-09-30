@@ -50,6 +50,7 @@ var player_start := Vector2.ZERO
 var bounds := Rect2()
 var boss_rect := Rect2()
 var boss_point := Vector2.ZERO
+var _in_scene := false
 var gate_rects: Array[Rect2] = []
 ## Засад в аренах нет; поле оставлено для совместимости с режимами, которые его читают.
 var ambush_active := false
@@ -750,7 +751,30 @@ func _scene_spacing_ok(p: Vector2) -> bool:
 	return true
 
 
+func _scene_blocked_any(p: Vector2) -> bool:
+	return chapter.has("scenes") and _scene_blocked(p)
+
+
+func _scene_blocked(p: Vector2) -> bool:
+	var zone := zone_at(p)
+	if zone == Zone.BOSS or zone == Zone.GATE or zone == Zone.EDGE:
+		return true
+	if boss_rect.grow(90.0).has_point(p) or p.distance_to(boss_point + Vector2(0, 60)) < 220.0:
+		return true
+	for r in gate_rects:
+		if r.grow(110.0).has_point(p):
+			return true
+	return false
+
+
 func _place_scene(scene: Dictionary, anchor: Vector2) -> bool:
+	_in_scene = true
+	var placed := _place_scene_items(scene, anchor)
+	_in_scene = false
+	return placed
+
+
+func _place_scene_items(scene: Dictionary, anchor: Vector2) -> bool:
 	var mirror := -1.0 if randf() < 0.5 else 1.0
 	var items: Array = scene.get("items", [])
 	if items.is_empty():
@@ -842,7 +866,7 @@ func _build_decor() -> void:
 func _place_prop(base: Vector2, id: String, allow_hub: bool) -> ArenaProp:
 	var shape := ArenaProp.make_shape(id)
 	var center := base + ArenaProp.shape_offset(id)
-	if not _can_place(shape, center):
+	if (_in_scene and _scene_blocked(center)) or not _can_place(shape, center):
 		return null
 	if not allow_hub and base.distance_to(player_start) < 120.0:
 		return null
@@ -857,7 +881,7 @@ func _place_prop(base: Vector2, id: String, allow_hub: bool) -> ArenaProp:
 func _place_destructible(base: Vector2, id: String) -> DestructibleObject:
 	var shape := DestructibleObject.shape_for(DestructibleObject.Kind.ART, id)
 	var center := base + DestructibleObject.offset_for(DestructibleObject.Kind.ART, id)
-	if not _can_place(shape, center):
+	if _scene_blocked_any(center) or not _can_place(shape, center):
 		return null
 	var object := DestructibleObject.new()
 	object.position = base

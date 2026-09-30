@@ -115,7 +115,8 @@ func is_mini_wave() -> bool:
 
 
 func _boss_key() -> String:
-	return String(_wave.get("boss", _wave.get("miniboss", "")))
+	var key := String(_wave.get("boss", ""))
+	return key if not key.is_empty() else String(_wave.get("miniboss", ""))
 
 
 ## Номер волны внутри главы (1…10).

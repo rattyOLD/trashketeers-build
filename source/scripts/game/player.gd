@@ -16,7 +16,7 @@ signal dash_ended(at: Vector2)
 const RADIUS := 20.0
 const BASE_SPEED := 240.0
 const BASE_MAX_HP := 100.0
-const BASE_MAGNET := 62.0
+const BASE_MAGNET := 110.0
 const INVULN_TIME := 0.7
 const KNOCKBACK_DECAY := 5.0
 const FALL_TIME := 0.9

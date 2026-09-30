@@ -207,6 +207,8 @@ func setup(player: Player, arena: DragonArena, comets: CometPool, laser: WhiteDr
 	_reflection.material = mirror
 	layers.decals.add_child(_reflection)
 
+	for smooth: Node in [self, _shadow, _reflection]:
+		smooth.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_ON
 	_tail_fx = TailWaveFx.new()
 	layers.fx.add_child(_tail_fx)
 	for i in SHOCKWAVES:

@@ -88,6 +88,7 @@ func start(_weapon_id: StringName = &"") -> void:
 	var exclude: Array[RID] = [dragon.get_rid()]
 	laser.setup(exclude, scorch)
 	dragon.setup(player, arena, comets, laser, fx, layers)
+	dragon.reset_physics_interpolation.call_deferred()
 	player.fell_into_void.connect(_on_player_fell)
 	if SaveService.is_glow_enabled():
 		add_child(RaidEnvironment.new())

@@ -80,7 +80,7 @@ func _spawn_player(at: Vector2, weapon: WeaponData, target_finder: Callable) -> 
 	stats.add_flat(&"crit_chance_add", CharacterDB.get_stat(hero, "crit"))
 	match hero:
 		"raccoon":
-			stats.add_flat(&"magnet_mult", 0.25)
+			stats.add_flat(&"magnet_mult", 0.5)
 		"red_panda":
 			stats.add_flat(&"burn_chance", 0.25)
 		"night":

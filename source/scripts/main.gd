@@ -44,6 +44,9 @@ var _loading: LoadingScreen
 
 
 func _ready() -> void:
+	# Интерполяция физики включена в проекте, но по умолчанию выключена для всего дерева: её
+	# включают только узлы, которым нужна плавность (дракон Хладгор).
+	physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
 	# Шрифт по умолчанию для всего, что рисуется через ThemeDB.fallback_font (цифры урона,
 	# подписи в _draw) — тот же, что у контролов (gui/theme/custom_font).
 	if ResourceLoader.exists(UI_FONT):
