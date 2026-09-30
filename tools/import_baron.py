@@ -33,18 +33,20 @@ def keyed(img):
     return Image.fromarray(rgba, "RGBA")
 
 
-def cut_sheet(path):
+def cut_sheet(path, cell_w=CELL_W, cell_h=CELL_H):
     sheet = keyed(Image.open(path))
+    cols = max(sheet.width // cell_w, 1)
+    rows = max(sheet.height // cell_h, 1)
     frames = []
-    for row in range(ROWS):
-        for col in range(COLS):
-            x0, y0 = col * CELL_W, row * CELL_H
-            cell = sheet.crop((x0, y0, x0 + CELL_W, y0 + CELL_H))
+    for row in range(rows):
+        for col in range(cols):
+            x0, y0 = col * cell_w, row * cell_h
+            cell = sheet.crop((x0, y0, x0 + cell_w, y0 + cell_h))
             box = cell.getchannel("A").point(lambda v: 255 if v > 40 else 0).getbbox()
             if box is None:
                 continue
             crop = cell.crop(box)
-            pivot = (CELL_W / 2 - box[0], box[3] - box[1])
+            pivot = (cell_w / 2 - box[0], box[3] - box[1])
             frames.append((crop, pivot))
     return frames
 
