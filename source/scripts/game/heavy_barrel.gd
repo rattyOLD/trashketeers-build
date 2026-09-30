@@ -5,9 +5,12 @@ extends Node
 
 signal parts_changed(count: int, total: int)
 signal ultimate_started
+signal assembled
 signal ultimate_ended
 
 const TOTAL_PARTS := 6
+const ASSEMBLY_TIME := 1.1
+const ASSEMBLY_SLOWMO := 0.3
 const DURATION := 30.0
 const INVULN_TIME := 3.0
 const WEAPON_ID := &"heavy_barrel"
@@ -52,8 +55,23 @@ func _activate() -> void:
 	_fx.ring(_player.global_position, FLASH_COLOR, 260.0)
 	_fx.burst(_player.global_position, FLASH_COLOR, 60, 420.0, 5.0)
 	SoundManager.play(&"boss_spawn", 0.0, false)
+	_play_assembly()
 	set_process(true)
 	ultimate_started.emit()
+
+
+## Мини-кат-сцена: кино-полосы, замедление времени и серия вспышек вокруг Енота.
+func _play_assembly() -> void:
+	assembled.emit()
+	_atmosphere.letterbox(true)
+	Engine.time_scale = ASSEMBLY_SLOWMO
+	for i in 3:
+		get_tree().create_timer(0.12 + 0.22 * i, true, false, true).timeout.connect(func() -> void:
+			if active and is_instance_valid(_player):
+				_fx.ring(_player.global_position, FLASH_COLOR if i % 2 == 0 else Color.WHITE, 140.0 + 90.0 * i))
+	get_tree().create_timer(ASSEMBLY_TIME, true, false, true).timeout.connect(func() -> void:
+		Engine.time_scale = 1.0
+		_atmosphere.letterbox(false))
 
 
 func _process(delta: float) -> void:
@@ -95,7 +113,7 @@ class Meter:
 		barrel.parts_changed.connect(_on_parts)
 		barrel.ultimate_started.connect(func() -> void: _active = true)
 		barrel.ultimate_ended.connect(func() -> void: _active = false)
-		custom_minimum_size = Vector2(_total * (CELL + GAP) + 64.0, CELL + 14.0)
+		custom_minimum_size = Vector2(_total * (CELL + GAP) + 64.0, CELL + 34.0)
 		size = custom_minimum_size
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
 		set_process(true)
@@ -121,7 +139,8 @@ class Meter:
 		draw_rect(Rect2(0, 0, size.x, size.y), Color("#1a1c2b"), true)
 		draw_rect(Rect2(0, 0, size.x, size.y), Color("#ffb020") if not _active else Color("#ff2ea6").lerp(Color.WHITE, glow * 0.4), false, 3.0)
 		var font := ThemeDB.fallback_font
-		draw_string(font, Vector2(6, size.y - 7), "H.B.", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("#ffb020"))
+		draw_string(font, Vector2(6, 26), "H.B.", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("#ffb020"))
+		draw_string(font, Vector2(6, size.y - 6), "ДЕТАЛИ СУПЕР-СТВОЛА", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#c9b98a"))
 		for i in _total:
 			var x := 46.0 + i * (CELL + GAP)
 			var rect := Rect2(x, 6, CELL, CELL)

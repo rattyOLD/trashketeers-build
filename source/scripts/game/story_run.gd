@@ -23,6 +23,7 @@ const CAPTIVE_LEAD := 0.07
 const BARK_CHANCE := 0.5
 const BARK_DELAY := 1.1
 const LIFE_BONUS := 1500
+const SECRET_POINTS := 1000
 const RANK_STEPS: Array[int] = [30000, 20000, 11000]
 const START_LIVES := 3
 const MEDKIT_HEAL := 0.4
@@ -59,6 +60,12 @@ var _wave_clock := 0.0
 var _boss_alive := false
 var _queue: Array = []
 var _box: DialogBox
+var _tip: TipCard
+var secrets: Array[StorySecret] = []
+var secrets_found := 0
+var _grade_shadow := Vector3(0.1, 0.02, 0.16)
+var _grade_light := Vector3(0.06, 0.03, -0.02)
+var _tip_queue: Array[Dictionary] = []
 var _seen := {}
 var _after_queue: Callable = Callable()
 var _start_y := 0.0
@@ -90,13 +97,14 @@ func setup(owner_game: Game, mission_id: String) -> bool:
 	_encounters = mission.get("encounters", [])
 	_captives = mission.get("captives", [])
 	_enemy_lines = root.get("enemy_lines", {})
+	BossBrain.story_phases = true
 	barrel = HeavyBarrel.new()
 	add_child(barrel)
 	barrel.setup(game.player, game.fx, game.atmosphere)
+	barrel.assembled.connect(_on_barrel_assembled)
 	var meter := HeavyBarrel.Meter.new()
 	meter.bind(barrel)
-	meter.position = Vector2(14.0, 52.0)
-	game.hud.add_child(meter)
+	game.hud.dock_story_meter(meter)
 	game.player.damaged.connect(func(_amount: float) -> void: _zone_hit = true)
 	_start_y = game.map.player_start.y
 	_end_y = game.map.boss_point.y
@@ -113,6 +121,43 @@ func setup(owner_game: Game, mission_id: String) -> bool:
 
 func title() -> String:
 	return "%s · %s" % [mission.get("title", ""), mission.get("subtitle", "")]
+
+
+func zone_count() -> int:
+	return maxi((mission.get("zones", []) as Array).size(), 1)
+
+
+func zone_number() -> int:
+	return clampi(zone_index + 1, 1, zone_count())
+
+
+func zone_name() -> String:
+	var zones: Array = mission.get("zones", [])
+	return str(zones[clampi(zone_index, 0, zones.size() - 1)].get("name", "")) if not zones.is_empty() else ""
+
+
+func encounter_mark(index: int) -> float:
+	return float(_encounters[index]["at"]) if index < _encounters.size() else -1.0
+
+
+func encounter_total() -> int:
+	return _encounters.size()
+
+
+func encounters_done() -> int:
+	return _next
+
+
+func captive_mark(index: int) -> float:
+	return float(_captives[index]["at"]) if index < _captives.size() else -1.0
+
+
+func captive_total() -> int:
+	return _captives.size()
+
+
+func captives_spawned() -> int:
+	return _next_captive
 
 
 func hud_text() -> String:
@@ -140,6 +185,7 @@ func result_lines(victory: bool) -> PackedStringArray:
 	lines.append("Очки: %d" % (score + bonus))
 	lines.append("Врагов: %d" % kills)
 	lines.append("Спасено: %d" % rescued)
+	lines.append("Тайники: %d из %d" % [secrets_found, secrets.size()])
 	lines.append("Детали ствола: %d из %d" % [barrel.parts if not barrel.active else HeavyBarrel.TOTAL_PARTS, HeavyBarrel.TOTAL_PARTS])
 	lines.append("Жизни: %d из %d" % [lives, START_LIVES])
 	lines.append("Время: %s" % BattleBase.format_time(game.director.elapsed))
@@ -175,6 +221,7 @@ func on_start() -> void:
 
 
 func _place_decor() -> void:
+	_place_secrets()
 	var inner_left: float = game.map.bounds.position.x + LevelSpawner.RING_SIDE * LevelSpawner.CELL
 	var inner_right: float = game.map.bounds.end.x - LevelSpawner.RING_SIDE * LevelSpawner.CELL
 	for entry in mission.get("posters", []):
@@ -192,6 +239,63 @@ func _place_decor() -> void:
 		tag.position = Vector2(randf_range(-260.0, 260.0), _y_of(float(entry["at"])))
 		tag.rotation = randf_range(-0.14, 0.14)
 		game.layers.decals.add_child(tag)
+
+
+func _place_secrets() -> void:
+	var inner_left: float = game.map.bounds.position.x + LevelSpawner.RING_SIDE * LevelSpawner.CELL
+	var inner_right: float = game.map.bounds.end.x - LevelSpawner.RING_SIDE * LevelSpawner.CELL
+	for entry: Dictionary in mission.get("secrets", []):
+		var secret := StorySecret.new()
+		secret.entry = entry
+		secret.side = float(entry.get("side", 1.0))
+		var inset := StorySecret.SIZE.x * 0.5
+		secret.position = Vector2(inner_left + inset if secret.side < 0.0 else inner_right - inset, _y_of(float(entry["at"])))
+		secret.broken.connect(_on_secret_broken)
+		game.layers.world.add_child(secret)
+		secrets.append(secret)
+
+
+func nearest_secret(from: Vector2, max_distance: float) -> Node2D:
+	var best: Node2D = null
+	var best_d := max_distance * max_distance
+	for secret in secrets:
+		if secret.is_targetable():
+			var d := from.distance_squared_to(secret.global_position)
+			if d < best_d:
+				best_d = d
+				best = secret
+	return best
+
+
+func _on_secret_broken(secret: StorySecret) -> void:
+	secrets_found += 1
+	score += SECRET_POINTS
+	var at := secret.global_position
+	game.fx.dust(at, 14, 120.0)
+	game.fx.chunks(at, Color("#6d6a7a"), 14, 320.0, 5.0)
+	game.fx.ring(at, Color("#5ff2ff"), 140.0)
+	game.add_shake(0.5)
+	SoundManager.play(&"crate_break", 0.0, false)
+	var kind := str(secret.entry.get("kind", "cache"))
+	var front := at + Vector2(-secret.side * 90.0, 0.0)
+	game.fx.popup(front + Vector2(0, -80), "ТАЙНИК +%d" % SECRET_POINTS, Color("#5ff2ff"), 32.0)
+	match kind:
+		"cache":
+			game.pickups.spawn_xp_gold(front, 8)
+			_drop_medkit(front)
+		"weapon":
+			game._drop_weapon(game._roll_weapon("rare"), front, true)
+			game.pickups.spawn_xp_gold(front, 4)
+	game.hud.toast(str(secret.entry.get("title", "ТАЙНИК")), str(secret.entry.get("text", "")), Color("#5ff2ff"))
+
+
+func _drop_medkit(at: Vector2) -> void:
+	var kit := Medkit.new()
+	kit.player = game.player
+	kit.heal_share = MEDKIT_HEAL
+	kit.picked.connect(tip_item.bind("medkit"))
+	kit.global_position = at
+	game.layers.fx.add_child(kit)
 
 
 func debug_jump(target: float) -> void:
@@ -245,6 +349,7 @@ func _check_zone() -> void:
 	zone_index = index
 	checkpoint = game.player.global_position
 	var zone: Dictionary = zones[index]
+	_apply_palette(zone)
 	game.hud.show_banner(str(zone["name"]), Color("#5ff2ff"), 2.4)
 	if index > 0:
 		game.player.heal(game.player.max_hp * ZONE_HEAL)
@@ -253,6 +358,27 @@ func _check_zone() -> void:
 		_say(str(zone["say"]), OPEN_DELAY + (0.8 if index == 0 else 0.0))
 	if bool(zone.get("crate", false)) and has_key:
 		_open_crate()
+
+
+## Палитра зоны: настроение погоды и плавный переход сплит-тонирования теней и света.
+func _apply_palette(zone: Dictionary) -> void:
+	if zone.has("mood"):
+		game.atmosphere.set_mood(str(zone["mood"]))
+	if not zone.has("shadow"):
+		return
+	var to_shadow := _vec3(zone["shadow"])
+	var to_light := _vec3(zone["highlight"])
+	var from_shadow := _grade_shadow
+	var from_light := _grade_light
+	_grade_shadow = to_shadow
+	_grade_light = to_light
+	var tween := create_tween()
+	tween.tween_method(func(t: float) -> void:
+		game.atmosphere.set_grade(from_shadow.lerp(to_shadow, t), from_light.lerp(to_light, t)), 0.0, 1.0, 2.0)
+
+
+func _vec3(raw: Array) -> Vector3:
+	return Vector3(float(raw[0]), float(raw[1]), float(raw[2]))
 
 
 func _tick_captives() -> void:
@@ -431,7 +557,14 @@ func _drop_part(at: Vector2) -> void:
 	game.layers.fx.add_child(box)
 
 
+func _on_barrel_assembled() -> void:
+	game.hud.show_banner("СУПЕР-СТВОЛ СОБРАН!", Color("#ff2ea6"), 2.4)
+	game.add_shake(1.0)
+	Platform.haptic("heavy")
+
+
 func _on_part_picked(box: HeavyBarrel.Case) -> void:
+	tip_item("barrel_part")
 	barrel.collect_part()
 	game.fx.popup(box.global_position + Vector2(0, -70), "ДЕТАЛЬ %d/%d" % [barrel.parts, HeavyBarrel.TOTAL_PARTS] if barrel.active == false else "СТВОЛ СОБРАН!", Color("#ff2ea6"), 34.0)
 	game.fx.ring(box.global_position, Color("#ffb020"), 140.0)
@@ -444,11 +577,7 @@ func _give_reward(reward: String) -> void:
 		return
 	var at := game.player.global_position + Vector2(0, -90)
 	if reward == "medkit":
-		var kit := Medkit.new()
-		kit.player = game.player
-		kit.heal_share = MEDKIT_HEAL
-		kit.global_position = at
-		game.layers.fx.add_child(kit)
+		_drop_medkit(at)
 		game.hud.toast("АПТЕЧКА", "Подбери, чтобы подлечиться", Color("#7cff6b"))
 	elif reward.begins_with("weapon:"):
 		game._drop_weapon(game._roll_weapon(reward.get_slice(":", 1)), at, true)
@@ -462,6 +591,7 @@ func on_boss_spawned(is_mini: bool) -> void:
 func on_miniboss_killed() -> void:
 	has_key = true
 	_boss_alive = false
+	tip_item("beer_key")
 	game.hud.toast("ПОЛУЧЕНО: ПИВНАЯ ПРОБКА-КЛЮЧ", "Она откроет Ящик с оружием в Зоне 3", Color("#ffb020"))
 	_say("baron_post", 1.0)
 
@@ -496,6 +626,7 @@ func finish() -> void:
 	game.hud.show_banner("ОСКОЛОК %d/6 ПОЛУЧЕН!" % shards, UiStyle.GOLD, 2.8)
 	_after_queue = game.story_finished
 	_say("king_dead", 1.6)
+	_say("outro", 1.7)
 
 
 func _open_crate() -> void:
@@ -536,6 +667,46 @@ func _pump() -> void:
 	_box.open(lines, speakers)
 
 
+## Подсказка при первом подборе: оружие или предмет. Показывается один раз, если подсказки не выключены.
+func tip_weapon(weapon: WeaponData) -> void:
+	_queue_tip(Tips.weapon_key(weapon), Tips.weapon_card(weapon))
+
+
+func tip_item(id: String) -> void:
+	_queue_tip(Tips.item_key(id), Tips.item_card(id))
+
+
+func _queue_tip(key: String, card: Dictionary) -> void:
+	if card.is_empty() or not Tips.is_new(key):
+		return
+	Tips.mark(key)
+	_tip_queue.append(card)
+	get_tree().create_timer(0.3, true, false, true).timeout.connect(_pump_tips)
+
+
+func _pump_tips() -> void:
+	if _tip != null or _tip_queue.is_empty():
+		return
+	if game.finished or game.player == null or game.player.is_dead:
+		_tip_queue.clear()
+		return
+	if _box != null or game._level_up_open or game.get_tree().paused:
+		get_tree().create_timer(0.4, true, false, true).timeout.connect(_pump_tips)
+		return
+	if not Tips.enabled():
+		_tip_queue.clear()
+		return
+	_tip = TipCard.new()
+	game.add_child(_tip)
+	_tip.finished.connect(_on_tip_finished)
+	_tip.open(_tip_queue.pop_front())
+
+
+func _on_tip_finished() -> void:
+	_tip = null
+	get_tree().create_timer(0.2, true, false, true).timeout.connect(_pump_tips)
+
+
 func _on_box_finished() -> void:
 	_box = null
 	get_tree().create_timer(0.15, true, false, true).timeout.connect(_pump)
@@ -544,6 +715,8 @@ func _on_box_finished() -> void:
 ## Аптечка: крест на земле, лечит при касании и исчезает.
 class Medkit:
 	extends Node2D
+
+	signal picked
 
 	var player: Node2D
 	var heal_share := 0.4
@@ -560,6 +733,7 @@ class Medkit:
 		if global_position.distance_to(player.global_position) < 56.0:
 			(player as Player).heal((player as Player).max_hp * heal_share)
 			SoundManager.play(&"level_up", -6.0, false)
+			picked.emit()
 			queue_free()
 
 	func _draw() -> void:
@@ -583,6 +757,7 @@ class Captive:
 
 	func _init() -> void:
 		z_index = 3
+		add_to_group(&"story_captive")
 
 	func _physics_process(delta: float) -> void:
 		_time += delta

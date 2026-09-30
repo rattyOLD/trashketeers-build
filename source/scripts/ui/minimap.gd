@@ -13,6 +13,16 @@ const WALL := Color("#7a4a30")
 const COVER := Color("#d0812f")
 const PORTAL := Color("#b46bff")
 
+signal tapped(overview: bool)
+
+const RAIL_W := 14.0
+const TITLE_H := 22.0
+const ZONE_TINTS: Array[Color] = [Color("#2a86c9"), Color("#8a4fd6"), Color("#c9722b"), Color("#d63a4f")]
+
+var story: StoryRun
+var overview := false
+var _last_tap_ms := 0
+var _stretch := 1.0
 var events: MapEvents
 var pickups: PickupManager
 var _level: LevelSpawner
@@ -38,6 +48,28 @@ func setup(level: LevelSpawner, player: Player, enemies: EnemyManager, director:
 	_panel.shadow_size = 6
 	_inner = UiStyle.box(Color(0, 0, 0, 0), Color(FRAME, 0.55), 2, 10)
 	rebuild()
+
+
+func set_story(run: StoryRun) -> void:
+	story = run
+	mouse_filter = Control.MOUSE_FILTER_STOP
+	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+
+
+func _gui_input(event: InputEvent) -> void:
+	if story == null:
+		return
+	var pressed := (event is InputEventMouseButton and (event as InputEventMouseButton).pressed) \
+		or (event is InputEventScreenTouch and (event as InputEventScreenTouch).pressed)
+	if not pressed:
+		return
+	var now := Time.get_ticks_msec()
+	if now - _last_tap_ms < 250:
+		return
+	_last_tap_ms = now
+	overview = not overview
+	queue_redraw()
+	tapped.emit(overview)
 
 
 func rebuild() -> void:
@@ -93,6 +125,10 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	if _level == null or _player == null or _texture == null or size.x < 20.0:
+		return
+	_stretch = 1.0
+	if story != null:
+		_draw_story()
 		return
 	draw_style_box(_panel, Rect2(Vector2.ZERO, size))
 	var field := Rect2(Vector2.ONE * INSET, size - Vector2.ONE * INSET * 2.0)
@@ -161,7 +197,8 @@ func _draw() -> void:
 
 
 func _to_map(origin: Vector2, scale: float, world: Vector2) -> Vector2:
-	return origin + (world - _level.bounds.position) / LevelSpawner.CELL * scale
+	var cells := (world - _level.bounds.position) / LevelSpawner.CELL
+	return origin + Vector2(cells.x, cells.y * _stretch) * scale
 
 
 func _dot(origin: Vector2, scale: float, world: Vector2, radius: float, color: Color, outline: bool) -> void:
@@ -176,3 +213,109 @@ func _diamond(origin: Vector2, scale: float, world: Vector2, radius: float, colo
 	var pts := PackedVector2Array([p + Vector2(0, -radius - 1.0), p + Vector2(radius + 1.0, 0), p + Vector2(0, radius + 1.0), p + Vector2(-radius - 1.0, 0)])
 	draw_colored_polygon(pts, Color(0, 0, 0, 0.65))
 	draw_colored_polygon(PackedVector2Array([p + Vector2(0, -radius), p + Vector2(radius, 0), p + Vector2(0, radius), p + Vector2(-radius, 0)]), color)
+
+
+# --- Сюжетная карта: крупный план вокруг игрока и рельса всей миссии справа ---------------------
+
+func _draw_story() -> void:
+	draw_style_box(_panel, Rect2(Vector2.ZERO, size))
+	var font := ThemeDB.fallback_font
+	var grid := Vector2(_level.grid_size)
+	var field := Rect2(INSET, INSET + TITLE_H, size.x - INSET * 2.0 - RAIL_W - 6.0, size.y - INSET * 2.0 - TITLE_H)
+	draw_string(font, Vector2(INSET + 2.0, INSET + 14.0), story.zone_name(), HORIZONTAL_ALIGNMENT_LEFT, size.x - INSET * 2.0, 13, Color("#ffd257"))
+	draw_rect(field, Color(0.02, 0.02, 0.06, 0.92))
+	var scale := field.size.x / grid.x
+	_stretch = (field.size.y / grid.y) / scale if overview else 1.0
+	var top := 0.0
+	var rows := minf(field.size.y / scale, grid.y)
+	if not overview:
+		var py := (_player.global_position.y - _level.bounds.position.y) / LevelSpawner.CELL
+		top = clampf(py - rows * 0.5, 0.0, maxf(grid.y - rows, 0.0))
+	var origin := field.position - Vector2(0.0, top * scale)
+	if overview:
+		origin = field.position
+		rows = grid.y
+	var src := Rect2(0.0, top, grid.x, minf(rows, grid.y - top))
+	draw_texture_rect_region(_texture, Rect2(origin + Vector2(0.0, top * scale), Vector2(src.size.x * scale, src.size.y * scale * _stretch)), src, Color(1, 1, 1, 0.95))
+	var inner := field.grow(-3.0)
+	if pickups != null:
+		for i in pickups.get_count():
+			if pickups.is_gold_at(i):
+				var g := _to_map(origin, scale, pickups.position_at(i))
+				if inner.has_point(g):
+					draw_circle(g, 2.4, Color("#ff9a1f"))
+	for object in _level.destructibles:
+		if object.kind == DestructibleObject.Kind.WEAPON_CRATE and object.is_intact() and object.visible:
+			var c := _to_map(origin, scale, object.global_position)
+			if inner.has_point(c):
+				draw_rect(Rect2(c - Vector2.ONE * 4.5, Vector2.ONE * 9.0), Color(0, 0, 0, 0.75))
+				draw_rect(Rect2(c - Vector2.ONE * 3.0, Vector2.ONE * 6.0), object.get_rarity_color())
+	var blink := 0.6 + 0.4 * sin(_time * 6.0)
+	for key: Variant in _level.story_gates:
+		var gate := _level.story_gates[key] as StoryGate
+		var a := _to_map(origin, scale, gate.rect.position)
+		var b := _to_map(origin, scale, gate.rect.end)
+		var bar := Rect2(a, Vector2(maxf(b.x - a.x, 6.0), maxf(b.y - a.y, 4.0)))
+		if inner.intersects(bar):
+			var color := Color("#7cff6b") if gate.is_open else Color("#ff3b5c").lerp(Color.WHITE, (1.0 - blink) * 0.5)
+			draw_rect(bar, Color(color, 0.85 if not gate.is_open else 0.5))
+	for node in get_tree().get_nodes_in_group(&"story_captive"):
+		var p := _to_map(origin, scale, (node as Node2D).global_position)
+		if inner.has_point(p):
+			draw_arc(p, 6.0 + blink, 0.0, TAU, 16, Color("#5ff2ff"), 2.0, true)
+			draw_circle(p, 2.5, Color("#5ff2ff"))
+	for enemy in _enemies.get_active():
+		if enemy.is_alive() and enemy != _director.boss:
+			var e := _to_map(origin, scale, enemy.global_position)
+			if inner.has_point(e):
+				draw_circle(e, 3.0, Color(0, 0, 0, 0.6))
+				draw_circle(e, 2.2, Color("#ff4d6d"))
+	if _director.boss != null and _director.boss.is_alive():
+		var bp := _to_map(origin, scale, _director.boss.global_position)
+		if inner.has_point(bp):
+			_diamond(origin, scale, _director.boss.global_position, 7.0 + sin(_time * 6.0), Color("#ffd23f"))
+	var me := _to_map(origin, scale, _player.global_position)
+	var aim := _player.visual.aim_direction.normalized() if _player.visual.aim_direction.length_squared() > 0.0 else Vector2.UP
+	draw_arc(me, 8.0 + sin(_time * 5.0) * 1.2, 0.0, TAU, 20, Color(FRAME, 0.6), 1.5, true)
+	draw_colored_polygon(PackedVector2Array([me + aim * 8.0, me + aim.rotated(2.5) * 6.0, me + aim.rotated(-2.5) * 6.0]), Color(0, 0, 0, 0.75))
+	draw_colored_polygon(PackedVector2Array([me + aim * 6.5, me + aim.rotated(2.5) * 4.2, me + aim.rotated(-2.5) * 4.2]), FRAME)
+	if not overview and top > 0.5:
+		_edge_arrow(field, true)
+	if not overview and top + rows < grid.y - 0.5:
+		_edge_arrow(field, false)
+	draw_style_box(_inner, field.grow(3.0))
+	_draw_rail(field)
+
+
+func _edge_arrow(field: Rect2, up: bool) -> void:
+	var x := field.get_center().x
+	var y := field.position.y + 7.0 if up else field.end.y - 7.0
+	var dir := -1.0 if up else 1.0
+	draw_colored_polygon(PackedVector2Array([Vector2(x, y + 5.0 * dir), Vector2(x - 7.0, y - 3.0 * dir), Vector2(x + 7.0, y - 3.0 * dir)]), Color(FRAME, 0.7))
+
+
+## Рельса всей миссии: зоны цветными полосами, засады и пленники засечками, босс наверху, Енот — стрелкой.
+func _draw_rail(field: Rect2) -> void:
+	var x0 := size.x - INSET - RAIL_W
+	var y0 := field.position.y
+	var h := field.size.y
+	var zones: Array = story.mission.get("zones", [])
+	for i in zones.size():
+		var from := float(zones[i]["from"])
+		var to := float(zones[i + 1]["from"]) if i + 1 < zones.size() else 1.0
+		var band := Rect2(x0, y0 + h * (1.0 - to), RAIL_W, h * (to - from))
+		draw_rect(band, Color(ZONE_TINTS[i % ZONE_TINTS.size()], 0.55))
+		draw_rect(band, Color(0, 0, 0, 0.55), false, 1.5)
+		draw_string(ThemeDB.fallback_font, Vector2(x0, band.get_center().y + 5.0), str(i + 1), HORIZONTAL_ALIGNMENT_CENTER, RAIL_W, 13, Color(1, 1, 1, 0.9))
+	for i in story.encounter_total():
+		var at := story.encounter_mark(i)
+		var y := y0 + h * (1.0 - at)
+		var done := i < story.encounters_done()
+		draw_line(Vector2(x0 - 2.0, y), Vector2(x0 + RAIL_W + 2.0, y), Color("#7cff6b") if done else Color("#ff3b5c"), 2.0)
+	for i in range(story.captives_spawned(), story.captive_total()):
+		var y := y0 + h * (1.0 - story.captive_mark(i))
+		draw_circle(Vector2(x0 + RAIL_W * 0.5, y), 2.6, Color("#5ff2ff"))
+	var boss := Vector2(x0 + RAIL_W * 0.5, y0 + 4.0)
+	draw_colored_polygon(PackedVector2Array([boss + Vector2(0, -6), boss + Vector2(6, 0), boss + Vector2(0, 6), boss + Vector2(-6, 0)]), Color("#ffd23f"))
+	var py := y0 + h * (1.0 - story.progress)
+	draw_colored_polygon(PackedVector2Array([Vector2(x0 - 1.0, py), Vector2(x0 - 9.0, py - 6.0), Vector2(x0 - 9.0, py + 6.0)]), FRAME)

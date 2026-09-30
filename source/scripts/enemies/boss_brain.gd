@@ -21,7 +21,7 @@ extends RefCounted
 enum State { WALK, ROCKETS, RING_CHARGE, RING_FIRE, LEAP_WINDUP, LEAP, GATLING_SPIN, GATLING, RAIN, STOMP_WINDUP,
 	TRANSFORM, DASH_WINDUP, DASH, FAN, SUMMON, SPIRAL, CARPET,
 	BEAM_WINDUP, BEAM, PRESS_WINDUP, PRESS, SMASH_WINDUP, SMASH_LUNGE, VOMIT_WINDUP, VOMIT,
-	BOLT_WINDUP, BOLT, GRID, ARC_WINDUP, BASS_WINDUP, BASS }
+	BOLT_WINDUP, BOLT, GRID, ARC_WINDUP, BASS_WINDUP, BASS, CRANE_WINDUP, CRANE_PULL }
 
 const TELEGRAPH := Color("#ff2e4d")
 ## Пассивки боссов: Король — «Свита» (регулярно зовёт подручных), Магнат — «Золотая корка»
@@ -60,6 +60,18 @@ const ENRAGE_TIME := 75.0
 const HAZARD_INTERVAL := 5.0
 const SPIRAL_TIME := 2.6
 const CARPET_STEP := 0.13
+const CRANE_WINDUP_TIME := 1.0
+const CRANE_PULL_TIME := 1.7
+const CRANE_PULL_SPEED := 340.0
+const CRANE_SLAM_RANGE := 150.0
+const CRANE_SLAM_RADIUS := 210.0
+const COLLAPSE_PHASE := 0.25
+const COLLAPSE_INTERVAL := 2.6
+const COLLAPSE_ZONES := 5
+const MAGNET := Color("#b46bff")
+
+## Сюжетные фазы Короля (кран-магнит и обвал) включает StoryRun; в обычных забегах Король прежний.
+static var story_phases := false
 
 var enemy: Enemy
 var pattern := "overlord"
@@ -113,6 +125,9 @@ var speakers: Array[Enemy] = []
 var _speakers_spawned := false
 var _speakers_alive := 0
 var _bass_cd := 5.0
+var _pulled: Player
+var _collapse := false
+var _collapse_timer := 0.0
 
 
 func setup(owner: Enemy) -> void:
@@ -146,6 +161,16 @@ func setup(owner: Enemy) -> void:
 	_speakers_spawned = false
 	_speakers_alive = 0
 	_bass_cd = 5.0
+	_pulled = null
+	_collapse = false
+	_collapse_timer = 0.0
+
+
+## Снимает притяжение магнита с Енота (конец атаки, смерть Короля).
+func release() -> void:
+	if _pulled != null and is_instance_valid(_pulled):
+		_pulled.external_pull = Vector2.ZERO
+	_pulled = null
 
 
 ## Порог второй фазы (доля HP).
@@ -255,6 +280,8 @@ func _tempo() -> float:
 
 ## Желаемая скорость босса на этот кадр.
 func tick(player: Player, dir: Vector2, path_dir: Vector2, dist: float, delta: float) -> Vector2:
+	if _pulled != null and (state != State.CRANE_PULL or enemy.posture_stun > 0.0 or player.is_dead):
+		release()
 	if enemy.posture_stun > 0.0:
 		return Vector2.ZERO
 	state_time += delta
@@ -270,10 +297,13 @@ func tick(player: Player, dir: Vector2, path_dir: Vector2, dist: float, delta: f
 		enraged = true
 		enemy.request_fx("enrage")
 	if phase == 2 and state != State.TRANSFORM and pattern != "shaman":
-		_hazard_timer -= delta
-		if _hazard_timer <= 0.0:
-			_hazard_timer = HAZARD_INTERVAL * _tempo()
-			_sky_drop(player)
+		if _collapse_active():
+			_tick_collapse(player, delta)
+		else:
+			_hazard_timer -= delta
+			if _hazard_timer <= 0.0:
+				_hazard_timer = HAZARD_INTERVAL * _tempo()
+				_sky_drop(player)
 	_tick_passive(delta)
 	match state:
 		State.TRANSFORM:
@@ -315,6 +345,23 @@ func tick(player: Player, dir: Vector2, path_dir: Vector2, dist: float, delta: f
 		State.BASS:
 			if state_time >= 0.5:
 				_rest(0.4)
+			return Vector2.ZERO
+		State.CRANE_WINDUP:
+			windup = clampf(state_time / CRANE_WINDUP_TIME, 0.0, 1.0)
+			enemy.queue_redraw()
+			if state_time >= CRANE_WINDUP_TIME:
+				_enter(State.CRANE_PULL)
+				_pulled = player
+				enemy.request_fx("crane", CRANE_SLAM_RADIUS)
+			return Vector2.ZERO
+		State.CRANE_PULL:
+			var to_boss := enemy.global_position - player.global_position
+			player.external_pull = to_boss.normalized() * CRANE_PULL_SPEED
+			enemy.queue_redraw()
+			if state_time >= CRANE_PULL_TIME or to_boss.length() < CRANE_SLAM_RANGE:
+				release()
+				_land(CRANE_SLAM_RADIUS, 32.0)
+				_rest(0.7)
 			return Vector2.ZERO
 		State.RING_CHARGE:
 			windup = clampf(state_time / 0.8, 0.0, 1.0)
@@ -556,6 +603,27 @@ func tick(player: Player, dir: Vector2, path_dir: Vector2, dist: float, delta: f
 	return Vector2.ZERO
 
 
+func _collapse_active() -> bool:
+	return story_phases and pattern == "overlord" and enemy.hp < enemy.max_hp * COLLAPSE_PHASE
+
+
+## Обвал: потолок трона сыплется плитами — пять кругов по арене, один под Енотом.
+func _tick_collapse(player: Player, delta: float) -> void:
+	if not _collapse:
+		_collapse = true
+		_collapse_timer = 0.8
+		enemy.request_fx("collapse", 0.0)
+	_collapse_timer -= delta
+	if _collapse_timer > 0.0:
+		return
+	_collapse_timer = COLLAPSE_INTERVAL * _tempo()
+	for i in COLLAPSE_ZONES:
+		var at := player.global_position + player.velocity * 0.45
+		if i > 0:
+			at = player.global_position + Vector2.from_angle(TAU * float(i) / COLLAPSE_ZONES + randf() * 0.6) * randf_range(120.0, 330.0)
+		_lob(at, 1.25, 96.0, 24.0, at + Vector2(randf_range(-80.0, 80.0), -700.0))
+
+
 func _begin_transform() -> void:
 	_break_speakers()
 	_enter(State.TRANSFORM)
@@ -624,6 +692,9 @@ func _next_attack(dist: float) -> void:
 			_enter(State.ROCKETS)
 			_shots_left = 5
 			_shot_timer = 0.0
+	elif story_phases and pattern == "overlord" and _step % 4 == 2:
+		_enter(State.CRANE_WINDUP)
+		SoundManager.play(&"beam_charge", -2.0)
 	else:
 		match _step % 3:
 			0:
@@ -903,7 +974,7 @@ func clip(moving: bool, hurt: float) -> Array:
 			return ["strike" if _flash_clip > 0.0 else "aim", 0.0]
 		State.BASS_WINDUP, State.BASS:
 			return ["windup" if state == State.BASS_WINDUP else "strike", 0.0]
-		State.RING_CHARGE, State.GATLING_SPIN, State.STOMP_WINDUP:
+		State.RING_CHARGE, State.GATLING_SPIN, State.STOMP_WINDUP, State.CRANE_WINDUP, State.CRANE_PULL:
 			return ["p2_windup" if p2 else "windup", 0.0]
 		State.LEAP_WINDUP, State.DASH_WINDUP:
 			return ["p2_windup", 0.0]
@@ -1005,6 +1076,16 @@ func _draw_zone(canvas: Node2D, at: Vector2, radius: float, t: float) -> void:
 
 
 ## Золотые нити от Короля к колонкам: видно, что именно даёт ему защиту.
+## Магнит на тросе: подкова с полюсами и дугами притяжения.
+func _draw_magnet(canvas: Node2D, head: Vector2, t: float) -> void:
+	canvas.draw_line(head + Vector2(0, -900.0), head, Color("#2a2838"), 7.0)
+	canvas.draw_arc(head + Vector2(0, 6), 30.0, 0.0, PI, 20, Color("#d63a4f"), 12.0, true)
+	canvas.draw_rect(Rect2(head + Vector2(-36, 4), Vector2(14, 22)), Color("#f4f0ff"), true)
+	canvas.draw_rect(Rect2(head + Vector2(22, 4), Vector2(14, 22)), Color("#f4f0ff"), true)
+	for k in 3:
+		canvas.draw_arc(head + Vector2(0, 26), 34.0 + 18.0 * k * t, 0.2, PI - 0.2, 16, Color(MAGNET, 0.6 - 0.15 * k), 3.0, true)
+
+
 func _draw_speaker_links(canvas: Node2D) -> void:
 	var pulse := 0.35 + 0.2 * sin(Time.get_ticks_msec() * 0.006)
 	var from := Vector2(0, -enemy.data.radius)
@@ -1027,6 +1108,20 @@ func draw(canvas: Node2D) -> void:
 					var at := canvas.to_local(speaker.global_position)
 					canvas.draw_arc(at, 50.0 + 120.0 * t, 0.0, TAU, 40, Color(TELEGRAPH, 0.3 + 0.6 * t), 5.0, true)
 					canvas.draw_arc(at, 50.0, 0.0, TAU, 24, Color(1.0, 0.92, 0.35, 0.8), 3.0, true)
+		State.CRANE_WINDUP:
+			var t := clampf(state_time / CRANE_WINDUP_TIME, 0.0, 1.0)
+			var head := Vector2(0.0, -enemy.data.radius * 3.4 * (1.0 - t * 0.35))
+			_draw_magnet(canvas, head, t)
+			canvas.draw_arc(Vector2.ZERO, CRANE_PULL_SPEED * 0.9 * (1.4 - t * 0.4), 0.0, TAU, 56, Color(MAGNET, 0.25 + 0.5 * t), 4.0, true)
+		State.CRANE_PULL:
+			var head := Vector2(0.0, -enemy.data.radius * 2.2)
+			_draw_magnet(canvas, head, 1.0)
+			if _pulled != null and is_instance_valid(_pulled):
+				var target := canvas.to_local(_pulled.global_position)
+				var flick := 0.5 + 0.5 * sin(state_time * 40.0)
+				canvas.draw_line(head, target, Color(MAGNET, 0.35 + 0.4 * flick), 6.0)
+				canvas.draw_line(head, target, Color(1, 1, 1, 0.5 * flick), 2.0)
+				canvas.draw_arc(target, 44.0 + 10.0 * flick, 0.0, TAU, 24, Color(MAGNET, 0.9), 3.0, true)
 		State.RING_CHARGE:
 			var t := clampf(state_time / 0.8, 0.0, 1.0)
 			canvas.draw_arc(Vector2.ZERO, enemy.data.radius * (1.1 + 0.9 * t), 0.0, TAU, 48, Color(TELEGRAPH, 0.35 + 0.5 * t), 6.0, true)

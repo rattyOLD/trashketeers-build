@@ -228,6 +228,8 @@ func start(_weapon_id: StringName = &"") -> void:
 		add_child(story)
 		if story.setup(self, story_mission):
 			hud.set_story_mode()
+			hud.set_story_layout(minimap)
+			minimap.set_story(story)
 			story.on_start()
 		else:
 			story.queue_free()
@@ -235,6 +237,7 @@ func start(_weapon_id: StringName = &"") -> void:
 
 
 func _exit_tree() -> void:
+	BossBrain.story_phases = false
 	Enemy.status_sink = Callable()
 	Enemy.global_speed_mult = 1.0
 	if SaveService.achievement_unlocked.is_connected(_on_achievement):
@@ -247,6 +250,10 @@ func _find_target(from: Vector2, max_distance: float) -> Node2D:
 	var enemy := enemies.find_nearest(from, max_distance)
 	if enemy != null:
 		return enemy
+	if story != null:
+		var secret := story.nearest_secret(from, max_distance)
+		if secret != null:
+			return secret
 	return map.find_nearest_destructible(from, max_distance)
 
 
@@ -290,7 +297,7 @@ func _physics_process(delta: float) -> void:
 func _update_hud_timer() -> void:
 	hud.set_time(director.elapsed)
 	if story != null:
-		hud.set_wave_text(story.hud_text())
+		hud.set_story_status(story.score, story.lives, story.zone_number(), story.zone_count(), story.zone_name())
 		return
 	hud.set_wave(maxi(director.wave_number, 1), director.get_enemies_left())
 
@@ -342,6 +349,13 @@ func _death_tip() -> String:
 
 
 func _run_summary_lines() -> PackedStringArray:
+	if story != null:
+		return PackedStringArray([
+			"%s · зона %d/%d" % [story.mission.get("title", ""), story.zone_number(), story.zone_count()],
+			"Очки: %d · Жизни: %d" % [story.score, story.lives],
+			"Врагов: %d · Спасено: %d" % [story.kills, story.rescued],
+			"Время: %s · Детали ствола: %d/%d" % [BattleBase.format_time(director.elapsed), story.barrel.parts, HeavyBarrel.TOTAL_PARTS],
+		])
 	return PackedStringArray([
 		"Волна %d · %s" % [maxi(director.wave_number, 1), director.current_chapter().get("title", "")],
 		"Врагов: %d · Уровень %d" % [kills, level],
@@ -498,6 +512,14 @@ func _flush_damage_numbers(delta: float, force: bool = false) -> void:
 
 
 func _on_enemy_damaged(enemy: Enemy, amount: float, is_crit: bool, kind: StringName) -> void:
+	if kind == &"melee":
+		var spread := enemy.data.radius * 0.6
+		fx.number(enemy.get_aim_point() + Vector2(randf_range(-spread, spread), -enemy.data.radius * 1.6), amount, FxManager.kind_color(kind), is_crit, FxManager.kind_scale(kind))
+		if is_crit:
+			SaveService.add_stat("crits", 1, false)
+		if enemy.data.is_boss():
+			hud.update_boss(maxf(enemy.hp, 0.0), enemy.max_hp)
+		return
 	var acc: Dictionary = _damage_acc.get(enemy, {})
 	if acc.is_empty():
 		acc = {"amount": 0.0, "crit": false, "kind": kind, "age": 0.0}
@@ -585,6 +607,16 @@ func _on_enemy_fx(_enemy: Enemy, kind: String, at: Vector2, radius: float) -> vo
 				fx.burst(other.global_position + Vector2(0, -20), Color("#5ff2ff"), 5, 160.0, 2.5)
 			if healed > 0:
 				fx.ring(at, Color("#5ff2ff"), radius * 0.6)
+		"crane":
+			hud.show_banner("МАГНИТ! УБЕГАЙ ИЛИ РЫВОК", Color("#b46bff"), 1.4)
+			atmosphere.flash(Color("#b46bff"), 0.25, 0.3)
+			add_shake(0.4)
+		"collapse":
+			hud.show_banner("ОБВАЛ! ПОТОЛОК ТРОНА СЫПЛЕТСЯ", UiStyle.DANGER, 2.4)
+			atmosphere.flash(Color(1.0, 0.6, 0.2), 0.45, 0.5)
+			fx.dust(player.global_position, 18, 420.0)
+			add_shake(1.0)
+			SoundManager.play(&"comet_impact", -2.0, false)
 		"enrage":
 			hud.show_banner("ЯРОСТЬ! БОСС УСКОРИЛСЯ", UiStyle.DANGER, 2.2)
 			atmosphere.flash(Color(1.0, 0.2, 0.2), 0.4, 0.6)
@@ -614,6 +646,8 @@ func _on_boss_phase(boss: Enemy, phase: int) -> void:
 
 func _on_enemy_died(enemy: Enemy) -> void:
 	var data := enemy.data
+	if data.is_boss():
+		player.external_pull = Vector2.ZERO
 	var at := enemy.global_position
 	var fall_dir := 1.0 if randf() < 0.5 else -1.0
 	if enemy.is_framed():
@@ -1041,6 +1075,8 @@ func _on_weapon_picked(pickup: WeaponPickup) -> void:
 		hud.toast(found.get_title(), "%s · %s" % [WeaponData.RARITY_NAMES[found.rarity], fate], found.get_rarity_color())
 	if old != null and not (old.id == found.id and old.tier == found.tier):
 		_drop_weapon(old, player.global_position + Vector2(0, 6), false, WEAPON_SWAP_DELAY)
+	if story != null:
+		story.tip_weapon(found)
 	player.visual.pickup_pop()
 	fx.popup(player.global_position + Vector2(0, -90), found.short_name.to_upper(), found.get_rarity_color(), 30.0)
 	fx.ring(player.global_position, found.get_rarity_color(), 60.0)

@@ -264,6 +264,7 @@ func activate(enemy_data: EnemyData, at: Vector2, hp_mult: float = 1.0, dmg_mult
 	_blink_cd = 0.0
 	_blink_pending = false
 	_alpha = data.stealth_alpha
+	_reset_alpha()
 	_use_alt_weapon = false
 	_attack_timer = randf_range(0.6, data.attack_cooldown)
 	_strafe_sign = 1.0 if randf() < 0.5 else -1.0
@@ -296,6 +297,14 @@ func activate(enemy_data: EnemyData, at: Vector2, hp_mult: float = 1.0, dmg_mult
 	visible = true
 	_collision.set_deferred("disabled", false)
 	queue_redraw()
+
+
+## Пулированный враг наследует прозрачность прошлого жильца слота (Искро-Заточка): без сброса обычные враги и боссы выходили полупрозрачными.
+func _reset_alpha() -> void:
+	_sprite.set_param("alpha", _alpha)
+	_parts.set_param("alpha", _alpha)
+	_alt_material.set_shader_parameter("alpha", _alpha)
+	_shadow.modulate.a = _alpha
 
 
 func deactivate() -> void:

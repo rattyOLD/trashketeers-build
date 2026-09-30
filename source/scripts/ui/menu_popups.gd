@@ -72,6 +72,7 @@ class Settings:
 	var _mini: MenuWidgets.PawToggle
 	var _fullscreen: MenuWidgets.PawToggle
 	var _auto_pick: MenuWidgets.PawToggle
+	var _tips: MenuWidgets.PawToggle
 	var _slot_buttons: Array[Button] = []
 	var _slot_hint: Label
 	var _slot_confirm := false
@@ -137,6 +138,12 @@ class Settings:
 		keys_button.pressed.connect(func() -> void: _keys.open())
 		controls_row.add_child(keys_button)
 		controls.add_child(controls_row)
+		_tips = MenuWidgets.PawToggle.new("Подсказки в сюжете", Tips.enabled())
+		_tips.toggled.connect(func(on: bool) -> void: Tips.set_enabled(on))
+		controls.add_child(_tips)
+		var tips_hint := UiStyle.label("Карточка с описанием и характеристиками при первом подборе оружия и предметов.", 19, UiStyle.TEXT_DIM, 4)
+		tips_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		controls.add_child(tips_hint)
 		_auto_pick = MenuWidgets.PawToggle.new("Автоподбор оружия", bool(Controls.get_value("auto_pick")))
 		_auto_pick.toggled.connect(func(on: bool) -> void: Controls.set_value("auto_pick", on))
 		controls.add_child(_auto_pick)
@@ -837,15 +844,27 @@ class Profile:
 		code_row.add_theme_constant_override("separation", 8)
 		var code_edit := _styled_edit("INS-001-XXXX")
 		code_row.add_child(code_edit)
-		var apply := UiStyle.button("ОК", UiStyle.HOT, 24, Vector2(110, 56))
+		var apply := UiStyle.button("ПРИМЕНИТЬ", UiStyle.HOT, 22, Vector2(200, 56))
+		var paint := func(color: Color) -> void:
+			apply.add_theme_stylebox_override("normal", UiStyle.button_box(color, false))
+			apply.add_theme_stylebox_override("hover", UiStyle.button_box(color.lightened(0.06), false))
+			apply.add_theme_stylebox_override("pressed", UiStyle.button_box(color.lightened(0.1), true))
+			apply.add_theme_stylebox_override("hover_pressed", UiStyle.button_box(color.lightened(0.1), true))
 		apply.pressed.connect(func() -> void:
-			if SaveService.activate_insider(code_edit.text):
+			var result: String = SaveService.activate_insider(code_edit.text)
+			if result == "ok":
 				code_edit.text = ""
+				refresh.call()
 			else:
-				status.text = "Код не подошёл. Проверь буквы и цифры."
-				return
-			refresh.call())
+				status.text = "Код отозван." if result == "revoked" else "Код не подошёл. Проверь буквы и цифры."
+			apply.text = "ПРИНЯТО" if result == "ok" else ("ОТОЗВАН" if result == "revoked" else "НЕВЕРНО")
+			paint.call(Color("#35c46a") if result == "ok" else Color("#d63a4f"))
+			get_tree().create_timer(1.6).timeout.connect(func() -> void:
+				if is_instance_valid(apply):
+					apply.text = "ПРИМЕНИТЬ"
+					paint.call(UiStyle.HOT)))
 		code_row.add_child(apply)
+		code_edit.text_submitted.connect(func(_t: String) -> void: apply.pressed.emit())
 		box.add_child(code_row)
 		var copy := UiStyle.button("Скопировать код сохранения", UiStyle.PANEL_LIGHT, 22, Vector2(0, 56))
 		copy.pressed.connect(func() -> void:

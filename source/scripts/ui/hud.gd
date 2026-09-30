@@ -64,6 +64,10 @@ var _pause: PausePanel
 var _revive: BattlePanels.RevivePanel
 var _run_result: BattlePanels.RunResultPanel
 var _chapter_card: BattlePanels.ChapterCard
+var _hint: HintBubble
+var _left_column: VBoxContainer
+var _story_bar: StoryBar
+var _minimap: Minimap
 var _toast_queue: Array = []
 var _toast_busy := false
 
@@ -148,6 +152,52 @@ func build(currency_icon: Texture2D, weapon: WeaponData) -> void:
 	_run_result.upgrade_pressed.connect(func() -> void: upgrade_pressed.emit())
 	_root.add_child(_run_result)
 	_fps_label.visible = bool(SaveService.data["show_fps"])
+	_hint = HintBubble.new()
+	_root.add_child(_hint)
+	_wire_hints()
+	_dash.held.connect(func() -> void: _hint.show_for(_dash, "Рывок: быстрый бросок в сторону движения, чтобы уйти от удара. Перезаряжается."))
+	_slot_bar.slot_held.connect(_on_slot_held)
+
+
+## Тап по элементу интерфейса показывает рядом короткую подсказку, что это.
+func _wire_hints() -> void:
+	HintBubble.attach(_hp_label.get_parent(), _hint, "Здоровье. Лечат аптечки, освобождённые пленники и вход в новую зону.")
+	HintBubble.attach(_nuts_row, _hint, "Монеты, собранные за забег.")
+	HintBubble.attach(_time_label, _hint, "Время забега.")
+	HintBubble.attach(_kills_label, _hint, "Сколько врагов побеждено за забег.")
+	HintBubble.attach(_loot_label, _hint, "Оружие, которое лежит на карте и ждёт, когда его подберут.")
+
+
+func _on_slot_held(index: int) -> void:
+	var weapon: WeaponData = _slot_bar.weapons[index] if index < _slot_bar.weapons.size() else null
+	if weapon == null:
+		_hint.show_for(_slot_bar, "Пустой слот. Подобранное оружие встанет сюда.")
+		return
+	_hint.show_for(_slot_bar, "Слот %d: %s. %s. Тап по слоту — взять это оружие." % [index + 1, weapon.get_title(), Tips.stat_line(weapon).capitalize()])
+
+
+## Сюжет: на месте опыта — шкала деталей супер-ствола и плашки очков, жизней и зоны.
+func dock_story_meter(meter: Control) -> void:
+	meter.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_left_column.add_child(meter)
+	HintBubble.attach(meter, _hint, "Детали супер-ствола. Собери все 6 из зачищенных комнат и получишь 30 секунд режима аннигиляции.")
+
+
+func set_story_layout(minimap: Minimap) -> void:
+	_wave_box.visible = false
+	_story_bar = StoryBar.new()
+	_left_column.add_child(_story_bar)
+	_story_bar.chip_tapped.connect(func(chip: Control, text: String) -> void: _hint.show_for(chip, text))
+	UiStyle.anchor(_boss_bar, Vector2(0.5, 0.0), Rect2(-300, 190, 600, 96))
+	UiStyle.anchor(_minimap_slot, Vector2(1.0, 0.0), Rect2(-216, 300, 198, 340))
+	_minimap = minimap
+	minimap.tapped.connect(func(overview: bool) -> void:
+		_hint.show_for(_minimap_slot, "Карта: ты, враги, ворота, пленники. Тап — %s." % ("крупный план" if overview else "вся карта")))
+
+
+func set_story_status(score: int, lives: int, zone_number: int, zone_count: int, zone_name: String) -> void:
+	if _story_bar != null:
+		_story_bar.update(score, lives, zone_number, zone_count, zone_name)
 
 
 # --- Показатели ------------------------------------------------------------------------------
@@ -219,8 +269,7 @@ func set_wave(number: int, enemies_left: int) -> void:
 
 ## Сюжетный режим без ио-механик: скрываем опыт и уровень.
 func set_story_mode() -> void:
-	for node in [_xp_bar, _level_label, _xp_label]:
-		node.visible = false
+	_xp_row.visible = false
 
 
 func set_wave_text(text: String) -> void:
@@ -307,6 +356,7 @@ func set_dash_charges(charges: int, max_charges: int) -> void:
 
 
 func set_minimap(minimap: Control) -> void:
+	_minimap = minimap as Minimap
 	minimap.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_minimap_slot.add_child(minimap)
 	minimap.visible = SaveService.is_minimap_enabled()
@@ -538,6 +588,7 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	left.add_theme_constant_override("separation", 6)
 	row.add_child(left)
+	_left_column = left
 
 	var hp_stack := Control.new()
 	hp_stack.custom_minimum_size = Vector2(0, 40)
@@ -757,6 +808,11 @@ class SkillButton:
 class DashButton:
 	extends Control
 	signal pressed
+	signal held
+
+	const HOLD_MS := 550
+
+	var _hold_start := -1
 
 	var cooldown := 0.0:
 		set(value):
@@ -777,11 +833,14 @@ class DashButton:
 			queue_redraw()
 
 	func _input(event: InputEvent) -> void:
+		if event is InputEventScreenTouch and not event.pressed:
+			_hold_start = -1
 		if not is_visible_in_tree() or get_tree().paused:
 			return
 		if event is InputEventScreenTouch and event.pressed:
 			var center := get_global_rect().get_center()
 			if (event as InputEventScreenTouch).position.distance_to(center) < size.x * 0.55:
+				_hold_start = Time.get_ticks_msec()
 				_press = 1.0
 				queue_redraw()
 				pressed.emit()
@@ -791,6 +850,9 @@ class DashButton:
 		if _press > 0.0:
 			_press = maxf(_press - delta * 5.0, 0.0)
 			queue_redraw()
+		if _hold_start >= 0 and Time.get_ticks_msec() - _hold_start >= HOLD_MS:
+			_hold_start = -1
+			held.emit()
 
 	func _draw() -> void:
 		var c := size * 0.5
@@ -832,6 +894,10 @@ class PausePanel:
 	var _settings: MenuPopups.Settings
 	var _editor: ControlEditor
 	var _tester: TesterPopup
+	var _tips_button: Button
+
+	func _refresh_tips_button() -> void:
+		_tips_button.text = "ПОДСКАЗКИ: ВКЛ" if Tips.enabled() else "ПОДСКАЗКИ: ВЫКЛ"
 
 	func _init() -> void:
 		set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -879,6 +945,13 @@ class PausePanel:
 		tools.add_child(_tool_button("ГРАФИКА", Color("#2a86c9"), func() -> void: _open_settings()))
 		tools.add_child(_tool_button("УПРАВЛЕНИЕ", Color("#8a4fd6"), func() -> void: _open_editor()))
 		tools.add_child(_tool_button("ТЕСТЕР", Color("#c98b1a"), func() -> void: _open_tester()))
+
+		_tips_button = UiStyle.button("", Color("#2d6a5a"), 22, Vector2(0, 60))
+		_tips_button.pressed.connect(func() -> void:
+			Tips.set_enabled(not Tips.enabled())
+			_refresh_tips_button())
+		box.add_child(_tips_button)
+		_refresh_tips_button()
 
 		var resume := BattlePanels.icon_button(BattlePanels.icon("play"), "ПРОДОЛЖИТЬ", "", Color("#35c46a"), 100)
 		resume.pressed.connect(_resume)
@@ -939,6 +1012,7 @@ class PausePanel:
 				chip.add_child(UiStyle.label(part, 22 if parts.size() > 1 else 24, UiStyle.TEXT, 5))
 				row.add_child(chip)
 			_chips.add_child(row)
+		_refresh_tips_button()
 		visible = true
 		UiStyle.pop_in(_panel, 0.45)
 

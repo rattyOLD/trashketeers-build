@@ -6,6 +6,10 @@ extends RefCounted
 
 const SALT := "trashketeers-insider-v1"
 const MAX_NUMBER := 999
+const REVOKED_PATH := "res://data/insider_revoked.json"
+
+static var _revoked: Array[int] = []
+static var _loaded := false
 
 
 static func check_of(number: int) -> String:
@@ -31,3 +35,16 @@ static func badge_of(number: int) -> String:
 	if number < 0:
 		return ""
 	return "[Dev]" if number == 0 else "[Insider]"
+
+
+## Отозванные номера (утёкшие коды): список в data/insider_revoked.json, номер 0 отозвать нельзя.
+static func is_revoked(number: int) -> bool:
+	if number <= 0:
+		return false
+	if not _loaded:
+		_loaded = true
+		var raw: Variant = ConfigLoader.load_json(REVOKED_PATH).get("revoked", [])
+		if raw is Array:
+			for n: Variant in raw:
+				_revoked.append(int(n))
+	return _revoked.has(number)

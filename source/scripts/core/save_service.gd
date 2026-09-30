@@ -52,6 +52,8 @@ const DEFAULTS := {
 	"fx_lite": false,
 	"minimap": true,
 	"show_fps": false,
+	"tips_off": false,
+	"tips_seen": [],
 	"grade_on": true,
 	"quality": -1,
 	"music_volume": 0.8,
@@ -537,7 +539,8 @@ func get_nickname() -> String:
 
 ## Номер инсайдера (0 — разработчик) или -1.
 func get_insider() -> int:
-	return int(data["insider_no"])
+	var number := int(data["insider_no"])
+	return -1 if Insider.is_revoked(number) else number
 
 
 func get_badge() -> String:
@@ -550,13 +553,16 @@ func get_display_nickname() -> String:
 	return get_nickname() if badge.is_empty() else "%s %s" % [badge, get_nickname()]
 
 
-func activate_insider(code: String) -> bool:
+## "ok" — принят, "revoked" — код отозван, "bad" — не подошёл.
+func activate_insider(code: String) -> String:
 	var number := Insider.parse(code)
 	if number < 0:
-		return false
+		return "bad"
+	if Insider.is_revoked(number):
+		return "revoked"
 	data["insider_no"] = number
 	save_data()
-	return true
+	return "ok"
 
 
 ## Всё сохранение одной строкой: копируется в буфер и переносится на другое устройство.

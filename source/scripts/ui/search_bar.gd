@@ -5,6 +5,10 @@ extends HBoxContainer
 
 signal changed(query: String)
 
+const PROMPT_COOLDOWN_MS := 1200
+
+static var _last_prompt := 0
+
 var edit: LineEdit
 
 
@@ -45,9 +49,15 @@ static func attach_touch_input(field: LineEdit, title: String) -> void:
 		return
 	field.focus_entered.connect(func() -> void:
 		field.release_focus()
+		var now := Time.get_ticks_msec()
+		if now - _last_prompt < PROMPT_COOLDOWN_MS:
+			return
+		_last_prompt = now
 		var typed: Variant = Platform.prompt_text(title, field.text)
+		_last_prompt = Time.get_ticks_msec()
 		if typed == null:
 			return
 		field.text = str(typed).substr(0, field.max_length if field.max_length > 0 else 64)
 		field.text_changed.emit(field.text)
+		_last_prompt = Time.get_ticks_msec()
 		field.text_submitted.emit(field.text))

@@ -26,12 +26,17 @@ static func button_style(fill: Color, border: Color, width: int = 4) -> StyleBox
 class SlotBar:
 	extends Control
 	signal slot_pressed(index: int)
+	signal slot_held(index: int)
+
+	const HOLD_MS := 550
 
 	var weapons: Array = []
 	var active := 0
 	var count := 2
 	var editor_preview := false
 	var _flash := 0.0
+	var _hold_index := -1
+	var _hold_start := 0
 
 	func _init() -> void:
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -51,8 +56,14 @@ class SlotBar:
 		if _flash > 0.0:
 			_flash = maxf(_flash - delta * 4.0, 0.0)
 			queue_redraw()
+		if _hold_index >= 0 and Time.get_ticks_msec() - _hold_start >= HOLD_MS:
+			var index := _hold_index
+			_hold_index = -1
+			slot_held.emit(index)
 
 	func _input(event: InputEvent) -> void:
+		if event is InputEventScreenTouch and not event.pressed:
+			_hold_index = -1
 		if editor_preview or not is_visible_in_tree() or get_tree().paused:
 			return
 		if event is InputEventScreenTouch and event.pressed:
@@ -62,6 +73,8 @@ class SlotBar:
 			for i in count:
 				var top := i * (SLOT_H + SLOT_GAP)
 				if local.y >= top and local.y <= top + SLOT_H:
+					_hold_index = i
+					_hold_start = Time.get_ticks_msec()
 					slot_pressed.emit(i)
 					get_viewport().set_input_as_handled()
 					return
