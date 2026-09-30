@@ -479,6 +479,10 @@ func _on_bullet_hit(bullet: Bullet, target: Node2D) -> void:
 		var impact_tex := WeaponVfx.impact_for(bullet.weapon)
 		if impact_tex != null:
 			fx.sprite_flash(impact_tex, bullet.global_position, WeaponVfx.impact_width(bullet.weapon) * (1.25 if crit else 1.0), 0.14)
+	if bullet.weapon.id == &"beer_jet_v1" or bullet.weapon.id == &"puke_v1":
+		fx.burst_dir(bullet.global_position, -bullet.velocity.normalized(), color, 7, 1.1, 300.0, 3.5)
+		fx.chunks(bullet.global_position, color.lightened(0.25), 3, 200.0, 3.0)
+		return
 	fx.burst_dir(bullet.global_position, -bullet.velocity.normalized(), color, 6 if crit else (2 if dense else 4), 0.8, 260.0, 3.0)
 	if target is Enemy and not dense:
 		fx.chunks(bullet.global_position, (target as Enemy).data.fx_color if (target as Enemy).data != null else color, 2, 140.0, 3.5)

@@ -787,7 +787,7 @@
       "weapon_id": "beer_jet_v1",
       "display_name": "Пивная струя",
       "bullet_sprite": "res://assets/bullets/beer_glob.png",
-      "bullet_scale": 0.55,
+      "bullet_scale": 0.85,
       "tint_bullet": false,
       "enemy_only": true,
       "damage": 8,
@@ -798,13 +798,14 @@
       "bullet_radius": 9,
       "range": 980,
       "fire_sound": "enemy_shot",
-      "loot_weight": 0.0
+      "loot_weight": 0.0,
+      "trail_points": 18
     },
     {
       "weapon_id": "puke_v1",
       "display_name": "Рвота",
       "bullet_sprite": "res://assets/bullets/puke_glob.png",
-      "bullet_scale": 0.7,
+      "bullet_scale": 0.9,
       "tint_bullet": false,
       "enemy_only": true,
       "damage": 10,
@@ -815,7 +816,8 @@
       "bullet_radius": 11,
       "range": 980,
       "fire_sound": "enemy_shot",
-      "loot_weight": 0.0
+      "loot_weight": 0.0,
+      "trail_points": 14
     },
     {
       "weapon_id": "toxic_glob_v1",
