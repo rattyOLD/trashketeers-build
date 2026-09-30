@@ -73,6 +73,8 @@ func _ready() -> void:
 		if url_hash.begins_with("#boss:"):
 			_debug_hash = url_hash.substr(6)
 			_start_game.call_deferred(SaveService.get_selected_weapon())
+		elif url_hash.begins_with("#story"):
+			_start_story.call_deferred(SaveService.get_selected_weapon())
 		elif url_hash.begins_with("#raid"):
 			_debug_hash = url_hash.substr(1)
 			_start_raid.call_deferred(SaveService.get_selected_weapon())
@@ -121,6 +123,7 @@ func _show_menu() -> void:
 	var menu := MainMenuUI.new()
 	menu.start_requested.connect(_start_game, CONNECT_DEFERRED)
 	menu.raid_requested.connect(_start_raid, CONNECT_DEFERRED)
+	menu.story_requested.connect(_start_story, CONNECT_DEFERRED)
 	_swap_screen(menu)
 
 
@@ -135,6 +138,17 @@ func _start_game(weapon_id: StringName) -> void:
 		if not _debug_hash.is_empty():
 			game.debug_boss(StringName(_debug_hash))
 			_debug_hash = "")
+
+
+func _start_story(weapon_id: StringName) -> void:
+	Orient.refresh(get_window())
+	_with_loading(BATTLE_RESOURCES, func() -> void:
+		var game := Game.new()
+		game.story_mission = "m1"
+		game.exit_requested.connect(_show_menu, CONNECT_DEFERRED)
+		game.restart_requested.connect(_start_story.bind(weapon_id), CONNECT_DEFERRED)
+		_swap_screen(game)
+		game.start(weapon_id))
 
 
 func _start_raid(weapon_id: StringName) -> void:

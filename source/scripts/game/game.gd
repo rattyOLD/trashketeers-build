@@ -89,6 +89,8 @@ var _combo := 0
 var _combo_timer := 0.0
 var _recorded := false
 var _portal: Portal
+var story_mission := ""
+var story: StoryRun
 var _switching := false
 
 
@@ -216,6 +218,14 @@ func start(_weapon_id: StringName = &"") -> void:
 	hud.toast("АДРЕНАЛИН!", "+35% скорострельности и +15% скорости на 20 с", Color("#ff7a3d"))
 	SoundManager.play_music(StringName(str(chapter.get("music", "battle"))))
 	SoundManager.start_ambient()
+	if not story_mission.is_empty():
+		story = StoryRun.new()
+		add_child(story)
+		if story.setup(self, story_mission):
+			story.on_start()
+		else:
+			story.queue_free()
+			story = null
 
 
 func _exit_tree() -> void:
@@ -347,6 +357,8 @@ func _on_wave_started(number: int, title: String, mood: String, is_boss: bool) -
 	atmosphere.letterbox(true)
 	get_tree().create_timer(1.9, false).timeout.connect(func() -> void: atmosphere.letterbox(false))
 	hud.show_wave_intro(director.chapter_wave(), title, is_boss)
+	if story != null:
+		story.on_wave_started(director.chapter_wave(), is_boss)
 	SoundManager.play(&"boss_spawn" if is_boss else &"ui_confirm", -2.0, false)
 	if director.chapter_wave() >= 2 and not is_boss:
 		map.airdrop(player.global_position)
@@ -382,6 +394,9 @@ func _on_wave_cleared(number: int) -> void:
 ## Босс главы повержен и все враги добиты: на помосте открывается портал.
 func _on_chapter_cleared(_chapter_index: int) -> void:
 	pickups.vacuum()
+	if story != null:
+		story.finish()
+		return
 	var next := ContentDB.get_chapter(director.chapter_index + 1)
 	_portal = map.open_portal(Color("#b84dff"), Color("#00f5ff") if next.get("layout", "") != "bank" else Color("#ffd257"))
 	if not _portal.entered.is_connected(_enter_portal):
@@ -543,6 +558,8 @@ func _on_enemy_fx(_enemy: Enemy, kind: String, at: Vector2, radius: float) -> vo
 		"speaker_down":
 			hud.show_banner("КОЛОНКА РАЗБИТА · ОСТАЛОСЬ %d" % int(radius), Color("#ffd257"), 1.2)
 		"muted":
+			if story != null:
+				story.on_boss_break()
 			hud.show_banner("ОГЛУШЕНИЕ МУЗЫКОЙ! БЕЙ КОРОЛЯ", Color("#5ff2ff"), 2.4)
 			atmosphere.flash(Color("#5ff2ff"), 0.3, 0.4)
 			add_shake(0.5)
@@ -570,6 +587,8 @@ func _on_enemy_fx(_enemy: Enemy, kind: String, at: Vector2, radius: float) -> vo
 func _on_boss_phase(boss: Enemy, phase: int) -> void:
 	if phase < 2:
 		return
+	if story != null:
+		story.on_boss_phase(phase)
 	hud.set_boss_fury()
 	var text := "МЕХ РАЗБИТ! МАГНАТ В ЯРОСТИ"
 	match boss.data.boss_pattern:
@@ -650,6 +669,8 @@ func debug_boss(enemy_id: StringName) -> void:
 
 func _on_boss_spawned(boss: Enemy) -> void:
 	Platform.note_event("boss spawned")
+	if story != null:
+		story.on_boss_spawned(director.is_mini_wave())
 	hud.show_boss(boss.data.display_name, boss.hp, boss.max_hp)
 	if not boss.posture_broken.is_connected(_on_posture_broken):
 		boss.posture_broken.connect(_on_posture_broken)
@@ -670,6 +691,8 @@ func _on_miniboss_killed(boss: Enemy, at: Vector2) -> void:
 	atmosphere.flash(Color.WHITE, 0.4, 0.5)
 	hud.hide_boss()
 	hud.show_banner("%s ПОВЕРЖЕН!" % boss.data.display_name.to_upper(), UiStyle.GOLD, 2.2)
+	if story != null:
+		story.on_miniboss_killed()
 	SoundManager.play(&"comet_impact", 0.0, false)
 	pickups.spawn(at, boss.data.nut_drop)
 	pickups.spawn_xp_gold(at, 30 + director.chapter_wave() * 4)
@@ -716,7 +739,7 @@ func _on_boss_killed(boss: Enemy, at: Vector2) -> void:
 
 ## Межстраничная реклама после босса (игра на паузе); VIP 2+ и «Без рекламы» её отключают.
 func _after_boss_ad() -> void:
-	if Premium.ads_removed():
+	if Premium.ads_removed() or story != null:
 		_open_level_up()
 		return
 	get_tree().paused = true
@@ -782,6 +805,21 @@ func _roll_weapon(rarity: String) -> WeaponData:
 			chance *= 0.4
 		return chosen.with_tier(tier)
 	return WeaponDB.get_weapon(StringName(SaveService.START_WEAPON)).with_tier(1)
+
+
+## Ящик сюжета открыт пробкой-ключом: тяжёлый легендарный ствол рядом с Енотом.
+func open_story_crate() -> void:
+	var at := player.global_position + Vector2(130, -30)
+	fx.burst(at + Vector2(0, -24), Color("#ffd257"), 28, 340.0, 4.5)
+	fx.ring(at, Color("#ffd257"), 120.0)
+	SoundManager.play(&"crate_break", -2.0)
+	hud.toast("ЯЩИК ОТКРЫТ КЛЮЧОМ", "Тяжёлая Бочка: подбери ствол и готовься к Королю", Color("#ffd257"))
+	_drop_weapon(_roll_weapon("legendary"), at, true)
+
+
+## Миссия пройдена: итоговый экран боя (победа).
+func story_finished() -> void:
+	_finish()
 
 
 func _drop_weapon(weapon: WeaponData, at: Vector2, loot: bool, delay: float = 0.4) -> void:

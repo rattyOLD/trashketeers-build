@@ -30,6 +30,7 @@ const DEFAULTS := {
 	"best_wave": 0,
 	"runs": 0,
 	"boss_kills": 0,
+	"story": {},
 	"raid_wins": 0,
 	"dragon_kills": 0,
 	"blueprints": [],
@@ -972,6 +973,24 @@ func record_run(summary: Dictionary) -> Dictionary:
 
 
 ## Босс побеждён — счётчик живой, чтобы ачивка открылась сразу.
+func story_done(mission_id: String) -> bool:
+	return bool((data["story"] as Dictionary).get(mission_id, {}).get("done", false))
+
+
+func story_shards() -> int:
+	var total := 0
+	for entry in (data["story"] as Dictionary).values():
+		if typeof(entry) == TYPE_DICTIONARY and bool(entry.get("done", false)):
+			total += int(entry.get("shards", 0))
+	return total
+
+
+func story_complete(mission_id: String, shards: int) -> void:
+	var story: Dictionary = data["story"]
+	story[mission_id] = {"done": true, "shards": shards}
+	save_data()
+
+
 func add_boss_kill() -> void:
 	data["boss_kills"] = int(data["boss_kills"]) + 1
 	check_achievements()

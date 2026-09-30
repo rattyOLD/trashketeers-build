@@ -10,8 +10,9 @@ extends Control
 
 signal start_requested(weapon_id: StringName)
 signal raid_requested(weapon_id: StringName)
+signal story_requested(weapon_id: StringName)
 
-enum Mode { SURVIVAL, RAID }
+enum Mode { SURVIVAL, RAID, STORY }
 
 const RIGHT_WIDTH := 540.0
 const COLUMN_WIDTH := 680.0
@@ -438,9 +439,9 @@ func _build_play() -> Control:
 func _build_modes() -> Control:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 12)
-	var titles := ["ВЫЖИВАНИЕ", "ЛЕДЯНОЙ НАЛЁТ"]
-	for i in 2:
-		var button := UiStyle.button(titles[i], UiStyle.PANEL, 26 if Orient.portrait else 22, Vector2(0, 68 if Orient.portrait else 60))
+	var titles := ["ВЫЖИВАНИЕ", "ЛЕДЯНОЙ НАЛЁТ", "СЮЖЕТ"]
+	for i in 3:
+		var button := UiStyle.button(titles[i], UiStyle.PANEL, 22 if Orient.portrait else 20, Vector2(0, 68 if Orient.portrait else 60))
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.toggle_mode = true
 		button.pressed.connect(_select_mode.bind(i))
@@ -452,7 +453,7 @@ func _build_modes() -> Control:
 
 func _select_mode(mode: int) -> void:
 	_mode = mode
-	var colors := [Color("#ffb020"), Color("#7df9ff")]
+	var colors := [Color("#ffb020"), Color("#7df9ff"), Color("#ff7ae0")]
 	for i in _mode_buttons.size():
 		var active := i == mode
 		var b := _mode_buttons[i]
@@ -546,7 +547,9 @@ func _can_afford_perk() -> bool:
 
 func _on_play() -> void:
 	SoundManager.play(&"ui_confirm")
-	if _mode == Mode.RAID:
+	if _mode == Mode.STORY:
+		story_requested.emit(SaveService.get_selected_weapon())
+	elif _mode == Mode.RAID:
 		raid_requested.emit(SaveService.get_selected_weapon())
 	else:
 		start_requested.emit(SaveService.get_selected_weapon())

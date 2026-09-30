@@ -1,0 +1,163 @@
+class_name DialogBox
+extends CanvasLayer
+## Диалоговое окно сюжета: портрет-плашка, имя, печатающийся текст. Тап — допечатать/дальше,
+## «ПРОПУСК» закрывает всю сцену. Пока открыто, игра на паузе (окно работает в паузе).
+
+signal finished
+
+const TYPE_SPEED := 70.0
+const PANEL_HEIGHT := 190.0
+
+var _lines: Array = []
+var _speakers: Dictionary = {}
+var _index := 0
+var _typed := 0.0
+var _full_text := ""
+var _panel: PanelContainer
+var _portrait: Label
+var _portrait_box: PanelContainer
+var _name: Label
+var _text: Label
+var _hint: Label
+var _paused_before := false
+var _done := false
+var _last_press_ms := 0
+
+
+func _init() -> void:
+	layer = 70
+	process_mode = Node.PROCESS_MODE_ALWAYS
+
+
+func open(lines: Array, speakers: Dictionary) -> void:
+	_lines = lines
+	_speakers = speakers
+	_index = 0
+	_paused_before = get_tree().paused
+	get_tree().paused = true
+	_build()
+	_show_line()
+
+
+func _build() -> void:
+	var root := Control.new()
+	root.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root.mouse_filter = Control.MOUSE_FILTER_STOP
+	root.gui_input.connect(_on_input)
+	add_child(root)
+	var shade := ColorRect.new()
+	shade.color = Color(0.03, 0.01, 0.08, 0.45)
+	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
+	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(shade)
+
+	_panel = PanelContainer.new()
+	_panel.add_theme_stylebox_override("panel", UiStyle.box(Color(0.1, 0.07, 0.2, 0.96), UiStyle.NEON, 5, 22))
+	_panel.anchor_left = 0.0
+	_panel.anchor_right = 1.0
+	_panel.anchor_top = 1.0
+	_panel.anchor_bottom = 1.0
+	_panel.offset_left = 18.0
+	_panel.offset_right = -18.0
+	_panel.offset_top = -PANEL_HEIGHT - 14.0
+	_panel.offset_bottom = -14.0
+	_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(_panel)
+
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 18)
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_panel.add_child(row)
+
+	_portrait_box = PanelContainer.new()
+	_portrait_box.custom_minimum_size = Vector2(120, 120)
+	_portrait_box.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_portrait_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(_portrait_box)
+	_portrait = UiStyle.label("", 72, UiStyle.TEXT, 10)
+	_portrait_box.add_child(_portrait)
+
+	var column := VBoxContainer.new()
+	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	column.add_theme_constant_override("separation", 6)
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(column)
+	_name = UiStyle.label("", 30, UiStyle.GOLD, 8)
+	_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	column.add_child(_name)
+	_text = UiStyle.label("", 26, UiStyle.TEXT, 6)
+	_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	_text.vertical_alignment = VERTICAL_ALIGNMENT_TOP
+	_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_text.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	column.add_child(_text)
+	_hint = UiStyle.label("тап — дальше", 20, UiStyle.TEXT_DIM, 4)
+	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	column.add_child(_hint)
+
+	var skip := UiStyle.button("ПРОПУСК", UiStyle.PANEL, 22, Vector2(150, 56))
+	skip.anchor_left = 1.0
+	skip.anchor_right = 1.0
+	skip.offset_left = -170.0
+	skip.offset_right = -18.0
+	skip.offset_top = 16.0
+	skip.offset_bottom = 72.0
+	skip.pressed.connect(_finish)
+	root.add_child(skip)
+
+
+func _show_line() -> void:
+	var line: Dictionary = _lines[_index]
+	var who: Dictionary = _speakers.get(str(line.get("who", "")), {})
+	var color := Color(str(who.get("color", "#ffffff")))
+	_name.text = str(who.get("name", ""))
+	_name.add_theme_color_override("font_color", color)
+	_portrait.text = str(who.get("glyph", "?"))
+	_portrait.add_theme_color_override("font_color", color)
+	_portrait_box.add_theme_stylebox_override("panel", UiStyle.box(color.darkened(0.7), color, 5, 60 if bool(who.get("radio", false)) else 16))
+	_full_text = str(line.get("text", ""))
+	_text.text = _full_text
+	_text.visible_characters = 0
+	_typed = 0.0
+	SoundManager.play(&"ui_click", -10.0)
+
+
+func _process(delta: float) -> void:
+	if _done or _text == null:
+		return
+	if _text.visible_characters < _full_text.length():
+		_typed += delta * TYPE_SPEED
+		_text.visible_characters = mini(int(_typed), _full_text.length())
+	_hint.visible = _text.visible_characters >= _full_text.length()
+
+
+func _on_input(event: InputEvent) -> void:
+	var pressed := false
+	if event is InputEventMouseButton:
+		pressed = (event as InputEventMouseButton).pressed
+	elif event is InputEventScreenTouch:
+		pressed = (event as InputEventScreenTouch).pressed
+	if not pressed or _done:
+		return
+	var now := Time.get_ticks_msec()
+	if now - _last_press_ms < 140:
+		return
+	_last_press_ms = now
+	if _text.visible_characters < _full_text.length():
+		_text.visible_characters = _full_text.length()
+		_typed = float(_full_text.length())
+		return
+	_index += 1
+	if _index >= _lines.size():
+		_finish()
+	else:
+		_show_line()
+
+
+func _finish() -> void:
+	if _done:
+		return
+	_done = true
+	get_tree().paused = _paused_before
+	finished.emit()
+	queue_free()
