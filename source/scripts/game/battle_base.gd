@@ -89,6 +89,8 @@ func _spawn_player(at: Vector2, weapon: WeaponData, target_finder: Callable) -> 
 
 
 func _setup_common(camera_bounds: Rect2, currency_icon: Texture2D) -> void:
+	Platform.mark_battle(true, "%s q=%d lite=%s" % [get_script().get_global_name(), SaveService.get_quality(), SaveService.is_fx_lite()])
+	get_tree().create_timer(15.0, false).timeout.connect(Platform.mark_battle.bind(false))
 	SoftGlow.lite = SaveService.is_fx_lite()
 	_fx_scale = 0.5 if SoftGlow.lite else 1.0
 	camera = Camera2D.new()
@@ -139,6 +141,7 @@ func set_camera_bounds(bounds: Rect2) -> void:
 
 
 func _exit_tree() -> void:
+	Platform.mark_battle(false)
 	if BulletPool.bullet_hit.is_connected(_on_bullet_hit):
 		BulletPool.bullet_hit.disconnect(_on_bullet_hit)
 	if BulletPool.exploded.is_connected(_on_explosion):

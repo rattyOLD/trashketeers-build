@@ -140,6 +140,38 @@ func set_render_cap(cap: float) -> void:
 		_js("window.__trash_dpr_cap = %s;" % str(cap))
 
 
+const BATTLE_FLAG := "__trash_battle"
+
+
+## Флаг «бой идёт»: ставится на старте боя и снимается через несколько секунд стабильной работы
+## или при выходе. Если при следующем запуске он остался — вкладку убила система (нехватка памяти).
+func mark_battle(active: bool, info: String = "") -> void:
+	if not is_web:
+		return
+	if active:
+		_js("window.localStorage.setItem('%s', %s);" % [BATTLE_FLAG, JSON.stringify(info)])
+	else:
+		_js("window.localStorage.removeItem('%s');" % BATTLE_FLAG)
+
+
+func consume_unclean_exit() -> String:
+	if not is_web:
+		return ""
+	var value: Variant = _js("var v = window.localStorage.getItem('%s'); window.localStorage.removeItem('%s'); return v;" % [BATTLE_FLAG, BATTLE_FLAG])
+	return "" if value == null else str(value)
+
+
+func device_info() -> String:
+	if not is_web:
+		return OS.get_name()
+	return str(_js("return navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + (window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio);"))
+
+
+func send_report(kind: String, text: String) -> void:
+	if is_web:
+		_js("if (window.trkReport) { window.trkReport(%s, %s); }" % [JSON.stringify(kind), JSON.stringify(text)])
+
+
 # --- Реклама за награду ---------------------------------------------------------------------------
 
 ## Показ рекламы за награду; callback(ok: bool) приходит один раз.

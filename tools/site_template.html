@@ -253,6 +253,22 @@ html, body {
 		},
 	};
 
+	// Адрес сбора отчётов о вылетах (Google Apps Script / Supabase и т.п.); пусто — отчёты не отправляются.
+	const REPORT_URL = '';
+	window.trkReport = function (kind, text) {
+		if (!REPORT_URL) {
+			return;
+		}
+		try {
+			const body = JSON.stringify({ kind: kind, text: String(text).slice(0, 3000), time: new Date().toISOString(), build: 'v34' });
+			if (navigator.sendBeacon) {
+				navigator.sendBeacon(REPORT_URL, body);
+			} else {
+				fetch(REPORT_URL, { method: 'POST', body: body, keepalive: true, mode: 'no-cors' });
+			}
+		} catch (e) {}
+	};
+
 	const logTail = [];
 	let started = false;
 	let crashed = false;
@@ -276,6 +292,7 @@ html, body {
 		try {
 			window.localStorage.setItem('trk_last_crash', report);
 		} catch (e) {}
+		window.trkReport('crash', report);
 		document.getElementById('crashlog').textContent = report;
 		document.getElementById('crash').classList.add('show');
 	}

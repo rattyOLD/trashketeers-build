@@ -166,7 +166,7 @@ class Settings:
 			var color := UiStyle.NEON.darkened(0.25) if i == q else UiStyle.PANEL_LIGHT
 			for state in ["normal", "hover"]:
 				_quality_buttons[i].add_theme_stylebox_override(state, UiStyle.button_box(color, false))
-		_quality_hint.text = QUALITY_HINTS[q]
+		_quality_hint.text = QUALITY_HINTS[q] + ("\nИгра закрылась во время боя, поэтому графика снижена автоматически." if bool(SaveService.data.get("crash_downgraded", false)) else "")
 		_fps.set_pressed_no_signal(bool(SaveService.data["show_fps"]))
 		_lite.set_pressed_no_signal(SaveService.is_fx_lite())
 		_mini.set_pressed_no_signal(SaveService.is_minimap_enabled())

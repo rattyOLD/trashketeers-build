@@ -51,6 +51,7 @@ func _ready() -> void:
 	# Телефоны с экраном 90–120 Гц иначе гонят вдвое больше кадров: греются и начинают
 	# троттлить. Игра рассчитана на 60.
 	Engine.max_fps = 60
+	_handle_unclean_exit()
 	SaveService.apply_quality()
 	_register_input()
 	_show_menu()
@@ -59,6 +60,17 @@ func _ready() -> void:
 		if url_hash.begins_with("#raid"):
 			_debug_hash = url_hash.substr(1)
 			_start_raid.call_deferred(SaveService.get_selected_weapon())
+
+
+func _handle_unclean_exit() -> void:
+	var info := Platform.consume_unclean_exit()
+	if info.is_empty():
+		return
+	var quality := SaveService.get_quality()
+	if quality > 0:
+		SaveService.set_quality(quality - 1)
+		SaveService.set_flag("crash_downgraded", true)
+	Platform.send_report("unclean_exit", "%s | now quality %d | %s" % [info, SaveService.get_quality(), Platform.device_info()])
 
 
 func _register_input() -> void:

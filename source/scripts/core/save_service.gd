@@ -390,7 +390,8 @@ func set_quality(q: int) -> void:
 
 
 func apply_quality() -> void:
-	Platform.set_render_cap([1.5, 2.0, 3.0][get_quality()])
+	var caps := [1.5, 2.0, 2.0] if Platform.is_touch() else [1.5, 2.0, 3.0]
+	Platform.set_render_cap(caps[get_quality()])
 
 
 func is_minimap_enabled() -> bool:
