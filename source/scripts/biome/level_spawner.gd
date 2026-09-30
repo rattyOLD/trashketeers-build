@@ -165,7 +165,26 @@ func find_spawn_point(center: Vector2, min_r: float, max_r: float, clearance: fl
 		var p := center + Vector2.from_angle(randf() * TAU) * randf_range(min_r, max_r)
 		if inner.has_point(p) and is_area_clear(p, clearance):
 			return p
-	return Vector2.INF
+	return _far_clear_point(center, min_r * 0.5, clearance)
+
+
+## Запасной поиск, когда кольцо вокруг Енота целиком вне карты (угол арены, узкая вертикальная арена):
+## любая свободная точка не ближе min_dist, иначе самая дальняя из найденных.
+func _far_clear_point(center: Vector2, min_dist: float, clearance: float) -> Vector2:
+	var inner := bounds.grow(-CELL - clearance)
+	var best := Vector2.INF
+	var best_dist := -1.0
+	for attempt in 48:
+		var p := Vector2(randf_range(inner.position.x, inner.end.x), randf_range(inner.position.y, inner.end.y))
+		if not is_area_clear(p, clearance):
+			continue
+		var d := p.distance_to(center)
+		if d >= min_dist:
+			return p
+		if d > best_dist:
+			best_dist = d
+			best = p
+	return best
 
 
 ## Точка в воротах спавна, дальняя от Енота не ближе min_distance (INF — все ворота рядом).

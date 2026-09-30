@@ -58,6 +58,8 @@ var _spawn_timer := 0.0
 var _escort_timer := 0.0
 var _boss_retry := 0.0
 var _boss_pending := false
+var _softlock_timer := 0.0
+const SOFTLOCK_TIME := 15.0
 var _boss_dead_time := -1.0
 var _hp_mult := 1.0
 var _dmg_mult := 1.0
@@ -156,6 +158,7 @@ func _physics_process(delta: float) -> void:
 			_tick_boss(delta)
 			_tick_spawns(delta)
 			_tick_stall(delta)
+			_tick_softlock(delta)
 			_tick_leash(delta)
 			if _boss_dead_time >= 0.0:
 				_boss_dead_time += delta
@@ -240,6 +243,10 @@ func _tick_boss(delta: float) -> void:
 		if _boss_retry > 0.0:
 			return
 		var boss_data := ContentDB.get_enemy(StringName(_boss_key()))
+		if boss_data == null:
+			Platform.send_report("softlock", "boss data missing wave=%d key='%s'" % [wave_number, _boss_key()])
+			_boss_pending = false
+			return
 		var boss_hp := pow(float(_difficulty["loop_hp"]), loop) * float(_chapter.get("power", 1.0)) * _adaptive_boss_mult(boss_data) * BOSS_HP_TRIM
 		boss = _enemies.spawn(boss_data, _level.boss_point, boss_hp, _dmg_mult)
 		if boss == null:
@@ -309,6 +316,20 @@ func summon_minions(count: int) -> void:
 		var at := _level.find_spawn_point(boss.global_position, ring, ring + 160.0, data.radius)
 		if at != Vector2.INF:
 			_enemies.spawn(data, at, _hp_mult, _dmg_mult)
+
+
+## Страховка от вечной волны: на арене никого, а «остались» враги или босс, и они не появляются 15 секунд.
+func _tick_softlock(delta: float) -> void:
+	if _enemies.get_active_count() > 0 or (remaining_to_spawn <= 0 and not _boss_pending):
+		_softlock_timer = 0.0
+		return
+	_softlock_timer += delta
+	if _softlock_timer < SOFTLOCK_TIME:
+		return
+	_softlock_timer = 0.0
+	Platform.send_report("softlock", "wave=%d left_to_spawn=%d boss_pending=%s player=%s" % [wave_number, remaining_to_spawn, _boss_pending, str(_player.global_position)])
+	remaining_to_spawn = 0
+	_boss_pending = false
 
 
 func _tick_stall(delta: float) -> void:
