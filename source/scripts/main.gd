@@ -57,6 +57,7 @@ func _ready() -> void:
 	# троттлить. Игра рассчитана на 60.
 	Engine.max_fps = 60
 	_handle_unclean_exit()
+	Platform.send_report("profile", "nick=%s hero=%s weapon=%s coins=%d dust=%d gems=%d quality=%d lite=%s glow=%s minimap=%s" % [SaveService.get_nickname(), SaveService.get_character_id(), SaveService.get_selected_weapon(), SaveService.get_coins(), SaveService.get_star_dust(), SaveService.get_gems(), SaveService.get_quality(), SaveService.is_fx_lite(), SaveService.is_glow_enabled(), SaveService.is_minimap_enabled()])
 	Orient.refresh(get_window())
 	get_window().size_changed.connect(_on_window_resized)
 	var poll := Timer.new()

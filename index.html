@@ -318,7 +318,7 @@ html, body {
 	// index.wasm / index.pck и отдаём ему уже скачанные и распакованные байты.
 	const FILES = {
 		wasm: { parts: [{url:"raccoon.core.0.wasm",bytes:5221065},{url:"raccoon.core.1.wasm",bytes:4165384}] },
-		pck: { parts: [{url:"raccoon.pack.0.wasm",bytes:12013889},{url:"raccoon.pack.1.wasm",bytes:4764981}] },
+		pck: { parts: [{url:"raccoon.pack.0.wasm",bytes:12013885},{url:"raccoon.pack.1.wasm",bytes:4765248}] },
 	};
 	const GODOT_CONFIG = {
 		args: [],
@@ -326,7 +326,7 @@ html, body {
 		ensureCrossOriginIsolationHeaders: false,
 		executable: 'index',
 		experimentalVK: false,
-		fileSizes: { 'index.pck': 17607664, 'index.wasm': 43699190 },
+		fileSizes: { 'index.pck': 17607888, 'index.wasm': 43699190 },
 		focusCanvas: true,
 		gdextensionLibs: [],
 		onPrint: function () {
@@ -348,7 +348,7 @@ html, body {
 
 	// Адрес сбора отчётов о вылетах (Google Apps Script / Supabase и т.п.); пусто — отчёты не отправляются.
 	const REPORT_URL = 'https://script.google.com/macros/s/AKfycbxVyy-SnRANW0Im-1Blne2TcUbca93WqzyBulpADwWWD7YH6x3KIygBYImTe8VfP5pp/exec';
-	const BUILD_ID_REPORT = '1790759881';
+	const BUILD_ID_REPORT = '1790760634';
 	const SESSION_ID = Math.random().toString(36).slice(2, 8);
 	const SESSION_START = Date.now();
 	const REPORT_CAP = 250;
@@ -395,6 +395,7 @@ html, body {
 		return {
 			uid: userId,
 			ua: nav.userAgent,
+			model: highEntropy,
 			lang: nav.language,
 			tz: (function () { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (e) { return ''; } })(),
 			screen: screen.width + 'x' + screen.height,
@@ -415,6 +416,16 @@ html, body {
 		};
 	}
 
+	let highEntropy = '';
+	try {
+		if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+			navigator.userAgentData.getHighEntropyValues(['model', 'platformVersion', 'fullVersionList']).then(function (v) {
+				highEntropy = (v.model || '') + ' / Android ' + (v.platformVersion || '?');
+			});
+		}
+	} catch (e) {}
+	const loadStart = Date.now();
+	window.trkLoaded = function () { noteEvent('engine started after ' + (Date.now() - loadStart) + ' ms'); };
 	try {
 		if (navigator.getBattery) {
 			navigator.getBattery().then(function (b) { battery = b; });
@@ -501,7 +512,7 @@ html, body {
 	window.trkReport('session_start', gpuInfo() + ' | ' + navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + (window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio) + ' | screen ' + screen.width + 'x' + screen.height + ' | cores ' + (navigator.hardwareConcurrency || '?'));
 
 	// Вкладка могла висеть со старой версией: при возврате в неё сверяем номер сборки и предлагаем обновиться.
-	const BUILD_ID = '1790759881';
+	const BUILD_ID = '1790760634';
 	function checkVersion() {
 		fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (v) {
 			if (v && v.build && v.build !== BUILD_ID && !document.getElementById('newver')) {
@@ -771,6 +782,7 @@ html, body {
 			return engine.startGame({}).then(function () {
 				clearTimeout(watchdog);
 				started = true;
+				if (window.trkLoaded) { window.trkLoaded(); }
 				release();
 				if (failed) {
 					return;

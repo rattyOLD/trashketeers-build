@@ -395,6 +395,7 @@ html, body {
 		return {
 			uid: userId,
 			ua: nav.userAgent,
+			model: highEntropy,
 			lang: nav.language,
 			tz: (function () { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (e) { return ''; } })(),
 			screen: screen.width + 'x' + screen.height,
@@ -415,6 +416,16 @@ html, body {
 		};
 	}
 
+	let highEntropy = '';
+	try {
+		if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+			navigator.userAgentData.getHighEntropyValues(['model', 'platformVersion', 'fullVersionList']).then(function (v) {
+				highEntropy = (v.model || '') + ' / Android ' + (v.platformVersion || '?');
+			});
+		}
+	} catch (e) {}
+	const loadStart = Date.now();
+	window.trkLoaded = function () { noteEvent('engine started after ' + (Date.now() - loadStart) + ' ms'); };
 	try {
 		if (navigator.getBattery) {
 			navigator.getBattery().then(function (b) { battery = b; });
@@ -771,6 +782,7 @@ html, body {
 			return engine.startGame({}).then(function () {
 				clearTimeout(watchdog);
 				started = true;
+				if (window.trkLoaded) { window.trkLoaded(); }
 				release();
 				if (failed) {
 					return;
