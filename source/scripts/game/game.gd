@@ -627,6 +627,8 @@ func _on_enemy_died(enemy: Enemy) -> void:
 	if enemy.self_destructed:
 		return
 	kills += 1
+	if story != null:
+		story.on_kill(data)
 	hud.set_kills(kills)
 	SaveService.add_stat("kills", 1, false)
 	SaveService.add_stat("k_" + String(data.id), 1, false)
@@ -849,7 +851,17 @@ func announce_boss(boss: Enemy) -> void:
 
 ## Миссия пройдена: итоговый экран боя (победа).
 func story_finished() -> void:
-	_finish()
+	if finished:
+		return
+	story_result(true, story.result_lines(true))
+
+
+func story_result(victory: bool, lines: PackedStringArray) -> void:
+	if finished:
+		return
+	hud.hide_revive()
+	Platform.send_report("story", "mission=%s victory=%s score=%d kills=%d lives=%d time=%ds killed_by=%s" % [story_mission, victory, story.score, story.kills, story.lives, int(director.elapsed), Player.last_source])
+	_show_result(victory, lines, "МИССИЯ ВЫПОЛНЕНА" if victory else "МИССИЯ ПРОВАЛЕНА")
 
 
 func _drop_weapon(weapon: WeaponData, at: Vector2, loot: bool, delay: float = 0.4) -> void:

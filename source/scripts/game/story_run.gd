@@ -11,8 +11,11 @@ const BARRIER_LEAD := 0.03
 const PACK_SPREAD := 110.0
 const ZONE_HEAL := 0.3
 const CLEAR_HEAL := 0.1
-const HP_PER_PROGRESS := 1.7
-const DMG_PER_PROGRESS := 0.5
+const HP_PER_PROGRESS := 1.2
+const DMG_PER_PROGRESS := 0.35
+const BOSS_POINTS := 5000
+const LIFE_BONUS := 1500
+const RANK_STEPS: Array[int] = [30000, 20000, 11000]
 const START_LIVES := 3
 const MEDKIT_HEAL := 0.4
 
@@ -27,6 +30,9 @@ var locked := false
 var barrier_y := 0.0
 var waypoint: Node2D
 var lives := START_LIVES
+var score := 0
+var kills := 0
+var lives_lost := 0
 var checkpoint := Vector2.ZERO
 
 var _encounters: Array = []
@@ -72,14 +78,48 @@ func title() -> String:
 func hud_text() -> String:
 	var zones: Array = mission.get("zones", [])
 	var number := clampi(zone_index + 1, 1, maxi(zones.size(), 1))
-	return "ЖИЗНИ %d · ЗОНА %d · ПУТЬ %d%%" % [lives, number, int(progress * 100.0)]
+	return "ОЧКИ %06d · ЖИЗНИ %d · ЗОНА %d" % [score, lives, number]
+
+
+func on_kill(data: EnemyData) -> void:
+	kills += 1
+	score += BOSS_POINTS if data.is_boss() else maxi(int(data.max_hp / 4.0), 10) * 10
+
+
+func rank() -> String:
+	var total := score + lives * LIFE_BONUS
+	for i in RANK_STEPS.size():
+		if total >= RANK_STEPS[i]:
+			return ["S", "A", "B"][i]
+	return "C"
+
+
+func result_lines(victory: bool) -> PackedStringArray:
+	var lines := PackedStringArray([title() if not victory else "ОСКОЛОК %d/6 ПОЛУЧЕН" % int(mission.get("shards", 1))])
+	var bonus := lives * LIFE_BONUS if victory else 0
+	lines.append("Очки: %d" % (score + bonus))
+	lines.append("Врагов: %d" % kills)
+	lines.append("Жизни: %d из %d" % [lives, START_LIVES])
+	lines.append("Время: %s" % BattleBase.format_time(game.director.elapsed))
+	if victory:
+		lines.append("Ранг: %s" % rank())
+	return lines
+
+
+func game_over() -> void:
+	finished_mission = true
+	game.story_result(false, result_lines(false))
 
 
 ## Жизнь потрачена: возвращает Рико на чекпоинт; false, когда жизни кончились.
 func try_respawn() -> bool:
-	if lives <= 1 or finished_mission:
-		return false
+	if finished_mission:
+		return true
+	if lives <= 1:
+		get_tree().create_timer(1.6, false).timeout.connect(game_over)
+		return true
 	lives -= 1
+	lives_lost += 1
 	game.hud.show_banner("ЖИЗНЬ ПОТЕРЯНА · ОСТАЛОСЬ %d" % lives, UiStyle.DANGER, 1.6)
 	get_tree().create_timer(1.3, false).timeout.connect(func() -> void: game.story_respawn(checkpoint))
 	return true
@@ -315,7 +355,7 @@ func finish() -> void:
 		return
 	finished_mission = true
 	var shards := int(mission.get("shards", 1))
-	SaveService.story_complete(str(mission.get("id", "")), shards)
+	SaveService.story_complete(str(mission.get("id", "")), shards, score + lives * LIFE_BONUS)
 	game.story_target = null
 	game.hud.show_banner("ОСКОЛОК %d/6 ПОЛУЧЕН!" % shards, UiStyle.GOLD, 2.8)
 	_after_queue = game.story_finished

@@ -985,9 +985,10 @@ func story_shards() -> int:
 	return total
 
 
-func story_complete(mission_id: String, shards: int) -> void:
+func story_complete(mission_id: String, shards: int, score: int = 0) -> void:
 	var story: Dictionary = data["story"]
-	story[mission_id] = {"done": true, "shards": shards}
+	var best := maxi(score, int((story.get(mission_id, {}) as Dictionary).get("best", 0)))
+	story[mission_id] = {"done": true, "shards": shards, "best": best}
 	save_data()
 
 
