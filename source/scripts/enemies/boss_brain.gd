@@ -95,6 +95,7 @@ var _fight_time := 0.0
 var _hazard_timer := HAZARD_INTERVAL
 var _carpet_from := Vector2.ZERO
 var _carpet_dir := Vector2.ZERO
+const BEER_STREAM_LIMIT := 110
 var _beer: WeaponData
 var _puke: WeaponData
 var _smash_hit := false
@@ -639,6 +640,8 @@ func _smash_impact(player: Player) -> void:
 
 func _fire_beer(weapon: WeaponData, angle_dir: Vector2, spread: float) -> void:
 	if weapon == null:
+		return
+	if BulletPool.get_active_count() > BEER_STREAM_LIMIT and randf() < 0.5:
 		return
 	var from := enemy.part_muzzle(0)
 	var bullet := BulletPool.spawn(weapon, from, angle_dir.rotated(spread), Bullet.Team.ENEMY)
