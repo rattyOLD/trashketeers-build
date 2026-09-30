@@ -11,7 +11,8 @@
       "name": "НЭЛЛ",
       "color": "#5ff2ff",
       "glyph": "Н",
-      "radio": true
+      "radio": true,
+      "portrait": "res://assets/ui/portraits/nell.png"
     },
     "baron": {
       "name": "ПИВНОЙ БАРОН",
