@@ -11,7 +11,9 @@ static var portrait := false
 
 ## Возвращает true, если ориентация сменилась.
 static func refresh(window: Window) -> bool:
-	var size := DisplayServer.window_get_size()
+	var size := Vector2(DisplayServer.window_get_size())
+	if OS.has_feature("web"):
+		size = Vector2(float(JavaScriptBridge.eval("window.innerWidth")), float(JavaScriptBridge.eval("window.innerHeight")))
 	var want := size.y > size.x
 	var changed := want != portrait
 	portrait = want

@@ -370,4 +370,5 @@ func _max_enemy_radius(weights: Dictionary) -> float:
 
 ## Радиус кольца спавна — чуть больше половины диагонали экрана: враг появляется за кадром.
 func _offscreen_radius() -> float:
-	return get_viewport().get_visible_rect().size.length() * 0.5 + SPAWN_MARGIN
+	var zoom := 1.0 if Orient.portrait else BattleBase.LANDSCAPE_ZOOM
+	return get_viewport().get_visible_rect().size.length() * 0.5 / zoom + SPAWN_MARGIN

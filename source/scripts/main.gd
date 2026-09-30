@@ -40,6 +40,8 @@ const RAID_RESOURCES := [
 
 var _debug_hash := ""
 var _screen: Node
+var _resize_serial := 0
+var _menu_view := Vector2.ZERO
 var _loading: LoadingScreen
 
 
@@ -57,6 +59,11 @@ func _ready() -> void:
 	_handle_unclean_exit()
 	Orient.refresh(get_window())
 	get_window().size_changed.connect(_on_window_resized)
+	var poll := Timer.new()
+	poll.wait_time = 0.7
+	poll.timeout.connect(_poll_orientation)
+	add_child(poll)
+	poll.start()
 	SaveService.apply_quality()
 	_register_input()
 	_show_menu()
@@ -78,10 +85,25 @@ func _handle_unclean_exit() -> void:
 	Platform.send_report("unclean_exit", "%s | now quality %d | last: %s | %s" % [info, SaveService.get_quality(), Platform.last_context(), Platform.device_info()])
 
 
-func _on_window_resized() -> void:
-	if not Orient.refresh(get_window()):
+## Браузер присылает size_changed до того, как холст принял новый размер, поэтому реагируем после паузы.
+func _poll_orientation() -> void:
+	if not OS.has_feature("web"):
 		return
-	if _screen is MainMenuUI:
+	var w := float(JavaScriptBridge.eval("window.innerWidth"))
+	var h := float(JavaScriptBridge.eval("window.innerHeight"))
+	if (h > w) != Orient.portrait:
+		_on_window_resized()
+
+
+func _on_window_resized() -> void:
+	_resize_serial += 1
+	var serial := _resize_serial
+	await get_tree().create_timer(0.35, true, false, true).timeout
+	if serial != _resize_serial:
+		return
+	var view := get_viewport().get_visible_rect().size
+	var flipped := Orient.refresh(get_window())
+	if (flipped or view != _menu_view) and _screen is MainMenuUI:
 		_show_menu()
 
 
@@ -90,6 +112,8 @@ func _register_input() -> void:
 
 
 func _show_menu() -> void:
+	Orient.refresh(get_window())
+	_menu_view = get_viewport().get_visible_rect().size
 	var menu := MainMenuUI.new()
 	menu.start_requested.connect(_start_game, CONNECT_DEFERRED)
 	menu.raid_requested.connect(_start_raid, CONNECT_DEFERRED)
@@ -97,6 +121,7 @@ func _show_menu() -> void:
 
 
 func _start_game(weapon_id: StringName) -> void:
+	Orient.refresh(get_window())
 	_with_loading(BATTLE_RESOURCES, func() -> void:
 		var game := Game.new()
 		game.exit_requested.connect(_show_menu, CONNECT_DEFERRED)
@@ -106,6 +131,7 @@ func _start_game(weapon_id: StringName) -> void:
 
 
 func _start_raid(weapon_id: StringName) -> void:
+	Orient.refresh(get_window())
 	_with_loading(RAID_RESOURCES, func() -> void:
 		var raid := Raid.new()
 		raid.exit_requested.connect(_show_menu, CONNECT_DEFERRED)

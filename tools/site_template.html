@@ -291,6 +291,21 @@ html, body {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako_inflate.min.js"></script>
 <script src="render_scale.js"></script>
+<script>
+(function () {
+	'use strict';
+	// iOS Safari меняет размер окна после поворота с задержкой и не всегда шлёт resize — движок остаётся со старым размером холста.
+	var kick = function () {
+		[60, 250, 600, 1200, 2500].forEach(function (ms) {
+			setTimeout(function () { window.dispatchEvent(new Event('resize')); }, ms);
+		});
+	};
+	window.addEventListener('orientationchange', kick);
+	window.addEventListener('resize', kick);
+	if (window.visualViewport) { window.visualViewport.addEventListener('resize', kick); }
+})();
+</script>
+
 <script src="audio_unlock.js"></script>
 <script src="index.js"></script>
 <script>

@@ -291,6 +291,21 @@ html, body {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako_inflate.min.js"></script>
 <script src="render_scale.js"></script>
+<script>
+(function () {
+	'use strict';
+	// iOS Safari меняет размер окна после поворота с задержкой и не всегда шлёт resize — движок остаётся со старым размером холста.
+	var kick = function () {
+		[60, 250, 600, 1200, 2500].forEach(function (ms) {
+			setTimeout(function () { window.dispatchEvent(new Event('resize')); }, ms);
+		});
+	};
+	window.addEventListener('orientationchange', kick);
+	window.addEventListener('resize', kick);
+	if (window.visualViewport) { window.visualViewport.addEventListener('resize', kick); }
+})();
+</script>
+
 <script src="audio_unlock.js"></script>
 <script src="index.js"></script>
 <script>
@@ -303,7 +318,7 @@ html, body {
 	// index.wasm / index.pck и отдаём ему уже скачанные и распакованные байты.
 	const FILES = {
 		wasm: { parts: [{url:"raccoon.core.0.wasm",bytes:5221065},{url:"raccoon.core.1.wasm",bytes:4165384}] },
-		pck: { parts: [{url:"raccoon.pack.0.wasm",bytes:12013879},{url:"raccoon.pack.1.wasm",bytes:4759778}] },
+		pck: { parts: [{url:"raccoon.pack.0.wasm",bytes:12013861},{url:"raccoon.pack.1.wasm",bytes:4761416}] },
 	};
 	const GODOT_CONFIG = {
 		args: [],
@@ -311,7 +326,7 @@ html, body {
 		ensureCrossOriginIsolationHeaders: false,
 		executable: 'index',
 		experimentalVK: false,
-		fileSizes: { 'index.pck': 17601552, 'index.wasm': 43699190 },
+		fileSizes: { 'index.pck': 17603248, 'index.wasm': 43699190 },
 		focusCanvas: true,
 		gdextensionLibs: [],
 		onPrint: function () {
@@ -372,7 +387,7 @@ html, body {
 	window.trkReport('session_start', navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + (window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio) + ' | screen ' + screen.width + 'x' + screen.height + ' | cores ' + (navigator.hardwareConcurrency || '?'));
 
 	// Вкладка могла висеть со старой версией: при возврате в неё сверяем номер сборки и предлагаем обновиться.
-	const BUILD_ID = '1790757265';
+	const BUILD_ID = '1790758105';
 	function checkVersion() {
 		fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (v) {
 			if (v && v.build && v.build !== BUILD_ID && !document.getElementById('newver')) {

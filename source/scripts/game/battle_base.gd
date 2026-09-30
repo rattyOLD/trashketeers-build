@@ -39,6 +39,7 @@ var _perf_resume_guard := 0
 var _context_timer := 0.0
 var _spikes_sent := 0
 static var _perfs_sent := 0
+const LANDSCAPE_ZOOM := 1.3
 var camera: Camera2D
 var hud: Hud
 var atmosphere: AtmosphereFX
@@ -109,6 +110,8 @@ func _setup_common(camera_bounds: Rect2, currency_icon: Texture2D) -> void:
 	camera.position_smoothing_speed = CAMERA_SMOOTHING
 	camera.position = player.position
 	add_child(camera)
+	_apply_camera_zoom()
+	get_window().size_changed.connect(_apply_camera_zoom)
 	set_camera_bounds(camera_bounds)
 	camera.make_current()
 	camera.reset_smoothing()
@@ -142,6 +145,11 @@ func _setup_common(camera_bounds: Rect2, currency_icon: Texture2D) -> void:
 	hud.restart_pressed.connect(func() -> void: restart_requested.emit())
 	hud.menu_pressed.connect(_on_menu_pressed)
 	hud.set_health(player.hp, player.max_hp)
+
+
+func _apply_camera_zoom() -> void:
+	var z := 1.0 if Orient.portrait else LANDSCAPE_ZOOM
+	camera.zoom = Vector2(z, z)
 
 
 func set_camera_bounds(bounds: Rect2) -> void:
