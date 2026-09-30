@@ -1,0 +1,179 @@
+{
+  "mode": "built-in imagegen",
+  "style": "2D cartoon, thick dark contour, smooth NON-pixel lines, two-tone cel shading, neon pink/cyan, top-left light, no lettering; magenta background except transparent graffiti and full-bleed floor/wall tiles",
+  "portraitBodies": [
+    {
+      "key": "rico",
+      "ref": "rico.png",
+      "prompt": "Rico, main raccoon hero: preserve existing grey/cream fur, black eye mask, pointed ears, orange goggles on forehead, red scarf. Wear field utility jacket with shoulder radio and orange accents. Left: attentive neutral confident expression, mouth closed. Right: funny indignant scowl, one eyebrow raised, slight visible tooth. Radio visible in both, no gun needed."
+    },
+    {
+      "key": "nell",
+      "ref": "nell.png",
+      "prompt": "Nell, female white rabbit radio dispatcher: preserve existing white/pink fur, large upright pink-lined ears, cyan goggles/glasses. Add radio headphones with boom mic, practical dispatcher jacket, tea mug at chest. Left: calm friendly listening. Right: incredulous annoyed/comical expression, raised eyebrow. Same ears, headset, glasses, tea and clothing in both."
+    },
+    {
+      "key": "baron",
+      "ref": "baron.png",
+      "prompt": "Beer Baron is EXACTLY the obese grey rat from the attached approved boss sheet: gold crown with pink jewels, black sunglasses, big cheeky rat snout with buckteeth, gold chains, orange/black utility straps, colorful beer cans on straps. Behind shoulder show wooden beer barrel with gold hoops, gold rivets and gold lid rim, same white foam silhouette in both, NO faucet/spigot. Pink stylized cat face graffiti on belly if visible, never text. Left: smug closed grin. Right: loudly laughing, open toothy mouth. Keep all equipment identical across portraits. Bust includes top of belly but face remains large. Reference has captions; exclude all captions."
+    },
+    {
+      "key": "king",
+      "ref": "king.png",
+      "prompt": "King of Trash, a male grey rat scrapyard tyrant. Preserve existing rat muzzle, pink ears, crowned tyrant character but implement story version: battered cooking-pot gold crown, red patched regal cape, rusty chains, shoulder-level backrest of scrap throne with a compact speaker on each side. Bust foreground with head looking at viewer. Left: calm arrogant smirk. Right: furious bared teeth, knitted brows. Same crown, outfit, scrap throne and speakers in both. Distinct from Beer Baron: no sunglasses, no barrel."
+    },
+    {
+      "key": "toxic",
+      "ref": "toxic.png",
+      "prompt": "Toxic worker: rat with bright green mohawk, pink ears, battered industrial gas mask with round lime green lenses and central round filter, dark work overalls, lime toxic backpack straps. Match existing reference identity. Left: timid frightened, hunched shoulders and worried eyes visibly discernible behind green lenses. Right: comically terrified, widened eyes, raised ears and shoulders. Keep gas mask fully worn in both; same mohawk, lenses, equipment. Not a villain pose, he is scared."
+    }
+  ],
+  "spriteBodies": [
+    {
+      "key": "captive",
+      "prompt": "One 768x512 sheet, grid 3 columns x 2 rows, cell 256x256. Same small raccoon orphan with grey fur, black eye mask, patched teal tunic throughout, no weapons. Row 1: (1) seated sad captive raccoon, hunched left sway; (2) seated sad captive raccoon, hunched right sway; (3) newly freed raccoon joyfully raises paws. Row 2: (4) happy raccoon running right with left foot leading; (5) happy raccoon running right with right foot leading; (6) completely empty magenta cell. Character ONLY, cage comes on a separate sheet. Same costume and character proportions all five frames, feet on identical baseline. Do not include cage, text or props.",
+      "cols": 3,
+      "rows": 2,
+      "cw": 256,
+      "ch": 256
+    },
+    {
+      "key": "cage",
+      "prompt": "One 768x512 sheet, grid 2 columns x 1 row, cell 384x512. Rusty steel rescue cage sized for a small raccoon, rectangular welded steel base, 4 corner posts, vertical bars, squat top roof and front swing door with padlock. Left cage closed; right EXACTLY SAME cage with open door swung right, clear entrance and empty interior. No character, no floor shadow. Same camera, scale, steel geometry and base position in both. Plenty of magenta margin.",
+      "cols": 2,
+      "rows": 1,
+      "cw": 384,
+      "ch": 512
+    },
+    {
+      "key": "hb_case",
+      "prompt": "One 768x512 sheet, grid 3 columns x 2 rows, cells 256x256. Top row 3 frames: same closed reinforced metal case with black-yellow hazard stripes, chunky latches, recognizable cannon silhouette emblem (NO LETTERS). Frame1 inactive, frame2 subtle pink seams glow, frame3 brighter pink seams glow. Same geometry and position every frame. Bottom row completely empty magenta. Case art footprint about 224x168 centered; no additional objects. No H.B. lettering.",
+      "cols": 3,
+      "rows": 2,
+      "cw": 256,
+      "ch": 256
+    },
+    {
+      "key": "hb_parts",
+      "prompt": "One 768x512 sheet, grid 3 columns x 2 rows, cells 256x256. Six detached component icons of ONE rusted diesel super-cannon, coherent black steel/copper with pink energy accents. Row1: (1) long heavy gun barrel with vented muzzle, (2) bolt/receiver mechanism with sliding metal block, (3) compact optical scope with cyan glass. Row2: (4) chunky pink glowing energy battery, (5) shoulder stock, (6) ammunition magazine. One recognizable component centered per cell, generous empty margin, no extra objects, NO text. Icons will be downsampled to 128x128.",
+      "cols": 3,
+      "rows": 2,
+      "cw": 256,
+      "ch": 256
+    },
+    {
+      "key": "hb_gun",
+      "prompt": "Single isolated assembled super-cannon called Heavy Barrel, NO WORDS. Wide horizontal 768x512 canvas. Large dieselpunk cannon with thick barrel and vented muzzle pointing RIGHT, rusted dark steel shell, copper piping, prominent contained neon pink energy core, scope, stock, magazine, all six components physically coherent. TOP-DOWN overhead weapon view, fully contained with at least 48px margin, no character, no shooting or explosion, no floor shadows.",
+      "cols": 1,
+      "rows": 1,
+      "cw": 768,
+      "ch": 512
+    },
+    {
+      "key": "gates",
+      "prompt": "Canvas 1152x256, grid THREE columns x TWO rows, cell384x128, six identical rusty metal industrial roller-shutter door frames, viewed from top-down 3/4. Same wall frame, yellow-black lower hazard stripe, red signal lamp upper left, door geometry and camera all six. Read order: top row (1) fully closed (2) raised one fifth (3) raised two fifths; bottom row (4) raised three fifths (5) raised four fifths (6) fully open, shutter coiled at top and dark clear entrance. Bottom rail same position all six. Broad low door profile, do not put a separate room behind. No words.",
+      "cols": 3,
+      "rows": 2,
+      "cw": 384,
+      "ch": 128
+    },
+    {
+      "key": "posters",
+      "prompt": "Canvas 960x1200 grid THREE columns by THREE rows, cell320x400. Nine distinct framed tattered portrait-format paper posters, frontal flat view, dimensions160x200 when reduced. Each poster has a BIG BLANK OFF-WHITE PAPER AREA, about two-thirds height, reserved for future code-rendered title and body text. Small pictogram in lower third ONLY, no words or pseudo-writing. Thin scrap-metal or rough wood frame, varied torn paper corners. Row1 pictograms: raccoon with walkie-talkie; clenched paw with coin; crossed-out rat silhouette. Row2 pictograms: skull inside gear; beer mug with crown; toothed biting crate. Row3 pictograms: lightning traveling along wire; walkie-talkie inside coffin; loudspeakers under crown. Exactly9 posters, generous margins, no extra objects. Blank space must remain blank.",
+      "cols": 3,
+      "rows": 3,
+      "cw": 320,
+      "ch": 400
+    },
+    {
+      "key": "walls",
+      "prompt": "Canvas768x512 grid THREE columns by TWO rows, cell256x256. TOP ROW ONLY: three modular 192x128 horizontal rusty metal wall segments: (1) riveted corrugated iron with pink abstract paint strokes, (2) patched steel plates with cyan abstract paint strokes, (3) scratched heavy welded panels with pink/cyan abstract doodles. Graffiti must be abstract symbols, NO letters. All three identical height and straight matching LEFT/RIGHT edge cross-section for horizontal joining, front top-down 3/4 view. No protruding pipes over segment edges. BOTTOM ROW totally empty magenta. One centered short horizontal wall segment per upper cell, separated, not a scene.",
+      "cols": 3,
+      "rows": 2,
+      "cw": 256,
+      "ch": 256
+    },
+    {
+      "key": "boss_floor",
+      "prompt": "Canvas768x256 grid THREE columns x ONE row cell256x256. Three game FLOOR TILES, flat overhead view, each fills its entire square cell edge to edge, absolutely NO perspective. Dark matte steel slabs with yellow-black hazard edging around perimeter, consistent perimeter width and matching edge color. Three center variations: riveted cross-bracing, worn metal plate, scratched inset industrial hatch. Restrained cyan/pink accent scuffs. Floor dark and low contrast for readable characters. No props, walls, text or visible grid separator. These are tile textures, no magenta INSIDE tiles, fill all 3 square cells completely.",
+      "cols": 3,
+      "rows": 1,
+      "cw": 256,
+      "ch": 256
+    },
+    {
+      "key": "boss_decor",
+      "prompt": "Canvas1536x384 grid THREE columns x ONE row, cell512x384. Three separate boss hall props, top-down 3/4 consistent view: (1) paired battered speaker cabinets with cyan/pink glowing rings, grouped as one prop; (2) paired tripod stage spotlights, warm lights with contained small glow, no long beam; (3) empty SCRAP THRONE built from bent rusty iron, car seat, welded pipes, pots, scraps, a crown ornament, NO character. Each prop centered and fully contained, equal game scale, 24px safe margin. Don't draw hall or floor, only detached objects on magenta.",
+      "cols": 3,
+      "rows": 1,
+      "cw": 512,
+      "ch": 384
+    },
+    {
+      "key": "hb_hero_fire",
+      "prompt": "One 768x512 sheet, 2 columns x 2 rows, 384x256 cells. Four animation frames of Rico raccoon main hero in SAME stable stance facing RIGHT, top-down 3/4 view matching hero sprite reference. Preserve grey/cream fur, black eye mask, orange goggles on forehead, red scarf, dark field jacket and orange utility straps. Holding the assembled heavy diesel super-cannon from weapon reference with BOTH hands, vented barrel, copper pipes, pink core. Frame1 aims with no flash; frame2 fires small pink-white muzzle flash at right; frame3 fires larger pink energy flash with slight backwards recoil; frame4 recovering from recoil, flash fades. Feet identical baseline, no running, no barrel morphing. Keep weapon fully in cell. Pure flat #FF00FF background, no floor shadows.",
+      "refs": [
+        "/workspace/scratch/a777a22c1d4f/references/rico.png",
+        "/workspace/scratch/a777a22c1d4f/generated_images/exec-dd284b32-b67e-41ea-b34f-5e6f87477152.png",
+        "/workspace/scratch/a777a22c1d4f/project_sources/04-087F48E1-2356-48BF-9603-F18E3DFC8BBC.jpeg"
+      ],
+      "cols": 2,
+      "rows": 2,
+      "cw": 384,
+      "ch": 256
+    },
+    {
+      "key": "hb_assembly",
+      "prompt": "One512x256 sheet, ONE column x TWO rows, cell512x128. Exact same horizontal metallic gun-component assembly HUD case/tray in both rows, straight-on UI view, NOT perspective. Rusted black metal outline, yellow hazard corners, small cannon silhouette emblem (NO letters). Exactly SIX evenly spaced square inset sockets across tray. TOP empty sockets with dark interiors. BOTTOM all six sockets filled with mini-icons LEFT TO RIGHT: barrel, bolt, scope, pink battery, stock, magazine. Only filled sockets differ; geometry identical. No extra UI or words. Pure flat#FF00FF background, safety margin 8px.",
+      "refs": [
+        "/workspace/scratch/a777a22c1d4f/generated_images/exec-dd284b32-b67e-41ea-b34f-5e6f87477152.png"
+      ],
+      "cols": 1,
+      "rows": 2,
+      "cw": 512,
+      "ch": 128
+    },
+    {
+      "key": "hb_assembly_fx",
+      "prompt": "One1024x512 sheet, FOUR columns x TWO rows, each256x256. Exactly EIGHT sequential frames of an assembly activation neon-pink energy BURST animation, centered at identical anchor. Read row-major. Frame1 tiny hot-pink spark, frame2 small pink starburst, frame3 growing white/pink core with angular pink rays, frame4 big peaked pink explosion ring, frame5 expanded fading pink ring with fragmented sparks, frame6 fading pink fragments, frame7 sparse sparks, frame8 tiny last spark. Stylized cartoon VFX with crisp curved/pointed shapes and soft contained glow, no black smoke or fire orange. Each contained with16px safe margin. Pure flat#FF00FF background, ensure burst has white core and dark-magenta outlines distinguishable from background.",
+      "refs": [
+        "/workspace/scratch/a777a22c1d4f/project_sources/04-087F48E1-2356-48BF-9603-F18E3DFC8BBC.jpeg"
+      ],
+      "cols": 4,
+      "rows": 2,
+      "cw": 256,
+      "ch": 256
+    },
+    {
+      "key": "hb_gun_top",
+      "prompt": "Single isolated super-cannon,768x512 canvas. Use weapon reference as identity reference. Draw EXACT SAME gun from DIRECT OVERHEAD looking straight down: TOP OF WEAPON ONLY, barrel pointing RIGHT, stock left, symmetric top surface profile, no visible vertical side face and no underside trigger guard dominating. Wide vented muzzle, black steel/copper shell, pink contained energy core, top optical scope, copper tube. Whole weapon fits with48px margin. No character, no shooting, no ground shadow. Pure flat#FF00FF background.",
+      "refs": [
+        "/workspace/scratch/a777a22c1d4f/generated_images/exec-dd284b32-b67e-41ea-b34f-5e6f87477152.png"
+      ],
+      "cols": 1,
+      "rows": 1,
+      "cw": 768,
+      "ch": 512
+    },
+    {
+      "key": "graffiti_bases",
+      "prompt": "One800x480 sheet, TWO columns x FOUR rows, each cell400x120. Eight separate wide horizontal ABSTRACT floor spray-paint underlays for later code-rendered Russian words. NO characters, no letters, no symbols resembling writing. Rough short brush swipes and splatter edges, central area clear for word overlay. Row1 pink swipe; cyan swipe. Row2 faded lime swipe; amber swipe. Row3 lavender swipe; electric cyan swipe. Row4 dark pink swipe; warm yellow swipe. Matte paint, no glowing lights, no drop shadow. Every streak fully contained with20px margins. GENUINELY TRANSPARENT BACKGROUND, transparent outside paint, preserve alpha.",
+      "refs": [
+        "/workspace/scratch/a777a22c1d4f/project_sources/08-IMG_1584.jpeg"
+      ],
+      "cols": 2,
+      "rows": 4,
+      "cw": 400,
+      "ch": 120,
+      "transparent": true
+    }
+  ],
+  "finalCorrections": [
+    "Beer Baron: every barrel hoop/rivet/lid rim bright yellow gold; brown wooden staves; no spigot; same pink cat plus curved arrow on belly, based on tools/src/astra_baron/baron_A1a.png.",
+    "Captive: frame5 gathered airborne stride; preserve frame4 extended stride. Add two swaying captive-in-closed-cage frames in384x512 cells.",
+    "Walls: full-bleed modular metal textures with matching side bands and top/bottom rails; export192x128.",
+    "Hero firing: shrink all4sprites uniformly and shorten frame3muzzle flash so it cannot cross cell.",
+    "Graffiti: remove all metal objects/frames, keep only matte paint and genuine alpha.",
+    "Poster01: replace rat illustration with recognizable Rico raccoon, preserve blank paper and frame."
+  ]
+}

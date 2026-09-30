@@ -1,0 +1,638 @@
+{
+  "brief": "astra/from_claude/BRIEF_v6_story.md",
+  "addendum": "astra/from_claude/BRIEF_v6_addendum.md",
+  "style": "Neon Trash Cartoon",
+  "generator": "built-in imagegen",
+  "background": "#FF00FF except wall/floor textures and RGBA graffiti",
+  "frameOrder": "left-to-right, top-to-bottom",
+  "groups": {
+    "portraits": 10,
+    "captive": 12,
+    "heavy_barrel": 30,
+    "gates": 7,
+    "env": 29
+  },
+  "assets": [
+    {
+      "path": "astra/inbox/story/portraits/rico_normal.png",
+      "width": 512,
+      "height": 512,
+      "character": "rico",
+      "emotion": "normal"
+    },
+    {
+      "path": "astra/inbox/story/portraits/rico_annoyed.png",
+      "width": 512,
+      "height": 512,
+      "character": "rico",
+      "emotion": "expressive"
+    },
+    {
+      "path": "astra/inbox/story/portraits/nell_normal.png",
+      "width": 512,
+      "height": 512,
+      "character": "nell",
+      "emotion": "normal"
+    },
+    {
+      "path": "astra/inbox/story/portraits/nell_annoyed.png",
+      "width": 512,
+      "height": 512,
+      "character": "nell",
+      "emotion": "expressive"
+    },
+    {
+      "path": "astra/inbox/story/portraits/baron_normal.png",
+      "width": 512,
+      "height": 512,
+      "character": "baron",
+      "emotion": "normal"
+    },
+    {
+      "path": "astra/inbox/story/portraits/baron_laugh.png",
+      "width": 512,
+      "height": 512,
+      "character": "baron",
+      "emotion": "expressive"
+    },
+    {
+      "path": "astra/inbox/story/portraits/king_normal.png",
+      "width": 512,
+      "height": 512,
+      "character": "king",
+      "emotion": "normal"
+    },
+    {
+      "path": "astra/inbox/story/portraits/king_angry.png",
+      "width": 512,
+      "height": 512,
+      "character": "king",
+      "emotion": "expressive"
+    },
+    {
+      "path": "astra/inbox/story/portraits/toxic_normal.png",
+      "width": 512,
+      "height": 512,
+      "character": "toxic",
+      "emotion": "normal"
+    },
+    {
+      "path": "astra/inbox/story/portraits/toxic_panic.png",
+      "width": 512,
+      "height": 512,
+      "character": "toxic",
+      "emotion": "expressive"
+    },
+    {
+      "path": "astra/inbox/story/captive/captive_sheet.png",
+      "width": 768,
+      "height": 512,
+      "columns": 3,
+      "rows": 2,
+      "frames": 5,
+      "cellWidth": 256,
+      "cellHeight": 256
+    },
+    {
+      "path": "astra/inbox/story/captive/captive_sway_1.png",
+      "width": 256,
+      "height": 256,
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/captive/captive_sway_2.png",
+      "width": 256,
+      "height": 256,
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/captive/captive_freed.png",
+      "width": 256,
+      "height": 256,
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/captive/captive_run_1.png",
+      "width": 256,
+      "height": 256,
+      "frame": 3
+    },
+    {
+      "path": "astra/inbox/story/captive/captive_run_2.png",
+      "width": 256,
+      "height": 256,
+      "frame": 4
+    },
+    {
+      "path": "astra/inbox/story/captive/cage_sheet.png",
+      "width": 768,
+      "height": 512,
+      "columns": 2,
+      "rows": 1,
+      "frames": 2,
+      "cellWidth": 384,
+      "cellHeight": 512
+    },
+    {
+      "path": "astra/inbox/story/captive/cage_closed.png",
+      "width": 384,
+      "height": 512,
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/captive/cage_open.png",
+      "width": 384,
+      "height": 512,
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/heavy_barrel/hb_case_sheet.png",
+      "width": 768,
+      "height": 512,
+      "columns": 3,
+      "rows": 2,
+      "frames": 3,
+      "cellWidth": 256,
+      "cellHeight": 256
+    },
+    {
+      "path": "astra/inbox/story/heavy_barrel/hb_case_closed.png",
+      "width": 256,
+      "height": 192,
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/heavy_barrel/hb_case_glow_1.png",
+      "width": 256,
+      "height": 192,
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/heavy_barrel/hb_case_glow_2.png",
+      "width": 256,
+      "height": 192,
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/heavy_barrel/hb_parts_sheet.png",
+      "width": 384,
+      "height": 256,
+      "columns": 3,
+      "rows": 2,
+      "frames": 6,
+      "cellWidth": 128,
+      "cellHeight": 128
+    },
+    {
+      "path": "astra/inbox/story/heavy_barrel/hb_part_barrel.png",
+      "width": 128,
+      "height": 128,
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/heavy_barrel/hb_part_bolt.png",
+      "width": 128,
+      "height": 128,
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/heavy_barrel/hb_part_scope.png",
+      "width": 128,
+      "height": 128,
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/heavy_barrel/hb_part_battery.png",
+      "width": 128,
+      "height": 128,
+      "frame": 3
+    },
+    {
+      "path": "astra/inbox/story/heavy_barrel/hb_part_stock.png",
+      "width": 128,
+      "height": 128,
+      "frame": 4
+    },
+    {
+      "path": "astra/inbox/story/heavy_barrel/hb_part_magazine.png",
+      "width": 128,
+      "height": 128,
+      "frame": 5
+    },
+    {
+      "path": "astra/inbox/story/heavy_barrel/hb_gun_side.png",
+      "width": 768,
+      "height": 512,
+      "columns": 1,
+      "rows": 1,
+      "frames": 1,
+      "cellWidth": 768,
+      "cellHeight": 512
+    },
+    {
+      "path": "astra/inbox/story/gates/gate_sheet.png",
+      "width": 1152,
+      "height": 256,
+      "columns": 3,
+      "rows": 2,
+      "frames": 6,
+      "cellWidth": 384,
+      "cellHeight": 128
+    },
+    {
+      "path": "astra/inbox/story/gates/gate_closed.png",
+      "width": 384,
+      "height": 128,
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/gates/gate_raise_1.png",
+      "width": 384,
+      "height": 128,
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/gates/gate_raise_2.png",
+      "width": 384,
+      "height": 128,
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/gates/gate_raise_3.png",
+      "width": 384,
+      "height": 128,
+      "frame": 3
+    },
+    {
+      "path": "astra/inbox/story/gates/gate_raise_4.png",
+      "width": 384,
+      "height": 128,
+      "frame": 4
+    },
+    {
+      "path": "astra/inbox/story/gates/gate_open.png",
+      "width": 384,
+      "height": 128,
+      "frame": 5
+    },
+    {
+      "path": "astra/inbox/story/env/posters_sheet.png",
+      "width": 480,
+      "height": 600,
+      "columns": 3,
+      "rows": 3,
+      "frames": 9,
+      "cellWidth": 160,
+      "cellHeight": 200
+    },
+    {
+      "path": "astra/inbox/story/env/poster_01.png",
+      "width": 160,
+      "height": 200,
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/env/poster_02.png",
+      "width": 160,
+      "height": 200,
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/env/poster_03.png",
+      "width": 160,
+      "height": 200,
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/env/poster_04.png",
+      "width": 160,
+      "height": 200,
+      "frame": 3
+    },
+    {
+      "path": "astra/inbox/story/env/poster_05.png",
+      "width": 160,
+      "height": 200,
+      "frame": 4
+    },
+    {
+      "path": "astra/inbox/story/env/poster_06.png",
+      "width": 160,
+      "height": 200,
+      "frame": 5
+    },
+    {
+      "path": "astra/inbox/story/env/poster_07.png",
+      "width": 160,
+      "height": 200,
+      "frame": 6
+    },
+    {
+      "path": "astra/inbox/story/env/poster_08.png",
+      "width": 160,
+      "height": 200,
+      "frame": 7
+    },
+    {
+      "path": "astra/inbox/story/env/poster_09.png",
+      "width": 160,
+      "height": 200,
+      "frame": 8
+    },
+    {
+      "path": "astra/inbox/story/env/wall_01.png",
+      "width": 192,
+      "height": 128,
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/env/wall_02.png",
+      "width": 192,
+      "height": 128,
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/env/wall_03.png",
+      "width": 192,
+      "height": 128,
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/env/boss_floor_sheet.png",
+      "width": 768,
+      "height": 256,
+      "columns": 3,
+      "rows": 1,
+      "frames": 3,
+      "cellWidth": 256,
+      "cellHeight": 256
+    },
+    {
+      "path": "astra/inbox/story/env/boss_floor_01.png",
+      "width": 256,
+      "height": 256,
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/env/boss_floor_02.png",
+      "width": 256,
+      "height": 256,
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/env/boss_floor_03.png",
+      "width": 256,
+      "height": 256,
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/env/boss_speakers.png",
+      "width": 512,
+      "height": 384,
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/env/boss_spotlights.png",
+      "width": 512,
+      "height": 384,
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/env/boss_throne.png",
+      "width": 512,
+      "height": 384,
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/heavy_barrel/hb_hero_fire_sheet.png",
+      "width": 768,
+      "height": 512,
+      "columns": 2,
+      "rows": 2,
+      "frames": 4,
+      "cellWidth": 384,
+      "cellHeight": 256,
+      "transparent": false
+    },
+    {
+      "path": "astra/inbox/story/heavy_barrel/hb_hero_aim.png",
+      "width": 384,
+      "height": 256,
+      "frame": 0,
+      "transparent": false
+    },
+    {
+      "path": "astra/inbox/story/heavy_barrel/hb_hero_fire_1.png",
+      "width": 384,
+      "height": 256,
+      "frame": 1,
+      "transparent": false
+    },
+    {
+      "path": "astra/inbox/story/heavy_barrel/hb_hero_fire_2.png",
+      "width": 384,
+      "height": 256,
+      "frame": 2,
+      "transparent": false
+    },
+    {
+      "path": "astra/inbox/story/heavy_barrel/hb_hero_recover.png",
+      "width": 384,
+      "height": 256,
+      "frame": 3,
+      "transparent": false
+    },
+    {
+      "path": "astra/inbox/story/heavy_barrel/hb_assembly_sheet.png",
+      "width": 512,
+      "height": 256,
+      "columns": 1,
+      "rows": 2,
+      "frames": 2,
+      "cellWidth": 512,
+      "cellHeight": 128,
+      "transparent": false
+    },
+    {
+      "path": "astra/inbox/story/heavy_barrel/hb_assembly_empty.png",
+      "width": 512,
+      "height": 128,
+      "frame": 0,
+      "transparent": false
+    },
+    {
+      "path": "astra/inbox/story/heavy_barrel/hb_assembly_full.png",
+      "width": 512,
+      "height": 128,
+      "frame": 1,
+      "transparent": false
+    },
+    {
+      "path": "astra/inbox/story/heavy_barrel/hb_assembly_fx_sheet.png",
+      "width": 1024,
+      "height": 512,
+      "columns": 4,
+      "rows": 2,
+      "frames": 8,
+      "cellWidth": 256,
+      "cellHeight": 256,
+      "transparent": false
+    },
+    {
+      "path": "astra/inbox/story/heavy_barrel/hb_assembly_fx_01.png",
+      "width": 256,
+      "height": 256,
+      "frame": 0,
+      "transparent": false
+    },
+    {
+      "path": "astra/inbox/story/heavy_barrel/hb_assembly_fx_02.png",
+      "width": 256,
+      "height": 256,
+      "frame": 1,
+      "transparent": false
+    },
+    {
+      "path": "astra/inbox/story/heavy_barrel/hb_assembly_fx_03.png",
+      "width": 256,
+      "height": 256,
+      "frame": 2,
+      "transparent": false
+    },
+    {
+      "path": "astra/inbox/story/heavy_barrel/hb_assembly_fx_04.png",
+      "width": 256,
+      "height": 256,
+      "frame": 3,
+      "transparent": false
+    },
+    {
+      "path": "astra/inbox/story/heavy_barrel/hb_assembly_fx_05.png",
+      "width": 256,
+      "height": 256,
+      "frame": 4,
+      "transparent": false
+    },
+    {
+      "path": "astra/inbox/story/heavy_barrel/hb_assembly_fx_06.png",
+      "width": 256,
+      "height": 256,
+      "frame": 5,
+      "transparent": false
+    },
+    {
+      "path": "astra/inbox/story/heavy_barrel/hb_assembly_fx_07.png",
+      "width": 256,
+      "height": 256,
+      "frame": 6,
+      "transparent": false
+    },
+    {
+      "path": "astra/inbox/story/heavy_barrel/hb_assembly_fx_08.png",
+      "width": 256,
+      "height": 256,
+      "frame": 7,
+      "transparent": false
+    },
+    {
+      "path": "astra/inbox/story/heavy_barrel/hb_gun_top.png",
+      "width": 768,
+      "height": 512,
+      "columns": 1,
+      "rows": 1,
+      "frames": 1,
+      "cellWidth": 768,
+      "cellHeight": 512,
+      "transparent": false
+    },
+    {
+      "path": "astra/inbox/story/env/graffiti_bases_sheet.png",
+      "width": 800,
+      "height": 480,
+      "columns": 2,
+      "rows": 4,
+      "frames": 8,
+      "cellWidth": 400,
+      "cellHeight": 120,
+      "transparent": true
+    },
+    {
+      "path": "astra/inbox/story/env/graffiti_base_01.png",
+      "width": 400,
+      "height": 120,
+      "frame": 0,
+      "transparent": true
+    },
+    {
+      "path": "astra/inbox/story/env/graffiti_base_02.png",
+      "width": 400,
+      "height": 120,
+      "frame": 1,
+      "transparent": true
+    },
+    {
+      "path": "astra/inbox/story/env/graffiti_base_03.png",
+      "width": 400,
+      "height": 120,
+      "frame": 2,
+      "transparent": true
+    },
+    {
+      "path": "astra/inbox/story/env/graffiti_base_04.png",
+      "width": 400,
+      "height": 120,
+      "frame": 3,
+      "transparent": true
+    },
+    {
+      "path": "astra/inbox/story/env/graffiti_base_05.png",
+      "width": 400,
+      "height": 120,
+      "frame": 4,
+      "transparent": true
+    },
+    {
+      "path": "astra/inbox/story/env/graffiti_base_06.png",
+      "width": 400,
+      "height": 120,
+      "frame": 5,
+      "transparent": true
+    },
+    {
+      "path": "astra/inbox/story/env/graffiti_base_07.png",
+      "width": 400,
+      "height": 120,
+      "frame": 6,
+      "transparent": true
+    },
+    {
+      "path": "astra/inbox/story/env/graffiti_base_08.png",
+      "width": 400,
+      "height": 120,
+      "frame": 7,
+      "transparent": true
+    },
+    {
+      "path": "astra/inbox/story/captive/captive_caged_sheet.png",
+      "width": 768,
+      "height": 512,
+      "columns": 2,
+      "rows": 1,
+      "frames": 2,
+      "cellWidth": 384,
+      "cellHeight": 512
+    },
+    {
+      "path": "astra/inbox/story/captive/captive_caged_1.png",
+      "width": 384,
+      "height": 512,
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/captive/captive_caged_2.png",
+      "width": 384,
+      "height": 512,
+      "frame": 1
+    }
+  ]
+}
