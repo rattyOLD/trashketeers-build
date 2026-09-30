@@ -14,6 +14,12 @@ const CLEAR_HEAL := 0.1
 const HP_PER_PROGRESS := 1.2
 const DMG_PER_PROGRESS := 0.35
 const BOSS_POINTS := 5000
+const RESCUE_POINTS := 3000
+const CLEAN_ZONE_POINTS := 2000
+const RESCUE_HEAL := 0.25
+const CAPTIVE_LEAD := 0.07
+const BARK_CHANCE := 0.5
+const BARK_DELAY := 1.1
 const LIFE_BONUS := 1500
 const RANK_STEPS: Array[int] = [30000, 20000, 11000]
 const START_LIVES := 3
@@ -33,10 +39,15 @@ var lives := START_LIVES
 var score := 0
 var kills := 0
 var lives_lost := 0
+var rescued := 0
 var checkpoint := Vector2.ZERO
 
 var _encounters: Array = []
 var _next := 0
+var _next_captive := 0
+var _captives: Array = []
+var _enemy_lines: Dictionary = {}
+var _zone_hit := false
 var _active: Dictionary = {}
 var _tracked: Array = []
 var _pending_waves: Array = []
@@ -59,6 +70,9 @@ func setup(owner_game: Game, mission_id: String) -> bool:
 		if str(entry.get("id", "")) == mission_id:
 			mission = entry
 	_encounters = mission.get("encounters", [])
+	_captives = mission.get("captives", [])
+	_enemy_lines = root.get("enemy_lines", {})
+	game.player.damaged.connect(func(_amount: float) -> void: _zone_hit = true)
 	_start_y = game.map.player_start.y
 	_end_y = game.map.boss_point.y
 	waypoint = Node2D.new()
@@ -99,6 +113,7 @@ func result_lines(victory: bool) -> PackedStringArray:
 	var bonus := lives * LIFE_BONUS if victory else 0
 	lines.append("Очки: %d" % (score + bonus))
 	lines.append("Врагов: %d" % kills)
+	lines.append("Спасено: %d" % rescued)
 	lines.append("Жизни: %d из %d" % [lives, START_LIVES])
 	lines.append("Время: %s" % BattleBase.format_time(game.director.elapsed))
 	if victory:
@@ -147,6 +162,7 @@ func _physics_process(delta: float) -> void:
 	_update_progress()
 	_check_zone()
 	_tick_pending_waves(delta)
+	_tick_captives()
 	if locked:
 		_hold_player()
 		_check_clear()
@@ -166,6 +182,10 @@ func _check_zone() -> void:
 			index = i
 	if index == zone_index:
 		return
+	if zone_index >= 0 and not _zone_hit:
+		score += CLEAN_ZONE_POINTS
+		game.fx.popup(game.player.global_position + Vector2(0, -110), "БЕЗ УРОНА +%d" % CLEAN_ZONE_POINTS, Color("#7cff6b"), 30.0)
+	_zone_hit = false
 	zone_index = index
 	checkpoint = game.player.global_position
 	var zone: Dictionary = zones[index]
@@ -177,6 +197,44 @@ func _check_zone() -> void:
 		_say(str(zone["say"]), OPEN_DELAY + (0.8 if index == 0 else 0.0))
 	if bool(zone.get("crate", false)) and has_key:
 		_open_crate()
+
+
+func _tick_captives() -> void:
+	if _next_captive >= _captives.size():
+		return
+	var entry: Dictionary = _captives[_next_captive]
+	if progress < float(entry["at"]) - CAPTIVE_LEAD:
+		return
+	_next_captive += 1
+	var side := float(entry.get("side", 1.0))
+	var want := Vector2(game.player.global_position.x + 230.0 * side, _y_of(float(entry["at"])))
+	var at := game.map.find_spawn_point(want, 0.0, 240.0, 40.0)
+	if at == Vector2.INF:
+		return
+	var captive := Captive.new()
+	captive.player = game.player
+	captive.freed.connect(_on_captive_freed.bind(captive))
+	captive.global_position = at
+	game.layers.fx.add_child(captive)
+
+
+func _on_captive_freed(captive: Captive) -> void:
+	rescued += 1
+	score += RESCUE_POINTS
+	game.player.heal(game.player.max_hp * RESCUE_HEAL)
+	game.fx.popup(captive.global_position + Vector2(0, -80), "СПАСЁН +%d" % RESCUE_POINTS, Color("#ffd257"), 32.0)
+	game.fx.ring(captive.global_position, Color("#ffd257"), 120.0)
+	game.pickups.spawn_xp_gold(captive.global_position, 5)
+	game.hud.toast("ПЛЕННИК ОСВОБОЖДЁН", "Спасено: %d · +%d очков" % [rescued, RESCUE_POINTS], Color("#ffd257"))
+
+
+func _bark(enemy: Enemy) -> void:
+	if not is_instance_valid(enemy) or enemy.pool_index < 0 or not enemy.is_alive():
+		return
+	var lines: Array = _enemy_lines.get(str(enemy.data.id), [])
+	if lines.is_empty():
+		return
+	game.fx.popup(enemy.global_position + Vector2(0, -70), str(lines.pick_random()), Color("#ff9b9b"), 22.0)
 
 
 func _update_waypoint() -> void:
@@ -253,6 +311,8 @@ func _spawn_wave(wave: Dictionary, index: int) -> void:
 		var enemy := game.enemies.spawn(batch[i], at, hp_mult, dmg_mult)
 		if enemy != null:
 			_tracked.append(enemy)
+			if randf() < BARK_CHANCE and _enemy_lines.has(str(batch[i].id)):
+				get_tree().create_timer(BARK_DELAY, false).timeout.connect(_bark.bind(enemy))
 
 
 func _spawn_boss(enc: Dictionary) -> void:
@@ -433,6 +493,40 @@ class Medkit:
 		draw_rect(Rect2(-20, bob - 20, 40, 40), Color("#180e22"), false, 4.0)
 		draw_rect(Rect2(-5, bob - 15, 10, 30), Color("#ff3b5c"), true)
 		draw_rect(Rect2(-15, bob - 5, 30, 10), Color("#ff3b5c"), true)
+
+
+## Пленник в клетке: касание освобождает его (как заложники в Metal Slug).
+class Captive:
+	extends Node2D
+
+	signal freed
+
+	var player: Node2D
+	var _time := 0.0
+	var _tex: Texture2D = load("res://assets/ui/portraits/nell.png")
+
+	func _init() -> void:
+		z_index = 3
+
+	func _physics_process(delta: float) -> void:
+		_time += delta
+		queue_redraw()
+		if player != null and global_position.distance_to(player.global_position) < 62.0:
+			SoundManager.play(&"level_up", -4.0, false)
+			freed.emit()
+			queue_free()
+
+	func _draw() -> void:
+		var bob := sin(_time * 3.0) * 2.0
+		draw_circle(Vector2(0, 30), 34.0, Color(0, 0, 0, 0.25))
+		draw_texture_rect(_tex, Rect2(-28, bob - 44, 56, 56), false)
+		var bar := Color("#8a8fa8")
+		for i in range(-3, 4):
+			draw_line(Vector2(i * 10.0, -48), Vector2(i * 10.0, 16), bar, 3.0)
+		draw_rect(Rect2(-34, -52, 68, 10), Color("#3a3550"), true)
+		draw_rect(Rect2(-34, 10, 68, 8), Color("#3a3550"), true)
+		var pulse := 0.6 + 0.4 * sin(_time * 6.0)
+		draw_rect(Rect2(-40, -58, 80, 80), Color(1.0, 0.82, 0.3, 0.6 * pulse), false, 3.0)
 
 
 ## Приглушённый энергобарьер: виден только вблизи, мерцающие секции вместо ровной линии.
