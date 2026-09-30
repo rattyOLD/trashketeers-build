@@ -1,3 +1,11 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Trashketeers">
+<link rel="apple-touch-icon" href="icon180.png">
+<link rel="manifest" href="manifest.webmanifest">
 <title>Trashketeers.io</title>
 <meta name="theme-color" content="#0d0a1c">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -303,9 +311,14 @@ html, body {
 (function () {
 	'use strict';
 	// iOS Safari меняет размер окна после поворота с задержкой и не всегда шлёт resize — движок остаётся со старым размером холста.
-	var kick = function () {
-		[60, 250, 600, 1200, 2500].forEach(function (ms) {
-			setTimeout(function () { window.dispatchEvent(new Event('resize')); }, ms);
+	var kickTimers = [];
+	var kick = function (event) {
+		if (event && event.isTrusted === false) {
+			return;
+		}
+		kickTimers.forEach(clearTimeout);
+		kickTimers = [250, 900, 2000].map(function (ms) {
+			return setTimeout(function () { window.dispatchEvent(new Event('resize')); }, ms);
 		});
 	};
 	window.addEventListener('orientationchange', kick);

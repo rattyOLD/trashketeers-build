@@ -390,7 +390,7 @@ func set_quality(q: int) -> void:
 
 
 func apply_quality() -> void:
-	var caps := [1.0, 1.5, 2.0] if Platform.is_touch() else [1.25, 2.0, 3.0]
+	var caps := [1.25, 1.75, 2.5] if Platform.is_touch() else [1.25, 2.0, 3.0]
 	Platform.set_render_cap(caps[get_quality()])
 
 

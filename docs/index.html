@@ -1,3 +1,11 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Trashketeers">
+<link rel="apple-touch-icon" href="icon180.png">
+<link rel="manifest" href="manifest.webmanifest">
 <title>Trashketeers.io</title>
 <meta name="theme-color" content="#0d0a1c">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -303,9 +311,14 @@ html, body {
 (function () {
 	'use strict';
 	// iOS Safari меняет размер окна после поворота с задержкой и не всегда шлёт resize — движок остаётся со старым размером холста.
-	var kick = function () {
-		[60, 250, 600, 1200, 2500].forEach(function (ms) {
-			setTimeout(function () { window.dispatchEvent(new Event('resize')); }, ms);
+	var kickTimers = [];
+	var kick = function (event) {
+		if (event && event.isTrusted === false) {
+			return;
+		}
+		kickTimers.forEach(clearTimeout);
+		kickTimers = [250, 900, 2000].map(function (ms) {
+			return setTimeout(function () { window.dispatchEvent(new Event('resize')); }, ms);
 		});
 	};
 	window.addEventListener('orientationchange', kick);
@@ -315,7 +328,7 @@ html, body {
 </script>
 
 <script>
-window.__trash_build = {label: 'v34.49', time: '30.09 22:25'};
+window.__trash_build = {label: 'v34.50', time: '30.09 22:31'};
 document.getElementById('ver').textContent = 'Версия ' + window.__trash_build.label + ' · сборка от ' + window.__trash_build.time;
 </script>
 <script src="audio_unlock.js"></script>
@@ -330,7 +343,7 @@ document.getElementById('ver').textContent = 'Версия ' + window.__trash_bu
 	// index.wasm / index.pck и отдаём ему уже скачанные и распакованные байты.
 	const FILES = {
 		wasm: { parts: [{url:"raccoon.core.0.wasm",bytes:5221065},{url:"raccoon.core.1.wasm",bytes:4165384}] },
-		pck: { parts: [{url:"raccoon.pack.0.wasm",bytes:12013864},{url:"raccoon.pack.1.wasm",bytes:4776683}] },
+		pck: { parts: [{url:"raccoon.pack.0.wasm",bytes:12013905},{url:"raccoon.pack.1.wasm",bytes:4778870}] },
 	};
 	const GODOT_CONFIG = {
 		args: [],
@@ -338,7 +351,7 @@ document.getElementById('ver').textContent = 'Версия ' + window.__trash_bu
 		ensureCrossOriginIsolationHeaders: false,
 		executable: 'index',
 		experimentalVK: false,
-		fileSizes: { 'index.pck': 17621424, 'index.wasm': 43699190 },
+		fileSizes: { 'index.pck': 17624336, 'index.wasm': 43699190 },
 		focusCanvas: true,
 		gdextensionLibs: [],
 		onPrint: function () {
@@ -360,7 +373,7 @@ document.getElementById('ver').textContent = 'Версия ' + window.__trash_bu
 
 	// Адрес сбора отчётов о вылетах (Google Apps Script / Supabase и т.п.); пусто — отчёты не отправляются.
 	const REPORT_URL = 'https://script.google.com/macros/s/AKfycbxVyy-SnRANW0Im-1Blne2TcUbca93WqzyBulpADwWWD7YH6x3KIygBYImTe8VfP5pp/exec';
-	const BUILD_ID_REPORT = '1790781957';
+	const BUILD_ID_REPORT = '1790782278';
 	const SESSION_ID = Math.random().toString(36).slice(2, 8);
 	const SESSION_START = Date.now();
 	const REPORT_CAP = 250;
@@ -564,7 +577,7 @@ document.getElementById('ver').textContent = 'Версия ' + window.__trash_bu
 	window.trkReport('session_start', gpuInfo() + ' | ' + navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + (window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio) + ' | screen ' + screen.width + 'x' + screen.height + ' | cores ' + (navigator.hardwareConcurrency || '?'));
 
 	// Вкладка могла висеть со старой версией: при возврате в неё сверяем номер сборки и предлагаем обновиться.
-	const BUILD_ID = '1790781957';
+	const BUILD_ID = '1790782278';
 	function checkVersion() {
 		fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (v) {
 			if (v && v.build && v.build !== BUILD_ID && !document.getElementById('newver')) {

@@ -113,8 +113,38 @@ class FullscreenButton:
 		flat = true
 		pressed.connect(func() -> void:
 			SoundManager.play(&"ui_click")
+			if not Platform.fullscreen_supported():
+				_show_install_hint()
+				return
 			Platform.set_fullscreen(not Platform.is_fullscreen())
 			get_tree().create_timer(0.4).timeout.connect(queue_redraw))
+
+	func _show_install_hint() -> void:
+		var layer := CanvasLayer.new()
+		layer.layer = 90
+		var dim := ColorRect.new()
+		dim.color = Color(0, 0, 0, 0.72)
+		dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+		layer.add_child(dim)
+		var center := CenterContainer.new()
+		center.set_anchors_preset(Control.PRESET_FULL_RECT)
+		dim.add_child(center)
+		var panel := PanelContainer.new()
+		panel.add_theme_stylebox_override("panel", UiStyle.box(UiStyle.PANEL_LIGHT, UiStyle.NEON, 4, 24))
+		center.add_child(panel)
+		var column := VBoxContainer.new()
+		column.add_theme_constant_override("separation", 14)
+		panel.add_child(column)
+		var title := UiStyle.label("ИГРА НА ВЕСЬ ЭКРАН", 34, UiStyle.GOLD, 8)
+		column.add_child(title)
+		var text := UiStyle.label("iPhone не даёт включить полный экран из браузера.\n1. Нажми «Поделиться» в Safari.\n2. Выбери «На экран Домой».\n3. Запускай игру с иконки: без адресной строки и панелей.", 24, UiStyle.TEXT, 5)
+		text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		text.custom_minimum_size = Vector2(700, 0)
+		column.add_child(text)
+		var ok := UiStyle.button("ПОНЯТНО", UiStyle.HOT, 32, Vector2(0, 76))
+		ok.pressed.connect(layer.queue_free)
+		column.add_child(ok)
+		get_tree().root.add_child(layer)
 
 	func _draw() -> void:
 		var inside := Platform.is_fullscreen()

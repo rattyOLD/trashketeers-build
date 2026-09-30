@@ -210,7 +210,7 @@ func _build_top_bar() -> Control:
 
 	_nuts_label = _add_capsule(row, ArenaProp.texture_of("res://assets/ui/hub/coin.png"), "coins")
 	_dust_label = _add_capsule(row, ArenaProp.texture_of("res://assets/ui/hub/neonite.png"), "gems")
-	if Platform.fullscreen_supported():
+	if Platform.is_web:
 		var full := MenuWidgets.FullscreenButton.new()
 		full.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(full)
@@ -275,22 +275,22 @@ func _add_capsule(row: HBoxContainer, icon_texture: Texture2D, kind: String) -> 
 # --- Логотип и Енот на надписи ----------------------------------------------------------------
 
 ## Боковая кнопка сцены: иконка без подписи; подпись и красная точка появляются, только когда есть что забрать.
-func _make_side_button(key: String, icon_path: String, caption_text: String, right: bool, y: float, action: Callable, column: int = 0) -> Button:
+func _make_side_button(key: String, icon_path: String, caption_text: String, right: bool, y: float, action: Callable, column: int = 0, px: float = 96.0) -> Button:
 	var button := Button.new()
 	button.flat = true
 	button.focus_mode = Control.FOCUS_NONE
-	button.size = Vector2(96, 96)
-	button.custom_minimum_size = Vector2(96, 96)
+	button.size = Vector2(px, px)
+	button.custom_minimum_size = Vector2(px, px)
 	if right:
 		button.anchor_left = 1.0
 		button.anchor_right = 1.0
 		button.offset_left = -100.0
 		button.offset_right = -4.0
 	else:
-		button.offset_left = 4.0 + column * 104.0
-		button.offset_right = 100.0 + column * 104.0
+		button.offset_left = 4.0 + column * (px + 8.0)
+		button.offset_right = 4.0 + column * (px + 8.0) + px
 	button.offset_top = y
-	button.offset_bottom = y + 96.0
+	button.offset_bottom = y + px
 	button.pressed.connect(func() -> void:
 		SoundManager.play(&"ui_click")
 		action.call())
@@ -301,14 +301,14 @@ func _make_side_button(key: String, icon_path: String, caption_text: String, rig
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon.set_anchors_preset(Control.PRESET_FULL_RECT)
 	button.add_child(icon)
-	var caption := UiStyle.label(caption_text, 17, UiStyle.GOLD, 5)
+	var caption := UiStyle.label(caption_text, 17 if px >= 90.0 else 12, UiStyle.GOLD, 5 if px >= 90.0 else 4)
 	caption.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	caption.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	caption.offset_top = -2.0
 	caption.visible = false
 	button.add_child(caption)
 	var dot := _NotifyDot.new()
-	dot.position = Vector2(70, 0)
+	dot.position = Vector2(px - 26.0, 0)
 	dot.visible = false
 	button.add_child(dot)
 	_side_buttons[key] = {"caption": caption, "dot": dot, "icon": icon}
@@ -380,17 +380,24 @@ func _build_stage() -> Control:
 	_preview = MenuWidgets.RaccoonPreview.new(SaveService.get_skin(), 2.5)
 	_preview.set_anchors_preset(Control.PRESET_FULL_RECT)
 	stage.add_child(_preview)
-	stage.add_child(_make_side_button("gift", "res://assets/ui/hub/daily_gift.png", "ПОДАРОК", false, 8.0, func() -> void: _daily.open()))
-	stage.add_child(_make_side_button("chest", "res://assets/ui/hub/chest_free.png", "БЕСПЛАТНО", false, 132.0, func() -> void: _chests.open()))
 	if Orient.portrait:
+		stage.add_child(_make_side_button("gift", "res://assets/ui/hub/daily_gift.png", "ПОДАРОК", false, 8.0, func() -> void: _daily.open()))
+		stage.add_child(_make_side_button("chest", "res://assets/ui/hub/chest_free.png", "БЕСПЛАТНО", false, 132.0, func() -> void: _chests.open()))
 		stage.add_child(_make_side_button("news", "res://assets/ui/hub/news.png", "НОВОЕ", true, 8.0, func() -> void: _changelog.open()))
 		stage.add_child(_make_side_button("pass", "res://assets/ui/hub/pass.png", "ПРОПУСК", true, 124.0, func() -> void: _pass.open()))
 		stage.add_child(_make_side_button("vip", "res://assets/ui/hub/vip.png", "VIP", true, 224.0, func() -> void: _vip.open()))
 	else:
-		stage.add_child(_make_side_button("news", "res://assets/ui/hub/news.png", "НОВОЕ", false, 8.0, func() -> void: _changelog.open(), 1))
-		stage.add_child(_make_side_button("pass", "res://assets/ui/hub/pass.png", "ПРОПУСК", false, 124.0, func() -> void: _pass.open(), 1))
-		stage.add_child(_make_side_button("vip", "res://assets/ui/hub/vip.png", "VIP", false, 240.0, func() -> void: _vip.open(), 1))
-	for key in ["pass", "vip"]:
+		var row := [
+			["gift", "res://assets/ui/hub/daily_gift.png", "ПОДАРОК", func() -> void: _daily.open()],
+			["chest", "res://assets/ui/hub/chest_free.png", "БЕСПЛАТНО", func() -> void: _chests.open()],
+			["news", "res://assets/ui/hub/news.png", "НОВОЕ", func() -> void: _changelog.open()],
+			["pass", "res://assets/ui/hub/pass.png", "ПРОПУСК", func() -> void: _pass.open()],
+			["vip", "res://assets/ui/hub/vip.png", "VIP", func() -> void: _vip.open()],
+		]
+		for i in row.size():
+			var spec: Array = row[i]
+			stage.add_child(_make_side_button(spec[0], spec[1], spec[2], false, 6.0, spec[3], i, 76.0))
+	for key in (["pass", "vip"] if Orient.portrait else ["gift", "chest", "news", "pass", "vip"]):
 		(_side_buttons[key]["caption"] as Label).visible = true
 	stage.add_child(_build_tester_button())
 	stage.gui_input.connect(func(event: InputEvent) -> void:
