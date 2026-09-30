@@ -10,6 +10,8 @@ var _zone: Label
 var _score_chip: PanelContainer
 var _lives_chip: PanelContainer
 var _zone_chip: PanelContainer
+var _foes_chip: PanelContainer
+var _foes: Label
 var _zone_number := 1
 var _zone_name := ""
 var _last_lives := -1
@@ -24,6 +26,9 @@ func _init() -> void:
 	_lives = _lives_chip.get_meta("value")
 	_zone_chip = _chip("ЗОНА", Color("#5ff2ff"))
 	_zone = _zone_chip.get_meta("value")
+	_foes_chip = _chip("ВРАГОВ", Color("#ff8a3d"))
+	_foes = _foes_chip.get_meta("value")
+	_foes_chip.visible = false
 	_score_chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_score_chip.size_stretch_ratio = 1.5
 
@@ -32,7 +37,9 @@ func chips() -> Array[Control]:
 	return [_score_chip, _lives_chip, _zone_chip]
 
 
-func update(score: int, lives: int, zone_number: int, zone_count: int, zone_name: String) -> void:
+func update(score: int, lives: int, zone_number: int, zone_count: int, zone_name: String, enemies_left: int = -1) -> void:
+	_foes_chip.visible = enemies_left >= 0
+	_foes.text = str(maxi(enemies_left, 0))
 	_score.text = "%06d" % score
 	_lives.text = "×%d" % lives
 	_zone.text = "%d/%d" % [zone_number, zone_count]
@@ -51,6 +58,8 @@ func hint_for(chip: Control) -> String:
 		return "Очки: за врагов, боссов, пленников и зоны без урона. От них зависит ранг S / A / B / C."
 	if chip == _lives_chip:
 		return "Жизни. Когда кончатся, миссия провалена. После смерти вернёшься на последний чекпоинт."
+	if chip == _foes_chip:
+		return "Сколько врагов осталось в засаде. Убей всех, и ворота откроются."
 	return "Зона %d: «%s». На входе в новую зону лечение и чекпоинт." % [_zone_number, _zone_name]
 
 

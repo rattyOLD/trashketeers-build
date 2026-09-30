@@ -297,7 +297,7 @@ func _physics_process(delta: float) -> void:
 func _update_hud_timer() -> void:
 	hud.set_time(director.elapsed)
 	if story != null:
-		hud.set_story_status(story.score, story.lives, story.zone_number(), story.zone_count(), story.zone_name())
+		hud.set_story_status(story.score, story.lives, story.zone_number(), story.zone_count(), story.zone_name(), story.enemies_left())
 		return
 	hud.set_wave(maxi(director.wave_number, 1), director.get_enemies_left())
 

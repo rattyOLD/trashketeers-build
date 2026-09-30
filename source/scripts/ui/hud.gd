@@ -201,9 +201,9 @@ func set_story_layout(minimap: Minimap) -> void:
 		_hint.show_for(_minimap_slot, "Карта: ты, враги, ворота, пленники. Тап — %s." % ("крупный план" if overview else "вся карта")))
 
 
-func set_story_status(score: int, lives: int, zone_number: int, zone_count: int, zone_name: String) -> void:
+func set_story_status(score: int, lives: int, zone_number: int, zone_count: int, zone_name: String, enemies_left: int = -1) -> void:
 	if _story_bar != null:
-		_story_bar.update(score, lives, zone_number, zone_count, zone_name)
+		_story_bar.update(score, lives, zone_number, zone_count, zone_name, enemies_left)
 
 
 # --- Показатели ------------------------------------------------------------------------------

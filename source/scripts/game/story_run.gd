@@ -167,10 +167,17 @@ func captives_spawned() -> int:
 	return _next_captive
 
 
-func hud_text() -> String:
-	var zones: Array = mission.get("zones", [])
-	var number := clampi(zone_index + 1, 1, maxi(zones.size(), 1))
-	return "ОЧКИ %06d · ЖИЗНИ %d · ЗОНА %d" % [score, lives, number]
+func enemies_left() -> int:
+	if not locked or _boss_alive:
+		return -1
+	var left := 0
+	for wave in _pending_waves:
+		for id in (wave as Dictionary).get("enemies", {}):
+			left += int(wave["enemies"][id])
+	for enemy in _tracked:
+		if is_instance_valid(enemy) and enemy.pool_index >= 0 and enemy.is_alive():
+			left += 1
+	return left
 
 
 func on_kill(data: EnemyData) -> void:

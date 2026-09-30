@@ -373,7 +373,10 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 			keepLog('err', arguments);
 			console.error.apply(console, arguments);
 			const text = Array.prototype.join.call(arguments, ' ');
-			if (/ERROR|Error/.test(text) && window.trkReport) {
+			if (text.indexOf('!is_inside_tree()') !== -1) {
+				treeErrors += 1;
+			}
+			if (/ERROR|Error/.test(text) && window.trkReport && treeErrors <= 3) {
 				window.trkReport('error', text);
 			}
 			if (/Aborted|abort\(|out of memory|Cannot enlarge memory|memory access out of bounds|unreachable/i.test(text)) {
@@ -391,6 +394,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	const sentKeys = {};
 	let reportCount = 0;
 	const logTail = [];
+	let treeErrors = 0;
 	const eventLog = [];
 	let hiddenMs = 0;
 	let hiddenSince = 0;
@@ -567,7 +571,8 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 		window.trkReport('error', 'unhandledrejection: ' + String(event.reason).slice(0, 500));
 	});
 	window.addEventListener('error', function (event) {
-		window.trkReport('error', 'js: ' + event.message + ' @ ' + (event.filename || '').split('/').pop() + ':' + event.lineno);
+		const stack = event.error && event.error.stack ? String(event.error.stack).split('\n').slice(0, 14).map(function (l) { return l.replace(/^\s*at\s+/, '').slice(0, 40); }).join(' < ') : '';
+		window.trkReport('error', 'js: ' + event.message + ' @ ' + (event.filename || '').split('/').pop() + ':' + event.lineno + (stack ? ' | stack: ' + stack : ''));
 	});
 
 	// Раз в 45 секунд, пока идёт бой: если вкладку убьёт система, по последнему пульсу видно, что происходило.
