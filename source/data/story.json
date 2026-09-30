@@ -225,7 +225,8 @@
                 "rat_punk": 4
               }
             }
-          ]
+          ],
+          "reward": "medkit"
         },
         {
           "at": 0.19,
@@ -243,7 +244,8 @@
                 "rat_punk": 6
               }
             }
-          ]
+          ],
+          "reward": "weapon:rare"
         },
         {
           "at": 0.27,
@@ -276,7 +278,8 @@
                 "rat_punk": 3
               }
             }
-          ]
+          ],
+          "reward": "medkit"
         },
         {
           "at": 0.41,
@@ -296,7 +299,8 @@
                 "rat_punk": 4
               }
             }
-          ]
+          ],
+          "reward": "weapon:epic"
         },
         {
           "at": 0.48,
@@ -335,7 +339,8 @@
                 "spark_rat": 3
               }
             }
-          ]
+          ],
+          "reward": "medkit"
         },
         {
           "at": 0.72,
@@ -355,7 +360,8 @@
                 "bomb_rat": 3
               }
             }
-          ]
+          ],
+          "reward": "weapon:epic"
         },
         {
           "at": 0.8,
@@ -383,7 +389,8 @@
                 "spark_shank": 2
               }
             }
-          ]
+          ],
+          "reward": "medkit"
         },
         {
           "at": 0.89,

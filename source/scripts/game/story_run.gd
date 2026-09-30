@@ -13,6 +13,8 @@ const ZONE_HEAL := 0.3
 const CLEAR_HEAL := 0.1
 const HP_PER_PROGRESS := 1.7
 const DMG_PER_PROGRESS := 0.5
+const START_LIVES := 3
+const MEDKIT_HEAL := 0.4
 
 var game: Game
 var mission: Dictionary = {}
@@ -24,6 +26,8 @@ var zone_index := -1
 var locked := false
 var barrier_y := 0.0
 var waypoint: Node2D
+var lives := START_LIVES
+var checkpoint := Vector2.ZERO
 
 var _encounters: Array = []
 var _next := 0
@@ -55,6 +59,7 @@ func setup(owner_game: Game, mission_id: String) -> bool:
 	game.layers.fx.add_child(waypoint)
 	_barrier = Barrier.new()
 	_barrier.bounds = game.map.bounds
+	_barrier.player = game.player
 	_barrier.visible = false
 	game.layers.fx.add_child(_barrier)
 	return not mission.is_empty()
@@ -67,10 +72,21 @@ func title() -> String:
 func hud_text() -> String:
 	var zones: Array = mission.get("zones", [])
 	var number := clampi(zone_index + 1, 1, maxi(zones.size(), 1))
-	return "ЗОНА %d · ПУТЬ %d%%" % [number, int(progress * 100.0)]
+	return "ЖИЗНИ %d · ЗОНА %d · ПУТЬ %d%%" % [lives, number, int(progress * 100.0)]
+
+
+## Жизнь потрачена: возвращает Рико на чекпоинт; false, когда жизни кончились.
+func try_respawn() -> bool:
+	if lives <= 1 or finished_mission:
+		return false
+	lives -= 1
+	game.hud.show_banner("ЖИЗНЬ ПОТЕРЯНА · ОСТАЛОСЬ %d" % lives, UiStyle.DANGER, 1.6)
+	get_tree().create_timer(1.3, false).timeout.connect(func() -> void: game.story_respawn(checkpoint))
+	return true
 
 
 func on_start() -> void:
+	checkpoint = game.player.global_position
 	game.hud.show_banner(title(), UiStyle.GOLD, 2.2)
 	_update_progress()
 	_check_zone()
@@ -111,6 +127,7 @@ func _check_zone() -> void:
 	if index == zone_index:
 		return
 	zone_index = index
+	checkpoint = game.player.global_position
 	var zone: Dictionary = zones[index]
 	game.hud.show_banner(str(zone["name"]), Color("#5ff2ff"), 2.4)
 	if index > 0:
@@ -237,10 +254,29 @@ func _check_clear() -> void:
 		return
 	locked = false
 	_barrier.visible = false
+	checkpoint = game.player.global_position
+	_give_reward(str(_active.get("reward", "")))
 	game.player.heal(game.player.max_hp * CLEAR_HEAL)
 	game.hud.show_banner("ПУТЬ СВОБОДЕН — ВПЕРЁД!", Color("#7cff6b"), 1.4)
 	SoundManager.play(&"shield_up", -4.0, false)
 	game.pickups.spawn_xp_gold(game.player.global_position + Vector2(0, -60), 4)
+
+
+## Награда за зачищенную засаду: аптечка или ствол (как бонусные капсулы в Contra).
+func _give_reward(reward: String) -> void:
+	if reward.is_empty():
+		return
+	var at := game.player.global_position + Vector2(0, -90)
+	if reward == "medkit":
+		var kit := Medkit.new()
+		kit.player = game.player
+		kit.heal_share = MEDKIT_HEAL
+		kit.global_position = at
+		game.layers.fx.add_child(kit)
+		game.hud.toast("АПТЕЧКА", "Подбери, чтобы подлечиться", Color("#7cff6b"))
+	elif reward.begins_with("weapon:"):
+		game._drop_weapon(game._roll_weapon(reward.get_slice(":", 1)), at, true)
+		game.hud.toast("ОРУЖИЕ", "Трофей с поля боя: подбери ствол", Color("#ffd257"))
 
 
 func on_boss_spawned(is_mini: bool) -> void:
@@ -305,6 +341,9 @@ func _say(key: String, delay: float) -> void:
 func _pump() -> void:
 	if _box != null:
 		return
+	if game._level_up_open or game.get_tree().paused:
+		get_tree().create_timer(0.6, true, false, true).timeout.connect(_pump)
+		return
 	if _queue.is_empty():
 		if _after_queue.is_valid():
 			var cb := _after_queue
@@ -326,12 +365,46 @@ func _on_box_finished() -> void:
 	get_tree().create_timer(0.15, true, false, true).timeout.connect(_pump)
 
 
-## Красный лазерный барьер поперёк прохода: Енот не пройдёт, пока засада не зачищена.
+## Аптечка: крест на земле, лечит при касании и исчезает.
+class Medkit:
+	extends Node2D
+
+	var player: Node2D
+	var heal_share := 0.4
+	var _time := 0.0
+
+	func _init() -> void:
+		z_index = 3
+
+	func _physics_process(delta: float) -> void:
+		_time += delta
+		queue_redraw()
+		if player == null:
+			return
+		if global_position.distance_to(player.global_position) < 56.0:
+			(player as Player).heal((player as Player).max_hp * heal_share)
+			SoundManager.play(&"level_up", -6.0, false)
+			queue_free()
+
+	func _draw() -> void:
+		var bob := sin(_time * 4.0) * 3.0
+		draw_circle(Vector2(0, bob + 8), 26.0, Color(0.0, 0.0, 0.0, 0.25))
+		draw_rect(Rect2(-20, bob - 20, 40, 40), Color("#f4f0ff"), true)
+		draw_rect(Rect2(-20, bob - 20, 40, 40), Color("#180e22"), false, 4.0)
+		draw_rect(Rect2(-5, bob - 15, 10, 30), Color("#ff3b5c"), true)
+		draw_rect(Rect2(-15, bob - 5, 30, 10), Color("#ff3b5c"), true)
+
+
+## Приглушённый энергобарьер: виден только вблизи, мерцающие секции вместо ровной линии.
 class Barrier:
 	extends Node2D
 
+	const SHOW_DISTANCE := 380.0
+	const SEGMENT := 34.0
+
 	var bounds := Rect2()
 	var y := 0.0
+	var player: Node2D
 	var _time := 0.0
 
 	func _init() -> void:
@@ -343,14 +416,24 @@ class Barrier:
 			queue_redraw()
 
 	func _draw() -> void:
+		if player == null:
+			return
+		var dist := absf(player.global_position.y - y)
+		var near := 1.0 - clampf(dist / SHOW_DISTANCE, 0.0, 1.0)
+		if near <= 0.02:
+			return
 		var left := bounds.position.x + 64.0
 		var right := bounds.end.x - 64.0
-		var pulse := 0.6 + 0.4 * sin(_time * 7.0)
-		draw_line(Vector2(left, y), Vector2(right, y), Color(1.0, 0.1, 0.25, 0.25 * pulse), 26.0)
-		draw_line(Vector2(left, y), Vector2(right, y), Color(1.0, 0.25, 0.35, 0.85), 6.0)
-		draw_line(Vector2(left, y), Vector2(right, y), Color(1.0, 0.9, 0.9, 0.9), 2.0)
-		var step := 96.0
 		var x := left
+		var index := 0
 		while x < right:
-			draw_circle(Vector2(x, y), 8.0, Color(1.0, 0.85, 0.3, 0.9))
-			x += step
+			var flick := 0.55 + 0.45 * sin(_time * 5.0 + float(index) * 1.7)
+			var gap := fmod(float(index) * 7.0 + floorf(_time * 2.0), 5.0) < 1.0
+			var alpha := near * 0.32 * flick
+			var wave := sin(x * 0.03 + _time * 3.0) * 3.0
+			if not gap:
+				draw_line(Vector2(x, y + wave), Vector2(x + SEGMENT, y + wave), Color(0.85, 0.22, 0.32, alpha), 4.0)
+			if index % 4 == 0:
+				draw_circle(Vector2(x, y), 5.0, Color(0.95, 0.6, 0.3, near * 0.4))
+			x += SEGMENT + 14.0
+			index += 1

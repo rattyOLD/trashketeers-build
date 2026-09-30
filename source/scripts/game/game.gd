@@ -217,13 +217,15 @@ func start(_weapon_id: StringName = &"") -> void:
 	hud.set_kills(kills)
 	hud.set_time(0.0)
 	hud.show_chapter(str(chapter.get("subtitle", "")), str(chapter.get("title", "")))
-	hud.toast("АДРЕНАЛИН!", "+35% скорострельности и +15% скорости на 20 с", Color("#ff7a3d"))
+	if story_mission.is_empty():
+		hud.toast("АДРЕНАЛИН!", "+35% скорострельности и +15% скорости на 20 с", Color("#ff7a3d"))
 	SoundManager.play_music(StringName(str(chapter.get("music", "battle"))))
 	SoundManager.start_ambient()
 	if not story_mission.is_empty():
 		story = StoryRun.new()
 		add_child(story)
 		if story.setup(self, story_mission):
+			hud.set_story_mode()
 			story.on_start()
 		else:
 			story.queue_free()
@@ -592,7 +594,7 @@ func _on_enemy_fx(_enemy: Enemy, kind: String, at: Vector2, radius: float) -> vo
 func _on_boss_phase(boss: Enemy, phase: int) -> void:
 	if phase < 2:
 		return
-	if story != null:
+	if story != null and boss.data.boss_pattern == "overlord":
 		story.on_boss_phase(phase)
 	hud.set_boss_fury()
 	var text := "МЕХ РАЗБИТ! МАГНАТ В ЯРОСТИ"
@@ -737,6 +739,8 @@ func _on_boss_killed(boss: Enemy, at: Vector2) -> void:
 	hud.toast("НАГРАДА БОССА", "+%s · чертёж: %s" % [Economy.format_gems(int(reward["gems"])), shard_text], Color("#ff7ae0"))
 	_drop_weapon(_roll_weapon("legendary" if randf() < Economy.BOSS_LEGENDARY_CHANCE else "epic"), at, true)
 	fx.confetti(at, 45)
+	if story != null:
+		return
 	_bonus_choices += 1
 	_pending_levelups += 1
 	if not _level_up_open:
@@ -820,6 +824,23 @@ func open_story_crate() -> void:
 	if crate != null:
 		crate.loot_rarity = "epic"
 	hud.toast("ЯЩИК СБРОШЕН", "Открой его пробкой-ключом: стреляй по ящику", Color("#ffd257"))
+
+
+## Сюжет: жизнь потрачена, Рико возвращается на последний чекпоинт.
+func story_respawn(at: Vector2) -> void:
+	if finished or player == null:
+		return
+	player.global_position = at
+	player.velocity = Vector2.ZERO
+	player.revive(0.7, REVIVE_INVULN)
+	BulletPool.release_all()
+	lobs.clear()
+	traps.clear()
+	camera.global_position = player.global_position
+	camera.reset_smoothing()
+	BulletPool.explode(at, REVIVE_BLAST, 0.0, Bullet.Team.PLAYER, Color("#7df9ff"), 2.4)
+	fx.ring(at, Color("#7df9ff"), REVIVE_BLAST)
+	SoundManager.play(&"shield_up", 0.0, false)
 
 
 func announce_boss(boss: Enemy) -> void:
@@ -1044,7 +1065,7 @@ func _on_xp_collected(amount: int) -> void:
 # --- Опыт и прокачка -----------------------------------------------------------------------------
 
 func _gain_xp(amount: int) -> void:
-	if finished:
+	if finished or story != null:
 		return
 	xp += amount
 	var needed := _xp_needed(level)
@@ -1196,6 +1217,8 @@ func _on_player_died() -> void:
 	fx.chunks(player.global_position, Color("#8e8aa6"), 14, 260.0, 5.0)
 	add_shake(1.0)
 	atmosphere.flash(Color(1.0, 0.1, 0.1), 0.5, 0.8)
+	if story != null and story.try_respawn():
+		return
 	get_tree().create_timer(DEATH_DELAY, false).timeout.connect(_offer_revive)
 
 

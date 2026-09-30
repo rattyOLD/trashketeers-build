@@ -74,6 +74,7 @@ func _ready() -> void:
 			_debug_hash = url_hash.substr(6)
 			_start_game.call_deferred(SaveService.get_selected_weapon())
 		elif url_hash.begins_with("#story"):
+			_debug_hash = url_hash.substr(1)
 			_start_story.call_deferred(SaveService.get_selected_weapon())
 		elif url_hash.begins_with("#raid"):
 			_debug_hash = url_hash.substr(1)
@@ -148,7 +149,11 @@ func _start_story(weapon_id: StringName) -> void:
 		game.exit_requested.connect(_show_menu, CONNECT_DEFERRED)
 		game.restart_requested.connect(_start_story.bind(weapon_id), CONNECT_DEFERRED)
 		_swap_screen(game)
-		game.start(weapon_id))
+		game.start(weapon_id)
+		if _debug_hash == "story:toast":
+			game.hud.toast("ПОЛУЧЕНО: ПИВНАЯ ПРОБКА-КЛЮЧ", "Она откроет Ящик с оружием в Зоне 3, стреляй по ящику", Color("#ffb020"))
+			game.hud.toast("КОРОЛЬ ХЛАМА", "Мои колонки! Они стоили мне трёх мусоровозов!", Color("#ff5a5a"))
+		_debug_hash = "")
 
 
 func _start_raid(weapon_id: StringName) -> void:

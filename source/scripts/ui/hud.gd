@@ -217,6 +217,12 @@ func set_wave(number: int, enemies_left: int) -> void:
 	_wave_label.text = "ВОЛНА %d · %d" % [number, enemies_left] if enemies_left > 0 else "ВОЛНА %d" % number
 
 
+## Сюжетный режим без ио-механик: скрываем опыт и уровень.
+func set_story_mode() -> void:
+	for node in [_xp_bar, _level_label, _xp_label]:
+		node.visible = false
+
+
 func set_wave_text(text: String) -> void:
 	_wave_label.text = text
 
@@ -475,6 +481,15 @@ func _animate_titles(hold: float) -> void:
 	tween.parallel().tween_property(_wave_sub, "modulate:a", 0.0, 0.35)
 
 
+## Однострочная подпись: кегль уменьшается, пока текст не влезет в ширину.
+func _fit_font(label: Label, base: int, max_width: float) -> void:
+	var font := label.get_theme_font("font")
+	var size := base
+	while size > 12 and font.get_string_size(label.text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, size).x > max_width:
+		size -= 1
+	label.add_theme_font_size_override("font_size", size)
+
+
 func _next_toast() -> void:
 	if _toast_queue.is_empty():
 		_toast_busy = false
@@ -486,8 +501,13 @@ func _next_toast() -> void:
 	_toast.offset_right = half
 	_toast_title.custom_minimum_size.x = half * 2.0 - 40.0
 	_toast_text.custom_minimum_size.x = half * 2.0 - 40.0
+	_toast.custom_minimum_size = Vector2(half * 2.0, 0.0)
 	_toast_title.text = item[0]
 	_toast_text.text = item[1]
+	_fit_font(_toast_title, 28, half * 2.0 - 48.0)
+	_fit_font(_toast_text, 20, half * 2.0 - 48.0)
+	_toast.size = Vector2(half * 2.0, 0.0)
+	_toast.reset_size.call_deferred()
 	_toast_title.add_theme_color_override("font_color", item[2])
 	_toast.visible = true
 	_toast.position.y = -140.0
@@ -673,10 +693,8 @@ func _build_toast() -> Control:
 	column.add_theme_constant_override("separation", 2)
 	_toast.add_child(column)
 	_toast_title = UiStyle.label("", 28, UiStyle.GOLD, 8)
-	_toast_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(_toast_title)
 	_toast_text = UiStyle.label("", 20, UiStyle.TEXT, 5)
-	_toast_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	column.add_child(_toast_text)
 	return _toast
 
