@@ -703,8 +703,9 @@ class Profile:
 			if child != keep:
 				content.remove_child(child)
 				child.queue_free()
-		content.add_child(_build_header())
-		content.add_child(_section("РЕКОРДЫ"))
+		var list := MenuPopups.scroll_list(content)
+		list.add_child(_build_header())
+		list.add_child(_section("РЕКОРДЫ"))
 		var records := GridContainer.new()
 		records.columns = 3
 		records.add_theme_constant_override("h_separation", 12)
@@ -712,8 +713,8 @@ class Profile:
 		records.add_child(_tile("Лучшая волна", str(SaveService.get_stat("best_wave")), "upgrade", UiStyle.GOLD, true))
 		records.add_child(_tile("Лучшее время", BattleBase.format_time(float(SaveService.data.get("best_time", 0.0))), "clock", UiStyle.NEON, true))
 		records.add_child(_tile("Боссов убито", str(int(SaveService.data.get("boss_kills", 0))), "trophy", UiStyle.HOT, true))
-		content.add_child(records)
-		content.add_child(_section("СТАТИСТИКА"))
+		list.add_child(records)
+		list.add_child(_section("СТАТИСТИКА"))
 		var grid := GridContainer.new()
 		grid.columns = 2
 		grid.add_theme_constant_override("h_separation", 12)
@@ -724,11 +725,11 @@ class Profile:
 		grid.add_child(_tile("Монет собрано", _num(SaveService.get_stat("nuts_total")), "", UiStyle.GOLD, false))
 		grid.add_child(_tile("Глав пройдено", str(SaveService.get_biomes_cleared()), "controls", Color("#b46bff"), false))
 		grid.add_child(_tile("Налётов выиграно", str(int(SaveService.data.get("raid_wins", 0))), "trophy", Color("#5cf3ff"), false))
-		content.add_child(grid)
-		content.add_child(_achievements_bar())
-		content.add_child(_chronicle_bar())
-		content.add_child(_section("Тестер и сохранение"))
-		content.add_child(_insider_block())
+		list.add_child(grid)
+		list.add_child(_achievements_bar())
+		list.add_child(_chronicle_bar())
+		list.add_child(_section("Тестер и сохранение"))
+		list.add_child(_insider_block())
 
 	func _num(value: int) -> String:
 		return SaveService.format_coins(value) if value >= 10000 else str(value)
