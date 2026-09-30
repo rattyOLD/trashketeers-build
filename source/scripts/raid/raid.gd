@@ -95,7 +95,7 @@ func start(_weapon_id: StringName = &"") -> void:
 
 	hud.configure_for_raid()
 	hud.set_nuts(SaveService.get_star_dust())
-	dragon.scale_health(player.weapon_controller.base_weapon.get_dps())
+	dragon.scale_health(player.weapon_controller.weapon.get_dps())
 	hud.show_boss("Хладгор · Хозяин Озера", dragon.hp, dragon.max_hp, true)
 	hud.show_banner("ЛЕДЯНОЙ НАЛЁТ: ХЛАДГОР", Color("#bff6ff"), 2.4)
 	_thermos_button = hud.add_thermos(_use_thermos)

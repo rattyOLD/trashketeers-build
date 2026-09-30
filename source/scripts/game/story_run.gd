@@ -37,6 +37,7 @@ var progress := 0.0
 var zone_index := -1
 var locked := false
 var gate_key := ""
+const IDLE_HINT := 9.0
 var waypoint: Node2D
 var lives := START_LIVES
 var score := 0
@@ -70,6 +71,8 @@ var _seen := {}
 var _after_queue: Callable = Callable()
 var _start_y := 0.0
 var _end_y := 0.0
+var _idle := 0.0
+var _idle_mark := 0.0
 
 
 static func map_chapter(base: Dictionary, mission_id: String) -> Dictionary:
@@ -338,6 +341,21 @@ func _physics_process(delta: float) -> void:
 		if progress >= _trigger_at(enc):
 			_begin(enc)
 	_update_waypoint()
+	_tick_idle(delta)
+
+
+func _tick_idle(delta: float) -> void:
+	if locked or game.director.boss != null:
+		_idle = 0.0
+		return
+	if absf(progress - _idle_mark) > 0.015:
+		_idle_mark = progress
+		_idle = 0.0
+		return
+	_idle += delta
+	if _idle >= IDLE_HINT:
+		_idle = 0.0
+		game.hud.show_banner("ВПЕРЁД! Иди вверх по стрелке", UiStyle.GOLD, 2.4)
 
 
 func _check_zone() -> void:

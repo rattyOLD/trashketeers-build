@@ -51,6 +51,7 @@ var _changelog: ChangelogPopup
 var _armory: MenuPopups.Armory
 var _upgrades: MenuPopups.Upgrades
 var _achievements: MenuPopups.Achievements
+var _from_profile := false
 var _chronicle: ChroniclePopup
 var _friends: FriendsPopup
 var _backdrop: MenuBackdrop
@@ -93,14 +94,17 @@ func _build() -> void:
 	_profile = MenuPopups.Profile.new()
 	_profile.achievements_requested.connect(func() -> void:
 		_profile.close()
+		_from_profile = true
 		_achievements.open())
 	_chronicle = ChroniclePopup.new()
 	_profile.chronicle_requested.connect(func() -> void:
 		_profile.close()
+		_from_profile = true
 		_chronicle.open())
 	_friends = FriendsPopup.new()
 	_profile.friends_requested.connect(func() -> void:
 		_profile.close()
+		_from_profile = true
 		_friends.open())
 	_tester = TesterPopup.new()
 	_chests = ChestsPopup.new()
@@ -120,11 +124,20 @@ func _build() -> void:
 	_editor = ControlEditor.new()
 	add_child(_editor)
 	_settings.editor_requested.connect(func() -> void: _editor.open())
+	for popup in [_achievements, _chronicle, _friends]:
+		popup.closed.connect(_back_to_profile.bind(popup))
 	for popup in [_settings, _shop, _skins, _armory, _upgrades, _achievements, _profile, _chronicle, _friends, _tester, _chests, _changelog, _daily, _currency, _vip, _pass, _odds]:
 		add_child(popup)
 		popup.closed.connect(_refresh)
 	_refresh()
 	UiStyle.pop_in(column, 0.8)
+
+
+func _back_to_profile(_popup: Control) -> void:
+	if not _from_profile:
+		return
+	_from_profile = false
+	_profile.open()
 
 
 # --- Верхняя панель ---------------------------------------------------------------------------

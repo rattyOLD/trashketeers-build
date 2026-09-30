@@ -37,7 +37,7 @@ enum Attack { COLD_BLAST, BEAM, COMET_VOLLEY, TAIL_SWEEP, ULTIMATE }
 enum Phase { GAP, WINDUP, ACTIVE }
 
 const MAX_HP := 4200.0
-const HP_PER_DPS := 70.0
+const HP_PER_DPS := 85.0
 const HP_CAP := 90000.0
 const FURY_THRESHOLD := 0.3
 const PHASE2_THRESHOLD := 0.65

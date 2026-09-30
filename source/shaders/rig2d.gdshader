@@ -76,10 +76,9 @@ void vertex() {
 		vec4 w0 = textureLod(weights0, UV, 0.0);
 		vec4 w1 = textureLod(weights1, UV, 0.0);
 		vec4 w2 = textureLod(weights2, UV, 0.0);
-		float w[12] = float[12](w0.r, w0.g, w0.b, w0.a, w1.r, w1.g, w1.b, w1.a, w2.r, w2.g, w2.b, w2.a);
 		vec2 p = VERTEX;
 		for (int i = 0; i < 12; i++) {
-			float wi = w[i];
+			float wi = i < 4 ? w0[i] : (i < 8 ? w1[i - 4] : w2[i - 8]);
 			if (wi < 0.002) {
 				continue;
 			}
@@ -100,10 +99,10 @@ float inside(vec2 uv) {
 vec3 recolor(vec2 uv, vec3 col) {
 	vec4 r0 = texture(regions0, uv);
 	vec4 r1 = texture(regions1, uv);
-	float m[6] = float[6](r0.r, r0.g, r0.b, r0.a, r1.r, r1.g);
 	float luma = dot(col, vec3(0.299, 0.587, 0.114));
 	for (int i = 0; i < 6; i++) {
-		float amount = m[i] * grad_light[i].a;
+		float region = i < 4 ? r0[i] : r1[i - 4];
+		float amount = region * grad_light[i].a;
 		if (amount < 0.003) {
 			continue;
 		}
