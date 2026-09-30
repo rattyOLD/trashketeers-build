@@ -38,6 +38,8 @@ var zone_index := -1
 var locked := false
 var gate_key := ""
 const IDLE_HINT := 9.0
+const STRAGGLER_AFTER := 14.0
+const STRAGGLER_FAR := 640.0
 var waypoint: Node2D
 var lives := START_LIVES
 var score := 0
@@ -72,6 +74,8 @@ var _after_queue: Callable = Callable()
 var _start_y := 0.0
 var _end_y := 0.0
 var _idle := 0.0
+var _lock_clock := 0.0
+var _idle_hints := 0
 var _idle_mark := 0.0
 
 
@@ -335,6 +339,7 @@ func _physics_process(delta: float) -> void:
 	_tick_captives()
 	if locked:
 		_check_clear()
+		_pull_stragglers(delta)
 		waypoint.global_position = game.player.global_position
 	elif _next < _encounters.size():
 		var enc: Dictionary = _encounters[_next]
@@ -344,6 +349,25 @@ func _physics_process(delta: float) -> void:
 	_tick_idle(delta)
 
 
+func _pull_stragglers(delta: float) -> void:
+	if not _pending_waves.is_empty() or _boss_alive:
+		_lock_clock = 0.0
+		return
+	_lock_clock += delta
+	if _lock_clock < STRAGGLER_AFTER:
+		return
+	_lock_clock = STRAGGLER_AFTER - 3.0
+	var player_pos := game.player.global_position
+	for enemy in _tracked:
+		if not is_instance_valid(enemy) or enemy.pool_index < 0 or not enemy.is_alive():
+			continue
+		if enemy.global_position.distance_to(player_pos) < STRAGGLER_FAR:
+			continue
+		var at := game.map.find_spawn_point(player_pos, 380.0, 560.0, 24.0)
+		if at != Vector2.INF:
+			enemy.global_position = at
+
+
 func _tick_idle(delta: float) -> void:
 	if locked or game.director.boss != null:
 		_idle = 0.0
@@ -351,10 +375,14 @@ func _tick_idle(delta: float) -> void:
 	if absf(progress - _idle_mark) > 0.015:
 		_idle_mark = progress
 		_idle = 0.0
+		_idle_hints = 0
 		return
 	_idle += delta
 	if _idle >= IDLE_HINT:
 		_idle = 0.0
+		_idle_hints += 1
+		if _idle_hints % 2 == 0:
+			_spawn_wave({"enemies": {"rat_punk": 3}}, 1)
 		game.hud.show_banner("ВПЕРЁД! Иди вверх по стрелке", UiStyle.GOLD, 2.4)
 
 

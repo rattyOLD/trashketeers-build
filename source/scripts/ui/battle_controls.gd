@@ -143,20 +143,19 @@ class InteractButton:
 
 	func _draw() -> void:
 		var k := size.x / 250.0
-		draw_set_transform(Vector2.ZERO, 0.0, Vector2(k, k))
 		var accent: Color = weapon.get_rarity_color() if weapon != null else UiStyle.GOLD
 		var pulse := 0.5 + 0.5 * sin(_time * 6.0)
-		var rect := Rect2(0, 0, 250, 96)
-		draw_style_box(BattleControls.button_style(Color(0.1, 0.06, 0.2, 0.92), Color(accent, 0.7 + 0.3 * pulse), 5), rect)
+		draw_style_box(BattleControls.button_style(Color(0.1, 0.06, 0.2, 0.92), Color(accent, 0.7 + 0.3 * pulse), maxi(roundi(5.0 * k), 2)), Rect2(Vector2.ZERO, size))
 		var font := ThemeDB.fallback_font
 		if weapon != null:
-			WeaponIcons.draw(self, weapon.icon, Vector2(56, 48), 0.7, 0.0, weapon.effect_color)
-		draw_string_outline(font, Vector2(104, 38), "ВЗЯТЬ", HORIZONTAL_ALIGNMENT_LEFT, 140, 30, 8, Color(0.06, 0.03, 0.1))
-		draw_string(font, Vector2(104, 38), "ВЗЯТЬ", HORIZONTAL_ALIGNMENT_LEFT, 140, 30, UiStyle.GOLD)
+			WeaponIcons.draw(self, weapon.icon, Vector2(56, 48) * k, 0.7 * k, 0.0, weapon.effect_color)
+		var text_x := 104.0 * k
+		var big := maxi(roundi(30.0 * k), 8)
+		draw_string_outline(font, Vector2(text_x, 38.0 * k), "ВЗЯТЬ", HORIZONTAL_ALIGNMENT_LEFT, 140.0 * k, big, maxi(roundi(8.0 * k), 2), Color(0.06, 0.03, 0.1))
+		draw_string(font, Vector2(text_x, 38.0 * k), "ВЗЯТЬ", HORIZONTAL_ALIGNMENT_LEFT, 140.0 * k, big, UiStyle.GOLD)
 		var title := weapon.get_title() if weapon != null else "Пистолет T1"
-		draw_string(font, Vector2(104, 62), title, HORIZONTAL_ALIGNMENT_LEFT, 138, 16, Color(accent, 1.0))
-		draw_string(font, Vector2(104, 84), note, HORIZONTAL_ALIGNMENT_LEFT, 138, 14, Color(1, 1, 1, 0.6))
-		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		draw_string(font, Vector2(text_x, 62.0 * k), title, HORIZONTAL_ALIGNMENT_LEFT, 138.0 * k, maxi(roundi(16.0 * k), 7), Color(accent, 1.0))
+		draw_string(font, Vector2(text_x, 84.0 * k), note, HORIZONTAL_ALIGNMENT_LEFT, 138.0 * k, maxi(roundi(14.0 * k), 6), Color(1, 1, 1, 0.6))
 
 
 ## Свайп вверх/вниз по свободной половине экрана листает слоты оружия.

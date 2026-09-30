@@ -60,6 +60,7 @@ func _build() -> void:
 	_panel.anchor_right = 1.0
 	_panel.offset_left = 14.0
 	_panel.offset_right = -14.0
+	_panel.clip_contents = true
 	_panel.offset_top = 14.0
 	add_child(_panel)
 	_body = VBoxContainer.new()
@@ -68,14 +69,16 @@ func _build() -> void:
 
 	var head := HBoxContainer.new()
 	head.add_theme_constant_override("separation", 8)
-	var title := UiStyle.label("РЕДАКТОР УПРАВЛЕНИЯ", 30, UiStyle.GOLD, 8)
+	var title := UiStyle.label("РЕДАКТОР УПРАВЛЕНИЯ", 26, UiStyle.GOLD, 7)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title.clip_text = true
+	title.custom_minimum_size = Vector2(0, 0)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	head.add_child(title)
-	var fold := UiStyle.button("СВЕРНУТЬ", UiStyle.PANEL_LIGHT, 20, Vector2(150, 56))
+	var fold := UiStyle.button("СВЕРНУТЬ", UiStyle.PANEL_LIGHT, 18, Vector2(120, 52))
 	fold.pressed.connect(_toggle_fold)
 	head.add_child(fold)
-	var done := UiStyle.button("ГОТОВО", Color("#5fd11f"), 24, Vector2(150, 56))
+	var done := UiStyle.button("ГОТОВО", Color("#5fd11f"), 20, Vector2(110, 52))
 	done.pressed.connect(_finish)
 	head.add_child(done)
 	_body.add_child(head)
@@ -164,7 +167,7 @@ func _slider(parent: Control, caption: String, low: float, high: float, on_chang
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 10)
 	var label := UiStyle.label(caption, 20, UiStyle.TEXT, 5)
-	label.custom_minimum_size = Vector2(230, 0)
+	label.custom_minimum_size = Vector2(190, 0)
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	row.add_child(label)
 	var slider := HSlider.new()
