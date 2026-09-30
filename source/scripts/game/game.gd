@@ -619,6 +619,18 @@ func _on_posture_broken(boss: Enemy) -> void:
 	SoundManager.play(&"boss_spawn", -4.0, false)
 
 
+## Отладка: #boss:<id> в адресе сразу выводит босса рядом с Енотом.
+func debug_boss(enemy_id: StringName) -> void:
+	var data := ContentDB.get_enemy(enemy_id)
+	if data == null:
+		return
+	player.max_hp = 99999.0
+	player.hp = 99999.0
+	var boss := enemies.spawn(data, player.global_position + Vector2(260, -40), 1.0, 1.0)
+	if boss != null:
+		_on_boss_spawned(boss)
+
+
 func _on_boss_spawned(boss: Enemy) -> void:
 	Platform.note_event("boss spawned")
 	hud.show_boss(boss.data.display_name, boss.hp, boss.max_hp)

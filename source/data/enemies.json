@@ -474,7 +474,7 @@
       "contact_damage": 16,
       "radius": 52,
       "sprite": "res://assets/bosses/baron_frames.png",
-      "sprite_scale": 1.9,
+      "sprite_scale": 1.05,
       "sprite_faces_right": true,
       "outline_world": 3.0,
       "knockback_resist": 1.0,

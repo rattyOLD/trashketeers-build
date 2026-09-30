@@ -788,13 +788,17 @@ func clip(moving: bool, hurt: float) -> Array:
 			return ["hit", 0.0]
 		return ["run", -1.0] if moving else ["idle", -1.0]
 	if pattern == "baron":
+		if enemy.posture_stun > 0.0:
+			return ["stun", -1.0]
 		match state:
 			State.BEAM_WINDUP:
 				return ["aim", 0.0]
 			State.BEAM, State.PRESS:
 				return ["beam", state_time * 12.0]
-			State.PRESS_WINDUP, State.SMASH_WINDUP:
-				return ["windup", 0.0]
+			State.PRESS_WINDUP:
+				return ["windup", state_time * 3.0]
+			State.SMASH_WINDUP:
+				return ["windup", state_time * 3.0]
 			State.SMASH_LUNGE:
 				return ["swing", state_time * 18.0]
 			State.VOMIT_WINDUP, State.VOMIT:

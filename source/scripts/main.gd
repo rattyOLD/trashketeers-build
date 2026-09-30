@@ -70,7 +70,10 @@ func _ready() -> void:
 	_show_menu()
 	if OS.has_feature("web"):
 		var url_hash := str(JavaScriptBridge.eval("window.location.hash"))
-		if url_hash.begins_with("#raid"):
+		if url_hash.begins_with("#boss:"):
+			_debug_hash = url_hash.substr(6)
+			_start_game.call_deferred(SaveService.get_selected_weapon())
+		elif url_hash.begins_with("#raid"):
 			_debug_hash = url_hash.substr(1)
 			_start_raid.call_deferred(SaveService.get_selected_weapon())
 
@@ -128,7 +131,10 @@ func _start_game(weapon_id: StringName) -> void:
 		game.exit_requested.connect(_show_menu, CONNECT_DEFERRED)
 		game.restart_requested.connect(_start_game.bind(weapon_id), CONNECT_DEFERRED)
 		_swap_screen(game)
-		game.start(weapon_id))
+		game.start(weapon_id)
+		if not _debug_hash.is_empty():
+			game.debug_boss(StringName(_debug_hash))
+			_debug_hash = "")
 
 
 func _start_raid(weapon_id: StringName) -> void:
