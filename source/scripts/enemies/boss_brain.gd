@@ -39,6 +39,7 @@ const BEAM_HALF_WIDTH := 30.0
 const PRESS_PUSH := 1150.0
 const SMASH_RANGE := 175.0
 const STUN_TIME := 1.15
+const HANGOVER_TIME := 2.2
 const VOMIT_TIME := 1.8
 const TRANSFORM_TIME := 1.6
 const OVERLORD_PHASE := 0.5
@@ -635,7 +636,15 @@ func _smash_impact(player: Player) -> void:
 			_enter(State.VOMIT_WINDUP)
 			enemy.request_fx("muzzle", 0.0, enemy.global_position)
 			return
-	_rest(1.1)
+	_hangover()
+
+
+## Уклонился от удара бочкой: Барон теряет равновесие и стоит открытым (урон x1.5), пока «похмелье» не пройдёт.
+func _hangover() -> void:
+	enemy.posture_stun = HANGOVER_TIME
+	enemy.posture = 0.0
+	enemy.posture_broken.emit(enemy)
+	_rest(0.4)
 
 
 func _fire_beer(weapon: WeaponData, angle_dir: Vector2, spread: float) -> void:

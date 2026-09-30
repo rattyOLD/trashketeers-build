@@ -149,6 +149,7 @@ var _attack_timer := 0.0
 var _strafe_sign := 1.0
 var _facing_left := false
 var _flank := 0.0
+var _step_down := false
 var _size_mult := 1.0
 var _act: Act = Act.MOVE
 var _act_time := 0.0
@@ -1009,6 +1010,13 @@ func _enter(act: Act, duration: float) -> void:
 
 # --- Анимация -----------------------------------------------------------------------------------
 
+func _boss_footstep(step_wave: float) -> void:
+	var down := step_wave < 0.12 and _move_amount > 0.35
+	if down and not _step_down:
+		request_fx("step", data.radius)
+	_step_down = down
+
+
 func _animate(delta: float, desired: Vector2) -> void:
 	var speed := desired.length()
 	var moving := speed > 5.0
@@ -1037,7 +1045,10 @@ func _animate(delta: float, desired: Vector2) -> void:
 	if _brain != null:
 		windup = maxf(windup, _brain.windup)
 		strike = maxf(strike, _brain.strike)
-		squash = 1.0 - 0.06 * _brain.windup + 0.05 * _brain.strike + sin(_time * 1.8) * 0.012
+		squash = 1.0 - 0.13 * _brain.windup + 0.09 * _brain.strike + sin(_time * 1.8) * 0.025 + (0.5 - step_wave) * 0.06 * _move_amount
+		lean -= 0.12 * _brain.windup
+		lean += 0.2 * _brain.strike
+		_boss_footstep(step_wave)
 	_pop = maxf(_pop - delta, 0.0)
 	var hurt := _pop / HIT_POP
 	var pop := 1.0 + hurt * 0.2
@@ -1050,7 +1061,10 @@ func _animate(delta: float, desired: Vector2) -> void:
 	elif absf(desired.x) > 5.0 and _act != Act.WINDUP:
 		_facing_left = desired.x < 0.0
 	var hover_bob := sin(_time * 3.4) * 5.0 if data.flying else 0.0
-	_sprite.position = Vector2(0, _sprite_base_y() + hover_bob - (0.0 if data.flying else hop))
+	var tremble := Vector2.ZERO
+	if _brain != null and windup > 0.2:
+		tremble = Vector2(sin(_time * 70.0), cos(_time * 83.0)) * 3.0 * windup
+	_sprite.position = Vector2(0, _sprite_base_y() + hover_bob - (0.0 if data.flying else hop)) + tremble
 	var sway := sin(_gait) * (0.025 if (_framed or _auto) else 0.06) * _move_amount
 	if _act == Act.MOVE:
 		lean += 0.16 * _move_amount

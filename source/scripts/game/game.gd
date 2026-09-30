@@ -519,6 +519,10 @@ func _on_enemy_fx(_enemy: Enemy, kind: String, at: Vector2, radius: float) -> vo
 			fx.dust(at, 16, radius)
 			fx.ring(at, Color("#c9a26a"), radius)
 			add_shake(0.6)
+		"step":
+			fx.dust(at + Vector2(0, 26), 3, radius * 0.9)
+			if at.distance_to(player.global_position) < 700.0:
+				add_shake(0.09)
 		"muzzle":
 			fx.muzzle_flash(at, (player.global_position - at).angle(), Color("#ffb347"), 1.4)
 		"summon":

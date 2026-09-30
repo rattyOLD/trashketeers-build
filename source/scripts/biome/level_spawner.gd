@@ -35,7 +35,9 @@ const AIRDROP_HEIGHT := 760.0
 const AIRDROP_MIN := 240.0
 const AIRDROP_MAX := 460.0
 const COVER_SPACING := 330.0
-const COVER_SPOTS := 11
+const COVER_SPOTS := 7
+## Доля предметов от исходной расстановки главы: карта не должна быть свалкой из контейнеров.
+const PROP_DENSITY := 0.55
 const SCENE_SPACING := 380.0
 const RIPPLE_INTERVAL := 0.3
 const PUDDLE_COUNT := 9
@@ -749,13 +751,18 @@ func _build_cover() -> void:
 func _build_scenes() -> void:
 	var library: Dictionary = ConfigLoader.load_json("res://data/scenes.json").get("scenes", {})
 	var area := _interior_rect()
-	for entry in chapter.get("scenes", []):
+	var entries: Array = chapter.get("scenes", []).duplicate()
+	entries.shuffle()
+	for index in entries.size():
+		var entry: Array = entries[index]
+		if index >= 3 and randf() < 0.45:
+			continue
 		var scene: Dictionary = library.get(str(entry[0]), {})
 		if scene.is_empty():
 			continue
 		var done := 0
 		for attempt in 120:
-			if done >= int(entry[1]):
+			if done >= maxi(int(round(float(entry[1]) * PROP_DENSITY)), 1):
 				break
 			var p := _scene_point(str(scene.get("anchor", "open")), area)
 			if p == Vector2.INF or not _scene_spacing_ok(p):
@@ -843,7 +850,7 @@ func _build_destructibles() -> void:
 	var area := _interior_rect()
 	var placed: Array[Vector2] = []
 	for prop_id in table:
-		var need := int(table[prop_id]) - int(_destr_done.get(prop_id, 0))
+		var need := int(round(float(table[prop_id]) * PROP_DENSITY)) - int(_destr_done.get(prop_id, 0))
 		var done := 0
 		for attempt in need * 40:
 			if done >= need:
@@ -870,7 +877,7 @@ func _build_destructibles() -> void:
 func _build_decor() -> void:
 	var area := _interior_rect()
 	for id in chapter.get("flat", []):
-		for n in 2:
+		for n in 1:
 			for attempt in 30:
 				var p := Vector2(randf_range(area.position.x, area.end.x), randf_range(area.position.y, area.end.y))
 				if _cover_allowed(p, 40.0) and is_area_clear(p, CELL * 1.6):
