@@ -32,6 +32,7 @@ var _side_buttons: Dictionary = {}
 var _nav_upgrades: MenuWidgets.NavButton
 var _nav_pass: MenuWidgets.NavButton
 var _lock_mark: LockMark
+var _mode_hint: HintBubble
 var _nuts_label: Label
 var _dust_label: Label
 var _weapon_title: Label
@@ -485,6 +486,10 @@ func _build_modes() -> Control:
 	_lock_mark = LockMark.new()
 	_mode_buttons[0].add_child(_lock_mark)
 	_lock_mark.visible = _survival_locked()
+	_apply_lock_look()
+	if not _survival_locked() and not bool(SaveService.data.get("survival_unlock_seen", false)):
+		SaveService.set_flag("survival_unlock_seen", true)
+		_lock_mark.play_open.call_deferred()
 	return row
 
 
@@ -493,6 +498,14 @@ func _on_mode_pressed(mode: int) -> void:
 	if _mode == Mode.SURVIVAL and not bool(SaveService.data.get("survival_intro_seen", false)):
 		SaveService.set_flag("survival_intro_seen", true)
 		_mode_intro.open()
+
+
+func _apply_lock_look() -> void:
+	var button := _mode_buttons[0]
+	if _survival_locked():
+		button.add_theme_color_override("font_color", Color(UiStyle.TEXT_DIM, 0.35))
+	elif _mode != Mode.SURVIVAL:
+		button.add_theme_color_override("font_color", UiStyle.TEXT_DIM)
 
 
 func _shake(control: Control) -> void:
@@ -511,6 +524,10 @@ func _select_mode(mode: int) -> void:
 		_mode_buttons[0].set_pressed_no_signal(false)
 		SoundManager.play(&"ui_click", -6.0)
 		_shake(_mode_buttons[0])
+		if _mode_hint == null:
+			_mode_hint = HintBubble.new()
+			add_child(_mode_hint)
+		_mode_hint.show_for(_mode_buttons[0], "Пройдите сюжет, и тогда откроется доступ.")
 		if _mode == Mode.SURVIVAL:
 			mode = Mode.STORY
 		else:
@@ -527,6 +544,8 @@ func _select_mode(mode: int) -> void:
 		b.add_theme_color_override("font_color", colors[i] if active or i == 2 else UiStyle.TEXT_DIM)
 		b.add_theme_color_override("font_pressed_color", colors[i])
 		b.add_theme_color_override("font_hover_pressed_color", colors[i])
+	if _lock_mark != null:
+		_apply_lock_look()
 
 
 # --- Карточка ствола и нижняя панель ----------------------------------------------------------------
@@ -646,8 +665,8 @@ func _refresh() -> void:
 	_nick_label.text = SaveService.get_display_nickname()
 	if _mode_buttons.size() > 2:
 		_mode_buttons[2].text = "СЮЖЕТ %d/6" % SaveService.story_shards()
-	if _lock_mark != null:
-		_lock_mark.visible = _survival_locked()
+	if _lock_mark != null and _survival_locked():
+		_lock_mark.visible = true
 	_level_label.text = "LVL %d" % SaveService.get_account_level() + (" · VIP %d" % Premium.level() if Premium.level() > 0 else "")
 	_xp_bar.value = SaveService.get_level_progress()
 	_nuts_label.text = str(SaveService.get_nuts())

@@ -19,6 +19,7 @@ var _vomit_puddles: Array[Texture2D] = []
 var _drying: Array[Texture2D] = []
 var _beer_splash: Array[Texture2D] = []
 var _vomit_splash: Array[Texture2D] = []
+var _foam: Array[Texture2D] = []
 
 
 func _ready() -> void:
@@ -32,6 +33,8 @@ func _ready() -> void:
 	for i in SPLASH_FRAMES:
 		_beer_splash.append(load(BASE + "beer_splash_%02d.png" % (i + 1)) as Texture2D)
 		_vomit_splash.append(load(BASE + "vomit_splash_%02d.png" % (i + 1)) as Texture2D)
+	for i in 4:
+		_foam.append(load(BASE + "beer_foam_%02d.png" % (i + 1)) as Texture2D)
 	for i in CAPACITY:
 		var sprite := Sprite2D.new()
 		sprite.visible = false
@@ -52,6 +55,10 @@ func splash(at: Vector2, kind: int, radius: float) -> void:
 	_start(at, kind, radius, SPLASH_TIME, true)
 
 
+func foam(at: Vector2, radius: float) -> void:
+	_start(at, 2, radius, 0.7, true)
+
+
 func _start(at: Vector2, kind: int, radius: float, life: float, is_splash: bool) -> void:
 	var k := _next
 	_next = (_next + 1) % CAPACITY
@@ -64,6 +71,8 @@ func _start(at: Vector2, kind: int, radius: float, life: float, is_splash: bool)
 	_age[k] = 0.0
 	_life[k] = life
 	_kind[k] = (kind + 2) if is_splash else kind
+	if is_splash and kind == 2 and life > SPLASH_TIME:
+		_kind[k] = 4
 	sprite.texture = _frame_for(k)
 	set_process(true)
 
@@ -71,6 +80,8 @@ func _start(at: Vector2, kind: int, radius: float, life: float, is_splash: bool)
 func _frame_for(k: int) -> Texture2D:
 	var t := _age[k] / maxf(_life[k], 0.01)
 	var kind := _kind[k]
+	if kind == 4:
+		return _foam[mini(int(t * _foam.size()), _foam.size() - 1)]
 	if kind >= 2:
 		var frames := _beer_splash if kind == 2 else _vomit_splash
 		return frames[mini(int(t * SPLASH_FRAMES), SPLASH_FRAMES - 1)]

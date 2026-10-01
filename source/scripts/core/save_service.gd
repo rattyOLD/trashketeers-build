@@ -100,6 +100,7 @@ const DEFAULTS := {
 	"ad_chest_at": 0,
 	"changelog_seen": "",
 	"survival_intro_seen": false,
+	"survival_unlock_seen": false,
 }
 
 const CLOUD_DEBOUNCE := 2.5

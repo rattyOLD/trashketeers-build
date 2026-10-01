@@ -195,6 +195,7 @@ func start(_weapon_id: StringName = &"") -> void:
 	hud.reroll_requested.connect(_on_reroll_requested)
 	_rerolls_free = 1 + int(SaveService.get_perk_bonus("reroll")) + Premium.reroll_bonus()
 	WeaponPickup.auto_pick = bool(Controls.get_value("auto_pick"))
+	player.weapon_controller.auto_fire = bool(Controls.get_value("auto_fire"))
 	for pickup in _weapon_pickups:
 		pickup.expired.connect(_on_pickup_expired)
 	player.weapon_controller.slots_changed.connect(_refresh_slots)
@@ -305,7 +306,7 @@ func _physics_process(delta: float) -> void:
 func _update_hud_timer() -> void:
 	hud.set_time(director.elapsed)
 	if story != null:
-		hud.set_story_status(story.score, story.lives, story.zone_number(), story.zone_count(), story.zone_name(), story.enemies_left(), SaveService.nell_order(), story.goal_rows())
+		hud.set_story_status(story.score, story.lives, story.zone_number(), story.zone_count(), story.zone_name(), -1, SaveService.nell_order(), story.goal_rows())
 		_tick_order()
 		return
 	hud.set_wave(maxi(director.wave_number, 1), director.get_enemies_left())
@@ -601,6 +602,8 @@ func _on_enemy_fx(_enemy: Enemy, kind: String, at: Vector2, radius: float) -> vo
 			fx.burst(at, Color("#fff6dc"), 3, 140.0, 2.4)
 			liquids.splash(at, 1 if foamy else 0, 44.0 if not foamy else 56.0)
 			liquids.puddle(at, 1 if foamy else 0, 34.0 if not foamy else 46.0, 2.8)
+			if not foamy:
+				liquids.foam(at + Vector2(0, -8), 38.0)
 		"muzzle":
 			fx.muzzle_flash(at, (player.global_position - at).angle(), Color("#ffb347"), 1.4)
 		"summon":

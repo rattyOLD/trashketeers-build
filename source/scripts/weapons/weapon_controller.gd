@@ -32,6 +32,7 @@ var weapon: WeaponData
 var aim_direction := Vector2.RIGHT
 ## Ручной прицел: направление от пальца/мыши, пока он зажат; ZERO — работает автоприцел.
 var manual_aim := Vector2.ZERO
+var auto_fire := true
 var has_target := false
 ## Callable(direction: Vector2) -> Vector2: глобальная точка дула нарисованного ствола.
 var muzzle_provider: Callable
@@ -146,12 +147,13 @@ func _physics_process(delta: float) -> void:
 		return
 
 	var manual := manual_aim != Vector2.ZERO
-	has_target = manual
-	if not manual:
+	var auto := not manual and auto_fire and _target != null and _is_target_valid()
+	has_target = manual or auto
+	if not manual and not auto:
 		_spin_up = maxf(_spin_up - delta * 0.8, 0.0)
 		return
 
-	var aim_point := global_position + manual_aim * minf(weapon.max_distance, 520.0)
+	var aim_point := global_position + manual_aim * minf(weapon.max_distance, 520.0) if manual else _target.global_position
 	aim_direction = global_position.direction_to(aim_point)
 	if _cooldown > 0.0:
 		return
