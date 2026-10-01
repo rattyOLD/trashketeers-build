@@ -1094,11 +1094,7 @@ func story_result(victory: bool, lines: PackedStringArray) -> void:
 		return
 	hud.hide_revive()
 	Platform.send_report("story", "mission=%s victory=%s score=%d kills=%d lives=%d time=%ds killed_by=%s" % [story_mission, victory, story.score, story.kills, story.lives, int(director.elapsed), Player.last_source])
-	if not victory:
-		var tip := _death_tip()
-		if not tip.is_empty():
-			lines.append(tip)
-	_show_result(victory, lines, "МИССИЯ ВЫПОЛНЕНА" if victory else "МИССИЯ ПРОВАЛЕНА")
+	_show_result(victory, lines, "МИССИЯ ВЫПОЛНЕНА" if victory else "МИССИЯ ПРОВАЛЕНА", false)
 
 
 func _drop_weapon(weapon: WeaponData, at: Vector2, loot: bool, delay: float = 0.4) -> void:

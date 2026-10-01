@@ -35,6 +35,7 @@ var has_key := false
 var finished_mission := false
 var progress := 0.0
 var zone_index := -1
+var _crate_dropped := false
 var locked := false
 var gate_key := ""
 const IDLE_HINT := 9.0
@@ -510,7 +511,7 @@ func _check_zone() -> void:
 	for i in zones.size():
 		if progress >= float(zones[i]["from"]):
 			index = i
-	if index == zone_index:
+	if index <= zone_index:
 		return
 	if zone_index >= 0 and not _zone_hit:
 		score += CLEAN_ZONE_POINTS
@@ -527,7 +528,8 @@ func _check_zone() -> void:
 		game.fx.ring(game.player.global_position, Color("#7cff6b"), 160.0)
 	if zone.has("say"):
 		_say(str(zone["say"]), OPEN_DELAY + (0.8 if index == 0 else 0.0))
-	if bool(zone.get("crate", false)) and has_key:
+	if bool(zone.get("crate", false)) and has_key and not _crate_dropped:
+		_crate_dropped = true
 		_open_crate()
 
 

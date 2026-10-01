@@ -535,10 +535,10 @@ func show_level_up(choices: Array[UpgradeData], level: int, stats: RunStats, bon
 	_level_up.open(choices, level, stats, bonus, reroll_text, reroll_ok)
 
 
-func show_result(victory: bool, lines: PackedStringArray, title: String = "") -> void:
+func show_result(victory: bool, lines: PackedStringArray, title: String = "", can_upgrade: bool = true) -> void:
 	_pause.visible = false
 	_hide_thermos()
-	_result.open(victory, lines, title)
+	_result.open(victory, lines, title, can_upgrade)
 
 
 func show_chapter(subtitle: String, title: String, accent: Color = UiStyle.NEON) -> void:

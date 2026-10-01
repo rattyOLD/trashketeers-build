@@ -384,7 +384,7 @@ func _run_summary_lines() -> PackedStringArray:
 	return PackedStringArray()
 
 
-func _show_result(victory: bool, lines: PackedStringArray, title: String = "") -> void:
+func _show_result(victory: bool, lines: PackedStringArray, title: String = "", can_upgrade: bool = true) -> void:
 	finished = true
 	Engine.time_scale = 1.0
 	get_tree().paused = true
@@ -392,7 +392,7 @@ func _show_result(victory: bool, lines: PackedStringArray, title: String = "") -
 	SoundManager.stop_ambient()
 	SoundManager.stop_music()
 	SoundManager.play(&"victory" if victory else &"defeat", 0.0, false)
-	hud.show_result(victory, lines, title)
+	hud.show_result(victory, lines, title, can_upgrade)
 
 
 func _update_shake(delta: float) -> void:

@@ -85,7 +85,7 @@ const WIN_TITLES := ["ПОБЕДА!", "ЖИВОЙ! ДАЖЕ УДИВИЛИСЬ",
 const LOSE_TITLES := ["ЕНОТ ПОВЕРЖЕН", "ЕНОТ ОТДЫХАЕТ", "ТЕБЯ ВЫНЕСЛИ", "КРЫСЫ ПЛЯШУТ", "СЛИВ ЗАСЧИТАН", "ЕНОТ ПОСКОЛЬЗНУЛСЯ", "НЭЛЛ ВЗДОХНУЛА"]
 
 
-func open(victory: bool, lines: PackedStringArray, title: String = "") -> void:
+func open(victory: bool, lines: PackedStringArray, title: String = "", can_upgrade: bool = true) -> void:
 	_title.text = title if not title.is_empty() else (WIN_TITLES.pick_random() if victory else LOSE_TITLES.pick_random())
 	_title.add_theme_color_override("font_color", UiStyle.GOLD if victory else UiStyle.DANGER)
 	_subtitle.text = lines[0] if not lines.is_empty() else ""
@@ -95,14 +95,14 @@ func open(victory: bool, lines: PackedStringArray, title: String = "") -> void:
 	var notes: Array[String] = []
 	for i in range(1, lines.size()):
 		var split := lines[i].find(": ")
-		if split > 0 and split < 24 and not lines[i].begins_with("Совет"):
+		if split > 0 and split < 24 and lines[i].length() - split - 2 <= 22 and not lines[i].begins_with("Совет"):
 			_stats_rows.add_child(_stat_row(lines[i].substr(0, split), lines[i].substr(split + 2)))
 		else:
 			notes.append(lines[i])
 	_stats_card.visible = _stats_rows.get_child_count() > 0
 	_tip_label.text = "\n".join(notes)
 	_tip_card.visible = not notes.is_empty()
-	_upgrade_button.visible = not victory
+	_upgrade_button.visible = not victory and can_upgrade
 	visible = true
 	UiStyle.pop_in(_panel)
 
