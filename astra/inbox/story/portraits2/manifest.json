@@ -80,7 +80,7 @@
       "block": "A",
       "transparent": false,
       "texture": false,
-      "sourceSheet": "godfather_pigeon",
+      "sourceSheet": "pigeon_angry_fix",
       "frame": 1
     },
     {

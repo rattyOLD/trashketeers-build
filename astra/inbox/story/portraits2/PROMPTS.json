@@ -32,6 +32,10 @@
     {
       "key": "emperor_silhouette",
       "prompt": "Edit this exact Emperor portrait into its concealed identity variant. Keep exactly the character's outline, pose, large ears, shoulder armor and reactor pipes silhouette, and identical framing. Fill every part of the character solid near-black, no internal linework, face features, pipes detail or reactor lights. Only two small glowing violet eyes remain visible. Flat pure #FF00FF background. Smooth cartoon silhouette, no letters, no question marks, no symbols. Square 512x512 game dialogue portrait."
+    },
+    {
+      "key": "pigeon_angry_fix",
+      "prompt": "Use case: identity-preserve. Change ONLY the facial emotion in this Godfather Pigeon game portrait to strong explosive ANGER: furiously squawking with beak wide open, brows sharply slanted, large visibly angry eyes, ruffled cheek feathers. Keep exactly his bluegrey pigeon identity, blackfedora, goldhatband, costlytrenchcoat, hands andTommygun, same pose framing size camera, smooth thick dark cartoon outline two-tone cel-shading. Pure #FF00FF background. No words or letters. 512x512 shoulders portrait. Make the angry expression clearly distinct from the calm original."
     }
   ]
 }
