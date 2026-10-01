@@ -1,0 +1,187 @@
+{
+  "brief": "astra/from_claude/BRIEF_v7_saga.md",
+  "block": "E",
+  "frameOrder": "left-to-right top-to-bottom",
+  "assets": [
+    {
+      "path": "astra/inbox/story/backdrops/m1_far.png",
+      "width": 2048,
+      "height": 512,
+      "block": "E",
+      "transparent": true,
+      "texture": false,
+      "sourceSheet": "m1_layers",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/backdrops/m1_mid.png",
+      "width": 2048,
+      "height": 512,
+      "block": "E",
+      "transparent": true,
+      "texture": false,
+      "sourceSheet": "m1_layers",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/backdrops/m1_near.png",
+      "width": 2048,
+      "height": 512,
+      "block": "E",
+      "transparent": true,
+      "texture": false,
+      "sourceSheet": "m1_layers",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/backdrops/m2_far.png",
+      "width": 2048,
+      "height": 512,
+      "block": "E",
+      "transparent": true,
+      "texture": false,
+      "sourceSheet": "m2_layers",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/backdrops/m2_mid.png",
+      "width": 2048,
+      "height": 512,
+      "block": "E",
+      "transparent": true,
+      "texture": false,
+      "sourceSheet": "m2_layers",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/backdrops/m2_near.png",
+      "width": 2048,
+      "height": 512,
+      "block": "E",
+      "transparent": true,
+      "texture": false,
+      "sourceSheet": "m2_layers",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/backdrops/m3_far.png",
+      "width": 2048,
+      "height": 512,
+      "block": "E",
+      "transparent": true,
+      "texture": false,
+      "sourceSheet": "m3_layers",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/backdrops/m3_mid.png",
+      "width": 2048,
+      "height": 512,
+      "block": "E",
+      "transparent": true,
+      "texture": false,
+      "sourceSheet": "m3_layers",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/backdrops/m3_near.png",
+      "width": 2048,
+      "height": 512,
+      "block": "E",
+      "transparent": true,
+      "texture": false,
+      "sourceSheet": "m3_layers",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/backdrops/m4_far.png",
+      "width": 2048,
+      "height": 512,
+      "block": "E",
+      "transparent": true,
+      "texture": false,
+      "sourceSheet": "m4_layers",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/backdrops/m4_mid.png",
+      "width": 2048,
+      "height": 512,
+      "block": "E",
+      "transparent": true,
+      "texture": false,
+      "sourceSheet": "m4_layers",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/backdrops/m4_near.png",
+      "width": 2048,
+      "height": 512,
+      "block": "E",
+      "transparent": true,
+      "texture": false,
+      "sourceSheet": "m4_layers",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/backdrops/m5_far.png",
+      "width": 2048,
+      "height": 512,
+      "block": "E",
+      "transparent": true,
+      "texture": false,
+      "sourceSheet": "m5_layers",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/backdrops/m5_mid.png",
+      "width": 2048,
+      "height": 512,
+      "block": "E",
+      "transparent": true,
+      "texture": false,
+      "sourceSheet": "m5_layers",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/backdrops/m5_near.png",
+      "width": 2048,
+      "height": 512,
+      "block": "E",
+      "transparent": true,
+      "texture": false,
+      "sourceSheet": "m5_layers",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/backdrops/m6_far.png",
+      "width": 2048,
+      "height": 512,
+      "block": "E",
+      "transparent": true,
+      "texture": false,
+      "sourceSheet": "m6_layers",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/backdrops/m6_mid.png",
+      "width": 2048,
+      "height": 512,
+      "block": "E",
+      "transparent": true,
+      "texture": false,
+      "sourceSheet": "m6_layers",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/backdrops/m6_near.png",
+      "width": 2048,
+      "height": 512,
+      "block": "E",
+      "transparent": true,
+      "texture": false,
+      "sourceSheet": "m6_layers",
+      "frame": 2
+    }
+  ]
+}
