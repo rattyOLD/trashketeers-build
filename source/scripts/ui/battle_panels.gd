@@ -391,6 +391,8 @@ class RunResultPanel:
 		_title = UiStyle.label("ЗАБЕГ ОКОНЧЕН", 44, UiStyle.GOLD, 12)
 		box.add_child(_title)
 		_subtitle = UiStyle.label("", 22, UiStyle.TEXT_DIM, 5)
+		_subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		_subtitle.custom_minimum_size = Vector2(520, 0)
 		box.add_child(_subtitle)
 
 		var grid := GridContainer.new()
@@ -498,7 +500,8 @@ class RunResultPanel:
 		var line := "%s · лучший результат: %d волн" % [str(summary.get("chapter", "")), int(summary.get("best_wave", 0))]
 		if bosses > 0:
 			line += " · боссов: %d" % bosses
-		_subtitle.text = line
+		var friend_line := str(summary.get("friend", ""))
+		_subtitle.text = line if friend_line.is_empty() else line + "\n" + friend_line
 		(_tiles["wave"] as StatTile).count_to(int(summary.get("wave", 0)), 0.15)
 		(_tiles["kills"] as StatTile).count_to(int(summary.get("kills", 0)), 0.25)
 		(_tiles["level"] as StatTile).count_to(int(summary.get("level", 1)), 0.35)

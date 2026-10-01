@@ -190,22 +190,14 @@ const HERO_DAMAGE_PER_LEVEL := 0.03
 const PERK_COST_GROWTH := 1.36
 const SLOT3_PRICE := 250
 
-## stat — ключ в data["stats"], goal — порог; награды — монеты и Звёздная Пыль.
+## stats — ключи в data["stats"] (суммируются), goal — порог; один заказ на день для сюжета и выживания.
 const NELL_ORDERS := [
-	{"id": "kills", "title": "Убей 40 врагов", "stat": "story_kills", "goal": 40, "nuts": 400, "dust": 2},
-	{"id": "rescue", "title": "Освободи 2 пленников", "stat": "story_rescued", "goal": 2, "nuts": 500, "dust": 3},
-	{"id": "secret", "title": "Найди 2 тайника", "stat": "story_secrets", "goal": 2, "nuts": 450, "dust": 2},
-	{"id": "clean", "title": "Пройди 2 зоны без урона", "stat": "story_clean_zones", "goal": 2, "nuts": 600, "dust": 3},
-	{"id": "ambush", "title": "Зачисти 3 засады", "stat": "story_ambushes", "goal": 3, "nuts": 500, "dust": 2},
-	{"id": "mission", "title": "Пройди миссию Свалки", "stat": "story_missions", "goal": 1, "nuts": 1000, "dust": 5},
-]
-const NELL_ORDERS_SURVIVAL := [
-	{"id": "kills", "title": "Убей 150 врагов", "stat": "kills", "goal": 150, "nuts": 350, "dust": 2},
-	{"id": "crates", "title": "Разбей 6 ящиков с оружием", "stat": "crates", "goal": 6, "nuts": 400, "dust": 2},
-	{"id": "boss", "title": "Победи босса", "stat": "boss_kills", "goal": 1, "nuts": 700, "dust": 4},
-	{"id": "dash", "title": "Сделай 60 рывков", "stat": "dashes", "goal": 60, "nuts": 300, "dust": 2},
-	{"id": "crit", "title": "Нанеси 80 критов", "stat": "crits", "goal": 80, "nuts": 350, "dust": 2},
-	{"id": "picks", "title": "Выбери 8 улучшений", "stat": "picks", "goal": 8, "nuts": 350, "dust": 2},
+	{"id": "kills", "title": "Убей 120 врагов", "stats": ["kills"], "goal": 120, "nuts": 350, "dust": 2},
+	{"id": "kills_big", "title": "Убей 300 врагов", "stats": ["kills"], "goal": 300, "nuts": 700, "dust": 4},
+	{"id": "dash", "title": "Сделай 60 рывков", "stats": ["dashes"], "goal": 60, "nuts": 300, "dust": 2},
+	{"id": "crit", "title": "Нанеси 80 критов", "stats": ["crits"], "goal": 80, "nuts": 350, "dust": 2},
+	{"id": "boss", "title": "Победи босса", "stats": ["boss_kills", "story_missions"], "goal": 1, "nuts": 800, "dust": 5},
+	{"id": "crates", "title": "Разбей 5 ящиков с оружием", "stats": ["crates"], "goal": 5, "nuts": 400, "dust": 2},
 ]
 const ACHIEVEMENTS := [
 	{"id": "first_blood", "title": "Первая кровь", "description": "Победить первую крысу. Она была чьей-то мамой, но это не точно", "stat": "kills", "goal": 1, "nuts": 20, "dust": 0},
@@ -1149,31 +1141,59 @@ func record_run(summary: Dictionary) -> Dictionary:
 
 
 ## Босс побеждён — счётчик живой, чтобы ачивка открылась сразу.
-## Заказ Нэлл на сегодня: один в день, счёт от значения счётчика на начало дня.
-func nell_order(survival: bool = false) -> Dictionary:
-	var key := "nell_order_s" if survival else "nell_order"
-	var pool: Array = NELL_ORDERS_SURVIVAL if survival else NELL_ORDERS
-	var order: Dictionary = data.get(key, {})
+## Заказ Нэлл на сегодня: один в день для всех режимов, счёт от суммы счётчиков на начало дня.
+func _order_total(spec: Dictionary) -> int:
+	var total := 0
+	for stat in spec["stats"]:
+		total += get_stat(str(stat))
+	return total
+
+
+func nell_order() -> Dictionary:
+	var order: Dictionary = data.get("nell_daily", {})
 	if int(order.get("day", -1)) != today():
-		var index := (today() + get_player_id().hash()) % pool.size()
-		var def: Dictionary = pool[absi(index)]
-		order = {"day": today(), "idx": absi(index), "base": get_stat(str(def["stat"])), "done": false}
-		data[key] = order
-	var spec: Dictionary = pool[clampi(int(order["idx"]), 0, pool.size() - 1)]
-	var progress := clampi(get_stat(str(spec["stat"])) - int(order["base"]), 0, int(spec["goal"]))
+		var index := absi((today() + get_player_id().hash()) % NELL_ORDERS.size())
+		order = {"day": today(), "idx": index, "base": _order_total(NELL_ORDERS[index]), "done": false}
+		data["nell_daily"] = order
+	var spec: Dictionary = NELL_ORDERS[clampi(int(order["idx"]), 0, NELL_ORDERS.size() - 1)]
+	var progress := clampi(_order_total(spec) - int(order["base"]), 0, int(spec["goal"]))
 	return {"title": spec["title"], "goal": spec["goal"], "progress": progress, "done": bool(order["done"]), "nuts": spec["nuts"], "dust": spec["dust"]}
 
 
 ## Возвращает заказ, если он только что выполнен (награда выдаётся здесь), иначе пустой словарь.
-func nell_order_tick(survival: bool = false) -> Dictionary:
-	var info := nell_order(survival)
+func nell_order_tick() -> Dictionary:
+	var info := nell_order()
 	if bool(info["done"]) or int(info["progress"]) < int(info["goal"]):
 		return {}
-	(data["nell_order_s" if survival else "nell_order"] as Dictionary)["done"] = true
+	(data["nell_daily"] as Dictionary)["done"] = true
 	add_coins(int(info["nuts"]))
 	add_gems(int(info["dust"]), false)
 	save_data()
 	return info
+
+
+## Строка для экрана поражения: друг, которого только что обогнали, или ближайший, до кого не дотянул.
+func friend_wave_line(wave: int, previous_best: int) -> String:
+	var passed: Dictionary = {}
+	var ahead: Dictionary = {}
+	for friend: Dictionary in get_friends():
+		var w := int(friend.get("w", 0))
+		if w <= 0:
+			continue
+		if w <= wave:
+			var fresh := w > previous_best
+			var better := passed.is_empty() or (fresh and not bool(passed["fresh"])) or (fresh == bool(passed["fresh"]) and w > int(passed["w"]))
+			if better:
+				passed = {"n": str(friend.get("n", "Друг")), "w": w, "fresh": fresh}
+		elif ahead.is_empty() or w < int(ahead["w"]):
+			ahead = {"n": str(friend.get("n", "Друг")), "w": w}
+	if not passed.is_empty() and bool(passed["fresh"]):
+		return "Только что обошёл друга %s: у него %d волн, у тебя %d. Передавай привет." % [passed["n"], passed["w"], wave]
+	if not ahead.is_empty():
+		return "До рекорда друга %s не хватило %d волн (у него %d)." % [ahead["n"], int(ahead["w"]) - wave, ahead["w"]]
+	if not passed.is_empty():
+		return "Друг %s с рекордом %d волн остался позади. Все остальные тоже." % [passed["n"], passed["w"]]
+	return ""
 
 
 func friend_best(mission_id: String) -> Dictionary:

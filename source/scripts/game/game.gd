@@ -91,6 +91,7 @@ var _recorded := false
 var _portal: Portal
 var story_mission := ""
 var story: StoryRun
+var radio: SurvivalRadio
 var story_target: Node2D
 var _switching := false
 
@@ -221,6 +222,10 @@ func start(_weapon_id: StringName = &"") -> void:
 		hud.toast("АДРЕНАЛИН!", "+35% скорострельности и +15% скорости на 20 с", Color("#ff7a3d"))
 	SoundManager.play_music(StringName(str(chapter.get("music", "battle"))))
 	SoundManager.start_ambient()
+	if story_mission.is_empty():
+		radio = SurvivalRadio.new()
+		add_child(radio)
+		radio.setup(self)
 	if not story_mission.is_empty():
 		story = StoryRun.new()
 		add_child(story)
@@ -298,10 +303,15 @@ func _update_hud_timer() -> void:
 	hud.set_time(director.elapsed)
 	if story != null:
 		hud.set_story_status(story.score, story.lives, story.zone_number(), story.zone_count(), story.zone_name(), story.enemies_left(), SaveService.nell_order(), story.goal_rows())
+		_tick_order()
 		return
 	hud.set_wave(maxi(director.wave_number, 1), director.get_enemies_left())
-	hud.set_survival_order(SaveService.nell_order(true))
-	var done := SaveService.nell_order_tick(true)
+	hud.set_survival_order(SaveService.nell_order())
+	_tick_order()
+
+
+func _tick_order() -> void:
+	var done := SaveService.nell_order_tick()
 	if not done.is_empty():
 		hud.toast("ЗАКАЗ НЭЛЛ ВЫПОЛНЕН", "%s. Награда: +%d монет, +%d неонита" % [done["title"], done["nuts"], done["dust"]], Color("#5ff2ff"))
 		SoundManager.play(&"level_up", -4.0, false)
@@ -390,6 +400,8 @@ func _on_wave_started(number: int, title: String, mood: String, is_boss: bool) -
 	atmosphere.set_mood(mood)
 	_check_clean_sweep()
 	events.on_wave_started(is_boss)
+	if radio != null:
+		radio.on_wave(is_boss)
 	atmosphere.letterbox(true)
 	get_tree().create_timer(1.9, false).timeout.connect(func() -> void: atmosphere.letterbox(false))
 	hud.show_wave_intro(director.chapter_wave(), title, is_boss)
@@ -765,6 +777,8 @@ func _on_miniboss_killed(boss: Enemy, at: Vector2) -> void:
 		_drop_weapon(_roll_weapon("epic" if randf() < 0.5 else "rare"), at, true)
 	else:
 		_offer_mini_choice(boss, at, 0)
+		if radio != null:
+			radio.on_mini_boss()
 
 
 const MINI_CHOICE_RETRIES := 12
@@ -975,7 +989,7 @@ func _open_orders() -> void:
 		return
 	var screen := OrdersScreen.new()
 	add_child(screen)
-	screen.open(SaveService.nell_order(story == null), story.goal_rows() if story != null else [])
+	screen.open(SaveService.nell_order(), story.goal_rows() if story != null else [])
 
 
 func _refresh_slots() -> void:
@@ -1414,7 +1428,9 @@ func _finish() -> void:
 	hud.hide_revive()
 	var summary := _run_summary()
 	summary["tip"] = _death_tip()
+	var previous_best := SaveService.get_stat("best_wave")
 	var result := _record()
+	summary["friend"] = SaveService.friend_wave_line(int(summary["wave"]), previous_best)
 	Platform.send_report("run", "mode=survival hero=%s weapon=%s wave=%d chapter=%s level=%d kills=%d time=%ds coins=%d bosses=%d revives=%d killed_by=%s died=%s record=%s" % [SaveService.get_character_id(), player.weapon_controller.base_weapon.id, summary["wave"], summary["chapter"], level, kills, int(director.elapsed), nuts, bosses_killed, revives_used, Player.last_source, player.is_dead, result.get("record", false)])
 	summary["record"] = result.get("record", false)
 	summary["total_coins"] = SaveService.get_coins()
