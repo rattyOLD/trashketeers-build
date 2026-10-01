@@ -854,7 +854,27 @@ class Profile:
 		var b := UiStyle.button(text, Color("#2fae5f") if Cloud.has_email() else Color("#d63a3a"), 24, Vector2(0, 84))
 		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		b.pressed.connect(func() -> void: account_requested.emit())
-		return b
+		if not Cloud.has_email() and Cloud.guest_key.is_empty():
+			return b
+		# Сколько устройств сейчас в этом аккаунте: видно, что браузер и приложение — один енот.
+		var box := VBoxContainer.new()
+		box.add_theme_constant_override("separation", 4)
+		box.add_child(b)
+		var devices := MenuPopups.small_hint("")
+		box.add_child(devices)
+		_fill_devices(devices)
+		return box
+
+	func _fill_devices(label: Label) -> void:
+		var count := await Cloud.my_devices()
+		if not is_instance_valid(label):
+			return
+		if count <= 0:
+			label.visible = false
+		elif count == 1:
+			label.text = "Ты вошёл на 1 устройстве. Открой ссылку-вход или войди логином на втором, и это будет тот же енот."
+		else:
+			label.text = "Ты вошёл на %d устройствах, это один и тот же аккаунт: прогресс, друзья и тег общие." % count
 
 	## Крупный код восстановления: нажал и скопировал. После любого сброса прогресс возвращается им.
 	func _recovery_bar() -> Control:

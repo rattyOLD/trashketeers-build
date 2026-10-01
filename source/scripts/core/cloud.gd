@@ -367,6 +367,14 @@ func restore_save(code: String) -> String:
 	return ""
 
 
+## Живые входы в этот аккаунт (устройства) за 30 дней; 0, если неизвестно (нет SQL v18 или связи).
+func my_devices() -> int:
+	if not has_code():
+		return 0
+	var result := await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/my_devices", {})
+	return int(result["data"]) if bool(result["ok"]) and (result["data"] is int or result["data"] is float) else 0
+
+
 ## {"ok": bool, "items": [{nickname, best_wave, insider}]} — лучшие игроки по волне.
 func top_waves(limit: int = 20) -> Dictionary:
 	var result := await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/top_waves", {"p_limit": limit})

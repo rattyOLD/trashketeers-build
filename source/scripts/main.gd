@@ -227,6 +227,10 @@ func _on_window_resized() -> void:
 	await get_tree().create_timer(0.35, true, false, true).timeout
 	if serial != _resize_serial:
 		return
+	# Открылась или закрылась экранная клавиатура, пока вводят текст: меню не перестраиваем, иначе окно
+	# с вводом (логин, пароль, чат) пропадёт вместе с набранным.
+	if get_viewport().gui_get_focus_owner() is LineEdit:
+		return
 	var view := get_viewport().get_visible_rect().size
 	var flipped := Orient.refresh(get_window())
 	if (flipped or view != _menu_view) and _screen is MainMenuUI:

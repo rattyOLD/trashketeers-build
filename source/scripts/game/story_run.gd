@@ -275,7 +275,9 @@ func result_lines(victory: bool) -> PackedStringArray:
 
 func game_over() -> void:
 	finished_mission = true
-	SaveService.clear_story_resume()
+	# Проиграл боссу: чекпоинт у его двери остаётся, в лагере можно продолжить прямо с босса.
+	if not bool(SaveService.story_resume(str(mission.get("id", ""))).get("boss_door", false)):
+		SaveService.clear_story_resume()
 	game.story_result(false, result_lines(false))
 
 
@@ -308,12 +310,13 @@ func try_respawn() -> bool:
 
 
 ## Чекпоинт в сохранение: после вылета, сворачивания (iOS может выгрузить вкладку) или выхода миссия продолжится отсюда.
-func _save_checkpoint() -> void:
+func _save_checkpoint(at: Variant = null, boss_door: bool = false) -> void:
 	if finished_mission or locked or _boss_alive or game == null or game.player == null or game.player.is_dead:
 		return
+	var spot: Vector2 = at if at is Vector2 else checkpoint
 	SaveService.set_story_resume({
-		"mission": str(mission.get("id", "")), "saved": int(Time.get_unix_time_from_system()),
-		"x": checkpoint.x, "y": checkpoint.y, "next": _next, "captive": _next_captive, "zone": zone_index,
+		"mission": str(mission.get("id", "")), "saved": int(Time.get_unix_time_from_system()), "boss_door": boss_door,
+		"x": spot.x, "y": spot.y, "next": _next, "captive": _next_captive, "zone": zone_index,
 		"min_trigger": _min_trigger, "score": score, "lives": lives, "lives_lost": lives_lost, "kills": kills,
 		"rescued": rescued, "parts": 0 if barrel.active else mini(barrel.parts, HeavyBarrel.TOTAL_PARTS - 1),
 		"key": has_key, "crate": _crate_dropped, "secrets": _broken_secrets.duplicate(), "elapsed": game.director.elapsed,
@@ -494,6 +497,9 @@ func _physics_process(delta: float) -> void:
 	elif _next < _encounters.size():
 		var enc: Dictionary = _encounters[_next]
 		if progress >= _trigger_at(enc):
+			if enc.has("boss") and not bool(enc.get("mini", false)):
+				# Чекпоинт «у двери босса»: проигрыш боссу не откатывает на целую зону.
+				_save_checkpoint(game.player.global_position, true)
 			_begin(enc)
 	_update_waypoint()
 	_tick_idle(delta)

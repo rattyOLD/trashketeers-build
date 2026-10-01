@@ -7,7 +7,7 @@ const HEALTH_RPCS := {
 	"my_badge": {}, "my_save": {}, "claim_badge": {"p_secret": "x"}, "inbox": {}, "list_requests": {}, "list_blocks": {}, "unread_total": {},
 	"request_friend": {"p_code": "ZZZZZZ"}, "friend_profile": {"p_code": "ZZZZZZ"}, "send_message": {"p_code": "ZZZZZZ", "p_body": ""},
 	"get_messages": {"p_code": "ZZZZZZ", "p_after": 0}, "dev_stats": {}, "dev_reports": {}, "dev_words": {}, "dev_badge_log": {},
-	"dev_password_log": {}, "dev_accounts": {"p_query": ""}, "dev_errors": {"p_limit": 1}, "dev_error_summary": {},
+	"dev_password_log": {}, "dev_accounts": {"p_query": ""}, "dev_errors": {"p_limit": 1}, "dev_error_summary": {}, "my_devices": {},
 }
 
 var _status: Label
@@ -190,6 +190,11 @@ func _load_all() -> void:
 		_stats_label.text = "Игроков: %s · онлайн за час: %s · за сутки: %s\nДружб: %s · сообщений за сутки: %s (всего %s)\nОткрытых жалоб: %s · в бане чата: %s\nDeV-аккаунтов: %s · Insider: %s" % [
 			s.get("players"), s.get("active_1h"), s.get("active_24h"), s.get("friendships"),
 			s.get("messages_24h"), s.get("messages_all"), s.get("reports_open"), s.get("banned"), s.get("devs"), s.get("insiders")]
+		if s.has("guests"):
+			var last := "ещё не было" if s.get("cleanup_at") == null else "%s, удалено %s" % [str(s.get("cleanup_at")).substr(5, 11).replace("T", " "), s.get("cleanup_removed")]
+			_stats_label.text += "\nГостей: %s · со скрытым входом: %s · с логином: %s\nЧистка пустых гостей: %s" % [s.get("guests"), s.get("guest_logins"), s.get("accounts"), last]
+		else:
+			_stats_label.text += "\nСчётчики гостей появятся после SQL v18."
 		if int(s.get("devs", 1)) > 1:
 			_stats_label.text += "\nDeV-аккаунтов несколько (твои телефон и мини-апка считаются). Если их больше, чем твоих устройств, перевыпусти ссылку и проверь журнал тегов."
 	else:

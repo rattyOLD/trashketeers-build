@@ -51,7 +51,7 @@ func _refresh() -> void:
 	var resume := SaveService.story_resume("m1")
 	_resume.visible = not resume.is_empty()
 	if not resume.is_empty():
-		_resume.text = "ПРОДОЛЖИТЬ: ЗОНА %d · ЖИЗНИ %d" % [int(resume.get("zone", 0)) + 1, int(resume.get("lives", 3))]
+		_resume.text = ("ПРОДОЛЖИТЬ: У ДВЕРИ БОССА · ЖИЗНИ %d" % int(resume.get("lives", 3))) if bool(resume.get("boss_door", false)) else ("ПРОДОЛЖИТЬ: ЗОНА %d · ЖИЗНИ %d" % [int(resume.get("zone", 0)) + 1, int(resume.get("lives", 3))])
 	MenuPopups.clear(_list)
 	for trader_id in TRADERS:
 		_list.add_child(_trader_card(trader_id))

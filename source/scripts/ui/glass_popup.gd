@@ -18,6 +18,7 @@ var _panel: Control
 var _glass: ColorRect
 var _frame: Panel
 var _title: Label
+var _center: CenterContainer
 
 
 static func panel_width() -> float:
@@ -39,6 +40,7 @@ func _init(title_text: String) -> void:
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(center)
+	_center = center
 
 	# Внешний контейнер без отступов: стекло и рамка растягиваются на всю панель,
 	# а содержимое лежит во внутреннем контейнере с полями.
@@ -87,6 +89,8 @@ func _init(title_text: String) -> void:
 	header.add_child(close_button)
 
 	_panel.resized.connect(_sync_glass)
+	# Телефонная клавиатура закрывает низ экрана: пока вводят текст, окно поднимается в верхнюю половину.
+	content.child_entered_tree.connect(_watch_inputs)
 
 
 func open() -> void:
@@ -113,6 +117,27 @@ func close() -> void:
 ## Хук наследника: перерисовать содержимое перед показом.
 func _refresh() -> void:
 	pass
+
+
+func _watch_inputs(node: Node) -> void:
+	if node is LineEdit:
+		var edit := node as LineEdit
+		if not edit.focus_entered.is_connected(_lift):
+			edit.focus_entered.connect(_lift.bind(true))
+			edit.focus_exited.connect(_lift.bind(false))
+	for child in node.get_children():
+		_watch_inputs(child)
+	if not node.child_entered_tree.is_connected(_watch_inputs):
+		node.child_entered_tree.connect(_watch_inputs)
+
+
+func _lift(up: bool) -> void:
+	if not Orient.portrait:
+		return
+	_center.anchor_top = 0.0
+	_center.anchor_bottom = 0.5 if up else 1.0
+	_center.offset_top = 40.0 if up else 0.0
+	_center.offset_bottom = 0.0
 
 
 func _sync_glass() -> void:
