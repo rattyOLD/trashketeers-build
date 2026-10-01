@@ -777,6 +777,7 @@ class Profile:
 	signal achievements_requested
 	signal chronicle_requested
 	signal friends_requested
+	signal account_requested
 
 	const ICON_DIR := "res://assets/ui/icons/"
 	const RANKS := [
@@ -951,10 +952,13 @@ class Profile:
 	func _cloud_block() -> Control:
 		var box := VBoxContainer.new()
 		box.add_theme_constant_override("separation", 10)
+		var account := UiStyle.button("ПОЧТА: %s" % (Cloud.email if Cloud.has_email() else "привязать, чтобы не потерять прогресс"), UiStyle.HOT, 22, Vector2(0, 62))
+		account.pressed.connect(func() -> void: account_requested.emit())
+		box.add_child(account)
 		var status := UiStyle.label("Код восстановления: %s" % (Cloud.recovery_code if not Cloud.recovery_code.is_empty() else "ещё не сохранялось"), 22, UiStyle.GOLD, 6)
 		status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		box.add_child(status)
-		box.add_child(MenuPopups.small_hint("Сохраняется само после забега. Код нужен, чтобы вернуть прогресс на другом устройстве или после очистки браузера. Запиши его."))
+		box.add_child(MenuPopups.small_hint("Прогресс сохраняется сам после забега. Код ниже: запасной способ вернуть его, если почту привязать не вышло."))
 		var save := UiStyle.button("Сохранить в облако сейчас", UiStyle.PANEL_LIGHT, 22, Vector2(0, 56))
 		save.pressed.connect(func() -> void:
 			save.disabled = true

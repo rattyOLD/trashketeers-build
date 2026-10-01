@@ -8,12 +8,14 @@ const URL := "https://ylclwkprhhlzavhahrko.supabase.co"
 const KEY := "sb_publishable_7xeZ6_3lc4Bi44z35wf4BQ__P6Maunz"
 const SESSION_KEY := "trk_cloud_session"
 const RECOVERY_KEY := "trk_recovery_code"
+const EMAIL_KEY := "trk_cloud_email"
 const UPLOAD_DELAY := 8.0
 const TIMEOUT := 10.0
 const EXPIRY_MARGIN := 60
 
 var friend_code := ""
 var recovery_code := ""
+var email := ""
 var online := false
 
 var _uid := ""
@@ -29,6 +31,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_load_session()
 	recovery_code = Platform.storage_get(RECOVERY_KEY)
+	email = Platform.storage_get(EMAIL_KEY)
 	if Platform.is_web:
 		get_tree().create_timer(4.0).timeout.connect(sync_profile)
 
@@ -119,6 +122,79 @@ func top_waves(limit: int = 20) -> Dictionary:
 	if bool(result["ok"]) and result["data"] is Array:
 		items = result["data"] as Array
 	return {"ok": bool(result["ok"]), "items": items}
+
+
+func has_email() -> bool:
+	return not email.is_empty()
+
+
+## Привязка почты к текущему профилю: "sent", "exists", "limit", "invalid" или "offline".
+func link_email(address: String) -> String:
+	var result := await _call(HTTPClient.METHOD_PUT, "/auth/v1/user", {"email": address.strip_edges().to_lower()})
+	return _email_status(result, true)
+
+
+## Подтверждение привязки кодом из письма.
+func confirm_link(address: String, token: String) -> bool:
+	var reply := await _verify("email_change", address, token)
+	if not _store_session(reply):
+		return false
+	_remember_email(address)
+	return true
+
+
+## Вход по почте на новом устройстве: "sent", "not_found", "limit" или "offline".
+func request_login(address: String) -> String:
+	var headers := PackedStringArray(["apikey: " + KEY, "Content-Type: application/json"])
+	var reply := await _raw(HTTPClient.METHOD_POST, URL + "/auth/v1/otp", headers, JSON.stringify({"email": address.strip_edges().to_lower(), "create_user": false}))
+	return _email_status(reply, false)
+
+
+## Подтверждение входа кодом из письма; профиль подменяется на привязанный к почте.
+func confirm_login(address: String, token: String) -> bool:
+	var reply := await _verify("email", address, token)
+	if not _store_session(reply):
+		return false
+	_remember_email(address)
+	friend_code = ""
+	recovery_code = ""
+	Platform.storage_set(RECOVERY_KEY, "")
+	return true
+
+
+## Сохранение, привязанное к текущему профилю (после входа по почте), либо пустая строка.
+func my_save() -> String:
+	var result := await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/my_save", {})
+	if bool(result["ok"]) and result["data"] is String:
+		return str(result["data"])
+	return ""
+
+
+func _verify(kind: String, address: String, token: String) -> Dictionary:
+	var headers := PackedStringArray(["apikey: " + KEY, "Content-Type: application/json"])
+	var body := {"type": kind, "email": address.strip_edges().to_lower(), "token": token.strip_edges()}
+	return await _raw(HTTPClient.METHOD_POST, URL + "/auth/v1/verify", headers, JSON.stringify(body))
+
+
+func _remember_email(address: String) -> void:
+	email = address.strip_edges().to_lower()
+	Platform.storage_set(EMAIL_KEY, email)
+
+
+func _email_status(reply: Dictionary, linking: bool) -> String:
+	if bool(reply["ok"]):
+		return "sent"
+	var code := int(reply["code"])
+	if code == 0:
+		return "offline"
+	if code == 429:
+		return "limit"
+	var info := str(reply["data"]).to_lower()
+	if linking and (info.contains("exists") or info.contains("registered")):
+		return "exists"
+	if not linking and (code == 422 or code == 400):
+		return "not_found"
+	return "invalid"
 
 
 func send_vote(line_id: String, value: int, who: String, line_text: String) -> void:

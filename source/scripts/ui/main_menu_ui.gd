@@ -57,6 +57,7 @@ var _changelog: ChangelogPopup
 var _armory: MenuPopups.Armory
 var _upgrades: MenuPopups.Upgrades
 var _camp: CampPopup
+var _account: AccountPopup
 var _achievements: MenuPopups.Achievements
 var _from_profile := false
 var _chronicle: ChroniclePopup
@@ -74,6 +75,11 @@ func _ready() -> void:
 	_build()
 	SoundManager.play_music(&"menu")
 	SoundManager.stop_ambient()
+	if int(SaveService.data["runs"]) >= 1 and not Cloud.has_email() and not bool(SaveService.data.get("acct_hint", false)) and Platform.is_web:
+		SaveService.set_flag("acct_hint", true)
+		get_tree().create_timer(1.6).timeout.connect(func() -> void:
+			if is_instance_valid(_account):
+				_account.open())
 	if open_upgrades_next:
 		open_upgrades_next = false
 		_upgrades.open.call_deferred()
@@ -97,6 +103,7 @@ func _build() -> void:
 	_armory = MenuPopups.Armory.new()
 	_armory.weapon_changed.connect(_on_weapon_changed)
 	_upgrades = MenuPopups.Upgrades.new()
+	_account = AccountPopup.new()
 	_camp = CampPopup.new()
 	_camp.departed.connect(func() -> void: story_requested.emit(SaveService.get_selected_weapon()))
 	_achievements = MenuPopups.Achievements.new()
@@ -105,6 +112,9 @@ func _build() -> void:
 		_profile.close()
 		_from_profile = true
 		_achievements.open())
+	_profile.account_requested.connect(func() -> void:
+		_profile.close()
+		_account.open())
 	_chronicle = ChroniclePopup.new()
 	_profile.chronicle_requested.connect(func() -> void:
 		_profile.close()
@@ -136,7 +146,7 @@ func _build() -> void:
 	_settings.editor_requested.connect(func() -> void: _editor.open())
 	for popup in [_achievements, _chronicle, _friends]:
 		popup.closed.connect(_back_to_profile.bind(popup))
-	for popup in [_settings, _shop, _skins, _armory, _upgrades, _camp, _achievements, _profile, _chronicle, _friends, _tester, _chests, _changelog, _daily, _currency, _vip, _pass, _odds, _mode_intro]:
+	for popup in [_settings, _shop, _skins, _armory, _upgrades, _camp, _account, _achievements, _profile, _chronicle, _friends, _tester, _chests, _changelog, _daily, _currency, _vip, _pass, _odds, _mode_intro]:
 		add_child(popup)
 		popup.closed.connect(_refresh)
 	_refresh()

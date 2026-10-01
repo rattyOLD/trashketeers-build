@@ -46,6 +46,7 @@ const DEFAULTS := {
 	"arsenal": {},
 	"perks": {},
 	"line_votes": {},
+	"acct_hint": false,
 	"camp_pack": {},
 	"line_votes_on": true,
 	"slot3": false,
