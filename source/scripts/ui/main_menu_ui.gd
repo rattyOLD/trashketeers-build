@@ -75,7 +75,7 @@ func _ready() -> void:
 	_build()
 	SoundManager.play_music(&"menu")
 	SoundManager.stop_ambient()
-	if int(SaveService.data["runs"]) >= 1 and not Cloud.has_email() and not bool(SaveService.data.get("acct_hint", false)) and Platform.is_web:
+	if Cloud.EMAIL_LOGIN and int(SaveService.data["runs"]) >= 1 and not Cloud.has_email() and not bool(SaveService.data.get("acct_hint", false)) and Platform.is_web:
 		SaveService.set_flag("acct_hint", true)
 		get_tree().create_timer(1.6).timeout.connect(func() -> void:
 			if is_instance_valid(_account):

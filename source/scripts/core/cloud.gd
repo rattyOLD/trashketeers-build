@@ -4,6 +4,8 @@ extends Node
 
 signal profile_synced
 
+## Вход по почте скрыт, пока в Supabase не настроены SMTP и шаблоны писем.
+const EMAIL_LOGIN := false
 const URL := "https://ylclwkprhhlzavhahrko.supabase.co"
 const KEY := "sb_publishable_7xeZ6_3lc4Bi44z35wf4BQ__P6Maunz"
 const SESSION_KEY := "trk_cloud_session"

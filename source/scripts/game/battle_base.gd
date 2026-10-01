@@ -238,7 +238,7 @@ func _perf_context() -> String:
 
 
 ## Динамическое качество: если 5 секунд подряд средний FPS ниже порога — упрощаем эффекты, затем снижаем разрешение холста.
-## Изменения действуют только в этом бою; настройки игрока не трогаем.
+## Изменения действуют только в этом бою; настройки игрока не трогаем. На «Красиво» разрешение и FPS не снижаются: игрок выбрал максимум сам.
 func _adapt_quality(delta: float) -> void:
 	if _perf_age < 8.0 or _adapt_level >= ADAPT_MAX:
 		return
@@ -252,6 +252,8 @@ func _adapt_quality(delta: float) -> void:
 	if fps >= (ADAPT_FPS if _adapt_level < 2 else ADAPT_HARD_FPS):
 		return
 	_adapt_level += 1
+	if SaveService.get_quality() >= 2 and _adapt_level != 1:
+		return
 	match _adapt_level:
 		1:
 			_fx_scale = 0.5
