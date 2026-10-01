@@ -96,7 +96,11 @@ func _sync_badge() -> void:
 	var level := int(reply["data"])
 	var secret := Platform.storage_get(BADGE_SECRET_KEY)
 	if not secret.is_empty() and Platform.storage_get(BADGE_UID_KEY) != _uid:
-		level = await claim_badge(secret, false)
+		var again := await _claim(secret, false)
+		if again >= 0:
+			level = again
+		else:
+			Platform.storage_set(BADGE_UID_KEY, _uid)
 	SaveService.set_badge_level(level)
 
 
@@ -104,6 +108,11 @@ func _sync_badge() -> void:
 func claim_badge(secret: String, remember: bool = true) -> int:
 	if not await sync_profile():
 		return -1
+	return await _claim(secret, remember)
+
+
+## Сам запрос тега без синхронизации профиля (её вызывает sync_profile, иначе вышла бы бесконечная петля).
+func _claim(secret: String, remember: bool) -> int:
 	var reply := await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/claim_badge", {"p_secret": secret})
 	var level := int(reply["data"]) if bool(reply["ok"]) and (reply["data"] is int or reply["data"] is float) else -1
 	if level >= 0:
@@ -335,6 +344,8 @@ func _email_status(reply: Dictionary, linking: bool) -> String:
 func _rpc(name: String, body: Dictionary) -> Dictionary:
 	var fresh := has_code() and Time.get_ticks_msec() / 1000 - _last_sync < 90
 	if not fresh and not await sync_profile():
+		if last_error.is_empty():
+			last_error = "профиль не синхронизировался (%s)" % _raw_note
 		return {"ok": false, "code": 0, "data": null}
 	return await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/" + name, body)
 
