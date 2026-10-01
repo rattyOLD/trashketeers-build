@@ -90,6 +90,7 @@ func _init(title_text: String) -> void:
 
 
 func open() -> void:
+	Platform.trail("окно " + _title.text)
 	_refresh()
 	visible = true
 	_panel.pivot_offset = _panel.size * 0.5

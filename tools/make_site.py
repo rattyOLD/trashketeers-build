@@ -82,7 +82,16 @@ except Exception:
 build_label = "%s.%d" % (base_ver, number)
 build_time = (datetime.datetime.utcnow() + datetime.timedelta(hours=7)).strftime("%d.%m %H:%M")
 page = page.replace("__BUILD_LABEL__", build_label).replace("__BUILD_TIME__", build_time)
-open(os.path.join(site, "version.json"), "w").write('{"build":"%s","label":"%s","time":"%s"}' % (build_id, build_label, build_time))
+# min_build: сборки старше этой больше не запускаются (полноэкранная плашка «Обнови игру»).
+# Поднимается, когда важное исправление нельзя оставить старым клиентам: FORCE_UPDATE=1 bash tools/build_main.sh
+min_build = "0"
+try:
+    min_build = str(json.load(open("/home/claude/trashketeers-build/version.json")).get("min_build", "0"))
+except Exception:
+    pass
+if os.environ.get("FORCE_UPDATE") == "1":
+    min_build = build_id
+open(os.path.join(site, "version.json"), "w").write(json.dumps({"build": build_id, "label": build_label, "time": build_time, "min_build": min_build}))
 page = page.replace("__PCK_SIZE__", str(len(pck_raw)))
 page = page.replace("__WASM_SIZE__", str(len(raw)))
 open(os.path.join(site, "index.html"), "w", encoding="utf-8").write(page)

@@ -399,7 +399,7 @@ html, body {
 </script>
 
 <script>
-window.__trash_build = {label: 'v34.191', time: '02.10 00:15'};
+window.__trash_build = {label: 'v34.192', time: '02.10 00:25'};
 document.getElementById('ver').textContent = 'Версия ' + window.__trash_build.label + ' · сборка от ' + window.__trash_build.time;
 </script>
 <script>
@@ -414,22 +414,31 @@ window.__trash_install = function () {
 if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(function () {}); }
 </script>
 <script>
-/* Запоминаем код восстановления в адресе и в манифесте: iOS кладёт в «Домой» именно текущий адрес,
-   и мини-апка стартует уже со ссылкой-входом (игра сама вернёт аккаунт, если хранилище пустое). */
+/* Адрес, с которым iOS кладёт игру на экран «Домой». Аккаунт с логином: мини-апка открывается с окном входа
+   (?login=имя), это тот же аккаунт на втором устройстве, ничего не переносится. Гость без логина: код восстановления
+   (?restore=) — единственный способ не потерять прогресс, но он ПЕРЕНОСИТ гостя на мини-апку. */
 (function () {
 	var baseManifest = document.querySelector('link[rel="manifest"]');
-	var lastCode = '';
+	var lastKey = '';
 	function sync() {
-		var code = '';
-		try { code = window.localStorage.getItem('trk_recovery_code') || ''; } catch (e) { return; }
-		if (!code || code === lastCode || !/^[A-Za-z0-9]{8,24}$/.test(code)) { return; }
-		lastCode = code;
+		var code = '', login = '';
+		try {
+			code = window.localStorage.getItem('trk_recovery_code') || '';
+			login = window.localStorage.getItem('trk_cloud_email') || '';
+		} catch (e) { return; }
+		var key = '', value = '';
+		if (/^[a-z0-9_]{3,20}$/.test(login)) { key = 'login'; value = login; }
+		else if (/^[A-Za-z0-9]{8,24}$/.test(code)) { key = 'restore'; value = code; }
+		if (!key || key + value === lastKey) { return; }
+		lastKey = key + value;
 		var params = new URLSearchParams(location.search);
-		params.set('restore', code);
+		params.delete('restore');
+		params.delete('login');
+		params.set(key, value);
 		try { history.replaceState(null, '', location.pathname + '?' + params.toString() + location.hash); } catch (e) {}
 		if (baseManifest) {
 			try {
-				var m = {name: 'Trash Squad', short_name: 'Trash Squad', start_url: location.pathname + '?restore=' + code, scope: location.pathname,
+				var m = {name: 'Trash Squad', short_name: 'Trash Squad', start_url: location.pathname + '?' + key + '=' + encodeURIComponent(value), scope: location.pathname,
 					display: 'fullscreen', orientation: 'portrait', background_color: '#0d0a1c', theme_color: '#0d0a1c',
 					icons: [{src: new URL('icon192.png', location.href).href, sizes: '192x192', type: 'image/png'}, {src: new URL('icon512.png', location.href).href, sizes: '512x512', type: 'image/png'}]};
 				baseManifest.href = URL.createObjectURL(new Blob([JSON.stringify(m)], {type: 'application/manifest+json'}));
@@ -452,7 +461,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	// index.wasm / index.pck и отдаём ему уже скачанные и распакованные байты.
 	const FILES = {
 		wasm: { parts: [{url:"raccoon.core.0.wasm?h=4cbe7e5f476b",bytes:5221065},{url:"raccoon.core.1.wasm?h=a8fbc151befa",bytes:4165384}] },
-		pck: { parts: [{url:"raccoon.pack.0.wasm?h=4486ab783652",bytes:11992485},{url:"raccoon.pack.1.wasm?h=a2333150a9fb",bytes:12547342},{url:"raccoon.pack.2.wasm?h=c4b37c89fd15",bytes:3980711}] },
+		pck: { parts: [{url:"raccoon.pack.0.wasm?h=00926f8338f5",bytes:11992503},{url:"raccoon.pack.1.wasm?h=8d4419764fe3",bytes:12547350},{url:"raccoon.pack.2.wasm?h=1f4c8d338a1b",bytes:3985692}] },
 	};
 	const GODOT_CONFIG = {
 		args: [],
@@ -460,7 +469,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 		ensureCrossOriginIsolationHeaders: false,
 		executable: 'index',
 		experimentalVK: false,
-		fileSizes: { 'index.pck': 29464736, 'index.wasm': 43699190 },
+		fileSizes: { 'index.pck': 29470640, 'index.wasm': 43699190 },
 		focusCanvas: true,
 		gdextensionLibs: [],
 		onPrint: function () {
@@ -485,7 +494,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 
 	// Адрес сбора отчётов о вылетах (Google Apps Script / Supabase и т.п.); пусто — отчёты не отправляются.
 	const REPORT_URL = 'https://script.google.com/macros/s/AKfycbxVyy-SnRANW0Im-1Blne2TcUbca93WqzyBulpADwWWD7YH6x3KIygBYImTe8VfP5pp/exec';
-	const BUILD_ID_REPORT = '1790874907';
+	const BUILD_ID_REPORT = '1790875548';
 	const SESSION_ID = Math.random().toString(36).slice(2, 8);
 	const SESSION_START = Date.now();
 	const REPORT_CAP = 250;
@@ -616,8 +625,19 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 			full += '\nENV ' + JSON.stringify(env);
 			if (heavy && kind !== 'session_start') {
 				full += '\nEVENTS ' + eventLog.slice(-25).join(' ; ') + '\nCONSOLE ' + logTail.slice(-15).join(' ; ');
+				let where = '';
+				try { where = window.localStorage.getItem('__trash_ctx') || ''; } catch (e) {}
+				full += '\nWHERE ' + where.slice(0, 300) + '\nTRAIL ' + (window.__trash_trail || []).join(' ; ');
 			}
 			full = full.slice(0, 8000);
+			// Копия ошибки для журнала в базе (вкладка «Ошибки» у DeV). Игра отправит её сама, даже в следующий запуск.
+			if (kind === 'error' || kind === 'webgl_context_lost' || kind === 'prev_session_died' || kind === 'unclean_exit') {
+				try {
+					const q = JSON.parse(window.localStorage.getItem('__trash_errq') || '[]');
+					q.push(kind + ': ' + full.slice(0, 3500));
+					window.localStorage.setItem('__trash_errq', JSON.stringify(q.slice(-20)));
+				} catch (e) {}
+			}
 			if (extra) {
 				full += '\nSHOT ' + String(extra).slice(0, 30000);
 			}
@@ -691,9 +711,32 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	window.trkReport('session_start', gpuInfo() + ' | ' + navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + (window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio) + ' | screen ' + screen.width + 'x' + screen.height + ' | cores ' + (navigator.hardwareConcurrency || '?'));
 
 	// Вкладка могла висеть со старой версией: при возврате в неё сверяем номер сборки и предлагаем обновиться.
-	const BUILD_ID = '1790874907';
+	const BUILD_ID = '1790875548';
+	// Важное обновление: старая сборка дальше не работает, иначе аккаунты и сохранения ломаются старым кодом.
+	function blockOldBuild(v) {
+		const wall = document.createElement('div');
+		wall.id = 'mustupdate';
+		wall.style.cssText = 'position:fixed;inset:0;z-index:99;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;background:rgba(10,6,24,.96);color:#fff;font:600 17px system-ui,sans-serif;text-align:center';
+		const title = document.createElement('div');
+		title.style.cssText = 'font:800 26px system-ui,sans-serif;color:#ff2ea6';
+		title.textContent = 'Вышло важное обновление';
+		const text = document.createElement('div');
+		text.style.cssText = 'max-width:420px;line-height:1.4;color:#c9c3e6';
+		text.textContent = 'Эта версия игры устарела и больше не запускается: так твой аккаунт и прогресс точно не пострадают. Обновление займёт пару секунд, енот подождёт.';
+		const btn = document.createElement('button');
+		btn.style.cssText = 'padding:16px 34px;border:0;border-radius:14px;background:#ff2ea6;color:#fff;font:800 20px system-ui,sans-serif';
+		btn.textContent = 'ОБНОВИТЬ ' + (v.label || '');
+		btn.addEventListener('click', function () { window.location.replace(window.location.pathname + '?v=' + v.build); });
+		wall.appendChild(title); wall.appendChild(text); wall.appendChild(btn);
+		document.body.appendChild(wall);
+		try { const c = document.getElementById('canvas'); if (c) { c.style.pointerEvents = 'none'; } } catch (e) {}
+	}
 	function checkVersion() {
 		fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (v) {
+			if (v && v.min_build && Number(BUILD_ID) < Number(v.min_build) && !document.getElementById('mustupdate')) {
+				blockOldBuild(v);
+				return;
+			}
 			if (v && v.build && v.build !== BUILD_ID && !document.getElementById('newver')) {
 				const bar = document.createElement('div');
 				bar.id = 'newver';

@@ -210,6 +210,12 @@ func set_context(text: String) -> void:
 		_js("window.localStorage.setItem('__trash_ctx', %s);" % JSON.stringify(text))
 
 
+## Хлебные крошки для отчётов об ошибках: последние 20 действий (экран, окно, запрос к серверу).
+func trail(text: String) -> void:
+	if is_web:
+		_js("var t = window.__trash_trail = window.__trash_trail || []; t.push(%s); if (t.length > 20) { t.shift(); }" % JSON.stringify("%ds %s" % [Time.get_ticks_msec() / 1000, text.left(80)]))
+
+
 func last_context() -> String:
 	if not is_web:
 		return ""

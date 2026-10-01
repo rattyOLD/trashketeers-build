@@ -7,7 +7,7 @@ const HEALTH_RPCS := {
 	"my_badge": {}, "my_save": {}, "claim_badge": {"p_secret": "x"}, "inbox": {}, "list_requests": {}, "list_blocks": {}, "unread_total": {},
 	"request_friend": {"p_code": "ZZZZZZ"}, "friend_profile": {"p_code": "ZZZZZZ"}, "send_message": {"p_code": "ZZZZZZ", "p_body": ""},
 	"get_messages": {"p_code": "ZZZZZZ", "p_after": 0}, "dev_stats": {}, "dev_reports": {}, "dev_words": {}, "dev_badge_log": {},
-	"dev_password_log": {}, "dev_accounts": {"p_query": ""},
+	"dev_password_log": {}, "dev_accounts": {"p_query": ""}, "dev_errors": {"p_limit": 1}, "dev_error_summary": {},
 }
 
 var _status: Label
@@ -22,6 +22,7 @@ var _reset_login: LineEdit
 var _reset_pass: LineEdit
 var _reset_log: Label
 var _health_label: Label
+var _errors_label: Label
 var _edit: LineEdit
 var _word_edit: LineEdit
 
@@ -51,6 +52,21 @@ func _refresh() -> void:
 	_list.add_child(health)
 	_health_label = _wrap("")
 	_list.add_child(_health_label)
+
+	_list.add_child(UiStyle.label("ОШИБКИ ИГРОКОВ", 22, UiStyle.TEXT_DIM, 5))
+	var erow := HBoxContainer.new()
+	erow.add_theme_constant_override("separation", 8)
+	var summary := UiStyle.button("Сводка за сутки", UiStyle.PANEL_LIGHT, 20, Vector2(0, 54))
+	summary.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	summary.pressed.connect(_load_error_summary)
+	erow.add_child(summary)
+	var recent := UiStyle.button("Последние 25", UiStyle.PANEL_LIGHT, 20, Vector2(0, 54))
+	recent.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	recent.pressed.connect(_load_errors)
+	erow.add_child(recent)
+	_list.add_child(erow)
+	_errors_label = _wrap("Игра сама присылает сюда ошибки, без Excel. Нужен SQL v15.")
+	_list.add_child(_errors_label)
 
 	_list.add_child(UiStyle.label("ССЫЛКИ ДЛЯ ТЕГОВ", 22, UiStyle.TEXT_DIM, 5))
 	_list.add_child(_link_button("Новая ссылка DeV (старая умрёт)", 0, "dev"))
@@ -234,6 +250,39 @@ func _load_reset_log() -> void:
 		var d := row as Dictionary
 		lines.append("%s · %s · %s" % [str(d.get("at", "")).substr(5, 11).replace("T", " "), d.get("login"), d.get("result")])
 	_reset_log.text = "\n".join(lines) if not lines.is_empty() else "Сбросов не было"
+
+
+func _load_error_summary() -> void:
+	_errors_label.text = "Загружаю..."
+	var r := await Cloud.dev_call("dev_error_summary")
+	if not is_instance_valid(_errors_label):
+		return
+	if int(r["code"]) == 404:
+		_errors_label.text = "Нужен SQL v15 (schema_v15_client_errors.sql)"
+		return
+	var lines: Array[String] = []
+	for row: Variant in Cloud._rows(r):
+		var d := row as Dictionary
+		lines.append("×%d (игроков %d) · %s\n   %s" % [int(d.get("hits", 0)), int(d.get("players", 0)), d.get("builds"), d.get("head")])
+	_errors_label.text = "\n".join(lines) if not lines.is_empty() else ("За сутки ошибок нет. Енот доволен." if bool(r["ok"]) else "Не загрузилось: " + Cloud.last_error)
+
+
+func _load_errors() -> void:
+	_errors_label.text = "Загружаю..."
+	var r := await Cloud.dev_call("dev_errors", {"p_limit": 25, "p_build": ""})
+	if not is_instance_valid(_errors_label):
+		return
+	if int(r["code"]) == 404:
+		_errors_label.text = "Нужен SQL v15 (schema_v15_client_errors.sql)"
+		return
+	var lines: Array[String] = []
+	for row: Variant in Cloud._rows(r):
+		var d := row as Dictionary
+		var body := str(d.get("body", ""))
+		var trail := body.get_slice("TRAIL ", 1).left(220) if body.contains("TRAIL ") else ""
+		lines.append("%s · %s · %s [%s]\n   %s%s" % [str(d.get("created_at", "")).substr(5, 11).replace("T", " "), d.get("build"),
+			d.get("nickname"), d.get("friend_code"), body.get_slice("\n", 0).left(160), ("\n   путь: " + trail) if not trail.is_empty() else ""])
+	_errors_label.text = "\n".join(lines) if not lines.is_empty() else ("Ошибок нет." if bool(r["ok"]) else "Не загрузилось: " + Cloud.last_error)
 
 
 func _load_log() -> void:

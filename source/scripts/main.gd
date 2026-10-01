@@ -40,6 +40,8 @@ const RAID_RESOURCES := [
 
 var _debug_hash := ""
 var _screen: Node
+var _pending_login := ""
+var _moved_prompted := false
 var _resize_serial := 0
 var _menu_view := Vector2.ZERO
 var _loading: LoadingScreen
@@ -104,9 +106,16 @@ func _accept_card_link() -> void:
 	var restore := Platform.consume_url_param("restore")
 	if not restore.is_empty() and restore.strip_edges().to_upper() == Platform.storage_get(Cloud.RECOVERY_KEY).to_upper():
 		restore = ""
+	var login := Platform.consume_url_param("login").strip_edges().to_lower()
+	if not login.is_empty() and login != Cloud.email:
+		_ask_login(login)
+		return
 	if not restore.is_empty():
 		_toast_note("Возвращаю аккаунт...")
 		var text := await Cloud.restore_save(restore)
+		if text.begins_with("ACCOUNT:"):
+			_ask_login(text.trim_prefix("ACCOUNT:"))
+			return
 		if not text.is_empty() and SaveService.import_code(text):
 			Cloud.recovery_code = restore
 			Platform.storage_set(Cloud.RECOVERY_KEY, restore)
@@ -230,13 +239,18 @@ func _show_menu() -> void:
 func _maybe_ask_returning(menu: MainMenuUI) -> void:
 	if not Cloud.session_lost_changed.is_connected(_on_session_lost):
 		Cloud.session_lost_changed.connect(_on_session_lost)
-	if Cloud.session_lost:
+	if Cloud.session_lost or Cloud.moved_away:
 		_on_session_lost()
+		return
+	if not _pending_login.is_empty() and not Cloud.has_email():
+		var login := _pending_login
+		_pending_login = ""
+		_ask_login(login)
 		return
 	if not Cloud.waiting_choice or not _debug_hash.is_empty():
 		return
 	get_tree().create_timer(1.0).timeout.connect(func() -> void:
-		if not is_instance_valid(menu) or not Cloud.waiting_choice:
+		if not is_instance_valid(menu) or not Cloud.waiting_choice or menu._account.visible:
 			return
 		menu._account.intro = "Уже играл в Trash Squad? Введи логин и пароль и жми «ВОЙТИ», прогресс вернётся. Новенький? Закрывай окно и беги на помойку, аккаунт заведёшь потом."
 		menu._account.closed.connect(func() -> void:
@@ -245,12 +259,33 @@ func _maybe_ask_returning(menu: MainMenuUI) -> void:
 		menu._account.open())
 
 
-## Сессия аккаунта слетела (сервер её больше не принимает): просим войти заново, прогресс на устройстве не трогаем.
+## Сессия аккаунта слетела (сервер её больше не принимает) или аккаунт переехал на другое устройство:
+## просим войти, нового енота не заводим, прогресс на устройстве не трогаем.
 func _on_session_lost() -> void:
-	if not Cloud.session_lost or not _screen is MainMenuUI:
+	if not _screen is MainMenuUI:
+		return
+	if Cloud.session_lost:
+		_ask_login(Cloud.email, "Сервер забыл твою сессию (так бывает после долгого перерыва). Войди логином и паролем, прогресс и друзья на месте.")
+	elif Cloud.moved_away and not _moved_prompted:
+		_moved_prompted = true
+		_ask_login("", "Этот енот переехал на другое устройство (например, в приложение с экрана «Домой») и живёт теперь там. Чтобы играть одним аккаунтом и тут, и там, заведи логин и пароль в приложении и войди ими здесь.")
+
+
+## Окно входа с подставленным логином: это тот же аккаунт на втором устройстве, ничего не переносится.
+func _ask_login(login: String, intro: String = "") -> void:
+	if not _screen is MainMenuUI:
+		_pending_login = login
 		return
 	var menu := _screen as MainMenuUI
-	menu._account.intro = "Сервер забыл твою сессию (так бывает после долгого перерыва или входа на другом устройстве). Войди логином и паролем, прогресс и друзья на месте."
+	menu._account.intro = intro if not intro.is_empty() else "Это твой аккаунт «%s». Введи пароль и жми «ВОЙТИ»: прогресс, друзья и тег подтянутся сами, и браузер с приложением будут одним аккаунтом." % login
+	menu._account.prefill_login = login
+	if menu._account.visible:
+		menu._account._refresh()
+		return
+	menu._account.closed.connect(func() -> void:
+		menu._account.intro = ""
+		menu._account.prefill_login = ""
+		Cloud.start_guest(), CONNECT_ONE_SHOT)
 	menu._account.open()
 
 
@@ -332,6 +367,7 @@ func _with_loading(resources: Array, build: Callable) -> void:
 
 
 func _swap_screen(next: Node) -> void:
+	Platform.trail("экран " + next.get_class() + ("/" + str((next.get_script() as Script).get_global_name()) if next.get_script() != null else ""))
 	get_tree().paused = false
 	if _screen != null:
 		# remove_child сразу вызывает _exit_tree старого экрана (бой чистит BulletPool)

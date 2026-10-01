@@ -36,6 +36,8 @@ var _raw_note := ""
 ## Чистое устройство: гостевой аккаунт не создаём, пока игрок не ответит «Уже играл? Войди» (или не закроет окно).
 var waiting_choice := false
 var session_lost := false
+## Аккаунт этого устройства перенесли на другое (мини-апка, новый телефон): здесь он больше не активен.
+var moved_away := false
 var _restore_after_signup := ""
 var _last_sync := 0
 var unread := 0
@@ -49,6 +51,7 @@ var _profile_busy := false
 var _upload_pending := false
 var _last_backup := ""
 var _backup_busy := false
+var _errors_busy := false
 var _backup_soon := false
 var _last_score := -1
 var _hidden_callback: JavaScriptObject
@@ -75,6 +78,11 @@ func _ready() -> void:
 		add_child(backup)
 		backup.start()
 		SaveService.changed.connect(_on_save_changed)
+		var errors := Timer.new()
+		errors.wait_time = 30.0
+		errors.timeout.connect(_flush_errors)
+		add_child(errors)
+		errors.start()
 		_hidden_callback = JavaScriptBridge.create_callback(func(_args: Array) -> void:
 			if bool(JavaScriptBridge.get_interface("document").hidden):
 				_auto_backup())
@@ -107,6 +115,12 @@ func sync_profile() -> bool:
 		var rows: Variant = result["data"]
 		if rows is Array and (rows as Array).size() > 0 and (rows as Array)[0] is Dictionary:
 			friend_code = str(((rows as Array)[0] as Dictionary).get("friend_code", ""))
+			if friend_code == "MOVED":
+				# Этот гость переехал на другое устройство (по коду восстановления). Нового енота здесь не заводим.
+				friend_code = ""
+				if not moved_away:
+					moved_away = true
+					session_lost_changed.emit()
 			_last_sync = Time.get_ticks_msec() / 1000
 			profile_synced.emit()
 	if has_code():
@@ -196,6 +210,26 @@ func _auto_backup() -> void:
 	_backup_busy = false
 
 
+## Ошибки игры из очереди браузера -> журнал в базе (вкладка «Ошибки» у DeV). Не отправилось — попробуем позже.
+func _flush_errors() -> void:
+	if not has_code() or _errors_busy:
+		return
+	var raw: Variant = Platform._js("var q = window.localStorage.getItem('__trash_errq') || ''; window.localStorage.removeItem('__trash_errq'); return q;")
+	var queue: Variant = _parse_or_null(str(raw)) if raw is String else null
+	if not queue is Array or (queue as Array).is_empty():
+		return
+	_errors_busy = true
+	var left: Array = (queue as Array).duplicate()
+	while not left.is_empty():
+		var reply := await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/log_error", {"p_build": Platform.build_label(), "p_device": Platform.device_info().left(120), "p_body": str(left[0])})
+		if not bool(reply["ok"]):
+			if int(reply["code"]) != 404:
+				Platform._js("var q = JSON.parse(window.localStorage.getItem('__trash_errq') || '[]'); window.localStorage.setItem('__trash_errq', JSON.stringify(%s.concat(q).slice(-20)));" % JSON.stringify(left))
+			break
+		left.pop_front()
+	_errors_busy = false
+
+
 ## Отпечаток сохранения без отметки времени: иначе каждая минута выглядела бы как «изменения».
 func _content_hash() -> String:
 	var copy: Dictionary = SaveService.data.duplicate()
@@ -262,7 +296,11 @@ func restore_save(code: String) -> String:
 		return ""
 	var result := await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/restore_save", {"p_code": code})
 	if bool(result["ok"]) and result["data"] is String and not str(result["data"]).is_empty():
+		# «ACCOUNT:логин» — код от аккаунта с логином: его не переносят, на этом устройстве в него входят.
+		if str(result["data"]).begins_with("ACCOUNT:"):
+			return str(result["data"])
 		friend_code = ""
+		moved_away = false
 		await sync_profile()
 		return str(result["data"])
 	return ""
@@ -333,6 +371,7 @@ func login_account(login: String, password: String) -> String:
 		return "wrong"
 	_remember_email(name)
 	friend_code = ""
+	moved_away = false
 	recovery_code = ""
 	Platform.storage_set(RECOVERY_KEY, "")
 	return "ok"
@@ -526,9 +565,11 @@ func _raw(method: int, url: String, headers: PackedStringArray, body: String) ->
 	request.queue_free()
 	if int(reply[0]) != HTTPRequest.RESULT_SUCCESS:
 		_raw_note = "нет ответа: %s" % NET_ERRORS.get(int(reply[0]), "код %d" % int(reply[0]))
+		Platform.trail("сеть сбой %s: %s" % [url.get_slice("/", 6).get_slice("?", 0), _raw_note])
 		return {"ok": false, "code": 0, "data": null}
 	var code := int(reply[1])
 	_raw_note = "HTTP %d" % code
+	Platform.trail("сеть %s -> %d" % [url.get_slice("/", 6).get_slice("?", 0) if url.contains("/rpc/") else url.get_slice(".co", 1).get_slice("?", 0), code])
 	var text := (reply[3] as PackedByteArray).get_string_from_utf8()
 	var parsed: Variant = JSON.parse_string(text) if not text.is_empty() else null
 	return {"ok": code >= 200 and code < 300, "code": code, "data": parsed}
@@ -581,7 +622,7 @@ func _ensure_session() -> bool:
 ## Гость потерял сессию: новая сессия забирает его прежний профиль, ID, друзей и облако по коду восстановления.
 func _auto_restore(code: String) -> void:
 	var result := await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/restore_save", {"p_code": code})
-	if bool(result["ok"]) and result["data"] is String and not str(result["data"]).is_empty():
+	if bool(result["ok"]) and result["data"] is String and not str(result["data"]).is_empty() and not str(result["data"]).begins_with("ACCOUNT:"):
 		friend_code = ""
 		recovery_code = code
 		Platform.storage_set(RECOVERY_KEY, code)

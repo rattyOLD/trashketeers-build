@@ -850,7 +850,7 @@ class Profile:
 
 	## Вход в аккаунт по логину и паролю: единственный способ ничего не терять при очистке браузера.
 	func _account_bar() -> Control:
-		var text := "АККАУНТ: %s ✓" % Cloud.email if Cloud.has_email() else "⚠ АККАУНТ НЕ СОЗДАН\nпрогресс может пропасть. Нажми и придумай логин и пароль"
+		var text := "АККАУНТ: %s" % Cloud.email if Cloud.has_email() else "АККАУНТ НЕ СОЗДАН!\nпрогресс может пропасть. Нажми и придумай логин и пароль"
 		var b := UiStyle.button(text, Color("#2fae5f") if Cloud.has_email() else Color("#d63a3a"), 24, Vector2(0, 84))
 		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		b.pressed.connect(func() -> void: account_requested.emit())
@@ -1042,7 +1042,9 @@ class Profile:
 			var saved := await Cloud.restore_save(edit.text)
 			if not is_instance_valid(restore):
 				return
-			if not saved.is_empty() and SaveService.import_code(saved):
+			if saved.begins_with("ACCOUNT:"):
+				restore.text = "ВОЙДИ ЛОГИНОМ «%s»" % saved.trim_prefix("ACCOUNT:")
+			elif not saved.is_empty() and SaveService.import_code(saved):
 				restore.text = "ГОТОВО"
 				Cloud.recovery_code = edit.text.strip_edges().to_upper()
 				Platform.storage_set(Cloud.RECOVERY_KEY, Cloud.recovery_code)

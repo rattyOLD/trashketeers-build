@@ -1,4 +1,4 @@
--- Trash Squad: ПОЛНАЯ настройка сервера одним файлом (все schema*.sql по порядку, v1..v14).
+-- Trash Squad: ПОЛНАЯ настройка сервера одним файлом (все schema*.sql по порядку, v1..v16).
 -- Для нового проекта Supabase: SQL Editor -> вставить целиком -> Run. Повторный запуск безопасен:
 -- таблицы и данные не трогаются, функции пересоздаются, действующие DeV/Insider-ссылки НЕ сбрасываются.
 -- Также нужно: Authentication -> Sign In / Providers -> включить Anonymous sign-ins и Email, выключить Confirm email.
@@ -1034,6 +1034,180 @@ $fn$;
 
 revoke all on function public.my_save() from public, anon;
 grant execute on function public.my_save() to authenticated;
+
+notify pgrst, 'reload schema';
+
+-- ======================== schema_v15_client_errors.sql ========================
+-- Trash Squad v15: журнал ошибок игры прямо в базе (вкладка «Ошибки» в панели DeV, без выгрузки Excel).
+-- Игра сама присылает ошибки (не чаще 30 в час с одного игрока), DeV читает последние и сводку по типам.
+-- Запустить один раз (повтор безопасен).
+
+create table if not exists public.client_errors (
+  id bigserial primary key,
+  created_at timestamptz not null default now(),
+  user_id uuid,
+  friend_code text,
+  build text not null default '',
+  device text not null default '',
+  body text not null
+);
+create index if not exists client_errors_time_idx on public.client_errors (created_at desc);
+alter table public.client_errors enable row level security;
+revoke all on public.client_errors from anon, authenticated;
+
+create or replace function public.log_error(p_build text, p_device text, p_body text)
+returns void language plpgsql security definer set search_path = public as $fn$
+declare
+  uid uuid := auth.uid();
+begin
+  if uid is null or coalesce(btrim(p_body), '') = '' then return; end if;
+  if (select count(*) from public.client_errors e where e.user_id = uid and e.created_at > now() - interval '1 hour') >= 30 then
+    return;
+  end if;
+  insert into public.client_errors (user_id, friend_code, build, device, body)
+    values (uid, (select p.friend_code from public.profiles p where p.id = uid), left(coalesce(p_build, ''), 40),
+            left(coalesce(p_device, ''), 120), left(p_body, 4000));
+  -- Журнал не растёт бесконечно: держим последние 20 000 записей.
+  if random() < 0.01 then
+    delete from public.client_errors where id < (select max(id) - 20000 from public.client_errors);
+  end if;
+end
+$fn$;
+
+-- Последние ошибки (по желанию только одной сборки).
+create or replace function public.dev_errors(p_limit int default 60, p_build text default '')
+returns table (id bigint, created_at timestamptz, friend_code text, nickname text, build text, device text, body text)
+language plpgsql security definer set search_path = public as $fn$
+begin
+  if not public.is_dev() then return; end if;
+  return query
+    select e.id, e.created_at, e.friend_code, p.nickname, e.build, e.device, e.body
+    from public.client_errors e left join public.profiles p on p.id = e.user_id
+    where coalesce(p_build, '') = '' or e.build = p_build
+    order by e.id desc limit least(greatest(coalesce(p_limit, 60), 1), 300);
+end
+$fn$;
+
+-- Сводка за сутки: какие ошибки чаще всего, у скольких игроков, в каких сборках.
+create or replace function public.dev_error_summary()
+returns table (head text, hits bigint, players bigint, builds text, last_at timestamptz)
+language plpgsql security definer set search_path = public as $fn$
+begin
+  if not public.is_dev() then return; end if;
+  return query
+    select left(split_part(e.body, chr(10), 1), 90) as head, count(*), count(distinct e.user_id),
+      string_agg(distinct e.build, ', '), max(e.created_at)
+    from public.client_errors e
+    where e.created_at > now() - interval '24 hours'
+    group by 1 order by 2 desc limit 40;
+end
+$fn$;
+
+revoke all on function public.log_error(text, text, text), public.dev_errors(int, text), public.dev_error_summary() from public, anon;
+grant execute on function public.log_error(text, text, text), public.dev_errors(int, text), public.dev_error_summary() to authenticated;
+
+notify pgrst, 'reload schema';
+
+-- ======================== schema_v16_one_account_many_devices.sql ========================
+-- Trash Squad v16: один аккаунт на нескольких устройствах, без «переездов».
+-- 1) Код восстановления больше НЕ переносит аккаунт с логином: игра отвечает «войди логином» (ACCOUNT:<логин>).
+--    Иначе браузер и мини-апка с экрана «Домой» отбирали аккаунт друг у друга.
+-- 2) Гостя (без логина) код по-прежнему переносит, но старое устройство это узнаёт (MOVED)
+--    и не заводит себе нового «левого» енота.
+-- Запустить один раз (повтор безопасен).
+
+create table if not exists public.moved_accounts (
+  old_id uuid primary key,
+  new_id uuid not null,
+  moved_at timestamptz not null default now()
+);
+alter table public.moved_accounts enable row level security;
+revoke all on public.moved_accounts from anon, authenticated;
+
+create or replace function public.restore_save(p_code text)
+returns text language plpgsql security definer set search_path = public, auth as $fn$
+declare
+  uid uuid := auth.uid();
+  k text := upper(btrim(p_code));
+  d text;
+  old uuid;
+  login text;
+  p public.profiles%rowtype;
+begin
+  if uid is null then return ''; end if;
+  select s.data, s.owner into d, old from public.cloud_saves s where s.code = k;
+  if d is null then return ''; end if;
+  if old is null or old = uid then return d; end if;
+
+  select split_part(coalesce(u.email, ''), '@', 1) into login from auth.users u where u.id = old;
+  if coalesce(login, '') <> '' then
+    return 'ACCOUNT:' || login;
+  end if;
+
+  delete from public.cloud_saves where owner = uid and code <> k;
+  update public.cloud_saves set owner = uid where code = k;
+  select * into p from public.profiles where id = old;
+  if found then
+    update public.profiles set friend_code = 'MOVED' || substr(md5(old::text), 1, 8) where id = old;
+    delete from public.profiles where id = uid;
+    insert into public.profiles (id, nickname, friend_code, best_wave, insider, updated_at, stats, last_seen, chat_banned)
+      values (uid, p.nickname, p.friend_code, p.best_wave, p.insider, now(), p.stats, now(), p.chat_banned);
+    update public.friendships set user_id = uid where user_id = old;
+    update public.friendships set friend_id = uid where friend_id = old;
+    update public.line_votes set user_id = uid where user_id = old;
+    update public.friend_requests set from_id = uid where from_id = old;
+    update public.friend_requests set to_id = uid where to_id = old;
+    update public.blocks set user_id = uid where user_id = old;
+    update public.blocks set blocked_id = uid where blocked_id = old;
+    update public.messages set from_id = uid where from_id = old;
+    update public.messages set to_id = uid where to_id = old;
+    update public.reports set reporter_id = uid where reporter_id = old;
+    update public.reports set target_id = uid where target_id = old;
+    delete from public.profiles where id = old;
+    insert into public.badge_log (friend_code, nickname, level, how)
+      select p.friend_code, p.nickname, p.insider, 'аккаунт перенесён по коду' where p.insider in (0, 1);
+  end if;
+  insert into public.moved_accounts (old_id, new_id) values (old, uid)
+    on conflict (old_id) do update set new_id = excluded.new_id, moved_at = now();
+  delete from public.moved_accounts where old_id = uid;
+  return d;
+end
+$fn$;
+
+-- Профиль: если этот енот уже переехал на другое устройство, новый профиль не создаём, отвечаем MOVED.
+create or replace function public.sync_profile_v2(p_nickname text, p_best_wave int, p_insider int, p_stats jsonb)
+returns table (friend_code text) language plpgsql security definer set search_path = public as $fn$
+declare
+  uid uuid := auth.uid();
+  code text;
+  nick text := left(btrim(coalesce(p_nickname, '')), 24);
+  wave int := least(greatest(coalesce(p_best_wave, 0), 0), 500);
+  clean jsonb := case when p_stats is null or length(p_stats::text) > 2000 then '{}'::jsonb else p_stats end;
+begin
+  if uid is null then raise exception 'not authenticated'; end if;
+  if nick = '' then nick := 'Енот'; end if;
+  select p.friend_code into code from public.profiles p where p.id = uid;
+  if code is null then
+    if exists (select 1 from public.moved_accounts m where m.old_id = uid) then
+      return query select 'MOVED'::text;
+      return;
+    end if;
+    loop
+      code := upper(substr(translate(md5(random()::text || clock_timestamp()::text), '01', 'XY'), 1, 6));
+      exit when not exists (select 1 from public.profiles p where p.friend_code = code);
+    end loop;
+    insert into public.profiles (id, nickname, friend_code, best_wave, insider, stats, last_seen)
+      values (uid, nick, code, wave, -1, clean, now());
+  else
+    update public.profiles set nickname = nick, best_wave = greatest(best_wave, wave),
+      stats = clean, last_seen = now(), updated_at = now() where id = uid;
+  end if;
+  return query select code;
+end
+$fn$;
+
+revoke all on function public.restore_save(text), public.sync_profile_v2(text, int, int, jsonb) from public, anon;
+grant execute on function public.restore_save(text), public.sync_profile_v2(text, int, int, jsonb) to authenticated;
 
 notify pgrst, 'reload schema';
 

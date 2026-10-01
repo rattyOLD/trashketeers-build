@@ -6,6 +6,7 @@ extends GlassPopup
 var _status: Label
 var _body: VBoxContainer
 var intro := ""
+var prefill_login := ""
 
 
 func _init() -> void:
@@ -71,6 +72,8 @@ func _render_guest() -> void:
 	_body.add_child(login_edit)
 	if Cloud.session_lost:
 		login_edit.text = Cloud.email
+	elif not prefill_login.is_empty():
+		login_edit.text = prefill_login
 	var pass_edit := _edit("Пароль (от 6 знаков)", true)
 	_body.add_child(pass_edit)
 	var create := UiStyle.button("СОЗДАТЬ АККАУНТ", UiStyle.HOT, 24, Vector2(0, 64))

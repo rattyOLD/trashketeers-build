@@ -396,7 +396,14 @@ func _social_row(friend: Dictionary) -> Control:
 	row.add_theme_constant_override("separation", 10)
 	panel.add_child(row)
 	var online := SocialProfilePopup.seen_text(str(friend.get("last_seen", ""))) == "Сейчас в сети"
-	var dot := UiStyle.label("●", 24, Color("#35c46a") if online else UiStyle.TEXT_DIM, 4)
+	# Кружок рисуем панелью: в шрифте игры нет символа «●», на телефоне вместо него вылезал квадрат с кодом.
+	var dot := Panel.new()
+	var dot_style := StyleBoxFlat.new()
+	dot_style.bg_color = Color("#35c46a") if online else UiStyle.TEXT_DIM
+	dot_style.set_corner_radius_all(8)
+	dot.add_theme_stylebox_override("panel", dot_style)
+	dot.custom_minimum_size = Vector2(16, 16)
+	dot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	dot.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(dot)
 	var text := VBoxContainer.new()
@@ -408,7 +415,7 @@ func _social_row(friend: Dictionary) -> Control:
 	name_label.clip_text = true
 	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	text.add_child(name_label)
-	var preview := str(friend.get("last_body", ""))
+	var preview := "" if friend.get("last_body") == null else str(friend.get("last_body"))
 	var sub := UiStyle.label(preview.left(34) if not preview.is_empty() else "волна %d" % int(friend.get("best_wave", 0)), 17, UiStyle.TEXT_DIM, 4)
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	sub.clip_text = true
