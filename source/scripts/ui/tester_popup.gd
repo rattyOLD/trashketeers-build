@@ -14,6 +14,8 @@ const BOSS_NAMES := {
 
 var _status: Label
 var _reset_armed := false
+var _list: VBoxContainer
+var _scroll: ScrollContainer
 
 
 func _init() -> void:
@@ -22,6 +24,9 @@ func _init() -> void:
 
 func _refresh() -> void:
 	var keep := content.get_child(0)
+	var scroll_pos := 0
+	if _scroll != null and is_instance_valid(_scroll):
+		scroll_pos = _scroll.scroll_vertical
 	for child in content.get_children():
 		if child != keep:
 			content.remove_child(child)
@@ -32,6 +37,9 @@ func _refresh() -> void:
 	_status.custom_minimum_size = Vector2(540, 0)
 	content.add_child(_status)
 	_status.text = "Монет: %d · Неонита: %d · Уровень: %d" % [SaveService.get_coins(), SaveService.get_gems(), SaveService.get_account_level()]
+	_list = MenuPopups.scroll_list(content)
+	_scroll = _list.get_parent().get_parent() as ScrollContainer
+	_restore_scroll.call_deferred(scroll_pos)
 
 	_section("ВЫДАЧА")
 	var grid := _grid()
@@ -41,9 +49,7 @@ func _refresh() -> void:
 	_action(grid, "+2 000 неонита", func() -> String:
 		Tester.give_gems(2000)
 		return "Выдано 2 000 неонита")
-	_action(grid, "Всё оружие (T1)", func() -> String:
-		return "Оружия выдано: %d" % Tester.give_all_weapons(false))
-	_action(grid, "Всё оружие (T5)", func() -> String:
+	_action(grid, "Всё оружие (макс)", func() -> String:
 		return "Оружия T5 выдано: %d" % Tester.give_all_weapons(true))
 	_action(grid, "Все герои и скины", func() -> String:
 		Tester.give_all_looks()
@@ -51,13 +57,7 @@ func _refresh() -> void:
 	_action(grid, "Прокачка на макс", func() -> String:
 		Tester.max_perks()
 		return "Сила / Выносливость / Броня на максимуме")
-	_action(grid, "Чертежи -1 до предмета", func() -> String:
-		Tester.give_shards()
-		return "Всем эпикам и легендаркам не хватает 1 чертежа")
-	_action(grid, "Уровень аккаунта +10", func() -> String:
-		Tester.add_account_levels(10)
-		return "Уровень аккаунта: %d" % SaveService.get_account_level())
-	content.add_child(grid)
+	_list.add_child(grid)
 
 	_section("СЮЖЕТ И РЕЖИМЫ")
 	var story := _grid()
@@ -81,7 +81,7 @@ func _refresh() -> void:
 		SaveService.data["story_log"] = {}
 		SaveService.save_data()
 		return "Журнал диалогов очищен")
-	content.add_child(story)
+	_list.add_child(story)
 
 	_section("В БОЮ")
 	for name in Tester.FLAGS:
@@ -90,7 +90,7 @@ func _refresh() -> void:
 		button.pressed.connect(func() -> void:
 			Tester.toggle(name)
 			_refresh())
-		content.add_child(button)
+		_list.add_child(button)
 
 	_section("СТАРТ БОЯ")
 	var titles: Array = []
@@ -106,8 +106,8 @@ func _refresh() -> void:
 	_action(start, "Волна: %d из %d" % [wave_now, WaveDirector.WAVES_PER_CHAPTER], func() -> String:
 		Tester.set_start(chapter_now, wave_now % WaveDirector.WAVES_PER_CHAPTER + 1)
 		return "Старт с волны %d" % Tester.start_wave())
-	content.add_child(start)
-	content.add_child(UiStyle.label("Сразу к боссу:", 20, UiStyle.TEXT_DIM, 4))
+	_list.add_child(start)
+	_list.add_child(UiStyle.label("Сразу к боссу:", 20, UiStyle.TEXT_DIM, 4))
 	var bosses := _grid()
 	for entry in _boss_fights():
 		var chosen := chapter_now == int(entry["chapter"]) and wave_now == int(entry["wave"])
@@ -118,7 +118,7 @@ func _refresh() -> void:
 	_action(bosses, "Обычный старт", func() -> String:
 		Tester.set_start(0, 1)
 		return "Старт с 1-й волны 1-й главы")
-	content.add_child(bosses)
+	_list.add_child(bosses)
 
 	_section("СБРОС ЛИМИТОВ")
 	var resets := _grid()
@@ -131,10 +131,7 @@ func _refresh() -> void:
 	_action(resets, "Подарок: забрать снова", func() -> String:
 		Tester.reset_daily()
 		return "Ежедневный подарок снова доступен")
-	_action(resets, "Подарок: следующий день", func() -> String:
-		Tester.advance_daily()
-		return "Серия подарка: день %d" % SaveService.get_daily_step())
-	content.add_child(resets)
+	_list.add_child(resets)
 
 	_section("ОПАСНО")
 	var reset := UiStyle.button("Сбросить сохранение", Color("#a3283e"), 22, Vector2(0, 58))
@@ -147,7 +144,7 @@ func _refresh() -> void:
 		changed.emit()
 		_refresh()
 		_status.text = "Сохранение сброшено")
-	content.add_child(reset)
+	_list.add_child(reset)
 
 
 func _boss_fights() -> Array:
@@ -166,7 +163,7 @@ func _boss_fights() -> Array:
 
 
 func _section(text: String) -> void:
-	content.add_child(UiStyle.label(text, 22, UiStyle.TEXT_DIM, 5))
+	_list.add_child(UiStyle.label(text, 22, UiStyle.TEXT_DIM, 5))
 
 
 func _grid() -> GridContainer:
@@ -187,3 +184,8 @@ func _action(grid: GridContainer, text: String, action: Callable) -> void:
 		_refresh()
 		_status.text = message)
 	grid.add_child(button)
+
+
+func _restore_scroll(pos: int) -> void:
+	if _scroll != null and is_instance_valid(_scroll):
+		_scroll.scroll_vertical = pos
