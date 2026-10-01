@@ -43,15 +43,29 @@ with open(os.path.join(build, "index.pck"), "rb") as src:
     pck_raw = src.read()
 with open(os.path.join(build, "index.wasm"), "rb") as src:
     raw = src.read()
+for extra in ("manifest.webmanifest", "sw.js", "icon180.png", "icon192.png", "icon512.png"):
+    shutil.copy("/home/claude/trashketeers-build/tools/" + extra, os.path.join(site, extra))
 shutil.copy("/home/claude/raccoon/web/audio_unlock.js", os.path.join(site, "audio_unlock.js"))
 shutil.copy("/home/claude/raccoon/web/render_scale.js", os.path.join(site, "render_scale.js"))
-page = open(os.path.join(scratch, "site_template.html"), encoding="utf-8").read()
+page = open("/home/claude/trashketeers-build/tools/site_template.html", encoding="utf-8").read()
+import json as _json
+_studio = str(_json.load(open("/home/claude/raccoon/data/brand.json")).get("studio", "")).strip()
+page = page.replace("__STUDIO_LINE__", ('<p class="studio">Сделано командой %s</p>' % _studio) if _studio else "")
 page = page.replace("__WASM_PARTS__", write_parts(raw, "raccoon.core", 24 * 1024 * 1024))
 page = page.replace("__PCK_PARTS__", write_parts(pck_raw, "raccoon.pack", 12 * 1024 * 1024))
 import time
 build_id = str(int(time.time()))
 page = page.replace("__BUILD_ID__", build_id)
-open(os.path.join(site, "version.json"), "w").write('{"build":"%s"}' % build_id)
+import json, subprocess, datetime
+base_ver = json.load(open("/home/claude/raccoon/data/changelog.json"))["entries"][0]["version"]
+try:
+    number = int(subprocess.check_output(["git", "-C", "/home/claude/trashketeers-build", "rev-list", "--count", "HEAD"]).decode().strip()) + 1
+except Exception:
+    number = 0
+build_label = "%s.%d" % (base_ver, number)
+build_time = (datetime.datetime.utcnow() + datetime.timedelta(hours=7)).strftime("%d.%m %H:%M")
+page = page.replace("__BUILD_LABEL__", build_label).replace("__BUILD_TIME__", build_time)
+open(os.path.join(site, "version.json"), "w").write('{"build":"%s","label":"%s","time":"%s"}' % (build_id, build_label, build_time))
 page = page.replace("__PCK_SIZE__", str(len(pck_raw)))
 page = page.replace("__WASM_SIZE__", str(len(raw)))
 open(os.path.join(site, "index.html"), "w", encoding="utf-8").write(page)

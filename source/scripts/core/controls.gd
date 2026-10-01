@@ -50,9 +50,9 @@ static func default_config(left_handed: bool = false) -> Dictionary:
 		"layout": {
 			"dash": {"x": cx, "y": 0.74, "s": 1.0},
 			"slots": {"x": cx, "y": 0.54, "s": 1.0},
-			"interact": {"x": 0.5, "y": 0.27, "s": 1.0},
+			"interact": {"x": 0.5, "y": 0.32, "s": 1.0},
 		},
-		"layout_v": 3,
+		"layout_v": 4,
 		"keys": {},
 		"presets": {},
 	}
@@ -79,11 +79,11 @@ static func config() -> Dictionary:
 		var slots: Dictionary = layout["slots"]
 		if float(slots["y"]) > 0.58:
 			slots["y"] = 0.54
-	if int(stored.get("layout_v", 1)) < 3:
-		stored["layout_v"] = 3
+	if int(stored.get("layout_v", 1)) < 4:
+		stored["layout_v"] = 4
 		var interact: Dictionary = layout["interact"]
-		if float(interact["y"]) > 0.5:
-			interact["y"] = 0.27
+		if float(interact["y"]) > 0.5 or is_equal_approx(float(interact["y"]), 0.27):
+			interact["y"] = 0.32
 	return stored
 
 

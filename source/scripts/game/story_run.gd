@@ -209,6 +209,13 @@ func order_text() -> String:
 	return "ЗАКАЗ НЭЛЛ: %s %d/%d" % [info["title"], info["progress"], info["goal"]]
 
 
+## Реплика-тост: не появляется, пока говорит диалог или фоновая реплика, чтобы персонаж не говорил в двух окнах сразу.
+func _chatter(title: String, text: String, color: Color) -> void:
+	if _box != null or (_ambient != null and _ambient.is_busy()):
+		return
+	game.hud.toast(title, text, color)
+
+
 func _count(stat: String, amount: int = 1) -> void:
 	SaveService.add_stat(stat, amount, false)
 	var done := SaveService.nell_order_tick()
@@ -222,7 +229,7 @@ func on_kill(data: EnemyData) -> void:
 	kills += 1
 	var milestone := str((_banter.get("kills", {}) as Dictionary).get(str(kills), ""))
 	if not milestone.is_empty():
-		game.hud.toast("НЭЛЛ", milestone.trim_prefix("Нэлл: "), Color("#5ff2ff"))
+		_chatter("НЭЛЛ", milestone.trim_prefix("Нэлл: "), Color("#5ff2ff"))
 	score += BOSS_POINTS if data.is_boss() else maxi(int(data.max_hp / 4.0), 10) * 10
 
 
@@ -449,7 +456,7 @@ func _tick_idle(delta: float) -> void:
 		_low_hp_cd = 45.0
 		var low: Array = _banter.get("low_hp", [])
 		if not low.is_empty():
-			game.hud.toast("НЭЛЛ", str(low.pick_random()), Color("#ff5a7a"))
+			_chatter("НЭЛЛ", str(low.pick_random()), Color("#ff5a7a"))
 	var pos := game.player.global_position
 	if pos.distance_to(_idle_pos) > IDLE_MOVE:
 		_idle_pos = pos
@@ -483,7 +490,7 @@ func _idle_line() -> void:
 		index = (index + 1) % pool.size()
 	_last_idle_line = index
 	var speaker: Dictionary = speakers.get(who, {})
-	game.hud.toast(str(speaker.get("name", "НЭЛЛ")), str(pool[index]), Color(str(speaker.get("color", "#5ff2ff"))))
+	_chatter(str(speaker.get("name", "НЭЛЛ")), str(pool[index]), Color(str(speaker.get("color", "#5ff2ff"))))
 
 
 func _check_zone() -> void:
@@ -799,11 +806,11 @@ func _king_banter() -> void:
 		key = "king_lowhp"
 	var lines: Array = _banter.get(key, [])
 	if not lines.is_empty():
-		game.hud.toast("КОРОЛЬ ХЛАМА", str(lines.pick_random()), Color("#ff5a5a"))
+		_chatter("КОРОЛЬ ХЛАМА", str(lines.pick_random()), Color("#ff5a5a"))
 	var after: Array = _banter.get("nell_after", [])
 	if not after.is_empty():
 		get_tree().create_timer(2.6, true, false, true).timeout.connect(func() -> void:
-			game.hud.toast("НЭЛЛ", str(after.pick_random()), Color("#5ff2ff")))
+			_chatter("НЭЛЛ", str(after.pick_random()), Color("#5ff2ff")))
 
 
 ## Босс подкалывает за ствол: донатный из пропуска, или наоборот слишком скромный.
@@ -821,13 +828,13 @@ func _weapon_taunt(is_mini: bool) -> void:
 	var color := Color("#ffb020") if is_mini else Color("#ff5a5a")
 	get_tree().create_timer(OPEN_DELAY + 7.5, true, false, true).timeout.connect(func() -> void:
 		if _boss_alive:
-			game.hud.toast(name, str(lines.pick_random()), color)
+			_chatter(name, str(lines.pick_random()), color)
 		if paid.has(str(wc.base_weapon.id)) and not is_mini:
 			var nell: Array = _banter.get("nell_donate", [])
 			if not nell.is_empty():
 				get_tree().create_timer(3.2, true, false, true).timeout.connect(func() -> void:
 					if _boss_alive:
-						game.hud.toast("НЭЛЛ", str(nell.pick_random()), Color("#5ff2ff"))))
+						_chatter("НЭЛЛ", str(nell.pick_random()), Color("#5ff2ff"))))
 
 
 func on_miniboss_killed() -> void:
@@ -849,13 +856,13 @@ func on_king_killed() -> void:
 func on_boss_phase(phase: int) -> void:
 	var lines: Array = (mission.get("phase_lines", {}) as Dictionary).get("king", [])
 	if phase >= 2 and lines.size() > 1:
-		game.hud.toast("КОРОЛЬ ХЛАМА", str(lines[1]), Color("#ff5a5a"))
+		_chatter("КОРОЛЬ ХЛАМА", str(lines[1]), Color("#ff5a5a"))
 
 
 func on_boss_break() -> void:
 	var lines: Array = (mission.get("phase_lines", {}) as Dictionary).get("king", [])
 	if not lines.is_empty():
-		game.hud.toast("КОРОЛЬ ХЛАМА", str(lines[0]), Color("#ff5a5a"))
+		_chatter("КОРОЛЬ ХЛАМА", str(lines[0]), Color("#ff5a5a"))
 
 
 ## Босс главы повержен: финальная сцена, затем итог миссии.
@@ -1136,4 +1143,4 @@ func _on_training_broken(target: TrainingTarget) -> void:
 	game.fx.dust(at, 10, 100.0)
 	game.pickups.spawn_xp_gold(at, 5)
 	game.fx.popup(at + Vector2(0, -70), "ЯЩИК ПОГИБ", Color("#ffd257"), 30.0)
-	game.hud.toast("НЭЛЛ", "Ну вот, один ящик на твоей совести. Дальше крысы.", Color("#5ff2ff"))
+	_chatter("НЭЛЛ", "Ну вот, один ящик на твоей совести. Дальше крысы.", Color("#5ff2ff"))

@@ -117,6 +117,13 @@ html, body {
 	text-shadow: 0 0 10px rgba(0, 245, 255, 0.7);
 	font-variant-numeric: tabular-nums;
 }
+#boot .studio {
+	margin: 10px 0 0;
+	font-size: 13px;
+	letter-spacing: 2px;
+	color: #5ff2ff;
+	opacity: 0.8;
+}
 #boot .ver {
 	margin-top: 18px;
 	font-size: 12px;
@@ -293,6 +300,7 @@ html, body {
 	<p id="status">Подключаемся к свалке…</p>
 	<p id="tip"></p>
 	<p class="ver" id="ver"></p>
+	
 	<p id="error" hidden></p>
 	<button id="retry" type="button" hidden>Попробовать ещё раз</button>
 </div>
@@ -328,7 +336,7 @@ html, body {
 </script>
 
 <script>
-window.__trash_build = {label: 'v34.119', time: '01.10 10:42'};
+window.__trash_build = {label: 'v34.121', time: '01.10 10:50'};
 document.getElementById('ver').textContent = 'Версия ' + window.__trash_build.label + ' · сборка от ' + window.__trash_build.time;
 </script>
 <script>
@@ -354,7 +362,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	// index.wasm / index.pck и отдаём ему уже скачанные и распакованные байты.
 	const FILES = {
 		wasm: { parts: [{url:"raccoon.core.0.wasm",bytes:5221065},{url:"raccoon.core.1.wasm",bytes:4165384}] },
-		pck: { parts: [{url:"raccoon.pack.0.wasm",bytes:11992314},{url:"raccoon.pack.1.wasm",bytes:12536661},{url:"raccoon.pack.2.wasm",bytes:1202454}] },
+		pck: { parts: [{url:"raccoon.pack.0.wasm",bytes:11992262},{url:"raccoon.pack.1.wasm",bytes:12536586},{url:"raccoon.pack.2.wasm",bytes:1203003}] },
 	};
 	const GODOT_CONFIG = {
 		args: [],
@@ -362,7 +370,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 		ensureCrossOriginIsolationHeaders: false,
 		executable: 'index',
 		experimentalVK: false,
-		fileSizes: { 'index.pck': 26654048, 'index.wasm': 43699190 },
+		fileSizes: { 'index.pck': 26655328, 'index.wasm': 43699190 },
 		focusCanvas: true,
 		gdextensionLibs: [],
 		onPrint: function () {
@@ -373,7 +381,10 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 			keepLog('err', arguments);
 			console.error.apply(console, arguments);
 			const text = Array.prototype.join.call(arguments, ' ');
-			if (/ERROR|Error/.test(text) && window.trkReport) {
+			if (text.indexOf('!is_inside_tree()') !== -1) {
+				treeErrors += 1;
+			}
+			if (/ERROR|Error/.test(text) && window.trkReport && treeErrors <= 3) {
 				window.trkReport('error', text);
 			}
 			if (/Aborted|abort\(|out of memory|Cannot enlarge memory|memory access out of bounds|unreachable/i.test(text)) {
@@ -384,13 +395,14 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 
 	// Адрес сбора отчётов о вылетах (Google Apps Script / Supabase и т.п.); пусто — отчёты не отправляются.
 	const REPORT_URL = 'https://script.google.com/macros/s/AKfycbxVyy-SnRANW0Im-1Blne2TcUbca93WqzyBulpADwWWD7YH6x3KIygBYImTe8VfP5pp/exec';
-	const BUILD_ID_REPORT = '1790826124';
+	const BUILD_ID_REPORT = '1790826650';
 	const SESSION_ID = Math.random().toString(36).slice(2, 8);
 	const SESSION_START = Date.now();
 	const REPORT_CAP = 250;
 	const sentKeys = {};
 	let reportCount = 0;
 	const logTail = [];
+	let treeErrors = 0;
 	const eventLog = [];
 	let hiddenMs = 0;
 	let hiddenSince = 0;
@@ -567,7 +579,8 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 		window.trkReport('error', 'unhandledrejection: ' + String(event.reason).slice(0, 500));
 	});
 	window.addEventListener('error', function (event) {
-		window.trkReport('error', 'js: ' + event.message + ' @ ' + (event.filename || '').split('/').pop() + ':' + event.lineno);
+		const stack = event.error && event.error.stack ? String(event.error.stack).split('\n').slice(0, 14).map(function (l) { return l.replace(/^\s*at\s+/, '').slice(0, 40); }).join(' < ') : '';
+		window.trkReport('error', 'js: ' + event.message + ' @ ' + (event.filename || '').split('/').pop() + ':' + event.lineno + (stack ? ' | stack: ' + stack : ''));
 	});
 
 	// Раз в 45 секунд, пока идёт бой: если вкладку убьёт система, по последнему пульсу видно, что происходило.
@@ -588,7 +601,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	window.trkReport('session_start', gpuInfo() + ' | ' + navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + (window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio) + ' | screen ' + screen.width + 'x' + screen.height + ' | cores ' + (navigator.hardwareConcurrency || '?'));
 
 	// Вкладка могла висеть со старой версией: при возврате в неё сверяем номер сборки и предлагаем обновиться.
-	const BUILD_ID = '1790826124';
+	const BUILD_ID = '1790826650';
 	function checkVersion() {
 		fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (v) {
 			if (v && v.build && v.build !== BUILD_ID && !document.getElementById('newver')) {
@@ -621,10 +634,32 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	let started = false;
 	let crashed = false;
 
+	// Android после сворачивания вкладки теряет шейдеры: экран остаётся чёрным или без спрайтов. Перезагрузка лечит, не чаще раза в 20 с.
+	function recoverGraphics() {
+		try {
+			const last = Number(sessionStorage.getItem('__trash_ctx_reload') || 0);
+			if (Date.now() - last < 20000) {
+				return;
+			}
+			const count = Number(sessionStorage.getItem('__trash_shader_reloads') || 0);
+			if (count >= 2) {
+				return;
+			}
+			sessionStorage.setItem('__trash_shader_reloads', String(count + 1));
+			sessionStorage.setItem('__trash_ctx_reload', String(Date.now()));
+			window.trkReport('shader_reload', logTail.slice(-6).join(' ; '));
+		} catch (e) {}
+		setTimeout(function () { window.location.reload(); }, 500);
+	}
+
 	function keepLog(kind, args) {
-		logTail.push(kind + ': ' + Array.prototype.join.call(args, ' ').slice(0, 300));
+		const line = Array.prototype.join.call(args, ' ').slice(0, 300);
+		logTail.push(kind + ': ' + line);
 		if (logTail.length > 30) {
 			logTail.shift();
+		}
+		if (started && line.indexOf('shader compilation failed') !== -1) {
+			recoverGraphics();
 		}
 	}
 

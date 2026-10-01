@@ -55,12 +55,12 @@ func _build() -> void:
 	_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_panel.anchor_left = 0.0
 	_panel.anchor_right = 1.0
-	_panel.anchor_top = 1.0
-	_panel.anchor_bottom = 1.0
-	_panel.offset_left = 20.0
-	_panel.offset_right = -20.0
-	_panel.offset_top = -214.0
-	_panel.offset_bottom = -104.0
+	_panel.anchor_top = 0.0
+	_panel.anchor_bottom = 0.0
+	_panel.offset_left = 36.0
+	_panel.offset_right = -36.0
+	_panel.offset_top = 352.0
+	_panel.offset_bottom = 436.0
 	_panel.visible = false
 	root.add_child(_panel)
 	var row := HBoxContainer.new()

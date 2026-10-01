@@ -166,6 +166,9 @@ func _build_portrait_layout() -> Control:
 	column.add_child(_build_play())
 	column.add_child(_build_dock())
 	column.add_child(UiStyle.label("Trashketeers.io · Неоновая Свалка", 16, Color(UiStyle.TEXT_DIM, 0.7), 4))
+	var studio := str(ConfigLoader.load_json("res://data/brand.json").get("studio", "")).strip_edges()
+	if not studio.is_empty():
+		column.add_child(UiStyle.label("Сделано командой %s" % studio, 16, Color(UiStyle.NEON, 0.8), 4))
 	return column
 
 
