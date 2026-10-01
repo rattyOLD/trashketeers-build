@@ -22,7 +22,7 @@ const AD_GEMS_TABLE := [[35.0, 1], [30.0, 2], [20.0, 3], [10.0, 4], [5.0, 5]]
 const REVIVE_COSTS := [8, 15, 30]
 const RARITY_ORDER := ["common", "rare", "epic", "legendary"]
 ## Монетами покупаются только common/rare/epic; легендарные — исключительно за неонит.
-const SHOP_PRICES := {"common": 1200, "rare": 3400, "epic": 9000}
+const SHOP_PRICES := {"common": 650, "rare": 1850, "epic": 5000}
 ## Каждая уже купленная копия удорожает следующую: цена × (1 + STEP × покупок), не больше CAP покупок.
 const SHOP_REPEAT_STEP := 0.3
 const SHOP_REPEAT_CAP := 8
@@ -30,29 +30,29 @@ const SHOP_REPEAT_CAP := 8
 const KEEP_CHANCE := {"common": 0.5, "rare": 0.3, "epic": 0.12, "legendary": 0.0}
 const BOSS_LEGENDARY_CHANCE := 0.15
 ## Неонит вместо монет для эпических и легендарных стволов (для тех, кто не хочет ждать).
-const SHOP_GEM_PRICES := {"epic": 120, "legendary": 300}
+const SHOP_GEM_PRICES := {"epic": 90, "legendary": 220}
 ## Донатные флагманы дороже обычных легендарок.
 const SHOP_GEM_OVERRIDE := {"railgun_v1": 480}
 const DUPLICATE_COINS := {"common": 150, "rare": 400, "epic": 1000, "legendary": 2500}
 const HERO_RARITY := {"red_panda": "rare", "snow": "rare", "night": "rare", "neon_hopper": "epic", "fluffy_chemist": "epic", "pigeon_mafioso": "epic"}
 const SKIN_RARITY := {"punk": "common", "bandit": "common", "neon": "rare", "gold": "epic", "star": "legendary"}
-const FIRST_BOSS_GEMS := 10
+const FIRST_BOSS_GEMS := 15
 
 const CHESTS := {
 	"common": {
-		"title": "Обычный сундук", "color": Color("#7fd0ff"), "coins": 300, "gems": 0,
+		"title": "Обычный сундук", "color": Color("#7fd0ff"), "coins": 200, "gems": 0,
 		"rolls": 3, "item_chance": 0.06,
 		"weapon_rarities": ["common", "common", "rare"], "people": ["skin_common", "skin_rare"],
 		"fillers": [[55.0, "coins", 60, 120], [28.0, "xp", 30, 60], [14.0, "shard", 1, 1], [3.0, "gems", 1, 1]],
 	},
 	"rare": {
-		"title": "Редкий сундук", "color": Color("#b36bff"), "coins": 900, "gems": 0,
+		"title": "Редкий сундук", "color": Color("#b36bff"), "coins": 600, "gems": 0,
 		"rolls": 4, "item_chance": 0.14,
 		"weapon_rarities": ["rare", "rare", "epic"], "people": ["hero_rare", "skin_rare"],
 		"fillers": [[45.0, "coins", 150, 280], [25.0, "xp", 80, 140], [22.0, "shard", 1, 2], [8.0, "gems", 1, 3]],
 	},
 	"epic": {
-		"title": "Эпический сундук", "color": Color("#ffb62e"), "coins": 3200, "gems": 45,
+		"title": "Эпический сундук", "color": Color("#ffb62e"), "coins": 2200, "gems": 35,
 		"rolls": 5, "item_chance": 0.3,
 		"weapon_rarities": ["epic", "epic", "legendary"], "people": ["hero_epic", "hero_legendary"],
 		"fillers": [[35.0, "coins", 350, 650], [20.0, "xp", 180, 300], [30.0, "shard", 2, 3], [15.0, "gems", 2, 5]],

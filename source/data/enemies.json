@@ -470,7 +470,7 @@
    "behavior": "boss",
    "boss_pattern": "baron",
    "max_hp": 3200,
-   "move_speed": 58,
+   "move_speed": 80,
    "contact_damage": 16,
    "radius": 52,
    "sprite": "res://assets/bosses/baron_frames.png",

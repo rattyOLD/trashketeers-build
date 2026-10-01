@@ -28,6 +28,8 @@ const TELEGRAPH := Color("#ff2e4d")
 ## (на 75/50/25% здоровья покрывается золотом и несколько секунд получает вдвое меньше урона).
 const SPEAKER_COUNT := 3
 const SPEAKER_MULT := 0.4
+## Колонки неуязвимы, пока Король не выпустит подручных: после призыва они открыты это время.
+const SPEAKER_OPEN_TIME := 9.0
 const BASS_INTERVAL := 8.0
 const BASS_WINDUP_TIME := 0.9
 const BASS_BULLETS := 12
@@ -39,7 +41,7 @@ const GOLD_SHELL_TIME := 4.0
 const GOLD_SHELL_MULT := 0.5
 const GOLD_SHELL_STEPS: Array[float] = [0.75, 0.5, 0.25]
 const FOAM_MULT := 0.75
-const BEAM_WINDUP_TIME := 0.75
+const BEAM_WINDUP_TIME := 0.62
 const BEAM_LOCK_TIME := 0.45
 const BEAM_LENGTH := 620.0
 const BEAM_HALF_WIDTH := 30.0
@@ -47,7 +49,7 @@ const PRESS_PUSH := 1150.0
 const SMASH_RANGE := 175.0
 const STUN_TIME := 1.15
 const HANGOVER_TIME := 2.2
-const VOMIT_TIME := 1.8
+const VOMIT_TIME := 1.4
 const TRANSFORM_TIME := 1.6
 const OVERLORD_PHASE := 0.5
 const BARON_PHASE := 0.5
@@ -129,6 +131,7 @@ var _speakers_alive := 0
 var _bass_cd := 5.0
 var _pulled: Player
 var _collapse := false
+static var speaker_window := 0.0
 var _collapse_timer := 0.0
 
 
@@ -166,6 +169,7 @@ func setup(owner: Enemy) -> void:
 	_pulled = null
 	_collapse = false
 	_collapse_timer = 0.0
+	speaker_window = 0.0
 
 
 ## Снимает притяжение магнита с Енота (конец атаки, смерть Короля).
@@ -192,7 +196,7 @@ func is_invulnerable() -> bool:
 static func passive_text(boss_pattern: String) -> String:
 	match boss_pattern:
 		"overlord":
-			return "Колонки трона: пока стоят, Король получает на 60%% меньше урона. Свита: каждые %d с зовёт подручных" % int(SUITE_INTERVAL)
+			return "Колонки трона неуязвимы, пока Король не выпустит свиту: после зова они открыты %d с. Пока колонки стоят, Король получает на 60%% меньше урона" % int(SPEAKER_OPEN_TIME)
 		"magnate":
 			return "Золотая корка: на 75/50/25%% здоровья получает вдвое меньше урона %d с" % int(GOLD_SHELL_TIME)
 		"baron":
@@ -209,13 +213,20 @@ func damage_taken_mult() -> float:
 	return GOLD_SHELL_MULT if shell_left > 0.0 else 1.0
 
 
+## Колонки трона получают урон только в окне после призыва подручных.
+static func speakers_open() -> bool:
+	return speaker_window > 0.0
+
+
 func _tick_passive(delta: float) -> void:
 	if pattern == "overlord":
+		speaker_window = maxf(speaker_window - delta, 0.0)
 		_tick_speakers(delta)
 		_suite_timer -= delta
 		if _suite_timer <= 0.0 and state == State.WALK:
 			_suite_timer = SUITE_INTERVAL * _tempo()
 			enemy.request_fx("summon", SUITE_COUNT + (1.0 if phase == 2 else 0.0))
+			speaker_window = SPEAKER_OPEN_TIME
 	elif pattern == "magnate":
 		shell_left = maxf(shell_left - delta, 0.0)
 		if _shell_step < GOLD_SHELL_STEPS.size() and enemy.hp <= enemy.max_hp * GOLD_SHELL_STEPS[_shell_step]:
@@ -277,7 +288,8 @@ func speed() -> float:
 
 ## Темп атак: ярость ускоряет всё на треть.
 func _tempo() -> float:
-	return 0.72 if enraged else 1.0
+	var base := 0.8 if pattern == "baron" else 1.0
+	return base * (0.72 if enraged else 1.0)
 
 
 ## Желаемая скорость босса на этот кадр.
@@ -469,6 +481,8 @@ func tick(player: Player, dir: Vector2, path_dir: Vector2, dist: float, delta: f
 			enemy.queue_redraw()
 			if state_time >= 0.7:
 				enemy.request_fx("summon", 3.0 + (2.0 if phase == 2 else 0.0) + (2.0 if enraged else 0.0))
+				if pattern == "overlord":
+					speaker_window = SPEAKER_OPEN_TIME
 				_rest(0.2)
 			return Vector2.ZERO
 		State.BOLT_WINDUP:

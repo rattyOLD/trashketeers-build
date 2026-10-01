@@ -198,7 +198,9 @@ const REMOVED_PERKS := {"rate": 160, "dasher": 200, "patch": 260, "haggle": 300}
 const HERO_MAX_LEVEL := 8
 const HERO_HP_PER_LEVEL := 0.04
 const HERO_DAMAGE_PER_LEVEL := 0.03
-const PERK_COST_GROWTH := 1.36
+const PERK_COST_GROWTH := 1.25
+## Общий множитель награды за забег: экономика была слишком скупой.
+const RUN_PAYOUT := 1.4
 const SLOT3_PRICE := 250
 
 ## stats — ключи в data["stats"] (суммируются), goal — порог; один заказ на день для сюжета и выживания.
@@ -1211,7 +1213,7 @@ func get_achievement_progress(achievement: Dictionary) -> float:
 ## summary: nuts, time, wave, kills, loot (Array [[id, tier], ...]). Возвращает {"record", "loot"}.
 func record_run(summary: Dictionary) -> Dictionary:
 	var boost_coins := 0.0 if int(data.get("boost_coins", 0)) <= 0 else Cosmetics.BOOST_COINS_BONUS
-	var nuts := int(round(maxi(int(summary.get("nuts", 0)), 0) * (1.0 + get_perk_bonus("loot") + CharacterDB.get_stat(get_character_id(), "coins") + Premium.coin_bonus() + boost_coins)))
+	var nuts := int(round(maxi(int(summary.get("nuts", 0)), 0) * RUN_PAYOUT * (1.0 + get_perk_bonus("loot") + CharacterDB.get_stat(get_character_id(), "coins") + Premium.coin_bonus() + boost_coins)))
 	var wave := int(summary.get("wave", 0))
 	data["nuts"] = get_nuts() + nuts
 	add_account_xp(int(round((int(summary.get("kills", 0)) + wave * 5) * (1.0 + Premium.xp_bonus()))))

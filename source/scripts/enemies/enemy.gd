@@ -611,6 +611,8 @@ func take_damage(amount: float, direction: Vector2 = Vector2.ZERO, is_crit: bool
 		return
 	if _brain != null and _brain.is_invulnerable():
 		return
+	if data.id == &"throne_speaker" and not BossBrain.speakers_open():
+		return
 	amount *= 1.0 - data.armor
 	if stun_left > 0.0 or posture_stun > 0.0:
 		amount *= STUN_DAMAGE_MULT
