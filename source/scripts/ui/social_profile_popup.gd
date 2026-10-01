@@ -86,6 +86,11 @@ func _load() -> void:
 		var result := await Cloud.report_user(friend_code, "профиль")
 		if is_instance_valid(self):
 			_status.text = "Жалоба отправлена, спасибо" if result == "ok" else "Не удалось отправить жалобу"))
+	if SaveService.is_dev():
+		_body.add_child(_two_tap("DeV: бан чата по ID", UiStyle.HOT, func() -> void:
+			var r := await Cloud.dev_call("dev_set_chat_ban", {"p_code": friend_code, "p_banned": true})
+			if is_instance_valid(self):
+				_status.text = "Чат для этого игрока отключён" if bool(r["ok"]) and str(r["data"]) == "ok" else "Не вышло (нужен DeV и SQL v7)"))
 	_body.add_child(_two_tap("Заблокировать", Color("#a3283e"), func() -> void:
 		var done := await Cloud.block_user(friend_code)
 		if is_instance_valid(self) and done:

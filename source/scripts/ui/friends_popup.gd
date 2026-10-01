@@ -389,7 +389,7 @@ func _social_row(friend: Dictionary) -> Control:
 	text.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var badge := Insider.badge_of(int(friend.get("insider", -1)))
-	var name_label := UiStyle.label("%s %s" % [badge, nick], 24, UiStyle.TEXT, 6)
+	var name_label := UiStyle.label(nick if badge.is_empty() else "%s %s" % [badge, nick], 24, UiStyle.TEXT, 6)
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	name_label.clip_text = true
 	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -686,10 +686,11 @@ class CardView:
 		var ins := int(info.get("ins", -1))
 		var tag_color := UiStyle.GOLD if ins == 0 else (UiStyle.HOT if ins > 0 else UiStyle.NEON)
 		var tag := Insider.badge_of(ins).trim_prefix("[").trim_suffix("]").to_upper()
-		var tag_size := font.get_string_size(tag, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 22)
-		var pill := Rect2(48, 38, tag_size.x + 36, 38)
-		draw_style_box(UiStyle.box(Color(tag_color, 0.2), tag_color, 3, 19), pill)
-		_fit(font, tag, Vector2(pill.position.x + 18, pill.position.y + 28), 22, tag_color, tag_size.x + 2.0)
+		if not tag.is_empty():
+			var tag_size := font.get_string_size(tag, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 22)
+			var pill := Rect2(48, 38, tag_size.x + 36, 38)
+			draw_style_box(UiStyle.box(Color(tag_color, 0.2), tag_color, 3, 19), pill)
+			_fit(font, tag, Vector2(pill.position.x + 18, pill.position.y + 28), 22, tag_color, tag_size.x + 2.0)
 		_fit(font, str(info.get("n", "Енот")), Vector2(48, 134), 66, UiStyle.TEXT, 560.0)
 		_wordmark(font, Vector2(w - 48, 74))
 		var frame := Rect2(48, 176, 248, 248)

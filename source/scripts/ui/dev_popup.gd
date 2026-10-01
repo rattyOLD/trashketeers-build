@@ -10,6 +10,7 @@ var _list: VBoxContainer
 var _stats_label: Label
 var _reports_box: VBoxContainer
 var _words_label: Label
+var _log_label: Label
 var _health_label: Label
 var _edit: LineEdit
 var _word_edit: LineEdit
@@ -45,6 +46,10 @@ func _refresh() -> void:
 	_list.add_child(_link_button("Новая ссылка DeV (старая умрёт)", 0, "dev"))
 	_list.add_child(_link_button("Новая ссылка Insider (старая умрёт)", 1, "insider"))
 	_list.add_child(_wrap("Ссылка показывается один раз и копируется в буфер. DeV-ссылка работает на 3 входа, Insider — без лимита до замены."))
+
+	_list.add_child(UiStyle.label("ЖУРНАЛ ТЕГОВ", 22, UiStyle.TEXT_DIM, 5))
+	_log_label = _wrap("...")
+	_list.add_child(_log_label)
 
 	_list.add_child(UiStyle.label("ЖАЛОБЫ", 22, UiStyle.TEXT_DIM, 5))
 	_reports_box = VBoxContainer.new()
@@ -144,6 +149,23 @@ func _load_all() -> void:
 		return
 	_load_reports()
 	_load_words()
+	_load_log()
+
+
+func _load_log() -> void:
+	var r := await Cloud.dev_call("dev_badge_log")
+	if not is_instance_valid(_log_label):
+		return
+	if int(r["code"]) == 404:
+		_log_label.text = "Нужен SQL v8 (schema_v8_badge_log.sql)"
+		return
+	var lines: Array[String] = []
+	for row: Variant in Cloud._rows(r):
+		var d := row as Dictionary
+		var who := "—" if d.get("friend_code") == null else "%s [%s]" % [d.get("nickname"), d.get("friend_code")]
+		var tag := "DeV" if int(d.get("level", -1)) == 0 else ("Insider" if int(d.get("level", -1)) == 1 else "снят")
+		lines.append("%s · %s · %s · %s" % [str(d.get("at", "")).substr(5, 11).replace("T", " "), tag, who, d.get("how")])
+	_log_label.text = "\n".join(lines) if not lines.is_empty() else "Пока никому не выдавали"
 
 
 func _load_words() -> void:
