@@ -103,7 +103,7 @@ func _render_guest() -> void:
 		elif result == "offline":
 			_say("Нет связи с сервером. Попробуй позже.")
 		else:
-			_say("Не получилось. Проверь логин."))
+			_say("Не получилось. Проверь логин (латиница, цифры, «_»)%s" % ((". Сервер ответил: " + Cloud.last_error.left(120)) if not Cloud.last_error.is_empty() else "")))
 	_body.add_child(create)
 	var login := UiStyle.button("ВОЙТИ (на новом устройстве)", UiStyle.PANEL_LIGHT, 22, Vector2(0, 58))
 	login.pressed.connect(func() -> void:

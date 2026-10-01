@@ -43,6 +43,7 @@ var session_lost := false
 var moved_away := false
 var guest_key := ""
 var _guest_busy := false
+var _hidden_mail := false
 var _restore_after_signup := ""
 var _last_sync := 0
 var unread := 0
@@ -125,6 +126,11 @@ static func _random_text(length: int, alphabet: String) -> String:
 	for i in length:
 		out += alphabet[bytes[i] % alphabet.length()]
 	return out
+
+
+## У аккаунта уже есть скрытый логин guest_… (ключ мог потеряться, но почта на сервере осталась).
+func email_is_hidden() -> bool:
+	return _hidden_mail
 
 
 ## Параметр ссылки-входа: скрытый вход гостя (вход, без переноса) или старый код восстановления.
@@ -409,6 +415,27 @@ func register_account(login: String, password: String) -> String:
 		return "invalid"
 	if not await _ensure_session():
 		return "offline"
+	# Гость со скрытым входом: почта у него уже есть, и её смена в Supabase требует письма. Логин меняет сервер (SQL v20),
+	# а пароль ставим отдельно.
+	if not guest_key.is_empty() or email_is_hidden():
+		var claim := await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/claim_login", {"p_login": name})
+		if not bool(claim["ok"]):
+			return "offline" if int(claim["code"]) == 0 else "invalid"
+		var answer := str(claim["data"])
+		if answer == "taken":
+			return "taken"
+		if answer != "ok":
+			return "invalid"
+		var pass_result := await _call(HTTPClient.METHOD_PUT, "/auth/v1/user", {"password": password})
+		if not bool(pass_result["ok"]):
+			_remember_email(name)
+			guest_key = ""
+			Platform.storage_set(GUEST_KEY, "")
+			return "offline" if int(pass_result["code"]) == 0 else "weak"
+		_remember_email(name)
+		guest_key = ""
+		Platform.storage_set(GUEST_KEY, "")
+		return "ok"
 	var result := await _call(HTTPClient.METHOD_PUT, "/auth/v1/user", {"email": name + ACCOUNT_DOMAIN, "password": password})
 	if not bool(result["ok"]):
 		var code := int(result["code"])
@@ -721,6 +748,7 @@ func _store_session(reply: Dictionary) -> bool:
 	_expires = int(Time.get_unix_time_from_system()) + int(session.get("expires_in", 3600))
 	if user is Dictionary:
 		_uid = str((user as Dictionary).get("id", _uid))
+		_hidden_mail = str((user as Dictionary).get("email", "")).begins_with(GUEST_PREFIX)
 	if _access.is_empty() or _uid.is_empty():
 		return false
 	Platform.storage_set(SESSION_KEY, JSON.stringify({"uid": _uid, "refresh": _refresh}))
