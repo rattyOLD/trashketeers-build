@@ -92,8 +92,8 @@ func _accept_card_link() -> void:
 			continue
 		var level := await Cloud.claim_badge(badge_code)
 		if level >= 0:
-			_toast_note("Тег выдан: %s" % SaveService.get_badge())
 			_show_menu()
+			_show_badge_welcome(level)
 		else:
 			_toast_note("Ссылка не сработала: сервер не принял секрет (или v7 ещё не выполнена)")
 	var restore := Platform.consume_url_param("restore")
@@ -135,6 +135,16 @@ func _accept_card_link() -> void:
 	elif card_result == "self":
 		note = "Это твоя собственная визитка. С собой дружить можно и без ссылки"
 	_toast_note(note)
+
+
+func _show_badge_welcome(level: int) -> void:
+	var layer := CanvasLayer.new()
+	layer.layer = 90
+	add_child(layer)
+	var popup := BadgeWelcomePopup.new(level)
+	layer.add_child(popup)
+	popup.closed.connect(layer.queue_free)
+	popup.open()
 
 
 func _toast_note(text: String) -> void:
