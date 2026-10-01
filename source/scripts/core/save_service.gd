@@ -238,6 +238,16 @@ const ACHIEVEMENTS := [
 	{"id": "wave_30", "title": "Хозяин биома", "description": "Дойти до 30-й волны. Хозяин биома, поздравляю", "stat": "best_wave", "goal": 30, "nuts": 900, "dust": 12},
 	{"id": "tycoon", "title": "Мусорный магнат", "description": "Собрать 10000 монет. Свалка теперь на тебя работает", "stat": "nuts_total", "goal": 10000, "nuts": 0, "dust": 10},
 	{"id": "crit_god", "title": "Только крит", "description": "Нанести 5000 критов. Крысы называют тебя «ой на ножках»", "stat": "crits", "goal": 5000, "nuts": 600, "dust": 6},
+	{"id": "dirty_martyr", "title": "Мученик помойки", "rank": "Мученик", "description": "Умереть 10 раз. Помойка помнит каждое падение", "stat": "deaths", "goal": 10, "nuts": 100, "dust": 1},
+	{"id": "dirty_undying", "title": "Почти бессмертный", "rank": "Бессмертный", "description": "Умереть 50 раз. Бессмертный, просто очень неудачливый", "stat": "deaths", "goal": 50, "nuts": 400, "dust": 4},
+	{"id": "dirty_racket", "title": "Рэкет по понятиям", "rank": "Рэкетир", "description": "Ограбить 10 боссов. Нэлл ведёт учёт, процент её", "stat": "robbed", "goal": 10, "nuts": 250, "dust": 3},
+	{"id": "dirty_kind", "title": "Добрый енот", "rank": "Добряк", "description": "Пощадить 10 боссов. Они тебя запомнят, но не добрым словом", "stat": "spared", "goal": 10, "nuts": 250, "dust": 3},
+	{"id": "dirty_pigeon", "title": "Голубятник", "rank": "Голубятник", "description": "Сбить 50 Голубей-бомбардиров. Статуи города благодарны", "stat": "k_pigeon_bomber", "goal": 50, "nuts": 220, "dust": 2},
+	{"id": "dirty_sanitar", "title": "Санитар свалки", "rank": "Санитар", "description": "Победить 150 Мусорных комков. Теперь они меньше, но их больше", "stat": "k_trash_blob", "goal": 150, "nuts": 220, "dust": 2},
+	{"id": "dirty_tax", "title": "Налоговая проверка", "rank": "Налоговая", "description": "Победить 30 Инкассаторов. Декларацию сдавать некому", "stat": "k_cash_collector", "goal": 30, "nuts": 260, "dust": 3},
+	{"id": "dirty_pirate", "title": "Гроза морей", "rank": "Гроза морей", "description": "Победить 5 Пиратов Мусорных Морей. Море мусора, а гроза ты", "stat": "k_sea_pirate", "goal": 5, "nuts": 260, "dust": 3},
+	{"id": "dirty_masochist", "title": "Любитель острых ощущений", "rank": "Мазохист", "description": "Сыграть 10 забегов с модификатором. Тебе мало, да?", "stat": "mod_runs", "goal": 10, "nuts": 300, "dust": 4},
+	{"id": "dirty_bossdown", "title": "Боссодав", "rank": "Боссодав", "description": "Победить 25 боссов. Они уже собираются в профсоюз", "stat": "boss_kills", "goal": 25, "nuts": 500, "dust": 6},
 ]
 
 const XP_PER_LEVEL_BASE := 20.0
@@ -715,9 +725,21 @@ func get_badge() -> String:
 
 
 ## Ник с плашкой статуса — для меню и таблички над Енотом.
+func get_rank() -> String:
+	var id := str(data.get("rank_id", ""))
+	if id.is_empty() or not is_achieved(id):
+		return ""
+	for achievement in ACHIEVEMENTS:
+		if achievement["id"] == id:
+			return str(achievement.get("rank", ""))
+	return ""
+
+
 func get_display_nickname() -> String:
 	var badge := get_badge()
-	return get_nickname() if badge.is_empty() else "%s %s" % [badge, get_nickname()]
+	var shown := get_nickname() if badge.is_empty() else "%s %s" % [badge, get_nickname()]
+	var rank := get_rank()
+	return shown if rank.is_empty() else "%s · %s" % [shown, rank]
 
 
 ## "ok" — принят, "revoked" — код отозван, "bad" — не подошёл.
@@ -1104,6 +1126,8 @@ func check_achievements() -> Array:
 			data["nuts"] = get_nuts() + int(achievement["nuts"])
 			data["star_dust"] = get_star_dust() + int(achievement["dust"])
 			unlocked.append(achievement)
+			if achievement.has("rank"):
+				data["rank_id"] = achievement["id"]
 			achievement_unlocked.emit(achievement)
 	return unlocked
 

@@ -505,6 +505,15 @@ func show_countdown(seconds: int) -> void:
 	tween.tween_property(_countdown, "modulate:a", 0.0, 0.2)
 
 
+func show_mod_badge(title: String) -> void:
+	var badge := UiStyle.label("МОД: %s ×%.1f" % [title, RunMods.mult_of(RunMods.active)], 15, Color("#ff9a3d"), 5)
+	badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_left_column.add_child(badge)
+	if RunMods.has(&"no_dash"):
+		_dash.modulate.a = 0.25
+
+
 func toast(title: String, text: String, color: Color = UiStyle.GOLD) -> void:
 	_toast_queue.append([title, text, color])
 	if not _toast_busy:

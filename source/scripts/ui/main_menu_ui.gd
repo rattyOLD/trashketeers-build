@@ -43,6 +43,7 @@ var _daily: DailyPopup
 var _currency: CurrencyPopup
 var _vip: VipPopup
 var _mode_intro: ModeIntroPopup
+var _mod_chip: Button
 var _pass: BattlePassPopup
 var _season_pill: Button
 var _odds: OddsPopup
@@ -164,6 +165,7 @@ func _build_portrait_layout() -> Control:
 	column.add_child(_build_stage())
 	column.add_child(_build_weapon_chip())
 	column.add_child(_build_modes())
+	column.add_child(_build_mod_chip())
 	column.add_child(_build_play())
 	column.add_child(_build_dock())
 	column.add_child(UiStyle.label("Trash Squad · Неоновая Свалка", 16, Color(UiStyle.TEXT_DIM, 0.7), 4))
@@ -201,6 +203,7 @@ func _build_landscape_layout() -> Control:
 	side.add_child(_build_logo())
 	side.add_child(_build_weapon_chip())
 	side.add_child(_build_modes())
+	side.add_child(_build_mod_chip())
 	side.add_child(_build_play())
 	column.add_child(_build_dock())
 	return column
@@ -511,6 +514,37 @@ func _build_modes() -> Control:
 	return row
 
 
+func _build_mod_chip() -> Control:
+	_mod_chip = UiStyle.button("", UiStyle.PANEL, 18, Vector2(0, 46 if Orient.portrait else 40))
+	_mod_chip.clip_text = true
+	var style := UiStyle.box(Color(0.16, 0.08, 0.03, 0.85), Color("#ff9a3d"), 3, 16)
+	for state in ["normal", "hover", "pressed", "hover_pressed"]:
+		_mod_chip.add_theme_stylebox_override(state, style)
+	_mod_chip.add_theme_color_override("font_color", Color("#ffb066"))
+	_mod_chip.pressed.connect(_on_mod_pressed)
+	_refresh_mod_chip()
+	return _mod_chip
+
+
+func _on_mod_pressed() -> void:
+	SoundManager.play(&"ui_click", -4.0)
+	var id := RunMods.cycle()
+	_refresh_mod_chip()
+	var info := RunMods.info(id)
+	if _mode_hint == null:
+		_mode_hint = HintBubble.new()
+		add_child(_mode_hint)
+	if not info.is_empty():
+		_mode_hint.show_for(_mod_chip, "%s. Монет за забег ×%.1f." % [info["desc"], RunMods.mult_of(id)])
+	elif id == RunMods.RANDOM:
+		_mode_hint.show_for(_mod_chip, "Один случайный модификатор на забег, у каждого свой множитель монет.")
+
+
+func _refresh_mod_chip() -> void:
+	_mod_chip.text = RunMods.button_text(RunMods.chosen())
+	_mod_chip.visible = _mode == Mode.SURVIVAL
+
+
 func _on_mode_pressed(mode: int) -> void:
 	_select_mode(mode)
 	if _mode == Mode.SURVIVAL and not bool(SaveService.data.get("survival_intro_seen", false)):
@@ -551,6 +585,8 @@ func _select_mode(mode: int) -> void:
 		else:
 			return
 	_mode = mode
+	if _mod_chip != null:
+		_mod_chip.visible = mode == Mode.SURVIVAL
 	var colors := [Color("#ffb020"), Color("#7df9ff"), Color("#ff7ae0")]
 	for i in _mode_buttons.size():
 		var active := i == mode

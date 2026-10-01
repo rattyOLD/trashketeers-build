@@ -144,6 +144,7 @@ static var status_sink: Callable
 static var next_kind: StringName = &""
 ## Общий множитель скорости крыс (набирается с волнами и включается на кемперов).
 static var global_speed_mult := 1.0
+static var mod_speed_mult := 1.0
 var _pop := 0.0
 var _attack_timer := 0.0
 var _strafe_sign := 1.0
@@ -544,8 +545,8 @@ func tick(delta: float, player: Player, nav: Callable = Callable()) -> void:
 		desired *= 1.0 - slow_amount
 	if stun_left > 0.0 and not data.is_boss():
 		desired = Vector2.ZERO
-	if global_speed_mult != 1.0 and not data.is_boss():
-		desired *= global_speed_mult
+	if not data.is_boss():
+		desired *= global_speed_mult * mod_speed_mult
 	if data.shield and dir != Vector2.ZERO and _shield_up():
 		var turned := rotate_toward(_shield_dir.angle(), dir.angle(), data.shield_turn * delta)
 		_shield_dir = Vector2.from_angle(turned)

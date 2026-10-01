@@ -95,10 +95,15 @@ var radio: SurvivalRadio
 var liquids: LiquidFx
 var story_target: Node2D
 var _switching := false
+var _boss_started := 0.0
 
 
 func start(_weapon_id: StringName = &"") -> void:
 	randomize()
+	RunMods.clear()
+	if story_mission.is_empty():
+		RunMods.resolve()
+		Enemy.mod_speed_mult = RunMods.ENEMY_SPEED if RunMods.has(&"fast_enemies") else 1.0
 	for id in ContentDB.get_enemy_ids():
 		var enemy_data := ContentDB.get_enemy(id)
 		if enemy_data == null or not enemy_data.frames_id.is_empty():
@@ -118,7 +123,10 @@ func start(_weapon_id: StringName = &"") -> void:
 		chapter = StoryRun.map_chapter(chapter, story_mission)
 	map.build(layers, chapter)
 
-	_spawn_player(map.player_start, SaveService.get_loadout(), _find_target)
+	var loadout := SaveService.get_loadout()
+	if not RunMods.only_shotguns(loadout):
+		loadout = WeaponDB.get_weapon(RunMods.SHOTGUN_IDS[0]).with_tier(1)
+	_spawn_player(map.player_start, loadout, _find_target)
 	map.attach_player(player)
 	enemies = EnemyManager.new()
 	add_child(enemies)
@@ -214,6 +222,8 @@ func start(_weapon_id: StringName = &"") -> void:
 	SaveService.achievement_unlocked.connect(_on_achievement)
 
 	stats.add_flat(&"fire_rate_mult", ADRENALINE_FIRE)
+	if RunMods.has(&"debt"):
+		stats.add_flat(&"damage_mult", RunMods.DEBT_DAMAGE)
 	player.set_speed_buff(ADRENALINE_SPEED)
 	player.apply_run_stats(stats)
 	hud.set_xp(xp, _xp_needed(level), level)
@@ -223,6 +233,9 @@ func start(_weapon_id: StringName = &"") -> void:
 	hud.show_chapter(str(chapter.get("subtitle", "")), str(chapter.get("title", "")))
 	if story_mission.is_empty():
 		hud.toast("АДРЕНАЛИН!", "+35% скорострельности и +15% скорости на 20 с", Color("#ff7a3d"))
+		if RunMods.active != RunMods.NONE:
+			hud.show_mod_badge(str(RunMods.info(RunMods.active)["title"]))
+			SaveService.add_stat("mod_runs", 1, false)
 	SoundManager.play_music(StringName(str(chapter.get("music", "battle"))))
 	SoundManager.start_ambient()
 	if story_mission.is_empty():
@@ -248,6 +261,8 @@ func _exit_tree() -> void:
 	BossBrain.story_phases = false
 	Enemy.status_sink = Callable()
 	Enemy.global_speed_mult = 1.0
+	Enemy.mod_speed_mult = 1.0
+	RunMods.clear()
 	if SaveService.achievement_unlocked.is_connected(_on_achievement):
 		SaveService.achievement_unlocked.disconnect(_on_achievement)
 	super._exit_tree()
@@ -330,7 +345,7 @@ func _run_summary() -> Dictionary:
 		"kills": kills,
 		"level": level,
 		"time": director.elapsed,
-		"coins": nuts,
+		"coins": RunMods.reward(nuts),
 		"gems": run_gems,
 		"bosses": bosses_killed,
 		"chapter": str(director.current_chapter().get("title", "")),
@@ -386,7 +401,7 @@ func _run_summary_lines() -> PackedStringArray:
 	return PackedStringArray([
 		"Волна %d · %s" % [maxi(director.wave_number, 1), director.current_chapter().get("title", "")],
 		"Врагов: %d · Уровень %d" % [kills, level],
-		"Время: %s · Монеты: %d" % [BattleBase.format_time(director.elapsed), nuts],
+		"Время: %s · Монеты: %d%s" % [BattleBase.format_time(director.elapsed), RunMods.reward(nuts), " (×%.1f)" % RunMods.mult_of(RunMods.active) if RunMods.active != RunMods.NONE else ""],
 	])
 
 
@@ -546,6 +561,8 @@ func _on_enemy_damaged(enemy: Enemy, amount: float, is_crit: bool, kind: StringN
 		fx.number(enemy.get_aim_point() + Vector2(randf_range(-spread, spread), -enemy.data.radius * 1.6), amount, FxManager.kind_color(kind), is_crit, FxManager.kind_scale(kind))
 		if is_crit:
 			SaveService.add_stat("crits", 1, false)
+			if radio != null:
+				radio.on_first_crit()
 		if enemy.data.is_boss():
 			hud.update_boss(maxf(enemy.hp, 0.0), enemy.max_hp)
 		return
@@ -557,6 +574,8 @@ func _on_enemy_damaged(enemy: Enemy, amount: float, is_crit: bool, kind: StringN
 	acc["crit"] = acc["crit"] or is_crit
 	if is_crit:
 		SaveService.add_stat("crits", 1, false)
+		if radio != null:
+			radio.on_first_crit()
 	if enemy.data.is_boss():
 		hud.update_boss(maxf(enemy.hp, 0.0), enemy.max_hp)
 
@@ -714,12 +733,17 @@ func _on_enemy_died(enemy: Enemy) -> void:
 	_split_enemy(enemy, at)
 	if enemy.self_destructed:
 		return
+	if RunMods.has(&"blast") and not data.is_boss():
+		var wave := maxi(director.wave_number, 1)
+		BulletPool.explode(at, RunMods.BLAST_RADIUS, RunMods.BLAST_DAMAGE_BASE + RunMods.BLAST_DAMAGE_PER_WAVE * wave, Bullet.Team.ENEMY, Color("#ff7a3d"), 1.0)
 	kills += 1
 	if story != null:
 		story.on_kill(data)
 	hud.set_kills(kills)
 	if radio != null:
 		radio.on_kill()
+		if not data.is_boss() and data.max_hp >= 120.0:
+			radio.on_elite()
 	SaveService.add_stat("kills", 1, false)
 	SaveService.add_stat("k_" + String(data.id), 1, false)
 	status.on_enemy_died(enemy, at)
@@ -771,6 +795,8 @@ func _on_boss_spawned(boss: Enemy) -> void:
 	if story != null:
 		story.on_boss_spawned(director.is_mini_wave())
 	hud.show_boss(boss.data.display_name, boss.hp, boss.max_hp)
+	if not director.is_mini_wave():
+		_boss_started = director.elapsed
 	if not boss.posture_broken.is_connected(_on_posture_broken):
 		boss.posture_broken.connect(_on_posture_broken)
 	hud.show_banner("БОСС: %s!" % boss.data.display_name.to_upper(), UiStyle.DANGER)
@@ -807,6 +833,7 @@ func _on_miniboss_killed(boss: Enemy, at: Vector2) -> void:
 			radio.on_mini_boss(String(player.weapon_controller.base_weapon.id), String(boss.data.id))
 
 
+const SPEED_KILL_TIME := 60.0
 const MINI_CHOICE_RETRIES := 12
 
 
@@ -842,6 +869,7 @@ func _surrender_art(boss_id: String) -> String:
 
 
 func _on_mini_choice(index: int, name: String, at: Vector2, boss_id: String) -> void:
+	SaveService.add_stat("spared" if index == 0 else "robbed", 1)
 	if index == 0:
 		player.heal(player.max_hp)
 		_rerolls_free += 1
@@ -911,6 +939,10 @@ func _on_boss_killed(boss: Enemy, at: Vector2) -> void:
 	fx.confetti(at, 45)
 	if story != null:
 		return
+	if director.elapsed - _boss_started <= SPEED_KILL_TIME:
+		SaveService.add_stat("speed_bosses", 1)
+		_drop_weapon(_roll_weapon("legendary"), at + Vector2(70.0, 0.0), true, 0.9)
+		hud.toast("СЕКРЕТНЫЙ СТВОЛ", "Босс за минуту! Нэлл: Я это не запишу, мне не поверят.", Color("#ffd23f"))
 	_bonus_choices += 1
 	_pending_levelups += 1
 	if not _level_up_open:
@@ -967,7 +999,7 @@ func _roll_weapon(rarity: String) -> WeaponData:
 		var pool: Array[WeaponData] = []
 		var total := 0.0
 		for weapon in WeaponDB.get_player_weapons():
-			if weapon.rarity == WeaponData.RARITIES[r] and weapon.loot_weight > 0.0:
+			if weapon.rarity == WeaponData.RARITIES[r] and weapon.loot_weight > 0.0 and RunMods.only_shotguns(weapon):
 				pool.append(weapon)
 				total += weapon.loot_weight
 		if pool.is_empty():
@@ -985,7 +1017,7 @@ func _roll_weapon(rarity: String) -> WeaponData:
 			tier += 1
 			chance *= 0.4
 		return chosen.with_tier(tier)
-	return WeaponDB.get_weapon(StringName(SaveService.START_WEAPON)).with_tier(1)
+	return WeaponDB.get_weapon(RunMods.SHOTGUN_IDS[0] if RunMods.has(&"shotguns") else StringName(SaveService.START_WEAPON)).with_tier(1)
 
 
 ## Ящик сюжета открыт пробкой-ключом: тяжёлый легендарный ствол рядом с Енотом.
@@ -1202,6 +1234,8 @@ func _on_weapon_picked(pickup: WeaponPickup) -> void:
 	var wc := player.weapon_controller
 	var found := pickup.weapon
 	var was_loot := pickup.is_loot
+	if radio != null and found.rarity == "legendary":
+		radio.on_legendary()
 	pickup.clear()
 	var slot := wc.first_empty_slot()
 	var old: WeaponData = null
@@ -1413,6 +1447,9 @@ func _on_player_died() -> void:
 	fx.chunks(player.global_position, Color("#8e8aa6"), 14, 260.0, 5.0)
 	add_shake(1.0)
 	atmosphere.flash(Color(1.0, 0.1, 0.1), 0.5, 0.8)
+	if radio != null:
+		radio.on_death()
+	SaveService.add_stat("deaths", 1)
 	if story != null and story.try_respawn():
 		return
 	get_tree().create_timer(DEATH_DELAY, false).timeout.connect(_offer_revive)
@@ -1470,7 +1507,7 @@ func _record() -> Dictionary:
 		return {}
 	_recorded = true
 	return SaveService.record_run({
-		"nuts": nuts,
+		"nuts": RunMods.reward(nuts),
 		"time": director.elapsed,
 		"wave": _waves_cleared(),
 		"kills": kills,
@@ -1491,7 +1528,7 @@ func _finish() -> void:
 	var previous_best := SaveService.get_stat("best_wave")
 	var result := _record()
 	summary["friend"] = SaveService.friend_wave_line(int(summary["wave"]), previous_best)
-	Platform.send_report("run", "mode=survival hero=%s weapon=%s wave=%d chapter=%s level=%d kills=%d time=%ds coins=%d bosses=%d revives=%d killed_by=%s died=%s record=%s" % [SaveService.get_character_id(), player.weapon_controller.base_weapon.id, summary["wave"], summary["chapter"], level, kills, int(director.elapsed), nuts, bosses_killed, revives_used, Player.last_source, player.is_dead, result.get("record", false)])
+	Platform.send_report("run", "mode=survival hero=%s weapon=%s wave=%d chapter=%s level=%d kills=%d time=%ds coins=%d bosses=%d revives=%d killed_by=%s died=%s record=%s mod=%s" % [SaveService.get_character_id(), player.weapon_controller.base_weapon.id, summary["wave"], summary["chapter"], level, kills, int(director.elapsed), nuts, bosses_killed, revives_used, Player.last_source, player.is_dead, result.get("record", false), RunMods.active])
 	summary["record"] = result.get("record", false)
 	summary["total_coins"] = SaveService.get_coins()
 	finished = true

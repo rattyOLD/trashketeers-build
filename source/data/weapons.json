@@ -116,7 +116,7 @@
       "spread_deg": 36,
       "range": 330,
       "crit_chance": 0.05,
-      "knockback": 1.5,
+      "knockback": 2.6,
       "trail_points": 3,
       "recoil": 2.2,
       "loot_weight": 1.0,

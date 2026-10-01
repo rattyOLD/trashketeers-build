@@ -393,7 +393,7 @@ func _update_shake(delta: float) -> void:
 
 
 func _request_dash() -> void:
-	if player == null or finished or get_tree().paused:
+	if player == null or finished or get_tree().paused or RunMods.has(&"no_dash"):
 		return
 	if hero_skills != null and hero_skills.has_skill():
 		hero_skills.try_use()

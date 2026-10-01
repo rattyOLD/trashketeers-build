@@ -381,6 +381,12 @@ func _on_secret_broken(secret: StorySecret) -> void:
 		"weapon":
 			game._drop_weapon(game._roll_weapon("rare"), front, true)
 			game.pickups.spawn_xp_gold(front, 4)
+		"stash":
+			game.pickups.spawn(front, 60)
+			game.pickups.spawn_xp_gold(front, 14)
+		"armory":
+			game._drop_weapon(game._roll_weapon("epic"), front, true)
+			_drop_medkit(front + Vector2(0.0, 40.0))
 	game.hud.toast(str(secret.entry.get("title", "ТАЙНИК")), str(secret.entry.get("text", "")), Color("#5ff2ff"))
 
 

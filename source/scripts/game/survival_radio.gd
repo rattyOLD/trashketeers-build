@@ -10,6 +10,9 @@ const STREAK_GOAL := 40
 const LOW_HP := 0.25
 const LOW_GAP_MS := 45000
 const MAX_LOW := 3
+const EVENT_GAP_MS := 60000
+const QUIP_WEAPON := &"double_v1"
+const QUIP_EVERY := 14
 
 var _line: AmbientLine
 var _radio: Dictionary = {}
@@ -22,6 +25,9 @@ var _low_ms := -60000
 var _low_count := 0
 var _streak := 0
 var _streak_goal := STREAK_GOAL
+var _crit_done := false
+var _quip_shots := 0
+var _event_ms := {&"elite": -EVENT_GAP_MS}
 
 
 func setup(owner_game: Node, player: Player) -> void:
@@ -35,6 +41,16 @@ func setup(owner_game: Node, player: Player) -> void:
 	_player = player
 	player.health_changed.connect(_on_health)
 	player.damaged.connect(func(_amount: float) -> void: _streak = 0)
+	player.weapon_controller.fired.connect(_on_fired)
+
+
+func _on_fired(weapon: WeaponData, _origin: Vector2, _direction: Vector2) -> void:
+	if weapon.id != QUIP_WEAPON:
+		return
+	_quip_shots += 1
+	if _quip_shots >= QUIP_EVERY:
+		_quip_shots = 0
+		_play("ded", true)
 
 
 func on_wave(is_boss: bool) -> void:
@@ -78,6 +94,27 @@ func _play(key: String, force: bool) -> void:
 	_used[key] = used
 	_last_ms = Time.get_ticks_msec()
 	_line.push(pool[index])
+
+
+func on_elite() -> void:
+	if Time.get_ticks_msec() - _event_ms[&"elite"] >= EVENT_GAP_MS:
+		_event_ms[&"elite"] = Time.get_ticks_msec()
+		_play("elite", true)
+
+
+func on_legendary() -> void:
+	_play("legendary", true)
+
+
+func on_death() -> void:
+	_play("death", true)
+
+
+func on_first_crit() -> void:
+	if _crit_done:
+		return
+	_crit_done = true
+	_play("first_crit", false)
 
 
 func on_kill() -> void:
