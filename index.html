@@ -1,345 +1,977 @@
-<!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
-		<title>Trashketeers.io</title>
-		<style>
-html, body, #canvas {
-	margin: 0;
-	padding: 0;
-	border: 0;
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Trash Squad">
+<link rel="apple-touch-icon" href="icon180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Trash Squad</title>
+<meta name="theme-color" content="#0d0a1c">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap">
+<style>
+html.sideways #rotate { display: flex; }
+:root {
+	color-scheme: dark;
+	--night: #0d0a1c;
+	--panel: #1b1433;
+	--pink: #ff2ea6;
+	--cyan: #00f5ff;
+	--text: #efe9ff;
+	--muted: #a79cc9;
+	--danger: #ff5c7a;
+	padding: 0 !important;
 }
-
-body {
-	color: white;
-	background-color: black;
+html, body {
+	height: 100%;
+	margin: 0;
+	background: var(--night);
+	color: var(--text);
 	overflow: hidden;
+	overscroll-behavior: none;
+	touch-action: none;
+	-webkit-user-select: none;
+	user-select: none;
+	-webkit-touch-callout: none;
+	-webkit-tap-highlight-color: transparent;
+}
+#canvas {
+	position: fixed;
+	left: 0;
+	top: 0;
+	display: block;
+	outline: none;
 	touch-action: none;
 }
-
-#canvas {
-	display: block;
-}
-
-#canvas:focus {
-	outline: none;
-}
-
-#status, #status-splash, #status-progress {
-	position: absolute;
-	left: 0;
-	right: 0;
-}
-
-#status, #status-splash {
-	top: 0;
-	bottom: 0;
-}
-
-#status {
-	background-color: #0d0a1c;
+#boot {
+	position: fixed;
+	inset: 0;
 	display: flex;
 	flex-direction: column;
-	justify-content: center;
 	align-items: center;
-	visibility: hidden;
-}
-
-#status-splash {
-	max-height: 100%;
-	max-width: 100%;
-	margin: auto;
-}
-
-#status-splash.show-image--false {
-	display: none;
-}
-
-#status-splash.fullsize--true {
-	height: 100%;
-	width: 100%;
-	object-fit: contain;
-}
-
-#status-splash.use-filter--false {
-	image-rendering: pixelated;
-}
-
-#status-progress, #status-notice {
-	display: none;
-}
-
-#status-progress {
-	bottom: 10%;
-	width: 50%;
-	margin: 0 auto;
-}
-
-#status-notice {
-	background-color: #5b3943;
-	border-radius: 0.5rem;
-	border: 1px solid #9b3943;
-	color: #e0e0e0;
-	font-family: 'Noto Sans', 'Droid Sans', Arial, sans-serif;
-	line-height: 1.3;
-	margin: 0 2rem;
-	overflow: hidden;
-	padding: 1rem;
+	justify-content: center;
+	gap: 22px;
+	padding: 24px 16px;
+	background:
+		radial-gradient(120% 60% at 50% 110%, rgba(255, 46, 166, 0.22), transparent 60%),
+		radial-gradient(90% 50% at 50% -10%, rgba(0, 245, 255, 0.14), transparent 60%),
+		var(--night);
+	font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 	text-align: center;
-	z-index: 1;
+	z-index: 5;
+	transition: opacity 0.35s ease;
 }
-		</style>
-		<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
-<link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<meta name="theme-color" content="#0d0a1c">
+#boot.gone { opacity: 0; pointer-events: none; }
+#boot h1 {
+	margin: 0;
+	font-family: "Russo One", "Arial Black", Impact, sans-serif;
+	font-weight: 400;
+	font-size: clamp(34px, 11vw, 64px);
+	letter-spacing: 0.02em;
+	line-height: 1;
+	color: #fff;
+	text-shadow: 0 0 6px var(--pink), 0 0 22px rgba(255, 46, 166, 0.75), 0 0 44px rgba(255, 46, 166, 0.4);
+	text-wrap: balance;
+}
+#boot .tag {
+	margin: 0;
+	font-size: 12px;
+	letter-spacing: 0.24em;
+	text-transform: uppercase;
+	color: var(--cyan);
+	text-shadow: 0 0 10px rgba(0, 245, 255, 0.6);
+}
+.bar {
+	position: relative;
+	width: min(82vw, 380px);
+	height: 22px;
+	border-radius: 12px;
+	background: #120d26;
+	border: 2px solid rgba(0, 245, 255, 0.55);
+	box-shadow: 0 0 18px rgba(0, 245, 255, 0.25), inset 0 2px 6px rgba(0, 0, 0, 0.6);
+	overflow: hidden;
+}
+.bar i {
+	display: block;
+	height: 100%;
+	width: 0%;
+	border-radius: 10px;
+	background: linear-gradient(90deg, var(--cyan), var(--pink));
+	box-shadow: 0 0 14px rgba(255, 46, 166, 0.7);
+}
+.bar i::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.35) 50%, transparent 70%);
+	background-size: 200% 100%;
+	animation: shine 1.4s linear infinite;
+}
+@keyframes shine { from { background-position: 200% 0; } to { background-position: -100% 0; } }
+#pct {
+	margin: -8px 0 0;
+	font-family: "Russo One", "Arial Black", Impact, sans-serif;
+	font-size: 26px;
+	color: #fff;
+	text-shadow: 0 0 10px rgba(0, 245, 255, 0.7);
+	font-variant-numeric: tabular-nums;
+}
+#boot .foot {
+	position: absolute;
+	left: 0; right: 0;
+	bottom: max(18px, env(safe-area-inset-bottom));
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
+}
+#boot .made { margin: 0; font-size: 12px; letter-spacing: 2px; color: #8f84b8; }
+#boot .studio {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	margin: 0;
+	font-family: "Russo One", "Arial Black", Impact, sans-serif;
+	font-size: 18px;
+	letter-spacing: 2px;
+	white-space: nowrap;
+	color: #5ff2ff;
+	text-shadow: 0 0 10px rgba(0, 245, 255, 0.5);
+}
+#boot .ver {
+	margin: 6px 0 0;
+	font-size: 11px;
+	letter-spacing: 1px;
+	color: #8f84b8;
+	opacity: 0.8;
+}
+#tip {
+	margin: 0;
+	max-width: 320px;
+	font-size: 14px;
+	color: var(--muted);
+	min-height: 2.6em;
+}
+#status {
+	margin: 0;
+	min-height: 1.4em;
+	font-size: 15px;
+	color: var(--muted);
+	font-variant-numeric: tabular-nums;
+}
+#error {
+	max-width: 420px;
+	margin: 0;
+	padding: 14px 16px;
+	border-radius: 10px;
+	background: rgba(255, 92, 122, 0.12);
+	box-shadow: inset 0 0 0 1px rgba(255, 92, 122, 0.55);
+	color: var(--text);
+	font-size: 14px;
+	line-height: 1.45;
+	white-space: pre-line;
+	text-align: left;
+}
+#retry {
+	font: inherit;
+	font-size: 15px;
+	padding: 10px 22px;
+	border: 0;
+	border-radius: 999px;
+	background: var(--pink);
+	color: #fff;
+	cursor: pointer;
+}
+#crash {
+	position: fixed;
+	inset: 0;
+	z-index: 9;
+	display: none;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 14px;
+	padding: 24px 16px;
+	background: rgba(13, 10, 28, 0.94);
+	font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+	text-align: center;
+}
+#crash.show { display: flex; }
+#crash h2 { margin: 0; font-size: 26px; color: var(--pink); }
+#crash pre {
+	max-width: 92vw;
+	max-height: 34vh;
+	overflow: auto;
+	margin: 0;
+	padding: 10px 12px;
+	border-radius: 10px;
+	background: rgba(255, 255, 255, 0.06);
+	color: var(--muted);
+	font-size: 11px;
+	text-align: left;
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+#crash button {
+	font: inherit;
+	font-size: 15px;
+	padding: 10px 22px;
+	border: 0;
+	border-radius: 999px;
+	color: #fff;
+	background: var(--pink);
+	cursor: pointer;
+}
+#crash button.alt { background: #3a2d60; }
+#retry:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+#rotate {
+	position: fixed;
+	inset: 0;
+	z-index: 8;
+	pointer-events: none;
+	display: none;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 26px;
+	padding: 24px;
+	text-align: center;
+	background:
+		radial-gradient(90% 50% at 50% 40%, rgba(0, 245, 255, 0.16), transparent 65%),
+		radial-gradient(120% 60% at 50% 110%, rgba(255, 46, 166, 0.28), transparent 60%),
+		rgba(13, 10, 28, 0.97);
+	font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+#rotate .phone {
+	position: relative;
+	width: 74px;
+	height: 128px;
+	border-radius: 16px;
+	border: 4px solid var(--cyan);
+	box-shadow: 0 0 22px rgba(0, 245, 255, 0.55), inset 0 0 14px rgba(0, 245, 255, 0.25);
+	background: rgba(0, 245, 255, 0.06);
+	animation: turn 1.8s ease-in-out infinite;
+}
+#rotate .phone::before {
+	content: "";
+	position: absolute;
+	top: 8px;
+	left: 50%;
+	width: 22px;
+	height: 5px;
+	margin-left: -11px;
+	border-radius: 3px;
+	background: var(--cyan);
+	opacity: 0.8;
+}
+#rotate .phone::after {
+	content: "";
+	position: absolute;
+	left: 50%;
+	bottom: 14px;
+	width: 26px;
+	height: 26px;
+	margin-left: -13px;
+	border-radius: 50%;
+	background: radial-gradient(circle, var(--pink) 30%, transparent 70%);
+	animation: pulse 1.3s ease-in-out infinite;
+}
+@keyframes turn {
+	0%, 100% { transform: translateY(0); }
+	50% { transform: translateY(-10px); }
+}
+@keyframes pulse { 0%, 100% { opacity: 0.45; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.15); } }
+#rotate h2 {
+	margin: 0;
+	font-family: "Russo One", "Arial Black", Impact, sans-serif;
+	font-weight: 400;
+	font-size: clamp(26px, 8vw, 40px);
+	color: #fff;
+	text-shadow: 0 0 6px var(--pink), 0 0 22px rgba(255, 46, 166, 0.7);
+}
+#rotate p { margin: 0; max-width: 300px; font-size: 15px; line-height: 1.4; color: var(--muted); }
+#rotate p b { color: var(--cyan); font-weight: 600; }
+@media (prefers-reduced-motion: reduce) {
+	#rotate .phone, #rotate .phone::after { animation: none; }
+	#boot, .bar i { transition: none; }
+}
+</style>
+
+<canvas id="canvas" tabindex="0">Браузер не поддерживает canvas.</canvas>
+
+<div id="rotate">
+	<div class="phone"></div>
+	<h2>Держи телефон вертикально</h2>
+	<p>Переверни телефон вертикально, и всё продолжится.</p>
+</div>
+
+<div id="boot">
+	<p class="tag">Неоновая Свалка</p>
+	<h1>Trash Squad</h1>
+	<div class="bar"><i id="fill"></i></div>
+	<p id="pct">0%</p>
+	<p id="status">Подключаемся к свалке…</p>
+	<p id="tip"></p>
+	<p id="error" hidden></p>
+	<button id="retry" type="button" hidden>Попробовать ещё раз</button>
+	<div class="foot">
+		<p class="made">Сделано командой</p><p class="studio"><svg class="mug" viewBox="0 0 64 64" width="34" height="34" aria-hidden="true"><path d="M14 24h30v28a6 6 0 0 1-6 6H20a6 6 0 0 1-6-6z" fill="#ffb020" stroke="#1a0033" stroke-width="3"/><path d="M44 30h6a6 6 0 0 1 0 14h-6" fill="none" stroke="#1a0033" stroke-width="3"/><path d="M44 30h6a6 6 0 0 1 0 14h-6" fill="none" stroke="#c3bfd8" stroke-width="1.2"/><circle cx="19" cy="22" r="7" fill="#fff6dc" stroke="#1a0033" stroke-width="2.5"/><circle cx="29" cy="18" r="8" fill="#fff6dc" stroke="#1a0033" stroke-width="2.5"/><circle cx="39" cy="22" r="7" fill="#fff6dc" stroke="#1a0033" stroke-width="2.5"/><path d="M16 28l-1-9 8 4zM42 28l1-9-8 4z" fill="#5a5470" stroke="#1a0033" stroke-width="2"/><rect x="17" y="36" width="24" height="9" rx="4.5" fill="#1a0033"/><circle cx="24" cy="40.5" r="2.4" fill="#fff"/><circle cx="34" cy="40.5" r="2.4" fill="#fff"/><ellipse cx="29" cy="47" rx="3" ry="2" fill="#1a0033"/></svg><span>Beer Party Studio</span><svg class="mug" viewBox="0 0 64 64" width="34" height="34" aria-hidden="true"><path d="M14 24h30v28a6 6 0 0 1-6 6H20a6 6 0 0 1-6-6z" fill="#ffb020" stroke="#1a0033" stroke-width="3"/><path d="M44 30h6a6 6 0 0 1 0 14h-6" fill="none" stroke="#1a0033" stroke-width="3"/><path d="M44 30h6a6 6 0 0 1 0 14h-6" fill="none" stroke="#c3bfd8" stroke-width="1.2"/><circle cx="19" cy="22" r="7" fill="#fff6dc" stroke="#1a0033" stroke-width="2.5"/><circle cx="29" cy="18" r="8" fill="#fff6dc" stroke="#1a0033" stroke-width="2.5"/><circle cx="39" cy="22" r="7" fill="#fff6dc" stroke="#1a0033" stroke-width="2.5"/><path d="M16 28l-1-9 8 4zM42 28l1-9-8 4z" fill="#5a5470" stroke="#1a0033" stroke-width="2"/><rect x="17" y="36" width="24" height="9" rx="4.5" fill="#1a0033"/><circle cx="24" cy="40.5" r="2.4" fill="#fff"/><circle cx="34" cy="40.5" r="2.4" fill="#fff"/><ellipse cx="29" cy="47" rx="3" ry="2" fill="#1a0033"/></svg></p>
+		<p class="ver" id="ver"></p>
+	</div>
+</div>
+
+<div id="crash">
+	<h2>Игра вылетела</h2>
+	<p style="margin:0;color:var(--muted);font-size:14px;max-width:340px">Скопируй лог и пришли разработчику: так мы найдём причину. Прогресс сохранён.</p>
+	<pre id="crashlog"></pre>
+	<button id="crashcopy" type="button" class="alt">Скопировать лог</button>
+	<button id="crashreload" type="button">Перезапустить</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako_inflate.min.js"></script>
+<script src="render_scale.js"></script>
 <script>
-// Ограничение плотности пикселей холста (подключается в <head> ДО index.js).
-// Godot в вебе рисует в разрешении экрана × devicePixelRatio: на телефоне с DPR 3 это
-// ~3 млн пикселей на кадр — видеочип греется, WebView начинает лагать и со временем падает.
-// Подменяем window.devicePixelRatio геттером с потолком window.__trash_dpr_cap: движок читает
-// его каждый кадр (GodotDisplayScreen.updateSize), так что игра может менять потолок на лету
-// из настроек графики (Platform.set_render_cap). Ввод пересчитывается движком по реальному
-// размеру холста, поэтому касания остаются точными.
 (function () {
 	'use strict';
-	try {
-		var descriptor = Object.getOwnPropertyDescriptor(window, 'devicePixelRatio')
-			|| Object.getOwnPropertyDescriptor(Window.prototype, 'devicePixelRatio');
-		var initial = window.devicePixelRatio || 1;
-		var real = descriptor && descriptor.get
-			? function () { return descriptor.get.call(window) || initial; }
-			: function () { return initial; };
-		var touch = ('ontouchstart' in window) || (navigator.maxTouchPoints || 0) > 0;
-		window.__trash_real_dpr = real;
-		window.__trash_is_touch = touch;
-		if (typeof window.__trash_dpr_cap !== 'number') {
-			window.__trash_dpr_cap = touch ? 1.5 : 2;
+	// iOS Safari меняет размер окна после поворота с задержкой и не всегда шлёт resize — движок остаётся со старым размером холста.
+	var kickTimers = [];
+	var kick = function (event) {
+		if (event && event.isTrusted === false) {
+			return;
 		}
-		Object.defineProperty(window, 'devicePixelRatio', {
-			configurable: true,
-			get: function () {
-				var r = real();
-				var cap = window.__trash_dpr_cap || r;
-				return Math.max(1, Math.min(r, cap));
-			}
+		kickTimers.forEach(clearTimeout);
+		kickTimers = [250, 900, 2000].map(function (ms) {
+			return setTimeout(function () { window.dispatchEvent(new Event('resize')); }, ms);
 		});
-	} catch (e) {
-		// Браузер не дал переопределить свойство — рисуем в родном разрешении.
-	}
+	};
+	try { if (screen.orientation && screen.orientation.lock && window.matchMedia('(pointer: coarse)').matches) { screen.orientation.lock('portrait').catch(function () {}); } } catch (e) {}
+	var phone = false;
+	try { phone = window.matchMedia('(pointer: coarse)').matches && Math.min(screen.width, screen.height) < 700; } catch (e) {}
+	var judge = function () {
+		var sideways = phone && window.innerWidth > window.innerHeight * 1.05;
+		document.documentElement.classList.toggle('sideways', sideways);
+	};
+	judge();
+	setInterval(judge, 300);
+	window.addEventListener('orientationchange', function () { judge(); setTimeout(judge, 400); });
+	window.addEventListener('orientationchange', kick);
+	window.addEventListener('resize', judge);
+	window.addEventListener('resize', kick);
+	if (window.visualViewport) { window.visualViewport.addEventListener('resize', kick); }
 })();
 </script>
+
 <script>
-// Разблокировка звука для iOS Safari / Telegram WebView / встраивания в iframe.
-// Подключается в <head> ДО index.js (export_presets.cfg → html/head_include и оболочка хостинга).
-//  1. Запоминаем каждый AudioContext, который создаст движок Godot.
-//  2. На каждом жесте (touchend/pointerup/click/keydown) синхронно зовём ctx.resume():
-//     iOS разрешает запуск аудио только внутри обработчика жеста, а после звонка или
-//     сворачивания приложения переводит контекст в "interrupted" — его тоже надо будить.
-//  3. Беззвучный режим айфона глушит Web Audio (категория "ambient"). navigator.audioSession
-//     = "playback" (iOS 17+) или бесшумный <audio> в цикле (iOS ≤ 16) переводят сессию
-//     в режим медиаплеера — игра звучит, как видео.
+window.__trash_build = {label: 'v34.160', time: '01.10 20:09'};
+document.getElementById('ver').textContent = 'Версия ' + window.__trash_build.label + ' · сборка от ' + window.__trash_build.time;
+</script>
+<script>
+window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); window.__trash_install_evt = e; });
+window.__trash_install = function () {
+	var e = window.__trash_install_evt;
+	if (!e) { return false; }
+	window.__trash_install_evt = null;
+	e.prompt();
+	return true;
+};
+if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').catch(function () {}); }
+</script>
+<script src="audio_unlock.js"></script>
+<script src="index.js"></script>
+<script>
 (function () {
 	'use strict';
-	var SILENT_URL = window.GODOT_SILENT_AUDIO_URL || 'data:audio/mpeg;base64,SUQzBAAAAAAAIlRTU0UAAAAOAAADTGF2ZjYzLjcuMTAwAAAAAAAAAAAAAAD/83DEAAAAAAAAAAAASW5mbwAAAA8AAAAWAAAJsQAdHR0dKCgoKCgzMzMzPT09PT1ISEhIU1NTU1NeXl5eaWlpaWlzc3Nzfn5+fn6JiYmJlJSUlJSenp6enqmpqam0tLS0tL+/v7/KysrKytTU1NTf39/f3+rq6ur19fX19f////8AAAAATGF2YzYzLjE0AAAAAAAAAAAAAAAAAvQvAAAAAAAACbFJCZ3fAAAAAAAAAAAAAAAAAP/zQMQAAAADSAAAAABMQU1FNC4xIChhbHBoYSAwKVVVTEFNRTQuMSAoYWxwaGEgMClVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NCxFsAAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVTEFNRTQuMSAoYWxwaGEgMClVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NAxKQAAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVMQU1FNC4xIChhbHBoYSAwKVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/80LEowAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVVVMQU1FNC4xIChhbHBoYSAwKVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/80DEpAAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVUxBTUU0LjEgKGFscGhhIDApVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsSjAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVUxBTUU0LjEgKGFscGhhIDApVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVTEFNRTQuMSAoYWxwaGEgMClVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NCxKMAAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVTEFNRTQuMSAoYWxwaGEgMClVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NAxKQAAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVMQU1FNC4xIChhbHBoYSAwKVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/80LEowAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVVVMQU1FNC4xIChhbHBoYSAwKVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/80DEpAAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVUxBTUU0LjEgKGFscGhhIDApVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsSjAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVUxBTUU0LjEgKGFscGhhIDApVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVTEFNRTQuMSAoYWxwaGEgMClVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NCxKMAAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVTEFNRTQuMSAoYWxwaGEgMClVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NAxKQAAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVMQU1FNC4xIChhbHBoYSAwKVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/80LEowAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVVVMQU1FNC4xIChhbHBoYSAwKVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/80DEpAAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVUxBTUU0LjEgKGFscGhhIDApVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQsSjAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVVUxBTUU0LjEgKGFscGhhIDApVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVf/zQMSkAAADSAAAAABVVVVVVVVVVVVVVVVVVVVVVVVVTEFNRTQuMSAoYWxwaGEgMClVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NCxKMAAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVTEFNRTQuMSAoYWxwaGEgMClVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//NAxKQAAANIAAAAAFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/80LEowAAA0gAAAAAVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVU=';
-	var contexts = [];
-	var NativeContext = window.AudioContext || window.webkitAudioContext;
-	if (NativeContext) {
-		var Tracked = function (options) {
-			var ctx = options === undefined ? new NativeContext() : new NativeContext(options);
-			contexts.push(ctx);
-			return ctx;
-		};
-		Tracked.prototype = NativeContext.prototype;
-		window.AudioContext = Tracked;
-		if (window.webkitAudioContext) {
-			window.webkitAudioContext = Tracked;
+
+	// Хостинг ограничивает бинарный файл 15 МБ и отдаёт только «веб-типы», а index.wasm весит
+	// ~44 МБ: движок лежит gzip-ом (raccoon.core.wasm), пак ресурсов — как raccoon.pack.wasm.
+	// Загрузчик Godot (Preloader) берёт файлы через window.fetch: подменяем fetch для
+	// index.wasm / index.pck и отдаём ему уже скачанные и распакованные байты.
+	const FILES = {
+		wasm: { parts: [{url:"raccoon.core.0.wasm",bytes:5221065},{url:"raccoon.core.1.wasm",bytes:4165384}] },
+		pck: { parts: [{url:"raccoon.pack.0.wasm",bytes:11993382},{url:"raccoon.pack.1.wasm",bytes:12547285},{url:"raccoon.pack.2.wasm",bytes:3907563}] },
+	};
+	const GODOT_CONFIG = {
+		args: [],
+		canvasResizePolicy: 2,
+		ensureCrossOriginIsolationHeaders: false,
+		executable: 'index',
+		experimentalVK: false,
+		fileSizes: { 'index.pck': 29382624, 'index.wasm': 43699190 },
+		focusCanvas: true,
+		gdextensionLibs: [],
+		onPrint: function () {
+			keepLog('log', arguments);
+			console.log.apply(console, arguments);
+		},
+		onPrintError: function () {
+			keepLog('err', arguments);
+			console.error.apply(console, arguments);
+			const text = Array.prototype.join.call(arguments, ' ');
+			if (text.indexOf('!is_inside_tree()') !== -1) {
+				treeErrors += 1;
+			}
+			if (/ERROR|Error/.test(text) && window.trkReport && treeErrors <= 3) {
+				window.trkReport('error', text);
+			}
+			if (/Aborted|abort\(|out of memory|Cannot enlarge memory|memory access out of bounds|unreachable/i.test(text)) {
+				crash(text);
+			}
+		},
+	};
+
+	// Адрес сбора отчётов о вылетах (Google Apps Script / Supabase и т.п.); пусто — отчёты не отправляются.
+	const REPORT_URL = 'https://script.google.com/macros/s/AKfycbxVyy-SnRANW0Im-1Blne2TcUbca93WqzyBulpADwWWD7YH6x3KIygBYImTe8VfP5pp/exec';
+	const BUILD_ID_REPORT = '1790860146';
+	const SESSION_ID = Math.random().toString(36).slice(2, 8);
+	const SESSION_START = Date.now();
+	const REPORT_CAP = 250;
+	const sentKeys = {};
+	let reportCount = 0;
+	const logTail = [];
+	let treeErrors = 0;
+	const eventLog = [];
+	let hiddenMs = 0;
+	let hiddenSince = 0;
+	let battery = null;
+	let userId = '';
+	try {
+		userId = window.localStorage.getItem('trk_uid') || '';
+		if (!userId) {
+			userId = Math.random().toString(36).slice(2, 10);
+			window.localStorage.setItem('trk_uid', userId);
 		}
+	} catch (e) { userId = 'nostorage'; }
+
+	function noteEvent(text) {
+		eventLog.push(Math.round((Date.now() - SESSION_START) / 1000) + 's ' + text);
+		if (eventLog.length > 25) { eventLog.shift(); }
+	}
+	window.trkNote = noteEvent;
+
+	function gpuInfo() {
+		try {
+			const c = document.createElement('canvas');
+			const gl = c.getContext('webgl2') || c.getContext('webgl');
+			if (!gl) { return 'no webgl'; }
+			const ext = gl.getExtension('WEBGL_debug_renderer_info');
+			const name = ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER);
+			return name + ' | maxTex ' + gl.getParameter(gl.MAX_TEXTURE_SIZE);
+		} catch (e) { return 'gpu?'; }
 	}
 
-	var silent = null;
+	function envInfo() {
+		const nav = navigator;
+		const conn = nav.connection || {};
+		let heap = '';
+		try { if (performance.memory) { heap = Math.round(performance.memory.usedJSHeapSize / 1048576) + '/' + Math.round(performance.memory.jsHeapSizeLimit / 1048576) + 'MB'; } } catch (e) {}
+		let standalone = false;
+		try { standalone = !!(window.matchMedia('(display-mode: standalone)').matches || nav.standalone); } catch (e) {}
+		return {
+			uid: userId,
+			ua: nav.userAgent,
+			model: highEntropy,
+			geo: geo,
+			lang: nav.language,
+			tz: (function () { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch (e) { return ''; } })(),
+			screen: screen.width + 'x' + screen.height,
+			inner: window.innerWidth + 'x' + window.innerHeight,
+			dpr: window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio,
+			dprCap: window.__trash_dpr_cap,
+			mem: nav.deviceMemory || '?',
+			cores: nav.hardwareConcurrency || '?',
+			net: (conn.effectiveType || '?') + ' ' + (conn.downlink || '?') + 'Mbps rtt' + (conn.rtt || '?') + (conn.saveData ? ' saveData' : ''),
+			battery: battery ? Math.round(battery.level * 100) + '%' + (battery.charging ? ' charging' : '') : '?',
+			heap: heap,
+			visible: document.visibilityState,
+			standalone: standalone,
+			online: nav.onLine,
+			hiddenSec: Math.round((hiddenMs + (hiddenSince ? Date.now() - hiddenSince : 0)) / 1000),
+			url: location.href.slice(0, 120),
+			ref: (document.referrer || '').slice(0, 80)
+		};
+	}
 
-	function keepSessionPlayback() {
+	let highEntropy = '';
+	let geo = '';
+	try {
+		if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+			navigator.userAgentData.getHighEntropyValues(['model', 'platformVersion', 'fullVersionList']).then(function (v) {
+				highEntropy = (v.model || '') + ' / Android ' + (v.platformVersion || '?');
+			});
+		}
+	} catch (e) {}
+	const loadStart = Date.now();
+	window.trkLoaded = function () {
+		const took = Date.now() - loadStart;
+		noteEvent('engine started after ' + took + ' ms');
 		try {
-			if (navigator.audioSession && navigator.audioSession.type !== 'playback') {
-				navigator.audioSession.type = 'playback';
+			const parts = performance.getEntriesByType('resource').filter(function (e) { return /\.(wasm|pck|js)(\?|$)/.test(e.name); }).map(function (e) {
+				return e.name.split('/').pop().split('?')[0] + ' ' + Math.round((e.encodedBodySize || e.transferSize || 0) / 1024) + 'KB ' + Math.round(e.duration) + 'ms';
+			});
+			window.trkReport('load', 'engine ready in ' + took + ' ms | ' + parts.join(' ; '));
+		} catch (e) {}
+	};
+	try {
+		fetch('https://ipwho.is/').then(function (r) { return r.json(); }).then(function (g) {
+			if (g && g.success) {
+				geo = (g.city || '?') + ', ' + (g.region || '') + ', ' + (g.country || '') + ' | ' + ((g.connection && g.connection.isp) || '');
+				window.trkReport('geo', geo);
+			}
+		}).catch(function () {});
+	} catch (e) {}
+	try {
+		const shot = window.localStorage.getItem('__trash_shot');
+		if (shot) {
+			window.localStorage.removeItem('__trash_shot');
+			window.setTimeout(function () {
+				window.trkReport('prev_session_died', 'previous session ended in battle without a clean exit | last: ' + (window.localStorage.getItem('__trash_ctx') || ''), shot);
+			}, 1500);
+		}
+	} catch (e) {}
+	try {
+		if (navigator.getBattery) {
+			navigator.getBattery().then(function (b) { battery = b; });
+		}
+	} catch (e) {}
+
+	window.trkReport = function (kind, text, extra) {
+		if (!REPORT_URL || reportCount >= REPORT_CAP) {
+			return;
+		}
+		try {
+			text = String(text);
+			const key = kind + text.slice(0, 100);
+			if (sentKeys[key]) {
 				return;
 			}
-		} catch (e) {
-			// Старый WebKit без Audio Session API — ниже сработает бесшумный <audio>.
-		}
-		if (navigator.audioSession) {
-			return;
-		}
-		if (!/iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent) || !('ontouchend' in document)) {
-			return;
-		}
-		if (silent === null) {
-			silent = document.createElement('audio');
-			silent.setAttribute('x-webkit-airplay', 'deny');
-			silent.setAttribute('playsinline', '');
-			silent.preload = 'auto';
-			silent.loop = true;
-			silent.src = SILENT_URL;
-		}
-		if (silent.paused && !document.hidden) {
-			var played = silent.play();
-			if (played && played.catch) {
-				played.catch(function () {});
+			sentKeys[key] = true;
+			reportCount += 1;
+			const heavy = kind !== 'heartbeat';
+			const env = envInfo();
+			let full = '[' + SESSION_ID + ' +' + Math.round((Date.now() - SESSION_START) / 1000) + 's] ' + text.slice(0, 3000);
+			full += '\nENV ' + JSON.stringify(env);
+			if (heavy && kind !== 'session_start') {
+				full += '\nEVENTS ' + eventLog.slice(-25).join(' ; ') + '\nCONSOLE ' + logTail.slice(-15).join(' ; ');
 			}
-		}
-	}
-
-	function unlock() {
-		keepSessionPlayback();
-		for (var i = 0; i < contexts.length; i++) {
-			var ctx = contexts[i];
-			if (ctx.state !== 'running' && ctx.state !== 'closed') {
-				var resumed = ctx.resume();
-				if (resumed && resumed.catch) {
-					resumed.catch(function () {});
-				}
+			full = full.slice(0, 8000);
+			if (extra) {
+				full += '\nSHOT ' + String(extra).slice(0, 30000);
 			}
-		}
-	}
+			const payload = {
+				kind: kind,
+				text: full,
+				time: new Date().toISOString(),
+				build: window.__trash_build.label,
+				buildId: BUILD_ID_REPORT,
+				session: SESSION_ID,
+				env: env
+			};
+			if (heavy && kind !== 'session_start') {
+				payload.events = eventLog.slice(-25);
+				payload.console = logTail.slice(-15);
+			}
+			const body = JSON.stringify(payload);
+			if (navigator.sendBeacon) {
+				navigator.sendBeacon(REPORT_URL, body);
+			} else {
+				fetch(REPORT_URL, { method: 'POST', body: body, keepalive: true, mode: 'no-cors' });
+			}
+		} catch (e) {}
+	};
 
-	['touchend', 'pointerup', 'mouseup', 'click', 'keydown'].forEach(function (type) {
-		window.addEventListener(type, unlock, { capture: true, passive: true });
-	});
 	document.addEventListener('visibilitychange', function () {
-		if (silent === null) {
-			return;
-		}
-		if (document.hidden) {
-			silent.pause();
+		noteEvent('visibility ' + document.visibilityState);
+		if (document.visibilityState === 'hidden') {
+			hiddenSince = Date.now();
+		} else if (hiddenSince) {
+			hiddenMs += Date.now() - hiddenSince;
+			hiddenSince = 0;
 		}
 	});
-	window.__godotAudioContexts = contexts;
-}());
-</script>
-	</head>
-	<body>
-		<canvas id="canvas">
-			Your browser does not support the canvas tag.
-		</canvas>
+	window.addEventListener('pagehide', function () {
+		let ctx = '';
+		try { ctx = window.localStorage.getItem('__trash_ctx') || ''; } catch (e) {}
+		window.trkReport('session_end', Math.round((Date.now() - SESSION_START) / 1000) + 's | last: ' + ctx);
+	});
+	window.addEventListener('orientationchange', function () { noteEvent('orientationchange ' + window.innerWidth + 'x' + window.innerHeight); });
+	window.addEventListener('online', function () { noteEvent('online'); });
+	window.addEventListener('offline', function () { noteEvent('offline'); });
+	window.addEventListener('pagehide', function (event) {
+		noteEvent('pagehide persisted=' + event.persisted);
+		try { window.localStorage.removeItem('__trash_shot'); } catch (e) {}
+	});
+	window.addEventListener('unhandledrejection', function (event) {
+		noteEvent('promise rejection: ' + String(event.reason).slice(0, 200));
+		window.trkReport('error', 'unhandledrejection: ' + String(event.reason).slice(0, 500));
+	});
+	window.addEventListener('error', function (event) {
+		const stack = event.error && event.error.stack ? String(event.error.stack).split('\n').slice(0, 14).map(function (l) { return l.replace(/^\s*at\s+/, '').slice(0, 40); }).join(' < ') : '';
+		window.trkReport('error', 'js: ' + event.message + ' @ ' + (event.filename || '').split('/').pop() + ':' + event.lineno + (stack ? ' | stack: ' + stack : ''));
+	});
 
-		<noscript>
-			Your browser does not support JavaScript.
-		</noscript>
+	// Раз в 45 секунд, пока идёт бой: если вкладку убьёт система, по последнему пульсу видно, что происходило.
+	let beats = 0;
+	setInterval(function () {
+		if (document.visibilityState !== 'visible' || beats >= 40) { return; }
+		let ctx = '';
+		try { ctx = window.localStorage.getItem('__trash_ctx') || ''; } catch (e) {}
+		if (ctx.indexOf('t=') < 0) { return; }
+		beats += 1;
+		window.trkReport('heartbeat', ctx + ' | beat ' + beats);
+	}, 45000);
 
-		<div id="status">
-			<img id="status-splash" class="show-image--false fullsize--true use-filter--true" src="index.png" alt="">
-			<progress id="status-progress"></progress>
-			<div id="status-notice"></div>
-		</div>
-
-		<script src="index.js"></script>
-		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":29382624,"index.wasm":43699190},"focusCanvas":true,"gdextensionLibs":[]};
-const GODOT_THREADS_ENABLED = false;
-const engine = new Engine(GODOT_CONFIG);
-
-(function () {
-	const statusOverlay = document.getElementById('status');
-	const statusProgress = document.getElementById('status-progress');
-	const statusNotice = document.getElementById('status-notice');
-
-	let initializing = true;
-	let statusMode = '';
-
-	function setStatusMode(mode) {
-		if (statusMode === mode || !initializing) {
-			return;
-		}
-		if (mode === 'hidden') {
-			statusOverlay.remove();
-			initializing = false;
-			return;
-		}
-		statusOverlay.style.visibility = 'visible';
-		statusProgress.style.display = mode === 'progress' ? 'block' : 'none';
-		statusNotice.style.display = mode === 'notice' ? 'block' : 'none';
-		statusMode = mode;
+	if (window.location.hash === '#reporttest') {
+		window.trkReport('test', 'Проверка связи: ' + navigator.userAgent);
 	}
 
-	function setStatusNotice(text) {
-		while (statusNotice.lastChild) {
-			statusNotice.removeChild(statusNotice.lastChild);
+	window.trkReport('session_start', gpuInfo() + ' | ' + navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + (window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio) + ' | screen ' + screen.width + 'x' + screen.height + ' | cores ' + (navigator.hardwareConcurrency || '?'));
+
+	// Вкладка могла висеть со старой версией: при возврате в неё сверяем номер сборки и предлагаем обновиться.
+	const BUILD_ID = '1790860146';
+	function checkVersion() {
+		fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (v) {
+			if (v && v.build && v.build !== BUILD_ID && !document.getElementById('newver')) {
+				const bar = document.createElement('div');
+				bar.id = 'newver';
+				bar.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:9;padding:10px 14px;background:#ff2ea6;color:#fff;font:600 15px system-ui,sans-serif;text-align:center;cursor:pointer';
+				bar.textContent = 'Вышла новая версия игры. Нажми, чтобы обновить.';
+				bar.addEventListener('click', function () { window.location.reload(); });
+				document.body.appendChild(bar);
+			}
+		}).catch(function () {});
+	}
+	document.addEventListener('visibilitychange', function () {
+		if (document.visibilityState === 'visible') {
+			checkVersion();
 		}
-		const lines = text.split('\n');
-		lines.forEach((line) => {
-			statusNotice.appendChild(document.createTextNode(line));
-			statusNotice.appendChild(document.createElement('br'));
+	});
+	setTimeout(checkVersion, 1500);
+	setInterval(checkVersion, 300000);
+	// Закэшированная страница старой сборки: один раз принудительно перезагружаемся на свежую.
+	fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (v) {
+		if (v && v.build && v.build !== BUILD_ID) {
+			let tries = 0;
+			try { tries = Number(sessionStorage.getItem('trk_reload') || 0); sessionStorage.setItem('trk_reload', String(tries + 1)); } catch (e) {}
+			if (tries < 2) {
+				window.location.replace(window.location.pathname + '?v=' + v.build);
+			}
+		}
+	}).catch(function () {});
+
+	let started = false;
+	let crashed = false;
+
+	// Android после сворачивания вкладки теряет шейдеры: экран остаётся чёрным или без спрайтов. Перезагрузка лечит, не чаще раза в 20 с.
+	function recoverGraphics() {
+		try {
+			const last = Number(sessionStorage.getItem('__trash_ctx_reload') || 0);
+			if (Date.now() - last < 20000) {
+				return;
+			}
+			const count = Number(sessionStorage.getItem('__trash_shader_reloads') || 0);
+			if (count >= 2) {
+				return;
+			}
+			sessionStorage.setItem('__trash_shader_reloads', String(count + 1));
+			sessionStorage.setItem('__trash_ctx_reload', String(Date.now()));
+			window.trkReport('shader_reload', logTail.slice(-6).join(' ; '));
+		} catch (e) {}
+		setTimeout(function () { window.location.reload(); }, 500);
+	}
+
+	function keepLog(kind, args) {
+		const line = Array.prototype.join.call(args, ' ').slice(0, 300);
+		logTail.push(kind + ': ' + line);
+		if (logTail.length > 30) {
+			logTail.shift();
+		}
+		if (started && line.indexOf('shader compilation failed') !== -1) {
+			recoverGraphics();
+		}
+	}
+
+	// Вылет уже запущенной игры: показываем текст ошибки и последние строки лога движка,
+	// чтобы тестер мог скопировать их и прислать. Сохранённый прогресс не затрагивается.
+	function crash(message) {
+		if (crashed || !started) {
+			return;
+		}
+		crashed = true;
+		const ua = navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + window.devicePixelRatio;
+		const report = 'CRASH: ' + message + '\n' + ua + '\n--- лог ---\n' + logTail.slice(-15).join('\n');
+		try {
+			window.localStorage.setItem('trk_last_crash', report);
+		} catch (e) {}
+		window.trkReport('crash', report);
+		document.getElementById('crashlog').textContent = report;
+		document.getElementById('crash').classList.add('show');
+	}
+
+	document.getElementById('crashreload').addEventListener('click', function () {
+		window.location.reload();
+	});
+	document.getElementById('crashcopy').addEventListener('click', function () {
+		const text = document.getElementById('crashlog').textContent;
+		if (navigator.clipboard && navigator.clipboard.writeText) {
+			navigator.clipboard.writeText(text).catch(function () {});
+		}
+	});
+
+	const boot = document.getElementById('boot');
+	const fill = document.getElementById('fill');
+	const statusEl = document.getElementById('status');
+	const errorEl = document.getElementById('error');
+	const retryBtn = document.getElementById('retry');
+	function sumBytes(parts) {
+		return parts.reduce(function (acc, part) { return acc + part.bytes; }, 0);
+	}
+	FILES.wasm.bytes = sumBytes(FILES.wasm.parts);
+	FILES.pck.bytes = sumBytes(FILES.pck.parts);
+	const loaded = { wasm: 0, pck: 0 };
+	const loadedParts = { wasm: FILES.wasm.parts.map(function () { return 0; }), pck: FILES.pck.parts.map(function () { return 0; }) };
+	const total = FILES.wasm.bytes + FILES.pck.bytes;
+	let failed = false;
+
+	function mb(n) {
+		return (n / 1048576).toFixed(1).replace('.', ',');
+	}
+
+	const pctEl = document.getElementById('pct');
+	const tipEl = document.getElementById('tip');
+	const TIPS = [
+		'Собирай неонит на свалке: он открывает героев и слоты.',
+		'Снайпер сильнее, когда стоишь на месте. Дробовик - вблизи.',
+		'Рывок спасает от удара босса - жми вовремя.',
+		'Бесплатный сундук в меню доступен раз в несколько часов.',
+		'Вампиризм копится медленно - не рассчитывай на бессмертие.'
+	];
+	let shown = 0;
+	let target = 0;
+	let ticking = false;
+	tipEl.textContent = TIPS[Math.floor(Math.random() * TIPS.length)];
+
+	function frame() {
+		shown += (target - shown) * 0.18;
+		if (Math.abs(target - shown) < 0.15) {
+			shown = target;
+		}
+		fill.style.width = shown.toFixed(1) + '%';
+		pctEl.textContent = Math.floor(shown) + '%';
+		if (shown !== target) {
+			requestAnimationFrame(frame);
+		} else {
+			ticking = false;
+		}
+	}
+
+	function renderProgress() {
+		const done = loaded.wasm + loaded.pck;
+		target = Math.min(100, (done / total) * 100);
+		statusEl.textContent = 'Загрузка ' + mb(done) + ' из ' + mb(total) + ' МБ';
+		if (!ticking) {
+			ticking = true;
+			requestAnimationFrame(frame);
+		}
+	}
+
+	function fail(message, canRetry) {
+		if (failed) {
+			return;
+		}
+		failed = true;
+		statusEl.hidden = true;
+		errorEl.textContent = message;
+		errorEl.hidden = false;
+		retryBtn.hidden = !canRetry;
+	}
+
+	retryBtn.addEventListener('click', function () {
+		window.location.reload();
+	});
+
+	function checkSupport() {
+		try {
+			new WebAssembly.Module(Uint8Array.of(0, 97, 115, 109, 1, 0, 0, 0));
+		} catch (e) {
+			return 'Этот просмотрщик запрещает WebAssembly, а без него игра не запускается.\n' +
+				'Откройте ссылку в Safari или Chrome (кнопка «Открыть в браузере»).';
+		}
+		const probe = document.createElement('canvas');
+		if (!probe.getContext('webgl2')) {
+			return 'Браузер не поддерживает WebGL 2.\nОбновите iOS / браузер до свежей версии.';
+		}
+		return '';
+	}
+
+	// Файл игры режется на части (лимит хостинга — 15 МБ на файл): части качаются параллельно,
+	// каждая распаковывается отдельно, затем склеиваются в исходный файл по порядку.
+	function updatePart(key, index, value) {
+		loadedParts[key][index] = value;
+		loaded[key] = loadedParts[key].reduce(function (acc, n) { return acc + n; }, 0);
+		renderProgress();
+	}
+
+	function downloadPart(key, index) {
+		const part = FILES[key].parts[index];
+		return fetch(part.url, { cache: 'force-cache' }).then(function (response) {
+			if (!response.ok) {
+				throw new Error('HTTP ' + response.status + ' на ' + part.url);
+			}
+			if (!response.body || !response.body.getReader) {
+				return response.arrayBuffer().then(function (buffer) {
+					updatePart(key, index, part.bytes);
+					return new Uint8Array(buffer);
+				});
+			}
+			const reader = response.body.getReader();
+			const chunks = [];
+			let size = 0;
+			function pump() {
+				return reader.read().then(function (step) {
+					if (step.done) {
+						const out = new Uint8Array(size);
+						let offset = 0;
+						for (const chunk of chunks) {
+							out.set(chunk, offset);
+							offset += chunk.length;
+						}
+						updatePart(key, index, part.bytes);
+						return out;
+					}
+					chunks.push(step.value);
+					size += step.value.length;
+					updatePart(key, index, Math.min(size, part.bytes));
+					return pump();
+				});
+			}
+			return pump();
+		}).then(gunzipIfNeeded);
+	}
+
+	function download(key) {
+		return Promise.all(FILES[key].parts.map(function (part, index) {
+			return downloadPart(key, index);
+		})).then(function (pieces) {
+			if (pieces.length === 1) {
+				return pieces[0];
+			}
+			let length = 0;
+			for (const piece of pieces) {
+				length += piece.length;
+			}
+			const out = new Uint8Array(length);
+			let offset = 0;
+			for (const piece of pieces) {
+				out.set(piece, offset);
+				offset += piece.length;
+			}
+			pieces.length = 0;
+			return out;
 		});
 	}
 
-	function displayFailureNotice(err) {
-		console.error(err);
-		if (err instanceof Error) {
-			setStatusNotice(err.message);
-		} else if (typeof err === 'string') {
-			setStatusNotice(err);
-		} else {
-			setStatusNotice('An unknown error occurred.');
+	// Хост может сам отдать .gz с Content-Encoding: gzip — тогда байты уже распакованы.
+	function gunzipIfNeeded(bytes) {
+		if (bytes[0] !== 0x1f || bytes[1] !== 0x8b) {
+			return Promise.resolve(bytes);
 		}
-		setStatusMode('notice');
-		initializing = false;
+		if (typeof DecompressionStream === 'function') {
+			const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+			return new Response(stream).arrayBuffer().then(function (buffer) {
+				return new Uint8Array(buffer);
+			});
+		}
+		if (window.pako) {
+			return Promise.resolve(window.pako.inflate(bytes));
+		}
+		return Promise.reject(new Error('Браузер не умеет распаковывать gzip.'));
 	}
 
-	const missing = Engine.getMissingFeatures({
-		threads: GODOT_THREADS_ENABLED,
+	// Мост держит распакованные байты (~50 МБ) только до старта движка: после этого Godot уже
+	// скопировал их к себе, и release() отпускает копии — на телефоне это заметная экономия памяти.
+	function installFetchBridge(wasmBytes, pckBytes) {
+		const nativeFetch = window.fetch.bind(window);
+		window.fetch = function (input, init) {
+			const url = typeof input === 'string' ? input : (input && input.url) || '';
+			const path = url.split('?')[0].split('#')[0];
+			if (/(^|\/)index\.wasm$/.test(path)) {
+				return Promise.resolve(new Response(wasmBytes, { status: 200, headers: { 'Content-Type': 'application/wasm' } }));
+			}
+			if (/(^|\/)index\.pck$/.test(path)) {
+				return Promise.resolve(new Response(pckBytes, { status: 200, headers: { 'Content-Type': 'application/octet-stream' } }));
+			}
+			return nativeFetch(input, init);
+		};
+		return function release() {
+			wasmBytes = null;
+			pckBytes = null;
+			window.fetch = nativeFetch;
+		};
+	}
+
+	function start() {
+		const problem = checkSupport();
+		if (problem) {
+			fail(problem, false);
+			return;
+		}
+		renderProgress();
+		Promise.all([download('wasm'), download('pck')]).then(function (parts) {
+			statusEl.textContent = 'Запускаем движок…';
+			target = 100;
+			fill.style.width = '100%';
+			pctEl.textContent = '100%';
+			const release = installFetchBridge(parts[0], parts[1]);
+			parts.length = 0;
+			const engine = new Engine(GODOT_CONFIG);
+			const watchdog = setTimeout(function () {
+				fail('Движок не запустился за 40 секунд.\nЗакройте другие вкладки и попробуйте ещё раз.', true);
+			}, 40000);
+			return engine.startGame({}).then(function () {
+				clearTimeout(watchdog);
+				started = true;
+				if (window.trkLoaded) { window.trkLoaded(); }
+				release();
+				if (failed) {
+					return;
+				}
+				boot.classList.add('gone');
+				setTimeout(function () {
+					boot.remove();
+				}, 400);
+			});
+		}).catch(function (err) {
+			console.error(err);
+			fail('Не удалось загрузить игру:\n' + (err && err.message ? err.message : String(err)) + '\nПроверьте интернет и нажмите «Попробовать ещё раз».', true);
+		});
+	}
+
+	window.addEventListener('unhandledrejection', function (event) {
+		const reason = event.reason;
+		const text = reason && reason.message ? reason.message : String(reason);
+		if (/WebAssembly|wasm/i.test(text)) {
+			fail('Браузер не смог запустить WebAssembly:\n' + text, true);
+		}
 	});
 
-	if (missing.length !== 0) {
-		if (GODOT_CONFIG['serviceWorker'] && GODOT_CONFIG['ensureCrossOriginIsolationHeaders'] && 'serviceWorker' in navigator) {
-			let serviceWorkerRegistrationPromise;
-			try {
-				serviceWorkerRegistrationPromise = navigator.serviceWorker.getRegistration();
-			} catch (err) {
-				serviceWorkerRegistrationPromise = Promise.reject(new Error('Service worker registration failed.'));
-			}
-			// There's a chance that installing the service worker would fix the issue
-			Promise.race([
-				serviceWorkerRegistrationPromise.then((registration) => {
-					if (registration != null) {
-						return Promise.reject(new Error('Service worker already exists.'));
-					}
-					return registration;
-				}).then(() => engine.installServiceWorker()),
-				// For some reason, `getRegistration()` can stall
-				new Promise((resolve) => {
-					setTimeout(() => resolve(), 2000);
-				}),
-			]).then(() => {
-				// Reload if there was no error.
-				window.location.reload();
-			}).catch((err) => {
-				console.error('Error while registering service worker:', err);
-			});
-		} else {
-			// Display the message as usual
-			const missingMsg = 'Error\nThe following features required to run Godot projects on the Web are missing:\n';
-			displayFailureNotice(missingMsg + missing.join('\n'));
+	const CRASH_PATTERN = /Aborted|abort\(|out of memory|memory access out of bounds|unreachable|RuntimeError|Cannot enlarge/i;
+	window.addEventListener('unhandledrejection', function (event) {
+		const reason = event.reason;
+		const text = reason && reason.message ? reason.message : String(reason);
+		if (CRASH_PATTERN.test(text)) {
+			crash(text);
 		}
-	} else {
-		setStatusMode('progress');
-		engine.startGame({
-			'onProgress': function (current, total) {
-				if (current > 0 && total > 0) {
-					statusProgress.value = current;
-					statusProgress.max = total;
-				} else {
-					statusProgress.removeAttribute('value');
-					statusProgress.removeAttribute('max');
-				}
-			},
-		}).then(() => {
-			setStatusMode('hidden');
-		}, displayFailureNotice);
-	}
-}());
-		</script>
-	</body>
-</html>
+	});
+	window.addEventListener('error', function (event) {
+		const text = event.message || (event.error && event.error.message) || '';
+		if (CRASH_PATTERN.test(text)) {
+			crash(text);
+		}
+	});
 
+	start();
+}());
+</script>
