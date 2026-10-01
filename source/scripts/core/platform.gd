@@ -465,6 +465,97 @@ func _on_js_back(_args: Array) -> void:
 	back_pressed.emit()
 
 
+## Настоящее поле ввода браузера поверх игрового (id — любое имя). На телефоне игрок тапает прямо в него,
+## поэтому клавиатура открывается сама, текст печатается на месте, работают автозамена, вставка и эмодзи.
+## rect — прямоугольник поля в координатах окна игры.
+func native_input_show(id: String, rect: Rect2, placeholder: String, secret: bool, max_length: int, font_px: float) -> void:
+	if not is_web:
+		return
+	var view := get_viewport().get_visible_rect().size
+	_js("""
+var c = document.getElementById('canvas') || document.querySelector('canvas'); if (!c) return;
+var r = c.getBoundingClientRect(); var k = r.width / %f;
+var id = 'trk_in_' + %s; var el = document.getElementById(id);
+if (!el) {
+  el = document.createElement('input'); el.id = id; el.autocomplete = 'off'; el.setAttribute('autocapitalize', 'sentences');
+  el.style.cssText = 'position:fixed;z-index:20;box-sizing:border-box;border:0;outline:0;background:transparent;color:#1a1030;padding:0 14px;font-family:system-ui,-apple-system,sans-serif;-webkit-appearance:none;border-radius:16px';
+  el.addEventListener('keydown', function (e) { if (e.key === 'Enter') { el.dataset.enter = '1'; e.preventDefault(); } });
+  el.addEventListener('input', function () { el.dataset.changed = '1'; });
+  document.body.appendChild(el);
+}
+el.type = %s; el.placeholder = %s; el.maxLength = %d;
+el.style.left = (r.left + %f * k) + 'px'; el.style.top = (r.top + %f * k) + 'px';
+el.style.width = (%f * k) + 'px'; el.style.height = (%f * k) + 'px';
+el.style.fontSize = Math.max(16, %f * k) + 'px'; el.style.display = 'block';
+if (!document.getElementById('trk_in_css')) { var st = document.createElement('style'); st.id = 'trk_in_css'; st.textContent = 'input[id^=trk_in_]::placeholder{font-size:0.72em;color:#8a82a0;opacity:1}'; document.head.appendChild(st); }
+""" % [view.x, JSON.stringify(id), JSON.stringify("password" if secret else "text"), JSON.stringify(placeholder), max_length if max_length > 0 else 500,
+		rect.position.x, rect.position.y, rect.size.x, rect.size.y, font_px])
+
+
+## Состояние поля: {"text", "enter" (нажали Enter), "changed" (печатали с прошлого опроса), "focused"}.
+func native_input_poll(id: String) -> Dictionary:
+	if not is_web:
+		return {}
+	var raw: Variant = _js("""
+var el = document.getElementById('trk_in_' + %s); if (!el) return '';
+var out = JSON.stringify({text: el.value, enter: el.dataset.enter === '1', changed: el.dataset.changed === '1', focused: document.activeElement === el});
+el.dataset.enter = ''; el.dataset.changed = ''; return out;
+""" % JSON.stringify(id))
+	var parsed: Variant = JSON.parse_string(str(raw)) if raw is String and not str(raw).is_empty() else null
+	return parsed as Dictionary if parsed is Dictionary else {}
+
+
+func native_input_set(id: String, text: String) -> void:
+	if is_web:
+		_js("var el = document.getElementById('trk_in_' + %s); if (el) { el.value = %s; }" % [JSON.stringify(id), JSON.stringify(text)])
+
+
+func native_input_hide(id: String) -> void:
+	if is_web:
+		_js("var el = document.getElementById('trk_in_' + %s); if (el) { el.blur(); el.remove(); }" % JSON.stringify(id))
+
+
+## Выбор файла с телефона/компьютера. Вызывать из нажатия кнопки. Результат забирать pick_file_result():
+## null — ещё выбирают; {} — отменили; {"name", "type", "size", "data" (base64)} — файл.
+func pick_file(accept: String, max_bytes: int) -> void:
+	if not is_web:
+		return
+	_js("""
+window.__trash_pick = null;
+var inp = document.createElement('input'); inp.type = 'file'; inp.accept = %s; inp.style.display = 'none';
+document.body.appendChild(inp);
+inp.addEventListener('change', function () {
+  var f = inp.files && inp.files[0]; inp.remove();
+  if (!f) { window.__trash_pick = {}; return; }
+  if (f.size > %d) { window.__trash_pick = {name: f.name, type: f.type, size: f.size, too_big: true}; return; }
+  var rd = new FileReader();
+  rd.onload = function () { var s = String(rd.result); window.__trash_pick = {name: f.name, type: f.type, size: f.size, data: s.slice(s.indexOf(',') + 1)}; };
+  rd.onerror = function () { window.__trash_pick = {}; };
+  rd.readAsDataURL(f);
+});
+window.addEventListener('focus', function once() { window.removeEventListener('focus', once); setTimeout(function () { if (window.__trash_pick === null && !(inp.files && inp.files.length)) { window.__trash_pick = {}; } }, 1500); });
+inp.click();
+""" % [JSON.stringify(accept), max_bytes])
+
+
+func pick_file_result() -> Variant:
+	if not is_web:
+		return {}
+	var raw: Variant = _js("var p = window.__trash_pick; if (p === null || p === undefined) return ''; window.__trash_pick = undefined; return JSON.stringify(p);")
+	if not raw is String or str(raw).is_empty():
+		return null
+	var parsed: Variant = JSON.parse_string(str(raw))
+	return parsed if parsed is Dictionary else {}
+
+
+## Открыть ссылку (файл из чата) в новой вкладке. Вызывать из нажатия кнопки.
+func open_url(url: String) -> void:
+	if is_web:
+		_js("window.open(%s, '_blank');" % JSON.stringify(url))
+	else:
+		OS.shell_open(url)
+
+
 ## Системный диалог ввода браузера (единственный надёжный способ открыть клавиатуру на iOS); null — отмена.
 func prompt_text(title: String, current: String) -> Variant:
 	if not OS.has_feature("web"):

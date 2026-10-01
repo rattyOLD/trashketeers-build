@@ -1,4 +1,4 @@
--- Trash Squad: ПОЛНАЯ настройка сервера одним файлом (все schema*.sql по порядку, v1..v20).
+-- Trash Squad: ПОЛНАЯ настройка сервера одним файлом (все schema*.sql по порядку, v1..v21).
 -- Для нового проекта Supabase: SQL Editor -> вставить целиком -> Run. Повторный запуск безопасен:
 -- таблицы и данные не трогаются, функции пересоздаются, действующие DeV/Insider-ссылки НЕ сбрасываются.
 -- Также нужно: Authentication -> Sign In / Providers -> включить Anonymous sign-ins и Email, выключить Confirm email.
@@ -1404,18 +1404,6 @@ create table if not exists public.chat_typing (
 alter table public.chat_typing enable row level security;
 revoke all on public.chat_typing from anon, authenticated;
 
--- Корзина для вложений: приватная, до 10 МБ. Путь файла: <отправитель>/<получатель>/<случайное имя>.
-insert into storage.buckets (id, name, public, file_size_limit)
-  values ('chat', 'chat', false, 10485760)
-  on conflict (id) do update set public = false, file_size_limit = 10485760;
-
-drop policy if exists "chat_files_read" on storage.objects;
-create policy "chat_files_read" on storage.objects for select to authenticated
-  using (bucket_id = 'chat' and (auth.uid()::text = (storage.foldername(name))[1] or auth.uid()::text = (storage.foldername(name))[2]));
-drop policy if exists "chat_files_upload" on storage.objects;
-create policy "chat_files_upload" on storage.objects for insert to authenticated
-  with check (bucket_id = 'chat' and auth.uid()::text = (storage.foldername(name))[1]);
-
 -- Куда класть файл для друга: путь выдаётся только друзьям (и только если никто никого не заблокировал).
 create or replace function public.chat_upload_path(p_code text, p_ext text)
 returns text language plpgsql security definer set search_path = public as $fn$
@@ -1541,6 +1529,25 @@ revoke all on function public.chat_upload_path(text, text), public.send_message_
 grant execute on function public.chat_upload_path(text, text), public.send_message_v2(text, text, text, jsonb),
   public.get_messages_v2(text, bigint), public.chat_peer(text), public.set_typing(text) to authenticated;
 
+-- Корзина для вложений: приватная, до 10 МБ. Путь файла: <отправитель>/<получатель>/<случайное имя>.
+-- Идёт последней и в защитном блоке: если у SQL Editor нет прав на storage, остальное всё равно применится.
+do $do$
+begin
+  insert into storage.buckets (id, name, public, file_size_limit)
+    values ('chat', 'chat', false, 10485760)
+    on conflict (id) do update set public = false, file_size_limit = 10485760;
+  drop policy if exists "chat_files_read" on storage.objects;
+  create policy "chat_files_read" on storage.objects for select to authenticated
+    using (bucket_id = 'chat' and (auth.uid()::text = (storage.foldername(name))[1] or auth.uid()::text = (storage.foldername(name))[2]));
+  drop policy if exists "chat_files_upload" on storage.objects;
+  create policy "chat_files_upload" on storage.objects for insert to authenticated
+    with check (bucket_id = 'chat' and auth.uid()::text = (storage.foldername(name))[1]);
+  raise notice 'Хранилище chat готово';
+exception when others then
+  raise warning 'Хранилище для файлов не настроилось: %. Текст, стикеры и реакции работают, картинки и файлы — нет. Пришли этот текст.', sqlerrm;
+end
+$do$;
+
 notify pgrst, 'reload schema';
 
 -- ======================== schema_v20_claim_login.sql ========================
@@ -1574,6 +1581,55 @@ $fn$;
 
 revoke all on function public.claim_login(text) from public, anon;
 grant execute on function public.claim_login(text) to authenticated;
+
+notify pgrst, 'reload schema';
+
+-- ======================== schema_v21_reactions.sql ========================
+-- Trash Squad v21: реакции на сообщения в личном чате (долгий тап: like, lol, fire).
+-- Одна реакция от каждого из двоих на сообщение; повторный тап той же убирает её. Запустить один раз (повтор безопасен).
+
+alter table public.messages add column if not exists reactions jsonb not null default '{}'::jsonb;
+
+-- p_emoji: 'like', 'lol', 'fire' или '' (убрать). Ответ: 'ok' или 'bad'.
+create or replace function public.react_message(p_id bigint, p_emoji text)
+returns text language plpgsql security definer set search_path = public as $fn$
+declare
+  uid uuid := auth.uid();
+  e text := coalesce(p_emoji, '');
+  m public.messages%rowtype;
+begin
+  if uid is null or e not in ('', 'like', 'lol', 'fire') then return 'bad'; end if;
+  select * into m from public.messages where id = p_id;
+  if not found or (m.from_id <> uid and m.to_id <> uid) then return 'bad'; end if;
+  if e = '' or m.reactions->>uid::text = e then
+    update public.messages set reactions = reactions - uid::text where id = p_id;
+  else
+    update public.messages set reactions = reactions || jsonb_build_object(uid::text, e) where id = p_id;
+  end if;
+  return 'ok';
+end
+$fn$;
+
+-- Реакции последних 100 сообщений переписки: [{id, mine_emoji, their_emoji}], только где они есть.
+create or replace function public.chat_reactions(p_code text)
+returns table (id bigint, mine text, theirs text)
+language plpgsql security definer set search_path = public as $fn$
+declare
+  uid uuid := auth.uid();
+  target uuid;
+begin
+  select p.id into target from public.profiles p where p.friend_code = upper(btrim(p_code));
+  if uid is null or target is null then return; end if;
+  return query
+    select m.id, m.reactions->>uid::text, m.reactions->>target::text
+    from public.messages m
+    where ((m.from_id = uid and m.to_id = target) or (m.from_id = target and m.to_id = uid)) and m.reactions <> '{}'::jsonb
+    order by m.id desc limit 100;
+end
+$fn$;
+
+revoke all on function public.react_message(bigint, text), public.chat_reactions(text) from public, anon;
+grant execute on function public.react_message(bigint, text), public.chat_reactions(text) to authenticated;
 
 notify pgrst, 'reload schema';
 

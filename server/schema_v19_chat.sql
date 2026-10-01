@@ -14,18 +14,6 @@ create table if not exists public.chat_typing (
 alter table public.chat_typing enable row level security;
 revoke all on public.chat_typing from anon, authenticated;
 
--- Корзина для вложений: приватная, до 10 МБ. Путь файла: <отправитель>/<получатель>/<случайное имя>.
-insert into storage.buckets (id, name, public, file_size_limit)
-  values ('chat', 'chat', false, 10485760)
-  on conflict (id) do update set public = false, file_size_limit = 10485760;
-
-drop policy if exists "chat_files_read" on storage.objects;
-create policy "chat_files_read" on storage.objects for select to authenticated
-  using (bucket_id = 'chat' and (auth.uid()::text = (storage.foldername(name))[1] or auth.uid()::text = (storage.foldername(name))[2]));
-drop policy if exists "chat_files_upload" on storage.objects;
-create policy "chat_files_upload" on storage.objects for insert to authenticated
-  with check (bucket_id = 'chat' and auth.uid()::text = (storage.foldername(name))[1]);
-
 -- Куда класть файл для друга: путь выдаётся только друзьям (и только если никто никого не заблокировал).
 create or replace function public.chat_upload_path(p_code text, p_ext text)
 returns text language plpgsql security definer set search_path = public as $fn$
@@ -150,5 +138,24 @@ revoke all on function public.chat_upload_path(text, text), public.send_message_
   public.get_messages_v2(text, bigint), public.chat_peer(text), public.set_typing(text) from public, anon;
 grant execute on function public.chat_upload_path(text, text), public.send_message_v2(text, text, text, jsonb),
   public.get_messages_v2(text, bigint), public.chat_peer(text), public.set_typing(text) to authenticated;
+
+-- Корзина для вложений: приватная, до 10 МБ. Путь файла: <отправитель>/<получатель>/<случайное имя>.
+-- Идёт последней и в защитном блоке: если у SQL Editor нет прав на storage, остальное всё равно применится.
+do $do$
+begin
+  insert into storage.buckets (id, name, public, file_size_limit)
+    values ('chat', 'chat', false, 10485760)
+    on conflict (id) do update set public = false, file_size_limit = 10485760;
+  drop policy if exists "chat_files_read" on storage.objects;
+  create policy "chat_files_read" on storage.objects for select to authenticated
+    using (bucket_id = 'chat' and (auth.uid()::text = (storage.foldername(name))[1] or auth.uid()::text = (storage.foldername(name))[2]));
+  drop policy if exists "chat_files_upload" on storage.objects;
+  create policy "chat_files_upload" on storage.objects for insert to authenticated
+    with check (bucket_id = 'chat' and auth.uid()::text = (storage.foldername(name))[1]);
+  raise notice 'Хранилище chat готово';
+exception when others then
+  raise warning 'Хранилище для файлов не настроилось: %. Текст, стикеры и реакции работают, картинки и файлы — нет. Пришли этот текст.', sqlerrm;
+end
+$do$;
 
 notify pgrst, 'reload schema';

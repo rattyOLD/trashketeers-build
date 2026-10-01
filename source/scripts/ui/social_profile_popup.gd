@@ -71,7 +71,8 @@ func _load() -> void:
 	else:
 		var write := UiStyle.button("НАПИСАТЬ", UiStyle.HOT, 26, Vector2(0, 66))
 		write.pressed.connect(func() -> void:
-			var chat := ChatPopup.new(friend_code, str(profile.get("nickname", "Енот")))
+			var stats: Dictionary = profile.get("stats") if profile.get("stats") is Dictionary else {}
+			var chat := ChatPopup.new(friend_code, str(profile.get("nickname", "Енот")), str(stats.get("c", "raccoon")))
 			add_child(chat)
 			chat.closed.connect(func() -> void:
 				chat.queue_free()

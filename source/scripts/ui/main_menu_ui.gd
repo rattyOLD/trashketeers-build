@@ -55,6 +55,7 @@ var _tester: TesterPopup
 var _stage: Control
 var _tester_button: Button
 var _account_banner: Control
+var _nav_friends: Control
 var _chests: ChestsPopup
 var _changelog: ChangelogPopup
 var _armory: MenuPopups.Armory
@@ -124,10 +125,6 @@ func _build() -> void:
 		_from_profile = true
 		_chronicle.open())
 	_friends = FriendsPopup.new()
-	_profile.friends_requested.connect(func() -> void:
-		_profile.close()
-		_from_profile = true
-		_friends.open())
 	_tester = TesterPopup.new()
 	_chests = ChestsPopup.new()
 	_chests.changed.connect(_refresh)
@@ -145,6 +142,10 @@ func _build() -> void:
 	_daily = DailyPopup.new()
 	_daily.claimed.connect(_refresh)
 	SaveService.badge_changed.connect(_refresh)
+	Cloud.unread_changed.connect(func() -> void:
+		if is_instance_valid(_nav_friends):
+			_nav_friends.set("badge", Cloud.unread > 0)
+			_nav_friends.queue_redraw())
 	_editor = ControlEditor.new()
 	add_child(_editor)
 	_settings.editor_requested.connect(func() -> void: _editor.open())
@@ -185,7 +186,6 @@ func _build_portrait_layout() -> Control:
 	column.add_child(_build_mod_chip())
 	column.add_child(_build_play())
 	column.add_child(_build_dock())
-	column.add_child(UiStyle.label("Trash Squad · Неоновая Свалка", 16, Color(UiStyle.TEXT_DIM, 0.7), 4))
 	var studio := str(ConfigLoader.load_json("res://data/brand.json").get("studio", "")).strip_edges()
 	if not studio.is_empty():
 		column.add_child(UiStyle.label("Сделано командой %s" % studio, 16, Color(UiStyle.NEON, 0.8), 4))
@@ -528,7 +528,7 @@ func _build_stage() -> Control:
 		for i in right.size():
 			var spec: Array = right[i]
 			stage.add_child(_make_side_button(spec[0], spec[1], spec[2], true, 6.0, spec[3], i, 76.0))
-	for key in (["vip"] if Orient.portrait else ["gift", "chest", "news", "vip"]):
+	for key in _side_buttons:
 		(_side_buttons[key]["caption"] as Label).visible = true
 	_stage = stage
 	_sync_tester_button()
@@ -737,6 +737,7 @@ func _build_nav() -> Control:
 	row.add_theme_constant_override("separation", 10)
 	var items := [
 		[MenuWidgets.NavButton.Kind.UPGRADES, "ПРОКАЧКА", Color("#ff4d6d"), func() -> void: _upgrades.open(), "upgrade"],
+		[MenuWidgets.NavButton.Kind.FRIENDS, "ДРУЗЬЯ", Color("#ffd257"), func() -> void: _friends.open(), "friends"],
 		[MenuWidgets.NavButton.Kind.SKINS, "ГЕРОИ", Color("#00e5ff"), func() -> void: _shop.open(), "hero"],
 		[MenuWidgets.NavButton.Kind.OUTFITS, "СКИНЫ", Color("#ff5ce1"), func() -> void: _skins.open(), "outfit"],
 	]
@@ -748,6 +749,9 @@ func _build_nav() -> Control:
 		row.add_child(button)
 		if item[0] == MenuWidgets.NavButton.Kind.UPGRADES:
 			_nav_upgrades = button
+		elif item[0] == MenuWidgets.NavButton.Kind.FRIENDS:
+			_nav_friends = button
+			button.badge = Cloud.unread > 0
 		elif item[4] == "pass":
 			_nav_pass = button
 	return row
@@ -801,7 +805,8 @@ func _refresh() -> void:
 	var weapon := SaveService.get_loadout()
 	var best := int(SaveService.data["best_wave"])
 	_weapon_title.text = weapon.get_title()
-	_record_label.text = "Рекорд: волна %d" % best if best > 0 else "Рекорда пока нет - вперёд!"
+	_record_label.text = "Рекорд: волна %d" % best if best > 0 else ""
+	_record_label.visible = best > 0
 	if _weapon_icon != null:
 		_weapon_icon.queue_free()
 	_weapon_icon = WeaponIcons.IconRect.new(weapon.icon, weapon.effect_color, Vector2(120, 54) if Orient.portrait else Vector2(96, 46))
@@ -923,6 +928,3 @@ class LogoText:
 		draw_string_outline(font, io, "Squad", HORIZONTAL_ALIGNMENT_LEFT, -1, io_size, 20, Color("#1a0f2a"))
 		draw_string(font, io, "Squad", HORIZONTAL_ALIGNMENT_LEFT, -1, io_size, Color("#00f5ff"))
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-		var tagline := "Енот-налётчик против крыс и свиней"
-		draw_string_outline(ThemeDB.fallback_font, Vector2(0, size.y - 6), tagline, HORIZONTAL_ALIGNMENT_CENTER, size.x, 22, 7, Color("#1a0f2a"))
-		draw_string(ThemeDB.fallback_font, Vector2(0, size.y - 6), tagline, HORIZONTAL_ALIGNMENT_CENTER, size.x, 22, Color("#ff9fd8"))

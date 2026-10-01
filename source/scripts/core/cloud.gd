@@ -373,6 +373,100 @@ func restore_save(code: String) -> String:
 	return ""
 
 
+## ---- Чат v2 (SQL v19): стикеры, картинки, файлы, «печатает», прочитано. ----
+
+## "ok", "not_friends", "blocked", "rate", "empty", "banned", "bad", "offline", "no_server".
+func send_chat(code: String, kind: String, body: String, attachment: Dictionary = {}) -> String:
+	var result := await _rpc("send_message_v2", {"p_code": code, "p_kind": kind, "p_body": body, "p_attachment": attachment if not attachment.is_empty() else null})
+	if int(result["code"]) == 404:
+		if kind == "text":
+			return await send_message(code, body)
+		return "no_server"
+	return str(result["data"]) if bool(result["ok"]) else "offline"
+
+
+## {"ok": bool, "items": [{id, mine, body, created_at, kind, attachment, seen}]}; без SQL v19 — старый формат.
+func get_chat(code: String, after_id: int) -> Dictionary:
+	var result := await _rpc("get_messages_v2", {"p_code": code, "p_after": after_id})
+	if int(result["code"]) == 404:
+		return await get_messages(code, after_id)
+	return {"ok": bool(result["ok"]), "items": _rows(result)}
+
+
+## {"typing": bool, "last_seen": String, "read_upto": int} или пустой словарь.
+func chat_peer(code: String) -> Dictionary:
+	var result := await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/chat_peer", {"p_code": code})
+	return result["data"] as Dictionary if bool(result["ok"]) and result["data"] is Dictionary else {}
+
+
+func set_typing(code: String) -> void:
+	await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/set_typing", {"p_code": code})
+
+
+## Загрузка вложения другу: путь от сервера (только друзьям), затем файл в приватную корзину chat. Пусто — не вышло.
+func upload_chat_file(code: String, ext: String, bytes: PackedByteArray, mime: String) -> String:
+	var path_reply := await _rpc("chat_upload_path", {"p_code": code, "p_ext": ext})
+	if not bool(path_reply["ok"]) or not path_reply["data"] is String or str(path_reply["data"]).is_empty():
+		if not bool(path_reply["ok"]):
+			last_error = "chat_upload_path -> HTTP %d" % int(path_reply["code"])
+		return ""
+	var path := str(path_reply["data"])
+	var headers := PackedStringArray(["apikey: " + KEY, "Authorization: Bearer " + _access, "Content-Type: " + (mime if not mime.is_empty() else "application/octet-stream"), "x-upsert: false"])
+	var reply := await _bytes_request(HTTPClient.METHOD_POST, URL + "/storage/v1/object/chat/" + path, headers, bytes)
+	if int(reply["code"]) < 200 or int(reply["code"]) >= 300:
+		last_error = "storage upload -> HTTP %d %s" % [int(reply["code"]), (reply["body"] as PackedByteArray).get_string_from_utf8().left(120)]
+		return ""
+	return path
+
+
+## Скачивание вложения (для картинок в чате). Пустой массив — не вышло.
+func download_chat_file(path: String) -> PackedByteArray:
+	if not await _ensure_session():
+		return PackedByteArray()
+	var headers := PackedStringArray(["apikey: " + KEY, "Authorization: Bearer " + _access])
+	var reply := await _bytes_request(HTTPClient.METHOD_GET, URL + "/storage/v1/object/authenticated/chat/" + path, headers, PackedByteArray())
+	return reply["body"] if int(reply["code"]) == 200 else PackedByteArray()
+
+
+## Временная ссылка на файл (1 час), чтобы открыть его в браузере. Пусто — не вышло.
+func sign_chat_file(path: String) -> String:
+	var result := await _call(HTTPClient.METHOD_POST, "/storage/v1/object/sign/chat/" + path, {"expiresIn": 3600})
+	if bool(result["ok"]) and result["data"] is Dictionary:
+		var signed := str((result["data"] as Dictionary).get("signedURL", ""))
+		if not signed.is_empty():
+			return URL + "/storage/v1" + signed if signed.begins_with("/") else signed
+	return ""
+
+
+func _bytes_request(method: int, url: String, headers: PackedStringArray, body: PackedByteArray) -> Dictionary:
+	if not await _ensure_session():
+		return {"code": 0, "body": PackedByteArray()}
+	headers[1] = "Authorization: Bearer " + _access
+	var request := HTTPRequest.new()
+	request.timeout = 60.0
+	request.accept_gzip = not Platform.is_web
+	add_child(request)
+	var err := request.request_raw(url, headers, method, body) if not body.is_empty() else request.request(url, headers, method)
+	if err != OK:
+		request.queue_free()
+		return {"code": 0, "body": PackedByteArray()}
+	var reply: Array = await request.request_completed
+	request.queue_free()
+	Platform.trail("файл %s -> %d" % [url.get_slice("/", 6), int(reply[1])])
+	return {"code": int(reply[1]) if int(reply[0]) == HTTPRequest.RESULT_SUCCESS else 0, "body": reply[3]}
+
+
+## Реакция на сообщение: "like", "lol", "fire" или "" (убрать). true — сервер принял.
+func react_message(id: int, emoji: String) -> bool:
+	var result := await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/react_message", {"p_id": id, "p_emoji": emoji})
+	return bool(result["ok"]) and str(result["data"]) == "ok"
+
+
+## Реакции в переписке: [{id, mine, theirs}] (только сообщения, где они есть).
+func chat_reactions(code: String) -> Array:
+	return _rows(await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/chat_reactions", {"p_code": code}))
+
+
 ## Живые входы в этот аккаунт (устройства) за 30 дней; 0, если неизвестно (нет SQL v18 или связи).
 func my_devices() -> int:
 	if not has_code():

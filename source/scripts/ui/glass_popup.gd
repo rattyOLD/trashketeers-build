@@ -11,6 +11,8 @@ const CORNER := 28.0
 const BORDER := Color("#00e5ff")
 
 static var _glass_shader: Shader
+## Открытые окна по порядку: поле ввода браузера показывается только у верхнего (иначе оно висело бы поверх других окон).
+static var _open_stack: Array[GlassPopup] = []
 
 var content: VBoxContainer
 
@@ -19,6 +21,7 @@ var _glass: ColorRect
 var _frame: Panel
 var _title: Label
 var _center: CenterContainer
+var _closing := false
 
 
 static func panel_width() -> float:
@@ -93,7 +96,28 @@ func _init(title_text: String) -> void:
 	content.child_entered_tree.connect(_watch_inputs)
 
 
+static func owner_of(node: Node) -> GlassPopup:
+	var cur := node.get_parent()
+	while cur != null:
+		if cur is GlassPopup:
+			return cur as GlassPopup
+		cur = cur.get_parent()
+	return null
+
+
+## Поле в верхнем открытом окне, и окно уже доиграло анимацию появления.
+static func is_on_top(node: Node) -> bool:
+	var popup := owner_of(node)
+	_open_stack = _open_stack.filter(func(p: GlassPopup) -> bool: return is_instance_valid(p) and p.visible)
+	if popup == null:
+		return _open_stack.is_empty()
+	return not _open_stack.is_empty() and _open_stack.back() == popup and popup._panel.scale.is_equal_approx(Vector2.ONE) and not popup._closing
+
+
 func open() -> void:
+	_closing = false
+	_open_stack.erase(self)
+	_open_stack.append(self)
 	Platform.trail("окно " + _title.text)
 	_refresh()
 	visible = true
@@ -106,11 +130,13 @@ func open() -> void:
 
 
 func close() -> void:
+	_closing = true
 	var tween := create_tween().set_parallel(true)
 	tween.tween_property(_panel, "scale", Vector2(0.6, 0.6), 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
 	tween.tween_property(_panel, "modulate:a", 0.0, 0.18)
 	tween.chain().tween_callback(func() -> void:
 		visible = false
+		_open_stack.erase(self)
 		closed.emit())
 
 

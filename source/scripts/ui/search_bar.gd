@@ -45,19 +45,12 @@ static func style(field: LineEdit, font_size: int) -> void:
 ## В веб-сборке на сенсорных экранах экранная клавиатура из Godot не открывается (iOS), поэтому по тапу
 ## вызывается нативный диалог ввода браузера; результат записывается в поле как обычный ввод.
 static func attach_touch_input(field: LineEdit, title: String) -> void:
-	if not OS.has_feature("web") or not DisplayServer.is_touchscreen_available():
+	if not OS.has_feature("web") or not Platform.is_touch():
 		return
-	field.focus_entered.connect(func() -> void:
-		field.release_focus()
-		var now := Time.get_ticks_msec()
-		if now - _last_prompt < PROMPT_COOLDOWN_MS:
-			return
-		_last_prompt = now
-		var typed: Variant = Platform.prompt_text(title, field.text)
-		_last_prompt = Time.get_ticks_msec()
-		if typed == null:
-			return
-		field.text = str(typed).substr(0, field.max_length if field.max_length > 0 else 64)
-		field.text_changed.emit(field.text)
-		_last_prompt = Time.get_ticks_msec()
-		field.text_submitted.emit(field.text))
+	field.add_child(NativeField.new(field, title))
+
+
+static func restore_colors(field: LineEdit) -> void:
+	field.add_theme_color_override("font_color", Color("#1a1030"))
+	field.add_theme_color_override("font_placeholder_color", Color("#8a82a0"))
+	field.add_theme_color_override("caret_color", Color("#ff2ea6"))

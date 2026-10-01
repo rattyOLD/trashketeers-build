@@ -472,7 +472,7 @@ class RaccoonPreview:
 ## Кнопка нижней навигации хаба: нарисованная иконка + подпись.
 class NavButton:
 	extends Button
-	enum Kind { UPGRADES, WEAPONS, SKINS, ACHIEVEMENTS, OUTFITS }
+	enum Kind { UPGRADES, WEAPONS, SKINS, ACHIEVEMENTS, OUTFITS, FRIENDS }
 	var kind: Kind = Kind.UPGRADES
 	var caption := ""
 	var accent := Color.WHITE
@@ -495,10 +495,10 @@ class NavButton:
 		pressed.connect(func() -> void: SoundManager.play(&"ui_click"))
 
 	func _draw() -> void:
-		var captioned := not Orient.portrait or badge or is_pressed() or is_hovered()
-		var c := Vector2(size.x * 0.5, size.y * (0.4 if captioned else 0.5))
+		# Подпись у каждой кнопки панели всегда видна: игрок сразу понимает, куда жмёт.
+		var c := Vector2(size.x * 0.5, size.y * 0.4)
 		if icon_texture != null:
-			var side := minf(size.x * 0.72, size.y * (0.62 if captioned else 0.78))
+			var side := minf(size.x * 0.72, size.y * 0.62)
 			var tex_size := icon_texture.get_size()
 			var fit := side / maxf(tex_size.x, tex_size.y)
 			var draw_size := tex_size * fit
@@ -547,8 +547,6 @@ class NavButton:
 		if badge:
 			draw_circle(Vector2(size.x - 18, 18), 10.0, LINE)
 			draw_circle(Vector2(size.x - 18, 18), 7.0, UiStyle.DANGER)
-		if not (not Orient.portrait or badge or is_pressed() or is_hovered()):
-			return
 		var font := ThemeDB.fallback_font
 		var pos := Vector2(0, size.y - 12)
 		draw_string_outline(font, pos, caption, HORIZONTAL_ALIGNMENT_CENTER, size.x, 20, 6, LINE)

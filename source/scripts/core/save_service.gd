@@ -39,6 +39,7 @@ const DEFAULTS := {
 	"story_best": {},
 	"story_choice": {},
 	"story_resume": {},
+	"recent_stickers": [],
 	"friends": {},
 	"invite_used": "",
 	"invite_paid": [],

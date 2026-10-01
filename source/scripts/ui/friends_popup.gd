@@ -1,7 +1,7 @@
 class_name FriendsPopup
 extends GlassPopup
-## Друзья без сервера: визитка с портретом (картинка для отправки), добавление друзей по коду визитки,
-## код приглашения с бонусом обоим. Значки «прошёл миссию» берутся из визитки друга.
+## Друзья: вкладки «Друзья» (чат, профиль), «Заявки», «Добавить» (ID, ссылка, визитка, бонус приглашения), «Топ».
+## Открывается кнопкой «Друзья» в нижней панели меню, больше нигде.
 
 const CARD_SIZE := Vector2(960, 540)
 const MISSION_COUNT := 6
@@ -21,143 +21,12 @@ func _init() -> void:
 	super("ДРУЗЬЯ")
 
 
-func _refresh() -> void:
-	var keep := content.get_child(0)
-	for child in content.get_children():
-		if child != keep:
-			content.remove_child(child)
-			child.queue_free()
-	_image_b64 = ""
-	var list := MenuPopups.scroll_list(content)
+enum Tab { FRIENDS, REQUESTS, ADD, TOP }
 
-	_status = UiStyle.label("Обменивайся визитками с друзьями: код приглашения даёт бонус вам обоим.", 20, UiStyle.NEON, 5)
-	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_status.custom_minimum_size = Vector2(panel_width() - 110.0, 0)
-	list.add_child(_status)
-
-	_build_online(list)
-	_build_top(list)
-
-	list.add_child(_section("МОЯ ВИЗИТКА"))
-	var card := CardView.new()
-	card.info = SaveService.card_info()
-	card.qr_text = SaveService.card_qr_text()
-	card.custom_minimum_size = Vector2(panel_width() - 110.0, (panel_width() - 110.0) * CARD_SIZE.y / CARD_SIZE.x)
-	list.add_child(card)
-	var share := UiStyle.button("ПОДЕЛИТЬСЯ КАРТИНКОЙ", UiStyle.HOT, 24, Vector2(0, 64))
-	share.pressed.connect(func() -> void:
-		var link := SaveService.card_qr_text()
-		var caption := "%s\n%s" % [_invite_line(), link] if not link.is_empty() else "Моя визитка в Trash Squad"
-		var note := Platform.share_image(_image_b64, "trashsquad_card.png", caption)
-		_say(note if not note.is_empty() else "Картинка готовится или не поддерживается здесь. Отправь код визитки ниже")
-	)
-	list.add_child(share)
-	var link_card := UiStyle.button("Отправить ссылку-визитку", UiStyle.PANEL_LIGHT, 22, Vector2(0, 56))
-	link_card.pressed.connect(func() -> void:
-		var link := SaveService.card_qr_text()
-		if link.is_empty():
-			_say("Ссылка есть только в браузерной версии. Отправь код визитки ниже")
-			return
-		_say(Platform.share(_invite_line(), link)))
-	list.add_child(link_card)
-	var copy_card := UiStyle.button("Скопировать код визитки", UiStyle.PANEL_LIGHT, 22, Vector2(0, 56))
-	copy_card.pressed.connect(func() -> void:
-		DisplayServer.clipboard_set(SaveService.card_code())
-		_say("Код визитки скопирован. Отправь его другу"))
-	list.add_child(copy_card)
-
-	list.add_child(_section("ДОБАВИТЬ ДРУГА"))
-	var add_row := HBoxContainer.new()
-	add_row.add_theme_constant_override("separation", 8)
-	var add_edit := _edit("Вставь код визитки друга")
-	add_row.add_child(add_edit)
-	var add_button := UiStyle.button("ДОБАВИТЬ", UiStyle.HOT, 22, Vector2(190, 56))
-	add_button.pressed.connect(func() -> void:
-		var result: String = SaveService.add_friend(add_edit.text)
-		if result == "ok" or result == "bonus":
-			add_edit.text = ""
-			_say("Друг добавлен" if result == "ok" else "Друг пришёл по твоему коду: +%d монет и +%d неонита!" % [SaveService.INVITE_COINS, SaveService.INVITE_GEMS])
-			_refresh_list_only()
-		elif result == "self":
-			_say("Это твоя собственная визитка")
-		else:
-			_say("Код не подошёл. Скопируй его целиком"))
-	add_row.add_child(add_button)
-	add_edit.text_submitted.connect(func(_t: String) -> void: add_button.pressed.emit())
-	list.add_child(add_row)
-
-	list.add_child(_section("ПРИГЛАШЕНИЕ"))
-	var invite_box := UiStyle.label("Твой код: %s" % SaveService.invite_code(), 26, UiStyle.GOLD, 7)
-	list.add_child(invite_box)
-	var invite_hint := UiStyle.label("Друг вводит его у себя: ему +%d монет и +%d неонита. Когда он пришлёт тебе визитку, столько же получишь ты (до %d друзей)." % [SaveService.INVITE_COINS, SaveService.INVITE_GEMS, SaveService.INVITE_PAID_MAX], 18, UiStyle.TEXT_DIM, 4)
-	invite_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	invite_hint.custom_minimum_size = Vector2(panel_width() - 110.0, 0)
-	list.add_child(invite_hint)
-	var invite_buttons := HBoxContainer.new()
-	invite_buttons.add_theme_constant_override("separation", 8)
-	var copy_invite := UiStyle.button("Скопировать код", UiStyle.PANEL_LIGHT, 22, Vector2(0, 56))
-	copy_invite.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	copy_invite.pressed.connect(func() -> void:
-		DisplayServer.clipboard_set(SaveService.invite_code())
-		_say("Код приглашения скопирован"))
-	invite_buttons.add_child(copy_invite)
-	var send_invite := UiStyle.button("Отправить", UiStyle.PANEL_LIGHT, 22, Vector2(0, 56))
-	send_invite.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	send_invite.pressed.connect(func() -> void:
-		var text := "Залетай в Trash Squad! Мой код приглашения: %s. Введи его в Профиль > Друзья и получи бонус." % SaveService.invite_code()
-		_say(Platform.share(text, Platform.invite_link()))
-		SaveService.mark_invite_sent())
-	invite_buttons.add_child(send_invite)
-	list.add_child(invite_buttons)
-	var used := str(SaveService.data["invite_used"])
-	if used.is_empty():
-		var code_row := HBoxContainer.new()
-		code_row.add_theme_constant_override("separation", 8)
-		var code_edit := _edit("Код друга: INV-...")
-		code_row.add_child(code_edit)
-		var code_button := UiStyle.button("ПРИНЯТЬ", UiStyle.HOT, 22, Vector2(190, 56))
-		code_button.pressed.connect(func() -> void:
-			var result: String = SaveService.use_invite(code_edit.text)
-			if result == "ok":
-				_say("Бонус получен: +%d монет и +%d неонита" % [SaveService.INVITE_COINS, SaveService.INVITE_GEMS])
-				_refresh()
-			elif result == "self":
-				_say("Свой код вводить нельзя")
-			elif result == "used":
-				_say("Приглашение уже принято")
-			else:
-				_say("Код не подошёл. Он начинается с INV-"))
-		code_row.add_child(code_button)
-		code_edit.text_submitted.connect(func(_t: String) -> void: code_button.pressed.emit())
-		list.add_child(code_row)
-	else:
-		list.add_child(UiStyle.label("Ты пришёл по коду %s" % used, 20, UiStyle.TEXT_DIM, 4))
-
-	list.add_child(_section("РЕЙТИНГ ДРУЗЕЙ"))
-	var chips := HBoxContainer.new()
-	chips.add_theme_constant_override("separation", 8)
-	list.add_child(chips)
-	_board_box = VBoxContainer.new()
-	_board_box.add_theme_constant_override("separation", 8)
-	list.add_child(_board_box)
-	for i in BOARD_METRICS.size():
-		var chip := UiStyle.button(str(BOARD_METRICS[i]["title"]), UiStyle.HOT if i == _board_metric else UiStyle.PANEL_LIGHT, 20, Vector2(0, 50))
-		chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var index := i
-		chip.pressed.connect(func() -> void:
-			_board_metric = index
-			_refresh())
-		chips.add_child(chip)
-	_fill_board()
-
-	list.add_child(_section("МОИ ДРУЗЬЯ"))
-	_friends_box = VBoxContainer.new()
-	_friends_box.add_theme_constant_override("separation", 10)
-	list.add_child(_friends_box)
-	_fill_friends()
-	_render_card()
-
-
+var _tab := Tab.FRIENDS
+var _tabs_row: HBoxContainer
+var _body: VBoxContainer
+var _requests_count := 0
 var _friends_box: VBoxContainer
 var _board_box: VBoxContainer
 var _online_box: VBoxContainer
@@ -166,8 +35,221 @@ var _online_note: Label
 var _online_code: Label
 
 
+## Друзья как в онлайн-играх: вкладки «Друзья», «Заявки», «Добавить», «Топ». Всё про друзей живёт только здесь.
+func _refresh() -> void:
+	var keep := content.get_child(0)
+	for child in content.get_children():
+		if child != keep:
+			content.remove_child(child)
+			child.queue_free()
+	_image_b64 = ""
+	_status = UiStyle.label("", 19, UiStyle.NEON, 4)
+	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_status.custom_minimum_size = Vector2(panel_width() - 110.0, 0)
+	content.add_child(_status)
+	_tabs_row = HBoxContainer.new()
+	_tabs_row.add_theme_constant_override("separation", 6)
+	content.add_child(_tabs_row)
+	_body = MenuPopups.scroll_list(content)
+	_show_tab(_tab)
+	_count_requests()
+
+
+func _count_requests() -> void:
+	var requests := await Cloud.list_requests()
+	if not is_instance_valid(_tabs_row):
+		return
+	_requests_count = requests.size()
+	_build_tabs()
+
+
+func _build_tabs() -> void:
+	MenuPopups.clear(_tabs_row)
+	var names := ["ДРУЗЬЯ", "ЗАЯВКИ" if _requests_count == 0 else "ЗАЯВКИ %d" % _requests_count, "ДОБАВИТЬ", "ТОП"]
+	for i in names.size():
+		var hot := i == _tab
+		var color := UiStyle.HOT if hot else (Color("#a3283e") if i == Tab.REQUESTS and _requests_count > 0 else UiStyle.PANEL_LIGHT)
+		var b := UiStyle.button(names[i], color, 18, Vector2(0, 50))
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.pressed.connect(_show_tab.bind(i))
+		_tabs_row.add_child(b)
+
+
+func _show_tab(tab: int) -> void:
+	_tab = tab as Tab
+	_say("")
+	_build_tabs()
+	MenuPopups.clear(_body)
+	match _tab:
+		Tab.FRIENDS:
+			_online_box = VBoxContainer.new()
+			_online_box.add_theme_constant_override("separation", 8)
+			_body.add_child(_online_box)
+			_online_box.add_child(UiStyle.label("Загружаю...", 18, UiStyle.TEXT_DIM, 4))
+			_load_online()
+			_body.add_child(_blocked_section())
+		Tab.REQUESTS:
+			_online_box = VBoxContainer.new()
+			_online_box.add_theme_constant_override("separation", 8)
+			_body.add_child(_online_box)
+			_load_requests()
+		Tab.ADD:
+			_build_add(_body)
+		Tab.TOP:
+			_build_top(_body)
+
+
+func _build_add(list: VBoxContainer) -> void:
+	list.add_child(_section("ТВОЙ ID"))
+	_online_code = UiStyle.label(Cloud.friend_code if Cloud.has_code() else "...", 40, UiStyle.GOLD, 8)
+	list.add_child(_online_code)
+	if not Cloud.has_code():
+		_fill_code()
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	var copy := UiStyle.button("Скопировать", UiStyle.PANEL_LIGHT, 20, Vector2(0, 56))
+	copy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	copy.pressed.connect(func() -> void:
+		if Cloud.has_code():
+			DisplayServer.clipboard_set(Cloud.friend_code)
+			_say("ID скопирован"))
+	row.add_child(copy)
+	var share := UiStyle.button("Позвать друга", UiStyle.HOT, 20, Vector2(0, 56))
+	share.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	share.pressed.connect(func() -> void:
+		var base := Platform.page_url()
+		if not Cloud.has_code() or base.is_empty():
+			_say("Ссылка появится, когда будет связь с сервером")
+			return
+		_say(Platform.share(_invite_line(), "%s?f=%s" % [base, Cloud.friend_code])))
+	row.add_child(share)
+	list.add_child(row)
+
+	list.add_child(_section("ДОБАВИТЬ ПО ID"))
+	var add_row := HBoxContainer.new()
+	add_row.add_theme_constant_override("separation", 8)
+	var edit := _edit("ID друга, например E58CY3")
+	edit.max_length = 64
+	add_row.add_child(edit)
+	var add := UiStyle.button("ДОБАВИТЬ", UiStyle.HOT, 20, Vector2(170, 56))
+	add.pressed.connect(func() -> void: _add_by_id(edit, add))
+	add_row.add_child(add)
+	edit.text_submitted.connect(func(_t: String) -> void: add.pressed.emit())
+	list.add_child(add_row)
+
+	list.add_child(_section("ВИЗИТКА"))
+	var card := CardView.new()
+	card.info = SaveService.card_info()
+	card.qr_text = SaveService.card_qr_text()
+	card.custom_minimum_size = Vector2(panel_width() - 110.0, (panel_width() - 110.0) * CARD_SIZE.y / CARD_SIZE.x)
+	list.add_child(card)
+	var share_card := UiStyle.button("Поделиться визиткой", UiStyle.PANEL_LIGHT, 20, Vector2(0, 56))
+	share_card.pressed.connect(func() -> void:
+		var link := SaveService.card_qr_text()
+		var caption := "%s\n%s" % [_invite_line(), link] if not link.is_empty() else "Моя визитка в Trash Squad"
+		var note := Platform.share_image(_image_b64, "trashsquad_card.png", caption)
+		_say(note if not note.is_empty() else "Картинка ещё готовится, нажми через секунду"))
+	list.add_child(share_card)
+	_render_card()
+
+	list.add_child(_section("БОНУС ЗА ПРИГЛАШЕНИЕ"))
+	var invite := UiStyle.label("Твой код %s: другу +%d монет и +%d неонита, тебе столько же." % [SaveService.invite_code(), SaveService.INVITE_COINS, SaveService.INVITE_GEMS], 18, UiStyle.TEXT_DIM, 4)
+	invite.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	invite.custom_minimum_size = Vector2(panel_width() - 110.0, 0)
+	list.add_child(invite)
+	var copy_invite := UiStyle.button("Скопировать код приглашения", UiStyle.PANEL_LIGHT, 20, Vector2(0, 54))
+	copy_invite.pressed.connect(func() -> void:
+		DisplayServer.clipboard_set(SaveService.invite_code())
+		SaveService.mark_invite_sent()
+		_say("Код приглашения скопирован"))
+	list.add_child(copy_invite)
+	if str(SaveService.data["invite_used"]).is_empty():
+		var code_row := HBoxContainer.new()
+		code_row.add_theme_constant_override("separation", 8)
+		var code_edit := _edit("Код друга: INV-...")
+		code_edit.max_length = 32
+		code_row.add_child(code_edit)
+		var code_button := UiStyle.button("ПРИНЯТЬ", UiStyle.HOT, 20, Vector2(170, 56))
+		code_button.pressed.connect(func() -> void:
+			var result: String = SaveService.use_invite(code_edit.text)
+			if result == "ok":
+				_say("Бонус получен: +%d монет и +%d неонита" % [SaveService.INVITE_COINS, SaveService.INVITE_GEMS])
+				_show_tab(Tab.ADD)
+			else:
+				_say({"self": "Свой код вводить нельзя", "used": "Приглашение уже принято"}.get(result, "Код не подошёл. Он начинается с INV-")))
+		code_row.add_child(code_button)
+		code_edit.text_submitted.connect(func(_t: String) -> void: code_button.pressed.emit())
+		list.add_child(code_row)
+
+
+func _fill_code() -> void:
+	await Cloud.sync_profile()
+	if is_instance_valid(_online_code):
+		_online_code.text = Cloud.friend_code if Cloud.has_code() else "нет связи"
+
+
+func _add_by_id(edit: LineEdit, add: Button) -> void:
+	var code := edit.text.strip_edges()
+	if code.is_empty():
+		return
+	if code.begins_with("TRF1."):
+		var card_result: String = SaveService.add_friend(code)
+		_say("Друг добавлен по визитке" if card_result == "ok" or card_result == "bonus" else "Визитка не подошла")
+		edit.text = ""
+		return
+	add.disabled = true
+	var result := await Cloud.request_friend(code)
+	if result == "no_server":
+		result = await Cloud.add_friend(code)
+	if not is_instance_valid(add):
+		return
+	add.disabled = false
+	var answers := {"sent": "Заявка отправлена. Друг увидит её во вкладке «Заявки»", "ok": "Вы друзья!", "friends": "Вы уже друзья",
+		"not_found": "Такого ID нет. Проверь буквы", "self": "Это твой собственный ID", "blocked": "Заявку отправить нельзя",
+		"limit": "Лимит друзей или заявок исчерпан"}
+	if answers.has(result):
+		_say(str(answers[result]))
+		if result in ["sent", "ok"]:
+			edit.text = ""
+	else:
+		_say("Не вышло: %s" % (Cloud.last_error if not Cloud.last_error.is_empty() else "нет связи с сервером"))
+
+
+func _blocked_section() -> Control:
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 6)
+	var button := UiStyle.button("Заблокированные", UiStyle.PANEL_LIGHT, 17, Vector2(0, 46))
+	var holder := VBoxContainer.new()
+	holder.add_theme_constant_override("separation", 6)
+	button.pressed.connect(func() -> void:
+		MenuPopups.clear(holder)
+		var blocks := await Cloud.list_blocks()
+		if not is_instance_valid(holder):
+			return
+		if blocks.is_empty():
+			holder.add_child(UiStyle.label("Никого", 18, UiStyle.TEXT_DIM, 4))
+		for entry in blocks:
+			if entry is Dictionary:
+				var code := str((entry as Dictionary).get("friend_code", ""))
+				var line := HBoxContainer.new()
+				var who := UiStyle.label(str((entry as Dictionary).get("nickname", "Енот")), 20, UiStyle.TEXT, 4)
+				who.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+				who.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+				line.add_child(who)
+				var undo := UiStyle.button("Разблокировать", UiStyle.PANEL_LIGHT, 17, Vector2(200, 46))
+				undo.pressed.connect(func() -> void:
+					await Cloud.unblock_user(code)
+					if is_instance_valid(line):
+						line.queue_free())
+				line.add_child(undo)
+				holder.add_child(line))
+	box.add_child(button)
+	box.add_child(holder)
+	return box
+
+
 func _build_top(list: VBoxContainer) -> void:
-	list.add_child(_section("ТОП ИГРОКОВ ПО ВОЛНЕ"))
+	list.add_child(_section("ЛУЧШИЕ ПО ВОЛНЕ"))
 	_top_box = VBoxContainer.new()
 	_top_box.add_theme_constant_override("separation", 6)
 	list.add_child(_top_box)
@@ -181,9 +263,8 @@ func _load_top() -> void:
 	MenuPopups.clear(_top_box)
 	var items: Array = result["items"]
 	if not bool(result["ok"]) or items.is_empty():
-		var text := "Топ не загрузился (%s). Енотам тоже нужен интернет." % Cloud.last_error if not bool(result["ok"]) else "Пока пусто: никто ещё не дошёл до рекорда волны. Стань первым."
-		var note := UiStyle.label(text, 18, UiStyle.TEXT_DIM, 4)
-		_top_box.add_child(note)
+		var text := "Топ не загрузился, нет связи" if not bool(result["ok"]) else "Пока пусто. Стань первым."
+		_top_box.add_child(UiStyle.label(text, 18, UiStyle.TEXT_DIM, 4))
 		return
 	for i in items.size():
 		var item: Dictionary = items[i]
@@ -195,7 +276,7 @@ func _load_top() -> void:
 		row.add_child(place)
 		var badge := Insider.badge_of(int(item.get("insider", -1)))
 		var nick := str(item.get("nickname", "Енот"))
-		var name_label := UiStyle.label(nick if badge.is_empty() else "%s %s" % [badge, nick], 22, UiStyle.TEXT, 5)
+		var name_label := UiStyle.label(nick if badge.is_empty() else "%s %s" % [badge, nick], 22, Insider.color_of(int(item.get("insider", -1)), UiStyle.TEXT), 5)
 		name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 		name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		name_label.clip_text = true
@@ -204,154 +285,71 @@ func _load_top() -> void:
 		_top_box.add_child(row)
 
 
-func _build_online(list: VBoxContainer) -> void:
-	list.add_child(_section("ОНЛАЙН-ДРУЗЬЯ"))
-	_online_code = UiStyle.label("Твой ID: ...", 28, UiStyle.GOLD, 7)
-	list.add_child(_online_code)
-	_online_note = UiStyle.label("Подключаюсь к серверу...", 18, UiStyle.TEXT_DIM, 4)
-	_online_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_online_note.custom_minimum_size = Vector2(panel_width() - 110.0, 0)
-	list.add_child(_online_note)
-	var copy := UiStyle.button("Скопировать мой ID", UiStyle.PANEL_LIGHT, 22, Vector2(0, 56))
-	copy.pressed.connect(func() -> void:
-		if Cloud.has_code():
-			DisplayServer.clipboard_set(Cloud.friend_code)
-			_say("ID скопирован. Отправь его другу"))
-	list.add_child(copy)
-	var keep := UiStyle.button("Ссылка-вход (личная, не для друзей): отправить себе", UiStyle.HOT, 21, Vector2(0, 58))
-	keep.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	keep.pressed.connect(func() -> void:
-		keep.disabled = true
-		_say("Готовлю ссылку...")
-		await Cloud.upload_save()
-		if not is_instance_valid(keep):
-			return
-		keep.disabled = false
-		var base := Platform.page_url()
-		var param := Cloud.entry_link_param()
-		if param.is_empty() or base.is_empty():
-			_say("Нет связи с сервером. Попробуй позже")
-			return
-		_say(Platform.share("Моя ссылка-вход в Trash Squad. Сохрани её в «Избранное»: открыв её на любом устройстве, попадёшь в этот же аккаунт.", "%s?%s" % [base, param])))
-	list.add_child(keep)
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 8)
-	var edit := _edit("ID друга (из его профиля)")
-	row.add_child(edit)
-	var add := UiStyle.button("ДОБАВИТЬ", UiStyle.HOT, 22, Vector2(190, 56))
-	add.pressed.connect(func() -> void:
-		var code := edit.text.strip_edges()
-		if code.is_empty():
-			return
-		if code.begins_with("TRF1."):
-			var card_result: String = SaveService.add_friend(code)
-			_say("Друг добавлен по визитке" if card_result == "ok" or card_result == "bonus" else "Визитка не подошла")
-			edit.text = ""
-			_refresh_list_only()
-			return
-		add.disabled = true
-		var result := await Cloud.request_friend(code)
-		if result == "no_server":
-			result = await Cloud.add_friend(code)
-		if not is_instance_valid(add):
-			return
-		add.disabled = false
-		if result == "sent":
-			edit.text = ""
-			_say("Заявка отправлена. Друг увидит её у себя в списке")
-		elif result == "ok":
-			edit.text = ""
-			_say("Вы друзья")
-			_load_online()
-		elif result == "friends":
-			_say("Вы уже друзья")
-		elif result == "not_found":
-			_say("Такого кода нет. Проверь буквы")
-		elif result == "self":
-			_say("Это твой собственный код")
-		elif result == "blocked":
-			_say("Заявку отправить нельзя")
-		elif result == "limit":
-			_say("Лимит друзей или заявок исчерпан")
-		else:
-			_say("Не вышло: %s" % (Cloud.last_error if not Cloud.last_error.is_empty() else "нет связи с сервером")))
-	row.add_child(add)
-	edit.text_submitted.connect(func(_t: String) -> void: add.pressed.emit())
-	list.add_child(row)
-	_online_box = VBoxContainer.new()
-	_online_box.add_theme_constant_override("separation", 8)
-	list.add_child(_online_box)
-	_load_online()
-	var blocked_button := UiStyle.button("Заблокированные игроки", UiStyle.PANEL_LIGHT, 20, Vector2(0, 52))
-	var blocked_box := VBoxContainer.new()
-	blocked_box.add_theme_constant_override("separation", 8)
-	blocked_button.pressed.connect(func() -> void:
-		MenuPopups.clear(blocked_box)
-		var blocks := await Cloud.list_blocks()
-		if not is_instance_valid(blocked_box):
-			return
-		if blocks.is_empty():
-			blocked_box.add_child(UiStyle.label("Список пуст", 18, UiStyle.TEXT_DIM, 4))
-		for entry in blocks:
-			if entry is Dictionary:
-				var code := str((entry as Dictionary).get("friend_code", ""))
-				var line := HBoxContainer.new()
-				var who := UiStyle.label(str((entry as Dictionary).get("nickname", "Енот")), 22, UiStyle.TEXT, 5)
-				who.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-				who.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-				line.add_child(who)
-				var undo := UiStyle.button("Разблокировать", UiStyle.PANEL_LIGHT, 18, Vector2(210, 48))
-				undo.pressed.connect(func() -> void:
-					await Cloud.unblock_user(code)
-					if is_instance_valid(line):
-						line.queue_free())
-				line.add_child(undo)
-				blocked_box.add_child(line))
-	list.add_child(blocked_button)
-	list.add_child(blocked_box)
-
-
 func _load_online() -> void:
+	var box := _online_box
 	var result := await Cloud.inbox()
-	if not is_instance_valid(_online_box):
+	if not is_instance_valid(box) or box != _online_box:
 		return
-	MenuPopups.clear(_online_box)
-	_online_code.text = "Твой ID: %s" % Cloud.friend_code if Cloud.has_code() else "Твой ID: нет связи"
-	if bool(result["no_server"]):
-		var legacy := await Cloud.list_friends()
-		if not is_instance_valid(_online_box):
-			return
-		_online_note.text = "Друзья по коду видят твой ник и рекорд волны." if bool(legacy["ok"]) else "Нет связи с сервером (%s). Остальное в игре работает как обычно." % Cloud.last_error
-		for item in legacy["items"] as Array:
-			if item is Dictionary:
-				_online_box.add_child(_online_row(item as Dictionary))
-		return
+	MenuPopups.clear(box)
 	if not bool(result["ok"]):
-		_online_note.text = "Нет связи с сервером (%s). Остальное в игре работает как обычно." % Cloud.last_error
+		box.add_child(_wrap_label("Нет связи с сервером (%s)" % Cloud.last_error))
 		return
-	var requests := await Cloud.list_requests()
-	if not is_instance_valid(_online_box):
-		return
-	if not requests.is_empty():
-		_online_box.add_child(UiStyle.label("ЗАЯВКИ В ДРУЗЬЯ: %d" % requests.size(), 22, UiStyle.HOT, 6))
-		for request in requests:
-			if request is Dictionary:
-				_online_box.add_child(_request_row(request as Dictionary))
 	var items: Array = result["items"]
-	_online_note.text = "Тапни по другу: профиль, статистика, личные сообщения." if not items.is_empty() else "Пока никого. Отправь другу свой ID или QR с визитки, либо введи ID друга."
+	if items.is_empty():
+		box.add_child(_wrap_label("Пока никого. Позови друга во вкладке «Добавить»."))
+		var go := UiStyle.button("ДОБАВИТЬ ДРУГА", UiStyle.HOT, 22, Vector2(0, 60))
+		go.pressed.connect(_show_tab.bind(Tab.ADD))
+		box.add_child(go)
+		return
+	items.sort_custom(func(a: Variant, b: Variant) -> bool:
+		var ua := int((a as Dictionary).get("unread", 0))
+		var ub := int((b as Dictionary).get("unread", 0))
+		if ua != ub:
+			return ua > ub
+		return str((a as Dictionary).get("last_seen", "")) > str((b as Dictionary).get("last_seen", "")))
+	var online := 0
+	for item in items:
+		if item is Dictionary and SocialProfilePopup.seen_text(str((item as Dictionary).get("last_seen", ""))) == "Сейчас в сети":
+			online += 1
+	var head := UiStyle.label("В сети %d из %d" % [online, items.size()], 18, Color("#35c46a") if online > 0 else UiStyle.TEXT_DIM, 4)
+	head.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	box.add_child(head)
 	for item in items:
 		if item is Dictionary:
-			_online_box.add_child(_social_row(item as Dictionary))
+			box.add_child(_social_row(item as Dictionary))
 	Cloud.refresh_unread()
+
+
+func _load_requests() -> void:
+	var box := _online_box
+	var requests := await Cloud.list_requests()
+	if not is_instance_valid(box) or box != _online_box:
+		return
+	MenuPopups.clear(box)
+	_requests_count = requests.size()
+	_build_tabs()
+	if requests.is_empty():
+		box.add_child(_wrap_label("Новых заявок нет."))
+		return
+	for request in requests:
+		if request is Dictionary:
+			box.add_child(_request_row(request as Dictionary))
+
+
+func _wrap_label(text: String) -> Label:
+	var label := UiStyle.label(text, 19, UiStyle.TEXT_DIM, 4)
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.custom_minimum_size = Vector2(panel_width() - 120.0, 0)
+	return label
 
 
 func _open_profile(code: String) -> void:
 	var popup := SocialProfilePopup.new(code)
 	add_child(popup)
-	popup.changed.connect(_load_online)
+	popup.changed.connect(func() -> void: _show_tab(_tab))
 	popup.closed.connect(func() -> void:
 		popup.queue_free()
-		_load_online())
+		_show_tab(_tab))
 	popup.open()
 
 
@@ -368,12 +366,12 @@ func _invite_line() -> String:
 	return INVITES[randi() % INVITES.size()] % SaveService.get_nickname()
 
 
-func _open_chat(code: String, nick: String) -> void:
-	var popup := ChatPopup.new(code, nick)
+func _open_chat(code: String, nick: String, character: String = "raccoon") -> void:
+	var popup := ChatPopup.new(code, nick, character)
 	add_child(popup)
 	popup.closed.connect(func() -> void:
 		popup.queue_free()
-		_load_online())
+		_show_tab(_tab))
 	popup.open()
 
 
@@ -397,27 +395,27 @@ func _social_row(friend: Dictionary) -> Control:
 	row.add_theme_constant_override("separation", 10)
 	panel.add_child(row)
 	var online := SocialProfilePopup.seen_text(str(friend.get("last_seen", ""))) == "Сейчас в сети"
-	# Кружок рисуем панелью: в шрифте игры нет символа «●», на телефоне вместо него вылезал квадрат с кодом.
-	var dot := Panel.new()
-	var dot_style := StyleBoxFlat.new()
-	dot_style.bg_color = Color("#35c46a") if online else UiStyle.TEXT_DIM
-	dot_style.set_corner_radius_all(8)
-	dot.add_theme_stylebox_override("panel", dot_style)
-	dot.custom_minimum_size = Vector2(16, 16)
-	dot.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	dot.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_child(dot)
+	var stats: Dictionary = friend.get("stats") if friend.get("stats") is Dictionary else {}
+	var character := str(stats.get("c", "raccoon"))
+	var avatar := ChatPopup.PeerAvatar.new()
+	avatar.character = character
+	avatar.online = online
+	row.add_child(avatar)
 	var text := VBoxContainer.new()
 	text.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var badge := Insider.badge_of(int(friend.get("insider", -1)))
-	var name_label := UiStyle.label(nick if badge.is_empty() else "%s %s" % [badge, nick], 24, UiStyle.TEXT, 6)
+	var tag := int(friend.get("insider", -1))
+	var badge := Insider.badge_of(tag)
+	var name_label := UiStyle.label(nick if badge.is_empty() else "%s %s" % [badge, nick], 24, Insider.color_of(tag, UiStyle.TEXT), 6)
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	name_label.clip_text = true
 	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	text.add_child(name_label)
-	var preview := "" if friend.get("last_body") == null else str(friend.get("last_body"))
-	var sub := UiStyle.label(preview.left(34) if not preview.is_empty() else "волна %d" % int(friend.get("best_wave", 0)), 17, UiStyle.TEXT_DIM, 4)
+	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#2f2452"), Color(UiStyle.NEON, 0.6) if tag < 0 else Insider.color_of(tag, UiStyle.TEXT), 3, 16))
+	var preview := "" if friend.get("last_body") == null else ChatPopup.preview_of(str(friend.get("last_body")))
+	var when := "" if friend.get("last_at") == null else ChatPopup._clock_label(str(friend.get("last_at")))
+	var sub_text := (preview.left(30) + ("  · " + when if not when.is_empty() else "")) if not preview.is_empty() else ("в сети" if online else "волна %d" % int(friend.get("best_wave", 0)))
+	var sub := UiStyle.label(sub_text, 17, Color("#35c46a") if preview.is_empty() and online else UiStyle.TEXT_DIM, 4)
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	sub.clip_text = true
 	sub.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -425,7 +423,7 @@ func _social_row(friend: Dictionary) -> Control:
 	row.add_child(text)
 	var unread := int(friend.get("unread", 0))
 	var chat := UiStyle.button("ЧАТ" if unread == 0 else "ЧАТ %d" % unread, UiStyle.HOT if unread > 0 else UiStyle.PANEL_LIGHT, 20, Vector2(128, 52))
-	chat.pressed.connect(func() -> void: _open_chat(code, nick))
+	chat.pressed.connect(func() -> void: _open_chat(code, nick, character))
 	row.add_child(chat)
 	return panel
 
@@ -449,13 +447,14 @@ func _request_row(request: Dictionary) -> Control:
 	accept.pressed.connect(func() -> void:
 		await Cloud.answer_request(code, true)
 		if is_instance_valid(self):
-			_load_online())
+			_say("Теперь вы друзья")
+			_show_tab(Tab.REQUESTS))
 	row.add_child(accept)
 	var decline := UiStyle.button("X", Color("#a3283e"), 20, Vector2(60, 52))
 	decline.pressed.connect(func() -> void:
 		await Cloud.answer_request(code, false)
 		if is_instance_valid(self):
-			_load_online())
+			_show_tab(Tab.REQUESTS))
 	row.add_child(decline)
 	return panel
 
@@ -706,7 +705,7 @@ class CardView:
 		_draw_background(w, h)
 		var level := int(info.get("lv", 1))
 		var ins := int(info.get("ins", -1))
-		var tag_color := UiStyle.GOLD if ins == 0 else (UiStyle.HOT if ins > 0 else UiStyle.NEON)
+		var tag_color := Insider.color_of(ins, UiStyle.NEON) if ins != 1 else UiStyle.HOT
 		var tag := Insider.badge_of(ins).trim_prefix("[").trim_suffix("]").to_upper()
 		if not tag.is_empty():
 			var tag_size := font.get_string_size(tag, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 22)
@@ -759,7 +758,7 @@ class CardView:
 		for i in range(-6, 22):
 			draw_line(Vector2(i * 64.0, 0), Vector2(i * 64.0 + 320.0, h), Color(1, 1, 1, 0.025), 2.0)
 		var ins := int(info.get("ins", -1))
-		var outer := UiStyle.GOLD if ins == 0 else (UiStyle.HOT if ins > 0 else UiStyle.NEON)
+		var outer := Insider.color_of(ins, UiStyle.NEON) if ins != 1 else UiStyle.HOT
 		var inner := Color(UiStyle.GOLD, 0.8) if ins == 0 else (Color(UiStyle.NEON, 0.8) if ins > 0 else Color(UiStyle.HOT, 0.8))
 		draw_style_box(UiStyle.box(Color(0, 0, 0, 0), outer, 6 if ins < 0 else 8, 30), Rect2(5, 5, w - 10, h - 10))
 		draw_style_box(UiStyle.box(Color(0, 0, 0, 0), inner, 2, 26), Rect2(15, 15, w - 30, h - 30))

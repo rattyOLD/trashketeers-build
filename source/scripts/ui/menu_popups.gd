@@ -115,13 +115,11 @@ class Settings:
 		_lite = MenuWidgets.PawToggle.new("Упрощённые эффекты", SaveService.is_fx_lite())
 		_lite.toggled.connect(func(on: bool) -> void: SaveService.set_flag("fx_lite", on))
 		graphics.add_child(_lite)
-		graphics.add_child(MenuPopups.small_hint("Меньше частиц и свечения. Помогает слабым телефонам."))
 		var eco := MenuWidgets.PawToggle.new("Экономия заряда", bool(SaveService.data.get("eco_fps", false)))
 		eco.toggled.connect(func(on: bool) -> void:
 			SaveService.set_flag("eco_fps", on)
 			SaveService.apply_quality())
 		graphics.add_child(eco)
-		graphics.add_child(MenuPopups.small_hint("Телефон меньше греется. Включи, если игра лагает."))
 		var haptics := MenuWidgets.PawToggle.new("Вибрация", bool(SaveService.data.get("haptics", true)))
 		haptics.toggled.connect(func(on: bool) -> void:
 			SaveService.set_flag("haptics", on)
@@ -136,7 +134,6 @@ class Settings:
 		_min_hud = MenuWidgets.PawToggle.new("Минимальный худ", bool(SaveService.data.get("min_hud", false)))
 		_min_hud.toggled.connect(func(on: bool) -> void: SaveService.set_flag("min_hud", on))
 		graphics.add_child(_min_hud)
-		graphics.add_child(MenuPopups.small_hint("В бою только здоровье, пауза, таймер и монеты."))
 		if Platform.fullscreen_supported():
 			_fullscreen = MenuWidgets.PawToggle.new("На весь экран", Platform.is_fullscreen())
 			_fullscreen.toggled.connect(func(on: bool) -> void: Platform.set_fullscreen(on))
@@ -810,7 +807,6 @@ class Profile:
 		list.add_child(_build_header())
 		if not Cloud.has_email():
 			list.add_child(_account_bar())
-		list.add_child(_friends_bar())
 		if Cloud.has_email():
 			list.add_child(_account_bar())
 		list.add_child(_recovery_bar())
@@ -842,7 +838,6 @@ class Profile:
 		var version := UiStyle.label(Platform.build_label() if not Platform.build_label().is_empty() else "локальная сборка", 30, UiStyle.GOLD, 7)
 		version.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		list.add_child(version)
-		list.add_child(MenuPopups.small_hint("Если у друга другой номер, пусть откроет игру заново или нажмёт на розовую плашку обновления."))
 		list.add_child(_section("Облачное сохранение"))
 		list.add_child(_cloud_block())
 		list.add_child(_section("Сохранение и реплики"))
@@ -1022,7 +1017,6 @@ class Profile:
 		var status := UiStyle.label("Код восстановления: %s" % (Cloud.recovery_code if not Cloud.recovery_code.is_empty() else "ещё не сохранялось"), 22, UiStyle.GOLD, 6)
 		status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		box.add_child(status)
-		box.add_child(MenuPopups.small_hint("Прогресс сохраняется сам после забега. Код выше: способ вернуть его на другом устройстве."))
 		var save := UiStyle.button("Сохранить в облако сейчас", UiStyle.PANEL_LIGHT, 22, Vector2(0, 56))
 		save.pressed.connect(func() -> void:
 			save.disabled = true
