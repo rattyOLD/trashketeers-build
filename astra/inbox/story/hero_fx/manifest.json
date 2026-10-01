@@ -1,0 +1,708 @@
+{
+  "brief": "astra/from_claude/BRIEF_v8_survival_fx.md",
+  "block": "H5",
+  "frameOrder": "left-to-right top-to-bottom",
+  "assets": [
+    {
+      "path": "astra/inbox/story/hero_fx/rico_fire_down_1.png",
+      "width": 768,
+      "height": 512,
+      "block": "H5",
+      "transparent": false,
+      "sourceSheet": "rico_down",
+      "frame": 0,
+      "contentBounds": [
+        131,
+        44,
+        636,
+        467
+      ],
+      "footPivot": [
+        383.5,
+        467
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/rico_fire_down_2.png",
+      "width": 768,
+      "height": 512,
+      "block": "H5",
+      "transparent": false,
+      "sourceSheet": "rico_down",
+      "frame": 1,
+      "contentBounds": [
+        148,
+        55,
+        619,
+        457
+      ],
+      "footPivot": [
+        383.5,
+        457
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/rico_reload_down_1.png",
+      "width": 768,
+      "height": 512,
+      "block": "H5",
+      "transparent": false,
+      "sourceSheet": "rico_down",
+      "frame": 2,
+      "contentBounds": [
+        154,
+        52,
+        613,
+        459
+      ],
+      "footPivot": [
+        383.5,
+        459
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/rico_reload_down_2.png",
+      "width": 768,
+      "height": 512,
+      "block": "H5",
+      "transparent": false,
+      "sourceSheet": "rico_down",
+      "frame": 3,
+      "contentBounds": [
+        137,
+        47,
+        631,
+        464
+      ],
+      "footPivot": [
+        384,
+        464
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/rico_reload_down_3.png",
+      "width": 768,
+      "height": 512,
+      "block": "H5",
+      "transparent": false,
+      "sourceSheet": "rico_down",
+      "frame": 4,
+      "contentBounds": [
+        159,
+        48,
+        609,
+        464
+      ],
+      "footPivot": [
+        384,
+        464
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/rico_dash_down_1.png",
+      "width": 768,
+      "height": 512,
+      "block": "H5",
+      "transparent": false,
+      "sourceSheet": "rico_down",
+      "frame": 5,
+      "contentBounds": [
+        129,
+        35,
+        639,
+        477
+      ],
+      "footPivot": [
+        384,
+        477
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/rico_dash_down_2.png",
+      "width": 768,
+      "height": 512,
+      "block": "H5",
+      "transparent": false,
+      "sourceSheet": "rico_down",
+      "frame": 6,
+      "contentBounds": [
+        133,
+        28,
+        635,
+        470
+      ],
+      "footPivot": [
+        384,
+        470
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/rico_down_sheet.png",
+      "width": 1536,
+      "height": 2048,
+      "block": "H5",
+      "transparent": false,
+      "columns": 2,
+      "rows": 4,
+      "cellWidth": 768,
+      "cellHeight": 512,
+      "frames": [
+        "rico_fire_down_1",
+        "rico_fire_down_2",
+        "rico_reload_down_1",
+        "rico_reload_down_2",
+        "rico_reload_down_3",
+        "rico_dash_down_1",
+        "rico_dash_down_2"
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/rico_fire_left_1.png",
+      "width": 768,
+      "height": 512,
+      "block": "H5",
+      "transparent": false,
+      "sourceSheet": "rico_left",
+      "frame": 0,
+      "contentBounds": [
+        43,
+        30,
+        724,
+        482
+      ],
+      "footPivot": [
+        383.5,
+        482
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/rico_fire_left_2.png",
+      "width": 768,
+      "height": 512,
+      "block": "H5",
+      "transparent": false,
+      "sourceSheet": "rico_left",
+      "frame": 1,
+      "contentBounds": [
+        92,
+        31,
+        675,
+        481
+      ],
+      "footPivot": [
+        383.5,
+        481
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/rico_reload_left_1.png",
+      "width": 768,
+      "height": 512,
+      "block": "H5",
+      "transparent": false,
+      "sourceSheet": "rico_left",
+      "frame": 2,
+      "contentBounds": [
+        93,
+        27,
+        674,
+        484
+      ],
+      "footPivot": [
+        383.5,
+        484
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/rico_reload_left_2.png",
+      "width": 768,
+      "height": 512,
+      "block": "H5",
+      "transparent": false,
+      "sourceSheet": "rico_left",
+      "frame": 3,
+      "contentBounds": [
+        91,
+        31,
+        676,
+        480
+      ],
+      "footPivot": [
+        383.5,
+        480
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/rico_reload_left_3.png",
+      "width": 768,
+      "height": 512,
+      "block": "H5",
+      "transparent": false,
+      "sourceSheet": "rico_left",
+      "frame": 4,
+      "contentBounds": [
+        89,
+        34,
+        678,
+        477
+      ],
+      "footPivot": [
+        383.5,
+        477
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/rico_dash_left_1.png",
+      "width": 768,
+      "height": 512,
+      "block": "H5",
+      "transparent": false,
+      "sourceSheet": "rico_left",
+      "frame": 5,
+      "contentBounds": [
+        70,
+        25,
+        698,
+        486
+      ],
+      "footPivot": [
+        384,
+        486
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/rico_dash_left_2.png",
+      "width": 768,
+      "height": 512,
+      "block": "H5",
+      "transparent": false,
+      "sourceSheet": "rico_left",
+      "frame": 6,
+      "contentBounds": [
+        76,
+        25,
+        692,
+        486
+      ],
+      "footPivot": [
+        384,
+        486
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/rico_left_sheet.png",
+      "width": 1536,
+      "height": 2048,
+      "block": "H5",
+      "transparent": false,
+      "columns": 2,
+      "rows": 4,
+      "cellWidth": 768,
+      "cellHeight": 512,
+      "frames": [
+        "rico_fire_left_1",
+        "rico_fire_left_2",
+        "rico_reload_left_1",
+        "rico_reload_left_2",
+        "rico_reload_left_3",
+        "rico_dash_left_1",
+        "rico_dash_left_2"
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/rico_fire_right_1.png",
+      "width": 768,
+      "height": 512,
+      "block": "H5",
+      "transparent": false,
+      "sourceSheet": "rico_right",
+      "frame": 0,
+      "contentBounds": [
+        55,
+        30,
+        712,
+        482
+      ],
+      "footPivot": [
+        383.5,
+        482
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/rico_fire_right_2.png",
+      "width": 768,
+      "height": 512,
+      "block": "H5",
+      "transparent": false,
+      "sourceSheet": "rico_right",
+      "frame": 1,
+      "contentBounds": [
+        96,
+        32,
+        672,
+        480
+      ],
+      "footPivot": [
+        384,
+        480
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/rico_reload_right_1.png",
+      "width": 768,
+      "height": 512,
+      "block": "H5",
+      "transparent": false,
+      "sourceSheet": "rico_right",
+      "frame": 2,
+      "contentBounds": [
+        97,
+        29,
+        670,
+        483
+      ],
+      "footPivot": [
+        383.5,
+        483
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/rico_reload_right_2.png",
+      "width": 768,
+      "height": 512,
+      "block": "H5",
+      "transparent": false,
+      "sourceSheet": "rico_right",
+      "frame": 3,
+      "contentBounds": [
+        100,
+        27,
+        667,
+        484
+      ],
+      "footPivot": [
+        383.5,
+        484
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/rico_reload_right_3.png",
+      "width": 768,
+      "height": 512,
+      "block": "H5",
+      "transparent": false,
+      "sourceSheet": "rico_right",
+      "frame": 4,
+      "contentBounds": [
+        88,
+        28,
+        679,
+        483
+      ],
+      "footPivot": [
+        383.5,
+        483
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/rico_dash_right_1.png",
+      "width": 768,
+      "height": 512,
+      "block": "H5",
+      "transparent": false,
+      "sourceSheet": "rico_right",
+      "frame": 5,
+      "contentBounds": [
+        75,
+        25,
+        693,
+        486
+      ],
+      "footPivot": [
+        384,
+        486
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/rico_dash_right_2.png",
+      "width": 768,
+      "height": 512,
+      "block": "H5",
+      "transparent": false,
+      "sourceSheet": "rico_right",
+      "frame": 6,
+      "contentBounds": [
+        79,
+        28,
+        689,
+        484
+      ],
+      "footPivot": [
+        384,
+        484
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/rico_right_sheet.png",
+      "width": 1536,
+      "height": 2048,
+      "block": "H5",
+      "transparent": false,
+      "columns": 2,
+      "rows": 4,
+      "cellWidth": 768,
+      "cellHeight": 512,
+      "frames": [
+        "rico_fire_right_1",
+        "rico_fire_right_2",
+        "rico_reload_right_1",
+        "rico_reload_right_2",
+        "rico_reload_right_3",
+        "rico_dash_right_1",
+        "rico_dash_right_2"
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/rico_fire_up_1.png",
+      "width": 768,
+      "height": 512,
+      "block": "H5",
+      "transparent": false,
+      "sourceSheet": "rico_up",
+      "frame": 0,
+      "contentBounds": [
+        101,
+        25,
+        667,
+        486
+      ],
+      "footPivot": [
+        384,
+        486
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/rico_fire_up_2.png",
+      "width": 768,
+      "height": 512,
+      "block": "H5",
+      "transparent": false,
+      "sourceSheet": "rico_up",
+      "frame": 1,
+      "contentBounds": [
+        164,
+        30,
+        604,
+        481
+      ],
+      "footPivot": [
+        384,
+        481
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/rico_reload_up_1.png",
+      "width": 768,
+      "height": 512,
+      "block": "H5",
+      "transparent": false,
+      "sourceSheet": "rico_up",
+      "frame": 2,
+      "contentBounds": [
+        137,
+        29,
+        631,
+        483
+      ],
+      "footPivot": [
+        384,
+        483
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/rico_reload_up_2.png",
+      "width": 768,
+      "height": 512,
+      "block": "H5",
+      "transparent": false,
+      "sourceSheet": "rico_up",
+      "frame": 3,
+      "contentBounds": [
+        144,
+        27,
+        623,
+        484
+      ],
+      "footPivot": [
+        383.5,
+        484
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/rico_reload_up_3.png",
+      "width": 768,
+      "height": 512,
+      "block": "H5",
+      "transparent": false,
+      "sourceSheet": "rico_up",
+      "frame": 4,
+      "contentBounds": [
+        140,
+        28,
+        627,
+        484
+      ],
+      "footPivot": [
+        383.5,
+        484
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/rico_dash_up_1.png",
+      "width": 768,
+      "height": 512,
+      "block": "H5",
+      "transparent": false,
+      "sourceSheet": "rico_up",
+      "frame": 5,
+      "contentBounds": [
+        148,
+        27,
+        619,
+        485
+      ],
+      "footPivot": [
+        383.5,
+        485
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/rico_dash_up_2.png",
+      "width": 768,
+      "height": 512,
+      "block": "H5",
+      "transparent": false,
+      "sourceSheet": "rico_up",
+      "frame": 6,
+      "contentBounds": [
+        164,
+        28,
+        603,
+        484
+      ],
+      "footPivot": [
+        383.5,
+        484
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/rico_up_sheet.png",
+      "width": 1536,
+      "height": 2048,
+      "block": "H5",
+      "transparent": false,
+      "columns": 2,
+      "rows": 4,
+      "cellWidth": 768,
+      "cellHeight": 512,
+      "frames": [
+        "rico_fire_up_1",
+        "rico_fire_up_2",
+        "rico_reload_up_1",
+        "rico_reload_up_2",
+        "rico_reload_up_3",
+        "rico_dash_up_1",
+        "rico_dash_up_2"
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/muzzle_small.png",
+      "width": 128,
+      "height": 128,
+      "block": "H5",
+      "transparent": false,
+      "sourceSheet": "muzzle_sizes",
+      "frame": 0,
+      "contentBounds": [
+        38,
+        42,
+        89,
+        86
+      ],
+      "footPivot": [
+        63.5,
+        86
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/muzzle_medium.png",
+      "width": 128,
+      "height": 128,
+      "block": "H5",
+      "transparent": false,
+      "sourceSheet": "muzzle_sizes",
+      "frame": 1,
+      "contentBounds": [
+        20,
+        30,
+        107,
+        97
+      ],
+      "footPivot": [
+        63.5,
+        97
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/muzzle_large.png",
+      "width": 128,
+      "height": 128,
+      "block": "H5",
+      "transparent": false,
+      "sourceSheet": "muzzle_sizes",
+      "frame": 2,
+      "contentBounds": [
+        6,
+        16,
+        121,
+        112
+      ],
+      "footPivot": [
+        63.5,
+        112
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/muzzle_sizes_sheet.png",
+      "width": 256,
+      "height": 256,
+      "block": "H5",
+      "transparent": false,
+      "columns": 2,
+      "rows": 2,
+      "cellWidth": 128,
+      "cellHeight": 128,
+      "frames": [
+        "muzzle_small",
+        "muzzle_medium",
+        "muzzle_large"
+      ]
+    },
+    {
+      "path": "astra/inbox/story/hero_fx/rico_model_reference.png",
+      "width": 1024,
+      "height": 1024,
+      "block": "H5",
+      "transparent": false,
+      "referenceOnly": true,
+      "columns": 2,
+      "rows": 2,
+      "views": [
+        "down",
+        "left",
+        "right",
+        "up"
+      ]
+    }
+  ]
+}
