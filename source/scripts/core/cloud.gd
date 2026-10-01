@@ -456,6 +456,12 @@ func _bytes_request(method: int, url: String, headers: PackedStringArray, body: 
 	return {"code": int(reply[1]) if int(reply[0]) == HTTPRequest.RESULT_SUCCESS else 0, "body": reply[3]}
 
 
+## Выйти на всех остальных устройствах (Supabase logout scope=others). Это устройство остаётся в аккаунте.
+func logout_others() -> bool:
+	var result := await _call(HTTPClient.METHOD_POST, "/auth/v1/logout?scope=others", {})
+	return int(result["code"]) == 204 or bool(result["ok"])
+
+
 ## Реакция на сообщение: "like", "lol", "fire" или "" (убрать). true — сервер принял.
 func react_message(id: int, emoji: String) -> bool:
 	var result := await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/react_message", {"p_id": id, "p_emoji": emoji})

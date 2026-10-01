@@ -857,13 +857,37 @@ class Profile:
 		box.add_child(b)
 		var devices := MenuPopups.small_hint("")
 		box.add_child(devices)
-		_fill_devices(devices)
+		var out := UiStyle.button("Выйти на всех устройствах, кроме этого", UiStyle.PANEL_LIGHT, 19, Vector2(0, 50))
+		out.visible = false
+		var armed := [false]
+		out.pressed.connect(func() -> void:
+			if not armed[0]:
+				armed[0] = true
+				out.text = "Точно? Нажми ещё раз"
+				get_tree().create_timer(3.0).timeout.connect(func() -> void:
+					if is_instance_valid(out) and armed[0]:
+						armed[0] = false
+						out.text = "Выйти на всех устройствах, кроме этого")
+				return
+			armed[0] = false
+			out.disabled = true
+			var ok := await Cloud.logout_others()
+			if not is_instance_valid(out):
+				return
+			out.text = "Готово: остальные устройства вышли" if ok else "Не вышло, нет связи"
+			if ok:
+				devices.text = "Ты вошёл только на этом устройстве."
+			else:
+				out.disabled = false)
+		box.add_child(out)
+		_fill_devices(devices, out)
 		return box
 
-	func _fill_devices(label: Label) -> void:
+	func _fill_devices(label: Label, out: Button) -> void:
 		var count := await Cloud.my_devices()
 		if not is_instance_valid(label):
 			return
+		out.visible = count > 1
 		if count <= 0:
 			label.visible = false
 		elif count == 1:
