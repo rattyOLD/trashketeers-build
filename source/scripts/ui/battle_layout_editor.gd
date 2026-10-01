@@ -12,6 +12,8 @@ var _selected := ""
 var _dragging := ""
 var _grab := Vector2.ZERO
 var _panel: PanelContainer
+var _panel_grab := Vector2.ZERO
+var _panel_drag := false
 var _body: VBoxContainer
 var _summary: VBoxContainer
 var _fold: Button
@@ -70,6 +72,8 @@ func _build() -> void:
 	_panel.offset_top = -90.0
 	_panel.offset_bottom = -90.0
 	_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	_panel.gui_input.connect(_on_panel_input)
 	add_child(_panel)
 	_body = VBoxContainer.new()
 	_body.add_theme_constant_override("separation", 6)
@@ -166,7 +170,7 @@ func _build() -> void:
 		_refresh())
 	resets.add_child(reset_all)
 	_summary.add_child(resets)
-	var hint := UiStyle.label("Тащи любой элемент пальцем. Тап выбирает его для настройки.", 16, UiStyle.TEXT_DIM, 4)
+	var hint := UiStyle.label("Тащи любой элемент пальцем. Эту панель тоже можно таскать за любое пустое место.", 16, UiStyle.TEXT_DIM, 4)
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	hint.custom_minimum_size = Vector2(300, 0)
 	_summary.add_child(hint)
@@ -205,6 +209,26 @@ func _toggle_fold() -> void:
 	_summary.visible = not _collapsed
 	_fold.text = "РАЗВЕРНУТЬ" if _collapsed else "СВЕРНУТЬ"
 	_panel.reset_size()
+
+
+func _on_panel_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
+		var button := event as InputEventMouseButton
+		_panel_drag = button.pressed
+		if button.pressed:
+			var rect := _panel.get_global_rect()
+			if _panel.anchor_right > 0.0:
+				_panel.set_anchors_preset(Control.PRESET_TOP_LEFT, true)
+				_panel.custom_minimum_size.x = rect.size.x
+				_panel.size = rect.size
+				_panel.position = rect.position
+			_panel_grab = button.global_position - _panel.global_position
+	elif event is InputEventMouseMotion and _panel_drag:
+		var target := (event as InputEventMouseMotion).global_position - _panel_grab
+		_panel.position = Vector2(
+			clampf(target.x, 0.0, maxf(size.x - _panel.size.x, 0.0)),
+			clampf(target.y, 0.0, maxf(size.y - 80.0, 0.0)))
+		get_viewport().set_input_as_handled()
 
 
 func _finish() -> void:
