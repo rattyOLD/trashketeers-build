@@ -248,20 +248,29 @@ func _build_online(list: VBoxContainer) -> void:
 			_refresh_list_only()
 			return
 		add.disabled = true
-		var result := await Cloud.add_friend(code)
+		var result := await Cloud.request_friend(code)
+		if result == "no_server":
+			result = await Cloud.add_friend(code)
 		if not is_instance_valid(add):
 			return
 		add.disabled = false
-		if result == "ok":
+		if result == "sent":
 			edit.text = ""
-			_say("Друг добавлен")
+			_say("Заявка отправлена. Друг увидит её у себя в списке")
+		elif result == "ok":
+			edit.text = ""
+			_say("Вы друзья")
 			_load_online()
+		elif result == "friends":
+			_say("Вы уже друзья")
 		elif result == "not_found":
 			_say("Такого кода нет. Проверь буквы")
 		elif result == "self":
 			_say("Это твой собственный код")
+		elif result == "blocked":
+			_say("Заявку отправить нельзя")
 		elif result == "limit":
-			_say("Друзей уже максимум")
+			_say("Лимит друзей или заявок исчерпан")
 		else:
 			_say("Нет связи с сервером. Попробуй позже"))
 	row.add_child(add)
@@ -271,22 +280,162 @@ func _build_online(list: VBoxContainer) -> void:
 	_online_box.add_theme_constant_override("separation", 8)
 	list.add_child(_online_box)
 	_load_online()
+	var blocked_button := UiStyle.button("Заблокированные игроки", UiStyle.PANEL_LIGHT, 20, Vector2(0, 52))
+	var blocked_box := VBoxContainer.new()
+	blocked_box.add_theme_constant_override("separation", 8)
+	blocked_button.pressed.connect(func() -> void:
+		MenuPopups.clear(blocked_box)
+		var blocks := await Cloud.list_blocks()
+		if not is_instance_valid(blocked_box):
+			return
+		if blocks.is_empty():
+			blocked_box.add_child(UiStyle.label("Список пуст", 18, UiStyle.TEXT_DIM, 4))
+		for entry in blocks:
+			if entry is Dictionary:
+				var code := str((entry as Dictionary).get("friend_code", ""))
+				var line := HBoxContainer.new()
+				var who := UiStyle.label(str((entry as Dictionary).get("nickname", "Енот")), 22, UiStyle.TEXT, 5)
+				who.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+				who.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+				line.add_child(who)
+				var undo := UiStyle.button("Разблокировать", UiStyle.PANEL_LIGHT, 18, Vector2(210, 48))
+				undo.pressed.connect(func() -> void:
+					await Cloud.unblock_user(code)
+					if is_instance_valid(line):
+						line.queue_free())
+				line.add_child(undo)
+				blocked_box.add_child(line))
+	list.add_child(blocked_button)
+	list.add_child(blocked_box)
 
 
 func _load_online() -> void:
-	var result := await Cloud.list_friends()
+	var result := await Cloud.inbox()
 	if not is_instance_valid(_online_box):
 		return
 	MenuPopups.clear(_online_box)
 	_online_code.text = "Твой ID: %s" % Cloud.friend_code if Cloud.has_code() else "Твой ID: нет связи"
+	if bool(result["no_server"]):
+		var legacy := await Cloud.list_friends()
+		if not is_instance_valid(_online_box):
+			return
+		_online_note.text = "Друзья по коду видят твой ник и рекорд волны." if bool(legacy["ok"]) else "Нет связи с сервером. Остальное в игре работает как обычно."
+		for item in legacy["items"] as Array:
+			if item is Dictionary:
+				_online_box.add_child(_online_row(item as Dictionary))
+		return
 	if not bool(result["ok"]):
 		_online_note.text = "Нет связи с сервером. Остальное в игре работает как обычно."
 		return
+	var requests := await Cloud.list_requests()
+	if not is_instance_valid(_online_box):
+		return
+	if not requests.is_empty():
+		_online_box.add_child(UiStyle.label("ЗАЯВКИ В ДРУЗЬЯ: %d" % requests.size(), 22, UiStyle.HOT, 6))
+		for request in requests:
+			if request is Dictionary:
+				_online_box.add_child(_request_row(request as Dictionary))
 	var items: Array = result["items"]
-	_online_note.text = "Друзья по коду видят твой ник и рекорд волны." if not items.is_empty() else "Пока никого. Отправь другу свой ID или введи ID друга."
+	_online_note.text = "Тапни по другу: профиль, статистика, личные сообщения." if not items.is_empty() else "Пока никого. Отправь другу свой ID или QR с визитки, либо введи ID друга."
 	for item in items:
 		if item is Dictionary:
-			_online_box.add_child(_online_row(item as Dictionary))
+			_online_box.add_child(_social_row(item as Dictionary))
+	Cloud.refresh_unread()
+
+
+func _open_profile(code: String) -> void:
+	var popup := SocialProfilePopup.new(code)
+	add_child(popup)
+	popup.changed.connect(_load_online)
+	popup.closed.connect(func() -> void:
+		popup.queue_free()
+		_load_online())
+	popup.open()
+
+
+func _open_chat(code: String, nick: String) -> void:
+	var popup := ChatPopup.new(code, nick)
+	add_child(popup)
+	popup.closed.connect(func() -> void:
+		popup.queue_free()
+		_load_online())
+	popup.open()
+
+
+func _tappable(panel: Control, action: Callable) -> void:
+	panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	panel.gui_input.connect(func(event: InputEvent) -> void:
+		var tapped: bool = (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT) or (event is InputEventScreenTouch and event.pressed)
+		if tapped:
+			SoundManager.play(&"ui_click")
+			action.call())
+
+
+func _social_row(friend: Dictionary) -> Control:
+	var code := str(friend.get("friend_code", ""))
+	var nick := str(friend.get("nickname", "Енот"))
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#2f2452"), Color(UiStyle.NEON, 0.6), 3, 14))
+	_tappable(panel, _open_profile.bind(code))
+	var row := HBoxContainer.new()
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_theme_constant_override("separation", 10)
+	panel.add_child(row)
+	var online := SocialProfilePopup.seen_text(str(friend.get("last_seen", ""))) == "Сейчас в сети"
+	var dot := UiStyle.label("●", 24, Color("#35c46a") if online else UiStyle.TEXT_DIM, 4)
+	dot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(dot)
+	var text := VBoxContainer.new()
+	text.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var badge := Insider.badge_of(int(friend.get("insider", -1)))
+	var name_label := UiStyle.label("%s %s" % [badge, nick], 24, UiStyle.TEXT, 6)
+	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	name_label.clip_text = true
+	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	text.add_child(name_label)
+	var preview := str(friend.get("last_body", ""))
+	var sub := UiStyle.label(preview.left(34) if not preview.is_empty() else "волна %d" % int(friend.get("best_wave", 0)), 17, UiStyle.TEXT_DIM, 4)
+	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	sub.clip_text = true
+	sub.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	text.add_child(sub)
+	row.add_child(text)
+	var unread := int(friend.get("unread", 0))
+	var chat := UiStyle.button("ЧАТ" if unread == 0 else "ЧАТ %d" % unread, UiStyle.HOT if unread > 0 else UiStyle.PANEL_LIGHT, 20, Vector2(128, 52))
+	chat.pressed.connect(func() -> void: _open_chat(code, nick))
+	row.add_child(chat)
+	return panel
+
+
+func _request_row(request: Dictionary) -> Control:
+	var code := str(request.get("friend_code", ""))
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#3a2450"), Color(UiStyle.HOT, 0.8), 3, 14))
+	_tappable(panel, _open_profile.bind(code))
+	var row := HBoxContainer.new()
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_theme_constant_override("separation", 8)
+	panel.add_child(row)
+	var name_label := UiStyle.label(str(request.get("nickname", "Енот")), 24, UiStyle.TEXT, 6)
+	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_label.clip_text = true
+	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(name_label)
+	var accept := UiStyle.button("ДА", Color("#2fae5f"), 20, Vector2(84, 52))
+	accept.pressed.connect(func() -> void:
+		await Cloud.answer_request(code, true)
+		if is_instance_valid(self):
+			_load_online())
+	row.add_child(accept)
+	var decline := UiStyle.button("X", Color("#a3283e"), 20, Vector2(60, 52))
+	decline.pressed.connect(func() -> void:
+		await Cloud.answer_request(code, false)
+		if is_instance_valid(self):
+			_load_online())
+	row.add_child(decline)
+	return panel
 
 
 func _online_row(friend: Dictionary) -> Control:
@@ -570,6 +719,12 @@ class CardView:
 			_text(font, "ID %s" % friend_code, Vector2(w - 330, h - 20), 32, UiStyle.NEON, 290.0, HORIZONTAL_ALIGNMENT_RIGHT)
 
 	func _draw_qr(font: Font) -> void:
+		if qr_text.is_empty():
+			_text(font, "УБИТО КРЫС", Vector2(704, 200), 22, UiStyle.TEXT_DIM, 208.0, HORIZONTAL_ALIGNMENT_CENTER)
+			_text(font, str(int(info.get("k", 0))), Vector2(704, 256), 56, UiStyle.DANGER, 208.0, HORIZONTAL_ALIGNMENT_CENTER)
+			_text(font, "ЗАБЕГОВ", Vector2(704, 316), 22, UiStyle.TEXT_DIM, 208.0, HORIZONTAL_ALIGNMENT_CENTER)
+			_text(font, str(int(info.get("r", 0))), Vector2(704, 372), 56, UiStyle.GOLD, 208.0, HORIZONTAL_ALIGNMENT_CENTER)
+			return
 		var plate := Rect2(704, 160, 208, 208)
 		draw_rect(plate.grow(8.0), UiStyle.OUTLINE)
 		draw_rect(plate, Color.WHITE)

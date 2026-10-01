@@ -674,6 +674,14 @@ func restore_backup(code: String) -> bool:
 	return true
 
 
+## Публичная статистика для профиля друзей на сервере.
+func public_stats() -> Dictionary:
+	return {
+		"lv": get_account_level(), "c": get_character_id(), "s": get_selected_skin(), "sh": story_shards(), "m": story_done_ids(),
+		"bk": int(data["boss_kills"]), "w": get_stat("best_wave"), "k": get_stat("kills"), "r": int(data["runs"]), "t": float(data["best_time"]),
+	}
+
+
 func card_code() -> String:
 	var raw := JSON.stringify(card_info()).to_utf8_buffer()
 	return "TRF1.%d.%s" % [raw.size(), Marshalls.raw_to_base64(raw.compress(FileAccess.COMPRESSION_DEFLATE))]

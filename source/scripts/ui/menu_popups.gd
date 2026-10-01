@@ -1147,7 +1147,7 @@ class Profile:
 		var title := UiStyle.label("ДРУЗЬЯ", 34, UiStyle.TEXT, 8)
 		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 		texts.add_child(title)
-		var sub := UiStyle.label("Визитка, рейтинг, профили друзей", 18, UiStyle.TEXT_DIM, 4)
+		var sub := UiStyle.label("Новых сообщений и заявок: %d" % Cloud.unread if Cloud.unread > 0 else "Визитка, рейтинг, профили, чат", 18, UiStyle.GOLD if Cloud.unread > 0 else UiStyle.TEXT_DIM, 4)
 		sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 		texts.add_child(sub)
 		head.add_child(texts)

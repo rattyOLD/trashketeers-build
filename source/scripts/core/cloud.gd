@@ -3,6 +3,7 @@ extends Node
 ## Всё необязательно: без связи игра работает как раньше, методы возвращают пустой результат.
 
 signal profile_synced
+signal unread_changed
 
 ## Вход по почте скрыт, пока в Supabase не настроены SMTP и шаблоны писем.
 const EMAIL_LOGIN := false
@@ -20,6 +21,7 @@ var friend_code := ""
 var recovery_code := ""
 var email := ""
 var online := false
+var unread := 0
 
 var _uid := ""
 var _access := ""
@@ -37,6 +39,12 @@ func _ready() -> void:
 	email = Platform.storage_get(EMAIL_KEY)
 	if Platform.is_web:
 		get_tree().create_timer(4.0).timeout.connect(sync_profile)
+		var poll := Timer.new()
+		poll.wait_time = 45.0
+		poll.timeout.connect(refresh_unread)
+		add_child(poll)
+		poll.start()
+		get_tree().create_timer(9.0).timeout.connect(refresh_unread)
 
 
 func has_code() -> bool:
@@ -51,7 +59,9 @@ func sync_profile() -> bool:
 		return has_code()
 	_profile_busy = true
 	var body := {"p_nickname": SaveService.get_nickname(), "p_best_wave": SaveService.get_stat("best_wave"), "p_insider": SaveService.get_insider()}
-	var result := await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/sync_profile", body)
+	var result := await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/sync_profile_v2", body.merged({"p_stats": SaveService.public_stats()}))
+	if not bool(result["ok"]) and int(result["code"]) == 404:
+		result = await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/sync_profile", body)
 	_profile_busy = false
 	if bool(result["ok"]):
 		var rows: Variant = result["data"]
@@ -198,6 +208,96 @@ func _email_status(reply: Dictionary, linking: bool) -> String:
 	if not linking and (code == 422 or code == 400):
 		return "not_found"
 	return "invalid"
+
+
+# --- Социальная часть: заявки, профили, личные сообщения ------------------------------------
+
+func _rpc(name: String, body: Dictionary) -> Dictionary:
+	if not await sync_profile():
+		return {"ok": false, "code": 0, "data": null}
+	return await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/" + name, body)
+
+
+func _rows(result: Dictionary) -> Array:
+	return (result["data"] as Array) if bool(result["ok"]) and result["data"] is Array else []
+
+
+## Социальные функции есть на сервере (схема schema_v5_social.sql выполнена).
+func social_ready(result: Dictionary) -> bool:
+	return int(result["code"]) != 404
+
+
+## "sent", "ok", "friends", "self", "not_found", "blocked", "limit", "offline", "no_server".
+func request_friend(code: String) -> String:
+	var result := await _rpc("request_friend", {"p_code": code})
+	if not social_ready(result):
+		return "no_server"
+	return str(result["data"]) if bool(result["ok"]) else "offline"
+
+
+func list_requests() -> Array:
+	return _rows(await _rpc("list_requests", {}))
+
+
+func answer_request(code: String, accept: bool) -> String:
+	var result := await _rpc("answer_request", {"p_code": code, "p_accept": accept})
+	return str(result["data"]) if bool(result["ok"]) else "offline"
+
+
+## {"ok": bool, "items": [...], "no_server": bool}: друзья с последним сообщением и числом непрочитанных.
+func inbox() -> Dictionary:
+	var result := await _rpc("inbox", {})
+	return {"ok": bool(result["ok"]), "items": _rows(result), "no_server": not social_ready(result)}
+
+
+func friend_profile(code: String) -> Dictionary:
+	var rows := _rows(await _rpc("friend_profile", {"p_code": code}))
+	return rows[0] as Dictionary if not rows.is_empty() and rows[0] is Dictionary else {}
+
+
+## "ok", "not_friends", "blocked", "rate", "empty", "banned", "offline".
+func send_message(code: String, text: String) -> String:
+	var result := await _rpc("send_message", {"p_code": code, "p_body": text})
+	return str(result["data"]) if bool(result["ok"]) else "offline"
+
+
+## {"ok": bool, "items": [{id, mine, body, created_at}]}; входящие помечаются прочитанными.
+func get_messages(code: String, after_id: int) -> Dictionary:
+	var result := await _rpc("get_messages", {"p_code": code, "p_after": after_id})
+	return {"ok": bool(result["ok"]), "items": _rows(result)}
+
+
+func block_user(code: String) -> bool:
+	var result := await _rpc("block_user", {"p_code": code})
+	return bool(result["ok"]) and str(result["data"]) == "ok"
+
+
+func unblock_user(code: String) -> bool:
+	return bool((await _rpc("unblock_user", {"p_code": code}))["ok"])
+
+
+func list_blocks() -> Array:
+	return _rows(await _rpc("list_blocks", {}))
+
+
+func report_user(code: String, reason: String, message_id: int = 0) -> String:
+	var body := {"p_code": code, "p_reason": reason}
+	if message_id > 0:
+		body["p_message_id"] = message_id
+	var result := await _rpc("report_user", body)
+	return str(result["data"]) if bool(result["ok"]) else "offline"
+
+
+## Новые сообщения и заявки: число для значка в меню.
+func refresh_unread() -> void:
+	if not has_code():
+		return
+	var result := await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/unread_total", {})
+	if bool(result["ok"]):
+		var count := int(result["data"])
+		if count != unread:
+			unread = count
+			unread_changed.emit()
 
 
 func send_vote(line_id: String, value: int, who: String, line_text: String) -> void:
