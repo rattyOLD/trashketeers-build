@@ -83,11 +83,15 @@ func find_nearest(from: Vector2, max_distance: float) -> Enemy:
 
 const SEPARATION_SPEED := 140.0
 const PLAYER_PUSH := 190.0
+const FAR_DISTANCE_SQ := 1100.0 * 1100.0
+var _frame := 0
 
 
 func _physics_process(delta: float) -> void:
 	if _player == null:
 		return
+	_frame += 1
+	var player_pos := _player.global_position
 	_compute_separation()
 	# Обход с конца по той же причине, что и в BulletPool: смерть врага внутри тика
 	# (контакт, отражённый урон) делает swap-remove, и проход вперёд пропустил бы элемент.
@@ -96,7 +100,12 @@ func _physics_process(delta: float) -> void:
 		if i < _active.size():
 			var enemy := _active[i]
 			if enemy.is_alive():
-				enemy.tick(delta, _player, _nav)
+				if enemy.global_position.distance_squared_to(player_pos) > FAR_DISTANCE_SQ and not enemy.data.is_boss():
+					# Далёкие враги думают через кадр с удвоенным шагом: их не видно, а нагрузка падает.
+					if (_frame + i) & 1 == 0:
+						enemy.tick(delta * 2.0, _player, _nav)
+				else:
+					enemy.tick(delta, _player, _nav)
 		i -= 1
 
 

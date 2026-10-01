@@ -175,10 +175,22 @@ func _physics_process(delta: float) -> void:
 	queue_redraw()
 
 
+## Видимая область в мировых координатах с запасом: за кадром лут не рисуем (до 320 штук = сотни команд отрисовки).
+func _view_rect() -> Rect2:
+	var size := get_viewport_rect().size
+	var inverse := get_canvas_transform().affine_inverse()
+	var top_left := inverse * Vector2.ZERO
+	var bottom_right := inverse * size
+	return Rect2(top_left, bottom_right - top_left).abs().grow(48.0)
+
+
 func _draw() -> void:
 	var nut_half := nut_texture.get_size() * 0.5
 	var xp_half := xp_texture.get_size() * 0.5
+	var view := _view_rect()
 	for i in _count:
+		if not view.has_point(_pos[i]):
+			continue
 		if _kind[i] == Kind.XP_GOLD:
 			var glow := 1.35 + 0.12 * sin(_time * 6.0 + i)
 			draw_circle(_pos[i] + Vector2(0, 8), 9.0, Color(0, 0, 0, 0.25))

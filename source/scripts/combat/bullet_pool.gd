@@ -20,7 +20,7 @@ const LOD_SWEEP_OFF := 150
 const RECYCLE_SAMPLES := 6
 const EXPLOSION_KNOCKBACK := 1.8
 
-@export var capacity := 384
+@export var capacity := 256
 ## Паспорт биома: снаряды на верхнем слое FX.
 @export var draw_z_index := BiomeLayers.Z_FX
 

@@ -808,11 +808,15 @@ class SkillButton:
 				pressed.emit()
 				get_viewport().set_input_as_handled()
 
+	var _redraw_gap := 0.0
+
 	func _process(delta: float) -> void:
 		_time += delta
 		if _press > 0.0:
 			_press = maxf(_press - delta * 5.0, 0.0)
-		if is_visible_in_tree() and (cooldown <= 0.001 or _press > 0.0):
+		_redraw_gap -= delta
+		if is_visible_in_tree() and (cooldown <= 0.001 or _press > 0.0) and (_press > 0.0 or _redraw_gap <= 0.0):
+			_redraw_gap = 0.05
 			queue_redraw()
 
 	func _draw() -> void:
