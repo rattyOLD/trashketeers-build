@@ -59,4 +59,9 @@ for f in sorted(os.listdir(SRC + 'heavy_barrel')):
     put('heavy_barrel/' + f, 'hb/' + f)
 for n in ('hidden_wall_plate', 'hidden_crate_open', 'hidden_crate_closed', 'wall_debris_01', 'wall_debris_02', 'wall_debris_03', 'wall_debris_04', 'break_wall_intact', 'break_wall_cracked', 'break_wall_destroyed'):
     put('terrain/%s.png' % n, 'terrain/%s.png' % n)
+for who in ('baron', 'shaman', 'magnate'):
+    for state in ('surrender', 'looted'):
+        put('surrender/%s_%s.png' % (who, state), 'surrender/%s_%s.png' % (who, state), True, (384, 384))
+for n in ('choice_spare', 'choice_loot'):
+    put('surrender/%s.png' % n, 'surrender/%s.png' % n, True)
 print('ok')

@@ -48,6 +48,14 @@ func open(card: Dictionary) -> void:
 	var title := UiStyle.label(str(card.get("title", "")).to_upper(), 36, color, 9)
 	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(title)
+	var image_path := str(card.get("image", ""))
+	if not image_path.is_empty() and ResourceLoader.exists(image_path):
+		var picture := TextureRect.new()
+		picture.texture = load(image_path) as Texture2D
+		picture.custom_minimum_size = Vector2(0, 230)
+		picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		box.add_child(picture)
 	var text := UiStyle.label(str(card.get("text", "")), 24, UiStyle.TEXT, 6)
 	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	text.custom_minimum_size = Vector2(width - 50.0, 0)
@@ -56,6 +64,11 @@ func open(card: Dictionary) -> void:
 	for i in options.size():
 		var option: Dictionary = options[i]
 		var button := UiStyle.button(str(option.get("label", "")), color.darkened(0.3) if i == 0 else UiStyle.PANEL_LIGHT, 26, Vector2(0, 76))
+		var icon_path := str(option.get("icon", ""))
+		if not icon_path.is_empty() and ResourceLoader.exists(icon_path):
+			button.icon = load(icon_path) as Texture2D
+			button.expand_icon = true
+			button.add_theme_constant_override("icon_max_width", 64)
 		button.pressed.connect(_pick.bind(i))
 		box.add_child(button)
 		var note := UiStyle.label(str(option.get("note", "")), 18, UiStyle.TEXT_DIM, 4)

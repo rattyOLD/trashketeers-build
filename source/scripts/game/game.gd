@@ -225,7 +225,7 @@ func start(_weapon_id: StringName = &"") -> void:
 	if story_mission.is_empty():
 		radio = SurvivalRadio.new()
 		add_child(radio)
-		radio.setup(self)
+		radio.setup(self, player)
 	if not story_mission.is_empty():
 		story = StoryRun.new()
 		add_child(story)
@@ -694,6 +694,8 @@ func _on_enemy_died(enemy: Enemy) -> void:
 	if story != null:
 		story.on_kill(data)
 	hud.set_kills(kills)
+	if radio != null:
+		radio.on_kill()
 	SaveService.add_stat("kills", 1, false)
 	SaveService.add_stat("k_" + String(data.id), 1, false)
 	status.on_enemy_died(enemy, at)
@@ -800,10 +802,16 @@ func _offer_mini_choice(boss: Enemy, at: Vector2, attempt: int) -> void:
 			"title": "%s на коленях" % name,
 			"text": "%s ползёт к тебе и бормочет: «Только не добивай! Я заплачу! Или расскажу, где пиво!» Решай, енот." % name,
 			"color": "#ffb020",
+			"image": _surrender_art(String(boss.data.id)),
 			"options": [
-				{"label": "ПОЩАДИТЬ", "note": "Полное лечение, +1 бесплатный реролл и редкий ствол. Нэлл будет в шоке."},
-				{"label": "ОГРАБИТЬ", "note": "Эпический ствол и +50% неонита за мини-босса. Без лечения."},
+				{"label": "ПОЩАДИТЬ", "icon": "res://assets/story/surrender/choice_spare.png", "note": "Полное лечение, +1 бесплатный реролл и редкий ствол. Нэлл будет в шоке."},
+				{"label": "ОГРАБИТЬ", "icon": "res://assets/story/surrender/choice_loot.png", "note": "Эпический ствол и +50% неонита за мини-босса. Без лечения."},
 			]}))
+
+
+func _surrender_art(boss_id: String) -> String:
+	var who := "baron" if boss_id == "beer_baron" else ("shaman" if boss_id == "electric_shaman" else ("magnate" if boss_id == "pig_magnate" else ""))
+	return "" if who.is_empty() else "res://assets/story/surrender/%s_surrender.png" % who
 
 
 func _on_mini_choice(index: int, name: String, at: Vector2) -> void:
