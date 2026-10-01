@@ -181,7 +181,8 @@ func _load_top() -> void:
 	MenuPopups.clear(_top_box)
 	var items: Array = result["items"]
 	if not bool(result["ok"]) or items.is_empty():
-		var note := UiStyle.label(["Пока пусто или связь ушла по мусорным делам.", "Тут никого. Либо друзей нет, либо интернет сбежал.", "Пусто. Енотам тоже нужен интернет."].pick_random(), 18, UiStyle.TEXT_DIM, 4)
+		var text := "Топ не загрузился (%s). Енотам тоже нужен интернет." % Cloud.last_error if not bool(result["ok"]) else "Пока пусто: никто ещё не дошёл до рекорда волны. Стань первым."
+		var note := UiStyle.label(text, 18, UiStyle.TEXT_DIM, 4)
 		_top_box.add_child(note)
 		return
 	for i in items.size():
