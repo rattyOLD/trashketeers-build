@@ -11,6 +11,9 @@ var _stats_label: Label
 var _reports_box: VBoxContainer
 var _words_label: Label
 var _log_label: Label
+var _reset_login: LineEdit
+var _reset_pass: LineEdit
+var _reset_log: Label
 var _health_label: Label
 var _edit: LineEdit
 var _word_edit: LineEdit
@@ -46,6 +49,18 @@ func _refresh() -> void:
 	_list.add_child(_link_button("Новая ссылка DeV (старая умрёт)", 0, "dev"))
 	_list.add_child(_link_button("Новая ссылка Insider (старая умрёт)", 1, "insider"))
 	_list.add_child(_wrap("Ссылка показывается один раз и копируется в буфер. DeV-ссылка работает на 3 входа, Insider на 50 (нужен SQL v9)."))
+
+	_list.add_child(UiStyle.label("СБРОС ПАРОЛЯ ИГРОКА", 22, UiStyle.TEXT_DIM, 5))
+	_reset_login = _field("Логин игрока")
+	_list.add_child(_reset_login)
+	_reset_pass = _field("Новый временный пароль (от 6 знаков)")
+	_list.add_child(_reset_pass)
+	var reset := UiStyle.button("Сбросить пароль", UiStyle.HOT, 22, Vector2(0, 56))
+	reset.pressed.connect(_reset_password)
+	_list.add_child(reset)
+	_list.add_child(_wrap("Не больше 2 сбросов в сутки на логин. Прежде чем сбрасывать, проверь, что пишет хозяин: ник, ID с визитки, лучшая волна."))
+	_reset_log = _wrap("...")
+	_list.add_child(_reset_log)
 
 	_list.add_child(UiStyle.label("ЖУРНАЛ ТЕГОВ", 22, UiStyle.TEXT_DIM, 5))
 	_log_label = _wrap("...")
@@ -152,6 +167,34 @@ func _load_all() -> void:
 	_load_reports()
 	_load_words()
 	_load_log()
+	_load_reset_log()
+
+
+func _reset_password() -> void:
+	var r := await Cloud.dev_call("dev_reset_password", {"p_login": _reset_login.text, "p_password": _reset_pass.text})
+	if not is_instance_valid(_status):
+		return
+	var code := str(r["data"]) if bool(r["ok"]) else "offline"
+	var texts := {"ok": "Пароль сброшен. Передай его игроку, пусть сменит в профиле.", "limit": "Лимит: 2 сброса в сутки на этот логин.",
+		"not_found": "Такого логина нет.", "bad": "Логин: 3–20 знаков, пароль от 6.", "denied": "Нужен DeV.", "offline": "Нет связи или нет SQL v11."}
+	_status.text = str(texts.get(code, code))
+	if code == "ok":
+		_reset_pass.text = ""
+	_load_reset_log()
+
+
+func _load_reset_log() -> void:
+	var r := await Cloud.dev_call("dev_password_log")
+	if not is_instance_valid(_reset_log):
+		return
+	if int(r["code"]) == 404:
+		_reset_log.text = "Нужен SQL v11 (schema_v11_password_reset.sql)"
+		return
+	var lines: Array[String] = []
+	for row: Variant in Cloud._rows(r):
+		var d := row as Dictionary
+		lines.append("%s · %s · %s" % [str(d.get("at", "")).substr(5, 11).replace("T", " "), d.get("login"), d.get("result")])
+	_reset_log.text = "\n".join(lines) if not lines.is_empty() else "Сбросов не было"
 
 
 func _load_log() -> void:

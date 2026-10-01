@@ -808,7 +808,12 @@ class Profile:
 				child.queue_free()
 		var list := MenuPopups.scroll_list(content)
 		list.add_child(_build_header())
+		if not Cloud.has_email():
+			list.add_child(_account_bar())
 		list.add_child(_friends_bar())
+		if Cloud.has_email():
+			list.add_child(_account_bar())
+		list.add_child(_recovery_bar())
 		list.add_child(_rank_button())
 		list.add_child(_section("РЕКОРДЫ"))
 		var records := GridContainer.new()
@@ -842,6 +847,30 @@ class Profile:
 		list.add_child(_cloud_block())
 		list.add_child(_section("Сохранение и реплики"))
 		list.add_child(_insider_block())
+
+	## Вход в аккаунт по логину и паролю: единственный способ ничего не терять при очистке браузера.
+	func _account_bar() -> Control:
+		var text := "АККАУНТ: %s ✓" % Cloud.email if Cloud.has_email() else "⚠ АККАУНТ НЕ СОЗДАН\nпрогресс может пропасть. Нажми и придумай логин и пароль"
+		var b := UiStyle.button(text, Color("#2fae5f") if Cloud.has_email() else Color("#d63a3a"), 24, Vector2(0, 84))
+		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		b.pressed.connect(func() -> void: account_requested.emit())
+		return b
+
+	## Крупный код восстановления: нажал и скопировал. После любого сброса прогресс возвращается им.
+	func _recovery_bar() -> Control:
+		var code := Cloud.recovery_code
+		var b := UiStyle.button("", UiStyle.PANEL_LIGHT, 22, Vector2(0, 96))
+		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		b.text = ("КОД ВОССТАНОВЛЕНИЯ\n%s\n(нажми, чтобы скопировать)" % code) if not code.is_empty() else "КОД ВОССТАНОВЛЕНИЯ\nготовлю... зайди сюда через минуту"
+		b.pressed.connect(func() -> void:
+			if Cloud.recovery_code.is_empty():
+				Cloud.queue_upload()
+				return
+			DisplayServer.clipboard_set(Cloud.recovery_code)
+			b.text = "Код скопирован: %s\nСохрани его в заметки" % Cloud.recovery_code)
+		if code.is_empty():
+			Cloud.upload_save()
+		return b
 
 	func _rank_button() -> Control:
 		var have := SaveService.unlocked_ranks().size()
@@ -952,12 +981,6 @@ class Profile:
 	func _cloud_block() -> Control:
 		var box := VBoxContainer.new()
 		box.add_theme_constant_override("separation", 10)
-		var account := UiStyle.button("ПОЧТА: %s" % (Cloud.email if Cloud.has_email() else "привязать, чтобы не потерять прогресс"), UiStyle.HOT, 22, Vector2(0, 62))
-		account.pressed.connect(func() -> void: account_requested.emit())
-		if Cloud.EMAIL_LOGIN:
-			box.add_child(account)
-		else:
-			account.queue_free()
 		var status := UiStyle.label("Код восстановления: %s" % (Cloud.recovery_code if not Cloud.recovery_code.is_empty() else "ещё не сохранялось"), 22, UiStyle.GOLD, 6)
 		status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		box.add_child(status)

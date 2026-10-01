@@ -99,6 +99,8 @@ func _accept_card_link() -> void:
 		else:
 			_toast_note("Ссылка не сработала: сервер не принял секрет (или v7 ещё не выполнена)")
 	var restore := Platform.consume_url_param("restore")
+	if not restore.is_empty() and restore.strip_edges().to_upper() == Platform.storage_get(Cloud.RECOVERY_KEY).to_upper():
+		restore = ""
 	if not restore.is_empty():
 		_toast_note("Возвращаю аккаунт...")
 		var text := await Cloud.restore_save(restore)

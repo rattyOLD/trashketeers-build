@@ -1,11 +1,8 @@
 class_name AccountPopup
 extends GlassPopup
-## Аккаунт по почте: привязать почту к профилю или войти на новом устройстве. Коды приходят письмом.
+## Аккаунт по логину и паролю: ничего не теряется при очистке браузера или смене телефона.
+## Почта не нужна и письма не рассылаются. Пароль нельзя восстановить, поэтому его стоит записать.
 
-enum Step { START, LINK_CODE, LOGIN_CODE }
-
-var _step := Step.START
-var _address := ""
 var _status: Label
 var _body: VBoxContainer
 
@@ -22,135 +19,103 @@ func _init() -> void:
 
 
 func _refresh() -> void:
-	_step = Step.START
-	_render()
-
-
-func _render() -> void:
 	MenuPopups.clear(_body)
-	if _step == Step.START:
-		_render_start()
-	else:
-		_render_code()
-
-
-func _render_start() -> void:
 	if Cloud.has_email():
-		_say("Почта привязана: %s. Прогресс вернётся на любом устройстве, где войдёшь по ней." % Cloud.email)
+		_render_logged()
 	else:
-		_say("Привяжи почту, и прогресс не пропадёт, даже если очистишь браузер или сменишь телефон.")
-	var edit := _edit("Твоя почта")
-	_body.add_child(edit)
-	var link := UiStyle.button("ПРИВЯЗАТЬ ПОЧТУ", UiStyle.HOT, 24, Vector2(0, 64))
-	link.pressed.connect(func() -> void:
-		if not _valid(edit.text):
-			_say("Проверь почту: она должна быть вида name@mail.com")
+		_render_guest()
+
+
+func _render_logged() -> void:
+	_say("Аккаунт «%s». Прогресс, друзья, чаты и тег привязаны к нему. На новом устройстве войди с этим логином и паролем." % Cloud.email)
+	var pass_edit := _edit("Новый пароль", true)
+	_body.add_child(pass_edit)
+	var change := UiStyle.button("СМЕНИТЬ ПАРОЛЬ", UiStyle.PANEL_LIGHT, 22, Vector2(0, 58))
+	change.pressed.connect(func() -> void:
+		if pass_edit.text.length() < 6:
+			_say("Пароль от 6 знаков.")
 			return
-		link.disabled = true
-		_say("Отправляю письмо...")
-		var result := await Cloud.link_email(edit.text)
-		if not is_instance_valid(link):
+		var result := await Cloud.change_password(pass_edit.text)
+		if is_instance_valid(change):
+			pass_edit.text = ""
+			_say("Пароль изменён." if result == "ok" else ("Слишком простой пароль." if result == "weak" else "Нет связи с сервером.")))
+	_body.add_child(change)
+	var save := UiStyle.button("СОХРАНИТЬ В ОБЛАКО СЕЙЧАС", UiStyle.PANEL_LIGHT, 22, Vector2(0, 58))
+	save.pressed.connect(func() -> void:
+		var code := await Cloud.upload_save()
+		if is_instance_valid(save):
+			_say("Сохранено." if not code.is_empty() else "Нет связи с сервером."))
+	_body.add_child(save)
+
+
+func _render_guest() -> void:
+	_say("Придумай логин и пароль, и прогресс не пропадёт при очистке браузера или смене телефона. Почта не нужна.")
+	var login_edit := _edit("Логин (латиница, цифры, _)", false)
+	_body.add_child(login_edit)
+	var pass_edit := _edit("Пароль (от 6 знаков)", true)
+	_body.add_child(pass_edit)
+	var create := UiStyle.button("СОЗДАТЬ АККАУНТ", UiStyle.HOT, 24, Vector2(0, 64))
+	create.pressed.connect(func() -> void:
+		if Cloud.clean_login(login_edit.text).is_empty():
+			_say("Логин: 3–20 знаков, только латиница, цифры и «_».")
 			return
-		link.disabled = false
-		if result == "sent":
-			_address = edit.text.strip_edges().to_lower()
-			_step = Step.LINK_CODE
-			_render()
-			_say("Письмо отправлено на %s. Введи код из письма. Проверь и «Спам»." % _address)
-		elif result == "exists":
-			_say("Эта почта уже привязана к профилю. Нажми «ВОЙТИ ПО ПОЧТЕ», чтобы вернуть тот прогресс.")
-		elif result == "limit":
-			_say("Слишком много писем. Подожди несколько минут и попробуй снова.")
+		if pass_edit.text.length() < 6:
+			_say("Пароль от 6 знаков.")
+			return
+		create.disabled = true
+		_say("Создаю...")
+		var result := await Cloud.register_account(login_edit.text, pass_edit.text)
+		if not is_instance_valid(create):
+			return
+		create.disabled = false
+		if result == "ok":
+			await Cloud.upload_save()
+			_refresh()
+			_say("Готово! Аккаунт создан, прогресс в облаке. Запиши пароль: восстановить его нельзя.")
+		elif result == "taken":
+			_say("Такой логин уже занят. Придумай другой, или нажми «ВОЙТИ», если это твой.")
+		elif result == "weak":
+			_say("Слишком простой пароль. Добавь знаков.")
+		elif result == "confirm":
+			_say("Сервер просит подтверждение почты: владельцу надо отключить Confirm email в Supabase (Authentication, Providers, Email).")
 		elif result == "offline":
 			_say("Нет связи с сервером. Попробуй позже.")
 		else:
-			_say("Не получилось отправить письмо. Проверь адрес."))
-	_body.add_child(link)
-	var login := UiStyle.button("ВОЙТИ ПО ПОЧТЕ (на новом устройстве)", UiStyle.PANEL_LIGHT, 22, Vector2(0, 58))
+			_say("Не получилось. Проверь логин."))
+	_body.add_child(create)
+	var login := UiStyle.button("ВОЙТИ (на новом устройстве)", UiStyle.PANEL_LIGHT, 22, Vector2(0, 58))
 	login.pressed.connect(func() -> void:
-		if not _valid(edit.text):
-			_say("Впиши почту выше, потом нажми «Войти».")
-			return
 		login.disabled = true
-		_say("Отправляю письмо...")
-		var result := await Cloud.request_login(edit.text)
+		_say("Вхожу...")
+		var result := await Cloud.login_account(login_edit.text, pass_edit.text)
 		if not is_instance_valid(login):
 			return
 		login.disabled = false
-		if result == "sent":
-			_address = edit.text.strip_edges().to_lower()
-			_step = Step.LOGIN_CODE
-			_render()
-			_say("Письмо отправлено на %s. Введи код из письма." % _address)
-		elif result == "not_found":
-			_say("К этой почте ничего не привязано. Привяжи её на старом устройстве или проверь адрес.")
-		elif result == "limit":
-			_say("Слишком много писем. Подожди несколько минут и попробуй снова.")
-		else:
-			_say("Нет связи с сервером. Попробуй позже."))
-	_body.add_child(login)
-	_body.add_child(MenuPopups.small_hint("Почта нужна только для входа. Мы ничего не рассылаем."))
-
-
-func _render_code() -> void:
-	var edit := _edit("Код из письма")
-	_body.add_child(edit)
-	var ok := UiStyle.button("ПОДТВЕРДИТЬ", UiStyle.HOT, 24, Vector2(0, 64))
-	ok.pressed.connect(func() -> void:
-		if edit.text.strip_edges().length() < 4:
+		if result != "ok":
+			_say("Нет связи с сервером." if result == "offline" else "Логин или пароль не подошли.")
 			return
-		ok.disabled = true
-		if _step == Step.LINK_CODE:
-			var done := await Cloud.confirm_link(_address, edit.text)
-			if not is_instance_valid(ok):
-				return
-			ok.disabled = false
-			if done:
-				await Cloud.upload_save()
-				_step = Step.START
-				_render()
-				_say("Готово! Почта привязана, прогресс сохранён в облаке.")
-			else:
-				_say("Код не подошёл. Проверь цифры или запроси новое письмо.")
+		await Cloud.sync_profile()
+		var saved := await Cloud.my_save()
+		_refresh()
+		if not saved.is_empty() and SaveService.import_code(saved):
+			_say("Вход выполнен, прогресс, друзья и тег на месте.")
 		else:
-			var logged := await Cloud.confirm_login(_address, edit.text)
-			if not is_instance_valid(ok):
-				return
-			ok.disabled = false
-			if not logged:
-				_say("Код не подошёл. Проверь цифры или запроси новое письмо.")
-				return
-			await Cloud.sync_profile()
-			var saved := await Cloud.my_save()
-			_step = Step.START
-			_render()
-			if not saved.is_empty() and SaveService.import_code(saved):
-				_say("Вход выполнен, прогресс возвращён.")
-			else:
-				_say("Вход выполнен. В облаке пока нет сохранения для этой почты."))
-	_body.add_child(ok)
-	var back := UiStyle.button("Назад", UiStyle.PANEL_LIGHT, 22, Vector2(0, 54))
-	back.pressed.connect(func() -> void:
-		_step = Step.START
-		_render())
-	_body.add_child(back)
-
-
-func _valid(text: String) -> bool:
-	var value := text.strip_edges()
-	return value.contains("@") and value.contains(".") and value.length() >= 6 and not value.contains(" ")
+			_say("Вход выполнен. В облаке пока нет сохранения, играй: оно появится само."))
+	_body.add_child(login)
+	_body.add_child(MenuPopups.small_hint("Если забыл пароль, вернуть его нельзя: заведи новый аккаунт. Код восстановления в профиле спасёт прогресс."))
 
 
 func _say(text: String) -> void:
 	_status.text = text
 
 
-func _edit(placeholder: String) -> LineEdit:
+func _edit(placeholder: String, secret: bool) -> LineEdit:
 	var edit := LineEdit.new()
 	edit.placeholder_text = placeholder
+	edit.secret = secret
 	edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	edit.custom_minimum_size = Vector2(0, 56)
-	edit.max_length = 128
+	edit.max_length = 64
 	SearchBar.style(edit, 22)
 	SearchBar.attach_touch_input(edit, placeholder)
 	return edit

@@ -6,7 +6,8 @@ signal profile_synced
 signal unread_changed
 
 ## Вход по почте скрыт, пока в Supabase не настроены SMTP и шаблоны писем.
-const EMAIL_LOGIN := false
+const EMAIL_LOGIN := true
+const ACCOUNT_DOMAIN := "@trashsquad.game"
 const URL := "https://ylclwkprhhlzavhahrko.supabase.co"
 const KEY := "sb_publishable_7xeZ6_3lc4Bi44z35wf4BQ__P6Maunz"
 const SESSION_KEY := "trk_cloud_session"
@@ -32,6 +33,7 @@ var _expires := 0
 var _session_busy := false
 var _profile_busy := false
 var _upload_pending := false
+var _last_backup := ""
 
 
 func _ready() -> void:
@@ -47,6 +49,11 @@ func _ready() -> void:
 		add_child(poll)
 		poll.start()
 		get_tree().create_timer(9.0).timeout.connect(refresh_unread)
+		var backup := Timer.new()
+		backup.wait_time = 150.0
+		backup.timeout.connect(_auto_backup)
+		add_child(backup)
+		backup.start()
 
 
 func has_code() -> bool:
@@ -72,6 +79,8 @@ func sync_profile() -> bool:
 			profile_synced.emit()
 	if has_code():
 		await _sync_badge()
+		if recovery_code.is_empty():
+			queue_upload()
 	return has_code()
 
 
@@ -133,6 +142,17 @@ func list_friends() -> Dictionary:
 
 
 ## Откладывает выгрузку сохранения, чтобы серия вызовов превратилась в один запрос.
+## Раз в пару минут выгружает сохранение, если оно изменилось: код восстановления всегда актуален.
+func _auto_backup() -> void:
+	if not has_code():
+		return
+	var snapshot := SaveService.export_code().sha256_text()
+	if snapshot == _last_backup:
+		return
+	if not (await upload_save()).is_empty():
+		_last_backup = snapshot
+
+
 func queue_upload() -> void:
 	if _upload_pending or not Platform.is_web:
 		return
@@ -158,8 +178,9 @@ func restore_save(code: String) -> String:
 	if not await sync_profile():
 		return ""
 	var result := await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/restore_save", {"p_code": code})
-	if bool(result["ok"]) and result["data"] is String:
-		await _sync_badge()
+	if bool(result["ok"]) and result["data"] is String and not str(result["data"]).is_empty():
+		friend_code = ""
+		await sync_profile()
 		return str(result["data"])
 	return ""
 
@@ -177,38 +198,71 @@ func has_email() -> bool:
 	return not email.is_empty()
 
 
-## Привязка почты к текущему профилю: "sent", "exists", "limit", "invalid" или "offline".
-func link_email(address: String) -> String:
-	var result := await _call(HTTPClient.METHOD_PUT, "/auth/v1/user", {"email": address.strip_edges().to_lower()})
-	return _email_status(result, true)
+## Логин: латиница, цифры и «_», 3–20 знаков. Иначе пустая строка.
+static func clean_login(text: String) -> String:
+	var value := text.strip_edges().to_lower()
+	if value.length() < 3 or value.length() > 20:
+		return ""
+	for i in value.length():
+		var c := value.unicode_at(i)
+		var ok := (c >= 97 and c <= 122) or (c >= 48 and c <= 57) or c == 95
+		if not ok:
+			return ""
+	return value
 
 
-## Подтверждение привязки кодом из письма.
-func confirm_link(address: String, token: String) -> bool:
-	var reply := await _verify("email_change", address, token)
-	if not _store_session(reply):
-		return false
-	_remember_email(address)
-	return true
+## Аккаунт без почты: логин и пароль превращают анонимный профиль в постоянный.
+## "ok", "taken", "weak", "invalid", "confirm" (в Supabase включено подтверждение почты) или "offline".
+func register_account(login: String, password: String) -> String:
+	var name := clean_login(login)
+	if name.is_empty():
+		return "invalid"
+	if not await _ensure_session():
+		return "offline"
+	var result := await _call(HTTPClient.METHOD_PUT, "/auth/v1/user", {"email": name + ACCOUNT_DOMAIN, "password": password})
+	if not bool(result["ok"]):
+		var code := int(result["code"])
+		var info := str(result["data"]).to_lower()
+		if code == 0:
+			return "offline"
+		if info.contains("password"):
+			return "weak"
+		if info.contains("registered") or info.contains("exists") or code == 422 or code == 409:
+			return "taken"
+		return "invalid"
+	var user: Variant = result["data"]
+	if user is Dictionary and not str((user as Dictionary).get("new_email", "")).is_empty():
+		return "confirm"
+	_remember_email(name)
+	return "ok"
 
 
-## Вход по почте на новом устройстве: "sent", "not_found", "limit" или "offline".
-func request_login(address: String) -> String:
+## Вход на новом устройстве: "ok", "wrong", "invalid" или "offline". Профиль подменяется на аккаунтный.
+func login_account(login: String, password: String) -> String:
+	var name := clean_login(login)
+	if name.is_empty() or password.is_empty():
+		return "invalid"
 	var headers := PackedStringArray(["apikey: " + KEY, "Content-Type: application/json"])
-	var reply := await _raw(HTTPClient.METHOD_POST, URL + "/auth/v1/otp", headers, JSON.stringify({"email": address.strip_edges().to_lower(), "create_user": false}))
-	return _email_status(reply, false)
-
-
-## Подтверждение входа кодом из письма; профиль подменяется на привязанный к почте.
-func confirm_login(address: String, token: String) -> bool:
-	var reply := await _verify("email", address, token)
+	var reply := await _raw(HTTPClient.METHOD_POST, URL + "/auth/v1/token?grant_type=password", headers, JSON.stringify({"email": name + ACCOUNT_DOMAIN, "password": password}))
+	if int(reply["code"]) == 0:
+		return "offline"
 	if not _store_session(reply):
-		return false
-	_remember_email(address)
+		return "wrong"
+	_remember_email(name)
 	friend_code = ""
 	recovery_code = ""
 	Platform.storage_set(RECOVERY_KEY, "")
-	return true
+	return "ok"
+
+
+## Смена пароля у вошедшего аккаунта: "ok", "weak" или "offline".
+func change_password(password: String) -> String:
+	if not await _ensure_session():
+		return "offline"
+	var result := await _call(HTTPClient.METHOD_PUT, "/auth/v1/user", {"password": password})
+	if bool(result["ok"]):
+		return "ok"
+	return "offline" if int(result["code"]) == 0 else "weak"
 
 
 ## Сохранение, привязанное к текущему профилю (после входа по почте), либо пустая строка.
