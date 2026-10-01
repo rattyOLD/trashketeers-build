@@ -1,0 +1,69 @@
+{
+  "generator": "built-in imagegen",
+  "prompts": [
+    {
+      "key": "m3_roofs_floor_clean",
+      "prompt": "Use case: stylized-concept. Generate a BRAND NEW game FLOOR TEXTURE strip with EXACTLY THREE adjacent square textures, 3columns1row, canvas1536x512. Each cell is a FLAT ORTHOGRAPHIC TOP-DOWN SURFACE TEXTURE filling its ENTIRE512square from edge to edge, including all outer canvas edges. Absolutely NO background gaps or magenta, no raised props, machines, tanks, vents, pipes, consoles, crates, grass or scenery. Materials in exact order: wet corrugated indigo roof metal; dark tar roof square with faint pink drainage seam; wet navy square roof pavers. Neontrash cartoon style: clean bold dark seams, chunky two-tone cel-shaded material patches, restrained neon detail, stylized rust and weathering. No photorealism, pixel art, text, logos, lettering or digits. All four edges of EACH texture must repeat seamlessly: same pattern height and colors at oppositeedges. No perspective depth, no isometric diamond. Fill whole canvas with only these3 surface textures; no framing or margin."
+    },
+    {
+      "key": "m3_roofs_walls",
+      "prompt": "Production neon-trash cartoon environment sheet, smooth thick dark outlines, two-tone cel shading, chunky rusty forms with neon, orthographic3/4topdown lightupperleft. No text, digits, pixelart. Exact grid row-major no lines, isolated centered complete objects on #FF00FF. Wet indigo nighttime roofs, pinkneon.3horizontal wallsections single row identicalbaseline: brickparapet, corrugatedaccesswall, wirestrungrailing STRICT cell spacing: every object occupies at most70% of its cell width AND height, with at least15% pure magenta padding on allfour sides. No parts or shadows may approach cell boundaries. No images in neighboring cells may overlap. Uniform exact equal rows andcolumns."
+    },
+    {
+      "key": "m3_roofs_props",
+      "prompt": "Production neon-trash cartoon environment sheet, smooth thick dark outlines, two-tone cel shading, chunky rusty forms with neon, orthographic3/4topdown lightupperleft. No text, digits, pixelart. Exact grid row-major no lines, isolated centered complete objects on #FF00FF. Wet indigo nighttime roofs, pinkneon.TEN props exactly5columns2rows in order: Yagiantenna, brickchimney, wirepole, blankbillboard, pigeonturret, satellitedish, exhaustvent, watertank, radiomast, cablereel STRICT cell spacing: every object occupies at most70% of its cell width AND height, with at least15% pure magenta padding on allfour sides. No parts or shadows may approach cell boundaries. No images in neighboring cells may overlap. Uniform exact equal rows andcolumns."
+    },
+    {
+      "key": "m3_roofs_boss",
+      "prompt": "Production neon-trash cartoon environment sheet, smooth thick dark outlines, two-tone cel shading, chunky rusty forms with neon, orthographic3/4topdown lightupperleft. No text, digits, pixelart. Exact grid row-major no lines, isolated centered complete objects on #FF00FF. Wet indigo nighttime roofs, pinkneon.One512x384 isolated complete landscape bosssetpiece nocharacter: GodfatherPigeon roofstage: ornate pigeontower with emptythroneperch, antennamast, blankpanel, pinklights. STRICT cell spacing: every object occupies at most70% of its cell width AND height, with at least15% pure magenta padding on allfour sides. No parts or shadows may approach cell boundaries. No images in neighboring cells may overlap. Uniform exact equal rows andcolumns."
+    },
+    {
+      "key": "m4_ice_floor",
+      "prompt": "Production neon-trash cartoon environment sheet, smooth thick dark outlines, two-tone cel shading, chunky rusty forms with neon, orthographic3/4topdown lightupperleft. No text, digits, pixelart. Exact grid row-major no lines, isolated centered complete objects on #FF00FF. Frozen factory cyanwhite navy.3square FLOOR textures single row, flat topdown fillcell edge-to-edge no magenta oppositeedges seamless: icecoatedsteel, frozenconveyorbed, crackedice"
+    },
+    {
+      "key": "m4_ice_walls",
+      "prompt": "Production neon-trash cartoon environment sheet, smooth thick dark outlines, two-tone cel shading, chunky rusty forms with neon, orthographic3/4topdown lightupperleft. No text, digits, pixelart. Exact grid row-major no lines, isolated centered complete objects on #FF00FF. Frozen factory cyanwhite navy.3horizontal wallsections single row identicalbaseline: frozenpipewall, frostedmetalwall, capsulewall STRICT cell spacing: every object occupies at most70% of its cell width AND height, with at least15% pure magenta padding on allfour sides. No parts or shadows may approach cell boundaries. No images in neighboring cells may overlap. Uniform exact equal rows andcolumns."
+    },
+    {
+      "key": "m4_ice_props",
+      "prompt": "Production neon-trash cartoon environment sheet, smooth thick dark outlines, two-tone cel shading, chunky rusty forms with neon, orthographic3/4topdown lightupperleft. No text, digits, pixelart. Exact grid row-major no lines, isolated centered complete objects on #FF00FF. Frozen factory cyanwhite navy.TEN props exactly5columns2rows in order: icepipeelbow, frozenconveyor, frostcapsule, coolantpump, frostedtank, icyvalvewheel, icecrate, cryogenerator, iciclerack, frozenturbine STRICT cell spacing: every object occupies at most70% of its cell width AND height, with at least15% pure magenta padding on allfour sides. No parts or shadows may approach cell boundaries. No images in neighboring cells may overlap. Uniform exact equal rows andcolumns."
+    },
+    {
+      "key": "m4_ice_boss",
+      "prompt": "Production neon-trash cartoon environment sheet, smooth thick dark outlines, two-tone cel shading, chunky rusty forms with neon, orthographic3/4topdown lightupperleft. No text, digits, pixelart. Exact grid row-major no lines, isolated centered complete objects on #FF00FF. Frozen factory cyanwhite navy.One512x384 isolated complete landscape bosssetpiece nocharacter: WhiteRaccoon stage huge frostlaboratorycapsule icycoolantpipes cyanblankdisplay. STRICT cell spacing: every object occupies at most70% of its cell width AND height, with at least15% pure magenta padding on allfour sides. No parts or shadows may approach cell boundaries. No images in neighboring cells may overlap. Uniform exact equal rows andcolumns."
+    },
+    {
+      "key": "m5_center_floor_clean",
+      "prompt": "Use case: stylized-concept. Generate a BRAND NEW game FLOOR TEXTURE strip with EXACTLY THREE adjacent square textures, 3columns1row, canvas1536x512. Each cell is a FLAT ORTHOGRAPHIC TOP-DOWN SURFACE TEXTURE filling its ENTIRE512square from edge to edge, including all outer canvas edges. Absolutely NO background gaps or magenta, no raised props, machines, tanks, vents, pipes, consoles, crates, grass or scenery. Materials in exact order: broken charcoal asphalt with faded yellow stripe; shattered concrete with toxicgreen cracks; scorched orange square plaza pavers. Neontrash cartoon style: clean bold dark seams, chunky two-tone cel-shaded material patches, restrained neon detail, stylized rust and weathering. No photorealism, pixel art, text, logos, lettering or digits. All four edges of EACH texture must repeat seamlessly: same pattern height and colors at oppositeedges. No perspective depth, no isometric diamond. Fill whole canvas with only these3 surface textures; no framing or margin."
+    },
+    {
+      "key": "m5_center_walls",
+      "prompt": "Production neon-trash cartoon environment sheet, smooth thick dark outlines, two-tone cel shading, chunky rusty forms with neon, orthographic3/4topdown lightupperleft. No text, digits, pixelart. Exact grid row-major no lines, isolated centered complete objects on #FF00FF. Cityruins orangefire rustycharcoal toxicgreen.3horizontal wallsections single row identicalbaseline: brokenskyscraperfacade, scorchedbarrier, rustwallblankbrokensign STRICT cell spacing: every object occupies at most70% of its cell width AND height, with at least15% pure magenta padding on allfour sides. No parts or shadows may approach cell boundaries. No images in neighboring cells may overlap. Uniform exact equal rows andcolumns."
+    },
+    {
+      "key": "m5_center_props",
+      "prompt": "Production neon-trash cartoon environment sheet, smooth thick dark outlines, two-tone cel shading, chunky rusty forms with neon, orthographic3/4topdown lightupperleft. No text, digits, pixelart. Exact grid row-major no lines, isolated centered complete objects on #FF00FF. Cityruins orangefire rustycharcoal toxicgreen.TEN props exactly5columns2rows in order: ruinedskyscraperstump, burninggarbagetruck, brokenblanksign, giantgear, roadcrater, benthydrant, brokentrafficlight, toxicdumpster, wreckedbus, concreterubbleheap STRICT cell spacing: every object occupies at most70% of its cell width AND height, with at least15% pure magenta padding on allfour sides. No parts or shadows may approach cell boundaries. No images in neighboring cells may overlap. Uniform exact equal rows andcolumns."
+    },
+    {
+      "key": "m5_center_boss",
+      "prompt": "Production neon-trash cartoon environment sheet, smooth thick dark outlines, two-tone cel shading, chunky rusty forms with neon, orthographic3/4topdown lightupperleft. No text, digits, pixelart. Exact grid row-major no lines, isolated centered complete objects on #FF00FF. Cityruins orangefire rustycharcoal toxicgreen.One512x384 isolated complete landscape bosssetpiece nocharacter: Huge brokentoothedgear onruinedintersection, garbagetruckwreck orangefire greencracks. STRICT cell spacing: every object occupies at most70% of its cell width AND height, with at least15% pure magenta padding on allfour sides. No parts or shadows may approach cell boundaries. No images in neighboring cells may overlap. Uniform exact equal rows andcolumns."
+    },
+    {
+      "key": "m6_heart_floor_clean",
+      "prompt": "Use case: stylized-concept. Generate a BRAND NEW game FLOOR TEXTURE strip with EXACTLY THREE adjacent square textures, 3columns1row, canvas1536x512. Each cell is a FLAT ORTHOGRAPHIC TOP-DOWN SURFACE TEXTURE filling its ENTIRE512square from edge to edge, including all outer canvas edges. Absolutely NO background gaps or magenta, no raised props, machines, tanks, vents, pipes, consoles, crates, grass or scenery. Materials in exact order: black reactor metal plates with pink conduit seam; gold maintenance floor grille; dark curved reactorcore floor plates. Neontrash cartoon style: clean bold dark seams, chunky two-tone cel-shaded material patches, restrained neon detail, stylized rust and weathering. No photorealism, pixel art, text, logos, lettering or digits. All four edges of EACH texture must repeat seamlessly: same pattern height and colors at oppositeedges. No perspective depth, no isometric diamond. Fill whole canvas with only these3 surface textures; no framing or margin."
+    },
+    {
+      "key": "m6_heart_walls",
+      "prompt": "Production neon-trash cartoon environment sheet, smooth thick dark outlines, two-tone cel shading, chunky rusty forms with neon, orthographic3/4topdown lightupperleft. No text, digits, pixelart. Exact grid row-major no lines, isolated centered complete objects on #FF00FF. Reactorheart blackgold copperpink.3horizontal wallsections single row identicalbaseline: goldgiantpipewall, blackbulkheadpinkwindow, brokenlullabyspeakerwall STRICT cell spacing: every object occupies at most70% of its cell width AND height, with at least15% pure magenta padding on allfour sides. No parts or shadows may approach cell boundaries. No images in neighboring cells may overlap. Uniform exact equal rows andcolumns."
+    },
+    {
+      "key": "m6_heart_props",
+      "prompt": "Production neon-trash cartoon environment sheet, smooth thick dark outlines, two-tone cel shading, chunky rusty forms with neon, orthographic3/4topdown lightupperleft. No text, digits, pixelart. Exact grid row-major no lines, isolated centered complete objects on #FF00FF. Reactorheart blackgold copperpink.TEN props exactly5columns2rows in order: giantcopperpipeelbow, glowingpinkcore, brokenlullabyspeaker, rustytoytruck, tornstuffedrattoy, goldreactorvalve, corepump, coppercoil, scrapchildcradle, blankcontrolconsole STRICT cell spacing: every object occupies at most70% of its cell width AND height, with at least15% pure magenta padding on allfour sides. No parts or shadows may approach cell boundaries. No images in neighboring cells may overlap. Uniform exact equal rows andcolumns."
+    },
+    {
+      "key": "m6_heart_boss",
+      "prompt": "Production neon-trash cartoon environment sheet, smooth thick dark outlines, two-tone cel shading, chunky rusty forms with neon, orthographic3/4topdown lightupperleft. No text, digits, pixelart. Exact grid row-major no lines, isolated centered complete objects on #FF00FF. Reactorheart blackgold copperpink.One512x384 isolated complete landscape bosssetpiece nocharacter: Gigantic civicBarrel reactorpinkcore goldpipearmor brokenlullabyspeakers rustytoys atbase. STRICT cell spacing: every object occupies at most70% of its cell width AND height, with at least15% pure magenta padding on allfour sides. No parts or shadows may approach cell boundaries. No images in neighboring cells may overlap. Uniform exact equal rows andcolumns."
+    }
+  ]
+}

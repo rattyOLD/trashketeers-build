@@ -1,0 +1,687 @@
+{
+  "brief": "astra/from_claude/BRIEF_v7_saga.md",
+  "block": "D",
+  "frameOrder": "left-to-right top-to-bottom",
+  "assets": [
+    {
+      "path": "astra/inbox/story/zones/m3_roofs/floor_01.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "m3_roofs_floor_clean",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/zones/m3_roofs/floor_02.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "m3_roofs_floor_clean",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/zones/m3_roofs/floor_03.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "m3_roofs_floor_clean",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/zones/m3_roofs/wall_01.png",
+      "width": 192,
+      "height": 128,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m3_roofs_walls",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/zones/m3_roofs/wall_02.png",
+      "width": 192,
+      "height": 128,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m3_roofs_walls",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/zones/m3_roofs/wall_03.png",
+      "width": 192,
+      "height": 128,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m3_roofs_walls",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/zones/m3_roofs/antenna.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m3_roofs_props",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/zones/m3_roofs/chimney.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m3_roofs_props",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/zones/m3_roofs/wire_pole.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m3_roofs_props",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/zones/m3_roofs/billboard_blank.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m3_roofs_props",
+      "frame": 3
+    },
+    {
+      "path": "astra/inbox/story/zones/m3_roofs/pigeon_tower.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m3_roofs_props",
+      "frame": 4
+    },
+    {
+      "path": "astra/inbox/story/zones/m3_roofs/satellite_dish.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m3_roofs_props",
+      "frame": 5
+    },
+    {
+      "path": "astra/inbox/story/zones/m3_roofs/roof_vent.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m3_roofs_props",
+      "frame": 6
+    },
+    {
+      "path": "astra/inbox/story/zones/m3_roofs/water_tank.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m3_roofs_props",
+      "frame": 7
+    },
+    {
+      "path": "astra/inbox/story/zones/m3_roofs/radio_mast.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m3_roofs_props",
+      "frame": 8
+    },
+    {
+      "path": "astra/inbox/story/zones/m3_roofs/cable_reel.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m3_roofs_props",
+      "frame": 9
+    },
+    {
+      "path": "astra/inbox/story/zones/m3_roofs/boss_decor.png",
+      "width": 512,
+      "height": 384,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m3_roofs_boss",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/zones/m4_ice/wall_01.png",
+      "width": 192,
+      "height": 128,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m4_ice_walls",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/zones/m4_ice/wall_02.png",
+      "width": 192,
+      "height": 128,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m4_ice_walls",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/zones/m4_ice/wall_03.png",
+      "width": 192,
+      "height": 128,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m4_ice_walls",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/zones/m4_ice/ice_pipe.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m4_ice_props",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/zones/m4_ice/conveyor.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m4_ice_props",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/zones/m4_ice/capsule.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m4_ice_props",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/zones/m4_ice/pump.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m4_ice_props",
+      "frame": 3
+    },
+    {
+      "path": "astra/inbox/story/zones/m4_ice/tank.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m4_ice_props",
+      "frame": 4
+    },
+    {
+      "path": "astra/inbox/story/zones/m4_ice/valve.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m4_ice_props",
+      "frame": 5
+    },
+    {
+      "path": "astra/inbox/story/zones/m4_ice/crate.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m4_ice_props",
+      "frame": 6
+    },
+    {
+      "path": "astra/inbox/story/zones/m4_ice/generator.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m4_ice_props",
+      "frame": 7
+    },
+    {
+      "path": "astra/inbox/story/zones/m4_ice/icicle_rack.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m4_ice_props",
+      "frame": 8
+    },
+    {
+      "path": "astra/inbox/story/zones/m4_ice/turbine.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m4_ice_props",
+      "frame": 9
+    },
+    {
+      "path": "astra/inbox/story/zones/m4_ice/boss_decor.png",
+      "width": 512,
+      "height": 384,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m4_ice_boss",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/zones/m5_center/floor_01.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "m5_center_floor_clean",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/zones/m5_center/floor_02.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "m5_center_floor_clean",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/zones/m5_center/floor_03.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "m5_center_floor_clean",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/zones/m5_center/wall_01.png",
+      "width": 192,
+      "height": 128,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m5_center_walls",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/zones/m5_center/wall_02.png",
+      "width": 192,
+      "height": 128,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m5_center_walls",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/zones/m5_center/wall_03.png",
+      "width": 192,
+      "height": 128,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m5_center_walls",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/zones/m5_center/tower.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m5_center_props",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/zones/m5_center/truck.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m5_center_props",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/zones/m5_center/sign_blank.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m5_center_props",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/zones/m5_center/gear.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m5_center_props",
+      "frame": 3
+    },
+    {
+      "path": "astra/inbox/story/zones/m5_center/crater.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m5_center_props",
+      "frame": 4
+    },
+    {
+      "path": "astra/inbox/story/zones/m5_center/hydrant.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m5_center_props",
+      "frame": 5
+    },
+    {
+      "path": "astra/inbox/story/zones/m5_center/traffic_light.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m5_center_props",
+      "frame": 6
+    },
+    {
+      "path": "astra/inbox/story/zones/m5_center/dumpster.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m5_center_props",
+      "frame": 7
+    },
+    {
+      "path": "astra/inbox/story/zones/m5_center/bus.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m5_center_props",
+      "frame": 8
+    },
+    {
+      "path": "astra/inbox/story/zones/m5_center/rubble.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m5_center_props",
+      "frame": 9
+    },
+    {
+      "path": "astra/inbox/story/zones/m5_center/boss_decor.png",
+      "width": 512,
+      "height": 384,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m5_center_boss",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/zones/m6_heart/floor_01.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "m6_heart_floor_clean",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/zones/m6_heart/floor_02.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "m6_heart_floor_clean",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/zones/m6_heart/floor_03.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "m6_heart_floor_clean",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/zones/m6_heart/wall_01.png",
+      "width": 192,
+      "height": 128,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m6_heart_walls",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/zones/m6_heart/wall_02.png",
+      "width": 192,
+      "height": 128,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m6_heart_walls",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/zones/m6_heart/wall_03.png",
+      "width": 192,
+      "height": 128,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m6_heart_walls",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/zones/m6_heart/pipe.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m6_heart_props",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/zones/m6_heart/core.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m6_heart_props",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/zones/m6_heart/speaker.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m6_heart_props",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/zones/m6_heart/toy_truck.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m6_heart_props",
+      "frame": 3
+    },
+    {
+      "path": "astra/inbox/story/zones/m6_heart/stuffed_toy.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m6_heart_props",
+      "frame": 4
+    },
+    {
+      "path": "astra/inbox/story/zones/m6_heart/valve.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m6_heart_props",
+      "frame": 5
+    },
+    {
+      "path": "astra/inbox/story/zones/m6_heart/pump.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m6_heart_props",
+      "frame": 6
+    },
+    {
+      "path": "astra/inbox/story/zones/m6_heart/coil.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m6_heart_props",
+      "frame": 7
+    },
+    {
+      "path": "astra/inbox/story/zones/m6_heart/cradle.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m6_heart_props",
+      "frame": 8
+    },
+    {
+      "path": "astra/inbox/story/zones/m6_heart/console.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m6_heart_props",
+      "frame": 9
+    },
+    {
+      "path": "astra/inbox/story/zones/m6_heart/boss_decor.png",
+      "width": 512,
+      "height": 384,
+      "block": "D",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m6_heart_boss",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/zones/m4_ice/floor_01.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "m4_ice_floor",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/zones/m4_ice/floor_02.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "m4_ice_floor",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/zones/m4_ice/floor_03.png",
+      "width": 256,
+      "height": 256,
+      "block": "D",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "m4_ice_floor",
+      "frame": 2
+    }
+  ]
+}
