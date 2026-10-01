@@ -4,7 +4,7 @@ extends RefCounted
 ## все оценки уходят в общий отчёт (Platform.send_report, вид "line_vote").
 
 static func enabled() -> bool:
-	return bool(SaveService.data.get("line_votes_on", true))
+	return SaveService.get_insider() >= 0 and bool(SaveService.data.get("line_votes_on", true))
 
 
 static func line_id(line: Dictionary) -> String:
@@ -28,4 +28,4 @@ static func cast(line: Dictionary, value: int) -> void:
 	(SaveService.data["line_votes"] as Dictionary)[id] = value
 	SaveService.save_data()
 	var text := str(line.get("text", "")).replace("|", "/")
-	Platform.send_report("line_vote", "%s|%d|%s|%s" % [id, value, str(line.get("who", "")), text])
+	Platform.send_report("line_vote", "%s|%d|%s|%s|ins%03d" % [id, value, str(line.get("who", "")), text, SaveService.get_insider()])

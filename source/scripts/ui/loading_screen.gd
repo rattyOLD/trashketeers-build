@@ -69,7 +69,7 @@ const TIPS := [
 	"Шутка: Пивной Барон считает, что любую проблему решает бочка. Он, кстати, прав.",
 	"Шутка: если бочка взрывается, это не баг. Это такая особенность жизни.",
 	"Шутка: рельсотрон в боевом пропуске. Барон его запомнит. И ты тоже.",
-	"Шутка: Нэлл говорит, что чай остыл. Она всегда говорит, что чай остыл.",
+	"Шутка: Игрок, если ты читаешь это на загрузке, то загрузка идёт слишком долго или ты просто любишь читать.",
 	"Шутка: смерть в игре — это не конец. Это повод попробовать ещё раз и ругаться тише.",
 	"Шутка: Рико не жадный. Он просто любит, когда монеты у него в кармане, а не на полу.",
 	"Шутка: некоторые враги дерутся за деньги, некоторые за идею. Крысы — за пиво.",
@@ -166,6 +166,7 @@ var _time := 0.0
 var _tracked: PackedStringArray = PackedStringArray()
 var _finishing := false
 var _cast_root: Node2D
+var _scenery: Control
 var _extras: Array[Extra] = []
 var _cast_timer := 2.2
 var _last_scene := ""
@@ -183,6 +184,35 @@ func _init() -> void:
 	bg.color = BG
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_root.add_child(bg)
+
+	_scenery = Scenery.new()
+	_scenery.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_scenery.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_root.add_child(_scenery)
+
+	var head := UiStyle.label("ЗАГРУЗКА", 20, Color("#ffb347"), 4)
+	head.anchor_left = 0.0
+	head.anchor_right = 1.0
+	head.anchor_top = 0.16
+	head.anchor_bottom = 0.16
+	head.offset_bottom = 30.0
+	_root.add_child(head)
+	var head_line := Control.new()
+	head_line.anchor_left = 0.5
+	head_line.anchor_right = 0.5
+	head_line.anchor_top = 0.16
+	head_line.anchor_bottom = 0.16
+	head_line.offset_left = -90.0
+	head_line.offset_right = 90.0
+	head_line.offset_top = 36.0
+	head_line.offset_bottom = 44.0
+	head_line.draw.connect(func() -> void:
+		var x := 0.0
+		while x < head_line.size.x:
+			var pts := PackedVector2Array([Vector2(x, 8), Vector2(x + 10, 8), Vector2(x + 18, 0), Vector2(x + 8, 0)])
+			head_line.draw_colored_polygon(pts, Color("#ffb347", 0.85) if int(x / 18.0) % 2 == 0 else Color(0, 0, 0, 0.6))
+			x += 18.0)
+	_root.add_child(head_line)
 
 	var text_col := VBoxContainer.new()
 	text_col.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -236,14 +266,27 @@ func _init() -> void:
 	_root.add_child(_runner)
 
 	var tip_text: String = TIPS.pick_random()
-	var tip := UiStyle.label(tip_text, 24, Color("#b5a9d6"), 6)
+	var tag := ""
+	for prefix in ["Совет: ", "Лор: ", "Шутка: "]:
+		if tip_text.begins_with(prefix):
+			tag = prefix.trim_suffix(": ").to_upper()
+			tip_text = tip_text.trim_prefix(prefix)
+	var card := PanelContainer.new()
+	card.add_theme_stylebox_override("panel", UiStyle.box(Color(0.06, 0.04, 0.14, 0.88), Color("#ffb347", 0.55), 3, 14))
+	card.anchor_left = 0.08
+	card.anchor_right = 0.92
+	card.anchor_top = 0.79
+	card.anchor_bottom = 0.79
+	card.grow_vertical = Control.GROW_DIRECTION_END
+	var card_col := VBoxContainer.new()
+	card_col.add_theme_constant_override("separation", 4)
+	card.add_child(card_col)
+	if not tag.is_empty():
+		card_col.add_child(UiStyle.label(tag, 17, Color("#ffb347"), 4))
+	var tip := UiStyle.label(tip_text, 23, Color("#d4cbef"), 6)
 	tip.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	tip.anchor_left = 0.08
-	tip.anchor_right = 0.92
-	tip.anchor_top = 0.78
-	tip.anchor_bottom = 0.78
-	tip.offset_bottom = 120.0
-	_root.add_child(tip)
+	card_col.add_child(tip)
+	_root.add_child(card)
 
 	var build := UiStyle.label("Версия %s" % Platform.build_label(), 18, Color("#8f84b8"), 4)
 	build.anchor_left = 0.0
@@ -639,3 +682,59 @@ func _run_scene(scene: String) -> void:
 			var extra := _spawn_extra("chef_boss", 0.92, -1.0, Vector2(right, lane), "run", 5.2)
 			if extra != null:
 				extra.vel = Vector2(-rect.size.x / 4.2, 0.0)
+
+
+## Фон загрузки: ночное небо с луной и две полосы свалки, которые плывут влево, пока Енот бежит.
+class Scenery:
+	extends Control
+	const LAYERS := [
+		{"base": 0.60, "speed": 14.0, "color": Color("#150b2c"), "seed": 3.0, "height": 120.0},
+		{"base": 0.66, "speed": 32.0, "color": Color("#1d1040"), "seed": 11.0, "height": 90.0},
+	]
+	var _t := 0.0
+
+	func _process(delta: float) -> void:
+		_t += delta
+		queue_redraw()
+
+	func _init() -> void:
+		set_process(true)
+
+	func _hash(n: float) -> float:
+		return fposmod(sin(n * 12.9898) * 43758.5453, 1.0)
+
+	func _draw() -> void:
+		var w := size.x
+		var h := size.y
+		draw_rect(Rect2(0, 0, w, h * 0.45), Color("#120726"))
+		draw_rect(Rect2(0, h * 0.45, w, h * 0.2), Color("#1a0c36"))
+		for i in 26:
+			var sx := _hash(float(i) * 1.7) * w
+			var sy := _hash(float(i) * 3.1) * h * 0.4
+			var tw := 0.35 + 0.35 * sin(_t * (1.2 + _hash(float(i)) * 2.0) + float(i))
+			draw_circle(Vector2(sx, sy), 1.6, Color(1, 1, 1, tw))
+		var moon := Vector2(w * 0.8, h * 0.12)
+		for k in 4:
+			draw_circle(moon, 70.0 - k * 14.0, Color("#ffb347", 0.04 + 0.03 * k))
+		draw_circle(moon, 34.0, Color("#ffe9b8", 0.9))
+		draw_circle(moon + Vector2(10, -6), 30.0, Color("#120726", 0.35))
+		for layer: Dictionary in LAYERS:
+			var base: float = h * float(layer["base"])
+			var spd: float = float(layer["speed"])
+			var seed_v: float = float(layer["seed"])
+			var tall: float = float(layer["height"])
+			var col: Color = layer["color"]
+			var shift := fposmod(_t * spd, 160.0)
+			var x := -shift - 160.0
+			while x < w + 160.0:
+				var idx := floorf((x + _t * spd) / 160.0)
+				var r := _hash(idx + seed_v)
+				var bw := 70.0 + 90.0 * _hash(idx * 1.3 + seed_v)
+				var bh := tall * (0.35 + 0.65 * r)
+				draw_rect(Rect2(x, base - bh, bw, h - base + bh), col)
+				if r > 0.55:
+					draw_circle(Vector2(x + bw * 0.5, base - bh), bw * 0.32, col)
+				elif r < 0.25:
+					draw_rect(Rect2(x + bw * 0.2, base - bh - 26.0, 8.0, 26.0), col)
+				x += 160.0
+		draw_rect(Rect2(0, h * 0.66, w, h * 0.34), Color("#10081f", 0.55))

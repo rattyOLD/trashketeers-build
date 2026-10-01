@@ -56,6 +56,7 @@ var _chests: ChestsPopup
 var _changelog: ChangelogPopup
 var _armory: MenuPopups.Armory
 var _upgrades: MenuPopups.Upgrades
+var _camp: CampPopup
 var _achievements: MenuPopups.Achievements
 var _from_profile := false
 var _chronicle: ChroniclePopup
@@ -96,6 +97,8 @@ func _build() -> void:
 	_armory = MenuPopups.Armory.new()
 	_armory.weapon_changed.connect(_on_weapon_changed)
 	_upgrades = MenuPopups.Upgrades.new()
+	_camp = CampPopup.new()
+	_camp.departed.connect(func() -> void: story_requested.emit(SaveService.get_selected_weapon()))
 	_achievements = MenuPopups.Achievements.new()
 	_profile = MenuPopups.Profile.new()
 	_profile.achievements_requested.connect(func() -> void:
@@ -133,7 +136,7 @@ func _build() -> void:
 	_settings.editor_requested.connect(func() -> void: _editor.open())
 	for popup in [_achievements, _chronicle, _friends]:
 		popup.closed.connect(_back_to_profile.bind(popup))
-	for popup in [_settings, _shop, _skins, _armory, _upgrades, _achievements, _profile, _chronicle, _friends, _tester, _chests, _changelog, _daily, _currency, _vip, _pass, _odds, _mode_intro]:
+	for popup in [_settings, _shop, _skins, _armory, _upgrades, _camp, _achievements, _profile, _chronicle, _friends, _tester, _chests, _changelog, _daily, _currency, _vip, _pass, _odds, _mode_intro]:
 		add_child(popup)
 		popup.closed.connect(_refresh)
 	_refresh()
@@ -688,7 +691,7 @@ func _can_afford_perk() -> bool:
 func _on_play() -> void:
 	SoundManager.play(&"ui_confirm")
 	if _mode == Mode.STORY:
-		story_requested.emit(SaveService.get_selected_weapon())
+		_camp.open()
 	elif _mode == Mode.RAID:
 		raid_requested.emit(SaveService.get_selected_weapon())
 	else:

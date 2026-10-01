@@ -46,6 +46,7 @@ const DEFAULTS := {
 	"arsenal": {},
 	"perks": {},
 	"line_votes": {},
+	"camp_pack": {},
 	"line_votes_on": true,
 	"slot3": false,
 	"hero_levels": {},
@@ -424,6 +425,27 @@ func roll_ad_day() -> void:
 		data["ads_day"] = today()
 		data["ads_coins"] = 0
 		data["ads_gems"] = 0
+
+
+func camp_has(item_id: String) -> bool:
+	return bool((data["camp_pack"] as Dictionary).get(item_id, false))
+
+
+func camp_buy(item_id: String, cost: int) -> bool:
+	if camp_has(item_id) or get_nuts() < cost:
+		return false
+	data["nuts"] = get_nuts() - cost
+	(data["camp_pack"] as Dictionary)[item_id] = true
+	save_data()
+	return true
+
+
+func camp_refund(item_id: String, cost: int) -> void:
+	if not camp_has(item_id):
+		return
+	(data["camp_pack"] as Dictionary).erase(item_id)
+	data["nuts"] = get_nuts() + cost
+	save_data()
 
 
 func add_nuts(amount: int) -> void:

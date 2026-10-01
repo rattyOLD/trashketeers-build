@@ -127,6 +127,8 @@ func start(_weapon_id: StringName = &"") -> void:
 
 	meta_enabled = story_mission.is_empty()
 	var loadout := SaveService.get_loadout()
+	if not story_mission.is_empty() and SaveService.camp_has("shotgun"):
+		loadout = WeaponDB.get_weapon(&"double_v1").with_tier(1)
 	if not RunMods.only_shotguns(loadout):
 		loadout = WeaponDB.get_weapon(RunMods.SHOTGUN_IDS[0]).with_tier(1)
 	_spawn_player(map.player_start, loadout, _find_target)
@@ -228,6 +230,7 @@ func start(_weapon_id: StringName = &"") -> void:
 	if RunMods.has(&"debt"):
 		stats.add_flat(&"damage_mult", RunMods.DEBT_DAMAGE)
 	player.set_speed_buff(ADRENALINE_SPEED)
+	_apply_camp_pack()
 	player.apply_run_stats(stats)
 	hud.set_xp(xp, _xp_needed(level), level)
 	hud.set_nuts(nuts)
@@ -1303,6 +1306,19 @@ func _check_clean_sweep() -> void:
 	_on_xp_collected(CLEAN_SWEEP_XP + level)
 	hud.toast("ЧИСТЫЙ СБОР!", "Весь лут подобран: +%d монет и опыт" % bonus, Color("#5cf3ff"))
 	fx.popup(player.global_position + Vector2(0, -100), "+%d" % bonus, Color("#ffd23f"), 30.0)
+
+
+func _apply_camp_pack() -> void:
+	if story_mission.is_empty():
+		return
+	if SaveService.camp_has("vest"):
+		player.vest += 1
+	if SaveService.camp_has("thermos"):
+		stats.add_flat(&"max_hp_add", Player.BASE_MAX_HP * 0.4)
+	if SaveService.camp_has("whetstone"):
+		stats.add_flat(&"damage_mult", 0.2)
+	(SaveService.data["camp_pack"] as Dictionary).clear()
+	SaveService.save_data()
 
 
 func _earned() -> int:

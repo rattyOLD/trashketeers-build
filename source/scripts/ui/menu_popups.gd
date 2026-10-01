@@ -122,10 +122,6 @@ class Settings:
 			SaveService.apply_quality())
 		graphics.add_child(eco)
 		graphics.add_child(MenuPopups.small_hint("Телефон меньше греется. Включи, если игра лагает."))
-		var votes := MenuWidgets.PawToggle.new("Оценка реплик", LineVotes.enabled())
-		votes.toggled.connect(func(on: bool) -> void: SaveService.set_flag("line_votes_on", on))
-		graphics.add_child(votes)
-		graphics.add_child(MenuPopups.small_hint("Под репликой кнопки «+» оставить и «×» убрать. Твоих оценок: %d. Убранные реплики больше не появятся." % LineVotes.rated_count()))
 		var haptics := MenuWidgets.PawToggle.new("Вибрация", bool(SaveService.data.get("haptics", true)))
 		haptics.toggled.connect(func(on: bool) -> void:
 			SaveService.set_flag("haptics", on)
@@ -941,11 +937,19 @@ class Profile:
 		box.add_theme_constant_override("separation", 10)
 		var status := UiStyle.label("", 22, UiStyle.NEON, 6)
 		status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		var votes_box := VBoxContainer.new()
+		votes_box.add_theme_constant_override("separation", 6)
+		var votes := MenuWidgets.PawToggle.new("Оценка реплик", bool(SaveService.data.get("line_votes_on", true)))
+		votes.toggled.connect(func(on: bool) -> void: SaveService.set_flag("line_votes_on", on))
+		votes_box.add_child(votes)
+		votes_box.add_child(MenuPopups.small_hint("Под репликой в бою кнопки «+» оставить и «×» убрать. Оценено: %d. Убранные реплики больше не появятся." % LineVotes.rated_count()))
 		var refresh := func() -> void:
 			var number := SaveService.get_insider()
 			status.text = "Статус: %s, номер %03d" % [SaveService.get_badge(), number] if number >= 0 else "Есть код тестера? Введи его и получи плашку возле ника."
+			votes_box.visible = number >= 0
 		refresh.call()
 		box.add_child(status)
+		box.add_child(votes_box)
 		var code_row := HBoxContainer.new()
 		code_row.add_theme_constant_override("separation", 8)
 		var code_edit := _styled_edit("INS-001-XXXX")

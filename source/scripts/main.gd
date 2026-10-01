@@ -76,6 +76,9 @@ func _ready() -> void:
 		elif url_hash.begins_with("#story"):
 			_debug_hash = url_hash.substr(1)
 			_start_story.call_deferred(SaveService.get_selected_weapon())
+		elif url_hash == "#camp":
+			_debug_hash = "camp"
+			_show_menu()
 		elif url_hash.begins_with("#raid"):
 			_debug_hash = url_hash.substr(1)
 			_start_raid.call_deferred(SaveService.get_selected_weapon())
@@ -126,6 +129,10 @@ func _show_menu() -> void:
 	menu.raid_requested.connect(_start_raid, CONNECT_DEFERRED)
 	menu.story_requested.connect(_start_story, CONNECT_DEFERRED)
 	_swap_screen(menu)
+	if _debug_hash == "camp":
+		SaveService.add_nuts(1000)
+		menu._camp.open.call_deferred()
+		_debug_hash = ""
 
 
 func _start_game(weapon_id: StringName) -> void:
