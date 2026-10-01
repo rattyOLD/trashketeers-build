@@ -30,6 +30,8 @@ var _level_label: Label
 var _xp_bar: ProgressBar
 var _side_buttons: Dictionary = {}
 var _nav_upgrades: MenuWidgets.NavButton
+var _nav_pass: MenuWidgets.NavButton
+var _mode_hint: HintBubble
 var _nuts_label: Label
 var _dust_label: Label
 var _weapon_title: Label
@@ -411,15 +413,13 @@ func _build_stage() -> Control:
 		stage.add_child(_make_side_button("gift", "res://assets/ui/hub/daily_gift.png", "ПОДАРОК", false, 8.0, func() -> void: _daily.open()))
 		stage.add_child(_make_side_button("chest", "res://assets/ui/hub/chest_free.png", "БЕСПЛАТНО", false, 132.0, func() -> void: _chests.open()))
 		stage.add_child(_make_side_button("news", "res://assets/ui/hub/news.png", "ОБНОВЛЕНИЯ", true, 8.0, func() -> void: _changelog.open()))
-		stage.add_child(_make_side_button("pass", "res://assets/ui/hub/pass.png", "ПРОПУСК", true, 124.0, func() -> void: _pass.open()))
-		stage.add_child(_make_side_button("vip", "res://assets/ui/hub/vip.png", "VIP", true, 224.0, func() -> void: _vip.open()))
+		stage.add_child(_make_side_button("vip", "res://assets/ui/hub/vip.png", "VIP", true, 124.0, func() -> void: _vip.open()))
 	else:
 		var left := [
 			["gift", "res://assets/ui/hub/daily_gift.png", "ПОДАРОК", func() -> void: _daily.open()],
 			["chest", "res://assets/ui/hub/chest_free.png", "БЕСПЛАТНО", func() -> void: _chests.open()],
 		]
 		var right := [
-			["pass", "res://assets/ui/hub/pass.png", "ПРОПУСК", func() -> void: _pass.open()],
 			["vip", "res://assets/ui/hub/vip.png", "VIP", func() -> void: _vip.open()],
 			["news", "res://assets/ui/hub/news.png", "ОБНОВЛЕНИЯ", func() -> void: _changelog.open()],
 		]
@@ -429,7 +429,7 @@ func _build_stage() -> Control:
 		for i in right.size():
 			var spec: Array = right[i]
 			stage.add_child(_make_side_button(spec[0], spec[1], spec[2], true, 6.0, spec[3], i, 76.0))
-	for key in (["pass", "vip"] if Orient.portrait else ["gift", "chest", "news", "pass", "vip"]):
+	for key in (["vip"] if Orient.portrait else ["gift", "chest", "news", "vip"]):
 		(_side_buttons[key]["caption"] as Label).visible = true
 	stage.add_child(_build_tester_button())
 	stage.gui_input.connect(func(event: InputEvent) -> void:
@@ -478,12 +478,26 @@ func _build_modes() -> Control:
 		button.pressed.connect(_select_mode.bind(i))
 		row.add_child(button)
 		_mode_buttons.append(button)
-	_select_mode(Mode.SURVIVAL)
+	_select_mode(Mode.STORY if _survival_locked() else Mode.SURVIVAL)
 	_mode_buttons[2].text = "СЮЖЕТ %d/6" % SaveService.story_shards()
 	return row
 
 
+func _survival_locked() -> bool:
+	return SaveService.get_stat("story_missions") < 1 and not Tester.flag("survival_open")
+
+
 func _select_mode(mode: int) -> void:
+	if mode == Mode.SURVIVAL and _survival_locked():
+		if _mode_hint == null:
+			_mode_hint = HintBubble.new()
+			add_child(_mode_hint)
+		_mode_buttons[0].set_pressed_no_signal(false)
+		_mode_hint.show_for(_mode_buttons[0], "Пока не пройдёшь сюжет, выживание недоступно. Рико, сначала миссия 1.")
+		if _mode == Mode.SURVIVAL:
+			mode = Mode.STORY
+		else:
+			return
 	_mode = mode
 	var colors := [Color("#ffb020"), Color("#7df9ff"), Color("#ff7ae0")]
 	for i in _mode_buttons.size():
@@ -561,7 +575,7 @@ func _build_nav() -> Control:
 	row.add_theme_constant_override("separation", 10)
 	var items := [
 		[MenuWidgets.NavButton.Kind.UPGRADES, "ПРОКАЧКА", Color("#ff4d6d"), func() -> void: _upgrades.open(), "upgrade"],
-		[MenuWidgets.NavButton.Kind.WEAPONS, "ОРУЖИЕ", Color("#ffb020"), func() -> void: _armory.open(), "armory"],
+		[MenuWidgets.NavButton.Kind.ACHIEVEMENTS, "ПРОПУСК", Color("#ffb020"), func() -> void: _pass.open(), "pass"],
 		[MenuWidgets.NavButton.Kind.SKINS, "ГЕРОИ", Color("#00e5ff"), func() -> void: _shop.open(), "hero"],
 		[MenuWidgets.NavButton.Kind.OUTFITS, "СКИНЫ", Color("#ff5ce1"), func() -> void: _skins.open(), "outfit"],
 	]
@@ -573,6 +587,8 @@ func _build_nav() -> Control:
 		row.add_child(button)
 		if item[0] == MenuWidgets.NavButton.Kind.UPGRADES:
 			_nav_upgrades = button
+		elif item[4] == "pass":
+			_nav_pass = button
 	return row
 
 
@@ -609,6 +625,7 @@ func _on_weapon_changed(_weapon_id: StringName) -> void:
 
 
 func _refresh() -> void:
+	_avatar.queue_redraw()
 	_nick_label.text = SaveService.get_display_nickname()
 	if _mode_buttons.size() > 2:
 		_mode_buttons[2].text = "СЮЖЕТ %d/6" % SaveService.story_shards()
@@ -629,7 +646,9 @@ func _refresh() -> void:
 	_set_side_alert("gift", SaveService.can_claim_daily())
 	_set_side_alert("chest", Economy.ad_chest_wait() <= 0)
 	_set_side_alert("news", ChangelogPopup.has_unseen())
-	_set_side_alert("pass", BattlePass.has_unclaimed())
+	if _nav_pass != null:
+		_nav_pass.badge = BattlePass.has_unclaimed()
+		_nav_pass.queue_redraw()
 	_set_side_alert("vip", false)
 	if _nav_upgrades != null:
 		_nav_upgrades.badge = _can_afford_perk()

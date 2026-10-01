@@ -67,11 +67,12 @@ var _run_result: BattlePanels.RunResultPanel
 var _chapter_card: BattlePanels.ChapterCard
 var _hint: HintBubble
 var _left_column: VBoxContainer
-var _order_label: Label
+var _order_card: OrderCard
 var _story_bar: StoryBar
 var _minimap: Minimap
 var _toast_queue: Array = []
 var _toast_busy := false
+var _toast_y := 168.0
 
 
 func _init() -> void:
@@ -193,23 +194,23 @@ func dock_story_meter(meter: Control) -> void:
 
 func set_story_layout(minimap: Minimap) -> void:
 	_wave_box.visible = false
+	_toast_y = 360.0
 	_story_bar = StoryBar.new()
 	_left_column.add_child(_story_bar)
-	_order_label = UiStyle.label("", 18, Color("#5ff2ff"), 5)
-	_order_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-	_order_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_left_column.add_child(_order_label)
+	_order_card = OrderCard.new()
+	_left_column.add_child(_order_card)
 	_story_bar.chip_tapped.connect(func(chip: Control, text: String) -> void: _hint.show_for(chip, text))
 	UiStyle.anchor(_boss_bar, Vector2(0.5, 0.0), Rect2(-300, 190, 600, 96))
-	UiStyle.anchor(_minimap_slot, Vector2(1.0, 0.0), Rect2(-216, 300, 198, 340))
+	UiStyle.anchor(_minimap_slot, Vector2(1.0, 0.0), Rect2(-150, 440, 132, 230))
 	_minimap = minimap
 	minimap.tapped.connect(func(overview: bool) -> void:
 		_hint.show_for(_minimap_slot, "Карта: ты, враги, ворота, пленники. Тап — %s." % ("крупный план" if overview else "вся карта")))
 
 
-func set_story_status(score: int, lives: int, zone_number: int, zone_count: int, zone_name: String, enemies_left: int = -1, order_text: String = "") -> void:
-	if _order_label != null:
-		_order_label.text = order_text
+func set_story_status(score: int, lives: int, zone_number: int, zone_count: int, zone_name: String, enemies_left: int = -1, order: Dictionary = {}, goals: Array = []) -> void:
+	if _order_card != null:
+		_order_card.set_goals(goals)
+		_order_card.set_order(str(order.get("title", "")), int(order.get("progress", 0)), int(order.get("goal", 1)), bool(order.get("done", false)))
 	if _story_bar != null:
 		_story_bar.update(score, lives, zone_number, zone_count, zone_name, enemies_left)
 
@@ -576,7 +577,7 @@ func _next_toast() -> void:
 	_toast.visible = true
 	_toast.position.y = -140.0
 	var tween := _toast.create_tween()
-	tween.tween_property(_toast, "position:y", 168.0, 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_property(_toast, "position:y", _toast_y, 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	tween.tween_interval(2.2)
 	tween.tween_property(_toast, "position:y", -140.0, 0.3).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	tween.tween_callback(func() -> void:

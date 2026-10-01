@@ -66,10 +66,7 @@ func _process(delta: float) -> void:
 func _draw() -> void:
 	var half := SIZE * 0.5
 	if hp <= 0.0:
-		draw_rect(Rect2(-half, SIZE), Color(0.03, 0.02, 0.07, 0.92))
-		draw_rect(Rect2(-half, SIZE), Color(SEAM, 0.35), false, 3.0)
-		for p in [Vector2(-18, 30), Vector2(14, 38), Vector2(-4, 48), Vector2(22, 12), Vector2(-24, 6)]:
-			draw_rect(Rect2(p - Vector2(9, 5), Vector2(18, 10)), STONE.darkened(0.25))
+		_draw_breach(half)
 		return
 	var jitter := Vector2(randf_range(-2.5, 2.5), 0.0) * _shake
 	draw_set_transform(jitter, 0.0, Vector2.ONE)
@@ -86,3 +83,26 @@ func _draw() -> void:
 	draw_rect(Rect2(-half + Vector2(6, 6), Vector2(10, 10)), Color(CRACK, 0.6))
 	draw_rect(Rect2(half - Vector2(16, 16), Vector2(10, 10)), Color(CRACK, 0.6))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+
+func _draw_breach(half: Vector2) -> void:
+	var niche := Rect2(-half + Vector2(6, 8), SIZE - Vector2(12, 16))
+	draw_rect(niche.grow(5.0), LINE)
+	var rows := 8
+	for i in rows:
+		var t := float(i) / float(rows - 1)
+		var color := Color("#2b2233").lerp(Color("#5a4636"), t)
+		draw_rect(Rect2(niche.position + Vector2(0, niche.size.y / rows * i), Vector2(niche.size.x, niche.size.y / rows + 1.0)), color)
+	var beam := 0.16 + 0.06 * sin(_time * 3.0)
+	draw_colored_polygon(PackedVector2Array([Vector2(-half.x + 8, -half.y + 10), Vector2(half.x - 8, -half.y + 10), Vector2(half.x * 0.6, half.y - 8), Vector2(-half.x * 0.6, half.y - 8)]), Color(SEAM, beam))
+	draw_rect(Rect2(-half.x + 6, half.y - 30, SIZE.x - 12, 22), Color(0, 0, 0, 0.28))
+	var jag := PackedVector2Array([Vector2(-half.x, -half.y), Vector2(half.x, -half.y), Vector2(half.x, -half.y + 14), Vector2(half.x * 0.5, -half.y + 24), Vector2(half.x * 0.1, -half.y + 12), Vector2(-half.x * 0.35, -half.y + 26), Vector2(-half.x, -half.y + 16)])
+	draw_colored_polygon(jag, STONE)
+	draw_polyline(PackedVector2Array([jag[6], jag[5], jag[4], jag[3], jag[2]]), LINE, 3.0, true)
+	var floor_y := half.y - 12.0
+	for p in [Vector2(-24, floor_y), Vector2(-6, floor_y + 3), Vector2(16, floor_y - 1), Vector2(28, floor_y + 2), Vector2(-30, floor_y - 12), Vector2(8, floor_y - 10)]:
+		var size := Vector2(14, 9)
+		draw_rect(Rect2(p - size * 0.5, size).grow(1.5), LINE)
+		draw_rect(Rect2(p - size * 0.5, size), STONE.darkened(0.12 + 0.06 * absf(p.x) / 30.0))
+	draw_rect(Rect2(-half + Vector2(2, 0), Vector2(5, SIZE.y)), Color(0, 0, 0, 0.35))
+	draw_rect(Rect2(half - Vector2(7, half.y * 2.0 - 0.0), Vector2(5, SIZE.y)), Color(0, 0, 0, 0.35))

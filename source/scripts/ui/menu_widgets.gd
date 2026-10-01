@@ -216,7 +216,12 @@ class Avatar:
 		var r := minf(size.x, size.y) * 0.5
 		draw_circle(c, r, LINE)
 		draw_circle(c, r - 4.0, Color("#3a2d60"))
-		var tex := get_texture_for(SaveService.get_character(), SaveService.get_selected_skin())
+		var tex: Texture2D = null
+		var custom := str(SaveService.data.get("avatar", ""))
+		if not custom.is_empty() and ResourceLoader.exists(custom):
+			tex = load(custom) as Texture2D
+		if tex == null:
+			tex = get_texture_for(SaveService.get_character(), SaveService.get_selected_skin())
 		if tex != null:
 			draw_texture_rect(tex, Rect2(c - Vector2.ONE * (r - 5.0), Vector2.ONE * (r - 5.0) * 2.0), false)
 		draw_arc(c, r - 2.0, 0.0, TAU, 40, UiStyle.NEON, 3.0, true)

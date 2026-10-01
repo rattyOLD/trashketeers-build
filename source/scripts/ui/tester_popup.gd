@@ -59,6 +59,30 @@ func _refresh() -> void:
 		return "Уровень аккаунта: %d" % SaveService.get_account_level())
 	content.add_child(grid)
 
+	_section("СЮЖЕТ И РЕЖИМЫ")
+	var story := _grid()
+	var open := Tester.flag("survival_open")
+	var open_button := UiStyle.button("Выживание: %s" % ("ОТКРЫТО" if open else "закрыто"), Color("#2fae5f") if open else UiStyle.PANEL_LIGHT, 21, Vector2(0, 62))
+	open_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	open_button.pressed.connect(func() -> void:
+		Tester.toggle("survival_open")
+		changed.emit()
+		_refresh())
+	story.add_child(open_button)
+	_action(story, "Засчитать миссию 1", func() -> String:
+		SaveService.story_complete("m1", 1, 0)
+		SaveService.add_stat("story_missions", 1, false)
+		return "Миссия 1 засчитана, осколков: %d" % SaveService.story_shards())
+	_action(story, "Показать мишень снова", func() -> String:
+		SaveService.data["train_again"] = true
+		SaveService.save_data()
+		return "Мишень покажется при старте сюжета")
+	_action(story, "Забыть диалоги сюжета", func() -> String:
+		SaveService.data["story_log"] = {}
+		SaveService.save_data()
+		return "Журнал диалогов очищен")
+	content.add_child(story)
+
 	_section("В БОЮ")
 	for name in Tester.FLAGS:
 		var on := Tester.flag(name)

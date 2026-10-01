@@ -224,6 +224,8 @@ func start(_weapon_id: StringName = &"") -> void:
 		story = StoryRun.new()
 		add_child(story)
 		if story.setup(self, story_mission):
+			player.weapon_controller.slot_count = 1
+			_refresh_slots()
 			hud.set_story_mode()
 			hud.set_story_layout(minimap)
 			minimap.set_story(story)
@@ -294,7 +296,7 @@ func _physics_process(delta: float) -> void:
 func _update_hud_timer() -> void:
 	hud.set_time(director.elapsed)
 	if story != null:
-		hud.set_story_status(story.score, story.lives, story.zone_number(), story.zone_count(), story.zone_name(), story.enemies_left(), story.order_text())
+		hud.set_story_status(story.score, story.lives, story.zone_number(), story.zone_count(), story.zone_name(), story.enemies_left(), SaveService.nell_order(), story.goal_rows())
 		return
 	hud.set_wave(maxi(director.wave_number, 1), director.get_enemies_left())
 
@@ -328,16 +330,20 @@ func _death_tip() -> String:
 	var text: String
 	if boss != null and boss.is_alive() and boss.hp > boss.max_hp * 0.55:
 		text = ["Босс слишком жирный для твоего урона. Прокачай урон или скорость атаки.",
-			"Босс почти не поцарапан. Загляни в Прокачку: урон решает."].pick_random()
+			"Босс почти не поцарапан. Ты точно в него стрелял, а не рядом?",
+			"Босс сказал, что ему было щекотно. Прокачай урон."].pick_random()
 	elif director.elapsed < DEATH_FAST_TIME:
-		text = ["Тебя слишком быстро убивают. Загляни в Прокачку и качни здоровье и броню.",
-			"Слабовато. В Прокачке есть чем это исправить."].pick_random()
+		text = ["Тебя слишком быстро убивают. Рекорд скорости, но не тот. Качни здоровье и броню.",
+			"Это был не забег, а пробежка. Прокачка поможет дожить до второй волны."].pick_random()
 	else:
-		text = ["Ты опять отлетел. Иди качнись, пока не поздно.",
-			"Снова отлетел. В Прокачке это можно исправить.",
-			"Слабовато. Иди качнись.",
-			"Не получается? В Прокачке можно стать сильнее.",
-			"Умираешь часто: качни выживаемость. Долго бьёшь босса: качни урон."].pick_random()
+		text = ["Ты опять отлетел. Иди качнись, пока крысы не заскучали.",
+			"Снова отлетел. В Прокачке лечат и не такое.",
+			"Слабовато. Иди качнись, Нэлл ставила на тебя.",
+			"Не получается? Прокачка есть, смущаться не надо.",
+			"Умираешь часто: качни выживаемость. Долго бьёшь босса: качни урон.",
+			"Ты умер красиво. Теперь умри чуть дальше: качни броню.",
+			"Крысы просили передать: «Спасибо за развлечение». Иди качнись.",
+			"Игрок, мы всё видели. Прокачка в меню, не стесняйся."].pick_random()
 	var cheapest := 1 << 30
 	for perk_id in SaveService.PERKS:
 		if not SaveService.is_perk_maxed(perk_id):
@@ -568,6 +574,11 @@ func _on_enemy_fx(_enemy: Enemy, kind: String, at: Vector2, radius: float) -> vo
 			fx.dust(at + Vector2(0, 26), 3, radius * 0.9)
 			if at.distance_to(player.global_position) < 700.0:
 				add_shake(0.09)
+		"beer", "beer_puke":
+			var foamy := kind == "beer_puke"
+			fx.burst(at, Color("#ffcf4a") if not foamy else Color("#f6e3a0"), 4, 200.0, 3.0)
+			fx.burst(at, Color("#fff6dc"), 3, 140.0, 2.4)
+			fx.splat(at, Color("#d98a12", 0.55), 26.0 if not foamy else 34.0, 2.6)
 		"muzzle":
 			fx.muzzle_flash(at, (player.global_position - at).angle(), Color("#ffb347"), 1.4)
 		"summon":

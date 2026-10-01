@@ -184,6 +184,9 @@ class Settings:
 		_auto_pick = MenuWidgets.PawToggle.new("Автоподбор оружия", bool(Controls.get_value("auto_pick")))
 		_auto_pick.toggled.connect(func(on: bool) -> void: Controls.set_value("auto_pick", on))
 		controls.add_child(_auto_pick)
+		var fire_hint := UiStyle.label("Стрельба: держи палец там, куда стрелять (правая часть экрана). Автоприцела нет.", 19, UiStyle.TEXT_DIM, 4)
+		fire_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		controls.add_child(fire_hint)
 		var slots_row := HBoxContainer.new()
 		slots_row.add_theme_constant_override("separation", 10)
 		var slots_label := UiStyle.label("Слоты оружия", 26, UiStyle.TEXT, 6)
@@ -842,6 +845,7 @@ class Profile:
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		info.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		info.add_child(_build_nick_editor())
+		info.add_child(_build_avatar_picker())
 		var rank_label := UiStyle.label(rank_for(level).to_upper(), 20, Color("#ff9a3d"), 5)
 		rank_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 		info.add_child(rank_label)
@@ -935,6 +939,36 @@ class Profile:
 		load_row.add_child(load)
 		box.add_child(load_row)
 		return box
+
+	const AVATARS := [
+		["", "Герой", 0],
+		["res://assets/ui/portraits/rico.png", "Рико", 0],
+		["res://assets/ui/portraits/nell.png", "Нэлл", 0],
+		["res://assets/ui/portraits/baron.png", "Барон", 1],
+		["res://assets/ui/portraits/king.png", "Король", 1],
+	]
+
+	func _build_avatar_picker() -> Control:
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 10)
+		var current := str(SaveService.data.get("avatar", ""))
+		var buttons: Array[Button] = []
+		for entry: Array in AVATARS:
+			var path := str(entry[0])
+			var open := int(entry[2]) == 0 or SaveService.get_stat("story_missions") >= 1
+			var button := UiStyle.button(str(entry[1]) if open else "закрыто", UiStyle.GOLD if path == current else UiStyle.PANEL_LIGHT, 18, Vector2(0, 52))
+			button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			button.disabled = not open
+			button.pressed.connect(func() -> void:
+				SaveService.data["avatar"] = path
+				SaveService.save_data()
+				for other in buttons:
+					other.modulate = Color(1, 1, 1, 0.55)
+				button.modulate = Color.WHITE)
+			button.modulate = Color.WHITE if path == current else Color(1, 1, 1, 0.55)
+			buttons.append(button)
+			row.add_child(button)
+		return row
 
 	func _build_nick_editor() -> Control:
 		var row := HBoxContainer.new()

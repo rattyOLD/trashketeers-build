@@ -56,6 +56,8 @@ var _next_captive := 0
 var _min_trigger := 0.0
 var _captives: Array = []
 var _enemy_lines: Dictionary = {}
+var _banter: Dictionary = {}
+var _low_hp_cd := 0.0
 var _zone_hit := false
 var _ever_hit := false
 var _active: Dictionary = {}
@@ -64,6 +66,7 @@ var _pending_waves: Array = []
 var _wave_clock := 0.0
 var _boss_alive := false
 var _queue: Array = []
+var _ambient: AmbientLine
 var _box: DialogBox
 var _tip: TipCard
 var secrets: Array[StorySecret] = []
@@ -108,6 +111,7 @@ func setup(owner_game: Game, mission_id: String) -> bool:
 	_encounters = mission.get("encounters", [])
 	_captives = mission.get("captives", [])
 	_enemy_lines = root.get("enemy_lines", {})
+	_banter = root.get("banter", {})
 	BossBrain.story_phases = true
 	barrel = HeavyBarrel.new()
 	add_child(barrel)
@@ -186,6 +190,18 @@ func enemies_left() -> int:
 	return left
 
 
+func goal_rows() -> Array:
+	var rows: Array = []
+	var total := captive_total()
+	if total > 0:
+		rows.append({"title": "Пленники", "progress": rescued, "goal": total, "done": rescued >= total})
+	var parts := HeavyBarrel.TOTAL_PARTS if barrel.active else barrel.parts
+	rows.append({"title": "Детали ствола", "progress": parts, "goal": HeavyBarrel.TOTAL_PARTS, "done": parts >= HeavyBarrel.TOTAL_PARTS})
+	if not secrets.is_empty():
+		rows.append({"title": "Тайники", "progress": secrets_found, "goal": secrets.size(), "done": secrets_found >= secrets.size()})
+	return rows
+
+
 func order_text() -> String:
 	var info := SaveService.nell_order()
 	if bool(info["done"]):
@@ -204,6 +220,9 @@ func _count(stat: String, amount: int = 1) -> void:
 func on_kill(data: EnemyData) -> void:
 	_count("story_kills")
 	kills += 1
+	var milestone := str((_banter.get("kills", {}) as Dictionary).get(str(kills), ""))
+	if not milestone.is_empty():
+		game.hud.toast("НЭЛЛ", milestone.trim_prefix("Нэлл: "), Color("#5ff2ff"))
 	score += BOSS_POINTS if data.is_boss() else maxi(int(data.max_hp / 4.0), 10) * 10
 
 
@@ -254,6 +273,8 @@ func game_over() -> void:
 func try_respawn() -> bool:
 	if finished_mission:
 		return true
+	if game.director.elapsed < 30.0 and SaveService.get_stat("story_missions") < 3:
+		SaveService.data["train_again"] = true
 	if lives <= 1:
 		get_tree().create_timer(1.6, false).timeout.connect(game_over)
 		return true
@@ -263,6 +284,9 @@ func try_respawn() -> bool:
 	var quips: Array = mission.get("death_lines", [])
 	if not quips.is_empty():
 		var quip := str(quips[mini(lives_lost, quips.size()) - 1])
+		var pool: Array = _banter.get("death", [])
+		if lives_lost == 2 and not pool.is_empty():
+			quip = str(pool.pick_random())
 		get_tree().create_timer(1.7, false).timeout.connect(func() -> void: game.hud.show_banner(quip, UiStyle.NEON, 2.6))
 	get_tree().create_timer(1.3, false).timeout.connect(func() -> void: game.story_respawn(checkpoint))
 	return true
@@ -270,6 +294,10 @@ func try_respawn() -> bool:
 
 func on_start() -> void:
 	checkpoint = game.player.global_position
+	_ambient = AmbientLine.new()
+	game.add_child(_ambient)
+	_ambient.setup(speakers)
+	_place_training_target()
 	game.hud.show_banner(title(), UiStyle.GOLD, 2.2)
 	_update_progress()
 	_check_zone()
@@ -416,6 +444,12 @@ func _pull_stragglers(delta: float) -> void:
 
 
 func _tick_idle(delta: float) -> void:
+	_low_hp_cd = maxf(_low_hp_cd - delta, 0.0)
+	if _low_hp_cd <= 0.0 and game.player.hp < game.player.max_hp * 0.25 and not game.player.is_dead:
+		_low_hp_cd = 45.0
+		var low: Array = _banter.get("low_hp", [])
+		if not low.is_empty():
+			game.hud.toast("НЭЛЛ", str(low.pick_random()), Color("#ff5a7a"))
 	var pos := game.player.global_position
 	if pos.distance_to(_idle_pos) > IDLE_MOVE:
 		_idle_pos = pos
@@ -528,7 +562,9 @@ func _on_captive_freed(captive: Captive) -> void:
 	game.fx.ring(captive.global_position, Color("#ffd257"), 120.0)
 	game.pickups.spawn_xp_gold(captive.global_position, 5)
 
-	game.hud.toast("ПЛЕННИК ОСВОБОЖДЁН", "Спасено: %d · +%d очков" % [rescued, RESCUE_POINTS], Color("#ffd257"))
+	var bark: Array = _banter.get("captive", [])
+	var tail := "\n«%s»" % str(bark.pick_random()) if not bark.is_empty() else ""
+	game.hud.toast("ПЛЕННИК ОСВОБОЖДЁН", "Спасено: %d · +%d очков%s" % [rescued, RESCUE_POINTS, tail], Color("#ffd257"))
 
 
 func _bark(enemy: Enemy) -> void:
@@ -752,6 +788,46 @@ func _give_reward(reward: String) -> void:
 
 func on_boss_spawned(is_mini: bool) -> void:
 	_say("baron_pre" if is_mini else "king_pre", OPEN_DELAY)
+	_weapon_taunt(is_mini)
+
+
+func _king_banter() -> void:
+	var key := "king_final"
+	if flawless():
+		key = "king_flawless"
+	elif game.player.hp < game.player.max_hp * 0.2:
+		key = "king_lowhp"
+	var lines: Array = _banter.get(key, [])
+	if not lines.is_empty():
+		game.hud.toast("КОРОЛЬ ХЛАМА", str(lines.pick_random()), Color("#ff5a5a"))
+	var after: Array = _banter.get("nell_after", [])
+	if not after.is_empty():
+		get_tree().create_timer(2.6, true, false, true).timeout.connect(func() -> void:
+			game.hud.toast("НЭЛЛ", str(after.pick_random()), Color("#5ff2ff")))
+
+
+## Босс подкалывает за ствол: донатный из пропуска, или наоборот слишком скромный.
+func _weapon_taunt(is_mini: bool) -> void:
+	var wc: WeaponController = game.player.weapon_controller
+	if wc == null or wc.weapon == null:
+		return
+	var paid: Array = _banter.get("paid_weapons", [])
+	var who := "baron" if is_mini else "king"
+	var bucket: Dictionary = _banter.get("donate", {}) if paid.has(str(wc.base_weapon.id)) else _banter.get("free", {})
+	var lines: Array = bucket.get(who, [])
+	if lines.is_empty():
+		return
+	var name := str((speakers.get(who, {}) as Dictionary).get("name", who))
+	var color := Color("#ffb020") if is_mini else Color("#ff5a5a")
+	get_tree().create_timer(OPEN_DELAY + 7.5, true, false, true).timeout.connect(func() -> void:
+		if _boss_alive:
+			game.hud.toast(name, str(lines.pick_random()), color)
+		if paid.has(str(wc.base_weapon.id)) and not is_mini:
+			var nell: Array = _banter.get("nell_donate", [])
+			if not nell.is_empty():
+				get_tree().create_timer(3.2, true, false, true).timeout.connect(func() -> void:
+					if _boss_alive:
+						game.hud.toast("НЭЛЛ", str(nell.pick_random()), Color("#5ff2ff"))))
 
 
 func on_miniboss_killed() -> void:
@@ -764,6 +840,7 @@ func on_miniboss_killed() -> void:
 
 func on_king_killed() -> void:
 	_boss_alive = false
+	_king_banter()
 	locked = false
 	game.map.open_story_gate("boss")
 	get_tree().create_timer(2.2, true, false, true).timeout.connect(finish)
@@ -816,6 +893,11 @@ func _say(key: String, delay: float) -> void:
 		return
 	_seen[key] = true
 	SaveService.log_dialog(str(mission.get("id", "")), key)
+	if (mission.get("ambient", []) as Array).has(key):
+		get_tree().create_timer(delay, false).timeout.connect(func() -> void:
+			if _ambient != null and not game.finished:
+				_ambient.push(dialogs[key]))
+		return
 	_queue.append(dialogs[key])
 	get_tree().create_timer(delay, true, false, true).timeout.connect(_pump)
 
@@ -1032,3 +1114,26 @@ class Graffiti:
 			draw_texture_rect(art, Rect2(-250, -75, 500, 150), false, Color(1, 1, 1, 0.78))
 		draw_string_outline(font, Vector2(-240, 18), text, HORIZONTAL_ALIGNMENT_CENTER, 480.0, 50, 6, Color(color.lightened(0.5), 0.55))
 		draw_string(font, Vector2(-240, 18), text, HORIZONTAL_ALIGNMENT_CENTER, 480.0, 50, Color(0.07, 0.02, 0.12, 0.88))
+
+
+func _place_training_target() -> void:
+	var again := bool(SaveService.data.get("train_again", false))
+	if SaveService.get_stat("story_missions") > 0 and not again:
+		return
+	SaveService.data["train_again"] = false
+	var target := TrainingTarget.new()
+	target.position = game.player.global_position + Vector2(0.0, -280.0)
+	target.broken.connect(_on_training_broken)
+	game.layers.world.add_child(target)
+	get_tree().create_timer(2.5, false).timeout.connect(func() -> void:
+		if is_instance_valid(target):
+			game.hud.toast("СТРЕЛЬБА", "Да держи ты уже палец на экране, где цель! Отпустил — Рико не стреляет, он не волшебник.", Color("#5ff2ff")))
+
+
+func _on_training_broken(target: TrainingTarget) -> void:
+	var at := target.global_position
+	game.fx.chunks(at, Color("#c48c52"), 12, 300.0, 5.0)
+	game.fx.dust(at, 10, 100.0)
+	game.pickups.spawn_xp_gold(at, 5)
+	game.fx.popup(at + Vector2(0, -70), "ЯЩИК ПОГИБ", Color("#ffd257"), 30.0)
+	game.hud.toast("НЭЛЛ", "Ну вот, один ящик на твоей совести. Дальше крысы.", Color("#5ff2ff"))

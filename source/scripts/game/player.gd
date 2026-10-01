@@ -97,6 +97,7 @@ func _init() -> void:
 	add_child(collision)
 
 	visual = RaccoonVisual.new()
+	visual.show_aim_line = true
 	add_child(visual)
 	# Своё мягкое пятно света на полу: енот читается даже в тёмных углах карты.
 	var glow := PointLight2D.new()
@@ -426,5 +427,39 @@ func _on_melee_swing(weapon: WeaponData, _origin: Vector2, direction: Vector2, _
 	visual.kick(direction, (0.5 + 0.18 * weapon.weight) * (1.6 if heavy else 1.0))
 
 
+## Звуковой акцент «кончается магазин / перегрев»: [каждый N-й выстрел, звук, питч, громкость dB, тяжёлая отдача].
+const SHOT_ACCENTS := {
+	&"shot_pistol": [7, &"ui_click", 0.55, -3.0, false],
+	&"shot_sniper": [7, &"ui_click", 0.5, -2.0, true],
+	&"shot_double": [7, &"ui_click", 0.6, -3.0, true],
+	&"shot_shotgun": [7, &"ui_click", 0.5, -3.0, true],
+	&"shot_launcher": [7, &"ui_click", 0.45, -2.0, true],
+	&"shot_smg": [30, &"ui_click", 0.7, -4.0, false],
+	&"shot_rifle": [30, &"ui_click", 0.65, -4.0, false],
+	&"shot_lmg": [70, &"ui_click", 0.5, -3.0, false],
+	&"shot_laser": [24, &"beam_charge", 1.5, -16.0, false],
+	&"shot_rail": [10, &"beam_charge", 1.2, -14.0, false],
+	&"shot_railgun": [5, &"beam_charge", 1.0, -10.0, true],
+	&"flame": [60, &"beam_charge", 0.8, -16.0, false],
+}
+
+const PAID_WEAPONS: Array[StringName] = [&"railgun_v1", &"coil_v1", &"sniper_v1", &"casino_v1"]
+const PAID_ACCENT := [6, &"star_dust", 1.5, -6.0, true]
+
+var _shot_count := 0
+var _accent_weapon: StringName = &""
+
+
 func _on_fired(weapon: WeaponData, _origin: Vector2, direction: Vector2) -> void:
 	visual.kick(direction, weapon.recoil)
+	var accent: Array = PAID_ACCENT if PAID_WEAPONS.has(weapon.id) else SHOT_ACCENTS.get(weapon.fire_sound, [])
+	if accent.is_empty():
+		return
+	if weapon.id != _accent_weapon:
+		_accent_weapon = weapon.id
+		_shot_count = 0
+	_shot_count += 1
+	if bool(accent[4]):
+		Platform.haptic("light")
+	if _shot_count % int(accent[0]) == 0:
+		SoundManager.play_pitched(accent[1], accent[2], accent[3])

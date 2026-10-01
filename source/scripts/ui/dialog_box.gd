@@ -7,6 +7,11 @@ signal finished
 
 const TYPE_SPEED := 70.0
 const PANEL_HEIGHT := 190.0
+const AUTO_BASE := 2.2
+const AUTO_PER_CHAR := 0.06
+const AUTO_MAX := 9.0
+
+var _auto_left := -1.0
 
 var _lines: Array = []
 var _speakers: Dictionary = {}
@@ -131,6 +136,7 @@ func _show_line() -> void:
 	_fit_panel()
 	_text.visible_characters = 0
 	_typed = 0.0
+	_auto_left = -1.0
 	SoundManager.play(&"ui_click", -10.0)
 
 
@@ -152,7 +158,14 @@ func _process(delta: float) -> void:
 	if _text.visible_characters < _full_text.length():
 		_typed += delta * TYPE_SPEED
 		_text.visible_characters = mini(int(_typed), _full_text.length())
-	_hint.visible = _text.visible_characters >= _full_text.length()
+	var typed_out := _text.visible_characters >= _full_text.length()
+	_hint.visible = typed_out
+	if typed_out:
+		if _auto_left < 0.0:
+			_auto_left = clampf(AUTO_BASE + float(_full_text.length()) * AUTO_PER_CHAR, AUTO_BASE, AUTO_MAX)
+		_auto_left -= delta
+		if _auto_left <= 0.0:
+			_advance()
 
 
 func _on_input(event: InputEvent) -> void:
@@ -171,6 +184,10 @@ func _on_input(event: InputEvent) -> void:
 		_text.visible_characters = _full_text.length()
 		_typed = float(_full_text.length())
 		return
+	_advance()
+
+
+func _advance() -> void:
 	_index += 1
 	if _index >= _lines.size():
 		_finish()

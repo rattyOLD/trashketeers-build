@@ -199,41 +199,41 @@ const NELL_ORDERS := [
 	{"id": "mission", "title": "Пройди миссию Свалки", "stat": "story_missions", "goal": 1, "nuts": 1000, "dust": 5},
 ]
 const ACHIEVEMENTS := [
-	{"id": "first_blood", "title": "Первая кровь", "description": "Победить первую крысу", "stat": "kills", "goal": 1, "nuts": 20, "dust": 0},
-	{"id": "exterminator", "title": "Дератизатор", "description": "Победить 300 крыс", "stat": "kills", "goal": 300, "nuts": 150, "dust": 0},
-	{"id": "rat_plague", "title": "Чума для чумы", "description": "Победить 2000 крыс", "stat": "kills", "goal": 2000, "nuts": 600, "dust": 5},
-	{"id": "wave_5", "title": "Пять волн", "description": "Дойти до 5-й волны", "stat": "best_wave", "goal": 5, "nuts": 80, "dust": 0},
-	{"id": "wave_10", "title": "Ветеран свалки", "description": "Дойти до 10-й волны", "stat": "best_wave", "goal": 10, "nuts": 250, "dust": 5},
-	{"id": "king_slayer", "title": "Цареубийца", "description": "Победить Короля Хлама", "stat": "boss_kills", "goal": 1, "nuts": 200, "dust": 0},
-	{"id": "dasher", "title": "Шустрый", "description": "Сделать 100 рывков", "stat": "dashes", "goal": 100, "nuts": 60, "dust": 0},
-	{"id": "crate_hunter", "title": "Охотник за ящиками", "description": "Разбить 15 ящиков с оружием", "stat": "crates", "goal": 15, "nuts": 120, "dust": 0},
-	{"id": "merger", "title": "Кузнец", "description": "Сделать первый Merge оружия", "stat": "merges", "goal": 1, "nuts": 100, "dust": 0},
-	{"id": "rich", "title": "Мешок монет", "description": "Собрать 1000 монет за всё время", "stat": "nuts_total", "goal": 1000, "nuts": 0, "dust": 5},
-	{"id": "dragon_raid", "title": "Тёплый приём", "description": "Победить Хладгора в Ледяном налёте", "stat": "raid_wins", "goal": 1, "nuts": 150, "dust": 5},
-	{"id": "raid_flawless", "title": "Без единой снежинки", "description": "Победить Хладгора, ни разу не замёрзнув", "stat": "raid_flawless", "goal": 1, "nuts": 300, "dust": 10, "hidden": true},
-	{"id": "crit_master", "title": "В яблочко", "description": "Нанести 500 критических попаданий", "stat": "crits", "goal": 500, "nuts": 120, "dust": 0},
-	{"id": "toxic_mask", "title": "Противогаз", "description": "Победить 100 Токсичных крыс", "stat": "k_toxic_rat", "goal": 100, "nuts": 180, "dust": 0},
-	{"id": "mad_calm", "title": "Успокоительное", "description": "Победить 100 Бешеных крыс", "stat": "k_dash_rat", "goal": 100, "nuts": 180, "dust": 0},
-	{"id": "punk_dead", "title": "Панк-рок жив, но не они", "description": "Победить 500 Скрэппи", "stat": "k_rat_punk", "goal": 500, "nuts": 260, "dust": 0},
-	{"id": "sniper_hunt", "title": "Сам себе снайпер", "description": "Победить 60 Свиней-снайперов", "stat": "k_pig_sniper", "goal": 60, "nuts": 240, "dust": 2},
-	{"id": "no_repair", "title": "Ремонту не подлежит", "description": "Победить 80 Свиней-механиков", "stat": "k_pig_mechanic", "goal": 80, "nuts": 240, "dust": 2},
-	{"id": "hangover", "title": "Похмелье Барона", "description": "Победить Пивного Барона", "stat": "k_beer_baron", "goal": 1, "nuts": 300, "dust": 3},
-	{"id": "nationalize", "title": "Национализация", "description": "Победить Свинью-Магната", "stat": "k_pig_magnate", "goal": 1, "nuts": 400, "dust": 4},
-	{"id": "marauder_catch", "title": "Ловец мародёров", "description": "Поймать 25 мародёров с добычей", "stat": "marauders", "goal": 25, "nuts": 220, "dust": 2},
-	{"id": "regular", "title": "Завсегдатай свалки", "description": "Сыграть 25 забегов", "stat": "runs", "goal": 25, "nuts": 300, "dust": 3},
-	{"id": "perk_junkie", "title": "Билд на ходу", "description": "Выбрать 100 улучшений в боях", "stat": "picks", "goal": 100, "nuts": 200, "dust": 0},
-	{"id": "chest_lord", "title": "Владыка сундуков", "description": "Открыть 20 сундуков", "stat": "chests", "goal": 20, "nuts": 250, "dust": 3},
-	{"id": "blacksmith_pro", "title": "Мастер горна", "description": "Сделать 10 Merge оружия", "stat": "merges", "goal": 10, "nuts": 300, "dust": 3},
-	{"id": "dash_king", "title": "Молния помоек", "description": "Сделать 1000 рывков", "stat": "dashes", "goal": 1000, "nuts": 350, "dust": 3},
-	{"id": "rescuer", "title": "Спасатель", "description": "Освободить 10 пленников в сюжете", "stat": "story_rescued", "goal": 10, "nuts": 200, "dust": 2},
-	{"id": "liberator", "title": "Освободитель", "description": "Освободить 40 пленников в сюжете", "stat": "story_rescued", "goal": 40, "nuts": 700, "dust": 6},
-	{"id": "all_free", "title": "Никто не забыт", "description": "Освободить всех пленников миссии", "stat": "story_all_rescued", "goal": 1, "nuts": 250, "dust": 3},
-	{"id": "untouchable", "title": "Неприкасаемый", "description": "Пройти миссию без единого урона и потери жизни", "stat": "story_flawless", "goal": 1, "nuts": 600, "dust": 8, "hidden": true},
-	{"id": "exterminator_pro", "title": "Санэпидемстанция", "description": "Победить 10000 врагов", "stat": "kills", "goal": 10000, "nuts": 1500, "dust": 15},
-	{"id": "wave_20", "title": "Двадцать волн", "description": "Дойти до 20-й волны", "stat": "best_wave", "goal": 20, "nuts": 500, "dust": 8},
-	{"id": "wave_30", "title": "Хозяин биома", "description": "Дойти до 30-й волны", "stat": "best_wave", "goal": 30, "nuts": 900, "dust": 12},
-	{"id": "tycoon", "title": "Мусорный магнат", "description": "Собрать 10000 монет за всё время", "stat": "nuts_total", "goal": 10000, "nuts": 0, "dust": 10},
-	{"id": "crit_god", "title": "Только крит", "description": "Нанести 5000 критических попаданий", "stat": "crits", "goal": 5000, "nuts": 600, "dust": 6},
+	{"id": "first_blood", "title": "Первая кровь", "description": "Победить первую крысу. Она была чьей-то мамой, но это не точно", "stat": "kills", "goal": 1, "nuts": 20, "dust": 0},
+	{"id": "exterminator", "title": "Дератизатор", "description": "Победить 300 крыс. Профсоюз уже в курсе", "stat": "kills", "goal": 300, "nuts": 150, "dust": 0},
+	{"id": "rat_plague", "title": "Чума для чумы", "description": "Победить 2000 крыс. Чума завидует", "stat": "kills", "goal": 2000, "nuts": 600, "dust": 5},
+	{"id": "wave_5", "title": "Пять волн", "description": "Дойти до 5-й волны и не расплакаться", "stat": "best_wave", "goal": 5, "nuts": 80, "dust": 0},
+	{"id": "wave_10", "title": "Ветеран свалки", "description": "Дойти до 10-й волны. Свалка тебя уважает, но не любит", "stat": "best_wave", "goal": 10, "nuts": 250, "dust": 5},
+	{"id": "king_slayer", "title": "Цареубийца", "description": "Победить Короля Хлама. Корона теперь дешевле", "stat": "boss_kills", "goal": 1, "nuts": 200, "dust": 0},
+	{"id": "dasher", "title": "Шустрый", "description": "Сделать 100 рывков. Ноги жалуются, енот нет", "stat": "dashes", "goal": 100, "nuts": 60, "dust": 0},
+	{"id": "crate_hunter", "title": "Охотник за ящиками", "description": "Разбить 15 ящиков с оружием. Подарки есть подарки", "stat": "crates", "goal": 15, "nuts": 120, "dust": 0},
+	{"id": "merger", "title": "Кузнец", "description": "Сделать первый Merge оружия. Два плохих ствола лучше одного", "stat": "merges", "goal": 1, "nuts": 100, "dust": 0},
+	{"id": "rich", "title": "Мешок монет", "description": "Собрать 1000 монет. Карманы довольны", "stat": "nuts_total", "goal": 1000, "nuts": 0, "dust": 5},
+	{"id": "dragon_raid", "title": "Тёплый приём", "description": "Победить Хладгора. Он замёрз, ты нет", "stat": "raid_wins", "goal": 1, "nuts": 150, "dust": 5},
+	{"id": "raid_flawless", "title": "Без единой снежинки", "description": "Победить Хладгора, ни разу не замёрзнув. Ты точно енот?", "stat": "raid_flawless", "goal": 1, "nuts": 300, "dust": 10, "hidden": true},
+	{"id": "crit_master", "title": "В яблочко", "description": "Нанести 500 критов. Крысы называют это «ой»", "stat": "crits", "goal": 500, "nuts": 120, "dust": 0},
+	{"id": "toxic_mask", "title": "Противогаз", "description": "Победить 100 Токсичных крыс. Дышать теперь можно", "stat": "k_toxic_rat", "goal": 100, "nuts": 180, "dust": 0},
+	{"id": "mad_calm", "title": "Успокоительное", "description": "Победить 100 Бешеных крыс. Таблетки не понадобились", "stat": "k_dash_rat", "goal": 100, "nuts": 180, "dust": 0},
+	{"id": "punk_dead", "title": "Панк-рок жив, но не они", "description": "Победить 500 Скрэппи. Панк-рок слегка притих", "stat": "k_rat_punk", "goal": 500, "nuts": 260, "dust": 0},
+	{"id": "sniper_hunt", "title": "Сам себе снайпер", "description": "Победить 60 Свиней-снайперов. Они целились, ты нет", "stat": "k_pig_sniper", "goal": 60, "nuts": 240, "dust": 2},
+	{"id": "no_repair", "title": "Ремонту не подлежит", "description": "Победить 80 Свиней-механиков. Гарантия аннулирована", "stat": "k_pig_mechanic", "goal": 80, "nuts": 240, "dust": 2},
+	{"id": "hangover", "title": "Похмелье Барона", "description": "Победить Пивного Барона. Бар закрыт, пиво разлито", "stat": "k_beer_baron", "goal": 1, "nuts": 300, "dust": 3},
+	{"id": "nationalize", "title": "Национализация", "description": "Победить Свинью-Магната. Рынок в панике", "stat": "k_pig_magnate", "goal": 1, "nuts": 400, "dust": 4},
+	{"id": "marauder_catch", "title": "Ловец мародёров", "description": "Поймать 25 мародёров. Свалка вернула своё", "stat": "marauders", "goal": 25, "nuts": 220, "dust": 2},
+	{"id": "regular", "title": "Завсегдатай свалки", "description": "Сыграть 25 забегов. Это уже диагноз", "stat": "runs", "goal": 25, "nuts": 300, "dust": 3},
+	{"id": "perk_junkie", "title": "Билд на ходу", "description": "Выбрать 100 улучшений. Ты любишь выбирать", "stat": "picks", "goal": 100, "nuts": 200, "dust": 0},
+	{"id": "chest_lord", "title": "Владыка сундуков", "description": "Открыть 20 сундуков. Азарт, как он есть", "stat": "chests", "goal": 20, "nuts": 250, "dust": 3},
+	{"id": "blacksmith_pro", "title": "Мастер горна", "description": "Сделать 10 Merge. Кузнец гордится", "stat": "merges", "goal": 10, "nuts": 300, "dust": 3},
+	{"id": "dash_king", "title": "Молния помоек", "description": "Сделать 1000 рывков. Енот уже не бегает, он телепортируется", "stat": "dashes", "goal": 1000, "nuts": 350, "dust": 3},
+	{"id": "rescuer", "title": "Спасатель", "description": "Освободить 10 пленников. Они сказали «спасибо». Некоторые", "stat": "story_rescued", "goal": 10, "nuts": 200, "dust": 2},
+	{"id": "liberator", "title": "Освободитель", "description": "Освободить 40 пленников. Клетки в панике", "stat": "story_rescued", "goal": 40, "nuts": 700, "dust": 6},
+	{"id": "all_free", "title": "Никто не забыт", "description": "Освободить всех пленников миссии. Никто не забыт, даже крысы", "stat": "story_all_rescued", "goal": 1, "nuts": 250, "dust": 3},
+	{"id": "untouchable", "title": "Неприкасаемый", "description": "Пройти миссию без единого урона. Нэлл не поверила, посмотрела запись", "stat": "story_flawless", "goal": 1, "nuts": 600, "dust": 8, "hidden": true},
+	{"id": "exterminator_pro", "title": "Санэпидемстанция", "description": "Победить 10000 врагов. Это уже геноцид, но мультяшный", "stat": "kills", "goal": 10000, "nuts": 1500, "dust": 15},
+	{"id": "wave_20", "title": "Двадцать волн", "description": "Дойти до 20-й волны. Ты точно не бот?", "stat": "best_wave", "goal": 20, "nuts": 500, "dust": 8},
+	{"id": "wave_30", "title": "Хозяин биома", "description": "Дойти до 30-й волны. Хозяин биома, поздравляю", "stat": "best_wave", "goal": 30, "nuts": 900, "dust": 12},
+	{"id": "tycoon", "title": "Мусорный магнат", "description": "Собрать 10000 монет. Свалка теперь на тебя работает", "stat": "nuts_total", "goal": 10000, "nuts": 0, "dust": 10},
+	{"id": "crit_god", "title": "Только крит", "description": "Нанести 5000 критов. Крысы называют тебя «ой на ножках»", "stat": "crits", "goal": 5000, "nuts": 600, "dust": 6},
 ]
 
 const XP_PER_LEVEL_BASE := 20.0
@@ -730,27 +730,11 @@ func activate_insider(code: String) -> String:
 
 ## Всё сохранение одной строкой: копируется в буфер и переносится на другое устройство.
 func export_code() -> String:
-	var raw := JSON.stringify(data).to_utf8_buffer()
-	return "TRS1.%d.%s" % [raw.size(), Marshalls.raw_to_base64(raw.compress(FileAccess.COMPRESSION_DEFLATE))]
+	return backup_code()
 
 
 func import_code(code: String) -> bool:
-	var parts := code.strip_edges().split(".")
-	if parts.size() != 3 or parts[0] != "TRS1" or not parts[1].is_valid_int():
-		return false
-	var packed := Marshalls.base64_to_raw(parts[2])
-	if packed.is_empty():
-		return false
-	var raw := packed.decompress(int(parts[1]), FileAccess.COMPRESSION_DEFLATE)
-	if raw.is_empty():
-		return false
-	var text := raw.get_string_from_utf8()
-	if typeof(JSON.parse_string(text)) != TYPE_DICTIONARY:
-		return false
-	_apply_text(text)
-	save_data()
-	reloaded.emit()
-	return true
+	return restore_backup(code)
 
 
 ## ID игрока: номер инсайдера, Telegram-аккаунт, если запущено в Telegram, иначе постоянный локальный номер.

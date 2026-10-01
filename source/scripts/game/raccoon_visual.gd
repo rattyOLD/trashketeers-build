@@ -90,6 +90,9 @@ var _hurt := 0.0
 var _pickup := 0.0
 var _cheer := 0.0
 var _kick := 0.0
+var _climb := 0.0
+var show_aim_line := false
+var _flash_t := 0.0
 var _body_kick := Vector2.ZERO
 var _dead := false
 var _death_t := 0.0
@@ -304,6 +307,8 @@ func update_motion(velocity: Vector2, aim: Vector2, delta: float) -> void:
 	_pickup = maxf(_pickup - delta, 0.0)
 	_cheer = maxf(_cheer - delta, 0.0)
 	_kick = lerpf(_kick, 0.0, clampf(KICK_DECAY * delta, 0.0, 1.0))
+	_climb = lerpf(_climb, 0.0, clampf(10.0 * delta, 0.0, 1.0))
+	_flash_t = maxf(_flash_t - delta, 0.0)
 	_body_kick = _body_kick.lerp(Vector2.ZERO, clampf(KICK_DECAY * delta, 0.0, 1.0))
 	var local_accel := accel.x * _facing
 	_tail_spring.update(clampf(-local_accel * 0.0006, -0.35, 0.35), delta)
@@ -343,7 +348,9 @@ func flash() -> void:
 
 ## Отдача: ствол уходит назад, тело — чуть против выстрела, голова кивает.
 func kick(direction: Vector2, strength: float) -> void:
-	_kick = minf(_kick + 5.0 * strength, 12.0)
+	_kick = minf(_kick + 8.0 * strength, 18.0)
+	_climb = minf(_climb + 0.07 * strength, 0.22)
+	_flash_t = 0.07
 	_body_kick -= direction.normalized() * 2.5 * strength
 	_head_spring.kick(-0.8 * strength)
 	_ear_spring.kick(-0.6 * strength)
@@ -699,6 +706,8 @@ func _draw_gun_layer() -> void:
 	var dir := _gun_direction(_gun_angle)
 	if melee_active:
 		dir = dir.rotated(melee_offset)
+	else:
+		dir = dir.rotated(-_climb * _facing)
 	var paw := _paw_at(_gun_angle)
 	if _hero_mode:
 		var shoulder := _sprite_xform() * _hero_shoulder
@@ -713,6 +722,17 @@ func _draw_gun_layer() -> void:
 			_gun_layer.draw_circle(paw, 4.5, sleeve.lightened(0.15))
 	var center := _gun_center(paw, dir, _kick)
 	WeaponIcons.draw(_gun_layer, weapon_icon, center, _weapon_scale(), dir.angle(), weapon_color, dir.x < 0.0)
+	if show_aim_line and aiming and not melee_active:
+		var from := center + _muzzle_offset(dir)
+		var line_dir := _gun_direction(_gun_angle)
+		_gun_layer.draw_dashed_line(from + line_dir * 20.0, from + line_dir * 320.0, Color(weapon_color, 0.14), 1.5, 14.0)
+	if _flash_t > 0.0 and not melee_active:
+		var muzzle := center + _muzzle_offset(dir)
+		var f := _flash_t / 0.07
+		var side := dir.orthogonal()
+		_gun_layer.draw_colored_polygon(PackedVector2Array([muzzle + side * 7.0 * f, muzzle + dir * 30.0 * f, muzzle - side * 7.0 * f, muzzle - dir * 6.0]), Color(1.0, 0.9, 0.5, 0.9 * f))
+		_gun_layer.draw_colored_polygon(PackedVector2Array([muzzle + side * 3.0 * f, muzzle + dir * 17.0 * f, muzzle - side * 3.0 * f, muzzle - dir * 3.0]), Color(1, 1, 1, f))
+		_gun_layer.draw_circle(muzzle, 7.0 * f, Color(weapon_color, 0.55 * f))
 	if glint > 0.0 and glint < 1.0:
 		var tip := center + _muzzle_offset(dir)
 		var shine := center.lerp(tip, glint)

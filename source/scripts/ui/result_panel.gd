@@ -81,8 +81,12 @@ func _init() -> void:
 
 
 ## Первая строка - заголовок-причина, «ключ: значение» - строки статистики, остальное - совет в отдельной плашке.
+const WIN_TITLES := ["ПОБЕДА!", "ЖИВОЙ! ДАЖЕ УДИВИЛИСЬ", "ГРАЦИОЗНО, КАК МУСОРНЫЙ БАК", "ЕНОТ ДОВОЛЕН", "КРЫСЫ В СЛЁЗАХ"]
+const LOSE_TITLES := ["ЕНОТ ПОВЕРЖЕН", "ЕНОТ ОТДЫХАЕТ", "ТЕБЯ ВЫНЕСЛИ", "КРЫСЫ ПЛЯШУТ", "СЛИВ ЗАСЧИТАН", "ЕНОТ ПОСКОЛЬЗНУЛСЯ", "НЭЛЛ ВЗДОХНУЛА"]
+
+
 func open(victory: bool, lines: PackedStringArray, title: String = "") -> void:
-	_title.text = title if not title.is_empty() else ("ПОБЕДА!" if victory else "ЕНОТ ПОВЕРЖЕН")
+	_title.text = title if not title.is_empty() else (WIN_TITLES.pick_random() if victory else LOSE_TITLES.pick_random())
 	_title.add_theme_color_override("font_color", UiStyle.GOLD if victory else UiStyle.DANGER)
 	_subtitle.text = lines[0] if not lines.is_empty() else ""
 	_subtitle.visible = not _subtitle.text.is_empty()

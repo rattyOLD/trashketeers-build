@@ -15,8 +15,8 @@ const PORTAL := Color("#b46bff")
 
 signal tapped(overview: bool)
 
-const RAIL_W := 14.0
-const TITLE_H := 22.0
+const RAIL_W := 10.0
+const TITLE_H := 18.0
 const ZONE_TINTS: Array[Color] = [Color("#2a86c9"), Color("#8a4fd6"), Color("#c9722b"), Color("#d63a4f")]
 
 var story: StoryRun
@@ -52,6 +52,9 @@ func setup(level: LevelSpawner, player: Player, enemies: EnemyManager, director:
 
 func set_story(run: StoryRun) -> void:
 	story = run
+	_panel.bg_color = Color(0.05, 0.04, 0.1, 0.5)
+	_panel.border_color = Color(RUST, 0.7)
+	_panel.shadow_size = 0
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 
@@ -222,8 +225,8 @@ func _draw_story() -> void:
 	var font := ThemeDB.fallback_font
 	var grid := Vector2(_level.grid_size)
 	var field := Rect2(INSET, INSET + TITLE_H, size.x - INSET * 2.0 - RAIL_W - 6.0, size.y - INSET * 2.0 - TITLE_H)
-	draw_string(font, Vector2(INSET + 2.0, INSET + 14.0), story.zone_name(), HORIZONTAL_ALIGNMENT_LEFT, size.x - INSET * 2.0, 13, Color("#ffd257"))
-	draw_rect(field, Color(0.02, 0.02, 0.06, 0.92))
+	draw_string(font, Vector2(INSET + 2.0, INSET + 11.0), story.zone_name(), HORIZONTAL_ALIGNMENT_LEFT, size.x - INSET * 2.0, 11, Color("#ffd257"))
+	draw_rect(field, Color(0.02, 0.02, 0.06, 0.5))
 	var scale := field.size.x / grid.x
 	_stretch = (field.size.y / grid.y) / scale if overview else 1.0
 	var top := 0.0
@@ -236,7 +239,7 @@ func _draw_story() -> void:
 		origin = field.position
 		rows = grid.y
 	var src := Rect2(0.0, top, grid.x, minf(rows, grid.y - top))
-	draw_texture_rect_region(_texture, Rect2(origin + Vector2(0.0, top * scale), Vector2(src.size.x * scale, src.size.y * scale * _stretch)), src, Color(1, 1, 1, 0.95))
+	draw_texture_rect_region(_texture, Rect2(origin + Vector2(0.0, top * scale), Vector2(src.size.x * scale, src.size.y * scale * _stretch)), src, Color(1, 1, 1, 0.72))
 	var inner := field.grow(-3.0)
 	if pickups != null:
 		for i in pickups.get_count():
@@ -306,7 +309,7 @@ func _draw_rail(field: Rect2) -> void:
 		var band := Rect2(x0, y0 + h * (1.0 - to), RAIL_W, h * (to - from))
 		draw_rect(band, Color(ZONE_TINTS[i % ZONE_TINTS.size()], 0.55))
 		draw_rect(band, Color(0, 0, 0, 0.55), false, 1.5)
-		draw_string(ThemeDB.fallback_font, Vector2(x0, band.get_center().y + 5.0), str(i + 1), HORIZONTAL_ALIGNMENT_CENTER, RAIL_W, 13, Color(1, 1, 1, 0.9))
+		draw_string(ThemeDB.fallback_font, Vector2(x0, band.get_center().y + 5.0), str(i + 1), HORIZONTAL_ALIGNMENT_CENTER, RAIL_W, 10, Color(1, 1, 1, 0.9))
 	for i in story.encounter_total():
 		var at := story.encounter_mark(i)
 		var y := y0 + h * (1.0 - at)

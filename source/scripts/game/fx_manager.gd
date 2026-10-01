@@ -359,11 +359,11 @@ func confetti(at: Vector2, count: int = 60) -> void:
 		_ch_spin[k] = randf() * TAU
 
 
-func splat(at: Vector2, color: Color, radius: float) -> void:
+func splat(at: Vector2, color: Color, radius: float, life: float = SPLAT_LIFE) -> void:
 	var k := _spl_next
 	_spl_next = (_spl_next + 1) % SPLAT_CAPACITY
 	_spl_pos[k] = at
-	_spl_life[k] = SPLAT_LIFE
+	_spl_life[k] = life
 	_spl_radius[k] = radius
 	_spl_color[k] = color
 	_spl_seed[k] = randf() * 100.0

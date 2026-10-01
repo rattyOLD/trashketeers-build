@@ -118,6 +118,7 @@ var _carpet_dir := Vector2.ZERO
 const BEER_STREAM_LIMIT := 110
 var _beer: WeaponData
 var _puke: WeaponData
+var _beer_count := 0
 var _smash_hit := false
 var _aim_dir := Vector2.RIGHT
 var _grid_points: Array[Vector2] = []
@@ -520,6 +521,8 @@ func tick(player: Player, dir: Vector2, path_dir: Vector2, dist: float, delta: f
 			return Vector2.ZERO
 		State.BEAM_WINDUP:
 			windup = clampf(state_time / BEAM_WINDUP_TIME, 0.0, 1.0)
+			if pattern == "baron" and int(state_time * 9.0) != int((state_time - delta) * 9.0):
+				enemy.request_fx("beer_puke", 0.0, enemy.part_muzzle(0))
 			if state_time < BEAM_LOCK_TIME:
 				_aim_dir = enemy.part_muzzle(0).direction_to(player.global_position + player.velocity * 0.15)
 			enemy.queue_redraw()
@@ -575,6 +578,8 @@ func tick(player: Player, dir: Vector2, path_dir: Vector2, dist: float, delta: f
 			return _leap_dir * 560.0
 		State.VOMIT_WINDUP:
 			windup = clampf(state_time / 0.5, 0.0, 1.0)
+			if int(state_time * 9.0) != int((state_time - delta) * 9.0):
+				enemy.request_fx("beer_puke", 0.0, enemy.part_muzzle(0))
 			_aim_dir = enemy.global_position.direction_to(player.global_position)
 			enemy.queue_redraw()
 			if state_time >= 0.5:
@@ -803,6 +808,9 @@ func _fire_beer(weapon: WeaponData, angle_dir: Vector2, spread: float) -> void:
 	var bullet := BulletPool.spawn(weapon, from, angle_dir.rotated(spread), Bullet.Team.ENEMY)
 	if bullet != null:
 		bullet.damage_scale = enemy.damage_mult
+	_beer_count += 1
+	if _beer_count % 5 == 0:
+		enemy.request_fx("beer_puke" if weapon == _puke else "beer", 0.0, from + angle_dir * randf_range(260.0, 560.0))
 
 
 func _in_cone(point: Vector2, dir: Vector2, half_angle: float, length: float) -> bool:

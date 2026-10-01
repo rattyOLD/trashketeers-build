@@ -5,7 +5,7 @@ extends RefCounted
 
 const ELEMENTS := ["dash", "slots", "interact"]
 const ELEMENT_TITLES := {"dash": "РЫВОК", "slots": "СЛОТЫ ОРУЖИЯ", "interact": "ВЗЯТЬ"}
-const ELEMENT_SIZE := {"dash": Vector2(160, 160), "slots": Vector2(132, 100), "interact": Vector2(250, 96)}
+const ELEMENT_SIZE := {"dash": Vector2(160, 160), "slots": Vector2(96, 96), "interact": Vector2(250, 96)}
 const PRESET_SLOTS := 3
 
 const KEY_ACTIONS := [
@@ -47,10 +47,11 @@ static func default_config(left_handed: bool = false) -> Dictionary:
 		"auto_pick": false,
 		"weapon_slots": 2,
 		"layout": {
-			"dash": {"x": cx, "y": 0.83, "s": 1.0},
-			"slots": {"x": cx, "y": 0.62, "s": 1.0},
+			"dash": {"x": cx, "y": 0.74, "s": 1.0},
+			"slots": {"x": cx, "y": 0.54, "s": 1.0},
 			"interact": {"x": 0.5, "y": 0.66, "s": 1.0},
 		},
+		"layout_v": 2,
 		"keys": {},
 		"presets": {},
 	}
@@ -69,6 +70,14 @@ static func config() -> Dictionary:
 	for id in ELEMENTS:
 		if not layout.has(id):
 			layout[id] = (base["layout"] as Dictionary)[id]
+	if int(stored.get("layout_v", 1)) < 2:
+		stored["layout_v"] = 2
+		var dash: Dictionary = layout["dash"]
+		if float(dash["y"]) > 0.78:
+			dash["y"] = 0.74
+		var slots: Dictionary = layout["slots"]
+		if float(slots["y"]) > 0.58:
+			slots["y"] = 0.54
 	return stored
 
 

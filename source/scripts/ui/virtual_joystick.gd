@@ -77,7 +77,7 @@ func _in_zone(point: Vector2) -> bool:
 
 func _hint_position() -> Vector2:
 	var x := size.x * (0.76 if bool(Controls.get_value("left_handed")) else 0.24)
-	return Vector2(x, size.y - 230.0)
+	return Vector2(x, size.y - 340.0)
 
 
 func _update_output() -> void:
