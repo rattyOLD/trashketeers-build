@@ -67,6 +67,7 @@ class Settings:
 	]
 	var _quality_buttons: Array[Button] = []
 	var _quality_hint: Label
+	var _min_hud: MenuWidgets.PawToggle
 	var _fps: MenuWidgets.PawToggle
 	var _lite: MenuWidgets.PawToggle
 	var _mini: MenuWidgets.PawToggle
@@ -125,6 +126,12 @@ class Settings:
 		_mini = MenuWidgets.PawToggle.new("Мини-карта в бою", SaveService.is_minimap_enabled())
 		_mini.toggled.connect(func(on: bool) -> void: SaveService.set_flag("minimap", on))
 		graphics.add_child(_mini)
+		_min_hud = MenuWidgets.PawToggle.new("Минимальный худ", bool(SaveService.data.get("min_hud", false)))
+		_min_hud.toggled.connect(func(on: bool) -> void: SaveService.set_flag("min_hud", on))
+		graphics.add_child(_min_hud)
+		var min_hint := UiStyle.label("В бою только здоровье, пауза, таймер, монеты и кнопки. Без заказа, счётчиков врагов и лута.", 19, UiStyle.TEXT_DIM, 4)
+		min_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		graphics.add_child(min_hint)
 		if Platform.fullscreen_supported():
 			_fullscreen = MenuWidgets.PawToggle.new("На весь экран", Platform.is_fullscreen())
 			_fullscreen.toggled.connect(func(on: bool) -> void: Platform.set_fullscreen(on))
@@ -234,6 +241,7 @@ class Settings:
 		_fps.set_pressed_no_signal(bool(SaveService.data["show_fps"]))
 		_lite.set_pressed_no_signal(SaveService.is_fx_lite())
 		_mini.set_pressed_no_signal(SaveService.is_minimap_enabled())
+		_min_hud.set_pressed_no_signal(bool(SaveService.data.get("min_hud", false)))
 		if _fullscreen != null:
 			_fullscreen.set_pressed_no_signal(Platform.is_fullscreen())
 		_auto_pick.set_pressed_no_signal(bool(Controls.get_value("auto_pick")))

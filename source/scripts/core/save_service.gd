@@ -61,6 +61,7 @@ const DEFAULTS := {
 	"haptics": true,
 	"minimap": true,
 	"show_fps": false,
+	"min_hud": false,
 	"tips_off": false,
 	"tips_seen": [],
 	"grade_on": true,

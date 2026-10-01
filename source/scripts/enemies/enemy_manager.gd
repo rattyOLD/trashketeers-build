@@ -81,6 +81,31 @@ func find_nearest(from: Vector2, max_distance: float) -> Enemy:
 	return best
 
 
+## Автоприцел с приоритетом угрозы: боссы и дальнобойные/взрывные «кажутся» ближе.
+func find_priority(from: Vector2, max_distance: float) -> Enemy:
+	var best: Enemy = null
+	var best_score := max_distance * max_distance
+	for enemy in _active:
+		if not enemy.is_alive():
+			continue
+		var dist_sq := from.distance_squared_to(enemy.global_position)
+		if dist_sq > max_distance * max_distance:
+			continue
+		var weight := 1.0
+		match enemy.data.behavior:
+			EnemyData.Behavior.BOSS:
+				weight = 0.3
+			EnemyData.Behavior.RANGED, EnemyData.Behavior.EXPLODER, EnemyData.Behavior.BOMBER, EnemyData.Behavior.TRAPPER:
+				weight = 0.55
+			EnemyData.Behavior.ASSASSIN:
+				weight = 0.7
+		var score := dist_sq * weight
+		if score < best_score:
+			best_score = score
+			best = enemy
+	return best
+
+
 const SEPARATION_SPEED := 140.0
 const PLAYER_PUSH := 190.0
 const FAR_DISTANCE_SQ := 1100.0 * 1100.0

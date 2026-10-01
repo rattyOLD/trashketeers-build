@@ -3,9 +3,9 @@ extends CanvasLayer
 ## Фоновая реплика сюжета: компактная плашка с портретом, игру не ставит на паузу и не ловит касания.
 ## Реплики идут по очереди, каждая живёт по длине текста; тап по плашке сразу убирает реплику.
 
-const MIN_TIME := 2.8
-const MAX_TIME := 8.0
-const PER_CHAR := 0.055
+const MIN_TIME := 2.2
+const MAX_TIME := 3.6
+const PER_CHAR := 0.03
 const FADE := 0.25
 
 var _speakers: Dictionary = {}

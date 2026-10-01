@@ -72,7 +72,7 @@ static func run_points(wave: int) -> int:
 ## {coins, gems, item} для клетки; track - "free" или "prem".
 static func reward(track: String, level: int) -> Dictionary:
 	if track == "free":
-		return {"coins": 60 + 10 * level, "gems": {10: 3, 20: 3, 30: 5}.get(level, 0), "item": str(FREE_ITEMS.get(level, ""))}
+		return {"coins": 60 + 10 * level, "gems": {5: 2, 10: 3, 15: 3, 20: 4, 25: 4, 30: 6}.get(level, 0), "item": str(FREE_ITEMS.get(level, ""))}
 	var gems := 0
 	if level % 5 == 0:
 		gems = 20 if level == TIERS else 10

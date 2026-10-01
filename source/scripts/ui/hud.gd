@@ -74,6 +74,9 @@ var _minimap: Minimap
 var _toast_queue: Array = []
 var _toast_busy := false
 var _toast_y := 168.0
+var _minimal := false
+var _low_hp := false
+var _pulse := 0.0
 
 
 func _init() -> void:
@@ -82,6 +85,7 @@ func _init() -> void:
 
 
 func build(currency_icon: Texture2D, weapon: WeaponData) -> void:
+	_minimal = bool(SaveService.data.get("min_hud", false))
 	_root = Control.new()
 	_root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -156,7 +160,8 @@ func build(currency_icon: Texture2D, weapon: WeaponData) -> void:
 	_run_result.menu_pressed.connect(func() -> void: menu_pressed.emit())
 	_run_result.upgrade_pressed.connect(func() -> void: upgrade_pressed.emit())
 	_root.add_child(_run_result)
-	_fps_label.visible = bool(SaveService.data["show_fps"])
+	_fps_label.visible = bool(SaveService.data["show_fps"]) and not _minimal
+	_kills_label.visible = not _minimal
 	_hint = HintBubble.new()
 	_root.add_child(_hint)
 	if Platform.is_touch():
@@ -199,6 +204,7 @@ func set_story_layout(minimap: Minimap) -> void:
 	_story_bar = StoryBar.new()
 	_left_column.add_child(_story_bar)
 	_order_card = OrderCard.new()
+	_order_card.minimal = _minimal
 	_order_card.pressed.connect(func() -> void: orders_requested.emit())
 	_left_column.add_child(_order_card)
 	_story_bar.chip_tapped.connect(func(chip: Control, text: String) -> void: _hint.show_for(chip, text))
@@ -219,10 +225,11 @@ func set_story_layout(minimap: Minimap) -> void:
 func set_survival_order(order: Dictionary) -> void:
 	if _order_card == null:
 		var spacer := Control.new()
-		spacer.custom_minimum_size = Vector2(0.0, 58.0)
+		spacer.custom_minimum_size = Vector2(0.0, 44.0)
 		spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_left_column.add_child(spacer)
 		_order_card = OrderCard.new()
+		_order_card.minimal = _minimal
 		_order_card.pressed.connect(func() -> void: orders_requested.emit())
 		_left_column.add_child(_order_card)
 	_order_card.set_order(str(order.get("title", "")), int(order.get("progress", 0)), int(order.get("goal", 1)), bool(order.get("done", false)))
@@ -243,6 +250,9 @@ func set_health(hp: float, max_hp: float) -> void:
 	if _hp_last >= 0.0 and hp > _hp_last + 0.3 and hp < max_hp + 0.01:
 		_hp_flash = maxf(_hp_flash, clampf((hp - _hp_last) / 6.0, 0.35, 1.0))
 	_hp_last = hp
+	_low_hp = max_hp > 0.0 and hp / max_hp < 0.3 and hp > 0.0
+	if not _low_hp:
+		_hp_bar.modulate = Color.WHITE
 	_hp_bar.value = hp
 	_hp_label.text = "%d / %d" % [ceili(hp), roundi(max_hp)]
 
@@ -290,7 +300,7 @@ func configure_for_raid() -> void:
 
 
 func set_loot_left(count: int) -> void:
-	_loot_label.visible = count > 0
+	_loot_label.visible = count > 0 and not _minimal
 	if count > 0:
 		_loot_label.text = "Лут на карте: %d" % count
 
@@ -300,7 +310,7 @@ func set_kills(kills: int) -> void:
 
 
 func set_wave(number: int, enemies_left: int) -> void:
-	_wave_label.text = "ВОЛНА %d · %d" % [number, enemies_left] if enemies_left > 0 else "ВОЛНА %d" % number
+	_wave_label.text = "ВОЛНА %d · %d" % [number, enemies_left] if enemies_left > 0 and not _minimal else "ВОЛНА %d" % number
 
 
 ## Сюжетный режим без ио-механик: скрываем опыт и уровень.
@@ -453,6 +463,7 @@ func hide_boss() -> void:
 
 
 func show_banner(text: String, color: Color, duration: float = 2.2) -> void:
+	duration = minf(duration, 1.8)
 	var half := minf(350.0, (_root.size.x - 28.0) * 0.5)
 	_banner.offset_left = -half
 	_banner.offset_right = half
@@ -472,14 +483,14 @@ func show_wave_intro(number: int, title: String, is_boss: bool) -> void:
 	_wave_title.text = "ВОЛНА %d" % number
 	_wave_title.add_theme_color_override("font_color", UiStyle.DANGER if is_boss else UiStyle.GOLD)
 	_wave_sub.text = ("БОСС: " + title) if is_boss else title
-	_animate_titles(1.6)
+	_animate_titles(1.0)
 
 
 func show_wave_cleared(bonus_nuts: int) -> void:
 	_wave_title.text = "ВОЛНА ОЧИЩЕНА!"
 	_wave_title.add_theme_color_override("font_color", Color("#7cff6b"))
 	_wave_sub.text = "+%s · лечение +15%%" % SaveService.format_coins(bonus_nuts)
-	_animate_titles(1.5)
+	_animate_titles(0.9)
 
 
 func show_countdown(seconds: int) -> void:
@@ -549,6 +560,9 @@ func _process(delta: float) -> void:
 	if _hp_flash > 0.0:
 		_hp_flash = maxf(_hp_flash - delta * 3.0, 0.0)
 		_hp_bar.modulate = Color.WHITE.lerp(Color(0.6, 1.6, 0.75), _hp_flash)
+	elif _low_hp:
+		_pulse += delta * 7.0
+		_hp_bar.modulate = Color.WHITE.lerp(Color(1.7, 0.45, 0.45), 0.5 + 0.5 * sin(_pulse))
 	if _fps_label.visible:
 		_fps_label.text = "%d FPS" % Engine.get_frames_per_second()
 
@@ -600,7 +614,7 @@ func _next_toast() -> void:
 	_toast.position.y = -140.0
 	var tween := _toast.create_tween()
 	tween.tween_property(_toast, "position:y", _toast_y, 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	tween.tween_interval(2.2)
+	tween.tween_interval(1.8)
 	tween.tween_property(_toast, "position:y", -140.0, 0.3).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	tween.tween_callback(func() -> void:
 		_toast.visible = false
@@ -628,29 +642,29 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	_left_column = left
 
 	var hp_stack := Control.new()
-	hp_stack.custom_minimum_size = Vector2(0, 40)
+	hp_stack.custom_minimum_size = Vector2(0, 46)
 	left.add_child(hp_stack)
-	_hp_bar = UiStyle.progress_bar(Color("#ff3b5c"), 40)
+	_hp_bar = UiStyle.progress_bar(Color("#ff3b5c"), 46)
 	_hp_bar.set_anchors_preset(Control.PRESET_FULL_RECT)
 	hp_stack.add_child(_hp_bar)
-	_hp_label = UiStyle.label("", 22, UiStyle.TEXT, 6)
+	_hp_label = UiStyle.label("", 26, UiStyle.TEXT, 6)
 	_hp_label.set_anchors_preset(Control.PRESET_FULL_RECT)
 	hp_stack.add_child(_hp_label)
 
 	_xp_row = HBoxContainer.new()
 	_xp_row.add_theme_constant_override("separation", 8)
 	left.add_child(_xp_row)
-	_level_label = UiStyle.label("УР 1", 22, UiStyle.NEON, 6)
-	_level_label.custom_minimum_size = Vector2(76, 0)
+	_level_label = UiStyle.label("УР 1", 20, UiStyle.NEON, 5)
+	_level_label.custom_minimum_size = Vector2(60, 0)
 	_xp_row.add_child(_level_label)
 	var xp_stack := Control.new()
 	xp_stack.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	xp_stack.custom_minimum_size = Vector2(0, 26)
+	xp_stack.custom_minimum_size = Vector2(0, 20)
 	_xp_row.add_child(xp_stack)
-	_xp_bar = UiStyle.progress_bar(UiStyle.NEON, 26)
+	_xp_bar = UiStyle.progress_bar(UiStyle.NEON, 20)
 	_xp_bar.set_anchors_preset(Control.PRESET_FULL_RECT)
 	xp_stack.add_child(_xp_bar)
-	_xp_label = UiStyle.label("0/10", 17, UiStyle.TEXT, 5)
+	_xp_label = UiStyle.label("0/10", 14, UiStyle.TEXT, 4)
 	_xp_label.set_anchors_preset(Control.PRESET_FULL_RECT)
 	xp_stack.add_child(_xp_label)
 
@@ -688,10 +702,10 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	_time_label = UiStyle.label("0:00", 26, UiStyle.TEXT, 6)
 	_time_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	right.add_child(_time_label)
-	_kills_label = UiStyle.label("Врагов: 0", 20, UiStyle.TEXT_DIM, 5)
+	_kills_label = UiStyle.label("Врагов: 0", 17, UiStyle.TEXT_DIM, 4)
 	_kills_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	right.add_child(_kills_label)
-	_loot_label = UiStyle.label("", 20, UiStyle.GOLD, 5)
+	_loot_label = UiStyle.label("", 17, UiStyle.GOLD, 4)
 	_loot_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_loot_label.visible = false
 	right.add_child(_loot_label)
@@ -705,8 +719,8 @@ func _build_wave_chip() -> Control:
 	_wave_box = PanelContainer.new()
 	_wave_box.add_theme_stylebox_override("panel", UiStyle.box(Color(0.08, 0.05, 0.15, 0.6), Color(UiStyle.GOLD, 0.7), 3, 20))
 	_wave_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	UiStyle.anchor(_wave_box, Vector2(0.5, 0.0), Rect2(-130, 104, 260, 44))
-	_wave_label = UiStyle.label("ВОЛНА 1", 22, UiStyle.GOLD, 6)
+	UiStyle.anchor(_wave_box, Vector2(0.5, 0.0), Rect2(-100, 98, 200, 36))
+	_wave_label = UiStyle.label("ВОЛНА 1", 19, UiStyle.GOLD, 5)
 	_wave_box.add_child(_wave_label)
 	return _wave_box
 
@@ -719,7 +733,7 @@ func _build_boss_bar() -> Control:
 
 
 func _build_banner() -> Control:
-	_banner = UiStyle.label("", 44, UiStyle.DANGER, 12)
+	_banner = UiStyle.label("", 34, UiStyle.DANGER, 10)
 	UiStyle.anchor(_banner, Vector2(0.5, 0.5), Rect2(-350, -380, 700, 110))
 	_banner.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_banner.visible = false
@@ -780,9 +794,9 @@ func _build_toast() -> Control:
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 2)
 	_toast.add_child(column)
-	_toast_title = UiStyle.label("", 28, UiStyle.GOLD, 8)
+	_toast_title = UiStyle.label("", 24, UiStyle.GOLD, 7)
 	column.add_child(_toast_title)
-	_toast_text = UiStyle.label("", 20, UiStyle.TEXT, 5)
+	_toast_text = UiStyle.label("", 17, UiStyle.TEXT, 4)
 	column.add_child(_toast_text)
 	return _toast
 

@@ -18,11 +18,8 @@ const OVERDRIVE_BASE := 2.5
 const OVERDRIVE_STEP := 0.75
 
 const RETARGET_INTERVAL := 0.1
-## Автоогонь чуть медленнее ручного: ручной прицел остаётся выгоднее, но пассивная игра работает.
-const AUTO_RATE_PENALTY := 1.12
-const AUTO_SCREEN_RANGE := 560.0
-## Помощь ручному прицелу: цель внутри конуса притягивает линию огня (+10% к прежнему конусу 11°).
-const ASSIST_ANGLE := deg_to_rad(12.1)
+## Стреляем только по тем, кто на экране: за кадром враги не «видны» игроку.
+const AUTO_SCREEN_RANGE := 600.0
 const MUZZLE_DISTANCE := 44.0
 ## Ближе этого запаса за дулом цель считается «в упор»: пуля стартует от корпуса,
 ## иначе она родилась бы уже за спиной крысы и прошла мимо.
@@ -36,7 +33,6 @@ var slot_count := 2
 var weapon: WeaponData
 var aim_direction := Vector2.RIGHT
 ## Ручной прицел: направление от пальца/мыши, пока он зажат; ZERO — работает автоприцел.
-var manual_aim := Vector2.ZERO
 var has_target := false
 ## Callable(direction: Vector2) -> Vector2: глобальная точка дула нарисованного ствола.
 var muzzle_provider: Callable
@@ -150,22 +146,17 @@ func _physics_process(delta: float) -> void:
 		_melee_step(delta)
 		return
 
-	var manual := manual_aim != Vector2.ZERO
-	var auto := not manual and _target != null and _is_target_valid() and global_position.distance_squared_to(_target.global_position) <= AUTO_SCREEN_RANGE * AUTO_SCREEN_RANGE
-	has_target = manual or auto
-	if not manual and not auto:
+	var auto := _target != null and _is_target_valid() and global_position.distance_squared_to(_target.global_position) <= AUTO_SCREEN_RANGE * AUTO_SCREEN_RANGE
+	has_target = auto
+	if not auto:
 		_spin_up = maxf(_spin_up - delta * 0.8, 0.0)
 		return
 
-	var aim_point := global_position + manual_aim * minf(weapon.max_distance, 520.0) if manual else _target.global_position
-	if manual and _target != null and _is_target_valid():
-		var to_target := global_position.direction_to(_target.global_position)
-		if absf(manual_aim.angle_to(to_target)) <= ASSIST_ANGLE:
-			aim_point = _target.global_position
+	var aim_point := _target.global_position
 	aim_direction = global_position.direction_to(aim_point)
 	if _cooldown > 0.0:
 		return
-	_cooldown = weapon.fire_interval * (1.0 if manual else AUTO_RATE_PENALTY)
+	_cooldown = weapon.fire_interval
 	if weapon.trait_id == &"spin":
 		_cooldown *= lerpf(1.7, 0.6, _spin_up)
 		_spin_up = minf(_spin_up + weapon.fire_interval / 1.8, 1.0)

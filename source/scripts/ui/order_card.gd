@@ -17,6 +17,8 @@ var _shown := 0.0
 var _flash := 0.0
 var _panel: StyleBoxFlat
 var _goals: Array = []
+## «Минимальный худ»: карточка не показывается вовсе.
+var minimal := false
 
 
 func _init() -> void:
@@ -28,7 +30,7 @@ func _init() -> void:
 
 
 func set_order(title: String, progress: int, goal: int, done: bool) -> void:
-	if title.is_empty():
+	if title.is_empty() or minimal:
 		visible = false
 		return
 	visible = true
@@ -47,6 +49,8 @@ func set_order(title: String, progress: int, goal: int, done: bool) -> void:
 
 
 func set_goals(goals: Array) -> void:
+	if minimal:
+		return
 	var same := goals.size() == _goals.size()
 	if same:
 		for i in goals.size():

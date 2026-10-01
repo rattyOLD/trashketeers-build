@@ -100,8 +100,6 @@ func _steer_dir() -> Vector2:
 	if _player.move_input.length() > 0.2:
 		return _player.move_input.normalized()
 	var wc := _player.weapon_controller
-	if wc.manual_aim != Vector2.ZERO:
-		return wc.manual_aim
 	return wc.aim_direction.normalized() if wc.aim_direction.length() > 0.1 else Vector2.RIGHT
 
 

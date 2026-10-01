@@ -255,7 +255,7 @@ func _exit_tree() -> void:
 
 ## Приоритет автоприцела: ближайший враг, если его нет — ближайший разрушаемый объект.
 func _find_target(from: Vector2, max_distance: float) -> Node2D:
-	var enemy := enemies.find_nearest(from, max_distance)
+	var enemy := enemies.find_priority(from, max_distance)
 	if enemy != null:
 		return enemy
 	if story != null:

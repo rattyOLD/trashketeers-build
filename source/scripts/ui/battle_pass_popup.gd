@@ -4,39 +4,121 @@ extends GlassPopup
 
 signal changed
 
-var _info: Label
-var _bar: ProgressBar
+var _hero: VBoxContainer
 var _actions: VBoxContainer
 var _status: Label
 var _list: VBoxContainer
 var _scroll_target: Control
 
+const FEATURE_ITEM := "weapon:railgun_v1"
+const FEATURE_TEXT := "Пробивает всех на линии. Рывок заряжает следующий выстрел, серии убийств растят рельс-комбо. Главная вкусность сезона."
+
 
 func _init() -> void:
 	super("БОЕВОЙ ПРОПУСК")
-	_info = UiStyle.label("", 24, UiStyle.GOLD, 6)
-	content.add_child(_info)
-	_bar = UiStyle.progress_bar(UiStyle.NEON, 20)
-	_bar.max_value = 1.0
-	content.add_child(_bar)
+	_hero = VBoxContainer.new()
+	_hero.add_theme_constant_override("separation", 8)
+	content.add_child(_hero)
 	_actions = VBoxContainer.new()
 	_actions.add_theme_constant_override("separation", 8)
 	content.add_child(_actions)
-	_status = UiStyle.label("", 19, UiStyle.TEXT_DIM, 4)
+	_status = UiStyle.label("", 18, UiStyle.TEXT_DIM, 4)
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_status.custom_minimum_size = Vector2(540, 0)
+	_status.custom_minimum_size = Vector2(10, 0)
 	content.add_child(_status)
 	_list = MenuPopups.scroll_list(content)
 
 
+## Шапка: сезон, огромный уровень, дни и толстая полоса с подсказкой «до следующего уровня».
+func _build_hero(level: int) -> void:
+	MenuPopups.clear(_hero)
+	var panel := PanelContainer.new()
+	var box := UiStyle.box(Color("#1d1038"), Color("#b34dff"), 4, 22)
+	box.shadow_color = Color(0.7, 0.3, 1.0, 0.35)
+	box.shadow_size = 10
+	panel.add_theme_stylebox_override("panel", box)
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 4)
+	panel.add_child(column)
+	var top := HBoxContainer.new()
+	column.add_child(top)
+	var season := UiStyle.label("СЕЗОН %d" % BattlePass.season(), 22, Color("#d9a6ff"), 5)
+	season.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	season.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	top.add_child(season)
+	var days := UiStyle.label("осталось дней: %d" % BattlePass.days_left(), 20, UiStyle.TEXT, 5)
+	days.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	top.add_child(days)
+	var big := "УРОВЕНЬ %d / %d" % [level, BattlePass.TIERS] if level < BattlePass.TIERS else "ВСЕ %d УРОВНЕЙ ПРОЙДЕНЫ" % BattlePass.TIERS
+	column.add_child(UiStyle.label(big, 38, UiStyle.GOLD, 9))
+	var bar := UiStyle.progress_bar(Color("#ffb020"), 30)
+	bar.max_value = 1.0
+	bar.value = BattlePass.tier_progress()
+	column.add_child(bar)
+	var to_next := UiStyle.label("", 18, UiStyle.TEXT_DIM, 4)
+	if level < BattlePass.TIERS:
+		to_next.text = "До уровня %d: %d очков" % [level + 1, BattlePass.POINTS_PER_TIER - BattlePass.points() % BattlePass.POINTS_PER_TIER]
+	else:
+		to_next.text = "До бонус-награды: %d очков" % (BattlePass.BONUS_POINTS - BattlePass.bonus_points_into() % BattlePass.BONUS_POINTS)
+	column.add_child(to_next)
+	var earn := UiStyle.label("Хороший забег: до +%d очков · подарок дня +%d" % [BattlePass.MAX_RUN_POINTS, BattlePass.DAILY_POINTS], 16, Color("#9be8b4"), 4)
+	earn.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	earn.custom_minimum_size = Vector2(10, 0)
+	column.add_child(earn)
+	_hero.add_child(panel)
+	if not BattlePass.is_claimed("prem", 1):
+		_hero.add_child(_feature_card())
+
+
+## Главный приз сезона: отдельная карточка с описанием и кнопкой.
+func _feature_card() -> Control:
+	var color := Economy.rarity_color(Economy.item_rarity(FEATURE_ITEM))
+	var panel := PanelContainer.new()
+	var box := UiStyle.box(Color(0.16, 0.1, 0.03, 0.96), color, 5, 22)
+	box.shadow_color = Color(color, 0.5)
+	box.shadow_size = 14
+	panel.add_theme_stylebox_override("panel", box)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	panel.add_child(row)
+	row.add_child(_item_art(FEATURE_ITEM, Vector2(170, 80)))
+	var texts := VBoxContainer.new()
+	texts.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	texts.add_theme_constant_override("separation", 2)
+	row.add_child(texts)
+	var tag := UiStyle.label("ЛЕГЕНДАРНЫЙ · УРОВЕНЬ 1 ПРЕМИУМА", 14, color, 4)
+	tag.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	texts.add_child(tag)
+	var title := UiStyle.label(Economy.item_title(FEATURE_ITEM), 24, UiStyle.TEXT, 6)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	title.clip_text = true
+	texts.add_child(title)
+	var desc := UiStyle.label(FEATURE_TEXT, 15, UiStyle.TEXT_DIM, 3)
+	desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	desc.custom_minimum_size = Vector2(10, 0)
+	texts.add_child(desc)
+	if not BattlePass.is_premium():
+		var buy := UiStyle.button("ПОЛУЧИТЬ С ПРЕМИУМОМ · %s" % Premium.price_text(BattlePass.price()), Color("#b34dff"), 17, Vector2(0, 46))
+		buy.pressed.connect(_buy)
+		texts.add_child(buy)
+	else:
+		var take := UiStyle.button("ЗАБРАТЬ", Color("#2fae5f"), 18, Vector2(0, 46))
+		take.disabled = not BattlePass.can_claim("prem", 1)
+		take.pressed.connect(func() -> void:
+			if BattlePass.claim("prem", 1):
+				SoundManager.play(&"star_dust")
+				changed.emit()
+				_refresh())
+		texts.add_child(take)
+	return panel
+
+
 func _refresh() -> void:
 	var level := BattlePass.tier()
-	_info.text = "Сезон %d · уровень %d из %d · осталось дней: %d" % [BattlePass.season(), level, BattlePass.TIERS, BattlePass.days_left()]
-	if level >= BattlePass.TIERS:
-		_info.text = "Сезон %d · всё пройдено! Бонус за каждые %d очков · дней: %d" % [BattlePass.season(), BattlePass.BONUS_POINTS, BattlePass.days_left()]
-	_bar.value = BattlePass.tier_progress()
+	_build_hero(level)
 	MenuPopups.clear(_actions)
-	var claim := UiStyle.button("СОБРАТЬ ВСЕ НАГРАДЫ", Color("#2fae5f"), 28, Vector2(0, 80))
+	var claim := UiStyle.button("СОБРАТЬ ВСЕ НАГРАДЫ", Color("#2fae5f"), 24, Vector2(0, 64))
 	claim.disabled = not BattlePass.has_unclaimed()
 	claim.pressed.connect(func() -> void:
 		var got := BattlePass.claim_all()
@@ -52,7 +134,7 @@ func _refresh() -> void:
 		changed.emit()
 		_refresh())
 	_actions.add_child(claim)
-	if not BattlePass.is_premium():
+	if not BattlePass.is_premium() and BattlePass.is_claimed("prem", 1):
 		var buy := UiStyle.button("ОТКРЫТЬ ПРЕМИУМ · %s" % Premium.price_text(BattlePass.price()), Color("#b34dff"), 26, Vector2(0, 76))
 		buy.pressed.connect(_buy)
 		_actions.add_child(buy)
@@ -64,10 +146,11 @@ func _refresh() -> void:
 		bonus.pressed.connect(_claim_bonus)
 		_actions.add_child(bonus)
 	var milestone := BattlePass.next_milestone()
-	if not milestone.is_empty():
+	if not milestone.is_empty() and str(milestone["item"]) != FEATURE_ITEM:
 		_actions.add_child(_milestone_card(milestone))
 	if BattlePass.tier() < BattlePass.TIERS:
-		var skip := UiStyle.button("ПРОПУСТИТЬ УРОВЕНЬ · %s" % Economy.format_gems(BattlePass.SKIP_COST), Color("#b34dff") if BattlePass.can_skip() else UiStyle.PANEL, 20, Vector2(0, 54))
+		var can_skip_n := mini(SaveService.get_gems() / BattlePass.SKIP_COST, BattlePass.TIERS - BattlePass.tier())
+		var skip := UiStyle.button("ПРОПУСТИТЬ УРОВЕНЬ · %s (можно: %d)" % [Economy.format_gems(BattlePass.SKIP_COST), can_skip_n], Color("#b34dff") if BattlePass.can_skip() else UiStyle.PANEL, 17, Vector2(0, 50))
 		skip.disabled = not BattlePass.can_skip()
 		skip.pressed.connect(func() -> void:
 			if BattlePass.skip_tier():
@@ -77,7 +160,7 @@ func _refresh() -> void:
 				_refresh())
 		_actions.add_child(skip)
 	if _status.text.is_empty():
-		_status.text = "Очки: забеги (чем дальше волна, тем больше) и ежедневный подарок. Уровень = 100 очков."
+		_status.text = "Уровень = 100 очков. Очки дают забеги (чем дальше волна, тем больше) и ежедневный подарок."
 	MenuPopups.clear(_list)
 	_list.add_child(_header_row())
 	_scroll_target = null
@@ -213,7 +296,11 @@ func _cell(track: String, tier: int) -> Control:
 		column.add_child(label)
 		panel.custom_minimum_size = Vector2(0, 124)
 		border = Economy.rarity_color(Economy.item_rarity(item)) if not claimed else border
-		panel.add_theme_stylebox_override("panel", UiStyle.box(bg, border, 5, 16))
+		var glow := UiStyle.box(bg, border, 5, 16)
+		if not claimed and Economy.item_rarity(item) in ["epic", "legendary"]:
+			glow.shadow_color = Color(border, 0.55)
+			glow.shadow_size = 12
+		panel.add_theme_stylebox_override("panel", glow)
 	if claimed:
 		var done := UiStyle.label("ЗАБРАНО", 15, Color("#5be37d"), 4)
 		done.mouse_filter = Control.MOUSE_FILTER_IGNORE
