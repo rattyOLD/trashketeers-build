@@ -1,0 +1,177 @@
+{
+  "brief": "astra/from_claude/BRIEF_v8_survival_fx.md",
+  "block": "H3",
+  "frameOrder": "left-to-right top-to-bottom",
+  "assets": [
+    {
+      "path": "astra/inbox/story/m1_env/floor_gate_dark.png",
+      "width": 256,
+      "height": 256,
+      "block": "H3",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "floor_gate",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/m1_env/floor_gate_light.png",
+      "width": 256,
+      "height": 256,
+      "block": "H3",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "floor_gate",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/m1_env/floor_toxic_ditch_dark.png",
+      "width": 256,
+      "height": 256,
+      "block": "H3",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "floor_toxic_ditch",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/m1_env/floor_toxic_ditch_light.png",
+      "width": 256,
+      "height": 256,
+      "block": "H3",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "floor_toxic_ditch",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/m1_env/floor_yard_dark.png",
+      "width": 256,
+      "height": 256,
+      "block": "H3",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "floor_yard",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/m1_env/floor_yard_light.png",
+      "width": 256,
+      "height": 256,
+      "block": "H3",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "floor_yard",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/m1_env/floor_scrapyard_dark.png",
+      "width": 256,
+      "height": 256,
+      "block": "H3",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "floor_scrapyard",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/m1_env/floor_scrapyard_light.png",
+      "width": 256,
+      "height": 256,
+      "block": "H3",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "floor_scrapyard",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/m1_env/tire.png",
+      "width": 256,
+      "height": 256,
+      "block": "H3",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m1_props_a",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/m1_env/broken_fridge.png",
+      "width": 256,
+      "height": 256,
+      "block": "H3",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m1_props_a",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/m1_env/garbage_bags.png",
+      "width": 256,
+      "height": 256,
+      "block": "H3",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m1_props_a",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/m1_env/rust_barrel_intact.png",
+      "width": 256,
+      "height": 256,
+      "block": "H3",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m1_props_a",
+      "frame": 3
+    },
+    {
+      "path": "astra/inbox/story/m1_env/rust_barrel_broken.png",
+      "width": 256,
+      "height": 256,
+      "block": "H3",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m1_props_a",
+      "frame": 4
+    },
+    {
+      "path": "astra/inbox/story/m1_env/toxin_puddle.png",
+      "width": 256,
+      "height": 256,
+      "block": "H3",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m1_props_a",
+      "frame": 5
+    },
+    {
+      "path": "astra/inbox/story/m1_env/skull_sign.png",
+      "width": 256,
+      "height": 256,
+      "block": "H3",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m1_props_b",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/m1_env/supply_crate.png",
+      "width": 256,
+      "height": 256,
+      "block": "H3",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m1_props_b",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/m1_env/barrier_arm.png",
+      "width": 256,
+      "height": 256,
+      "block": "H3",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "m1_props_b",
+      "frame": 2
+    }
+  ]
+}
