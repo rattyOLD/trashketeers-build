@@ -38,7 +38,7 @@ func _process(_delta: float) -> void:
 	if not _shown or not rect.is_equal_approx(_rect):
 		_rect = rect
 		var font_px := float(field.get_theme_font_size("font_size"))
-		Platform.native_input_show(_id, rect, placeholder, field.secret, field.max_length, font_px)
+		Platform.native_input_show(_id, rect, placeholder, field.secret, field.max_length, font_px, field.has_meta("dark"))
 		if not _shown:
 			_shown = true
 			_html_text = ""

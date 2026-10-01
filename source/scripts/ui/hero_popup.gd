@@ -23,9 +23,6 @@ func _init() -> void:
 	super("ГЕРОИ")
 	_balance = UiStyle.label("", 24, UiStyle.GOLD, 6)
 	content.add_child(_balance)
-	var search := SearchBar.new("Найти героя по имени")
-	search.changed.connect(_on_search)
-	content.add_child(search)
 	_list = MenuPopups.scroll_list(content)
 	_action_box = VBoxContainer.new()
 	_action_box.add_theme_constant_override("separation", 10)
@@ -74,6 +71,12 @@ func _refresh() -> void:
 	lore.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	lore.custom_minimum_size = Vector2(520, 0)
 	_list.add_child(lore)
+	if character.has("quote"):
+		var quote := UiStyle.label("«%s»" % str(character["quote"]), 20, accent.lightened(0.35), 5)
+		quote.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		quote.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		quote.custom_minimum_size = Vector2(520, 0)
+		_list.add_child(quote)
 	_list.add_child(_build_passive(character, accent))
 	_list.add_child(_build_stats(character, level, owned))
 	if owned and not bool(character.get("coming_soon", false)):
@@ -176,7 +179,7 @@ func _build_passive(character: Dictionary, accent: Color) -> Control:
 	var head := UiStyle.label("ПАССИВКА: %s" % str(passive.get("title", "-")).to_upper(), 24, UiStyle.GOLD, 6)
 	head.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	column.add_child(head)
-	var text := UiStyle.label(str(passive.get("text", "Особых способностей нет")), 20, UiStyle.TEXT, 5)
+	var text := UiStyle.label(str(passive.get("text", "Нет")), 20, UiStyle.TEXT, 5)
 	text.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	text.custom_minimum_size = Vector2(500, 0)
@@ -184,7 +187,7 @@ func _build_passive(character: Dictionary, accent: Color) -> Control:
 	var skill: Dictionary = character.get("skill", {})
 	if not skill.is_empty():
 		var skill_color := Color(str(skill.get("color", "#ffcf3d")))
-		var skill_head := UiStyle.label("НАВЫК вместо рывка: %s · %d с" % [str(skill.get("title", "")).to_upper(), int(skill.get("cooldown", 0))], 21, skill_color, 5)
+		var skill_head := UiStyle.label("НАВЫК: %s · %d с" % [str(skill.get("title", "")).to_upper(), int(skill.get("cooldown", 0))], 21, skill_color, 5)
 		skill_head.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 		column.add_child(skill_head)
 		var skill_text := UiStyle.label(str(skill.get("text", "")), 18, UiStyle.TEXT, 4)
@@ -193,7 +196,7 @@ func _build_passive(character: Dictionary, accent: Color) -> Control:
 		skill_text.custom_minimum_size = Vector2(500, 0)
 		column.add_child(skill_text)
 	else:
-		var none := UiStyle.label("НАВЫК: рывок. Универсал без лишних фокусов", 19, UiStyle.TEXT_DIM, 4)
+		var none := UiStyle.label("НАВЫК: РЫВОК", 21, UiStyle.TEXT_DIM, 5)
 		none.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 		column.add_child(none)
 	return panel

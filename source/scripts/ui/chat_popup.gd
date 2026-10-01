@@ -20,11 +20,9 @@ const SEND_ERRORS := {
 }
 ## Подсказка в строке ввода: каждый раз новая подколка вместо скучного «Сообщение».
 const TEASES: Array[String] = [
-	"Ну давай, заплачь", "Можешь печатать быстрее?", "Ну ты и диванный герой", "Да напиши уже что-нибудь",
-	"Енот ждёт. Енот стареет", "Скажи что-то умное. Или как обычно", "Крысы печатают быстрее",
-	"Пиши, пока Барон не отобрал", "Только без голосовых, мы не звери", "Жми, не стесняйся, тут все свои",
-	"Ещё секунда — и я усну", "Сообщение, достойное помойки", "Ну и? Мусоровоз не ждёт",
-	"Напиши «гг», если сдался", "Клавиатура не кусается", "Опять молчишь, как пленник в клетке",
+	"Ну давай, заплачь", "Печатай быстрее", "Диванный герой?", "Напиши уже что-то",
+	"Енот ждёт", "Крысы пишут быстрее", "Без голосовых", "Клавиатура не кусается",
+	"Ну и? Мусоровоз ждёт", "Скажи что-то умное", "Опять молчишь?", "Жми, не стесняйся",
 ]
 const REACTIONS: Array[String] = ["like", "lol", "fire"]
 const LONG_PRESS := 0.42
@@ -55,6 +53,8 @@ var _uploading := false
 var _base_height := 640.0
 var _first_load := true
 var _reaction_rows: Dictionary = {}
+var _message_nodes: Dictionary = {}
+var _media: Array[Dictionary] = []
 var _reaction_state: Dictionary = {}
 var _quick: HBoxContainer
 
@@ -98,7 +98,12 @@ func _refresh() -> void:
 	_status = UiStyle.label("Загружаю переписку...", 18, UiStyle.TEXT_DIM, 4)
 	_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	_status.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(_status)
+	var media := UiStyle.button("МЕДИА", UiStyle.PANEL_LIGHT, 17, Vector2(110, 46))
+	media.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	media.pressed.connect(_show_gallery)
+	head.add_child(media)
 	content.add_child(head)
 
 	_scroll = DragScroll.new()
@@ -149,6 +154,7 @@ func _refresh() -> void:
 	_edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_edit.custom_minimum_size = Vector2(0, 60)
 	SearchBar.style(_edit, 22)
+	SearchBar.style_dark(_edit)
 	SearchBar.attach_touch_input(_edit, _edit.placeholder_text)
 	for child in _edit.get_children():
 		if child is NativeField:
@@ -162,6 +168,8 @@ func _refresh() -> void:
 	content.add_child(bar)
 	_reaction_rows.clear()
 	_reaction_state.clear()
+	_message_nodes.clear()
+	_media.clear()
 	_poll()
 	_poll_peer()
 
@@ -308,8 +316,12 @@ func _add_message(item: Dictionary) -> void:
 			content_node = art
 		"image":
 			content_node = _bubble(mine, _image_view(attachment))
+			_media.append({"id": id, "kind": "image", "attachment": attachment})
 		"file":
 			content_node = _bubble(mine, _file_view(attachment))
+			_media.append({"id": id, "kind": "file", "attachment": attachment})
+		"deleted":
+			content_node = _bubble(mine, _deleted_label())
 		_:
 			var label := UiStyle.label(body, 22, UiStyle.TEXT, 3)
 			label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
@@ -335,7 +347,9 @@ func _add_message(item: Dictionary) -> void:
 	column.add_child(reactions_row)
 	_reaction_rows[id] = reactions_row
 	column.add_child(meta)
-	_make_long_press(content_node, column, id, mine)
+	_message_nodes[id] = {"column": column, "content": content_node, "mine": mine}
+	if kind != "deleted":
+		_make_long_press(content_node, column, id, mine)
 	_list.add_child(row)
 	if not _first_load:
 		column.pivot_offset = Vector2(column.size.x if mine else 0.0, 30.0)
@@ -379,10 +393,11 @@ func _image_view(attachment: Dictionary) -> Control:
 	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	art.mouse_filter = Control.MOUSE_FILTER_STOP
-	_load_image(art, str(attachment.get("path", "")))
+	var path := str(attachment.get("path", ""))
+	_load_image(art, path)
 	art.gui_input.connect(func(event: InputEvent) -> void:
 		if _tapped(event) and art.texture != null:
-			_show_viewer(art.texture))
+			_show_viewer(art.texture, path))
 	return art
 
 
@@ -494,6 +509,19 @@ func _open_message_menu(column: VBoxContainer, id: int, mine: bool) -> void:
 			menu.queue_free()
 			_apply_reaction(id, "" if emoji == current else emoji))
 		row.add_child(b)
+	if mine or SaveService.get_insider() in [0, 1, Insider.GOD]:
+		var remove := UiStyle.button("Удалить", Color("#a3283e"), 17, Vector2(120, 52))
+		var armed := [false]
+		remove.pressed.connect(func() -> void:
+			if not armed[0]:
+				armed[0] = true
+				remove.text = "Точно?"
+				return
+			menu.queue_free()
+			_mark_deleted(id)
+			if not await Cloud.delete_message(id) and is_instance_valid(_status):
+				_status.text = "Удаление заработает после обновления сервера (SQL v22)")
+		row.add_child(remove)
 	if not mine:
 		var report := UiStyle.button("!", Color("#a3283e"), 18, Vector2(52, 52))
 		report.pressed.connect(func() -> void:
@@ -515,6 +543,34 @@ func _open_message_menu(column: VBoxContainer, id: int, mine: bool) -> void:
 			menu.queue_free())
 
 
+func _deleted_label() -> Label:
+	var label := UiStyle.label("Сообщение удалено", 19, UiStyle.TEXT_DIM, 2)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	return label
+
+
+## Сообщение удалено (мной или собеседником): вместо содержимого серая плашка, реакции и меню убираются.
+func _mark_deleted(id: int) -> void:
+	var node: Dictionary = _message_nodes.get(id, {})
+	if node.is_empty() or bool(node.get("deleted", false)):
+		return
+	node["deleted"] = true
+	var column: VBoxContainer = node["column"]
+	var old: Control = node["content"]
+	if not is_instance_valid(column) or not is_instance_valid(old):
+		return
+	var replacement := _bubble(bool(node["mine"]), _deleted_label())
+	column.add_child(replacement)
+	column.move_child(replacement, old.get_index())
+	old.queue_free()
+	node["content"] = replacement
+	_media = _media.filter(func(m: Dictionary) -> bool: return int(m["id"]) != id)
+	var row: HBoxContainer = _reaction_rows.get(id)
+	if row != null and is_instance_valid(row):
+		row.visible = false
+	_reaction_state.erase(id)
+
+
 func _apply_reaction(id: int, emoji: String) -> void:
 	var state: Dictionary = _reaction_state.get(id, {})
 	state["mine"] = emoji
@@ -534,6 +590,9 @@ func _poll_reactions() -> void:
 		if row is Dictionary:
 			var id := int((row as Dictionary).get("id", 0))
 			seen[id] = true
+			if bool((row as Dictionary).get("deleted", false)):
+				_mark_deleted(id)
+				continue
 			var state := {"mine": "" if row.get("mine") == null else str(row.get("mine")), "theirs": "" if row.get("theirs") == null else str(row.get("theirs"))}
 			if state != _reaction_state.get(id, {}):
 				_reaction_state[id] = state
@@ -587,9 +646,9 @@ static func _reaction_texture(id: String) -> Texture2D:
 	return load(path) as Texture2D if ResourceLoader.exists(path) else null
 
 
-func _show_viewer(texture: Texture2D) -> void:
+func _show_viewer(texture: Texture2D, path: String = "") -> void:
 	var shade := ColorRect.new()
-	shade.color = Color(0, 0, 0, 0.92)
+	shade.color = Color(0, 0, 0, 0.94)
 	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
 	shade.mouse_filter = Control.MOUSE_FILTER_STOP
 	var art := TextureRect.new()
@@ -597,16 +656,118 @@ func _show_viewer(texture: Texture2D) -> void:
 	art.set_anchors_preset(Control.PRESET_FULL_RECT)
 	art.offset_left = 12
 	art.offset_right = -12
-	art.offset_top = 60
-	art.offset_bottom = -60
+	art.offset_top = 90
+	art.offset_bottom = -110
 	art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	shade.add_child(art)
+	var close := UiStyle.button("X", UiStyle.PANEL_LIGHT, 28, Vector2(64, 64))
+	close.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	close.offset_left = -84
+	close.offset_top = 20
+	close.pressed.connect(shade.queue_free)
+	shade.add_child(close)
+	if not path.is_empty():
+		var save := UiStyle.button("ОТКРЫТЬ ОРИГИНАЛ", UiStyle.HOT, 22, Vector2(320, 64))
+		save.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+		save.offset_left = -160
+		save.offset_right = 160
+		save.offset_top = -90
+		save.offset_bottom = -26
+		save.disabled = true
+		var url := [""]
+		_sign_into(save, url, path)
+		save.pressed.connect(func() -> void:
+			if not str(url[0]).is_empty():
+				Platform.open_url(str(url[0])))
+		shade.add_child(save)
 	shade.gui_input.connect(func(event: InputEvent) -> void:
 		if _tapped(event):
 			shade.queue_free())
+	_track_overlay(shade)
 	add_child(shade)
+
+
+func _track_overlay(node: Node) -> void:
+	overlays += 1
+	node.tree_exited.connect(func() -> void: overlays = maxi(overlays - 1, 0))
+
+
+## Все картинки и файлы переписки: сетка превью, тап открывает на весь экран.
+func _show_gallery() -> void:
+	var shade := ColorRect.new()
+	shade.color = Color(0.03, 0.02, 0.08, 0.97)
+	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
+	shade.mouse_filter = Control.MOUSE_FILTER_STOP
+	_track_overlay(shade)
+	add_child(shade)
+	var box := VBoxContainer.new()
+	box.set_anchors_preset(Control.PRESET_FULL_RECT)
+	box.offset_left = 20
+	box.offset_right = -20
+	box.offset_top = 24
+	box.offset_bottom = -24
+	box.add_theme_constant_override("separation", 12)
+	shade.add_child(box)
+	var head := HBoxContainer.new()
+	var title := UiStyle.label("МЕДИА · %d" % _media.size(), 30, UiStyle.TEXT, 8)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(title)
+	var close := UiStyle.button("X", UiStyle.PANEL_LIGHT, 28, Vector2(64, 64))
+	close.pressed.connect(shade.queue_free)
+	head.add_child(close)
+	box.add_child(head)
+	if _media.is_empty():
+		box.add_child(UiStyle.label("Пока ни одной картинки и ни одного файла.", 20, UiStyle.TEXT_DIM, 4))
+		return
+	var scroll := DragScroll.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	box.add_child(scroll)
+	var grid := GridContainer.new()
+	grid.columns = 3
+	grid.add_theme_constant_override("h_separation", 8)
+	grid.add_theme_constant_override("v_separation", 8)
+	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(grid)
+	var side := (get_viewport_rect().size.x - 40.0 - 16.0) / 3.0
+	for i in range(_media.size() - 1, -1, -1):
+		var entry: Dictionary = _media[i]
+		var attachment: Dictionary = entry["attachment"]
+		var path := str(attachment.get("path", ""))
+		if str(entry["kind"]) == "image":
+			var art := TextureRect.new()
+			art.custom_minimum_size = Vector2(side, side)
+			art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+			art.mouse_filter = Control.MOUSE_FILTER_STOP
+			_load_image(art, path)
+			art.gui_input.connect(func(event: InputEvent) -> void:
+				if _tapped(event) and art.texture != null:
+					_show_viewer(art.texture, path))
+			grid.add_child(art)
+		else:
+			var tile := PanelContainer.new()
+			tile.custom_minimum_size = Vector2(side, side)
+			tile.add_theme_stylebox_override("panel", UiStyle.box(Color("#2b2148"), Color(UiStyle.NEON, 0.4), 2, 14))
+			var inner := VBoxContainer.new()
+			inner.alignment = BoxContainer.ALIGNMENT_CENTER
+			inner.add_child(FileGlyph.new())
+			(inner.get_child(0) as Control).size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+			var name_label := UiStyle.label(str(attachment.get("name", "файл")).left(14), 15, UiStyle.TEXT, 2)
+			inner.add_child(name_label)
+			tile.add_child(inner)
+			var url := [""]
+			var dummy := Button.new()
+			_sign_into(dummy, url, path)
+			tile.add_child(dummy)
+			dummy.flat = true
+			dummy.pressed.connect(func() -> void:
+				if not str(url[0]).is_empty():
+					Platform.open_url(str(url[0])))
+			grid.add_child(tile)
 
 
 ## ---- Отправка ----

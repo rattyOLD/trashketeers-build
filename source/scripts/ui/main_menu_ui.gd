@@ -158,11 +158,10 @@ func _build() -> void:
 	UiStyle.pop_in(column, 0.8)
 
 
+## Закрыл окно, открытое из профиля: возвращаемся в меню (раньше снова открывался профиль, и казалось,
+## что из ачивок не выйти).
 func _back_to_profile(_popup: Control) -> void:
-	if not _from_profile:
-		return
 	_from_profile = false
-	_profile.open()
 
 
 # --- Верхняя панель ---------------------------------------------------------------------------

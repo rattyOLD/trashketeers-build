@@ -746,6 +746,7 @@ class Achievements:
 		column.add_child(head)
 		var title := UiStyle.label((String(achievement["title"]) if done or not achievement.get("hidden", false) else "???") + ("  · получено" if done else ""), 26, UiStyle.GOLD if done else UiStyle.TEXT, 7)
 		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		title.clip_text = true
 		title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		head.add_child(title)
 		var reward := PackedStringArray()
@@ -756,6 +757,8 @@ class Achievements:
 		head.add_child(UiStyle.label(" ".join(reward), 18, UiStyle.GOLD, 4))
 		var desc := UiStyle.label(String(achievement["description"]) if done or not achievement.get("hidden", false) else "Скрытое достижение. Хладгор подскажет.", 19, UiStyle.TEXT_DIM, 4)
 		desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		desc.custom_minimum_size = Vector2(panel_width() - 150.0, 0)
 		column.add_child(desc)
 		var bar := UiStyle.progress_bar(UiStyle.GOLD if done else UiStyle.NEON, 16)
 		bar.max_value = 1.0
@@ -874,7 +877,7 @@ class Profile:
 			var ok := await Cloud.logout_others()
 			if not is_instance_valid(out):
 				return
-			out.text = "Готово: остальные устройства вышли" if ok else "Не вышло, нет связи"
+			out.text = "Готово: остальные устройства вышли" if ok else "Не вышло (%s)" % Cloud.last_error.left(60)
 			if ok:
 				devices.text = "Ты вошёл только на этом устройстве."
 			else:

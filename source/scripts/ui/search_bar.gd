@@ -50,7 +50,21 @@ static func attach_touch_input(field: LineEdit, title: String) -> void:
 	field.add_child(NativeField.new(field, title))
 
 
+## Тёмное поле в неоновой рамке (строка чата): светлый текст, розовый курсор.
+static func style_dark(field: LineEdit) -> void:
+	field.set_meta("dark", true)
+	field.add_theme_color_override("font_color", Color("#f2ecff"))
+	field.add_theme_color_override("font_placeholder_color", Color("#8f86b3"))
+	field.add_theme_stylebox_override("normal", UiStyle.box(Color("#1d1536"), Color(UiStyle.NEON, 0.55), 3, 30))
+	field.add_theme_stylebox_override("focus", UiStyle.box(Color("#241a42"), UiStyle.NEON, 3, 30))
+
+
 static func restore_colors(field: LineEdit) -> void:
+	if field.has_meta("dark"):
+		field.add_theme_color_override("font_color", Color("#f2ecff"))
+		field.add_theme_color_override("font_placeholder_color", Color("#8f86b3"))
+		field.add_theme_color_override("caret_color", Color("#ff2ea6"))
+		return
 	field.add_theme_color_override("font_color", Color("#1a1030"))
 	field.add_theme_color_override("font_placeholder_color", Color("#8a82a0"))
 	field.add_theme_color_override("caret_color", Color("#ff2ea6"))

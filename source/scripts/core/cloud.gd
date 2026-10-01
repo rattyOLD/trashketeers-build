@@ -458,13 +458,24 @@ func _bytes_request(method: int, url: String, headers: PackedStringArray, body: 
 
 ## Выйти на всех остальных устройствах (Supabase logout scope=others). Это устройство остаётся в аккаунте.
 func logout_others() -> bool:
-	var result := await _call(HTTPClient.METHOD_POST, "/auth/v1/logout?scope=others", {})
-	return int(result["code"]) == 204 or bool(result["ok"])
+	var result := await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/logout_others", {})
+	if bool(result["ok"]) and (result["data"] is int or result["data"] is float) and int(result["data"]) >= 0:
+		return true
+	if int(result["code"]) == 404:
+		var fallback := await _call(HTTPClient.METHOD_POST, "/auth/v1/logout?scope=others", {})
+		return int(fallback["code"]) == 204 or bool(fallback["ok"])
+	return false
 
 
 ## Реакция на сообщение: "like", "lol", "fire" или "" (убрать). true — сервер принял.
 func react_message(id: int, emoji: String) -> bool:
 	var result := await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/react_message", {"p_id": id, "p_emoji": emoji})
+	return bool(result["ok"]) and str(result["data"]) == "ok"
+
+
+## Удалить своё сообщение (у обоих). true — сервер принял.
+func delete_message(id: int) -> bool:
+	var result := await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/delete_message", {"p_id": id})
 	return bool(result["ok"]) and str(result["data"]) == "ok"
 
 

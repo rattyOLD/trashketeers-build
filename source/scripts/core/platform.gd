@@ -468,7 +468,7 @@ func _on_js_back(_args: Array) -> void:
 ## Настоящее поле ввода браузера поверх игрового (id — любое имя). На телефоне игрок тапает прямо в него,
 ## поэтому клавиатура открывается сама, текст печатается на месте, работают автозамена, вставка и эмодзи.
 ## rect — прямоугольник поля в координатах окна игры.
-func native_input_show(id: String, rect: Rect2, placeholder: String, secret: bool, max_length: int, font_px: float) -> void:
+func native_input_show(id: String, rect: Rect2, placeholder: String, secret: bool, max_length: int, font_px: float, dark: bool = false) -> void:
 	if not is_web:
 		return
 	var view := get_viewport().get_visible_rect().size
@@ -483,12 +483,13 @@ if (!el) {
   el.addEventListener('input', function () { el.dataset.changed = '1'; });
   document.body.appendChild(el);
 }
-el.type = %s; el.placeholder = %s; el.maxLength = %d;
+el.type = %s; el.placeholder = %s; el.maxLength = %d; el.style.color = %s; el.style.caretColor = '#ff2ea6'; el.classList.toggle('trk_dark', %s);
 el.style.left = (r.left + %f * k) + 'px'; el.style.top = (r.top + %f * k) + 'px';
 el.style.width = (%f * k) + 'px'; el.style.height = (%f * k) + 'px';
 el.style.fontSize = Math.max(16, %f * k) + 'px'; el.style.display = 'block';
-if (!document.getElementById('trk_in_css')) { var st = document.createElement('style'); st.id = 'trk_in_css'; st.textContent = 'input[id^=trk_in_]::placeholder{font-size:0.72em;color:#8a82a0;opacity:1}'; document.head.appendChild(st); }
+if (!document.getElementById('trk_in_css')) { var st = document.createElement('style'); st.id = 'trk_in_css'; st.textContent = 'input[id^=trk_in_]::placeholder{font-size:0.72em;color:#8a82a0;opacity:1} input.trk_dark::placeholder{color:#8f86b3}'; document.head.appendChild(st); }
 """ % [view.x, JSON.stringify(id), JSON.stringify("password" if secret else "text"), JSON.stringify(placeholder), max_length if max_length > 0 else 500,
+		JSON.stringify("#f2ecff" if dark else "#1a1030"), "true" if dark else "false",
 		rect.position.x, rect.position.y, rect.size.x, rect.size.y, font_px])
 
 
@@ -503,6 +504,11 @@ el.dataset.enter = ''; el.dataset.changed = ''; return out;
 """ % JSON.stringify(id))
 	var parsed: Variant = JSON.parse_string(str(raw)) if raw is String and not str(raw).is_empty() else null
 	return parsed as Dictionary if parsed is Dictionary else {}
+
+
+## Сейчас печатают в браузерном поле (открыта экранная клавиатура).
+func native_input_active() -> bool:
+	return is_web and _js_bool("!!(document.activeElement && String(document.activeElement.id).indexOf('trk_in_') === 0)")
 
 
 func native_input_set(id: String, text: String) -> void:

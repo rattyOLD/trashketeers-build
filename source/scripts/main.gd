@@ -229,7 +229,7 @@ func _on_window_resized() -> void:
 		return
 	# Открылась или закрылась экранная клавиатура, пока вводят текст: меню не перестраиваем, иначе окно
 	# с вводом (логин, пароль, чат) пропадёт вместе с набранным.
-	if get_viewport().gui_get_focus_owner() is LineEdit:
+	if get_viewport().gui_get_focus_owner() is LineEdit or GlassPopup.any_open() or Platform.native_input_active():
 		return
 	var view := get_viewport().get_visible_rect().size
 	var flipped := Orient.refresh(get_window())
