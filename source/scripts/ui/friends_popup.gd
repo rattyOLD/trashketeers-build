@@ -664,6 +664,9 @@ class AvatarView:
 class CardView:
 	extends Control
 
+	const BG_TOP := Color("#1d1140")
+	const BG_BOTTOM := Color("#0b0617")
+
 	var info: Dictionary = {}
 	var qr_text := ""
 	var _qr: QrCode
@@ -678,69 +681,104 @@ class CardView:
 		var font := get_theme_default_font()
 		var w := FriendsPopup.CARD_SIZE.x
 		var h := FriendsPopup.CARD_SIZE.y
-		draw_rect(Rect2(0, 0, w, h), Color("#140c26"))
-		draw_rect(Rect2(0, h * 0.5, w, h * 0.5), Color("#1a1030"))
-		draw_rect(Rect2(0, 0, w, 130), Color("#241a40"))
-		draw_rect(Rect2(0, 126, w, 5), UiStyle.HOT)
-		draw_rect(Rect2(0, h - 64, w, 64), Color("#0d0819"))
-		draw_rect(Rect2(4, 4, w - 8, h - 8), UiStyle.NEON, false, 8.0)
-		var badge := Insider.badge_of(int(info.get("ins", -1)))
-		var nick := str(info.get("n", "Енот"))
-		_text(font, nick if badge.is_empty() else "%s %s" % [badge, nick], Vector2(48, 90), 62, UiStyle.TEXT, 600.0)
-		_text(font, "TRASH SQUAD", Vector2(w - 330, 84), 34, UiStyle.GOLD, 290.0, HORIZONTAL_ALIGNMENT_RIGHT)
-		var c := Vector2(170, 330)
-		draw_circle(c, 126.0, UiStyle.OUTLINE)
-		draw_circle(c, 120.0, Color("#3a2d60"))
+		_draw_background(w, h)
+		var level := int(info.get("lv", 1))
+		var ins := int(info.get("ins", -1))
+		var tag_color := UiStyle.GOLD if ins == 0 else (UiStyle.HOT if ins > 0 else UiStyle.NEON)
+		var tag := Insider.badge_of(ins).trim_prefix("[").trim_suffix("]").to_upper()
+		var tag_size := font.get_string_size(tag, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 22)
+		var pill := Rect2(48, 38, tag_size.x + 36, 38)
+		draw_style_box(UiStyle.box(Color(tag_color, 0.2), tag_color, 3, 19), pill)
+		_fit(font, tag, Vector2(pill.position.x + 18, pill.position.y + 28), 22, tag_color, tag_size.x + 2.0)
+		_fit(font, str(info.get("n", "Енот")), Vector2(48, 134), 66, UiStyle.TEXT, 560.0)
+		_wordmark(font, Vector2(w - 48, 74))
+		var frame := Rect2(48, 176, 248, 248)
+		draw_style_box(UiStyle.box(Color("#2a1f4a"), UiStyle.NEON, 6, 40), frame)
 		var tex := MenuWidgets.Avatar.get_texture_for(CharacterDB.get_character(str(info.get("c", ""))), str(info.get("s", "classic")))
 		if tex != null:
-			draw_texture_rect(tex, Rect2(c - Vector2.ONE * 114.0, Vector2.ONE * 228.0), false)
-		draw_arc(c, 123.0, 0.0, TAU, 64, UiStyle.NEON, 7.0, true)
-		var level := int(info.get("lv", 1))
-		_text(font, MenuPopups.Profile.rank_for(level).to_upper(), Vector2(330, 196), 30, Color("#ff9a3d"), 340.0)
-		_text(font, "УРОВЕНЬ %d" % level, Vector2(330, 252), 54, UiStyle.TEXT, 340.0)
+			draw_texture_rect(tex, frame.grow(-12.0), false)
+		var level_pill := Rect2(frame.position.x + 52, frame.end.y - 22, 144, 46)
+		draw_style_box(UiStyle.box(UiStyle.HOT, UiStyle.OUTLINE, 3, 23), level_pill)
+		_fit(font, "УР. %d" % level, Vector2(level_pill.position.x, level_pill.position.y + 34), 30, Color.WHITE, level_pill.size.x, HORIZONTAL_ALIGNMENT_CENTER)
+		_fit(font, MenuPopups.Profile.rank_for(level).to_upper(), Vector2(332, 204), 30, Color("#ff9a3d"), 340.0)
 		var stats := [["ВОЛНА", str(int(info.get("w", 0))), UiStyle.NEON], ["БОССЫ", str(int(info.get("bk", 0))), UiStyle.HOT], ["ОСКОЛКИ", "%d/6" % int(info.get("sh", 0)), UiStyle.GOLD]]
 		for i in stats.size():
-			var rect := Rect2(330 + i * 116, 282, 108, 84)
-			draw_rect(rect, Color("#2a1f4a"))
-			draw_rect(rect, stats[i][2], false, 3.0)
-			_text(font, str(stats[i][1]), rect.position + Vector2(0, 44), 38, UiStyle.TEXT, rect.size.x, HORIZONTAL_ALIGNMENT_CENTER)
-			_text(font, str(stats[i][0]), rect.position + Vector2(0, 72), 17, UiStyle.TEXT_DIM, rect.size.x, HORIZONTAL_ALIGNMENT_CENTER)
+			var rect := Rect2(332 + i * 116, 226, 108, 104)
+			var accent: Color = stats[i][2]
+			draw_style_box(UiStyle.box(Color(1, 1, 1, 0.07), Color(accent, 0.55), 3, 20), rect)
+			draw_rect(Rect2(rect.position.x + 22, rect.position.y + 10, rect.size.x - 44, 5), accent)
+			_fit(font, str(stats[i][1]), rect.position + Vector2(0, 66), 44, UiStyle.TEXT, rect.size.x - 10.0, HORIZONTAL_ALIGNMENT_CENTER)
+			_fit(font, str(stats[i][0]), rect.position + Vector2(0, 92), 17, UiStyle.TEXT_DIM, rect.size.x - 10.0, HORIZONTAL_ALIGNMENT_CENTER)
+		_fit(font, "СЮЖЕТ", Vector2(332, 372), 18, UiStyle.TEXT_DIM, 120.0)
 		var done: Array = info.get("m", []) as Array
 		for i in FriendsPopup.MISSION_COUNT:
 			var passed := done.has("m%d" % (i + 1))
-			var rect := Rect2(330 + i * 56, 392, 50, 40)
-			draw_rect(rect, Color("#35c46a") if passed else Color("#3a2d60"))
-			draw_rect(rect, UiStyle.OUTLINE, false, 3.0)
-			_text(font, "М%d" % (i + 1), rect.position + Vector2(0, 29), 22, UiStyle.TEXT if passed else UiStyle.TEXT_DIM, rect.size.x, HORIZONTAL_ALIGNMENT_CENTER)
+			var centre := Vector2(354 + i * 56, 410)
+			draw_circle(centre, 24.0, Color("#35c46a") if passed else Color("#2a1f4a"))
+			draw_arc(centre, 24.0, 0.0, TAU, 40, Color("#8dffb0") if passed else Color(UiStyle.TEXT_DIM, 0.6), 3.0, true)
+			_fit(font, "%d" % (i + 1), centre + Vector2(-24, 10), 28, UiStyle.TEXT if passed else UiStyle.TEXT_DIM, 48.0, HORIZONTAL_ALIGNMENT_CENTER)
 		_draw_qr(font)
-		_text(font, "Енот-налётчик против крыс и свиней", Vector2(40, h - 22), 24, UiStyle.TEXT_DIM, 520.0)
+		draw_rect(Rect2(0, h - 70, w, 70), Color(0, 0, 0, 0.35))
+		_fit(font, "Енот-налётчик против крыс и свиней", Vector2(48, h - 26), 24, UiStyle.TEXT_DIM, 520.0)
 		var friend_code := str(info.get("fc", ""))
 		if not friend_code.is_empty():
-			_text(font, "ID %s" % friend_code, Vector2(w - 330, h - 20), 32, UiStyle.NEON, 290.0, HORIZONTAL_ALIGNMENT_RIGHT)
+			var id_text := "ID %s" % friend_code
+			var id_width := font.get_string_size(id_text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 30).x
+			var id_rect := Rect2(w - 48 - id_width - 36, h - 62, id_width + 36, 46)
+			draw_style_box(UiStyle.box(Color(UiStyle.NEON, 0.15), UiStyle.NEON, 3, 23), id_rect)
+			_fit(font, id_text, Vector2(id_rect.position.x + 18, id_rect.position.y + 34), 30, UiStyle.NEON, id_width + 2.0)
+
+	func _draw_background(w: float, h: float) -> void:
+		draw_polygon(PackedVector2Array([Vector2(0, 0), Vector2(w, 0), Vector2(w, h), Vector2(0, h)]), PackedColorArray([BG_TOP, BG_TOP, BG_BOTTOM, BG_BOTTOM]))
+		for i in 7:
+			draw_circle(Vector2(w - 60, 40), 340.0 - i * 44.0, Color(UiStyle.NEON, 0.012 + i * 0.006))
+			draw_circle(Vector2(40, h - 20), 300.0 - i * 40.0, Color(UiStyle.HOT, 0.012 + i * 0.005))
+		for i in range(-6, 22):
+			draw_line(Vector2(i * 64.0, 0), Vector2(i * 64.0 + 320.0, h), Color(1, 1, 1, 0.025), 2.0)
+		draw_style_box(UiStyle.box(Color(0, 0, 0, 0), UiStyle.NEON, 6, 30), Rect2(5, 5, w - 10, h - 10))
+		draw_style_box(UiStyle.box(Color(0, 0, 0, 0), Color(UiStyle.HOT, 0.8), 2, 26), Rect2(15, 15, w - 30, h - 30))
+
+	func _wordmark(font: Font, right_top: Vector2) -> void:
+		var first := "TRASH "
+		var second := "SQUAD"
+		var w1 := font.get_string_size(first, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 36).x
+		var w2 := font.get_string_size(second, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 36).x
+		var x := right_top.x - w1 - w2
+		_fit(font, first, Vector2(x, right_top.y), 36, UiStyle.GOLD, w1 + 2.0)
+		_fit(font, second, Vector2(x + w1, right_top.y), 36, UiStyle.NEON, w2 + 2.0)
 
 	func _draw_qr(font: Font) -> void:
+		var plate := Rect2(704, 176, 208, 208)
 		if qr_text.is_empty():
-			_text(font, "УБИТО КРЫС", Vector2(704, 200), 22, UiStyle.TEXT_DIM, 208.0, HORIZONTAL_ALIGNMENT_CENTER)
-			_text(font, str(int(info.get("k", 0))), Vector2(704, 256), 56, UiStyle.DANGER, 208.0, HORIZONTAL_ALIGNMENT_CENTER)
-			_text(font, "ЗАБЕГОВ", Vector2(704, 316), 22, UiStyle.TEXT_DIM, 208.0, HORIZONTAL_ALIGNMENT_CENTER)
-			_text(font, str(int(info.get("r", 0))), Vector2(704, 372), 56, UiStyle.GOLD, 208.0, HORIZONTAL_ALIGNMENT_CENTER)
+			draw_style_box(UiStyle.box(Color(1, 1, 1, 0.07), Color(UiStyle.NEON, 0.55), 3, 24), plate)
+			_fit(font, "УБИТО КРЫС", Vector2(plate.position.x, 224), 20, UiStyle.TEXT_DIM, plate.size.x, HORIZONTAL_ALIGNMENT_CENTER)
+			_fit(font, str(int(info.get("k", 0))), Vector2(plate.position.x, 280), 52, UiStyle.DANGER, plate.size.x - 10.0, HORIZONTAL_ALIGNMENT_CENTER)
+			_fit(font, "ЗАБЕГОВ", Vector2(plate.position.x, 332), 20, UiStyle.TEXT_DIM, plate.size.x, HORIZONTAL_ALIGNMENT_CENTER)
+			_fit(font, str(int(info.get("r", 0))), Vector2(plate.position.x, 372), 40, UiStyle.GOLD, plate.size.x - 10.0, HORIZONTAL_ALIGNMENT_CENTER)
 			return
-		var plate := Rect2(704, 160, 208, 208)
-		draw_rect(plate.grow(8.0), UiStyle.OUTLINE)
-		draw_rect(plate, Color.WHITE)
-		if not qr_text.is_empty():
-			if _qr_for != qr_text:
-				_qr = QrCode.encode(qr_text)
-				_qr_for = qr_text
-			if _qr != null:
-				var cell := floorf(plate.size.x / float(_qr.size + 4))
-				var origin := plate.position + (plate.size - Vector2.ONE * cell * _qr.size) * 0.5
-				for y in _qr.size:
-					for x in _qr.size:
-						if _qr.is_dark(x, y):
-							draw_rect(Rect2(origin + Vector2(x, y) * cell, Vector2.ONE * cell), Color("#140c26"))
-		_text(font, "СКАНИРУЙ И ДОБАВЬ", Vector2(692, 412), 23, UiStyle.TEXT, 232.0, HORIZONTAL_ALIGNMENT_CENTER)
-		_text(font, "ЕНОТА В ДРУЗЬЯ", Vector2(692, 442), 23, UiStyle.HOT, 232.0, HORIZONTAL_ALIGNMENT_CENTER)
+		draw_style_box(UiStyle.box(Color(UiStyle.NEON, 0.25), Color(UiStyle.NEON, 0.0), 0, 34), plate.grow(14.0))
+		draw_style_box(UiStyle.box(Color.WHITE, UiStyle.NEON, 5, 24), plate)
+		if _qr_for != qr_text:
+			_qr = QrCode.encode(qr_text)
+			_qr_for = qr_text
+		if _qr != null:
+			var cell := floorf((plate.size.x - 16.0) / float(_qr.size + 2))
+			var origin := plate.position + (plate.size - Vector2.ONE * cell * _qr.size) * 0.5
+			for y in _qr.size:
+				for x in _qr.size:
+					if _qr.is_dark(x, y):
+						draw_rect(Rect2(origin + Vector2(x, y) * cell, Vector2.ONE * cell), Color("#140c26"))
+		_fit(font, "СКАНИРУЙ QR", Vector2(plate.position.x - 12, 430), 24, UiStyle.TEXT, plate.size.x + 24.0, HORIZONTAL_ALIGNMENT_CENTER)
+		_fit(font, "И ДОБАВЬ В ДРУЗЬЯ", Vector2(plate.position.x - 12, 460), 24, UiStyle.HOT, plate.size.x + 24.0, HORIZONTAL_ALIGNMENT_CENTER)
+
+	## Строка с обводкой; кегль уменьшается, пока текст не влезет в ширину (иначе движок обрезает хвост).
+	@warning_ignore("integer_division")
+	func _fit(font: Font, text: String, at: Vector2, font_size: int, color: Color, width: float, align: HorizontalAlignment = HORIZONTAL_ALIGNMENT_LEFT) -> void:
+		var used := font_size
+		while used > 12 and font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, used).x > width:
+			used -= 1
+		draw_string_outline(font, at, text, align, width, used, maxi(4, used / 8), UiStyle.OUTLINE)
+		draw_string(font, at, text, align, width, used, color)
 
 	func _text(font: Font, text: String, at: Vector2, font_size: int, color: Color, width: float, align: HorizontalAlignment = HORIZONTAL_ALIGNMENT_LEFT) -> void:
 		draw_string_outline(font, at, text, align, width, font_size, 7, UiStyle.OUTLINE)
