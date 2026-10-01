@@ -1,0 +1,294 @@
+{
+  "generator": "built-in imagegen",
+  "prompts": [
+    {
+      "key": "acid",
+      "cols": 3,
+      "rows": 2,
+      "cw": 256,
+      "ch": 256,
+      "names": [
+        "acid_01",
+        "acid_02",
+        "acid_03",
+        "acid_04",
+        "acid_edge_corner",
+        "acid_edge_straight"
+      ],
+      "texture": true,
+      "block": "F",
+      "dir": "terrain",
+      "prompt": "Production neontrash cartoon game sheet, smoothchunkyforms bolddarkoutline two-tone celshading neon/rust, orthographic3/4topdown lightupperleft. Uniformgrid rowmajor no lines or labels, complete centered sprites on #FF00FF. No text/digits/pixelart. Animation samecamera center scale. Six square acidtiles. Cells1–4 same limeacid fullsquare bubblingneonfoam successive phases, edges seamless fillsquare; cell5 Lcorner rustyconcretebank borderingacid; cell6 straightconcretebank top borderingacid. Flat topdown not bowl. Exactgrid3columns2rows.",
+      "path": "/workspace/scratch/a777a22c1d4f/generated_images/exec-94eb2b4f-0e70-4017-91f4-7048f790d80a.png"
+    },
+    {
+      "key": "bridges",
+      "cols": 1,
+      "rows": 3,
+      "cw": 768,
+      "ch": 256,
+      "names": [
+        "bridge_wood",
+        "bridge_steel",
+        "bridge_scrap"
+      ],
+      "ow": 384,
+      "oh": 128,
+      "block": "F",
+      "dir": "terrain",
+      "prompt": "Production neontrash cartoon game sheet, smoothchunkyforms bolddarkoutline two-tone celshading neon/rust, orthographic3/4topdown lightupperleft. Uniformgrid rowmajor no lines or labels, complete centered sprites on #FF00FF. No text/digits/pixelart. Animation samecamera center scale. Three horizontal bridges ONE PER ROW. Wooden slats rustrailcyanlights; steelmesh rustrailpinklights; patchwoodmetal rustrailgreenlights. Entire isolatedbridge shallowwide3:1. Exactgrid1columns3rows.",
+      "path": "/workspace/scratch/a777a22c1d4f/generated_images/exec-a2f40454-dab5-4931-9878-a2c38899be3d.png"
+    },
+    {
+      "key": "ledges_clean",
+      "path": "/workspace/scratch/a777a22c1d4f/generated_images/exec-6f2a704b-6aed-496e-a282-6810b1a446a5.png",
+      "prompt": "Use case: stylized-concept. BRAND NEW game HEIGHT-LEDGE modular asset sheet. EXACTLY3 long shallow STRAIGHT horizontal edge strips, ONE PER ROW on uniform1column3rows canvas1536x1152. Each row1536x384, independent centered strip with clear pure #FF00FF margin. A ledge is JUST a narrow straight platform lip and the vertical side face with dark shadow underneath, shown orthographic top-down/side threequarter. NO complete platforms, NO arenas, NO circles, NO enclosures, railings, stairs or surrounding scenery. Row1 broken concrete ledge straight edge with chipped masonry side and shadow; row2 layered rusty scrapmetal ledge straight edge with side shadow; row3 black/gold reactor maintenance ledge straight edge with tiny pink rimlights and side shadow. Smooth chunky2Dcartoon thick dark outline clean two-tone celshading, rusty neon-trash aesthetic. Objects at most80% rowwidth and60% rowheight, fully contained. No text, digits, letters, logos or pixelart.",
+      "block": "F",
+      "dir": "terrain",
+      "cols": 1,
+      "rows": 3,
+      "cw": 768,
+      "ch": 192,
+      "ow": 384,
+      "oh": 96,
+      "names": [
+        "ledge_concrete",
+        "ledge_scrap",
+        "ledge_reactor"
+      ]
+    },
+    {
+      "key": "break_wall",
+      "cols": 3,
+      "rows": 1,
+      "cw": 384,
+      "ch": 256,
+      "names": [
+        "break_wall_intact",
+        "break_wall_cracked",
+        "break_wall_destroyed"
+      ],
+      "ow": 192,
+      "oh": 128,
+      "block": "F",
+      "dir": "terrain",
+      "prompt": "Production neontrash cartoon game sheet, smoothchunkyforms bolddarkoutline two-tone celshading neon/rust, orthographic3/4topdown lightupperleft. Uniformgrid rowmajor no lines or labels, complete centered sprites on #FF00FF. No text/digits/pixelart. Animation samecamera center scale. Three states SAME brick/metal wall: intact; crackedstanding; collapsedlow rubble withgap. Samebaseline footprint. Exactgrid3columns1rows.",
+      "path": "/workspace/scratch/a777a22c1d4f/generated_images/exec-d8ab8cc9-3bbd-4523-898f-1099e41f58ec.png"
+    },
+    {
+      "key": "wall_debris",
+      "cols": 2,
+      "rows": 2,
+      "cw": 256,
+      "ch": 256,
+      "names": [
+        "wall_debris_01",
+        "wall_debris_02",
+        "wall_debris_03",
+        "wall_debris_04"
+      ],
+      "ow": 64,
+      "oh": 64,
+      "block": "F",
+      "dir": "terrain",
+      "prompt": "Production neontrash cartoon game sheet, smoothchunkyforms bolddarkoutline two-tone celshading neon/rust, orthographic3/4topdown lightupperleft. Uniformgrid rowmajor no lines or labels, complete centered sprites on #FF00FF. No text/digits/pixelart. Animation samecamera center scale. Four debrisfragments2x2: brickpair, bentplate, concreteshard, boltbrick scrap. Simple small readable chunks. Exactgrid2columns2rows.",
+      "path": "/workspace/scratch/a777a22c1d4f/generated_images/exec-b125bae0-51dc-4983-ae11-24663e841a27.png"
+    },
+    {
+      "key": "hidden_crate",
+      "cols": 2,
+      "rows": 1,
+      "cw": 512,
+      "ch": 384,
+      "names": [
+        "hidden_crate_closed",
+        "hidden_crate_open"
+      ],
+      "ow": 256,
+      "oh": 192,
+      "block": "F",
+      "dir": "terrain",
+      "prompt": "Production neontrash cartoon game sheet, smoothchunkyforms bolddarkoutline two-tone celshading neon/rust, orthographic3/4topdown lightupperleft. Uniformgrid rowmajor no lines or labels, complete centered sprites on #FF00FF. No text/digits/pixelart. Animation samecamera center scale. Same woodmetal concealedstashbox two states: closed, openedlid revealing scrap andblankpaper. Samecamerafootprint. Exactgrid2columns1rows.",
+      "path": "/workspace/scratch/a777a22c1d4f/generated_images/exec-0633fff5-5687-47aa-8b73-217ca88d4a03.png"
+    },
+    {
+      "key": "hidden_note",
+      "cols": 1,
+      "rows": 1,
+      "cw": 320,
+      "ch": 400,
+      "names": [
+        "hidden_note_blank"
+      ],
+      "ow": 160,
+      "oh": 200,
+      "block": "F",
+      "dir": "terrain",
+      "prompt": "Production neontrash cartoon game sheet, smoothchunkyforms bolddarkoutline two-tone celshading neon/rust, orthographic3/4topdown lightupperleft. Uniformgrid rowmajor no lines or labels, complete centered sprites on #FF00FF. No text/digits/pixelart. Animation samecamera center scale. One BLANK cream paper note pinned tosmallrustplate, entirelyunmarked paper rippededges, frontview. Exactgrid1columns1rows.",
+      "path": "/workspace/scratch/a777a22c1d4f/generated_images/exec-76fd5301-c7bd-4363-8222-5e8bb86bc296.png"
+    },
+    {
+      "key": "hidden_plate",
+      "cols": 1,
+      "rows": 1,
+      "cw": 256,
+      "ch": 256,
+      "names": [
+        "hidden_wall_plate"
+      ],
+      "block": "F",
+      "dir": "terrain",
+      "prompt": "Production neontrash cartoon game sheet, smoothchunkyforms bolddarkoutline two-tone celshading neon/rust, orthographic3/4topdown lightupperleft. Uniformgrid rowmajor no lines or labels, complete centered sprites on #FF00FF. No text/digits/pixelart. Animation samecamera center scale. One removable rustywallplate partlyliftedcorner revealsdarksecret recess, rivets greenneonseam. Exactgrid1columns1rows.",
+      "path": "/workspace/scratch/a777a22c1d4f/generated_images/exec-5c1e68a6-6281-423b-a5d3-967eff5a1ddf.png"
+    },
+    {
+      "key": "king_magnet",
+      "cols": 2,
+      "rows": 2,
+      "cw": 384,
+      "ch": 384,
+      "names": [
+        "king_magnet_01",
+        "king_magnet_02",
+        "king_magnet_03",
+        "king_magnet_04"
+      ],
+      "block": "F",
+      "dir": "terrain",
+      "prompt": "Production neontrash cartoon game sheet, smoothchunkyforms bolddarkoutline two-tone celshading neon/rust, orthographic3/4topdown lightupperleft. Uniformgrid rowmajor no lines or labels, complete centered sprites on #FF00FF. No text/digits/pixelart. Animation samecamera center scale. Four glowframes SAME giant electromagnet craneHEAD disk rusty goldcasing centralchainattachment blueviolet coils.2x2grid. Glowdim,medium,maximum,fading. Same centeredhead nocranearm nochain. Exactgrid2columns2rows.",
+      "path": "/workspace/scratch/a777a22c1d4f/generated_images/exec-7fc4ffc8-a25e-4f2b-839d-df8b661acc12.png"
+    },
+    {
+      "key": "king_chain",
+      "cols": 1,
+      "rows": 1,
+      "cw": 128,
+      "ch": 512,
+      "names": [
+        "king_chain_tile"
+      ],
+      "ow": 64,
+      "oh": 256,
+      "block": "F",
+      "dir": "terrain",
+      "prompt": "Production neontrash cartoon game sheet, smoothchunkyforms bolddarkoutline two-tone celshading neon/rust, orthographic3/4topdown lightupperleft. Uniformgrid rowmajor no lines or labels, complete centered sprites on #FF00FF. No text/digits/pixelart. Animation samecamera center scale. One thin vertical rusty linkedchain1:4, topbottomends joinseamlessly repeated. Puremagenta outside. Exactgrid1columns1rows.",
+      "path": "/workspace/scratch/a777a22c1d4f/generated_images/exec-fd25e6e2-b338-45c2-9ca1-c96005c3087f.png"
+    },
+    {
+      "key": "king_electric",
+      "cols": 4,
+      "rows": 2,
+      "cw": 256,
+      "ch": 256,
+      "names": [
+        "king_electric_01",
+        "king_electric_02",
+        "king_electric_03",
+        "king_electric_04",
+        "king_electric_05",
+        "king_electric_06",
+        "king_electric_07",
+        "king_electric_08"
+      ],
+      "block": "F",
+      "dir": "terrain",
+      "prompt": "Production neontrash cartoon game sheet, smoothchunkyforms bolddarkoutline two-tone celshading neon/rust, orthographic3/4topdown lightupperleft. Uniformgrid rowmajor no lines or labels, complete centered sprites on #FF00FF. No text/digits/pixelart. Animation samecamera center scale. 8cyanviolet electricdischargeframes4x2. Central tinyspark grows branches to maxburst thencontracts/fades. Onlyarcs whitecores noequipment, centeredcontained sameanchor. Exactgrid4columns2rows.",
+      "path": "/workspace/scratch/a777a22c1d4f/generated_images/exec-5cbe359f-349a-465d-8909-48b4593a0f2e.png"
+    },
+    {
+      "key": "collapse_rocks",
+      "cols": 3,
+      "rows": 3,
+      "cw": 256,
+      "ch": 256,
+      "names": [
+        "collapse_small_01",
+        "collapse_small_02",
+        "collapse_small_03",
+        "collapse_medium_01",
+        "collapse_medium_02",
+        "collapse_medium_03",
+        "collapse_large_01",
+        "collapse_large_02",
+        "collapse_large_03"
+      ],
+      "sizes": [
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          128,
+          128
+        ],
+        [
+          192,
+          192
+        ],
+        [
+          192,
+          192
+        ],
+        [
+          192,
+          192
+        ],
+        [
+          256,
+          256
+        ],
+        [
+          256,
+          256
+        ],
+        [
+          256,
+          256
+        ]
+      ],
+      "block": "F",
+      "dir": "terrain",
+      "prompt": "Production neontrash cartoon game sheet, smoothchunkyforms bolddarkoutline two-tone celshading neon/rust, orthographic3/4topdown lightupperleft. Uniformgrid rowmajor no lines or labels, complete centered sprites on #FF00FF. No text/digits/pixelart. Animation samecamera center scale. Nine distinct fallingjunkboulders3x3, each one compact irregular crushedrust/concretemass isolated noground. Toprow3small variants, middlerow3medium, bottomrow3large. No motionlines. Exactgrid3columns3rows.",
+      "path": "/workspace/scratch/a777a22c1d4f/generated_images/exec-3ccfd916-5d5c-4c85-8a09-ae84a2f1f8be.png"
+    },
+    {
+      "key": "collapse_dust",
+      "cols": 4,
+      "rows": 2,
+      "cw": 256,
+      "ch": 256,
+      "names": [
+        "collapse_dust_01",
+        "collapse_dust_02",
+        "collapse_dust_03",
+        "collapse_dust_04",
+        "collapse_dust_05",
+        "collapse_dust_06",
+        "collapse_dust_07",
+        "collapse_dust_08"
+      ],
+      "block": "F",
+      "dir": "terrain",
+      "prompt": "Production neontrash cartoon game sheet, smoothchunkyforms bolddarkoutline two-tone celshading neon/rust, orthographic3/4topdown lightupperleft. Uniformgrid rowmajor no lines or labels, complete centered sprites on #FF00FF. No text/digits/pixelart. Animation samecamera center scale. 8impactdustframes4x2: smalltanpuff; growingcloud; spreadingdust; maxsoftcloud; dissipatingspread; faintwisps; tinyfadingwisps; faintresidue. Same groundanchor containedcells, no rocks. Exactgrid4columns2rows.",
+      "path": "/workspace/scratch/a777a22c1d4f/generated_images/exec-8028cf19-757e-40fa-b4de-b807651e5691.png"
+    },
+    {
+      "key": "collapse_warning",
+      "cols": 1,
+      "rows": 1,
+      "cw": 256,
+      "ch": 256,
+      "names": [
+        "collapse_warning"
+      ],
+      "block": "F",
+      "dir": "terrain",
+      "prompt": "Production neontrash cartoon game sheet, smoothchunkyforms bolddarkoutline two-tone celshading neon/rust, orthographic3/4topdown lightupperleft. Uniformgrid rowmajor no lines or labels, complete centered sprites on #FF00FF. No text/digits/pixelart. Animation samecamera center scale. One topdown redwarning neon circle ring withemptycenter and smallinwardtriangles noexclamation noletters, contained20pxmargin. Exactgrid1columns1rows.",
+      "path": "/workspace/scratch/a777a22c1d4f/generated_images/exec-5905f74c-9947-40e8-9262-c8bf8f574748.png"
+    }
+  ]
+}

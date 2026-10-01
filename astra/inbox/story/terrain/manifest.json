@@ -1,0 +1,547 @@
+{
+  "brief": "astra/from_claude/BRIEF_v7_saga.md",
+  "block": "F",
+  "frameOrder": "left-to-right top-to-bottom",
+  "assets": [
+    {
+      "path": "astra/inbox/story/terrain/acid_01.png",
+      "width": 256,
+      "height": 256,
+      "block": "F",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "acid",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/terrain/acid_02.png",
+      "width": 256,
+      "height": 256,
+      "block": "F",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "acid",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/terrain/acid_03.png",
+      "width": 256,
+      "height": 256,
+      "block": "F",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "acid",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/terrain/acid_04.png",
+      "width": 256,
+      "height": 256,
+      "block": "F",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "acid",
+      "frame": 3
+    },
+    {
+      "path": "astra/inbox/story/terrain/acid_edge_corner.png",
+      "width": 256,
+      "height": 256,
+      "block": "F",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "acid",
+      "frame": 4
+    },
+    {
+      "path": "astra/inbox/story/terrain/acid_edge_straight.png",
+      "width": 256,
+      "height": 256,
+      "block": "F",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "acid",
+      "frame": 5
+    },
+    {
+      "path": "astra/inbox/story/terrain/bridge_wood.png",
+      "width": 384,
+      "height": 128,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "bridges",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/terrain/bridge_steel.png",
+      "width": 384,
+      "height": 128,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "bridges",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/terrain/bridge_scrap.png",
+      "width": 384,
+      "height": 128,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "bridges",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/terrain/ledge_concrete.png",
+      "width": 384,
+      "height": 96,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "ledges",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/terrain/ledge_scrap.png",
+      "width": 384,
+      "height": 96,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "ledges",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/terrain/ledge_reactor.png",
+      "width": 384,
+      "height": 96,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "ledges",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/terrain/break_wall_intact.png",
+      "width": 192,
+      "height": 128,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "break_wall",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/terrain/break_wall_cracked.png",
+      "width": 192,
+      "height": 128,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "break_wall",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/terrain/break_wall_destroyed.png",
+      "width": 192,
+      "height": 128,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "break_wall",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/terrain/wall_debris_01.png",
+      "width": 64,
+      "height": 64,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "wall_debris",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/terrain/wall_debris_02.png",
+      "width": 64,
+      "height": 64,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "wall_debris",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/terrain/wall_debris_03.png",
+      "width": 64,
+      "height": 64,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "wall_debris",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/terrain/wall_debris_04.png",
+      "width": 64,
+      "height": 64,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "wall_debris",
+      "frame": 3
+    },
+    {
+      "path": "astra/inbox/story/terrain/hidden_crate_closed.png",
+      "width": 256,
+      "height": 192,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "hidden_crate",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/terrain/hidden_crate_open.png",
+      "width": 256,
+      "height": 192,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "hidden_crate",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/terrain/hidden_note_blank.png",
+      "width": 160,
+      "height": 200,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "hidden_note",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/terrain/hidden_wall_plate.png",
+      "width": 256,
+      "height": 256,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "hidden_plate",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/terrain/king_magnet_01.png",
+      "width": 384,
+      "height": 384,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "king_magnet",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/terrain/king_magnet_02.png",
+      "width": 384,
+      "height": 384,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "king_magnet",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/terrain/king_magnet_03.png",
+      "width": 384,
+      "height": 384,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "king_magnet",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/terrain/king_magnet_04.png",
+      "width": 384,
+      "height": 384,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "king_magnet",
+      "frame": 3
+    },
+    {
+      "path": "astra/inbox/story/terrain/king_chain_tile.png",
+      "width": 64,
+      "height": 256,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "king_chain",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/terrain/king_electric_01.png",
+      "width": 256,
+      "height": 256,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "king_electric",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/terrain/king_electric_02.png",
+      "width": 256,
+      "height": 256,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "king_electric",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/terrain/king_electric_03.png",
+      "width": 256,
+      "height": 256,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "king_electric",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/terrain/king_electric_04.png",
+      "width": 256,
+      "height": 256,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "king_electric",
+      "frame": 3
+    },
+    {
+      "path": "astra/inbox/story/terrain/king_electric_05.png",
+      "width": 256,
+      "height": 256,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "king_electric",
+      "frame": 4
+    },
+    {
+      "path": "astra/inbox/story/terrain/king_electric_06.png",
+      "width": 256,
+      "height": 256,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "king_electric",
+      "frame": 5
+    },
+    {
+      "path": "astra/inbox/story/terrain/king_electric_07.png",
+      "width": 256,
+      "height": 256,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "king_electric",
+      "frame": 6
+    },
+    {
+      "path": "astra/inbox/story/terrain/king_electric_08.png",
+      "width": 256,
+      "height": 256,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "king_electric",
+      "frame": 7
+    },
+    {
+      "path": "astra/inbox/story/terrain/collapse_small_01.png",
+      "width": 128,
+      "height": 128,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "collapse_rocks",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/terrain/collapse_small_02.png",
+      "width": 128,
+      "height": 128,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "collapse_rocks",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/terrain/collapse_small_03.png",
+      "width": 128,
+      "height": 128,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "collapse_rocks",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/terrain/collapse_medium_01.png",
+      "width": 192,
+      "height": 192,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "collapse_rocks",
+      "frame": 3
+    },
+    {
+      "path": "astra/inbox/story/terrain/collapse_medium_02.png",
+      "width": 192,
+      "height": 192,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "collapse_rocks",
+      "frame": 4
+    },
+    {
+      "path": "astra/inbox/story/terrain/collapse_medium_03.png",
+      "width": 192,
+      "height": 192,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "collapse_rocks",
+      "frame": 5
+    },
+    {
+      "path": "astra/inbox/story/terrain/collapse_large_01.png",
+      "width": 256,
+      "height": 256,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "collapse_rocks",
+      "frame": 6
+    },
+    {
+      "path": "astra/inbox/story/terrain/collapse_large_02.png",
+      "width": 256,
+      "height": 256,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "collapse_rocks",
+      "frame": 7
+    },
+    {
+      "path": "astra/inbox/story/terrain/collapse_large_03.png",
+      "width": 256,
+      "height": 256,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "collapse_rocks",
+      "frame": 8
+    },
+    {
+      "path": "astra/inbox/story/terrain/collapse_dust_01.png",
+      "width": 256,
+      "height": 256,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "collapse_dust",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/terrain/collapse_dust_02.png",
+      "width": 256,
+      "height": 256,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "collapse_dust",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/terrain/collapse_dust_03.png",
+      "width": 256,
+      "height": 256,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "collapse_dust",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/terrain/collapse_dust_04.png",
+      "width": 256,
+      "height": 256,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "collapse_dust",
+      "frame": 3
+    },
+    {
+      "path": "astra/inbox/story/terrain/collapse_dust_05.png",
+      "width": 256,
+      "height": 256,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "collapse_dust",
+      "frame": 4
+    },
+    {
+      "path": "astra/inbox/story/terrain/collapse_dust_06.png",
+      "width": 256,
+      "height": 256,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "collapse_dust",
+      "frame": 5
+    },
+    {
+      "path": "astra/inbox/story/terrain/collapse_dust_07.png",
+      "width": 256,
+      "height": 256,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "collapse_dust",
+      "frame": 6
+    },
+    {
+      "path": "astra/inbox/story/terrain/collapse_dust_08.png",
+      "width": 256,
+      "height": 256,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "collapse_dust",
+      "frame": 7
+    },
+    {
+      "path": "astra/inbox/story/terrain/collapse_warning.png",
+      "width": 256,
+      "height": 256,
+      "block": "F",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "collapse_warning",
+      "frame": 0
+    }
+  ]
+}
