@@ -170,7 +170,7 @@ func _load_top() -> void:
 	MenuPopups.clear(_top_box)
 	var items: Array = result["items"]
 	if not bool(result["ok"]) or items.is_empty():
-		var note := UiStyle.label("Пока пусто или нет связи.", 18, UiStyle.TEXT_DIM, 4)
+		var note := UiStyle.label(["Пока пусто или связь ушла по мусорным делам.", "Тут никого. Либо друзей нет, либо интернет сбежал.", "Пусто. Енотам тоже нужен интернет."].pick_random(), 18, UiStyle.TEXT_DIM, 4)
 		_top_box.add_child(note)
 		return
 	for i in items.size():

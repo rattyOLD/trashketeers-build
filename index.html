@@ -365,7 +365,7 @@ html, body {
 </script>
 
 <script>
-window.__trash_build = {label: 'v34.160', time: '01.10 20:09'};
+window.__trash_build = {label: 'v34.163', time: '01.10 20:13'};
 document.getElementById('ver').textContent = 'Версия ' + window.__trash_build.label + ' · сборка от ' + window.__trash_build.time;
 </script>
 <script>
@@ -391,7 +391,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	// index.wasm / index.pck и отдаём ему уже скачанные и распакованные байты.
 	const FILES = {
 		wasm: { parts: [{url:"raccoon.core.0.wasm",bytes:5221065},{url:"raccoon.core.1.wasm",bytes:4165384}] },
-		pck: { parts: [{url:"raccoon.pack.0.wasm",bytes:11993382},{url:"raccoon.pack.1.wasm",bytes:12547285},{url:"raccoon.pack.2.wasm",bytes:3907563}] },
+		pck: { parts: [{url:"raccoon.pack.0.wasm",bytes:11993396},{url:"raccoon.pack.1.wasm",bytes:12547198},{url:"raccoon.pack.2.wasm",bytes:3907740}] },
 	};
 	const GODOT_CONFIG = {
 		args: [],
@@ -399,7 +399,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 		ensureCrossOriginIsolationHeaders: false,
 		executable: 'index',
 		experimentalVK: false,
-		fileSizes: { 'index.pck': 29382624, 'index.wasm': 43699190 },
+		fileSizes: { 'index.pck': 29382960, 'index.wasm': 43699190 },
 		focusCanvas: true,
 		gdextensionLibs: [],
 		onPrint: function () {
@@ -424,7 +424,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 
 	// Адрес сбора отчётов о вылетах (Google Apps Script / Supabase и т.п.); пусто — отчёты не отправляются.
 	const REPORT_URL = 'https://script.google.com/macros/s/AKfycbxVyy-SnRANW0Im-1Blne2TcUbca93WqzyBulpADwWWD7YH6x3KIygBYImTe8VfP5pp/exec';
-	const BUILD_ID_REPORT = '1790860146';
+	const BUILD_ID_REPORT = '1790860395';
 	const SESSION_ID = Math.random().toString(36).slice(2, 8);
 	const SESSION_START = Date.now();
 	const REPORT_CAP = 250;
@@ -630,7 +630,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	window.trkReport('session_start', gpuInfo() + ' | ' + navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + (window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio) + ' | screen ' + screen.width + 'x' + screen.height + ' | cores ' + (navigator.hardwareConcurrency || '?'));
 
 	// Вкладка могла висеть со старой версией: при возврате в неё сверяем номер сборки и предлагаем обновиться.
-	const BUILD_ID = '1790860146';
+	const BUILD_ID = '1790860395';
 	function checkVersion() {
 		fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (v) {
 			if (v && v.build && v.build !== BUILD_ID && !document.getElementById('newver')) {
@@ -777,14 +777,72 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 		}
 	}
 
-	function fail(message, canRetry) {
+	const QUIPS = {
+		net: {
+			titles: ['Связь с свалкой потеряна', 'Интернет ушёл за пивом', 'Енот остался без сети', 'Тут только тишина и мусор', 'Провода кто-то сгрыз'],
+			lines: [
+				'Даже крысы-перекупы онлайн, а ты нет. Проверь Wi-Fi или мобильный интернет.',
+				'Игра грузится из интернета, а интернета у тебя сейчас нет. Логика железная.',
+				'Скорее всего, роутер обиделся. Постучи по нему и попробуй ещё раз.',
+				'Свалка на связи, а ты где-то в цифровой пустоте. Включи интернет и возвращайся.',
+				'Мы честно пытались достучаться до сервера. Сервер сделал вид, что не слышит.',
+				'Без сети енот не воюет. Найди сигнал, хоть на крыше, хоть у соседа.'
+			],
+			buttons: ['Дёрнуть рубильник', 'Ещё разок, с чувством', 'Попробовать снова', 'Реанимировать']
+		},
+		engine: {
+			titles: ['Движок завис', 'Енот уснул на старте', 'Что-то пошло по помойке'],
+			lines: [
+				'Закрой лишние вкладки, пусть телефон выдохнет, и попробуй ещё раз.',
+				'Телефон не потянул. Бывает, свалка тяжёлая. Освободи память и перезапусти.',
+				'Движок задумался о смысле жизни. Подождать не вариант, перезапусти.'
+			],
+			buttons: ['Пнуть движок', 'Перезапустить', 'Ещё разок']
+		},
+		wasm: {
+			titles: ['Браузер упёрся', 'Не тот браузер'],
+			lines: [
+				'Этот браузер не умеет запускать игру. Открой ссылку в Safari или Chrome.',
+				'Встроенный просмотрщик режет всё, что интереснее текста. Открой в обычном браузере.'
+			],
+			buttons: ['Попробовать ещё раз', 'Ещё разок']
+		}
+	};
+
+	function pick(list) {
+		return list[Math.floor(Math.random() * list.length)];
+	}
+
+	function fail(message, canRetry, kind) {
 		if (failed) {
 			return;
 		}
 		failed = true;
+		const set = QUIPS[kind || 'net'];
 		statusEl.hidden = true;
-		errorEl.textContent = message;
+		tipEl.hidden = true;
+		errorEl.textContent = '';
+		const head = document.createElement('strong');
+		head.textContent = pick(set.titles);
+		head.style.display = 'block';
+		head.style.marginBottom = '6px';
+		head.style.fontSize = '17px';
+		head.style.color = 'var(--pink)';
+		const body = document.createElement('span');
+		body.textContent = pick(set.lines);
+		errorEl.appendChild(head);
+		errorEl.appendChild(body);
+		if (message) {
+			const tech = document.createElement('small');
+			tech.textContent = message;
+			tech.style.display = 'block';
+			tech.style.marginTop = '8px';
+			tech.style.opacity = '0.55';
+			tech.style.fontSize = '11px';
+			errorEl.appendChild(tech);
+		}
 		errorEl.hidden = false;
+		retryBtn.textContent = pick(set.buttons);
 		retryBtn.hidden = !canRetry;
 	}
 
@@ -915,7 +973,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	function start() {
 		const problem = checkSupport();
 		if (problem) {
-			fail(problem, false);
+			fail(problem, false, 'wasm');
 			return;
 		}
 		renderProgress();
@@ -928,7 +986,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 			parts.length = 0;
 			const engine = new Engine(GODOT_CONFIG);
 			const watchdog = setTimeout(function () {
-				fail('Движок не запустился за 40 секунд.\nЗакройте другие вкладки и попробуйте ещё раз.', true);
+				fail('Движок не запустился за 40 секунд.', true, 'engine');
 			}, 40000);
 			return engine.startGame({}).then(function () {
 				clearTimeout(watchdog);
@@ -945,7 +1003,8 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 			});
 		}).catch(function (err) {
 			console.error(err);
-			fail('Не удалось загрузить игру:\n' + (err && err.message ? err.message : String(err)) + '\nПроверьте интернет и нажмите «Попробовать ещё раз».', true);
+			const text = err && err.message ? err.message : String(err);
+			fail(text, true, navigator.onLine === false || /fetch|network|load|HTTP|timeout/i.test(text) ? 'net' : 'engine');
 		});
 	}
 
@@ -953,7 +1012,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 		const reason = event.reason;
 		const text = reason && reason.message ? reason.message : String(reason);
 		if (/WebAssembly|wasm/i.test(text)) {
-			fail('Браузер не смог запустить WebAssembly:\n' + text, true);
+			fail(text, true, 'wasm');
 		}
 	});
 
