@@ -882,7 +882,11 @@ class Profile:
 		box.add_child(link)
 		box.add_child(MenuPopups.small_hint("Ссылка-вход и код открывают твой аккаунт целиком. Никому их не показывай и не кидай в чаты, в отличие от визитки."))
 		if code.is_empty():
-			Cloud.upload_save()
+			var fill := func() -> void:
+				var fresh := await Cloud.upload_save()
+				if not fresh.is_empty() and is_instance_valid(b):
+					b.text = "КОД ВОССТАНОВЛЕНИЯ\n%s\n(нажми, чтобы скопировать)" % fresh
+			fill.call()
 		return box
 
 	func _rank_button() -> Control:

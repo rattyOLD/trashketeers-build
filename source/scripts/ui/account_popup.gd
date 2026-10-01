@@ -98,6 +98,7 @@ func _render_guest() -> void:
 		await Cloud.sync_profile()
 		var saved := await Cloud.my_save()
 		_refresh()
+		Cloud.upload_save()
 		if not saved.is_empty() and SaveService.import_code(saved):
 			_say("Вход выполнен, прогресс, друзья и тег на месте.")
 		else:
