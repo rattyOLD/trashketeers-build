@@ -10,6 +10,7 @@ const COLOR_RIB := Color("#1a1c2b")
 const COLOR_LAMP_LOCKED := Color("#ff3b5c")
 const COLOR_LAMP_OPEN := Color("#7cff6b")
 
+static var _frames: Array[Texture2D] = []
 var rect := Rect2()
 var is_open := false
 
@@ -56,7 +57,26 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 
+static func _load_frames() -> void:
+	if not _frames.is_empty():
+		return
+	for name in ["closed", "raise_1", "raise_2", "raise_3", "raise_4", "open"]:
+		var tex := load("res://assets/story/gates/%s.png" % name) as Texture2D
+		if tex == null:
+			_frames.clear()
+			return
+		_frames.append(tex)
+
+
 func _draw() -> void:
+	_load_frames()
+	if not _frames.is_empty():
+		var index := clampi(roundi(_lift * float(_frames.size() - 1)), 0, _frames.size() - 1)
+		var pad := Vector2(24.0, 18.0)
+		draw_texture_rect(_frames[index], Rect2(rect.position - pad, rect.size + pad * 2.0), false)
+		var glow := COLOR_LAMP_OPEN if is_open else Color(COLOR_LAMP_LOCKED, 0.6 + 0.4 * sin(_time * 6.0))
+		draw_circle(rect.position + Vector2(-6.0, -4.0), 7.0, Color(glow, 0.55))
+		return
 	var r := rect
 	var plate_h := r.size.y * (1.0 - _lift)
 	var pillar := Color("#3a3d56")

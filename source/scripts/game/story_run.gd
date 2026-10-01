@@ -255,10 +255,13 @@ func _place_decor() -> void:
 	_place_secrets()
 	var inner_left: float = game.map.bounds.position.x + LevelSpawner.RING_SIDE * LevelSpawner.CELL
 	var inner_right: float = game.map.bounds.end.x - LevelSpawner.RING_SIDE * LevelSpawner.CELL
+	var posters_placed := 0
 	for entry in mission.get("posters", []):
 		var poster := Poster.new()
 		poster.title = str(entry["title"])
 		poster.text = str(entry["text"])
+		poster.art = load("res://assets/story/posters/%d.png" % (posters_placed % 9 + 1)) as Texture2D
+		posters_placed += 1
 		var side := float(entry.get("side", 1.0))
 		poster.position = Vector2(inner_left + 46.0 if side < 0.0 else inner_right - 46.0, _y_of(float(entry["at"])))
 		poster.rotation = randf_range(-0.07, 0.07)
@@ -267,6 +270,7 @@ func _place_decor() -> void:
 		var tag := Graffiti.new()
 		tag.text = str(entry["text"])
 		tag.color = Color(str(entry.get("color", "#ff2ea6")))
+		tag.art = load("res://assets/story/graffiti/%d.png" % tag.pick_base()) as Texture2D
 		tag.position = Vector2(randf_range(-260.0, 260.0), _y_of(float(entry["at"])))
 		tag.rotation = randf_range(-0.14, 0.14)
 		game.layers.decals.add_child(tag)
@@ -829,7 +833,7 @@ class Captive:
 
 	var player: Node2D
 	var _time := 0.0
-	var _tex: Texture2D = load("res://assets/ui/portraits/nell.png")
+	var _cage: Array[Texture2D] = [load("res://assets/story/captive/captive_caged_1.png"), load("res://assets/story/captive/captive_caged_2.png")]
 
 	func _init() -> void:
 		z_index = 3
@@ -841,50 +845,95 @@ class Captive:
 		if player != null and global_position.distance_to(player.global_position) < 62.0:
 			SoundManager.play(&"level_up", -4.0, false)
 			freed.emit()
+			var runner := FreedRunner.new()
+			runner.global_position = global_position
+			runner.direction = -1.0 if player.global_position.x > global_position.x else 1.0
+			get_parent().add_child(runner)
 			queue_free()
 
 	func _draw() -> void:
-		var bob := sin(_time * 3.0) * 2.0
-		draw_circle(Vector2(0, 30), 34.0, Color(0, 0, 0, 0.25))
-		draw_texture_rect(_tex, Rect2(-28, bob - 44, 56, 56), false)
-		var bar := Color("#8a8fa8")
-		for i in range(-3, 4):
-			draw_line(Vector2(i * 10.0, -48), Vector2(i * 10.0, 16), bar, 3.0)
-		draw_rect(Rect2(-34, -52, 68, 10), Color("#3a3550"), true)
-		draw_rect(Rect2(-34, 10, 68, 8), Color("#3a3550"), true)
+		draw_circle(Vector2(0, 34), 44.0, Color(0, 0, 0, 0.28))
+		var frame := int(_time * 1.6) % 2
+		draw_texture_rect(_cage[frame], Rect2(-65.0, -106.0, 130.0, 174.0), false)
 		var pulse := 0.6 + 0.4 * sin(_time * 6.0)
-		draw_rect(Rect2(-40, -58, 80, 80), Color(1.0, 0.82, 0.3, 0.6 * pulse), false, 3.0)
+		draw_arc(Vector2(0, -8), 62.0, 0.0, TAU, 40, Color(1.0, 0.82, 0.3, 0.55 * pulse), 3.0)
 
 
-## Плакат на стене: бумага с булавкой, заголовок и пара строк в тоне свалки.
+## Освобождённый пленник: радуется и убегает за экран.
+class FreedRunner:
+	extends Node2D
+
+	var direction := 1.0
+	var _time := 0.0
+	var _joy: Texture2D = load("res://assets/story/captive/captive_freed.png")
+	var _run: Array[Texture2D] = [load("res://assets/story/captive/captive_run_1.png"), load("res://assets/story/captive/captive_run_2.png")]
+
+	func _init() -> void:
+		z_index = 3
+
+	func _physics_process(delta: float) -> void:
+		_time += delta
+		if _time > 0.7:
+			position.x += direction * 230.0 * delta
+		modulate.a = clampf((2.6 - _time) / 0.8, 0.0, 1.0)
+		queue_redraw()
+		if _time >= 2.6:
+			queue_free()
+
+	func _draw() -> void:
+		var tex := _joy if _time < 0.7 else _run[int(_time * 8.0) % 2]
+		if direction < 0.0 and _time >= 0.7:
+			draw_set_transform(Vector2.ZERO, 0.0, Vector2(-1.0, 1.0))
+			draw_texture_rect(tex, Rect2(-48.0, -78.0, 96.0, 96.0), false)
+			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		else:
+			draw_texture_rect(tex, Rect2(-48.0, -78.0, 96.0, 96.0), false)
+
+
+## Плакат на стене: бумага Астры, заголовок и строки накладывает код.
 class Poster:
 	extends Node2D
 
 	var title := ""
 	var text := ""
+	var art: Texture2D
 
 	func _init() -> void:
 		z_index = 2
 
 	func _draw() -> void:
 		var font := ThemeDB.fallback_font
-		draw_rect(Rect2(-56, -74, 112, 148), Color(0, 0, 0, 0.3), true)
-		draw_rect(Rect2(-60, -80, 112, 148), Color("#d8caa4"), true)
-		draw_rect(Rect2(-60, -80, 112, 148), Color("#6b5a3a"), false, 3.0)
-		draw_rect(Rect2(-60, -80, 112, 26), Color("#b3262e"), true)
-		draw_multiline_string(font, Vector2(-56, -62), title, HORIZONTAL_ALIGNMENT_CENTER, 104.0, 11, 2, Color("#fff4dc"))
-		draw_multiline_string(font, Vector2(-54, -36), text, HORIZONTAL_ALIGNMENT_CENTER, 100.0, 11, 6, Color("#2a1f12"))
-		draw_circle(Vector2(-4, -80), 5.0, Color("#ff3b5c"))
+		draw_rect(Rect2(-64, -78, 144, 180), Color(0, 0, 0, 0.22), true)
+		if art != null:
+			draw_texture_rect(art, Rect2(-72, -90, 144, 180), false)
+		draw_multiline_string(font, Vector2(-62, -66), title, HORIZONTAL_ALIGNMENT_CENTER, 124.0, 14, 2, Color("#8a1c24"))
+		draw_multiline_string(font, Vector2(-62, -36), text, HORIZONTAL_ALIGNMENT_CENTER, 124.0, 11, 4, Color("#2a1f12"))
 
 
-## Неоновый тег на полу: крупная надпись краской под небольшим углом.
+## Неоновый тег на полу: полоса краски Астры и надпись поверх.
 class Graffiti:
 	extends Node2D
 
+	const BASE_COLORS: Array[Color] = [Color("#f51dc1"), Color("#01dde5"), Color("#a8e50b"), Color("#f69f01"), Color("#a743f3"), Color("#01bef6"), Color("#f4177f"), Color("#f4d306")]
+
 	var text := ""
 	var color := Color("#ff2ea6")
+	var art: Texture2D
+
+	func pick_base() -> int:
+		var best := 0
+		var best_distance := 99.0
+		for i in BASE_COLORS.size():
+			var c: Color = BASE_COLORS[i]
+			var d := absf(c.r - color.r) + absf(c.g - color.g) + absf(c.b - color.b)
+			if d < best_distance:
+				best_distance = d
+				best = i
+		return best + 1
 
 	func _draw() -> void:
 		var font := ThemeDB.fallback_font
-		draw_string(font, Vector2(-250, 14), text, HORIZONTAL_ALIGNMENT_CENTER, 500.0, 54, Color(color, 0.16))
-		draw_string(font, Vector2(-252, 10), text, HORIZONTAL_ALIGNMENT_CENTER, 500.0, 54, Color(color, 0.34))
+		if art != null:
+			draw_texture_rect(art, Rect2(-250, -75, 500, 150), false, Color(1, 1, 1, 0.78))
+		draw_string_outline(font, Vector2(-240, 18), text, HORIZONTAL_ALIGNMENT_CENTER, 480.0, 50, 6, Color(color.lightened(0.5), 0.55))
+		draw_string(font, Vector2(-240, 18), text, HORIZONTAL_ALIGNMENT_CENTER, 480.0, 50, Color(0.07, 0.02, 0.12, 0.88))

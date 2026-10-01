@@ -571,6 +571,37 @@ func card_info() -> Dictionary:
 	}
 
 
+func backup_code() -> String:
+	save_data()
+	var raw := JSON.stringify(data).to_utf8_buffer()
+	return "TRS1.%d.%s" % [raw.size(), Marshalls.raw_to_base64(raw.compress(FileAccess.COMPRESSION_DEFLATE))]
+
+
+func restore_backup(code: String) -> bool:
+	var parts := code.strip_edges().split(".")
+	if parts.size() != 3 or parts[0] != "TRS1" or not parts[1].is_valid_int():
+		return false
+	var size := int(parts[1])
+	if size <= 0 or size > 600000:
+		return false
+	var packed := Marshalls.base64_to_raw(parts[2])
+	if packed.is_empty():
+		return false
+	var raw := packed.decompress(size, FileAccess.COMPRESSION_DEFLATE)
+	if raw.is_empty():
+		return false
+	var text := raw.get_string_from_utf8()
+	var parsed = JSON.parse_string(text)
+	if typeof(parsed) != TYPE_DICTIONARY or not (parsed as Dictionary).has("nickname"):
+		return false
+	_apply_text(text)
+	data["saved_at"] = int(Time.get_unix_time_from_system())
+	Platform.storage_set(STORAGE_KEY, JSON.stringify(data))
+	changed.emit()
+	reloaded.emit()
+	return true
+
+
 func card_code() -> String:
 	var raw := JSON.stringify(card_info()).to_utf8_buffer()
 	return "TRF1.%d.%s" % [raw.size(), Marshalls.raw_to_base64(raw.compress(FileAccess.COMPRESSION_DEFLATE))]

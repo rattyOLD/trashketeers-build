@@ -127,6 +127,30 @@ class Settings:
 			var fs_hint := UiStyle.label("Браузер iPhone не умеет полный экран. Открой «Поделиться» и выбери «На экран Домой»: игра запустится без адресной строки.", 19, UiStyle.TEXT_DIM, 4)
 			fs_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			graphics.add_child(fs_hint)
+		var backup := MenuPopups.section_card(list, "СОХРАНЕНИЕ")
+		var backup_hint := UiStyle.label("Код хранит весь прогресс: ник, монеты, оружие, сюжет, номер тестера. Скопируй его заранее. На iPhone игра в Safari и значок «На экран Домой» хранят прогресс раздельно, код переносит его между ними и на другие устройства.", 19, UiStyle.TEXT_DIM, 4)
+		backup_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		backup.add_child(backup_hint)
+		var copy_button := UiStyle.button("СКОПИРОВАТЬ КОД СОХРАНЕНИЯ", UiStyle.PANEL_LIGHT, 22, Vector2(0, 66))
+		copy_button.pressed.connect(func() -> void:
+			DisplayServer.clipboard_set(SaveService.backup_code())
+			copy_button.text = "СКОПИРОВАНО")
+		backup.add_child(copy_button)
+		var paste := LineEdit.new()
+		paste.placeholder_text = "Вставь код TRS1..."
+		paste.custom_minimum_size = Vector2(0, 66)
+		paste.add_theme_font_size_override("font_size", 22)
+		backup.add_child(paste)
+		var restore := UiStyle.button("ВОССТАНОВИТЬ ИЗ КОДА", Color("#b03a5a"), 22, Vector2(0, 66))
+		var armed := [false]
+		restore.pressed.connect(func() -> void:
+			if not armed[0]:
+				armed[0] = true
+				restore.text = "ЗАМЕНИТ ТЕКУЩИЙ ПРОГРЕСС. ТАПНИ ЕЩЁ РАЗ"
+				return
+			armed[0] = false
+			restore.text = "ПРОГРЕСС ВОССТАНОВЛЕН" if SaveService.restore_backup(paste.text) else "КОД НЕ ПОДОШЁЛ")
+		backup.add_child(restore)
 		if Platform.can_install() and not Platform.is_standalone():
 			var install := UiStyle.button("УСТАНОВИТЬ ИГРУ НА ТЕЛЕФОН", UiStyle.PANEL_LIGHT, 22, Vector2(0, 72))
 			install.pressed.connect(Platform.install_app)

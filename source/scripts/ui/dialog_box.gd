@@ -119,6 +119,8 @@ func _show_line() -> void:
 	_name.text = str(who.get("name", ""))
 	_name.add_theme_color_override("font_color", color)
 	var tex_path := str(who.get("portrait", ""))
+	if str(line.get("emo", "")) == "alt" and who.has("portrait_alt"):
+		tex_path = str(who["portrait_alt"])
 	_portrait_tex.texture = load(tex_path) as Texture2D if not tex_path.is_empty() else null
 	_portrait_tex.visible = _portrait_tex.texture != null
 	_portrait.text = "" if _portrait_tex.visible else str(who.get("glyph", "?"))
