@@ -228,6 +228,11 @@ func _show_menu() -> void:
 
 ## Чистое устройство: до создания гостя спрашиваем «Уже играл?». Закрыл окно — значит новенький, заводим гостя.
 func _maybe_ask_returning(menu: MainMenuUI) -> void:
+	if not Cloud.session_lost_changed.is_connected(_on_session_lost):
+		Cloud.session_lost_changed.connect(_on_session_lost)
+	if Cloud.session_lost:
+		_on_session_lost()
+		return
 	if not Cloud.waiting_choice or not _debug_hash.is_empty():
 		return
 	get_tree().create_timer(1.0).timeout.connect(func() -> void:
@@ -238,6 +243,15 @@ func _maybe_ask_returning(menu: MainMenuUI) -> void:
 			menu._account.intro = ""
 			Cloud.start_guest(), CONNECT_ONE_SHOT)
 		menu._account.open())
+
+
+## Сессия аккаунта слетела (сервер её больше не принимает): просим войти заново, прогресс на устройстве не трогаем.
+func _on_session_lost() -> void:
+	if not Cloud.session_lost or not _screen is MainMenuUI:
+		return
+	var menu := _screen as MainMenuUI
+	menu._account.intro = "Сервер забыл твою сессию (так бывает после долгого перерыва или входа на другом устройстве). Войди логином и паролем, прогресс и друзья на месте."
+	menu._account.open()
 
 
 ## После первого забега (и ещё раз после пятого) один раз просим завести аккаунт: иначе прогресс может пропасть.

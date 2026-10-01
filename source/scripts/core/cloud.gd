@@ -4,6 +4,8 @@ extends Node
 
 signal profile_synced
 signal unread_changed
+## Сессия аккаунта с логином слетела: игра просит войти заново (новый гость не создаётся).
+signal session_lost_changed
 
 ## Вход по почте скрыт, пока в Supabase не настроены SMTP и шаблоны писем.
 const EMAIL_LOGIN := true
@@ -33,6 +35,8 @@ var last_error := ""
 var _raw_note := ""
 ## Чистое устройство: гостевой аккаунт не создаём, пока игрок не ответит «Уже играл? Войди» (или не закроет окно).
 var waiting_choice := false
+var session_lost := false
+var _restore_after_signup := ""
 var _last_sync := 0
 var unread := 0
 
@@ -183,13 +187,20 @@ func list_friends() -> Dictionary:
 func _auto_backup() -> void:
 	if not has_code() or _backup_busy:
 		return
-	var snapshot := SaveService.export_code().sha256_text()
+	var snapshot := _content_hash()
 	if snapshot == _last_backup:
 		return
 	_backup_busy = true
 	if not (await upload_save()).is_empty():
 		_last_backup = snapshot
 	_backup_busy = false
+
+
+## Отпечаток сохранения без отметки времени: иначе каждая минута выглядела бы как «изменения».
+func _content_hash() -> String:
+	var copy: Dictionary = SaveService.data.duplicate()
+	copy.erase("saved_at")
+	return JSON.stringify(copy).sha256_text()
 
 
 ## Прогресс вырос (забег, уровень, награда) — сохраняем в облако через пару секунд, не дожидаясь минутного таймера.
@@ -538,7 +549,7 @@ func _ensure_session() -> bool:
 		ok = _store_session(reply)
 		if not ok and int(reply["code"]) >= 400 and int(reply["code"]) < 500:
 			await get_tree().create_timer(1.5).timeout
-			var parsed: Variant = JSON.parse_string(Platform.storage_get(SESSION_KEY))
+			var parsed: Variant = _parse_or_null(Platform.storage_get(SESSION_KEY))
 			var newer := str((parsed as Dictionary).get("refresh", "")) if parsed is Dictionary else ""
 			if not newer.is_empty() and newer != _refresh:
 				_refresh = newer
@@ -548,10 +559,34 @@ func _ensure_session() -> bool:
 				Platform.storage_set(LOST_KEY, JSON.stringify({"uid": _uid, "code": friend_code}))
 				_refresh = ""
 				_uid = ""
-	if not ok and _refresh.is_empty():
+				_access = ""
+				# Сервер больше не принимает сессию. Молча заводить нового енота нельзя: аккаунт «менялся бы» у игрока.
+				# С логином просим войти заново; у гостя есть код восстановления — переносим его аккаунт на новую сессию.
+				if not email.is_empty():
+					session_lost = true
+					session_lost_changed.emit()
+					_session_busy = false
+					return false
+				_restore_after_signup = recovery_code
+	if not ok and _refresh.is_empty() and not session_lost:
 		ok = _store_session(await _raw(HTTPClient.METHOD_POST, URL + "/auth/v1/signup", headers, "{}"))
 	_session_busy = false
+	if ok and not _restore_after_signup.is_empty():
+		var code := _restore_after_signup
+		_restore_after_signup = ""
+		_auto_restore.call_deferred(code)
 	return ok
+
+
+## Гость потерял сессию: новая сессия забирает его прежний профиль, ID, друзей и облако по коду восстановления.
+func _auto_restore(code: String) -> void:
+	var result := await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/restore_save", {"p_code": code})
+	if bool(result["ok"]) and result["data"] is String and not str(result["data"]).is_empty():
+		friend_code = ""
+		recovery_code = code
+		Platform.storage_set(RECOVERY_KEY, code)
+		Platform.storage_set(LOST_KEY, "")
+		await sync_profile()
 
 
 func _store_session(reply: Dictionary) -> bool:
@@ -569,11 +604,18 @@ func _store_session(reply: Dictionary) -> bool:
 		return false
 	Platform.storage_set(SESSION_KEY, JSON.stringify({"uid": _uid, "refresh": _refresh}))
 	waiting_choice = false
+	if session_lost:
+		session_lost = false
+		session_lost_changed.emit()
 	return true
 
 
 func _load_session() -> void:
-	var parsed: Variant = JSON.parse_string(Platform.storage_get(SESSION_KEY))
+	var parsed: Variant = _parse_or_null(Platform.storage_get(SESSION_KEY))
 	if parsed is Dictionary:
 		_uid = str((parsed as Dictionary).get("uid", ""))
 		_refresh = str((parsed as Dictionary).get("refresh", ""))
+
+
+static func _parse_or_null(text: String) -> Variant:
+	return null if text.strip_edges().is_empty() else JSON.parse_string(text)

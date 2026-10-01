@@ -669,7 +669,17 @@ static func parse_backup(code: String) -> Dictionary:
 static func score_of(d: Dictionary) -> int:
 	var stats: Variant = d.get("stats", {})
 	var nuts_total := int((stats as Dictionary).get("nuts_total", 0)) if stats is Dictionary else 0
-	return int(d.get("account_xp", 0)) + int(d.get("runs", 0)) * 100 + int(d.get("best_wave", 0)) * 50 + int(d.get("boss_kills", 0)) * 300 + nuts_total / 10
+	# Сюжет весит больше всего: пройденная миссия и найденные осколки не должны проиграть «пустому» устройству.
+	var story_points := 0
+	var story: Variant = d.get("story", {})
+	if story is Dictionary:
+		for entry in (story as Dictionary).values():
+			if entry is Dictionary:
+				story_points += (2000 if bool((entry as Dictionary).get("done", false)) else 0) + int((entry as Dictionary).get("shards", 0)) * 200
+	var choices: Variant = d.get("story_choice", {})
+	if choices is Dictionary:
+		story_points += (choices as Dictionary).size() * 100
+	return int(d.get("account_xp", 0)) + int(d.get("runs", 0)) * 100 + int(d.get("best_wave", 0)) * 50 + int(d.get("boss_kills", 0)) * 300 + nuts_total / 10 + story_points
 
 
 func progress_score() -> int:

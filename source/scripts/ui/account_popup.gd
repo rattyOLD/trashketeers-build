@@ -21,7 +21,7 @@ func _init() -> void:
 
 func _refresh() -> void:
 	MenuPopups.clear(_body)
-	if Cloud.has_email():
+	if Cloud.has_email() and not Cloud.session_lost:
 		_render_logged()
 	else:
 		_render_guest()
@@ -69,6 +69,8 @@ func _render_guest() -> void:
 	_say(intro if not intro.is_empty() else "Придумай логин и пароль, и прогресс не пропадёт при очистке браузера или смене телефона. Почта не нужна.")
 	var login_edit := _edit("Логин (латиница, цифры, _)", false)
 	_body.add_child(login_edit)
+	if Cloud.session_lost:
+		login_edit.text = Cloud.email
 	var pass_edit := _edit("Пароль (от 6 знаков)", true)
 	_body.add_child(pass_edit)
 	var create := UiStyle.button("СОЗДАТЬ АККАУНТ", UiStyle.HOT, 24, Vector2(0, 64))
