@@ -165,7 +165,7 @@ func build(currency_icon: Texture2D, weapon: WeaponData) -> void:
 			if not panels.has(child):
 				UiStyle.boost_labels(child, HUD_TEXT_BOOST)
 	_wire_hints()
-	_dash.held.connect(func() -> void: _hint.show_for(_dash, "Рывок: быстрый бросок в сторону движения, чтобы уйти от удара. Перезаряжается."))
+	_dash.held.connect(func() -> void: _hint.show_for(_dash, "Рывок: быстрый бросок от удара."))
 	_slot_bar.slot_held.connect(_on_slot_held)
 
 
@@ -202,11 +202,18 @@ func set_story_layout(minimap: Minimap) -> void:
 	_order_card.pressed.connect(func() -> void: orders_requested.emit())
 	_left_column.add_child(_order_card)
 	_story_bar.chip_tapped.connect(func(chip: Control, text: String) -> void: _hint.show_for(chip, text))
-	UiStyle.anchor(_boss_bar, Vector2(0.5, 0.0), Rect2(-240, 462, 480, 84))
+	_boss_bar.anchor_left = 0.0
+	_boss_bar.anchor_right = 1.0
+	_boss_bar.anchor_top = 0.0
+	_boss_bar.anchor_bottom = 0.0
+	_boss_bar.offset_left = 18.0
+	_boss_bar.offset_right = -164.0
+	_boss_bar.offset_top = 462.0
+	_boss_bar.offset_bottom = 546.0
 	UiStyle.anchor(_minimap_slot, Vector2(1.0, 0.0), Rect2(-150, 520, 132, 230))
 	_minimap = minimap
 	minimap.tapped.connect(func(overview: bool) -> void:
-		_hint.show_for(_minimap_slot, "Карта: ты, враги, ворота, пленники. Тап — %s." % ("крупный план" if overview else "вся карта")))
+		_hint.show_for(_minimap_slot, "Карта. Тап: %s." % ("крупный план" if overview else "вся карта")))
 
 
 func set_survival_order(order: Dictionary) -> void:

@@ -182,9 +182,6 @@ class Settings:
 		_auto_pick = MenuWidgets.PawToggle.new("Автоподбор оружия", bool(Controls.get_value("auto_pick")))
 		_auto_pick.toggled.connect(func(on: bool) -> void: Controls.set_value("auto_pick", on))
 		controls.add_child(_auto_pick)
-		var auto_fire := MenuWidgets.PawToggle.new("Автоатака", bool(Controls.get_value("auto_fire")))
-		auto_fire.toggled.connect(func(on: bool) -> void: Controls.set_value("auto_fire", on))
-		controls.add_child(auto_fire)
 		var fire_hint := UiStyle.label("Автоатака: енот сам стреляет в ближайшего врага. Если держишь палец на правой части экрана, стреляет туда, куда держишь.", 19, UiStyle.TEXT_DIM, 4)
 		fire_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		controls.add_child(fire_hint)

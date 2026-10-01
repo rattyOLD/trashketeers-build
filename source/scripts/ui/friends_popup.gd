@@ -42,7 +42,7 @@ func _refresh() -> void:
 	list.add_child(card)
 	var share := UiStyle.button("ПОДЕЛИТЬСЯ КАРТИНКОЙ", UiStyle.HOT, 24, Vector2(0, 64))
 	share.pressed.connect(func() -> void:
-		var note := Platform.share_image(_image_b64, "trashketeers_card.png", "Моя визитка в Trashketeers.io")
+		var note := Platform.share_image(_image_b64, "trashsquad_card.png", "Моя визитка в Trash Squad")
 		_say(note if not note.is_empty() else "Картинка готовится или не поддерживается здесь. Отправь код визитки ниже")
 	)
 	list.add_child(share)
@@ -90,7 +90,7 @@ func _refresh() -> void:
 	var send_invite := UiStyle.button("Отправить", UiStyle.PANEL_LIGHT, 22, Vector2(0, 56))
 	send_invite.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	send_invite.pressed.connect(func() -> void:
-		var text := "Залетай в Trashketeers.io! Мой код приглашения: %s. Введи его в Профиль > Друзья и получи бонус." % SaveService.invite_code()
+		var text := "Залетай в Trash Squad! Мой код приглашения: %s. Введи его в Профиль > Друзья и получи бонус." % SaveService.invite_code()
 		_say(Platform.share(text, Platform.invite_link()))
 		SaveService.mark_invite_sent())
 	invite_buttons.add_child(send_invite)

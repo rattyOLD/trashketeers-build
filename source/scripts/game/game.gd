@@ -195,7 +195,6 @@ func start(_weapon_id: StringName = &"") -> void:
 	hud.reroll_requested.connect(_on_reroll_requested)
 	_rerolls_free = 1 + int(SaveService.get_perk_bonus("reroll")) + Premium.reroll_bonus()
 	WeaponPickup.auto_pick = bool(Controls.get_value("auto_pick"))
-	player.weapon_controller.auto_fire = bool(Controls.get_value("auto_fire"))
 	for pickup in _weapon_pickups:
 		pickup.expired.connect(_on_pickup_expired)
 	player.weapon_controller.slots_changed.connect(_refresh_slots)

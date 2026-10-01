@@ -9,6 +9,9 @@ var _list: VBoxContainer
 var _balance: Label
 var _pity: Label
 var _pity_bar: ProgressBar
+var _timer_label: Label
+var _timer_bar: ProgressBar
+var _tick := 0.0
 var _busy := false
 
 
@@ -16,29 +19,55 @@ func _init() -> void:
 	super("СУНДУКИ")
 	_balance = UiStyle.label("", 24, UiStyle.GOLD, 6)
 	content.add_child(_balance)
-	_pity = UiStyle.label("", 19, UiStyle.TEXT_DIM, 4)
+	var pity_card := PanelContainer.new()
+	pity_card.add_theme_stylebox_override("panel", UiStyle.box(Color("#1a1330"), Color("#b34dff"), 3, 16))
+	var pity_box := VBoxContainer.new()
+	pity_box.add_theme_constant_override("separation", 4)
+	pity_card.add_child(pity_box)
+	_pity = UiStyle.label("", 19, UiStyle.TEXT, 4)
 	_pity.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_pity.custom_minimum_size = Vector2(560, 0)
-	content.add_child(_pity)
+	_pity.custom_minimum_size = Vector2(10, 0)
+	pity_box.add_child(_pity)
 	_pity_bar = ProgressBar.new()
 	_pity_bar.max_value = 1.0
 	_pity_bar.show_percentage = false
-	_pity_bar.custom_minimum_size = Vector2(0, 18)
-	_pity_bar.add_theme_stylebox_override("background", UiStyle.box(Color("#1f1738"), Color("#3a2d60"), 2, 9))
-	_pity_bar.add_theme_stylebox_override("fill", UiStyle.box(Color("#b34dff"), Color("#b34dff"), 0, 9))
-	content.add_child(_pity_bar)
+	_pity_bar.custom_minimum_size = Vector2(0, 16)
+	_pity_bar.add_theme_stylebox_override("background", UiStyle.box(Color("#0f0a1e"), Color("#3a2d60"), 2, 8))
+	_pity_bar.add_theme_stylebox_override("fill", UiStyle.box(Color("#b34dff"), Color("#b34dff"), 0, 8))
+	pity_box.add_child(_pity_bar)
+	content.add_child(pity_card)
 	_list = MenuPopups.scroll_list(content)
+
+
+func _process(delta: float) -> void:
+	_tick += delta
+	if _tick < 1.0:
+		return
+	_tick = 0.0
+	if _timer_label != null and is_instance_valid(_timer_label):
+		_update_timer()
+
+
+func _update_timer() -> void:
+	var wait := Economy.ad_chest_wait()
+	var total := maxi(Premium.chest_cooldown(), 1)
+	if wait <= 0:
+		_timer_label.text = "Готов! Забирай"
+		_timer_bar.value = 1.0
+		return
+	_timer_label.text = "Следующий через %d:%02d:%02d" % [wait / 3600, (wait % 3600) / 60, wait % 60]
+	_timer_bar.value = 1.0 - float(wait) / float(total)
 
 
 func _refresh() -> void:
 	_balance.text = "%s · %s" % [SaveService.format_coins(SaveService.get_coins()), Economy.format_gems(SaveService.get_gems())]
-	_pity.text = "До гарантии: %d/%d · герой или эпик/легендарка" % [Economy.pity(), Economy.PITY_GUARANTEE]
+	var left := maxi(Economy.PITY_GUARANTEE - Economy.pity(), 0)
+	_pity.text = "ГАРАНТИЯ: %d/%d. Через %d открытий выпадет герой или эпик/легендарка" % [Economy.pity(), Economy.PITY_GUARANTEE, left]
 	_pity_bar.value = float(Economy.pity()) / float(Economy.PITY_GUARANTEE)
 	MenuPopups.clear(_list)
-	_list.add_child(UiStyle.label("БЕСПЛАТНО ЗА РЕКЛАМУ", 24, UiStyle.NEON, 6))
 	_list.add_child(_make_ad_chest())
 	_list.add_child(_make_ads())
-	_list.add_child(UiStyle.label("СУНДУКИ ЗА МОНЕТЫ", 24, UiStyle.NEON, 6))
+	_list.add_child(UiStyle.label("СУНДУКИ ЗА МОНЕТЫ", 22, UiStyle.NEON, 6))
 	for chest_id in Economy.CHEST_ORDER:
 		_list.add_child(_make_chest(chest_id))
 
@@ -47,7 +76,7 @@ func _make_chest(chest_id: String) -> Control:
 	var chest: Dictionary = Economy.CHESTS[chest_id]
 	var color: Color = chest["color"]
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", UiStyle.box(UiStyle.PANEL_LIGHT, color, 5, 22))
+	panel.add_theme_stylebox_override("panel", UiStyle.box(UiStyle.PANEL_LIGHT, color, 4, 20))
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 6)
 	panel.add_child(column)
@@ -55,13 +84,13 @@ func _make_chest(chest_id: String) -> Control:
 	head.add_theme_constant_override("separation", 12)
 	var icon := TextureRect.new()
 	icon.texture = ArenaProp.texture_of("res://assets/ui/chests/chest_%s.png" % chest_id)
-	icon.custom_minimum_size = Vector2(120, 88)
+	icon.custom_minimum_size = Vector2(96, 72)
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	head.add_child(icon)
 	var title_box := VBoxContainer.new()
 	title_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var title := UiStyle.label(str(chest["title"]).to_upper(), 32, color, 8)
+	var title := UiStyle.label(str(chest["title"]).to_upper(), 28, color, 7)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	title_box.add_child(title)
 	if chest_id == Economy.daily_chest():
@@ -74,7 +103,7 @@ func _make_chest(chest_id: String) -> Control:
 	odds.pressed.connect(func() -> void: odds_requested.emit(chest_id))
 	head.add_child(odds)
 	column.add_child(head)
-	var info := UiStyle.label("Наград: %d · шанс предмета %d%%" % [int(chest["rolls"]), roundi(Economy.item_chance(chest_id) * 100.0)], 20, UiStyle.TEXT, 5)
+	var info := UiStyle.label("Наград: %d · предмет %d%%" % [int(chest["rolls"]), roundi(Economy.item_chance(chest_id) * 100.0)], 19, UiStyle.TEXT, 4)
 	info.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	column.add_child(info)
 	var names: Array[String] = []
@@ -83,36 +112,75 @@ func _make_chest(chest_id: String) -> Control:
 	var shelf := UiStyle.label("Витрина: " + ", ".join(names), 18, UiStyle.TEXT_DIM, 4)
 	shelf.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	shelf.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	shelf.custom_minimum_size = Vector2(520, 0)
+	shelf.custom_minimum_size = Vector2(10, 0)
+	shelf.clip_text = false
 	column.add_child(shelf)
 	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 10)
+	row.add_theme_constant_override("separation", 8)
 	column.add_child(row)
 	var coins_ok := Economy.can_afford(chest_id, false)
-	var coin_button := UiStyle.button("ОТКРЫТЬ · %s" % SaveService.format_coins(Economy.chest_price(chest_id, false)), Color("#e0a020") if coins_ok else UiStyle.PANEL, 21, Vector2(0, 62))
+	var coin_button := UiStyle.button("%s" % SaveService.format_coins(Economy.chest_price(chest_id, false)), Color("#e0a020") if coins_ok else UiStyle.PANEL, 21, Vector2(0, 58))
 	coin_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	coin_button.disabled = not coins_ok
 	coin_button.pressed.connect(func() -> void: _open(chest_id, false))
 	row.add_child(coin_button)
-	var price := Economy.chest_price(chest_id, false)
-	if SaveService.get_coins() >= price * 5:
-		var multi := UiStyle.button("×5", Color("#c98a1a"), 21, Vector2(84, 62))
-		multi.pressed.connect(func() -> void: _open_many(chest_id, 5))
-		row.add_child(multi)
 	if int(chest["gems"]) > 0:
 		var gems_ok := Economy.can_afford(chest_id, true)
-		var gem_button := UiStyle.button("ИЛИ · %s" % Economy.format_gems(Economy.chest_price(chest_id, true)), Color("#b34dff") if gems_ok else UiStyle.PANEL, 21, Vector2(0, 62))
+		var gem_button := UiStyle.button(Economy.format_gems(Economy.chest_price(chest_id, true)), Color("#b34dff") if gems_ok else UiStyle.PANEL, 21, Vector2(0, 58))
 		gem_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		gem_button.disabled = not gems_ok
 		gem_button.pressed.connect(func() -> void: _open(chest_id, true))
 		row.add_child(gem_button)
+	var price := Economy.chest_price(chest_id, false)
+	var multi_row := HBoxContainer.new()
+	multi_row.add_theme_constant_override("separation", 8)
+	column.add_child(multi_row)
+	for count: int in [5, 10]:
+		var affordable: bool = SaveService.get_coins() >= price * count
+		var multi := UiStyle.button("×%d · %s" % [count, SaveService.format_coins(price * count)], Color("#c98a1a") if affordable else UiStyle.PANEL, 17, Vector2(0, 46))
+		multi.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		multi.disabled = not affordable
+		multi.pressed.connect(func() -> void: _open_many(chest_id, count))
+		multi_row.add_child(multi)
 	return panel
 
 
 func _make_ad_chest() -> Control:
 	var wait := Economy.ad_chest_wait()
-	var subtitle := "Смотри рекламу - сундук сразу твой" if wait <= 0 else "Следующий через %s" % Economy.ad_chest_wait_text()
-	return _ad_card("БЕСПЛАТНЫЙ СУНДУК", subtitle, "res://assets/ui/hub/chest_free.png", "", Color("#2fae5f"), wait <= 0, func() -> void:
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#12301f"), Color("#2fae5f"), 3, 18))
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	panel.add_child(row)
+	var icon := TextureRect.new()
+	icon.texture = ArenaProp.texture_of("res://assets/ui/hub/chest_free.png")
+	icon.custom_minimum_size = Vector2(72, 72)
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(icon)
+	var texts := VBoxContainer.new()
+	texts.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	texts.add_theme_constant_override("separation", 3)
+	row.add_child(texts)
+	var head := UiStyle.label("БЕСПЛАТНЫЙ СУНДУК", 19, UiStyle.TEXT, 4)
+	head.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	texts.add_child(head)
+	_timer_label = UiStyle.label("", 16, Color("#9be8b4"), 4)
+	_timer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	texts.add_child(_timer_label)
+	_timer_bar = ProgressBar.new()
+	_timer_bar.max_value = 1.0
+	_timer_bar.show_percentage = false
+	_timer_bar.custom_minimum_size = Vector2(0, 10)
+	_timer_bar.add_theme_stylebox_override("background", UiStyle.box(Color("#0a1a10"), Color("#1f6b3c"), 2, 5))
+	_timer_bar.add_theme_stylebox_override("fill", UiStyle.box(Color("#2fae5f"), Color("#2fae5f"), 0, 5))
+	texts.add_child(_timer_bar)
+	_update_timer()
+	var take := UiStyle.button("ЗАБРАТЬ", Color("#2fae5f") if wait <= 0 else UiStyle.PANEL, 17, Vector2(104, 54))
+	take.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	take.disabled = wait > 0
+	take.pressed.connect(func() -> void:
 		Platform.show_rewarded_ad(func(ok: bool) -> void:
 			if not ok:
 				return
@@ -120,19 +188,22 @@ func _make_ad_chest() -> Control:
 			if rewards.is_empty():
 				return
 			_show_reveal(rewards, Premium.chest_tier())))
+	row.add_child(take)
+	return panel
 
 
+## Реклама за валюту: две спокойные плашки в ряд, без тикетов и бейджей.
 func _make_ads() -> Control:
-	var box := VBoxContainer.new()
-	box.add_theme_constant_override("separation", 10)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 10)
 	for kind in ["coins", "gems"]:
 		var left := Economy.ads_left(kind)
-		var title := "+%s" % SaveService.format_coins(Economy.AD_COINS) if kind == "coins" else "НЕОНИТ 1-5"
-		var icon := "res://assets/ui/hub/coins_pile.png" if kind == "coins" else "res://assets/ui/hub/neonite_pile.png"
 		var color := Color("#e0a020") if kind == "coins" else Color("#b34dff")
-		var subtitle := "Смотри рекламу - получи сразу" if left > 0 else "На сегодня всё, возвращайся завтра"
-		var chip := "осталось %d" % left if left > 0 else ""
-		box.add_child(_ad_card(title, subtitle, icon, chip, color, left > 0, func() -> void:
+		var title := "+%s" % SaveService.format_coins(Economy.AD_COINS) if kind == "coins" else "НЕОНИТ 1-5"
+		var button := UiStyle.button("%s\n%s" % [title, ("реклама · ещё %d" % left) if left > 0 else "завтра снова"], color.darkened(0.45) if left > 0 else UiStyle.PANEL, 16, Vector2(0, 70))
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.disabled = left <= 0
+		button.pressed.connect(func() -> void:
 			Platform.show_rewarded_ad(func(ok: bool) -> void:
 				if not ok:
 					return
@@ -140,75 +211,9 @@ func _make_ads() -> Control:
 				if amount > 0:
 					SoundManager.play(&"star_dust")
 					changed.emit()
-					_refresh())))
-	return box
-
-
-func _ad_card(title: String, subtitle: String, icon_path: String, chip: String, color: Color, enabled: bool, action: Callable) -> Control:
-	var button := Button.new()
-	button.custom_minimum_size = Vector2(0, 96)
-	button.focus_mode = Control.FOCUS_NONE
-	button.disabled = not enabled
-	var base := color.darkened(0.42) if enabled else UiStyle.PANEL
-	button.add_theme_stylebox_override("normal", UiStyle.button_box(base, false))
-	button.add_theme_stylebox_override("hover", UiStyle.button_box(base.lightened(0.06), false))
-	button.add_theme_stylebox_override("pressed", UiStyle.button_box(base.lightened(0.1), true))
-	button.add_theme_stylebox_override("disabled", UiStyle.button_box(base, false))
-	button.pressed.connect(action)
-	var row := HBoxContainer.new()
-	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT, Control.PRESET_MODE_MINSIZE, 14)
-	row.add_theme_constant_override("separation", 14)
-	button.add_child(row)
-	var ticket := TextureRect.new()
-	ticket.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	ticket.texture = ArenaProp.texture_of("res://assets/ui/hub/ad_ticket.png")
-	ticket.custom_minimum_size = Vector2(64, 64)
-	ticket.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	ticket.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	ticket.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	ticket.modulate = Color.WHITE if enabled else Color(1, 1, 1, 0.4)
-	row.add_child(ticket)
-	var texts := VBoxContainer.new()
-	texts.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	texts.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	texts.alignment = BoxContainer.ALIGNMENT_CENTER
-	texts.add_theme_constant_override("separation", 2)
-	var head := UiStyle.label(title, 26, UiStyle.TEXT if enabled else UiStyle.TEXT_DIM, 7)
-	head.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-	texts.add_child(head)
-	var sub := UiStyle.label(subtitle, 17, Color(UiStyle.TEXT, 0.85) if enabled else UiStyle.TEXT_DIM, 4)
-	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-	sub.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	sub.custom_minimum_size = Vector2(230, 0)
-	texts.add_child(sub)
-	if chip != "":
-		var chip_label := UiStyle.label(chip, 18, UiStyle.GOLD, 4)
-		chip_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-		texts.add_child(chip_label)
-	row.add_child(texts)
-	var icon := TextureRect.new()
-	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	icon.texture = ArenaProp.texture_of(icon_path)
-	icon.custom_minimum_size = Vector2(72, 72)
-	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	icon.modulate = Color.WHITE if enabled else Color(1, 1, 1, 0.45)
-	row.add_child(icon)
-	if enabled:
-		var badge := TextureRect.new()
-		badge.texture = ArenaProp.texture_of("res://assets/ui/hub/free_badge.png")
-		badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		badge.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		badge.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		badge.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-		badge.offset_left = -128.0
-		badge.offset_right = -6.0
-		badge.offset_top = -50.0
-		badge.offset_bottom = 6.0
-		button.add_child(badge)
-	return button
+					_refresh()))
+		row.add_child(button)
+	return row
 
 
 func _open(chest_id: String, with_gems: bool) -> void:

@@ -3,10 +3,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="Trashketeers">
+<meta name="apple-mobile-web-app-title" content="Trash Squad">
 <link rel="apple-touch-icon" href="icon180.png">
 <link rel="manifest" href="manifest.webmanifest">
-<title>Trashketeers.io</title>
+<title>Trash Squad</title>
 <meta name="theme-color" content="#0d0a1c">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -117,23 +117,35 @@ html, body {
 	text-shadow: 0 0 10px rgba(0, 245, 255, 0.7);
 	font-variant-numeric: tabular-nums;
 }
+#boot .foot {
+	position: absolute;
+	left: 0; right: 0;
+	bottom: max(18px, env(safe-area-inset-bottom));
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
+}
+#boot .made { margin: 0; font-size: 12px; letter-spacing: 2px; color: #8f84b8; }
 #boot .studio {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: 12px;
-	margin: 12px 0 0;
-	font-size: 13px;
+	gap: 10px;
+	margin: 0;
+	font-family: "Russo One", "Arial Black", Impact, sans-serif;
+	font-size: 18px;
 	letter-spacing: 2px;
+	white-space: nowrap;
 	color: #5ff2ff;
-	opacity: 0.8;
+	text-shadow: 0 0 10px rgba(0, 245, 255, 0.5);
 }
 #boot .ver {
-	margin-top: 18px;
-	font-size: 12px;
-	letter-spacing: 1.5px;
+	margin: 6px 0 0;
+	font-size: 11px;
+	letter-spacing: 1px;
 	color: #8f84b8;
-	opacity: 0.85;
+	opacity: 0.8;
 }
 #tip {
 	margin: 0;
@@ -298,15 +310,17 @@ html, body {
 
 <div id="boot">
 	<p class="tag">Неоновая Свалка</p>
-	<h1>Trashketeers.io</h1>
+	<h1>Trash Squad</h1>
 	<div class="bar"><i id="fill"></i></div>
 	<p id="pct">0%</p>
 	<p id="status">Подключаемся к свалке…</p>
 	<p id="tip"></p>
-	<p class="ver" id="ver"></p>
-	__STUDIO_LINE__
 	<p id="error" hidden></p>
 	<button id="retry" type="button" hidden>Попробовать ещё раз</button>
+	<div class="foot">
+		__STUDIO_LINE__
+		<p class="ver" id="ver"></p>
+	</div>
 </div>
 
 <div id="crash">

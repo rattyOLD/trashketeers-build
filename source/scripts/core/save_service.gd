@@ -109,7 +109,7 @@ const DAILY_REWARDS := [50, 75, 100, 150, 200, 300, 500]
 const DAILY_GEMS := {4: 2, 7: 6}
 ## Ежедневные задания Сетки: прогресс сбрасывается в новый день (UTC).
 const QUESTS := [
-	{"id": "raccoon_run", "game": "raccoon", "title": "Сыграй забег в Trashketeers.io", "goal": 1, "reward": 60},
+	{"id": "raccoon_run", "game": "raccoon", "title": "Сыграй забег в Trash Squad", "goal": 1, "reward": 60},
 	{"id": "rats", "game": "raccoon", "title": "Победи 50 крыс", "goal": 50, "reward": 70},
 	{"id": "knife_levels", "game": "knife", "title": "Пройди 3 уровня во «Втык!»", "goal": 3, "reward": 80},
 	{"id": "knife_perfect", "game": "knife", "title": "Сделай 10 идеальных втыков", "goal": 10, "reward": 70},

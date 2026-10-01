@@ -63,7 +63,7 @@ MUG = (
     '<circle cx="24" cy="40.5" r="2.4" fill="#fff"/><circle cx="34" cy="40.5" r="2.4" fill="#fff"/>'
     '<ellipse cx="29" cy="47" rx="3" ry="2" fill="#1a0033"/></svg>'
 )
-page = page.replace("__STUDIO_LINE__", ('<p class="studio">' + MUG + '<span>Сделано командой %s</span>' % _studio + MUG + '</p>') if _studio else "")
+page = page.replace("__STUDIO_LINE__", ('<p class="made">Сделано командой</p><p class="studio">' + MUG + '<span>%s</span>' % _studio + MUG + '</p>') if _studio else "")
 page = page.replace("__WASM_PARTS__", write_parts(raw, "raccoon.core", 24 * 1024 * 1024))
 page = page.replace("__PCK_PARTS__", write_parts(pck_raw, "raccoon.pack", 12 * 1024 * 1024))
 import time

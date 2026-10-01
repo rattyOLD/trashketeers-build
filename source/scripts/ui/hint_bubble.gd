@@ -4,8 +4,8 @@ extends PanelContainer
 ## Сама не ловит касания, исчезает через несколько секунд или при новой подсказке.
 
 const SHOW_TIME := 4.0
-const MAX_WIDTH := 400.0
-const GAP := 10.0
+const MAX_WIDTH := 290.0
+const GAP := 8.0
 
 var _label: Label
 var _token := 0
@@ -16,12 +16,12 @@ func _init() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	visible = false
 	z_index = 50
-	var style := UiStyle.box(Color(0.06, 0.04, 0.14, 0.96), UiStyle.NEON, 3, 16)
-	style.set_content_margin_all(12)
+	var style := UiStyle.box(Color(0.06, 0.04, 0.14, 0.96), Color(UiStyle.NEON, 0.8), 2, 12)
+	style.set_content_margin_all(8)
 	style.shadow_color = Color(0, 0, 0, 0.5)
 	style.shadow_size = 6
 	add_theme_stylebox_override("panel", style)
-	_label = UiStyle.label("", 22, UiStyle.TEXT, 5)
+	_label = UiStyle.label("", 17, UiStyle.TEXT, 4)
 	_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -36,8 +36,8 @@ func show_for(target: Control, text: String) -> void:
 	var view := get_viewport().get_visible_rect().size
 	var width := minf(MAX_WIDTH, view.x - 36.0)
 	_label.text = text
-	_label.custom_minimum_size = Vector2(width - 24.0, 0.0)
-	_label.size = Vector2(width - 24.0, 0.0)
+	_label.custom_minimum_size = Vector2(width - 16.0, 0.0)
+	_label.size = Vector2(width - 16.0, 0.0)
 	size = Vector2.ZERO
 	modulate.a = 0.0
 	visible = true

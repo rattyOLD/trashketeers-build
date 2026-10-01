@@ -3,7 +3,7 @@ extends Control
 ## Хаб в стиле .io-игр (альбомный):
 ##   фон — живая Неоновая Свалка (MenuBackdrop) под тёмным градиентом;
 ##   верх — аватарка, уровень, валюты, шестерёнка;
-##   логотип Trashketeers.io, на надписи сидит Енот в текущем скине;
+##   логотип Trash Squad, на надписи сидит Енот в текущем скине;
 ##   поле ника с кубиком случайного имени, большая зелёная [ ИГРАТЬ ], выбор режима;
 ##   низ — ПРОКАЧКА · ОРУЖИЕ + MERGE · ГЕРОИ (гардероб) · АЧИВКИ.
 ## Альбомная раскладка: слева сцена с Енотом и боковыми кнопками, справа логотип, ствол, режим и ИГРАТЬ, снизу дока.
@@ -165,7 +165,7 @@ func _build_portrait_layout() -> Control:
 	column.add_child(_build_modes())
 	column.add_child(_build_play())
 	column.add_child(_build_dock())
-	column.add_child(UiStyle.label("Trashketeers.io · Неоновая Свалка", 16, Color(UiStyle.TEXT_DIM, 0.7), 4))
+	column.add_child(UiStyle.label("Trash Squad · Неоновая Свалка", 16, Color(UiStyle.TEXT_DIM, 0.7), 4))
 	var studio := str(ConfigLoader.load_json("res://data/brand.json").get("studio", "")).strip_edges()
 	if not studio.is_empty():
 		column.add_child(UiStyle.label("Сделано командой %s" % studio, 16, Color(UiStyle.NEON, 0.8), 4))
@@ -761,7 +761,7 @@ class ShadeOverlay:
 			draw_rect(Rect2(0, h * i / steps, size.x, h / steps + 1.0), Color(0.03, 0.01, 0.08, alpha))
 
 
-## Логотип «Trashketeers.io»: толстая обводка, двухцветная заливка, наклон и тень.
+## Логотип «Trash Squad»: толстая обводка, двухцветная заливка, наклон и тень.
 class LogoText:
 	extends Control
 	var font: Font
@@ -778,20 +778,20 @@ class LogoText:
 		var base := Vector2(0, size.y - 46.0)
 		var wobble := sin(_time * 1.6) * 0.012
 		draw_set_transform(Vector2(size.x * 0.5, base.y), -0.05 + wobble, Vector2.ONE)
-		var title := "Trashketeers"
-		var probe := font.get_string_size(title, HORIZONTAL_ALIGNMENT_LEFT, -1, 100).x + font.get_string_size(".io", HORIZONTAL_ALIGNMENT_LEFT, -1, 63).x
+		var title := "Trash"
+		var probe := font.get_string_size(title, HORIZONTAL_ALIGNMENT_LEFT, -1, 100).x + font.get_string_size("Squad", HORIZONTAL_ALIGNMENT_LEFT, -1, 90).x
 		var font_size := int(100.0 * minf(1.0, size.x * 0.9 / maxf(probe, 1.0)))
-		var io_size := int(font_size * 0.63)
+		var io_size := int(font_size * 0.9)
 		var width := font.get_string_size(title, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
-		var io_width := font.get_string_size(".io", HORIZONTAL_ALIGNMENT_LEFT, -1, io_size).x
-		var start := Vector2(-(width + io_width) * 0.5, 0)
+		var io_width := font.get_string_size("Squad", HORIZONTAL_ALIGNMENT_LEFT, -1, io_size).x
+		var start := Vector2(-(width + io_width + 14.0) * 0.5, 0)
 		draw_string_outline(font, start + Vector2(0, 10), title, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, 34, Color(0, 0, 0, 0.45))
 		draw_string_outline(font, start, title, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, 26, Color("#1a0f2a"))
 		draw_string(font, start, title, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color("#ffc93c"))
 		draw_string(font, start + Vector2(0, -4), title, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color(1.0, 0.93, 0.55, 0.55))
-		var io := start + Vector2(width + 6, 0)
-		draw_string_outline(font, io, ".io", HORIZONTAL_ALIGNMENT_LEFT, -1, io_size, 20, Color("#1a0f2a"))
-		draw_string(font, io, ".io", HORIZONTAL_ALIGNMENT_LEFT, -1, io_size, Color("#00f5ff"))
+		var io := start + Vector2(width + 14, 0)
+		draw_string_outline(font, io, "Squad", HORIZONTAL_ALIGNMENT_LEFT, -1, io_size, 20, Color("#1a0f2a"))
+		draw_string(font, io, "Squad", HORIZONTAL_ALIGNMENT_LEFT, -1, io_size, Color("#00f5ff"))
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		var tagline := "Енот-налётчик против крыс и свиней"
 		draw_string_outline(ThemeDB.fallback_font, Vector2(0, size.y - 6), tagline, HORIZONTAL_ALIGNMENT_CENTER, size.x, 22, 7, Color("#1a0f2a"))
