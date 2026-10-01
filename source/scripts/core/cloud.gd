@@ -17,8 +17,12 @@ const BADGE_UID_KEY := "trk_badge_uid"
 const RECOVERY_KEY := "trk_recovery_code"
 const EMAIL_KEY := "trk_cloud_email"
 const UPLOAD_DELAY := 8.0
+## Автосохранение в облако: раз в минуту, если что-то поменялось; через 5 с после роста прогресса (конец забега,
+## уровень, награды); сразу, когда игру сворачивают. Пустые повторы не отправляются (сверка по хешу сохранения).
+const BACKUP_EVERY := 60.0
+const BACKUP_AFTER_PROGRESS := 5.0
 const TIMEOUT := 10.0
-const NET_ERRORS := {2: "не подключиться", 3: "адрес не найден", 4: "обрыв связи", 5: "ошибка TLS", 6: "сервер промолчал", 9: "запрос сорвался (CORS или блокировка)", 13: "таймаут 10 с"}
+const NET_ERRORS := {8: "двойная распаковка ответа", 2: "не подключиться", 3: "адрес не найден", 4: "обрыв связи", 5: "ошибка TLS", 6: "сервер промолчал", 9: "запрос сорвался (CORS или блокировка)", 13: "таймаут 10 с"}
 const EXPIRY_MARGIN := 60
 
 var friend_code := ""
@@ -40,6 +44,10 @@ var _session_busy := false
 var _profile_busy := false
 var _upload_pending := false
 var _last_backup := ""
+var _backup_busy := false
+var _backup_soon := false
+var _last_score := -1
+var _hidden_callback: JavaScriptObject
 
 
 func _ready() -> void:
@@ -58,10 +66,15 @@ func _ready() -> void:
 		poll.start()
 		get_tree().create_timer(9.0).timeout.connect(refresh_unread)
 		var backup := Timer.new()
-		backup.wait_time = 150.0
+		backup.wait_time = BACKUP_EVERY
 		backup.timeout.connect(_auto_backup)
 		add_child(backup)
 		backup.start()
+		SaveService.changed.connect(_on_save_changed)
+		_hidden_callback = JavaScriptBridge.create_callback(func(_args: Array) -> void:
+			if bool(JavaScriptBridge.get_interface("document").hidden):
+				_auto_backup())
+		JavaScriptBridge.get_interface("document").addEventListener("visibilitychange", _hidden_callback)
 
 
 func start_guest() -> void:
@@ -168,13 +181,30 @@ func list_friends() -> Dictionary:
 ## Откладывает выгрузку сохранения, чтобы серия вызовов превратилась в один запрос.
 ## Раз в пару минут выгружает сохранение, если оно изменилось: код восстановления всегда актуален.
 func _auto_backup() -> void:
-	if not has_code():
+	if not has_code() or _backup_busy:
 		return
 	var snapshot := SaveService.export_code().sha256_text()
 	if snapshot == _last_backup:
 		return
+	_backup_busy = true
 	if not (await upload_save()).is_empty():
 		_last_backup = snapshot
+	_backup_busy = false
+
+
+## Прогресс вырос (забег, уровень, награда) — сохраняем в облако через пару секунд, не дожидаясь минутного таймера.
+func _on_save_changed() -> void:
+	var score := SaveService.progress_score()
+	if score == _last_score:
+		return
+	var first := _last_score < 0
+	_last_score = score
+	if first or _backup_soon or not has_code():
+		return
+	_backup_soon = true
+	get_tree().create_timer(BACKUP_AFTER_PROGRESS).timeout.connect(func() -> void:
+		_backup_soon = false
+		_auto_backup())
 
 
 func queue_upload() -> void:
@@ -190,7 +220,7 @@ func queue_upload() -> void:
 ## Защита от потери прогресса: перед записью смотрим, что лежит в облаке. Если облако богаче (на новом устройстве
 ## пустая игра), забираем его вместо перезаписи. Если проверить не удалось (нет функции my_save), не пишем ничего.
 func upload_save() -> String:
-	if not await sync_profile():
+	if not has_code() and not await sync_profile():
 		return ""
 	var cloud := await fetch_cloud_save()
 	if not bool(cloud["ok"]):
@@ -473,6 +503,9 @@ func _call(method: int, path: String, body: Variant, extra: PackedStringArray = 
 func _raw(method: int, url: String, headers: PackedStringArray, body: String) -> Dictionary:
 	var request := HTTPRequest.new()
 	request.timeout = TIMEOUT
+	# В браузере ответ уже распакован самим браузером. Если Godot распаковывает его второй раз, большие ответы
+	# (список друзей, топ, сохранение) падают с RESULT_BODY_DECOMPRESS_FAILED (код 8), а маленькие проходят.
+	request.accept_gzip = not Platform.is_web
 	add_child(request)
 	if request.request(url, headers, method, body) != OK:
 		request.queue_free()
