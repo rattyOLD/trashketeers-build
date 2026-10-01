@@ -18,6 +18,7 @@ const RECOVERY_KEY := "trk_recovery_code"
 const EMAIL_KEY := "trk_cloud_email"
 const UPLOAD_DELAY := 8.0
 const TIMEOUT := 10.0
+const NET_ERRORS := {2: "не подключиться", 3: "адрес не найден", 4: "обрыв связи", 5: "ошибка TLS", 6: "сервер промолчал", 9: "запрос сорвался (CORS или блокировка)", 13: "таймаут 10 с"}
 const EXPIRY_MARGIN := 60
 
 var friend_code := ""
@@ -26,6 +27,8 @@ var email := ""
 var online := false
 var last_error := ""
 var _raw_note := ""
+## Чистое устройство: гостевой аккаунт не создаём, пока игрок не ответит «Уже играл? Войди» (или не закроет окно).
+var waiting_choice := false
 var _last_sync := 0
 var unread := 0
 
@@ -45,7 +48,9 @@ func _ready() -> void:
 	recovery_code = Platform.storage_get(RECOVERY_KEY)
 	email = Platform.storage_get(EMAIL_KEY)
 	if Platform.is_web:
-		get_tree().create_timer(4.0).timeout.connect(sync_profile)
+		waiting_choice = _refresh.is_empty() and SaveService.progress_score() == 0
+		if not waiting_choice:
+			get_tree().create_timer(4.0).timeout.connect(sync_profile)
 		var poll := Timer.new()
 		poll.wait_time = 45.0
 		poll.timeout.connect(refresh_unread)
@@ -57,6 +62,12 @@ func _ready() -> void:
 		backup.timeout.connect(_auto_backup)
 		add_child(backup)
 		backup.start()
+
+
+func start_guest() -> void:
+	if waiting_choice:
+		waiting_choice = false
+		sync_profile()
 
 
 func has_code() -> bool:
@@ -454,7 +465,7 @@ func _call(method: int, path: String, body: Variant, extra: PackedStringArray = 
 			reply = await _raw(method, URL + path, headers, JSON.stringify(body) if body != null else "")
 	online = int(reply["code"]) > 0
 	if not bool(reply["ok"]):
-		var detail := str(reply["data"]).left(120) if reply["data"] != null else ""
+		var detail := str(reply["data"]).left(120) if reply["data"] != null else _raw_note
 		last_error = "%s -> HTTP %d %s" % [path.get_slice("/", 4).get_slice("?", 0), int(reply["code"]), detail]
 	return reply
 
@@ -470,7 +481,7 @@ func _raw(method: int, url: String, headers: PackedStringArray, body: String) ->
 	var reply: Array = await request.request_completed
 	request.queue_free()
 	if int(reply[0]) != HTTPRequest.RESULT_SUCCESS:
-		_raw_note = "нет ответа, код сети %d" % int(reply[0])
+		_raw_note = "нет ответа: %s" % NET_ERRORS.get(int(reply[0]), "код %d" % int(reply[0]))
 		return {"ok": false, "code": 0, "data": null}
 	var code := int(reply[1])
 	_raw_note = "HTTP %d" % code
@@ -524,6 +535,7 @@ func _store_session(reply: Dictionary) -> bool:
 	if _access.is_empty() or _uid.is_empty():
 		return false
 	Platform.storage_set(SESSION_KEY, JSON.stringify({"uid": _uid, "refresh": _refresh}))
+	waiting_choice = false
 	return true
 
 

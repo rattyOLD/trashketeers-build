@@ -111,16 +111,21 @@ func _render_guest() -> void:
 		if result != "ok":
 			_say("Нет связи с сервером." if result == "offline" else "Логин или пароль не подошли.")
 			return
-		await Cloud.sync_profile()
+		# Сначала читаем облако, и только потом синхронизируем профиль: иначе гостевой ник и статистика
+		# с этого устройства затёрли бы ник аккаунта на сервере.
 		var cloud := await Cloud.fetch_cloud_save()
 		if not bool(cloud["ok"]):
 			_refresh()
-			_say("Вход выполнен, но облачное сохранение не прочиталось (на сервере нет функции my_save или нет связи). Ничего не затёрто. Попроси DeV выполнить SQL v14 и войди ещё раз.")
+			_say("Вход выполнен, но облачное сохранение не прочиталось (%s). Ничего не затёрто, попробуй войти ещё раз чуть позже." % Cloud.last_error)
 			return
 		var saved := str(cloud["text"])
 		var theirs := SaveService.parse_backup(saved)
 		var richer_cloud := not theirs.is_empty() and SaveService.score_of(theirs) >= SaveService.progress_score()
-		if richer_cloud and SaveService.import_code(saved):
+		var imported := richer_cloud and SaveService.import_code(saved)
+		await Cloud.sync_profile()
+		if not is_instance_valid(login):
+			return
+		if imported:
 			_refresh()
 			Cloud.upload_save()
 			_say("Вход выполнен, прогресс, друзья и тег на месте.")

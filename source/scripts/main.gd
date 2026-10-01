@@ -219,10 +219,25 @@ func _show_menu() -> void:
 	menu.story_requested.connect(_start_story, CONNECT_DEFERRED)
 	_swap_screen(menu)
 	_maybe_nag_account(menu)
+	_maybe_ask_returning(menu)
 	if _debug_hash == "camp":
 		SaveService.add_nuts(1000)
 		menu._camp.open.call_deferred()
 		_debug_hash = ""
+
+
+## Чистое устройство: до создания гостя спрашиваем «Уже играл?». Закрыл окно — значит новенький, заводим гостя.
+func _maybe_ask_returning(menu: MainMenuUI) -> void:
+	if not Cloud.waiting_choice or not _debug_hash.is_empty():
+		return
+	get_tree().create_timer(1.0).timeout.connect(func() -> void:
+		if not is_instance_valid(menu) or not Cloud.waiting_choice:
+			return
+		menu._account.intro = "Уже играл в Trash Squad? Введи логин и пароль и жми «ВОЙТИ», прогресс вернётся. Новенький? Закрывай окно и беги на помойку, аккаунт заведёшь потом."
+		menu._account.closed.connect(func() -> void:
+			menu._account.intro = ""
+			Cloud.start_guest(), CONNECT_ONE_SHOT)
+		menu._account.open())
 
 
 ## После первого забега (и ещё раз после пятого) один раз просим завести аккаунт: иначе прогресс может пропасть.
