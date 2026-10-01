@@ -1,0 +1,145 @@
+class_name AvatarPicker
+extends GlassPopup
+## Выбор портрета: сетка плиток. Открытые выбираются, закрытые подсказывают условие, недоступные ждут обновлений.
+
+signal picked
+
+const COLUMNS := 3
+const TILE := 150.0
+## path, название, тип условия, значение, подсказка
+const ENTRIES := [
+	["", "Герой", "open", 0, ""],
+	["res://assets/story/portraits/rico.png", "Рико", "open", 0, ""],
+	["res://assets/story/portraits/rico_alt.png", "Рико злой", "story", 1, "Пройди миссию 1"],
+	["res://assets/story/portraits/nell.png", "Нэлл", "open", 0, ""],
+	["res://assets/story/portraits/nell_alt.png", "Нэлл в бешенстве", "story", 1, "Пройди миссию 1"],
+	["res://assets/story/portraits/baron.png", "Барон", "stat:k_beer_baron", 1, "Победи Пивного Барона"],
+	["res://assets/story/portraits/baron_alt.png", "Барон ржёт", "stat:k_beer_baron", 3, "Победи Барона 3 раза"],
+	["res://assets/story/portraits/king.png", "Король Хлама", "shards", 1, "Забери 1 осколок Бочки"],
+	["res://assets/story/portraits/king_alt.png", "Король злой", "shards", 6, "Собери все 6 осколков"],
+	["res://assets/story/portraits/toxic.png", "Токсик", "stat:k_toxic_rat", 100, "Победи 100 Токсичных крыс"],
+	["", "???", "never", 0, "Недоступно"],
+	["", "???", "never", 0, "Недоступно"],
+]
+
+static var _cache: Dictionary = {}
+
+
+## Портрет как ImageTexture: сжатые текстуры в полигонах с UV на некоторых GPU рисуются белыми.
+static func portrait_texture(path: String) -> Texture2D:
+	if _cache.has(path):
+		return _cache[path]
+	if not ResourceLoader.exists(path):
+		return null
+	var image := (load(path) as Texture2D).get_image()
+	if image.is_compressed():
+		image.decompress()
+	var texture := ImageTexture.create_from_image(image)
+	_cache[path] = texture
+	return texture
+
+
+var _grid: GridContainer
+var _hint: Label
+
+
+func _init() -> void:
+	super("ПОРТРЕТ")
+	_hint = UiStyle.label("", 20, UiStyle.TEXT_DIM, 4)
+	_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_hint.custom_minimum_size = Vector2(panel_width() - 70.0, 0)
+	content.add_child(_hint)
+	var list := MenuPopups.scroll_list(content)
+	_grid = GridContainer.new()
+	_grid.columns = COLUMNS
+	_grid.add_theme_constant_override("h_separation", 12)
+	_grid.add_theme_constant_override("v_separation", 12)
+	list.add_child(_grid)
+
+
+func _refresh() -> void:
+	MenuPopups.clear(_grid)
+	_hint.text = "Тап по открытому портрету выбирает его. Остальные открываются по ходу игры."
+	var current := str(SaveService.data.get("avatar", ""))
+	for entry: Array in ENTRIES:
+		var state := _state(entry)
+		_grid.add_child(_tile(entry, state, str(entry[0]) == current and state == 0))
+
+
+## 0 открыт, 1 закрыт, 2 недоступен.
+func _state(entry: Array) -> int:
+	var kind := str(entry[2])
+	var value := int(entry[3])
+	if kind == "open":
+		return 0
+	if kind == "never":
+		return 2
+	if kind == "story":
+		return 0 if SaveService.get_stat("story_missions") >= value else 1
+	if kind == "shards":
+		return 0 if SaveService.story_shards() >= value else 1
+	if kind.begins_with("stat:"):
+		return 0 if SaveService.get_stat(kind.substr(5)) >= value else 1
+	return 1
+
+
+func _tile(entry: Array, state: int, selected: bool) -> Control:
+	var tile := PortraitTile.new(str(entry[0]), str(entry[1]), state, selected)
+	tile.custom_minimum_size = Vector2((panel_width() - 70.0) / float(COLUMNS) - 8.0, TILE + 36.0)
+	tile.gui_input.connect(func(event: InputEvent) -> void:
+		var tapped: bool = (event is InputEventMouseButton and event.pressed) or (event is InputEventScreenTouch and event.pressed)
+		if not tapped:
+			return
+		if state == 0:
+			SaveService.data["avatar"] = str(entry[0])
+			SaveService.save_data()
+			SoundManager.play(&"ui_confirm", -6.0)
+			picked.emit()
+			close()
+		else:
+			_hint.text = "%s: %s" % [entry[1], entry[4]])
+	return tile
+
+
+class PortraitTile:
+	extends Control
+
+	var _path: String
+	var _title: String
+	var _state: int
+	var _selected: bool
+
+	func _init(path: String, title: String, state: int, selected: bool) -> void:
+		_path = path
+		_title = title
+		_state = state
+		_selected = selected
+		mouse_filter = Control.MOUSE_FILTER_STOP
+
+	func _draw() -> void:
+		var r := minf(size.x, size.y - 30.0) * 0.5 - 4.0
+		var c := Vector2(size.x * 0.5, r + 4.0)
+		draw_circle(c, r, Color("#1a0033"))
+		draw_circle(c, r - 3.0, Color("#3a2d60"))
+		var tex: Texture2D = null
+		if _path.is_empty() and _state == 0:
+			tex = MenuWidgets.Avatar.get_texture_for(SaveService.get_character(), SaveService.get_selected_skin())
+		elif not _path.is_empty():
+			tex = AvatarPicker.portrait_texture(_path)
+		if tex != null:
+			MenuWidgets.Avatar.draw_round(self, tex, c, r - 4.0)
+		if _state != 0:
+			draw_circle(c, r - 3.0, Color(0.03, 0.0, 0.08, 0.72 if _state == 1 else 0.88))
+			_draw_lock(c)
+		var ring := UiStyle.GOLD if _selected else (UiStyle.NEON if _state == 0 else Color(UiStyle.TEXT_DIM, 0.5))
+		draw_arc(c, r - 1.5, 0.0, TAU, 48, ring, 5.0 if _selected else 3.0, true)
+		var font := ThemeDB.fallback_font
+		var color := UiStyle.GOLD if _selected else (UiStyle.TEXT if _state == 0 else Color(UiStyle.TEXT_DIM, 0.7))
+		draw_string(font, Vector2(0, size.y - 8.0), _title if _state != 2 else "???", HORIZONTAL_ALIGNMENT_CENTER, size.x, 20, color)
+
+	func _draw_lock(c: Vector2) -> void:
+		draw_arc(c + Vector2(0, -6), 11.0, PI, TAU, 14, Color("#d8d0ff"), 5.0, true)
+		var body := Rect2(c + Vector2(-17, -6), Vector2(34, 26))
+		draw_rect(body.grow(3.0), Color("#1a0033"))
+		draw_rect(body, Color("#ffd257") if _state == 1 else Color("#8f84b8"))
+		draw_circle(c + Vector2(0, 6), 4.0, Color("#1a0033"))

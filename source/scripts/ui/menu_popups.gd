@@ -10,7 +10,7 @@ static func list_height() -> float:
 static func scroll_list(parent: Control) -> VBoxContainer:
 	var scroll := DragScroll.new()
 	scroll.custom_minimum_size = Vector2(0, list_height())
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
 	scroll.scroll_deadzone = 16
 	scroll.follow_focus = true
 	var bar := scroll.get_v_scroll_bar()
@@ -61,9 +61,9 @@ class Settings:
 	signal editor_requested
 	const QUALITY_NAMES := ["ЭКОНОМ", "БАЛАНС", "КРАСИВО"]
 	const QUALITY_HINTS := [
-		"Для слабых телефонов: без теней и света предметов, без свечения и цветокоррекции, меньше частиц, разрешение 1× (картинка мягче, играется намного плавнее)",
-		"Тени и свет предметов, цветокоррекция, полные эффекты, разрешение 1.5×",
-		"Всё включено: неоновое свечение, разрешение 2× (на ПК до 3×) — для мощных устройств",
+		"Для слабых телефонов: без теней и свечения, меньше частиц, разрешение 1×",
+		"Тени, цветокоррекция, полные эффекты, 1.5×",
+		"Всё включено, свечение, 2×. Для мощных устройств",
 	]
 	var _quality_buttons: Array[Button] = []
 	var _quality_hint: Label
@@ -82,6 +82,9 @@ class Settings:
 	func _init() -> void:
 		super("НАСТРОЙКИ")
 		var list := MenuPopups.scroll_list(content)
+		var credits_button := UiStyle.button("СОЗДАТЕЛИ · BEER PARTY STUDIO", UiStyle.PANEL_LIGHT, 22, Vector2(0, 68))
+		credits_button.pressed.connect(func() -> void: _credits.open())
+		list.add_child(credits_button)
 		var sound := MenuPopups.section_card(list, "ЗВУК")
 		sound.add_child(Hud.VolumeSlider.new("Музыка", "music"))
 		sound.add_child(Hud.VolumeSlider.new("Эффекты", "sfx"))
@@ -103,10 +106,7 @@ class Settings:
 		_lite = MenuWidgets.PawToggle.new("Упрощённые эффекты", SaveService.is_fx_lite())
 		_lite.toggled.connect(func(on: bool) -> void: SaveService.set_flag("fx_lite", on))
 		graphics.add_child(_lite)
-		var lite_hint := UiStyle.label("Меньше частиц, вспышек и цифр урона, без свечения. Для слабых телефонов.", 19, UiStyle.TEXT_DIM, 4)
-		lite_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		graphics.add_child(lite_hint)
-		var eco := MenuWidgets.PawToggle.new("Экономия заряда (30 FPS)", bool(SaveService.data.get("eco_fps", false)))
+		var eco := MenuWidgets.PawToggle.new("Экономия заряда", bool(SaveService.data.get("eco_fps", false)))
 		eco.toggled.connect(func(on: bool) -> void:
 			SaveService.set_flag("eco_fps", on)
 			SaveService.apply_quality())
@@ -179,9 +179,6 @@ class Settings:
 		_tips = MenuWidgets.PawToggle.new("Подсказки в сюжете", Tips.enabled())
 		_tips.toggled.connect(func(on: bool) -> void: Tips.set_enabled(on))
 		controls.add_child(_tips)
-		var tips_hint := UiStyle.label("Карточка с описанием и характеристиками при первом подборе оружия и предметов.", 19, UiStyle.TEXT_DIM, 4)
-		tips_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		controls.add_child(tips_hint)
 		_auto_pick = MenuWidgets.PawToggle.new("Автоподбор оружия", bool(Controls.get_value("auto_pick")))
 		_auto_pick.toggled.connect(func(on: bool) -> void: Controls.set_value("auto_pick", on))
 		controls.add_child(_auto_pick)
@@ -206,10 +203,6 @@ class Settings:
 		_slot_hint = UiStyle.label("", 19, UiStyle.TEXT_DIM, 4)
 		_slot_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		controls.add_child(_slot_hint)
-		var about := MenuPopups.section_card(list, "О ПРОЕКТЕ")
-		var credits_button := UiStyle.button("СОЗДАТЕЛИ", UiStyle.PANEL_LIGHT, 24, Vector2(0, 76))
-		credits_button.pressed.connect(func() -> void: _credits.open())
-		about.add_child(credits_button)
 		_keys = KeyBinds.new()
 		add_child(_keys)
 		_credits = CreditsPopup.new()
@@ -774,8 +767,13 @@ class Profile:
 		[14, "Ржавый ветеран"], [22, "Неоновый воротила"], [32, "Король хлама"],
 	]
 
+	var _picker: AvatarPicker
+
 	func _init() -> void:
 		super("ПРОФИЛЬ")
+		_picker = AvatarPicker.new()
+		_picker.picked.connect(_refresh)
+		add_child(_picker)
 
 	static func rank_for(level: int) -> String:
 		var title := str(RANKS[0][1])
@@ -849,13 +847,23 @@ class Profile:
 		var avatar := MenuWidgets.Avatar.new()
 		avatar.custom_minimum_size = Vector2(140, 140)
 		avatar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		head.add_child(avatar)
+		avatar.mouse_filter = Control.MOUSE_FILTER_STOP
+		avatar.gui_input.connect(func(event: InputEvent) -> void:
+			var tapped: bool = (event is InputEventMouseButton and event.pressed) or (event is InputEventScreenTouch and event.pressed)
+			if tapped:
+				_picker.open())
+		var avatar_box := VBoxContainer.new()
+		avatar_box.add_theme_constant_override("separation", 2)
+		avatar_box.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		avatar_box.add_child(avatar)
+		var change := UiStyle.label("СМЕНИТЬ", 16, UiStyle.NEON, 4)
+		avatar_box.add_child(change)
+		head.add_child(avatar_box)
 		var info := VBoxContainer.new()
 		info.add_theme_constant_override("separation", 6)
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		info.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		info.add_child(_build_nick_editor())
-		info.add_child(_build_avatar_picker())
 		var rank_label := UiStyle.label(rank_for(level).to_upper(), 20, Color("#ff9a3d"), 5)
 		rank_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 		info.add_child(rank_label)
@@ -949,36 +957,6 @@ class Profile:
 		load_row.add_child(load)
 		box.add_child(load_row)
 		return box
-
-	const AVATARS := [
-		["", "Герой", 0],
-		["res://assets/ui/portraits/rico.png", "Рико", 0],
-		["res://assets/ui/portraits/nell.png", "Нэлл", 0],
-		["res://assets/ui/portraits/baron.png", "Барон", 1],
-		["res://assets/ui/portraits/king.png", "Король", 1],
-	]
-
-	func _build_avatar_picker() -> Control:
-		var row := HBoxContainer.new()
-		row.add_theme_constant_override("separation", 10)
-		var current := str(SaveService.data.get("avatar", ""))
-		var buttons: Array[Button] = []
-		for entry: Array in AVATARS:
-			var path := str(entry[0])
-			var open := int(entry[2]) == 0 or SaveService.get_stat("story_missions") >= 1
-			var button := UiStyle.button(str(entry[1]) if open else "закрыто", UiStyle.GOLD if path == current else UiStyle.PANEL_LIGHT, 18, Vector2(0, 52))
-			button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			button.disabled = not open
-			button.pressed.connect(func() -> void:
-				SaveService.data["avatar"] = path
-				SaveService.save_data()
-				for other in buttons:
-					other.modulate = Color(1, 1, 1, 0.55)
-				button.modulate = Color.WHITE)
-			button.modulate = Color.WHITE if path == current else Color(1, 1, 1, 0.55)
-			buttons.append(button)
-			row.add_child(button)
-		return row
 
 	func _build_nick_editor() -> Control:
 		var row := HBoxContainer.new()

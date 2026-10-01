@@ -29,6 +29,7 @@ func _init() -> void:
 
 
 ## Подсказка под элементом (или над ним, если он в нижней половине экрана).
+## Размер считается через кадр: у свежего автоврапнутого Label высота при первом показе ещё не посчитана.
 func show_for(target: Control, text: String) -> void:
 	_token += 1
 	var token := _token
@@ -36,6 +37,13 @@ func show_for(target: Control, text: String) -> void:
 	var width := minf(MAX_WIDTH, view.x - 36.0)
 	_label.text = text
 	_label.custom_minimum_size = Vector2(width - 24.0, 0.0)
+	_label.size = Vector2(width - 24.0, 0.0)
+	size = Vector2.ZERO
+	modulate.a = 0.0
+	visible = true
+	await get_tree().process_frame
+	if token != _token or not is_instance_valid(target):
+		return
 	reset_size()
 	var rect := target.get_global_rect()
 	var pos := Vector2(rect.position.x, rect.end.y + GAP)
@@ -44,8 +52,6 @@ func show_for(target: Control, text: String) -> void:
 	pos.x = clampf(pos.x, 18.0, view.x - size.x - 18.0)
 	pos.y = clampf(pos.y, 12.0, view.y - size.y - 12.0)
 	global_position = pos
-	visible = true
-	modulate.a = 0.0
 	create_tween().tween_property(self, "modulate:a", 1.0, 0.12)
 	get_tree().create_timer(SHOW_TIME, true, false, true).timeout.connect(func() -> void:
 		if token == _token:

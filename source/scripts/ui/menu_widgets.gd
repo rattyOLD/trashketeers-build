@@ -218,13 +218,24 @@ class Avatar:
 		draw_circle(c, r - 4.0, Color("#3a2d60"))
 		var tex: Texture2D = null
 		var custom := str(SaveService.data.get("avatar", ""))
-		if not custom.is_empty() and ResourceLoader.exists(custom):
-			tex = load(custom) as Texture2D
+		if not custom.is_empty():
+			tex = AvatarPicker.portrait_texture(custom)
 		if tex == null:
 			tex = get_texture_for(SaveService.get_character(), SaveService.get_selected_skin())
 		if tex != null:
-			draw_texture_rect(tex, Rect2(c - Vector2.ONE * (r - 5.0), Vector2.ONE * (r - 5.0) * 2.0), false)
+			Avatar.draw_round(self, tex, c, r - 5.0)
 		draw_arc(c, r - 2.0, 0.0, TAU, 40, UiStyle.NEON, 3.0, true)
+
+	## Картинка строго внутри круга: полигон с UV вместо квадрата, чтобы углы не вылезали за рамку.
+	static func draw_round(item: CanvasItem, tex: Texture2D, center: Vector2, radius: float) -> void:
+		var points := PackedVector2Array()
+		var uvs := PackedVector2Array()
+		for i in 40:
+			var a := TAU * float(i) / 40.0
+			var d := Vector2(cos(a), sin(a))
+			points.append(center + d * radius)
+			uvs.append(Vector2(0.5, 0.5) + d * 0.5)
+		item.draw_colored_polygon(points, Color.WHITE, uvs, tex)
 
 	static func get_texture_for(character: Dictionary, skin_id: String) -> ImageTexture:
 		var key := "%s:%s" % [character.get("id", ""), skin_id]
