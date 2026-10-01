@@ -47,7 +47,7 @@ func _refresh() -> void:
 	var share := UiStyle.button("ПОДЕЛИТЬСЯ КАРТИНКОЙ", UiStyle.HOT, 24, Vector2(0, 64))
 	share.pressed.connect(func() -> void:
 		var link := SaveService.card_qr_text()
-		var caption := "Я в Trash Squad. Сканируй QR или жми ссылку, и мы подружимся: %s" % link if not link.is_empty() else "Моя визитка в Trash Squad"
+		var caption := "%s\n%s" % [_invite_line(), link] if not link.is_empty() else "Моя визитка в Trash Squad"
 		var note := Platform.share_image(_image_b64, "trashsquad_card.png", caption)
 		_say(note if not note.is_empty() else "Картинка готовится или не поддерживается здесь. Отправь код визитки ниже")
 	)
@@ -58,7 +58,7 @@ func _refresh() -> void:
 		if link.is_empty():
 			_say("Ссылка есть только в браузерной версии. Отправь код визитки ниже")
 			return
-		_say(Platform.share("Моя визитка в Trash Squad. Открой ссылку, и мы подружимся.", link)))
+		_say(Platform.share(_invite_line(), link)))
 	list.add_child(link_card)
 	var copy_card := UiStyle.button("Скопировать код визитки", UiStyle.PANEL_LIGHT, 22, Vector2(0, 56))
 	copy_card.pressed.connect(func() -> void:
@@ -351,6 +351,19 @@ func _open_profile(code: String) -> void:
 		popup.queue_free()
 		_load_online())
 	popup.open()
+
+
+const INVITES: Array[String] = [
+	"Енот зовёт на свалку. Жми и будем друзьями:",
+	"Крысы нервничают, а я уже в игре. Заходи, подружимся:",
+	"Тут бесплатно стреляют по крысам. Присоединяйся:",
+	"Моя визитка с помойки. Добавь меня, пока не уехал мусоровоз:",
+	"Тебя ждут на свалке, пушка выдаётся на месте:",
+]
+
+
+func _invite_line() -> String:
+	return INVITES[randi() % INVITES.size()]
 
 
 func _open_chat(code: String, nick: String) -> void:
