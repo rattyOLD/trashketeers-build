@@ -415,25 +415,28 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 </script>
 <script>
 /* Адрес, с которым iOS кладёт игру на экран «Домой». Аккаунт с логином: мини-апка открывается с окном входа
-   (?login=имя), это тот же аккаунт на втором устройстве, ничего не переносится. Гость без логина: код восстановления
-   (?restore=) — единственный способ не потерять прогресс, но он ПЕРЕНОСИТ гостя на мини-апку. */
+   (?login=имя). Гость: скрытый вход (?g=guest_….пароль) — мини-апка входит в тот же аккаунт, ничего не переносится.
+   Старый код восстановления (?restore=) — только если скрытого входа ещё нет (он ПЕРЕНОСИТ гостя). */
 (function () {
 	var baseManifest = document.querySelector('link[rel="manifest"]');
 	var lastKey = '';
 	function sync() {
-		var code = '', login = '';
+		var code = '', login = '', guest = '';
 		try {
 			code = window.localStorage.getItem('trk_recovery_code') || '';
 			login = window.localStorage.getItem('trk_cloud_email') || '';
+			guest = window.localStorage.getItem('trk_guest_key') || '';
 		} catch (e) { return; }
 		var key = '', value = '';
 		if (/^[a-z0-9_]{3,20}$/.test(login)) { key = 'login'; value = login; }
+		else if (/^guest_[a-z0-9]{12}\.[A-Za-z0-9]{24}$/.test(guest)) { key = 'g'; value = guest; }
 		else if (/^[A-Za-z0-9]{8,24}$/.test(code)) { key = 'restore'; value = code; }
 		if (!key || key + value === lastKey) { return; }
 		lastKey = key + value;
 		var params = new URLSearchParams(location.search);
 		params.delete('restore');
 		params.delete('login');
+		params.delete('g');
 		params.set(key, value);
 		try { history.replaceState(null, '', location.pathname + '?' + params.toString() + location.hash); } catch (e) {}
 		if (baseManifest) {

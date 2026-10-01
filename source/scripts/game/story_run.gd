@@ -50,6 +50,7 @@ var kills := 0
 var lives_lost := 0
 var rescued := 0
 var checkpoint := Vector2.ZERO
+var _broken_secrets: Array = []
 
 var _encounters: Array = []
 var _next := 0
@@ -274,6 +275,7 @@ func result_lines(victory: bool) -> PackedStringArray:
 
 func game_over() -> void:
 	finished_mission = true
+	SaveService.clear_story_resume()
 	game.story_result(false, result_lines(false))
 
 
@@ -303,6 +305,59 @@ func try_respawn() -> bool:
 		get_tree().create_timer(1.7, false).timeout.connect(func() -> void: game.hud.show_banner(quip, UiStyle.NEON, 2.6))
 	get_tree().create_timer(1.3, false).timeout.connect(func() -> void: game.story_respawn(checkpoint))
 	return true
+
+
+## Чекпоинт в сохранение: после вылета, сворачивания (iOS может выгрузить вкладку) или выхода миссия продолжится отсюда.
+func _save_checkpoint() -> void:
+	if finished_mission or locked or _boss_alive or game == null or game.player == null or game.player.is_dead:
+		return
+	SaveService.set_story_resume({
+		"mission": str(mission.get("id", "")), "saved": int(Time.get_unix_time_from_system()),
+		"x": checkpoint.x, "y": checkpoint.y, "next": _next, "captive": _next_captive, "zone": zone_index,
+		"min_trigger": _min_trigger, "score": score, "lives": lives, "lives_lost": lives_lost, "kills": kills,
+		"rescued": rescued, "parts": 0 if barrel.active else mini(barrel.parts, HeavyBarrel.TOTAL_PARTS - 1),
+		"key": has_key, "crate": _crate_dropped, "secrets": _broken_secrets.duplicate(), "elapsed": game.director.elapsed,
+		"hit": _ever_hit,
+	})
+
+
+## Продолжение с чекпоинта: пройденные засады пропускаются, их двери открыты, счёт, жизни и находки на месте.
+func resume_from(d: Dictionary) -> void:
+	_next = clampi(int(d.get("next", 0)), 0, _encounters.size())
+	_next_captive = clampi(int(d.get("captive", 0)), 0, _captives.size())
+	for i in _next:
+		var enc: Dictionary = _encounters[i]
+		if bool(enc.get("lock", false)) and not (enc.has("boss") and not bool(enc.get("mini", false))):
+			game.map.open_story_gate(LevelSpawner.door_key(float(enc["at"])))
+	_min_trigger = float(d.get("min_trigger", 0.0))
+	score = int(d.get("score", 0))
+	lives = clampi(int(d.get("lives", START_LIVES)), 1, START_LIVES)
+	lives_lost = int(d.get("lives_lost", 0))
+	kills = int(d.get("kills", 0))
+	rescued = int(d.get("rescued", 0))
+	has_key = bool(d.get("key", false))
+	_crate_dropped = bool(d.get("crate", false))
+	_ever_hit = bool(d.get("hit", true))
+	for raw in d.get("secrets", []):
+		var idx := int(raw)
+		if idx >= 0 and idx < secrets.size() and secrets[idx].is_intact():
+			secrets[idx].break_silently()
+			_broken_secrets.append(idx)
+			secrets_found += 1
+	for i in clampi(int(d.get("parts", 0)), 0, HeavyBarrel.TOTAL_PARTS - 1):
+		barrel.collect_part()
+	game.director.elapsed = float(d.get("elapsed", 0.0))
+	checkpoint = Vector2(float(d.get("x", checkpoint.x)), float(d.get("y", checkpoint.y)))
+	game.player.global_position = checkpoint
+	game.camera.global_position = checkpoint
+	game.camera.reset_smoothing()
+	var zones: Array = mission.get("zones", [])
+	zone_index = clampi(int(d.get("zone", 0)), 0, maxi(zones.size() - 1, 0))
+	_zone_hit = true
+	if not zones.is_empty():
+		_apply_palette(zones[zone_index])
+	_update_progress()
+	game.hud.show_banner("ПРОДОЛЖАЕМ С ЧЕКПОИНТА · ЖИЗНИ %d" % lives, Color("#5ff2ff"), 2.4)
 
 
 func on_start() -> void:
@@ -369,6 +424,7 @@ func nearest_secret(from: Vector2, max_distance: float) -> Node2D:
 
 func _on_secret_broken(secret: StorySecret) -> void:
 	secrets_found += 1
+	_broken_secrets.append(secrets.find(secret))
 	_count("story_secrets")
 	score += SECRET_POINTS
 	var at := secret.global_position
@@ -520,6 +576,7 @@ func _check_zone() -> void:
 	_zone_hit = false
 	zone_index = index
 	checkpoint = game.player.global_position
+	_save_checkpoint.call_deferred()
 	var zone: Dictionary = zones[index]
 	_apply_palette(zone)
 	game.hud.show_banner(str(zone["name"]), Color("#5ff2ff"), 2.4)
@@ -763,6 +820,7 @@ func _check_clear() -> void:
 	game.map.open_story_gate(gate_key)
 	_min_trigger = float(_active.get("at", 0.0)) + LevelSpawner.DOOR_LEAD + EXIT_MARGIN
 	checkpoint = game.player.global_position
+	_save_checkpoint.call_deferred()
 	_give_reward(str(_active.get("reward", "")))
 	game.player.heal(game.player.max_hp * CLEAR_HEAL)
 	game.hud.show_banner("ПУТЬ СВОБОДЕН — ВПЕРЁД!", Color("#7cff6b"), 1.4)
@@ -883,6 +941,7 @@ func finish() -> void:
 	if finished_mission:
 		return
 	finished_mission = true
+	SaveService.clear_story_resume()
 	var shards := int(mission.get("shards", 1))
 	SaveService.story_complete(str(mission.get("id", "")), shards, score + lives * LIFE_BONUS)
 	if not _captives.is_empty() and rescued >= _captives.size():

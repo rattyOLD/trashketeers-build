@@ -399,7 +399,7 @@ html, body {
 </script>
 
 <script>
-window.__trash_build = {label: 'v34.193', time: '02.10 00:42'};
+window.__trash_build = {label: 'v34.194', time: '02.10 00:49'};
 document.getElementById('ver').textContent = 'Версия ' + window.__trash_build.label + ' · сборка от ' + window.__trash_build.time;
 </script>
 <script>
@@ -415,25 +415,28 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 </script>
 <script>
 /* Адрес, с которым iOS кладёт игру на экран «Домой». Аккаунт с логином: мини-апка открывается с окном входа
-   (?login=имя), это тот же аккаунт на втором устройстве, ничего не переносится. Гость без логина: код восстановления
-   (?restore=) — единственный способ не потерять прогресс, но он ПЕРЕНОСИТ гостя на мини-апку. */
+   (?login=имя). Гость: скрытый вход (?g=guest_….пароль) — мини-апка входит в тот же аккаунт, ничего не переносится.
+   Старый код восстановления (?restore=) — только если скрытого входа ещё нет (он ПЕРЕНОСИТ гостя). */
 (function () {
 	var baseManifest = document.querySelector('link[rel="manifest"]');
 	var lastKey = '';
 	function sync() {
-		var code = '', login = '';
+		var code = '', login = '', guest = '';
 		try {
 			code = window.localStorage.getItem('trk_recovery_code') || '';
 			login = window.localStorage.getItem('trk_cloud_email') || '';
+			guest = window.localStorage.getItem('trk_guest_key') || '';
 		} catch (e) { return; }
 		var key = '', value = '';
 		if (/^[a-z0-9_]{3,20}$/.test(login)) { key = 'login'; value = login; }
+		else if (/^guest_[a-z0-9]{12}\.[A-Za-z0-9]{24}$/.test(guest)) { key = 'g'; value = guest; }
 		else if (/^[A-Za-z0-9]{8,24}$/.test(code)) { key = 'restore'; value = code; }
 		if (!key || key + value === lastKey) { return; }
 		lastKey = key + value;
 		var params = new URLSearchParams(location.search);
 		params.delete('restore');
 		params.delete('login');
+		params.delete('g');
 		params.set(key, value);
 		try { history.replaceState(null, '', location.pathname + '?' + params.toString() + location.hash); } catch (e) {}
 		if (baseManifest) {
@@ -461,7 +464,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	// index.wasm / index.pck и отдаём ему уже скачанные и распакованные байты.
 	const FILES = {
 		wasm: { parts: [{url:"raccoon.core.0.wasm?h=4cbe7e5f476b",bytes:5221065},{url:"raccoon.core.1.wasm?h=a8fbc151befa",bytes:4165384}] },
-		pck: { parts: [{url:"raccoon.pack.0.wasm?h=03a934b81922",bytes:11992503},{url:"raccoon.pack.1.wasm?h=3f5f03956dac",bytes:12547355},{url:"raccoon.pack.2.wasm?h=0f30c20c4a6e",bytes:3986119}] },
+		pck: { parts: [{url:"raccoon.pack.0.wasm?h=b86e5f0f97cb",bytes:11992493},{url:"raccoon.pack.1.wasm?h=805323d01ba5",bytes:12547395},{url:"raccoon.pack.2.wasm?h=777db63d518e",bytes:3993023}] },
 	};
 	const GODOT_CONFIG = {
 		args: [],
@@ -469,7 +472,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 		ensureCrossOriginIsolationHeaders: false,
 		executable: 'index',
 		experimentalVK: false,
-		fileSizes: { 'index.pck': 29471184, 'index.wasm': 43699190 },
+		fileSizes: { 'index.pck': 29478400, 'index.wasm': 43699190 },
 		focusCanvas: true,
 		gdextensionLibs: [],
 		onPrint: function () {
@@ -494,7 +497,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 
 	// Адрес сбора отчётов о вылетах (Google Apps Script / Supabase и т.п.); пусто — отчёты не отправляются.
 	const REPORT_URL = 'https://script.google.com/macros/s/AKfycbxVyy-SnRANW0Im-1Blne2TcUbca93WqzyBulpADwWWD7YH6x3KIygBYImTe8VfP5pp/exec';
-	const BUILD_ID_REPORT = '1790876536';
+	const BUILD_ID_REPORT = '1790876977';
 	const SESSION_ID = Math.random().toString(36).slice(2, 8);
 	const SESSION_START = Date.now();
 	const REPORT_CAP = 250;
@@ -711,7 +714,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	window.trkReport('session_start', gpuInfo() + ' | ' + navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + (window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio) + ' | screen ' + screen.width + 'x' + screen.height + ' | cores ' + (navigator.hardwareConcurrency || '?'));
 
 	// Вкладка могла висеть со старой версией: при возврате в неё сверяем номер сборки и предлагаем обновиться.
-	const BUILD_ID = '1790876536';
+	const BUILD_ID = '1790876977';
 	// Важное обновление: старая сборка дальше не работает, иначе аккаунты и сохранения ломаются старым кодом.
 	function blockOldBuild(v) {
 		const wall = document.createElement('div');

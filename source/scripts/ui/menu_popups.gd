@@ -874,10 +874,11 @@ class Profile:
 		var link := UiStyle.button("Скопировать ссылку-вход", UiStyle.PANEL_LIGHT, 21, Vector2(0, 54))
 		link.pressed.connect(func() -> void:
 			var base := Platform.page_url()
-			if Cloud.recovery_code.is_empty() or base.is_empty():
+			var param := Cloud.entry_link_param()
+			if param.is_empty() or base.is_empty():
 				link.text = "Ссылки пока нет, подожди минуту"
 				return
-			DisplayServer.clipboard_set("%s?restore=%s" % [base, Cloud.recovery_code])
+			DisplayServer.clipboard_set("%s?%s" % [base, param])
 			link.text = "Скопировано. Никому не показывай!")
 		box.add_child(link)
 		box.add_child(MenuPopups.small_hint("Ссылка-вход и код открывают твой аккаунт целиком. Никому их не показывай и не кидай в чаты, в отличие от визитки."))

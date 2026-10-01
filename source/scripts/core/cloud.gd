@@ -18,6 +18,9 @@ const BADGE_SECRET_KEY := "trk_badge_secret"
 const BADGE_UID_KEY := "trk_badge_uid"
 const RECOVERY_KEY := "trk_recovery_code"
 const EMAIL_KEY := "trk_cloud_email"
+## Скрытый вход гостя «guest_xxxxxxxxxxxx.пароль»: ссылка-вход по нему — это ВХОД в тот же аккаунт, а не перенос.
+const GUEST_KEY := "trk_guest_key"
+const GUEST_PREFIX := "guest_"
 const UPLOAD_DELAY := 8.0
 ## Автосохранение в облако: раз в минуту, если что-то поменялось; через 5 с после роста прогресса (конец забега,
 ## уровень, награды); сразу, когда игру сворачивают. Пустые повторы не отправляются (сверка по хешу сохранения).
@@ -38,6 +41,8 @@ var waiting_choice := false
 var session_lost := false
 ## Аккаунт этого устройства перенесли на другое (мини-апка, новый телефон): здесь он больше не активен.
 var moved_away := false
+var guest_key := ""
+var _guest_busy := false
 var _restore_after_signup := ""
 var _last_sync := 0
 var unread := 0
@@ -61,6 +66,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_load_session()
 	recovery_code = Platform.storage_get(RECOVERY_KEY)
+	guest_key = Platform.storage_get(GUEST_KEY)
 	email = Platform.storage_get(EMAIL_KEY)
 	if Platform.is_web:
 		waiting_choice = _refresh.is_empty() and SaveService.progress_score() == 0
@@ -95,6 +101,59 @@ func start_guest() -> void:
 		sync_profile()
 
 
+## Гостю тихо заводим скрытый логин и пароль (тот же uid, Supabase делает анонима постоянным).
+## Тогда ссылка-вход открывает этот же аккаунт на втором устройстве, и оба остаются активными.
+func _ensure_guest_key() -> void:
+	if _guest_busy or not email.is_empty() or not guest_key.is_empty() or _uid.is_empty():
+		return
+	_guest_busy = true
+	var name := GUEST_PREFIX + _random_text(12, "abcdefghijklmnopqrstuvwxyz0123456789")
+	var password := _random_text(24, "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789")
+	var result := await _call(HTTPClient.METHOD_PUT, "/auth/v1/user", {"email": name + ACCOUNT_DOMAIN, "password": password})
+	var user: Variant = result["data"]
+	var pending := user is Dictionary and not str((user as Dictionary).get("new_email", "")).is_empty()
+	if bool(result["ok"]) and not pending:
+		guest_key = "%s.%s" % [name, password]
+		Platform.storage_set(GUEST_KEY, guest_key)
+	_guest_busy = false
+
+
+static func _random_text(length: int, alphabet: String) -> String:
+	var crypto := Crypto.new()
+	var bytes := crypto.generate_random_bytes(length)
+	var out := ""
+	for i in length:
+		out += alphabet[bytes[i] % alphabet.length()]
+	return out
+
+
+## Параметр ссылки-входа: скрытый вход гостя (вход, без переноса) или старый код восстановления.
+func entry_link_param() -> String:
+	if not guest_key.is_empty():
+		return "g=" + guest_key.uri_encode()
+	if not recovery_code.is_empty():
+		return "restore=" + recovery_code.uri_encode()
+	return ""
+
+
+## Вход по скрытому ключу гостя из ссылки: "ok", "wrong", "offline", "invalid".
+func login_guest(key: String) -> String:
+	var parts := key.strip_edges().split(".")
+	if parts.size() != 2 or not parts[0].begins_with(GUEST_PREFIX) or parts[1].length() < 12:
+		return "invalid"
+	var headers := PackedStringArray(["apikey: " + KEY, "Content-Type: application/json"])
+	var reply := await _raw(HTTPClient.METHOD_POST, URL + "/auth/v1/token?grant_type=password", headers, JSON.stringify({"email": parts[0] + ACCOUNT_DOMAIN, "password": parts[1]}))
+	if int(reply["code"]) == 0:
+		return "offline"
+	if not _store_session(reply):
+		return "wrong"
+	guest_key = key.strip_edges()
+	Platform.storage_set(GUEST_KEY, guest_key)
+	friend_code = ""
+	moved_away = false
+	return "ok"
+
+
 func has_code() -> bool:
 	return not friend_code.is_empty()
 
@@ -127,6 +186,8 @@ func sync_profile() -> bool:
 		await _sync_badge()
 		if recovery_code.is_empty():
 			queue_upload()
+		if email.is_empty() and guest_key.is_empty():
+			_ensure_guest_key()
 	return has_code()
 
 
@@ -336,7 +397,7 @@ static func clean_login(text: String) -> String:
 ## "ok", "taken", "weak", "invalid", "confirm" (в Supabase включено подтверждение почты) или "offline".
 func register_account(login: String, password: String) -> String:
 	var name := clean_login(login)
-	if name.is_empty():
+	if name.is_empty() or name.begins_with(GUEST_PREFIX):
 		return "invalid"
 	if not await _ensure_session():
 		return "offline"
@@ -355,6 +416,8 @@ func register_account(login: String, password: String) -> String:
 	if user is Dictionary and not str((user as Dictionary).get("new_email", "")).is_empty():
 		return "confirm"
 	_remember_email(name)
+	guest_key = ""
+	Platform.storage_set(GUEST_KEY, "")
 	return "ok"
 
 
@@ -372,6 +435,8 @@ func login_account(login: String, password: String) -> String:
 	_remember_email(name)
 	friend_code = ""
 	moved_away = false
+	guest_key = ""
+	Platform.storage_set(GUEST_KEY, "")
 	recovery_code = ""
 	Platform.storage_set(RECOVERY_KEY, "")
 	return "ok"
@@ -380,7 +445,7 @@ func login_account(login: String, password: String) -> String:
 ## Выход: прогресс сперва уходит в облако, затем на устройстве остаётся чистая игра. Вернуться можно логином и паролем.
 func logout() -> void:
 	await upload_save()
-	for key in [SESSION_KEY, LOST_KEY, RECOVERY_KEY, EMAIL_KEY, BADGE_SECRET_KEY, BADGE_UID_KEY, SaveService.BADGE_KEY, "trk_badge_seen", "trk_acct_nag", SaveService.STORAGE_KEY]:
+	for key in [SESSION_KEY, LOST_KEY, RECOVERY_KEY, EMAIL_KEY, GUEST_KEY, BADGE_SECRET_KEY, BADGE_UID_KEY, SaveService.BADGE_KEY, "trk_badge_seen", "trk_acct_nag", SaveService.STORAGE_KEY]:
 		Platform.storage_set(key, "")
 	Platform.reload_clean()
 
@@ -603,6 +668,13 @@ func _ensure_session() -> bool:
 				_access = ""
 				# Сервер больше не принимает сессию. Молча заводить нового енота нельзя: аккаунт «менялся бы» у игрока.
 				# С логином просим войти заново; у гостя есть код восстановления — переносим его аккаунт на новую сессию.
+				if not guest_key.is_empty():
+					var parts := guest_key.split(".")
+					if parts.size() == 2:
+						var again := await _raw(HTTPClient.METHOD_POST, URL + "/auth/v1/token?grant_type=password", headers, JSON.stringify({"email": parts[0] + ACCOUNT_DOMAIN, "password": parts[1]}))
+						if _store_session(again):
+							_session_busy = false
+							return true
 				if not email.is_empty():
 					session_lost = true
 					session_lost_changed.emit()

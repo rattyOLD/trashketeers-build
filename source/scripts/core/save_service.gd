@@ -38,6 +38,7 @@ const DEFAULTS := {
 	"nell_order": {},
 	"story_best": {},
 	"story_choice": {},
+	"story_resume": {},
 	"friends": {},
 	"invite_used": "",
 	"invite_paid": [],
@@ -1376,6 +1377,31 @@ func friend_best(mission_id: String) -> Dictionary:
 func record_story_best(mission_id: String, score: int) -> void:
 	var best: Dictionary = data["story_best"]
 	best[mission_id] = maxi(score, int(best.get(mission_id, 0)))
+
+
+## Чекпоинт сюжетной миссии: продолжить после вылета, сворачивания или выхода. Живёт неделю.
+const STORY_RESUME_MAX_AGE := 7 * 24 * 3600
+var resume_requested := false
+
+
+func story_resume(mission_id: String) -> Dictionary:
+	var d: Dictionary = data.get("story_resume", {})
+	if str(d.get("mission", "")) != mission_id:
+		return {}
+	if int(Time.get_unix_time_from_system()) - int(d.get("saved", 0)) > STORY_RESUME_MAX_AGE:
+		return {}
+	return d
+
+
+func set_story_resume(d: Dictionary) -> void:
+	data["story_resume"] = d
+	save_data()
+
+
+func clear_story_resume() -> void:
+	if not (data.get("story_resume", {}) as Dictionary).is_empty():
+		data["story_resume"] = {}
+		save_data()
 
 
 func story_choice(mission_id: String) -> String:

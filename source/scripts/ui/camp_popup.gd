@@ -20,6 +20,7 @@ const ITEMS: Array[Dictionary] = [
 
 var _balance: Label
 var _list: VBoxContainer
+var _resume: Button
 
 
 func _init() -> void:
@@ -31,8 +32,15 @@ func _init() -> void:
 	note.custom_minimum_size = Vector2(520, 0)
 	content.add_child(note)
 	_list = MenuPopups.scroll_list(content)
+	_resume = UiStyle.button("ПРОДОЛЖИТЬ С ЧЕКПОИНТА", Color("#1d8fb0"), 26, Vector2(0, 70))
+	_resume.pressed.connect(func() -> void:
+		SaveService.resume_requested = true
+		close()
+		departed.emit())
+	content.add_child(_resume)
 	var go := UiStyle.button("В ПУТЬ", Color("#2fae5f"), 30, Vector2(0, 76))
 	go.pressed.connect(func() -> void:
+		SaveService.resume_requested = false
 		close()
 		departed.emit())
 	content.add_child(go)
@@ -40,6 +48,10 @@ func _init() -> void:
 
 func _refresh() -> void:
 	_balance.text = "Баланс: " + SaveService.format_coins(SaveService.get_nuts())
+	var resume := SaveService.story_resume("m1")
+	_resume.visible = not resume.is_empty()
+	if not resume.is_empty():
+		_resume.text = "ПРОДОЛЖИТЬ: ЗОНА %d · ЖИЗНИ %d" % [int(resume.get("zone", 0)) + 1, int(resume.get("lives", 3))]
 	MenuPopups.clear(_list)
 	for trader_id in TRADERS:
 		_list.add_child(_trader_card(trader_id))

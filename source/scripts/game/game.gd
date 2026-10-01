@@ -265,6 +265,10 @@ func start(_weapon_id: StringName = &"") -> void:
 			hud.set_story_layout(minimap)
 			minimap.set_story(story)
 			story.on_start()
+			var resume := SaveService.story_resume(story_mission) if SaveService.resume_requested else {}
+			SaveService.resume_requested = false
+			if not resume.is_empty():
+				story.resume_from(resume)
 		else:
 			story.queue_free()
 			story = null

@@ -46,6 +46,14 @@ func is_targetable() -> bool:
 	return hp > 0.0
 
 
+## Тайник уже вскрыт в прошлом заходе (продолжение с чекпоинта): без награды и эффектов.
+func break_silently() -> void:
+	hp = 0.0
+	collision_layer = 0
+	_shape.set_deferred("disabled", true)
+	queue_redraw()
+
+
 func take_damage(amount: float, _direction: Vector2 = Vector2.ZERO, _is_crit: bool = false) -> void:
 	if hp <= 0.0:
 		return

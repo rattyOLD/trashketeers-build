@@ -223,15 +223,16 @@ func _build_online(list: VBoxContainer) -> void:
 	keep.pressed.connect(func() -> void:
 		keep.disabled = true
 		_say("Готовлю ссылку...")
-		var code := await Cloud.upload_save()
+		await Cloud.upload_save()
 		if not is_instance_valid(keep):
 			return
 		keep.disabled = false
 		var base := Platform.page_url()
-		if code.is_empty() or base.is_empty():
+		var param := Cloud.entry_link_param()
+		if param.is_empty() or base.is_empty():
 			_say("Нет связи с сервером. Попробуй позже")
 			return
-		_say(Platform.share("Моя ссылка-вход в Trash Squad. Сохрани её в «Избранное»: если аккаунт слетит, открой ссылку, и прогресс вернётся.", "%s?restore=%s" % [base, code.uri_encode()])))
+		_say(Platform.share("Моя ссылка-вход в Trash Squad. Сохрани её в «Избранное»: открыв её на любом устройстве, попадёшь в этот же аккаунт.", "%s?%s" % [base, param])))
 	list.add_child(keep)
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)

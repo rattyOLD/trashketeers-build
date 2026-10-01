@@ -30,7 +30,7 @@ func _init() -> void:
 	_foes = _foes_chip.get_meta("value")
 	_foes_chip.visible = false
 	_score_chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_score_chip.size_stretch_ratio = 1.5
+	_score_chip.size_flags_stretch_ratio = 1.5
 
 
 func chips() -> Array[Control]:

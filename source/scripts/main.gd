@@ -106,6 +106,24 @@ func _accept_card_link() -> void:
 	var restore := Platform.consume_url_param("restore")
 	if not restore.is_empty() and restore.strip_edges().to_upper() == Platform.storage_get(Cloud.RECOVERY_KEY).to_upper():
 		restore = ""
+	var guest := Platform.consume_url_param("g").strip_edges()
+	if not guest.is_empty() and guest != Cloud.guest_key and not Cloud.has_email():
+		_toast_note("Захожу в твой аккаунт...")
+		var entered := await Cloud.login_guest(guest)
+		if entered == "ok":
+			var cloud := await Cloud.fetch_cloud_save()
+			var saved := str(cloud["text"])
+			var theirs := SaveService.parse_backup(saved)
+			if bool(cloud["ok"]) and not theirs.is_empty() and SaveService.score_of(theirs) >= SaveService.progress_score():
+				SaveService.import_code(saved)
+			await Cloud.sync_profile()
+			_toast_note("Ты в своём аккаунте. Здесь и на другом устройстве теперь один енот")
+			_show_menu()
+		elif entered == "offline":
+			_toast_note("Нет связи с сервером. Открой ссылку ещё раз, когда появится интернет")
+		else:
+			_toast_note("Ссылка-вход не подошла. Возьми свежую в профиле на старом устройстве")
+		return
 	var login := Platform.consume_url_param("login").strip_edges().to_lower()
 	if not login.is_empty() and login != Cloud.email:
 		_ask_login(login)
