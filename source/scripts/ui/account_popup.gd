@@ -5,6 +5,7 @@ extends GlassPopup
 
 var _status: Label
 var _body: VBoxContainer
+var intro := ""
 
 
 func _init() -> void:
@@ -49,7 +50,7 @@ func _render_logged() -> void:
 
 
 func _render_guest() -> void:
-	_say("Придумай логин и пароль, и прогресс не пропадёт при очистке браузера или смене телефона. Почта не нужна.")
+	_say(intro if not intro.is_empty() else "Придумай логин и пароль, и прогресс не пропадёт при очистке браузера или смене телефона. Почта не нужна.")
 	var login_edit := _edit("Логин (латиница, цифры, _)", false)
 	_body.add_child(login_edit)
 	var pass_edit := _edit("Пароль (от 6 знаков)", true)

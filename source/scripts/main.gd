@@ -215,10 +215,27 @@ func _show_menu() -> void:
 	menu.raid_requested.connect(_start_raid, CONNECT_DEFERRED)
 	menu.story_requested.connect(_start_story, CONNECT_DEFERRED)
 	_swap_screen(menu)
+	_maybe_nag_account(menu)
 	if _debug_hash == "camp":
 		SaveService.add_nuts(1000)
 		menu._camp.open.call_deferred()
 		_debug_hash = ""
+
+
+## После первого забега (и ещё раз после пятого) один раз просим завести аккаунт: иначе прогресс может пропасть.
+func _maybe_nag_account(menu: MainMenuUI) -> void:
+	if not Platform.is_web or Cloud.has_email() or not _debug_hash.is_empty():
+		return
+	var runs := SaveService.get_stat("runs")
+	var shown := int(Platform.storage_get("trk_acct_nag"))
+	if runs < 1 or shown >= 2 or (shown == 1 and runs < 5):
+		return
+	Platform.storage_set("trk_acct_nag", str(shown + 1))
+	menu._account.intro = "Первый забег позади, енот! Заведи логин и пароль, и прогресс не пропадёт, даже если телефон сойдёт с ума или браузер всё забудет."
+	get_tree().create_timer(1.2).timeout.connect(func() -> void:
+		if is_instance_valid(menu):
+			menu._account.open()
+			menu._account.intro = "")
 
 
 func _start_game(weapon_id: StringName) -> void:

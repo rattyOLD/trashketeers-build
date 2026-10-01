@@ -217,7 +217,7 @@ func _build_online(list: VBoxContainer) -> void:
 			DisplayServer.clipboard_set(Cloud.friend_code)
 			_say("ID скопирован. Отправь его другу"))
 	list.add_child(copy)
-	var keep := UiStyle.button("Ссылка-вход: вернуть аккаунт, если слетит", UiStyle.HOT, 21, Vector2(0, 58))
+	var keep := UiStyle.button("Ссылка-вход (личная, не для друзей): отправить себе", UiStyle.HOT, 21, Vector2(0, 58))
 	keep.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	keep.pressed.connect(func() -> void:
 		keep.disabled = true

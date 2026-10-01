@@ -858,6 +858,8 @@ class Profile:
 
 	## Крупный код восстановления: нажал и скопировал. После любого сброса прогресс возвращается им.
 	func _recovery_bar() -> Control:
+		var box := VBoxContainer.new()
+		box.add_theme_constant_override("separation", 6)
 		var code := Cloud.recovery_code
 		var b := UiStyle.button("", UiStyle.PANEL_LIGHT, 22, Vector2(0, 96))
 		b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -868,9 +870,20 @@ class Profile:
 				return
 			DisplayServer.clipboard_set(Cloud.recovery_code)
 			b.text = "Код скопирован: %s\nСохрани его в заметки" % Cloud.recovery_code)
+		box.add_child(b)
+		var link := UiStyle.button("Скопировать ссылку-вход", UiStyle.PANEL_LIGHT, 21, Vector2(0, 54))
+		link.pressed.connect(func() -> void:
+			var base := Platform.page_url()
+			if Cloud.recovery_code.is_empty() or base.is_empty():
+				link.text = "Ссылки пока нет, подожди минуту"
+				return
+			DisplayServer.clipboard_set("%s?restore=%s" % [base, Cloud.recovery_code])
+			link.text = "Скопировано. Никому не показывай!")
+		box.add_child(link)
+		box.add_child(MenuPopups.small_hint("Ссылка-вход и код открывают твой аккаунт целиком. Никому их не показывай и не кидай в чаты, в отличие от визитки."))
 		if code.is_empty():
 			Cloud.upload_save()
-		return b
+		return box
 
 	func _rank_button() -> Control:
 		var have := SaveService.unlocked_ranks().size()
