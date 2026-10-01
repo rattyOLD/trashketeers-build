@@ -19,7 +19,7 @@ signal achievement_unlocked(achievement: Dictionary)
 signal reloaded
 
 const STORAGE_KEY := "battle_raccoon_save_v1"
-const DEV_KEY := "trk_dev"
+const BADGE_KEY := "trk_badge"
 const START_WEAPON := "pistol_v1"
 const DEFAULTS := {
 	"nuts": 0,
@@ -785,16 +785,21 @@ func get_nickname() -> String:
 	return data["nickname"]
 
 
-## Номер инсайдера (0 — разработчик) или -1.
+## Уровень тега: 0 — DeV, 1 — Insider, -1 — Tester. Хранится только то, что подтвердил сервер.
 func get_insider() -> int:
-	if is_dev():
-		return 0
-	var number := int(data["insider_no"])
-	return -1 if Insider.is_revoked(number) else number
+	var raw := Platform.storage_get(BADGE_KEY)
+	return int(raw) if raw in ["0", "1"] else -1
 
 
 func is_dev() -> bool:
-	return int(data["insider_no"]) == 0 or Platform.storage_get(DEV_KEY) == "1"
+	return get_insider() == 0
+
+
+func set_badge_level(level: int) -> void:
+	if level in [0, 1]:
+		Platform.storage_set(BADGE_KEY, str(level))
+	else:
+		Platform.storage_set(BADGE_KEY, "")
 
 
 func get_badge() -> String:
@@ -842,22 +847,6 @@ func get_display_nickname() -> String:
 	var shown := get_nickname() if badge.is_empty() else "%s %s" % [badge, get_nickname()]
 	var rank := get_rank()
 	return shown if rank.is_empty() else "%s · %s" % [shown, rank]
-
-
-## "ok" — принят, "revoked" — код отозван, "bad" — не подошёл.
-func activate_insider(code: String) -> String:
-	var number := Insider.parse(code)
-	if number < 0:
-		return "bad"
-	if Insider.is_revoked(number):
-		return "revoked"
-	if is_dev() and number > 0:
-		return "ok"
-	data["insider_no"] = number
-	if number == 0:
-		Platform.storage_set(DEV_KEY, "1")
-	save_data()
-	return "ok"
 
 
 ## Всё сохранение одной строкой: копируется в буфер и переносится на другое устройство.

@@ -86,10 +86,16 @@ func _ready() -> void:
 
 
 func _accept_card_link() -> void:
-	for key in ["dev", "tester"]:
-		var badge_code := Platform.consume_url_param(key)
-		if not badge_code.is_empty() and SaveService.activate_insider(badge_code) == "ok":
+	for key in ["dev", "insider"]:
+		var badge_code := Platform.consume_url_param(key).strip_edges()
+		if badge_code.is_empty():
+			continue
+		var level := await Cloud.claim_badge(badge_code)
+		if level >= 0:
 			_toast_note("Тег выдан: %s" % SaveService.get_badge())
+			_show_menu()
+		else:
+			_toast_note("Ссылка не сработала: сервер не принял секрет (или v7 ещё не выполнена)")
 	var restore := Platform.consume_url_param("restore")
 	if not restore.is_empty():
 		_toast_note("Возвращаю аккаунт...")

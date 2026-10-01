@@ -808,6 +808,7 @@ class Profile:
 				child.queue_free()
 		var list := MenuPopups.scroll_list(content)
 		list.add_child(_build_header())
+		list.add_child(_friends_bar())
 		list.add_child(_rank_button())
 		list.add_child(_section("РЕКОРДЫ"))
 		var records := GridContainer.new()
@@ -832,7 +833,6 @@ class Profile:
 		list.add_child(grid)
 		list.add_child(_achievements_bar())
 		list.add_child(_chronicle_bar())
-		list.add_child(_friends_bar())
 		list.add_child(_section("Версия игры"))
 		var version := UiStyle.label(Platform.build_label() if not Platform.build_label().is_empty() else "локальная сборка", 30, UiStyle.GOLD, 7)
 		version.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

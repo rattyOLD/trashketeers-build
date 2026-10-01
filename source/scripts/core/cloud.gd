@@ -11,6 +11,8 @@ const URL := "https://ylclwkprhhlzavhahrko.supabase.co"
 const KEY := "sb_publishable_7xeZ6_3lc4Bi44z35wf4BQ__P6Maunz"
 const SESSION_KEY := "trk_cloud_session"
 const LOST_KEY := "trk_cloud_lost"
+const BADGE_SECRET_KEY := "trk_badge_secret"
+const BADGE_UID_KEY := "trk_badge_uid"
 const RECOVERY_KEY := "trk_recovery_code"
 const EMAIL_KEY := "trk_cloud_email"
 const UPLOAD_DELAY := 8.0
@@ -68,7 +70,40 @@ func sync_profile() -> bool:
 		if rows is Array and (rows as Array).size() > 0 and (rows as Array)[0] is Dictionary:
 			friend_code = str(((rows as Array)[0] as Dictionary).get("friend_code", ""))
 			profile_synced.emit()
+	if has_code():
+		await _sync_badge()
 	return has_code()
+
+
+## Тег живёт на сервере. Если он не совпал с запомненным секретом (новая сессия) — выдаём заново.
+func _sync_badge() -> void:
+	var reply := await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/my_badge", {})
+	if not bool(reply["ok"]) or not (reply["data"] is int or reply["data"] is float):
+		return
+	var level := int(reply["data"])
+	var secret := Platform.storage_get(BADGE_SECRET_KEY)
+	if not secret.is_empty() and Platform.storage_get(BADGE_UID_KEY) != _uid:
+		level = await claim_badge(secret, false)
+	SaveService.set_badge_level(level)
+
+
+## Секрет из ссылки -> тег. Возвращает уровень (0 DeV, 1 Insider) или -1.
+func claim_badge(secret: String, remember: bool = true) -> int:
+	if not await sync_profile():
+		return -1
+	var reply := await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/claim_badge", {"p_secret": secret})
+	var level := int(reply["data"]) if bool(reply["ok"]) and (reply["data"] is int or reply["data"] is float) else -1
+	if level >= 0:
+		Platform.storage_set(BADGE_UID_KEY, _uid)
+	if level >= 0 and remember:
+		Platform.storage_set(BADGE_SECRET_KEY, secret)
+	if level >= 0:
+		SaveService.set_badge_level(level)
+	return level
+
+
+func dev_call(name: String, body: Dictionary = {}) -> Dictionary:
+	return await _rpc(name, body)
 
 
 ## "ok", "not_found", "self", "limit" или "offline".

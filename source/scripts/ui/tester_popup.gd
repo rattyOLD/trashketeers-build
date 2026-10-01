@@ -41,6 +41,16 @@ func _refresh() -> void:
 	_scroll = _list.get_parent().get_parent() as ScrollContainer
 	_restore_scroll.call_deferred(scroll_pos)
 
+	_section("СЕРВЕР")
+	var panel := UiStyle.button("ПАНЕЛЬ DeV: жалобы, стата, стоп-слова", UiStyle.HOT, 22, Vector2(0, 64))
+	_fit(panel)
+	panel.pressed.connect(func() -> void:
+		var dev := DevPopup.new()
+		add_child(dev)
+		dev.closed.connect(dev.queue_free)
+		dev.open())
+	_list.add_child(panel)
+
 	_section("ВЫДАЧА")
 	var grid := _grid()
 	_action(grid, "+100 000 монет", func() -> String:
