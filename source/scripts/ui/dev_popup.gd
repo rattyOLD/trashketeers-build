@@ -4,7 +4,7 @@ extends GlassPopup
 ## Все действия проверяются на сервере (is_dev по аккаунту), здесь только интерфейс.
 
 const HEALTH_RPCS := {
-	"my_badge": {}, "claim_badge": {"p_secret": "x"}, "inbox": {}, "list_requests": {}, "list_blocks": {}, "unread_total": {},
+	"my_badge": {}, "my_save": {}, "claim_badge": {"p_secret": "x"}, "inbox": {}, "list_requests": {}, "list_blocks": {}, "unread_total": {},
 	"request_friend": {"p_code": "ZZZZZZ"}, "friend_profile": {"p_code": "ZZZZZZ"}, "send_message": {"p_code": "ZZZZZZ", "p_body": ""},
 	"get_messages": {"p_code": "ZZZZZZ", "p_after": 0}, "dev_stats": {}, "dev_reports": {}, "dev_words": {}, "dev_badge_log": {},
 	"dev_password_log": {}, "dev_accounts": {"p_query": ""},

@@ -112,13 +112,26 @@ func _render_guest() -> void:
 			_say("Нет связи с сервером." if result == "offline" else "Логин или пароль не подошли.")
 			return
 		await Cloud.sync_profile()
-		var saved := await Cloud.my_save()
-		_refresh()
-		Cloud.upload_save()
-		if not saved.is_empty() and SaveService.import_code(saved):
+		var cloud := await Cloud.fetch_cloud_save()
+		if not bool(cloud["ok"]):
+			_refresh()
+			_say("Вход выполнен, но облачное сохранение не прочиталось (на сервере нет функции my_save или нет связи). Ничего не затёрто. Попроси DeV выполнить SQL v14 и войди ещё раз.")
+			return
+		var saved := str(cloud["text"])
+		var theirs := SaveService.parse_backup(saved)
+		var richer_cloud := not theirs.is_empty() and SaveService.score_of(theirs) >= SaveService.progress_score()
+		if richer_cloud and SaveService.import_code(saved):
+			_refresh()
+			Cloud.upload_save()
 			_say("Вход выполнен, прогресс, друзья и тег на месте.")
+		elif saved.is_empty():
+			_refresh()
+			Cloud.upload_save()
+			_say("Вход выполнен. В облаке этого аккаунта ещё пусто, твой текущий прогресс сохранён туда.")
 		else:
-			_say("Вход выполнен. В облаке пока нет сохранения, играй: оно появится само."))
+			_refresh()
+			Cloud.upload_save()
+			_say("Вход выполнен. На этом устройстве прогресса больше, чем в облаке, он сохранён в аккаунт."))
 	_body.add_child(login)
 	_body.add_child(MenuPopups.small_hint("Запиши пароль: мы его не видим и вернуть не сможем. Если забудешь, поможет только DeV (сбросит на временный)."))
 

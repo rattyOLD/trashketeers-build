@@ -166,14 +166,32 @@ func queue_upload() -> void:
 
 
 ## Кладёт сохранение в облако и возвращает код восстановления (пусто, если связи нет).
+## Защита от потери прогресса: перед записью смотрим, что лежит в облаке. Если облако богаче (на новом устройстве
+## пустая игра), забираем его вместо перезаписи. Если проверить не удалось (нет функции my_save), не пишем ничего.
 func upload_save() -> String:
 	if not await sync_profile():
 		return ""
+	var cloud := await fetch_cloud_save()
+	if not bool(cloud["ok"]):
+		return recovery_code
+	var cloud_text := str(cloud["text"])
+	if not cloud_text.is_empty():
+		var theirs := SaveService.parse_backup(cloud_text)
+		if not theirs.is_empty() and SaveService.score_of(theirs) > SaveService.progress_score():
+			SaveService.import_code(cloud_text)
 	var result := await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/upload_save", {"p_data": SaveService.export_code()})
 	if bool(result["ok"]) and result["data"] is String and not str(result["data"]).is_empty():
 		recovery_code = str(result["data"])
 		Platform.storage_set(RECOVERY_KEY, recovery_code)
 	return recovery_code
+
+
+## {"ok": bool, "text": String}: ok=false, если функции my_save нет на сервере или нет связи; пустой text — в облаке пусто.
+func fetch_cloud_save() -> Dictionary:
+	var result := await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/my_save", {})
+	if not bool(result["ok"]):
+		return {"ok": false, "text": ""}
+	return {"ok": true, "text": str(result["data"]) if result["data"] is String else ""}
 
 
 ## Возвращает код сохранения из облака по коду восстановления или пустую строку.

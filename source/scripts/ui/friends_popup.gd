@@ -319,13 +319,13 @@ func _load_online() -> void:
 		var legacy := await Cloud.list_friends()
 		if not is_instance_valid(_online_box):
 			return
-		_online_note.text = "Друзья по коду видят твой ник и рекорд волны." if bool(legacy["ok"]) else "Нет связи с сервером. Остальное в игре работает как обычно."
+		_online_note.text = "Друзья по коду видят твой ник и рекорд волны." if bool(legacy["ok"]) else "Нет связи с сервером (%s). Остальное в игре работает как обычно." % Cloud.last_error
 		for item in legacy["items"] as Array:
 			if item is Dictionary:
 				_online_box.add_child(_online_row(item as Dictionary))
 		return
 	if not bool(result["ok"]):
-		_online_note.text = "Нет связи с сервером. Остальное в игре работает как обычно."
+		_online_note.text = "Нет связи с сервером (%s). Остальное в игре работает как обычно." % Cloud.last_error
 		return
 	var requests := await Cloud.list_requests()
 	if not is_instance_valid(_online_box):

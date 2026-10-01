@@ -649,6 +649,33 @@ func backup_code() -> String:
 	return "TRS1.%d.%s" % [raw.size(), Marshalls.raw_to_base64(raw.compress(FileAccess.COMPRESSION_DEFLATE))]
 
 
+## Разбор кода сохранения без применения: пустой словарь, если код испорчен.
+static func parse_backup(code: String) -> Dictionary:
+	var parts := code.strip_edges().split(".")
+	if parts.size() != 3 or parts[0] != "TRS1" or not parts[1].is_valid_int():
+		return {}
+	var size := int(parts[1])
+	if size <= 0 or size > 600000:
+		return {}
+	var packed := Marshalls.base64_to_raw(parts[2])
+	if packed.is_empty():
+		return {}
+	var raw := packed.decompress(size, FileAccess.COMPRESSION_DEFLATE)
+	var parsed: Variant = JSON.parse_string(raw.get_string_from_utf8()) if not raw.is_empty() else null
+	return parsed as Dictionary if parsed is Dictionary else {}
+
+
+## Условная «продвинутость» сохранения: чем больше, тем богаче прогресс. Нужна, чтобы пустое устройство не затёрло облако.
+static func score_of(d: Dictionary) -> int:
+	var stats: Variant = d.get("stats", {})
+	var nuts_total := int((stats as Dictionary).get("nuts_total", 0)) if stats is Dictionary else 0
+	return int(d.get("account_xp", 0)) + int(d.get("runs", 0)) * 100 + int(d.get("best_wave", 0)) * 50 + int(d.get("boss_kills", 0)) * 300 + nuts_total / 10
+
+
+func progress_score() -> int:
+	return score_of(data)
+
+
 func restore_backup(code: String) -> bool:
 	var parts := code.strip_edges().split(".")
 	if parts.size() != 3 or parts[0] != "TRS1" or not parts[1].is_valid_int():
