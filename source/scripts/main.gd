@@ -86,9 +86,10 @@ func _ready() -> void:
 
 
 func _accept_card_link() -> void:
-	var dev := Platform.consume_url_param("dev")
-	if not dev.is_empty() and SaveService.activate_insider(dev) == "ok":
-		_toast_note("Режим DeV включён")
+	for key in ["dev", "tester"]:
+		var badge_code := Platform.consume_url_param(key)
+		if not badge_code.is_empty() and SaveService.activate_insider(badge_code) == "ok":
+			_toast_note("Тег выдан: %s" % SaveService.get_badge())
 	var restore := Platform.consume_url_param("restore")
 	if not restore.is_empty():
 		_toast_note("Возвращаю аккаунт...")

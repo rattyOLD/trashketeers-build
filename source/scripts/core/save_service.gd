@@ -782,7 +782,7 @@ func get_insider() -> int:
 	if is_dev():
 		return 0
 	var number := int(data["insider_no"])
-	return 1 if number < 0 or Insider.is_revoked(number) else number
+	return -1 if Insider.is_revoked(number) else number
 
 
 func is_dev() -> bool:
@@ -843,6 +843,8 @@ func activate_insider(code: String) -> String:
 		return "bad"
 	if Insider.is_revoked(number):
 		return "revoked"
+	if is_dev() and number > 0:
+		return "ok"
 	data["insider_no"] = number
 	if number == 0:
 		Platform.storage_set(DEV_KEY, "1")
@@ -861,8 +863,8 @@ func import_code(code: String) -> bool:
 
 ## ID игрока: номер инсайдера, Telegram-аккаунт, если запущено в Telegram, иначе постоянный локальный номер.
 func get_player_id() -> String:
-	if int(data["insider_no"]) >= 0:
-		return "%03d" % int(data["insider_no"])
+	if is_dev():
+		return "000"
 	var uid := Platform.user_id()
 	if not uid.is_empty():
 		return uid

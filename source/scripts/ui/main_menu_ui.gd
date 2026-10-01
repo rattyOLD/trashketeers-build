@@ -468,7 +468,8 @@ func _build_stage() -> Control:
 			stage.add_child(_make_side_button(spec[0], spec[1], spec[2], true, 6.0, spec[3], i, 76.0))
 	for key in (["vip"] if Orient.portrait else ["gift", "chest", "news", "vip"]):
 		(_side_buttons[key]["caption"] as Label).visible = true
-	stage.add_child(_build_tester_button())
+	if SaveService.is_dev():
+		stage.add_child(_build_tester_button())
 	stage.gui_input.connect(func(event: InputEvent) -> void:
 		var tapped: bool = (event is InputEventMouseButton and event.pressed) or (event is InputEventScreenTouch and event.pressed)
 		if tapped:
