@@ -854,12 +854,12 @@ func _show_mini_card(name: String, boss_id: String, at: Vector2) -> void:
 	panel.chosen.connect(func(index: int) -> void: _on_mini_choice(index, name, at, boss_id))
 	panel.open({
 		"title": "%s на коленях" % name,
-		"text": "«Только не добивай! Я заплачу! Или расскажу, где пиво!» Решай, енот.",
+		"text": "«Не добивай! Заплачу! Или скажу, где пиво!»",
 		"color": "#ffb020",
 		"image": _surrender_art(boss_id),
 		"options": [
-			{"label": "ПОЩАДИТЬ", "icon": "res://assets/story/surrender/choice_spare.png", "note": "Полное лечение, бесплатный реролл, редкий ствол."},
-			{"label": "ОГРАБИТЬ", "icon": "res://assets/story/surrender/choice_loot.png", "note": "Эпический ствол и +50% неонита. Без лечения."},
+			{"label": "ПОЩАДИТЬ", "icon": "res://assets/story/surrender/choice_spare.png", "bullets": ["Полное лечение", "Бесплатный реролл", "Редкий ствол"]},
+			{"label": "ОГРАБИТЬ", "icon": "res://assets/story/surrender/choice_loot.png", "bullets": ["Эпический ствол", "+50% неонита", "-Без лечения"]},
 		]})
 
 

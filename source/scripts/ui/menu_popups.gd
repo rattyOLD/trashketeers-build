@@ -36,6 +36,13 @@ static func scroll_list(parent: Control) -> VBoxContainer:
 	return list
 
 
+static func small_hint(text: String) -> Label:
+	var hint := UiStyle.label(text, 17, UiStyle.TEXT_DIM, 4)
+	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	return hint
+
+
 static func section_card(list: Control, title: String) -> VBoxContainer:
 	var panel := PanelContainer.new()
 	panel.add_theme_stylebox_override("panel", UiStyle.box(UiStyle.PANEL, UiStyle.OUTLINE, 3, 20))
@@ -108,19 +115,18 @@ class Settings:
 		_lite = MenuWidgets.PawToggle.new("Упрощённые эффекты", SaveService.is_fx_lite())
 		_lite.toggled.connect(func(on: bool) -> void: SaveService.set_flag("fx_lite", on))
 		graphics.add_child(_lite)
+		graphics.add_child(MenuPopups.small_hint("Меньше частиц и свечения. Помогает слабым телефонам."))
 		var eco := MenuWidgets.PawToggle.new("Экономия заряда", bool(SaveService.data.get("eco_fps", false)))
 		eco.toggled.connect(func(on: bool) -> void:
 			SaveService.set_flag("eco_fps", on)
 			SaveService.apply_quality())
 		graphics.add_child(eco)
+		graphics.add_child(MenuPopups.small_hint("Телефон меньше греется. Включи, если игра лагает."))
 		var haptics := MenuWidgets.PawToggle.new("Вибрация", bool(SaveService.data.get("haptics", true)))
 		haptics.toggled.connect(func(on: bool) -> void:
 			SaveService.set_flag("haptics", on)
 			Platform.haptic("medium"))
 		graphics.add_child(haptics)
-		var eco_hint := UiStyle.label("Телефон меньше греется и дольше держит заряд. Включи, если игра лагает или нагревает телефон.", 19, UiStyle.TEXT_DIM, 4)
-		eco_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		graphics.add_child(eco_hint)
 		_fps = MenuWidgets.PawToggle.new("Счётчик FPS", bool(SaveService.data["show_fps"]))
 		_fps.toggled.connect(func(on: bool) -> void: SaveService.set_flag("show_fps", on))
 		graphics.add_child(_fps)
@@ -130,25 +136,15 @@ class Settings:
 		_min_hud = MenuWidgets.PawToggle.new("Минимальный худ", bool(SaveService.data.get("min_hud", false)))
 		_min_hud.toggled.connect(func(on: bool) -> void: SaveService.set_flag("min_hud", on))
 		graphics.add_child(_min_hud)
-		_nearest = MenuWidgets.PawToggle.new("Цель: только ближайшая", bool(SaveService.data.get("target_nearest", false)))
-		_nearest.toggled.connect(func(on: bool) -> void: SaveService.set_flag("target_nearest", on))
-		graphics.add_child(_nearest)
-		var near_hint := UiStyle.label("Выкл: автоприцел сначала берёт боссов и стрелков. Вкл: всегда ближайшего врага.", 19, UiStyle.TEXT_DIM, 4)
-		near_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		graphics.add_child(near_hint)
-		var min_hint := UiStyle.label("В бою только здоровье, пауза, таймер, монеты и кнопки. Без заказа, счётчиков врагов и лута.", 19, UiStyle.TEXT_DIM, 4)
-		min_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		graphics.add_child(min_hint)
+		graphics.add_child(MenuPopups.small_hint("В бою только здоровье, пауза, таймер и монеты."))
 		if Platform.fullscreen_supported():
 			_fullscreen = MenuWidgets.PawToggle.new("На весь экран", Platform.is_fullscreen())
 			_fullscreen.toggled.connect(func(on: bool) -> void: Platform.set_fullscreen(on))
 			graphics.add_child(_fullscreen)
 		else:
-			var fs_hint := UiStyle.label("Браузер iPhone не умеет полный экран. Открой «Поделиться» и выбери «На экран Домой»: игра запустится без адресной строки.", 19, UiStyle.TEXT_DIM, 4)
-			fs_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			graphics.add_child(fs_hint)
+			graphics.add_child(MenuPopups.small_hint("iPhone: «Поделиться» → «На экран Домой», тогда игра пойдёт на весь экран."))
 		var backup := MenuPopups.section_card(list, "СОХРАНЕНИЕ")
-		var backup_hint := UiStyle.label("Код хранит весь прогресс: ник, монеты, оружие, сюжет, номер тестера. Скопируй его заранее. На iPhone игра в Safari и значок «На экран Домой» хранят прогресс раздельно, код переносит его между ними и на другие устройства.", 19, UiStyle.TEXT_DIM, 4)
+		var backup_hint := UiStyle.label("Код хранит весь прогресс. Safari и значок на экране Домой хранят его раздельно, код переносит между ними и на другие устройства.", 19, UiStyle.TEXT_DIM, 4)
 		backup_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		backup.add_child(backup_hint)
 		var copy_button := UiStyle.button("СКОПИРОВАТЬ КОД СОХРАНЕНИЯ", UiStyle.PANEL_LIGHT, 22, Vector2(0, 66))
@@ -175,7 +171,7 @@ class Settings:
 			var install := UiStyle.button("УСТАНОВИТЬ ИГРУ НА ТЕЛЕФОН", UiStyle.PANEL_LIGHT, 22, Vector2(0, 72))
 			install.pressed.connect(Platform.install_app)
 			graphics.add_child(install)
-			var install_hint := UiStyle.label("Игра встанет иконкой на экран и будет открываться сразу на весь экран, без адресной строки.", 19, UiStyle.TEXT_DIM, 4)
+			var install_hint := UiStyle.label("Иконка на экране, запуск без адресной строки.", 19, UiStyle.TEXT_DIM, 4)
 			install_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			graphics.add_child(install_hint)
 		var controls := MenuPopups.section_card(list, "УПРАВЛЕНИЕ")
@@ -190,15 +186,17 @@ class Settings:
 		keys_button.pressed.connect(func() -> void: _keys.open())
 		controls_row.add_child(keys_button)
 		controls.add_child(controls_row)
+		controls.add_child(MenuPopups.small_hint("Стрельба автоматическая. Держи палец справа, чтобы целиться самому."))
 		_tips = MenuWidgets.PawToggle.new("Подсказки в сюжете", Tips.enabled())
 		_tips.toggled.connect(func(on: bool) -> void: Tips.set_enabled(on))
 		controls.add_child(_tips)
 		_auto_pick = MenuWidgets.PawToggle.new("Автоподбор оружия", bool(Controls.get_value("auto_pick")))
 		_auto_pick.toggled.connect(func(on: bool) -> void: Controls.set_value("auto_pick", on))
 		controls.add_child(_auto_pick)
-		var fire_hint := UiStyle.label("Автоатака: енот сам стреляет в ближайшего врага. Если держишь палец на правой части экрана, стреляет туда, куда держишь.", 19, UiStyle.TEXT_DIM, 4)
-		fire_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		controls.add_child(fire_hint)
+		_nearest = MenuWidgets.PawToggle.new("Цель: только ближайшая", bool(SaveService.data.get("target_nearest", false)))
+		_nearest.toggled.connect(func(on: bool) -> void: SaveService.set_flag("target_nearest", on))
+		controls.add_child(_nearest)
+		controls.add_child(MenuPopups.small_hint("Выкл: сначала боссы и стрелки. Вкл: всегда ближайший враг."))
 		var slots_row := HBoxContainer.new()
 		slots_row.add_theme_constant_override("separation", 10)
 		var slots_label := UiStyle.label("Слоты оружия", 26, UiStyle.TEXT, 6)
@@ -257,7 +255,7 @@ class Settings:
 		if SaveService.has_slot3():
 			_slot_hint.text = "Третий слот открыт"
 		elif not _slot_confirm:
-			_slot_hint.text = "Третий слот оружия — за %s. Копится за ачивки и ежедневные награды." % Economy.format_gems(SaveService.SLOT3_PRICE)
+			_slot_hint.text = "Третий слот: %s" % Economy.format_gems(SaveService.SLOT3_PRICE)
 		for i in _slot_buttons.size():
 			var color := UiStyle.NEON.darkened(0.25) if Controls.weapon_slot_count() == i + 2 else UiStyle.PANEL_LIGHT
 			for state in ["normal", "hover"]:

@@ -24,10 +24,9 @@ func _init() -> void:
 		rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		row.add_child(rect)
-	content.add_child(_line("Тут нет миссий и босса в конце. Есть арена, волны врагов и ты. Стреляешь куда держишь палец, враги не заканчиваются, пока не закончишься ты.", UiStyle.TEXT))
-	content.add_child(_line("Каждая волна злее прошлой. Каждые 5 волн приходит мини-босс: добей и выбери, пощадить его ради удачи или обобрать до трусов.", UiStyle.TEXT_DIM))
-	content.add_child(_line("Между волнами можно выдохнуть секунды две. Нэлл каждый день даёт заказ с наградой, он висит слева сверху.", UiStyle.TEXT_DIM))
-	content.add_child(_line("Рекорд волны сохраняется. Друзья его видят. Радуйся тихо.", UiStyle.GOLD))
+	content.add_child(_line("Арена, волны врагов и ты. Они не кончаются, пока не кончишься ты.", UiStyle.TEXT))
+	content.add_child(_line("Каждые 5 волн мини-босс: пощади ради удачи или обери до трусов.", UiStyle.TEXT_DIM))
+	content.add_child(_line("Заказ Нэлл с наградой висит слева сверху. Рекорд волны видят друзья.", UiStyle.TEXT_DIM))
 	_taunt = _line("", Color("#ff7ae0"))
 	content.add_child(_taunt)
 	var go := UiStyle.button("ПОНЯТНО", Color("#2fae5f"), 28, Vector2(0, 72))
@@ -38,11 +37,11 @@ func _init() -> void:
 func _refresh() -> void:
 	var done := SaveService.get_stat("story_missions")
 	if SaveService.story_shards() >= 6:
-		_taunt.text = "Сюжет пройден, Король повержен, город спасён. А тебе мало? Ладно, садист. Здесь тебя никто не пожалеет, и я в первую очередь."
+		_taunt.text = "Король повержен, город спасён. Тебе мало? Ладно, садист. Здесь тебя никто не пожалеет."
 	elif done >= 1:
-		_taunt.text = "Сюжет ещё не закончен, а ты уже здесь? Убежал от сюжета, потому что слабак? Нэлл всё запомнила, а Король Хлама уже смеётся."
+		_taunt.text = "Сюжет не кончен, а ты уже тут? Сбежал, слабак? Нэлл всё запомнила."
 	else:
-		_taunt.text = "Ты открыл это раньше сюжета. Тестер, да? Тогда ладно."
+		_taunt.text = "Раньше сюжета влез? Тестер, значит. Иди ищи баги, а не славу, багоёб хренов. Сломаешь что-нибудь, я тебя найду."
 
 
 func _line(text: String, color: Color) -> Label:

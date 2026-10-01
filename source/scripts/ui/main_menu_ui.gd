@@ -665,7 +665,6 @@ func _build_nav() -> Control:
 	row.add_theme_constant_override("separation", 10)
 	var items := [
 		[MenuWidgets.NavButton.Kind.UPGRADES, "ПРОКАЧКА", Color("#ff4d6d"), func() -> void: _upgrades.open(), "upgrade"],
-		[MenuWidgets.NavButton.Kind.ACHIEVEMENTS, "ПРОПУСК", Color("#ffb020"), func() -> void: _pass.open(), "pass"],
 		[MenuWidgets.NavButton.Kind.SKINS, "ГЕРОИ", Color("#00e5ff"), func() -> void: _shop.open(), "hero"],
 		[MenuWidgets.NavButton.Kind.OUTFITS, "СКИНЫ", Color("#ff5ce1"), func() -> void: _skins.open(), "outfit"],
 	]
@@ -740,8 +739,13 @@ func _refresh() -> void:
 	_set_side_alert("news", ChangelogPopup.has_unseen())
 	if _nav_pass != null:
 		_nav_pass.badge = BattlePass.has_unclaimed()
-		_season_pill.visible = not BattlePass.is_claimed("prem", 1)
 		_nav_pass.queue_redraw()
+	if not BattlePass.is_claimed("prem", 1):
+		_season_pill.text = "СЕЗОН: РЕЛЬСОТРОН В ПРОПУСКЕ"
+	elif BattlePass.has_unclaimed():
+		_season_pill.text = "ПРОПУСК: ЕСТЬ НАГРАДЫ!"
+	else:
+		_season_pill.text = "БОЕВОЙ ПРОПУСК"
 	_set_side_alert("vip", false)
 	if _nav_upgrades != null:
 		_nav_upgrades.badge = _can_afford_perk()
