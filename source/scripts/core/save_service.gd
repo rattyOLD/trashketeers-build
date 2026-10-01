@@ -17,6 +17,8 @@ signal changed
 signal achievement_unlocked(achievement: Dictionary)
 ## Прогресс заменён более свежей облачной копией — экраны перечитывают данные.
 signal reloaded
+## Тег DeV/Insider пришёл с сервера или снят: меню перерисовывает ник и кнопку тестера.
+signal badge_changed
 
 const STORAGE_KEY := "battle_raccoon_save_v1"
 const BADGE_KEY := "trk_badge"
@@ -833,10 +835,13 @@ func is_dev() -> bool:
 
 
 func set_badge_level(level: int) -> void:
+	var before := get_insider()
 	if level in [0, 1]:
 		Platform.storage_set(BADGE_KEY, str(level))
 	else:
 		Platform.storage_set(BADGE_KEY, "")
+	if get_insider() != before:
+		badge_changed.emit()
 
 
 func get_badge() -> String:

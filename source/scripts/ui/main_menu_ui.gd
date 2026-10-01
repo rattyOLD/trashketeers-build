@@ -52,6 +52,8 @@ var _settings: MenuPopups.Settings
 var _shop: HeroPopup
 var _skins: MenuPopups.Shop
 var _tester: TesterPopup
+var _stage: Control
+var _tester_button: Button
 var _chests: ChestsPopup
 var _changelog: ChangelogPopup
 var _armory: MenuPopups.Armory
@@ -141,6 +143,7 @@ func _build() -> void:
 	_currency.changed.connect(_refresh)
 	_daily = DailyPopup.new()
 	_daily.claimed.connect(_refresh)
+	SaveService.badge_changed.connect(_refresh)
 	_editor = ControlEditor.new()
 	add_child(_editor)
 	_settings.editor_requested.connect(func() -> void: _editor.open())
@@ -400,6 +403,19 @@ func _set_side_alert(key: String, alert: bool, caption_text: String = "") -> voi
 		caption.text = caption_text
 
 
+## Кнопка тестера появляется и пропадает вместе с тегом DeV: тег приходит с сервера уже после того, как меню построено.
+func _sync_tester_button() -> void:
+	if _stage == null:
+		return
+	var need := SaveService.is_dev()
+	if need and not is_instance_valid(_tester_button):
+		_tester_button = _build_tester_button()
+		_stage.add_child(_tester_button)
+	elif not need and is_instance_valid(_tester_button):
+		_tester_button.queue_free()
+		_tester_button = null
+
+
 func _build_tester_button() -> Button:
 	var button := UiStyle.button("ТЕСТЕР", Color("#a3283e"), 15, Vector2(84, 84))
 	button.anchor_left = 1.0
@@ -468,8 +484,8 @@ func _build_stage() -> Control:
 			stage.add_child(_make_side_button(spec[0], spec[1], spec[2], true, 6.0, spec[3], i, 76.0))
 	for key in (["vip"] if Orient.portrait else ["gift", "chest", "news", "vip"]):
 		(_side_buttons[key]["caption"] as Label).visible = true
-	if SaveService.is_dev():
-		stage.add_child(_build_tester_button())
+	_stage = stage
+	_sync_tester_button()
 	stage.gui_input.connect(func(event: InputEvent) -> void:
 		var tapped: bool = (event is InputEventMouseButton and event.pressed) or (event is InputEventScreenTouch and event.pressed)
 		if tapped:
@@ -724,6 +740,7 @@ func _on_weapon_changed(_weapon_id: StringName) -> void:
 
 
 func _refresh() -> void:
+	_sync_tester_button()
 	_avatar.queue_redraw()
 	_nick_label.text = SaveService.get_display_nickname()
 	_nick_label.add_theme_color_override("font_color", Cosmetics.nick_color(UiStyle.GOLD))
