@@ -678,6 +678,14 @@ func card_code() -> String:
 	return "TRF1.%d.%s" % [raw.size(), Marshalls.raw_to_base64(raw.compress(FileAccess.COMPRESSION_DEFLATE))]
 
 
+## Ссылка на игру, по которой друг добавляется автоматически: визитка зашита в параметр адреса.
+func card_link() -> String:
+	var base := Platform.page_url()
+	if base.is_empty():
+		return ""
+	return "%s?card=%s" % [base, card_code().uri_encode()]
+
+
 func get_friends() -> Array:
 	var list: Array = (data["friends"] as Dictionary).values()
 	list.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a.get("added", 0)) > int(b.get("added", 0)))

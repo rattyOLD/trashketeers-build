@@ -45,10 +45,20 @@ func _refresh() -> void:
 	list.add_child(card)
 	var share := UiStyle.button("ПОДЕЛИТЬСЯ КАРТИНКОЙ", UiStyle.HOT, 24, Vector2(0, 64))
 	share.pressed.connect(func() -> void:
-		var note := Platform.share_image(_image_b64, "trashsquad_card.png", "Моя визитка в Trash Squad")
+		var link := SaveService.card_link()
+		var caption := "Моя визитка в Trash Squad. Открой ссылку, и мы подружимся: %s" % link if not link.is_empty() else "Моя визитка в Trash Squad"
+		var note := Platform.share_image(_image_b64, "trashsquad_card.png", caption)
 		_say(note if not note.is_empty() else "Картинка готовится или не поддерживается здесь. Отправь код визитки ниже")
 	)
 	list.add_child(share)
+	var link_card := UiStyle.button("Отправить ссылку-визитку", UiStyle.PANEL_LIGHT, 22, Vector2(0, 56))
+	link_card.pressed.connect(func() -> void:
+		var link := SaveService.card_link()
+		if link.is_empty():
+			_say("Ссылка есть только в браузерной версии. Отправь код визитки ниже")
+			return
+		_say(Platform.share("Моя визитка в Trash Squad. Открой ссылку, и мы подружимся.", link)))
+	list.add_child(link_card)
 	var copy_card := UiStyle.button("Скопировать код визитки", UiStyle.PANEL_LIGHT, 22, Vector2(0, 56))
 	copy_card.pressed.connect(func() -> void:
 		DisplayServer.clipboard_set(SaveService.card_code())

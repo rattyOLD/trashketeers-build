@@ -392,6 +392,22 @@ func invite_link() -> String:
 	return ""
 
 
+## Адрес страницы игры без параметров и якоря.
+func page_url() -> String:
+	if not is_web:
+		return ""
+	var href = _js("return location.origin + location.pathname;")
+	return str(href) if typeof(href) == TYPE_STRING else ""
+
+
+## Значение параметра адреса (?name=...); после чтения параметр убирается из адреса.
+func consume_url_param(key: String) -> String:
+	if not is_web:
+		return ""
+	var value = _js("var p = new URLSearchParams(location.search); var v = p.get(%s); if (v !== null) { p.delete(%s); var q = p.toString(); history.replaceState(null, '', location.pathname + (q ? '?' + q : '') + location.hash); } return v || '';" % [JSON.stringify(key), JSON.stringify(key)])
+	return str(value) if typeof(value) == TYPE_STRING else ""
+
+
 ## Telegram: нативное окно «Поделиться»; браузер: navigator.share или копирование в буфер.
 ## Возвращает текст-подсказку для тоста.
 func share(text: String, url: String) -> String:

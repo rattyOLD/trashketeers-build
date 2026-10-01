@@ -68,6 +68,7 @@ func _ready() -> void:
 	SaveService.apply_quality()
 	_register_input()
 	_show_menu()
+	_accept_card_link.call_deferred()
 	if OS.has_feature("web"):
 		var url_hash := str(JavaScriptBridge.eval("window.location.hash"))
 		if url_hash.begins_with("#boss:"):
@@ -82,6 +83,36 @@ func _ready() -> void:
 		elif url_hash.begins_with("#raid"):
 			_debug_hash = url_hash.substr(1)
 			_start_raid.call_deferred(SaveService.get_selected_weapon())
+
+
+func _accept_card_link() -> void:
+	var code := Platform.consume_url_param("card")
+	if code.is_empty():
+		return
+	var result: String = SaveService.add_friend(code)
+	var text := "Визитка по ссылке не подошла"
+	if result == "ok" or result == "bonus":
+		var added := SaveService.get_friends()
+		var who := str((added[0] as Dictionary).get("n", "Енот")) if not added.is_empty() else "Енот"
+		text = "%s теперь в друзьях" % who if result == "ok" else "%s в друзьях: +%d монет и +%d неонита" % [who, SaveService.INVITE_COINS, SaveService.INVITE_GEMS]
+	elif result == "self":
+		text = "Это твоя собственная визитка. С собой дружить можно и без ссылки"
+	var layer := CanvasLayer.new()
+	layer.layer = 90
+	add_child(layer)
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", UiStyle.box(Color(0.06, 0.03, 0.12, 0.95), UiStyle.NEON, 4, 20))
+	var label := UiStyle.label(text, 26, UiStyle.TEXT, 6)
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.custom_minimum_size = Vector2(maxf(get_viewport().get_visible_rect().size.x - 120.0, 240.0), 0.0)
+	panel.add_child(label)
+	layer.add_child(panel)
+	panel.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	panel.position.y = 150.0
+	var tween := panel.create_tween()
+	tween.tween_interval(4.0)
+	tween.tween_property(panel, "modulate:a", 0.0, 0.5)
+	tween.tween_callback(layer.queue_free)
 
 
 func _handle_unclean_exit() -> void:
