@@ -679,6 +679,20 @@ func _on_boss_phase(boss: Enemy, phase: int) -> void:
 	Platform.haptic("heavy")
 
 
+func _split_enemy(enemy: Enemy, at: Vector2) -> void:
+	var data := enemy.data
+	if data.split_into == &"":
+		return
+	var child := ContentDB.get_enemy(data.split_into)
+	if child == null:
+		return
+	for i in data.split_count:
+		var angle := TAU * (float(i) + randf() * 0.4) / data.split_count
+		var spawned := enemies.spawn(child, at + Vector2.from_angle(angle) * data.radius * 0.7, enemy.max_hp / maxf(data.max_hp, 1.0), enemy.damage_mult)
+		if spawned != null:
+			spawned.push(Vector2.from_angle(angle) * 260.0)
+
+
 func _on_enemy_died(enemy: Enemy) -> void:
 	var data := enemy.data
 	if data.is_boss():
@@ -695,6 +709,7 @@ func _on_enemy_died(enemy: Enemy) -> void:
 	fx.chunks(body, Color("#8e8aa6"), 4, 180.0, 4.0)
 	fx.splat(at + Vector2(0, 6), data.fx_color.darkened(0.2), data.radius * 1.3)
 	fx.ring(at, data.fx_color, data.radius * 2.2)
+	_split_enemy(enemy, at)
 	if enemy.self_destructed:
 		return
 	kills += 1
@@ -787,7 +802,7 @@ func _on_miniboss_killed(boss: Enemy, at: Vector2) -> void:
 	else:
 		_offer_mini_choice(boss, at, 0)
 		if radio != null:
-			radio.on_mini_boss(String(player.weapon_controller.base_weapon.id))
+			radio.on_mini_boss(String(player.weapon_controller.base_weapon.id), String(boss.data.id))
 
 
 const MINI_CHOICE_RETRIES := 12

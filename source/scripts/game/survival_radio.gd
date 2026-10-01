@@ -50,7 +50,10 @@ func on_wave(is_boss: bool) -> void:
 		_play("waves", false)
 
 
-func on_mini_boss(weapon_id: String) -> void:
+func on_mini_boss(weapon_id: String, boss_id: String = "") -> void:
+	if boss_id == "sea_pirate" or boss_id == "chef_boss":
+		_play("mini_pirate" if boss_id == "sea_pirate" else "mini_chef", true)
+		return
 	var paid: Array = _radio.get("paid_weapons", [])
 	_play("mini_paid" if paid.has(weapon_id) else "mini", true)
 

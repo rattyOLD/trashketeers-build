@@ -82,6 +82,8 @@ const DEFAULTS := {
 	"trap_every": 3,
 	"blink_distance": 0.0,
 	"muzzles": [],
+	"split_into": "",
+	"split_count": 2,
 }
 
 var id: StringName
@@ -158,6 +160,9 @@ var shield_block: float
 var shield_turn: float
 ## Летающий: зависает на hover px над тенью, не упирается в укрытия.
 var flying: bool
+## При смерти делится на split_count врагов split_into (мусорный танк).
+var split_into: StringName
+var split_count: int
 var hover: float
 ## Кадр атаки (выстрел Искруна, удар щитом Слиткобоя) — отдельная картинка с концепт-листа.
 var attack_texture: Texture2D:
@@ -257,6 +262,8 @@ static func from_dict(raw: Dictionary, resolve_texture: Callable) -> EnemyData:
 	e.shield_block = clampf(d["shield_block"], 0.0, 1.0)
 	e.shield_turn = maxf(d["shield_turn"], 0.1)
 	e.flying = d["flying"]
+	e.split_into = StringName(str(d["split_into"]))
+	e.split_count = int(d["split_count"])
 	e.hover = maxf(d["hover"], 0.0)
 	var attack_path := str(d["attack_sprite"])
 	e._attack_path = attack_path

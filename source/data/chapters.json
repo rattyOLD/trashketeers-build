@@ -1,1570 +1,1678 @@
 {
-  "version": 1,
-  "chapters": [
+ "version": 1,
+ "chapters": [
+  {
+   "id": "junkyard",
+   "title": "Неоновая Свалка",
+   "subtitle": "Глава 1 · локация 1",
+   "layout": "junkyard",
+   "floor": "res://assets/biome/ch1_floor.png",
+   "size": [
+    40,
+    50
+   ],
+   "music": "battle",
+   "grade": {
+    "shadow": [
+     0.1,
+     0.02,
+     0.16
+    ],
+    "highlight": [
+     0.06,
+     0.03,
+     -0.02
+    ]
+   },
+   "macro": 1.0,
+   "minimap": {
+    "floor": "#2a2744",
+    "lane": "#1f1f33",
+    "wall": "#6a5f8a",
+    "cover": "#8a7aa8",
+    "boss": "#ff2e63"
+   },
+   "border": [
+    "container",
+    "junk_pile",
+    "dumpster",
+    "tire_stack",
+    "fence",
+    "oil_barrels",
+    "generator",
+    "junk_pile",
+    "container"
+   ],
+   "cover_big": [
+    "junk_pile",
+    "container",
+    "generator",
+    "dumpster",
+    "crt_terminal",
+    "barricade"
+   ],
+   "cover_small": [
+    "tire_stack",
+    "oil_barrels",
+    "toxic_bags",
+    "cable_spool"
+   ],
+   "flat": [
+    "scrap_ramp",
+    "r_fence",
+    "r_floodlight",
+    "r_generator",
+    "r_dumpster",
+    "r_tires",
+    "r_barricade"
+   ],
+   "lamp": "floodlight",
+   "destructibles": {
+    "d_barrel": 5,
+    "d_crt": 3,
+    "d_toxic": 3,
+    "d_container": 2,
+    "d_junk": 3,
+    "d_bags": 2,
+    "d_dumpster": 2,
+    "d_cans": 3,
+    "d_crates": 3
+   },
+   "boss": "junk_overlord",
+   "escort": {
+    "enemy": "rat_punk",
+    "interval": 5.2,
+    "count": 4
+   },
+   "waves": [
     {
-      "id": "junkyard",
-      "title": "Неоновая Свалка",
-      "subtitle": "Глава 1 · локация 1",
-      "layout": "junkyard",
-      "floor": "res://assets/biome/ch1_floor.png",
-      "size": [
-        40,
-        50
-      ],
-      "music": "battle",
-      "grade": {
-        "shadow": [
-          0.1,
-          0.02,
-          0.16
-        ],
-        "highlight": [
-          0.06,
-          0.03,
-          -0.02
-        ]
-      },
-      "macro": 1.0,
-      "minimap": {
-        "floor": "#2a2744",
-        "lane": "#1f1f33",
-        "wall": "#6a5f8a",
-        "cover": "#8a7aa8",
-        "boss": "#ff2e63"
-      },
-      "border": [
-        "container",
-        "junk_pile",
-        "dumpster",
-        "tire_stack",
-        "fence",
-        "oil_barrels",
-        "generator",
-        "junk_pile",
-        "container"
-      ],
-      "cover_big": [
-        "junk_pile",
-        "container",
-        "generator",
-        "dumpster",
-        "crt_terminal",
-        "barricade"
-      ],
-      "cover_small": [
-        "tire_stack",
-        "oil_barrels",
-        "toxic_bags",
-        "cable_spool"
-      ],
-      "flat": [
-        "scrap_ramp",
-        "r_fence",
-        "r_floodlight",
-        "r_generator",
-        "r_dumpster",
-        "r_tires",
-        "r_barricade"
-      ],
-      "lamp": "floodlight",
-      "destructibles": {
-        "d_barrel": 5,
-        "d_crt": 3,
-        "d_toxic": 3,
-        "d_container": 2,
-        "d_junk": 3,
-        "d_bags": 2,
-        "d_dumpster": 2,
-        "d_cans": 3,
-        "d_crates": 3
-      },
-      "boss": "junk_overlord",
-      "escort": {
-        "enemy": "rat_punk",
-        "interval": 5.2,
-        "count": 4
-      },
-      "waves": [
-        {
-          "title": "Разминка",
-          "count": 12,
-          "spawn_interval": 1.15,
-          "batch": 2,
-          "max_alive": 10,
-          "weights": {
-            "rat_punk": 1.0
-          },
-          "mood": "clear"
-        },
-        {
-          "title": "Шпана с ломами",
-          "count": 17,
-          "spawn_interval": 1.012,
-          "batch": 2,
-          "max_alive": 12,
-          "weights": {
-            "rat_punk": 0.85,
-            "bomb_rat": 0.15
-          },
-          "mood": "clear"
-        },
-        {
-          "title": "Искрящие",
-          "count": 22,
-          "spawn_interval": 0.92,
-          "batch": 3,
-          "max_alive": 14,
-          "weights": {
-            "rat_punk": 0.62,
-            "bomb_rat": 0.13,
-            "spark_rat": 0.25,
-            "toxic_rat": 0.1
-          },
-          "mood": "pink_haze"
-        },
-        {
-          "title": "Из тени",
-          "count": 26,
-          "spawn_interval": 0.874,
-          "batch": 3,
-          "max_alive": 17,
-          "weights": {
-            "rat_punk": 0.5,
-            "spark_rat": 0.2,
-            "bomb_rat": 0.1,
-            "spark_shank": 0.2,
-            "toxic_rat": 0.11
-          },
-          "mood": "toxic"
-        },
-        {
-          "title": "Пивной Барон",
-          "count": 31,
-          "spawn_interval": 0.828,
-          "batch": 3,
-          "max_alive": 19,
-          "weights": {
-            "rat_punk": 0.42,
-            "spark_rat": 0.18,
-            "spark_shank": 0.15,
-            "magnet_trapper": 0.15,
-            "bomb_rat": 0.1,
-            "toxic_rat": 0.12
-          },
-          "mood": "storm",
-          "miniboss": "beer_baron"
-        },
-        {
-          "title": "Бешеные",
-          "count": 36,
-          "spawn_interval": 0.782,
-          "batch": 4,
-          "max_alive": 22,
-          "weights": {
-            "rat_punk": 0.36,
-            "spark_rat": 0.16,
-            "spark_shank": 0.14,
-            "magnet_trapper": 0.12,
-            "dash_rat": 0.14,
-            "bomb_rat": 0.08,
-            "toxic_rat": 0.13
-          },
-          "mood": "pink_haze"
-        },
-        {
-          "title": "Банда",
-          "count": 43,
-          "spawn_interval": 0.718,
-          "batch": 4,
-          "max_alive": 25,
-          "weights": {
-            "rat_punk": 0.3,
-            "spark_rat": 0.16,
-            "spark_shank": 0.14,
-            "magnet_trapper": 0.12,
-            "dash_rat": 0.12,
-            "gang_rat": 0.16,
-            "toxic_rat": 0.14
-          },
-          "mood": "toxic"
-        },
-        {
-          "title": "Облава",
-          "count": 50,
-          "spawn_interval": 0.644,
-          "batch": 5,
-          "max_alive": 28,
-          "weights": {
-            "rat_punk": 0.26,
-            "spark_rat": 0.18,
-            "spark_shank": 0.16,
-            "magnet_trapper": 0.14,
-            "dash_rat": 0.1,
-            "gang_rat": 0.16,
-            "toxic_rat": 0.15
-          },
-          "mood": "storm"
-        },
-        {
-          "title": "Последний рубеж",
-          "count": 60,
-          "spawn_interval": 0.57,
-          "batch": 5,
-          "max_alive": 32,
-          "weights": {
-            "rat_punk": 0.24,
-            "spark_rat": 0.18,
-            "spark_shank": 0.16,
-            "magnet_trapper": 0.14,
-            "dash_rat": 0.1,
-            "gang_rat": 0.18,
-            "toxic_rat": 0.16
-          },
-          "mood": "alarm"
-        },
-        {
-          "title": "Junk Overlord",
-          "count": 22,
-          "spawn_interval": 2.1,
-          "batch": 2,
-          "max_alive": 10,
-          "weights": {
-            "rat_punk": 0.45,
-            "spark_rat": 0.2,
-            "spark_shank": 0.2,
-            "bomb_rat": 0.15
-          },
-          "mood": "alarm",
-          "boss": "junk_overlord"
-        }
-      ],
-      "variant": 0,
-      "power": 1.0,
-      "count_mult": 1.0,
-      "scenes": [
-        [
-          "trash_row",
-          2
-        ],
-        [
-          "power_station",
-          1
-        ],
-        [
-          "container_yard",
-          2
-        ],
-        [
-          "tire_shop",
-          1
-        ],
-        [
-          "ewaste",
-          1
-        ],
-        [
-          "checkpoint",
-          2
-        ],
-        [
-          "toxic_corner",
-          1
-        ]
-      ]
+     "title": "Разминка",
+     "count": 12,
+     "spawn_interval": 1.15,
+     "batch": 2,
+     "max_alive": 10,
+     "weights": {
+      "rat_punk": 1.0
+     },
+     "mood": "clear"
     },
     {
-      "id": "junkyard_2",
-      "title": "Неоновая Свалка",
-      "subtitle": "Глава 1 · локация 2",
-      "layout": "junkyard",
-      "floor": "res://assets/biome/ch1_floor.png",
-      "size": [
-        42,
-        52
-      ],
-      "music": "battle",
-      "grade": {
-        "shadow": [
-          0.1,
-          0.02,
-          0.16
-        ],
-        "highlight": [
-          0.06,
-          0.03,
-          -0.02
-        ]
-      },
-      "macro": 1.0,
-      "minimap": {
-        "floor": "#2a2744",
-        "lane": "#1f1f33",
-        "wall": "#6a5f8a",
-        "cover": "#8a7aa8",
-        "boss": "#ff2e63"
-      },
-      "border": [
-        "container",
-        "junk_pile",
-        "dumpster",
-        "tire_stack",
-        "fence",
-        "oil_barrels",
-        "generator",
-        "junk_pile",
-        "container",
-        "spruce",
-        "outskirts_fence",
-        "rocks"
-      ],
-      "cover_big": [
-        "junk_pile",
-        "container",
-        "generator",
-        "dumpster",
-        "crt_terminal",
-        "barricade",
-        "water_tower",
-        "shed",
-        "van",
-        "spruce"
-      ],
-      "cover_small": [
-        "tire_stack",
-        "oil_barrels",
-        "toxic_bags",
-        "cable_spool",
-        "bush",
-        "bush_low",
-        "rocks"
-      ],
-      "flat": [
-        "scrap_ramp",
-        "r_fence",
-        "r_floodlight",
-        "r_generator",
-        "r_dumpster",
-        "r_tires",
-        "r_barricade"
-      ],
-      "lamp": "floodlight",
-      "destructibles": {
-        "d_barrel": 5,
-        "d_crt": 3,
-        "d_toxic": 3,
-        "d_container": 2,
-        "d_junk": 3,
-        "d_bags": 2,
-        "d_dumpster": 2,
-        "d_cans": 3,
-        "d_crates": 3
-      },
-      "boss": "junk_overlord",
-      "escort": {
-        "enemy": "rat_punk",
-        "interval": 5.2,
-        "count": 4
-      },
-      "waves": [
-        {
-          "title": "Разминка",
-          "count": 12,
-          "spawn_interval": 1.15,
-          "batch": 2,
-          "max_alive": 10,
-          "weights": {
-            "rat_punk": 1.0
-          },
-          "mood": "clear"
-        },
-        {
-          "title": "Шпана с ломами",
-          "count": 17,
-          "spawn_interval": 1.012,
-          "batch": 2,
-          "max_alive": 12,
-          "weights": {
-            "rat_punk": 0.85,
-            "bomb_rat": 0.15
-          },
-          "mood": "clear"
-        },
-        {
-          "title": "Искрящие",
-          "count": 22,
-          "spawn_interval": 0.92,
-          "batch": 3,
-          "max_alive": 14,
-          "weights": {
-            "rat_punk": 0.62,
-            "bomb_rat": 0.13,
-            "spark_rat": 0.25,
-            "toxic_rat": 0.16
-          },
-          "mood": "pink_haze"
-        },
-        {
-          "title": "Из тени",
-          "count": 26,
-          "spawn_interval": 0.874,
-          "batch": 3,
-          "max_alive": 17,
-          "weights": {
-            "rat_punk": 0.5,
-            "spark_rat": 0.2,
-            "bomb_rat": 0.1,
-            "spark_shank": 0.26,
-            "toxic_rat": 0.176
-          },
-          "mood": "toxic"
-        },
-        {
-          "title": "Шаман-Электрик",
-          "count": 31,
-          "spawn_interval": 0.828,
-          "batch": 3,
-          "max_alive": 19,
-          "weights": {
-            "rat_punk": 0.42,
-            "spark_rat": 0.18,
-            "spark_shank": 0.195,
-            "magnet_trapper": 0.195,
-            "bomb_rat": 0.1,
-            "toxic_rat": 0.192
-          },
-          "mood": "storm",
-          "miniboss": "electric_shaman"
-        },
-        {
-          "title": "Бешеные",
-          "count": 36,
-          "spawn_interval": 0.782,
-          "batch": 4,
-          "max_alive": 22,
-          "weights": {
-            "rat_punk": 0.36,
-            "spark_rat": 0.16,
-            "spark_shank": 0.182,
-            "magnet_trapper": 0.156,
-            "dash_rat": 0.14,
-            "bomb_rat": 0.08,
-            "toxic_rat": 0.208
-          },
-          "mood": "pink_haze"
-        },
-        {
-          "title": "Банда",
-          "count": 43,
-          "spawn_interval": 0.718,
-          "batch": 4,
-          "max_alive": 25,
-          "weights": {
-            "rat_punk": 0.3,
-            "spark_rat": 0.16,
-            "spark_shank": 0.182,
-            "magnet_trapper": 0.156,
-            "dash_rat": 0.12,
-            "gang_rat": 0.208,
-            "toxic_rat": 0.224
-          },
-          "mood": "toxic"
-        },
-        {
-          "title": "Облава",
-          "count": 50,
-          "spawn_interval": 0.644,
-          "batch": 5,
-          "max_alive": 28,
-          "weights": {
-            "rat_punk": 0.26,
-            "spark_rat": 0.18,
-            "spark_shank": 0.208,
-            "magnet_trapper": 0.182,
-            "dash_rat": 0.1,
-            "gang_rat": 0.208,
-            "toxic_rat": 0.24
-          },
-          "mood": "storm"
-        },
-        {
-          "title": "Последний рубеж",
-          "count": 60,
-          "spawn_interval": 0.57,
-          "batch": 5,
-          "max_alive": 32,
-          "weights": {
-            "rat_punk": 0.24,
-            "spark_rat": 0.18,
-            "spark_shank": 0.208,
-            "magnet_trapper": 0.182,
-            "dash_rat": 0.1,
-            "gang_rat": 0.234,
-            "toxic_rat": 0.256
-          },
-          "mood": "alarm"
-        },
-        {
-          "title": "Junk Overlord II",
-          "count": 22,
-          "spawn_interval": 2.1,
-          "batch": 2,
-          "max_alive": 10,
-          "weights": {
-            "rat_punk": 0.45,
-            "spark_rat": 0.2,
-            "spark_shank": 0.26,
-            "bomb_rat": 0.15
-          },
-          "mood": "alarm",
-          "boss": "junk_overlord"
-        }
-      ],
-      "variant": 1,
-      "power": 1.6,
-      "count_mult": 1.2,
-      "scenes": [
-        [
-          "watchman",
-          1
-        ],
-        [
-          "water_tower",
-          1
-        ],
-        [
-          "tree_line",
-          2
-        ],
-        [
-          "power_station",
-          1
-        ],
-        [
-          "container_yard",
-          1
-        ],
-        [
-          "trash_row",
-          1
-        ],
-        [
-          "tire_shop",
-          1
-        ],
-        [
-          "ewaste",
-          1
-        ],
-        [
-          "checkpoint",
-          2
-        ],
-        [
-          "toxic_corner",
-          1
-        ]
-      ]
+     "title": "Шпана с ломами",
+     "count": 17,
+     "spawn_interval": 1.012,
+     "batch": 2,
+     "max_alive": 12,
+     "weights": {
+      "rat_punk": 0.85,
+      "bomb_rat": 0.15,
+      "courier_rat": 0.12
+     },
+     "mood": "clear"
     },
     {
-      "id": "junkyard_3",
-      "title": "Неоновая Свалка",
-      "subtitle": "Глава 1 · локация 3",
-      "layout": "junkyard",
-      "floor": "res://assets/biome/ch1_floor.png",
-      "size": [
-        44,
-        54
-      ],
-      "music": "battle",
-      "grade": {
-        "shadow": [
-          0.1,
-          0.02,
-          0.16
-        ],
-        "highlight": [
-          0.06,
-          0.03,
-          -0.02
-        ]
-      },
-      "macro": 1.0,
-      "minimap": {
-        "floor": "#2a2744",
-        "lane": "#1f1f33",
-        "wall": "#6a5f8a",
-        "cover": "#8a7aa8",
-        "boss": "#ff2e63"
-      },
-      "border": [
-        "spruce",
-        "outskirts_fence",
-        "bush",
-        "rocks",
-        "container",
-        "spruce",
-        "junk_pile",
-        "outskirts_fence",
-        "toxic_pipe"
-      ],
-      "cover_big": [
-        "van",
-        "shed",
-        "water_tower",
-        "toxic_pipe",
-        "spruce",
-        "junk_pile",
-        "container",
-        "generator"
-      ],
-      "cover_small": [
-        "bush",
-        "bush_low",
-        "rocks",
-        "tire_stack",
-        "oil_barrels"
-      ],
-      "flat": [
-        "scrap_ramp",
-        "r_fence",
-        "r_floodlight",
-        "r_generator",
-        "r_dumpster",
-        "r_tires",
-        "r_barricade"
-      ],
-      "lamp": "floodlight",
-      "destructibles": {
-        "d_barrel": 5,
-        "d_crt": 3,
-        "d_toxic": 3,
-        "d_container": 2,
-        "d_junk": 3,
-        "d_bags": 2,
-        "d_dumpster": 2,
-        "d_cans": 3,
-        "d_crates": 3
-      },
-      "boss": "junk_overlord",
-      "escort": {
-        "enemy": "rat_punk",
-        "interval": 5.2,
-        "count": 4
-      },
-      "waves": [
-        {
-          "title": "Разминка",
-          "count": 12,
-          "spawn_interval": 1.15,
-          "batch": 2,
-          "max_alive": 10,
-          "weights": {
-            "rat_punk": 1.0
-          },
-          "mood": "clear"
-        },
-        {
-          "title": "Шпана с ломами",
-          "count": 17,
-          "spawn_interval": 1.012,
-          "batch": 2,
-          "max_alive": 12,
-          "weights": {
-            "rat_punk": 0.85,
-            "bomb_rat": 0.15
-          },
-          "mood": "clear"
-        },
-        {
-          "title": "Искрящие",
-          "count": 22,
-          "spawn_interval": 0.92,
-          "batch": 3,
-          "max_alive": 14,
-          "weights": {
-            "rat_punk": 0.62,
-            "bomb_rat": 0.13,
-            "spark_rat": 0.25,
-            "toxic_rat": 0.22
-          },
-          "mood": "pink_haze"
-        },
-        {
-          "title": "Из тени",
-          "count": 26,
-          "spawn_interval": 0.874,
-          "batch": 3,
-          "max_alive": 17,
-          "weights": {
-            "rat_punk": 0.5,
-            "spark_rat": 0.2,
-            "bomb_rat": 0.1,
-            "spark_shank": 0.32,
-            "toxic_rat": 0.242
-          },
-          "mood": "toxic"
-        },
-        {
-          "title": "Пивной Барон · ФИНАЛ",
-          "count": 31,
-          "spawn_interval": 0.828,
-          "batch": 3,
-          "max_alive": 19,
-          "weights": {
-            "rat_punk": 0.42,
-            "spark_rat": 0.18,
-            "spark_shank": 0.24,
-            "magnet_trapper": 0.24,
-            "bomb_rat": 0.1,
-            "toxic_rat": 0.264
-          },
-          "mood": "storm",
-          "miniboss": "beer_baron"
-        },
-        {
-          "title": "Бешеные",
-          "count": 36,
-          "spawn_interval": 0.782,
-          "batch": 4,
-          "max_alive": 22,
-          "weights": {
-            "rat_punk": 0.36,
-            "spark_rat": 0.16,
-            "spark_shank": 0.224,
-            "magnet_trapper": 0.192,
-            "dash_rat": 0.14,
-            "bomb_rat": 0.08,
-            "toxic_rat": 0.286
-          },
-          "mood": "pink_haze"
-        },
-        {
-          "title": "Банда",
-          "count": 43,
-          "spawn_interval": 0.718,
-          "batch": 4,
-          "max_alive": 25,
-          "weights": {
-            "rat_punk": 0.3,
-            "spark_rat": 0.16,
-            "spark_shank": 0.224,
-            "magnet_trapper": 0.192,
-            "dash_rat": 0.12,
-            "gang_rat": 0.256,
-            "toxic_rat": 0.308
-          },
-          "mood": "toxic"
-        },
-        {
-          "title": "Облава",
-          "count": 50,
-          "spawn_interval": 0.644,
-          "batch": 5,
-          "max_alive": 28,
-          "weights": {
-            "rat_punk": 0.26,
-            "spark_rat": 0.18,
-            "spark_shank": 0.256,
-            "magnet_trapper": 0.224,
-            "dash_rat": 0.1,
-            "gang_rat": 0.256,
-            "toxic_rat": 0.33
-          },
-          "mood": "storm"
-        },
-        {
-          "title": "Последний рубеж",
-          "count": 60,
-          "spawn_interval": 0.57,
-          "batch": 5,
-          "max_alive": 32,
-          "weights": {
-            "rat_punk": 0.24,
-            "spark_rat": 0.18,
-            "spark_shank": 0.256,
-            "magnet_trapper": 0.224,
-            "dash_rat": 0.1,
-            "gang_rat": 0.288,
-            "toxic_rat": 0.352
-          },
-          "mood": "alarm"
-        },
-        {
-          "title": "Junk Overlord · ФИНАЛ",
-          "count": 22,
-          "spawn_interval": 2.1,
-          "batch": 2,
-          "max_alive": 10,
-          "weights": {
-            "rat_punk": 0.45,
-            "spark_rat": 0.2,
-            "spark_shank": 0.32,
-            "bomb_rat": 0.15
-          },
-          "mood": "alarm",
-          "boss": "junk_overlord"
-        }
-      ],
-      "variant": 2,
-      "power": 2.4,
-      "count_mult": 1.4,
-      "scenes": [
-        [
-          "watchman",
-          1
-        ],
-        [
-          "water_tower",
-          1
-        ],
-        [
-          "tree_line",
-          3
-        ],
-        [
-          "pipe_yard",
-          1
-        ],
-        [
-          "power_station",
-          1
-        ],
-        [
-          "container_yard",
-          1
-        ],
-        [
-          "tire_shop",
-          1
-        ],
-        [
-          "trash_row",
-          1
-        ],
-        [
-          "checkpoint",
-          1
-        ]
-      ]
+     "title": "Искрящие",
+     "count": 22,
+     "spawn_interval": 0.92,
+     "batch": 3,
+     "max_alive": 14,
+     "weights": {
+      "rat_punk": 0.62,
+      "bomb_rat": 0.13,
+      "spark_rat": 0.25,
+      "toxic_rat": 0.1,
+      "courier_rat": 0.12
+     },
+     "mood": "pink_haze"
     },
     {
-      "id": "bank",
-      "title": "Золотой Банк",
-      "subtitle": "Глава 2 · локация 1",
-      "layout": "bank",
-      "floor": "res://assets/biome/ch2_floor.png",
-      "size": [
-        40,
-        50
-      ],
-      "music": "knife",
-      "grade": {
-        "shadow": [
-          0.08,
-          0.03,
-          0.05
-        ],
-        "highlight": [
-          0.07,
-          0.05,
-          -0.01
-        ]
-      },
-      "macro": 0.35,
-      "minimap": {
-        "floor": "#d9bf86",
-        "lane": "#e89ab8",
-        "lawn": "#4f8f2e",
-        "wall": "#b08a3a",
-        "cover": "#f2d27a",
-        "boss": "#ff2e63"
-      },
-      "border": [
-        "railing",
-        "planter",
-        "railing_low",
-        "lamp_banner",
-        "railing",
-        "planter"
-      ],
-      "cover_big": [
-        "picnic_table",
-        "cake_cart",
-        "fountain",
-        "planter"
-      ],
-      "cover_small": [
-        "umbrella",
-        "column",
-        "cash_pile"
-      ],
-      "flat": [
-        "r_railing",
-        "r_fountain",
-        "r_statue"
-      ],
-      "lamp": "lamp_banner",
-      "destructibles": {
-        "cash_pile": 4,
-        "crystals": 3,
-        "umbrella": 3,
-        "column": 2,
-        "picnic_table": 2,
-        "cake_cart": 2
-      },
-      "boss": "mud_magnate",
-      "escort": {
-        "enemy": "pig_royal",
-        "interval": 5.6,
-        "count": 3
-      },
-      "waves": [
-        {
-          "title": "Охрана банка",
-          "count": 14,
-          "spawn_interval": 1.104,
-          "batch": 2,
-          "max_alive": 11,
-          "weights": {
-            "pig_guard": 1.0
-          },
-          "mood": "sunny"
-        },
-        {
-          "title": "Пикник со стрельбой",
-          "count": 19,
-          "spawn_interval": 1.012,
-          "batch": 2,
-          "max_alive": 13,
-          "weights": {
-            "pig_guard": 0.75,
-            "croupier": 0.25,
-            "pig_mechanic": 0.066
-          },
-          "mood": "sunny"
-        },
-        {
-          "title": "Дивиденды",
-          "count": 24,
-          "spawn_interval": 0.92,
-          "batch": 3,
-          "max_alive": 15,
-          "weights": {
-            "pig_guard": 0.55,
-            "croupier": 0.2,
-            "dropper": 0.25,
-            "pig_sniper": 0.086,
-            "pig_mechanic": 0.072
-          },
-          "mood": "golden"
-        },
-        {
-          "title": "Крупная ставка",
-          "count": 29,
-          "spawn_interval": 0.874,
-          "batch": 3,
-          "max_alive": 17,
-          "weights": {
-            "pig_guard": 0.45,
-            "croupier": 0.2,
-            "dropper": 0.2,
-            "pig_angry": 0.15,
-            "pig_sniper": 0.094,
-            "pig_mechanic": 0.078
-          },
-          "mood": "golden"
-        },
-        {
-          "title": "Свинья-Магнат",
-          "count": 34,
-          "spawn_interval": 0.828,
-          "batch": 3,
-          "max_alive": 19,
-          "weights": {
-            "pig_guard": 0.38,
-            "croupier": 0.18,
-            "dropper": 0.18,
-            "pig_angry": 0.12,
-            "bruiser": 0.14,
-            "pig_sniper": 0.102,
-            "pig_mechanic": 0.084
-          },
-          "mood": "party",
-          "miniboss": "pig_magnate"
-        },
-        {
-          "title": "Вскрытие сейфа",
-          "count": 38,
-          "spawn_interval": 0.782,
-          "batch": 4,
-          "max_alive": 22,
-          "weights": {
-            "pig_guard": 0.32,
-            "croupier": 0.18,
-            "dropper": 0.18,
-            "pig_heavy": 0.12,
-            "bruiser": 0.1,
-            "vault_pig": 0.1,
-            "pig_sniper": 0.11,
-            "pig_mechanic": 0.09
-          },
-          "mood": "party"
-        },
-        {
-          "title": "Инкассация",
-          "count": 46,
-          "spawn_interval": 0.718,
-          "batch": 4,
-          "max_alive": 25,
-          "weights": {
-            "pig_guard": 0.28,
-            "croupier": 0.18,
-            "dropper": 0.2,
-            "pig_heavy": 0.12,
-            "bruiser": 0.1,
-            "vault_pig": 0.12,
-            "pig_sniper": 0.118,
-            "pig_mechanic": 0.096
-          },
-          "mood": "golden"
-        },
-        {
-          "title": "Биржевой крах",
-          "count": 53,
-          "spawn_interval": 0.644,
-          "batch": 5,
-          "max_alive": 28,
-          "weights": {
-            "pig_guard": 0.24,
-            "croupier": 0.2,
-            "dropper": 0.2,
-            "pig_angry": 0.1,
-            "bruiser": 0.12,
-            "vault_pig": 0.14,
-            "pig_sniper": 0.126,
-            "pig_mechanic": 0.102
-          },
-          "mood": "vault"
-        },
-        {
-          "title": "Хранилище",
-          "count": 62,
-          "spawn_interval": 0.57,
-          "batch": 5,
-          "max_alive": 32,
-          "weights": {
-            "pig_guard": 0.22,
-            "croupier": 0.2,
-            "dropper": 0.2,
-            "pig_heavy": 0.1,
-            "bruiser": 0.12,
-            "vault_pig": 0.16,
-            "pig_sniper": 0.134,
-            "pig_mechanic": 0.108
-          },
-          "mood": "vault"
-        },
-        {
-          "title": "Mud Magnate",
-          "count": 20,
-          "spawn_interval": 2.3,
-          "batch": 2,
-          "max_alive": 9,
-          "weights": {
-            "pig_guard": 0.45,
-            "croupier": 0.3,
-            "dropper": 0.25
-          },
-          "mood": "vault",
-          "boss": "mud_magnate"
-        }
-      ],
-      "variant": 0,
-      "power": 1.0,
-      "count_mult": 1.0
+     "title": "Из тени",
+     "count": 26,
+     "spawn_interval": 0.874,
+     "batch": 3,
+     "max_alive": 17,
+     "weights": {
+      "rat_punk": 0.5,
+      "spark_rat": 0.2,
+      "bomb_rat": 0.1,
+      "spark_shank": 0.2,
+      "toxic_rat": 0.11,
+      "courier_rat": 0.12
+     },
+     "mood": "toxic"
     },
     {
-      "id": "bank_2",
-      "title": "Золотой Банк",
-      "subtitle": "Глава 2 · локация 2",
-      "layout": "bank",
-      "floor": "res://assets/biome/ch2_floor.png",
-      "size": [
-        42,
-        52
-      ],
-      "music": "knife",
-      "grade": {
-        "shadow": [
-          0.08,
-          0.03,
-          0.05
-        ],
-        "highlight": [
-          0.07,
-          0.05,
-          -0.01
-        ]
-      },
-      "macro": 0.35,
-      "minimap": {
-        "floor": "#d9bf86",
-        "lane": "#e89ab8",
-        "lawn": "#4f8f2e",
-        "wall": "#b08a3a",
-        "cover": "#f2d27a",
-        "boss": "#ff2e63"
-      },
-      "border": [
-        "railing",
-        "planter",
-        "railing_low",
-        "lamp_banner",
-        "railing",
-        "planter"
-      ],
-      "cover_big": [
-        "picnic_table",
-        "cake_cart",
-        "fountain",
-        "planter"
-      ],
-      "cover_small": [
-        "umbrella",
-        "column",
-        "cash_pile"
-      ],
-      "flat": [
-        "r_railing",
-        "r_fountain",
-        "r_statue"
-      ],
-      "lamp": "lamp_banner",
-      "destructibles": {
-        "cash_pile": 4,
-        "crystals": 3,
-        "umbrella": 3,
-        "column": 2,
-        "picnic_table": 2,
-        "cake_cart": 2
-      },
-      "boss": "mud_magnate",
-      "escort": {
-        "enemy": "pig_royal",
-        "interval": 5.6,
-        "count": 3
-      },
-      "waves": [
-        {
-          "title": "Охрана банка",
-          "count": 14,
-          "spawn_interval": 1.104,
-          "batch": 2,
-          "max_alive": 11,
-          "weights": {
-            "pig_guard": 1.0
-          },
-          "mood": "sunny"
-        },
-        {
-          "title": "Пикник со стрельбой",
-          "count": 19,
-          "spawn_interval": 1.012,
-          "batch": 2,
-          "max_alive": 13,
-          "weights": {
-            "pig_guard": 0.75,
-            "croupier": 0.325,
-            "pig_mechanic": 0.106
-          },
-          "mood": "sunny"
-        },
-        {
-          "title": "Дивиденды",
-          "count": 24,
-          "spawn_interval": 0.92,
-          "batch": 3,
-          "max_alive": 15,
-          "weights": {
-            "pig_guard": 0.55,
-            "croupier": 0.26,
-            "dropper": 0.25,
-            "pig_sniper": 0.138,
-            "pig_mechanic": 0.115
-          },
-          "mood": "golden"
-        },
-        {
-          "title": "Крупная ставка",
-          "count": 29,
-          "spawn_interval": 0.874,
-          "batch": 3,
-          "max_alive": 17,
-          "weights": {
-            "pig_guard": 0.45,
-            "croupier": 0.26,
-            "dropper": 0.2,
-            "pig_angry": 0.15,
-            "pig_sniper": 0.15,
-            "pig_mechanic": 0.125
-          },
-          "mood": "golden"
-        },
-        {
-          "title": "Свинья-Магнат II",
-          "count": 34,
-          "spawn_interval": 0.828,
-          "batch": 3,
-          "max_alive": 19,
-          "weights": {
-            "pig_guard": 0.38,
-            "croupier": 0.234,
-            "dropper": 0.18,
-            "pig_angry": 0.12,
-            "bruiser": 0.182,
-            "pig_sniper": 0.163,
-            "pig_mechanic": 0.134
-          },
-          "mood": "party",
-          "miniboss": "pig_magnate"
-        },
-        {
-          "title": "Вскрытие сейфа",
-          "count": 38,
-          "spawn_interval": 0.782,
-          "batch": 4,
-          "max_alive": 22,
-          "weights": {
-            "pig_guard": 0.32,
-            "croupier": 0.234,
-            "dropper": 0.18,
-            "pig_heavy": 0.12,
-            "bruiser": 0.13,
-            "vault_pig": 0.13,
-            "pig_sniper": 0.176,
-            "pig_mechanic": 0.144
-          },
-          "mood": "party"
-        },
-        {
-          "title": "Инкассация",
-          "count": 46,
-          "spawn_interval": 0.718,
-          "batch": 4,
-          "max_alive": 25,
-          "weights": {
-            "pig_guard": 0.28,
-            "croupier": 0.234,
-            "dropper": 0.2,
-            "pig_heavy": 0.12,
-            "bruiser": 0.13,
-            "vault_pig": 0.156,
-            "pig_sniper": 0.189,
-            "pig_mechanic": 0.154
-          },
-          "mood": "golden"
-        },
-        {
-          "title": "Биржевой крах",
-          "count": 53,
-          "spawn_interval": 0.644,
-          "batch": 5,
-          "max_alive": 28,
-          "weights": {
-            "pig_guard": 0.24,
-            "croupier": 0.26,
-            "dropper": 0.2,
-            "pig_angry": 0.1,
-            "bruiser": 0.156,
-            "vault_pig": 0.182,
-            "pig_sniper": 0.202,
-            "pig_mechanic": 0.163
-          },
-          "mood": "vault"
-        },
-        {
-          "title": "Хранилище",
-          "count": 62,
-          "spawn_interval": 0.57,
-          "batch": 5,
-          "max_alive": 32,
-          "weights": {
-            "pig_guard": 0.22,
-            "croupier": 0.26,
-            "dropper": 0.2,
-            "pig_heavy": 0.1,
-            "bruiser": 0.156,
-            "vault_pig": 0.208,
-            "pig_sniper": 0.214,
-            "pig_mechanic": 0.173
-          },
-          "mood": "vault"
-        },
-        {
-          "title": "Mud Magnate II",
-          "count": 20,
-          "spawn_interval": 2.3,
-          "batch": 2,
-          "max_alive": 9,
-          "weights": {
-            "pig_guard": 0.45,
-            "croupier": 0.39,
-            "dropper": 0.25
-          },
-          "mood": "vault",
-          "boss": "mud_magnate"
-        }
-      ],
-      "variant": 1,
-      "power": 1.6,
-      "count_mult": 1.2
+     "title": "Пивной Барон",
+     "count": 31,
+     "spawn_interval": 0.828,
+     "batch": 3,
+     "max_alive": 19,
+     "weights": {
+      "rat_punk": 0.42,
+      "spark_rat": 0.18,
+      "spark_shank": 0.15,
+      "magnet_trapper": 0.15,
+      "bomb_rat": 0.1,
+      "toxic_rat": 0.12
+     },
+     "mood": "storm",
+     "miniboss": "beer_baron"
     },
     {
-      "id": "bank_3",
-      "title": "Золотой Банк",
-      "subtitle": "Глава 2 · локация 3",
-      "layout": "bank",
-      "floor": "res://assets/biome/ch2_floor.png",
-      "size": [
-        44,
-        54
-      ],
-      "music": "knife",
-      "grade": {
-        "shadow": [
-          0.08,
-          0.03,
-          0.05
-        ],
-        "highlight": [
-          0.07,
-          0.05,
-          -0.01
-        ]
-      },
-      "macro": 0.35,
-      "minimap": {
-        "floor": "#d9bf86",
-        "lane": "#e89ab8",
-        "lawn": "#4f8f2e",
-        "wall": "#b08a3a",
-        "cover": "#f2d27a",
-        "boss": "#ff2e63"
-      },
-      "border": [
-        "railing",
-        "planter",
-        "railing_low",
-        "lamp_banner",
-        "railing",
-        "planter"
-      ],
-      "cover_big": [
-        "picnic_table",
-        "cake_cart",
-        "fountain",
-        "planter"
-      ],
-      "cover_small": [
-        "umbrella",
-        "column",
-        "cash_pile"
-      ],
-      "flat": [
-        "r_railing",
-        "r_fountain",
-        "r_statue"
-      ],
-      "lamp": "lamp_banner",
-      "destructibles": {
-        "cash_pile": 4,
-        "crystals": 3,
-        "umbrella": 3,
-        "column": 2,
-        "picnic_table": 2,
-        "cake_cart": 2
-      },
-      "boss": "mud_magnate",
-      "escort": {
-        "enemy": "pig_royal",
-        "interval": 5.6,
-        "count": 3
-      },
-      "waves": [
-        {
-          "title": "Охрана банка",
-          "count": 14,
-          "spawn_interval": 1.104,
-          "batch": 2,
-          "max_alive": 11,
-          "weights": {
-            "pig_guard": 1.0
-          },
-          "mood": "sunny"
-        },
-        {
-          "title": "Пикник со стрельбой",
-          "count": 19,
-          "spawn_interval": 1.012,
-          "batch": 2,
-          "max_alive": 13,
-          "weights": {
-            "pig_guard": 0.75,
-            "croupier": 0.4,
-            "pig_mechanic": 0.145
-          },
-          "mood": "sunny"
-        },
-        {
-          "title": "Дивиденды",
-          "count": 24,
-          "spawn_interval": 0.92,
-          "batch": 3,
-          "max_alive": 15,
-          "weights": {
-            "pig_guard": 0.55,
-            "croupier": 0.32,
-            "dropper": 0.25,
-            "pig_sniper": 0.189,
-            "pig_mechanic": 0.158
-          },
-          "mood": "golden"
-        },
-        {
-          "title": "Крупная ставка",
-          "count": 29,
-          "spawn_interval": 0.874,
-          "batch": 3,
-          "max_alive": 17,
-          "weights": {
-            "pig_guard": 0.45,
-            "croupier": 0.32,
-            "dropper": 0.2,
-            "pig_angry": 0.15,
-            "pig_sniper": 0.207,
-            "pig_mechanic": 0.172
-          },
-          "mood": "golden"
-        },
-        {
-          "title": "Свинья-Магнат · ФИНАЛ",
-          "count": 34,
-          "spawn_interval": 0.828,
-          "batch": 3,
-          "max_alive": 19,
-          "weights": {
-            "pig_guard": 0.38,
-            "croupier": 0.288,
-            "dropper": 0.18,
-            "pig_angry": 0.12,
-            "bruiser": 0.224,
-            "pig_sniper": 0.224,
-            "pig_mechanic": 0.185
-          },
-          "mood": "party",
-          "miniboss": "pig_magnate"
-        },
-        {
-          "title": "Вскрытие сейфа",
-          "count": 38,
-          "spawn_interval": 0.782,
-          "batch": 4,
-          "max_alive": 22,
-          "weights": {
-            "pig_guard": 0.32,
-            "croupier": 0.288,
-            "dropper": 0.18,
-            "pig_heavy": 0.12,
-            "bruiser": 0.16,
-            "vault_pig": 0.16,
-            "pig_sniper": 0.242,
-            "pig_mechanic": 0.198
-          },
-          "mood": "party"
-        },
-        {
-          "title": "Инкассация",
-          "count": 46,
-          "spawn_interval": 0.718,
-          "batch": 4,
-          "max_alive": 25,
-          "weights": {
-            "pig_guard": 0.28,
-            "croupier": 0.288,
-            "dropper": 0.2,
-            "pig_heavy": 0.12,
-            "bruiser": 0.16,
-            "vault_pig": 0.192,
-            "pig_sniper": 0.26,
-            "pig_mechanic": 0.211
-          },
-          "mood": "golden"
-        },
-        {
-          "title": "Биржевой крах",
-          "count": 53,
-          "spawn_interval": 0.644,
-          "batch": 5,
-          "max_alive": 28,
-          "weights": {
-            "pig_guard": 0.24,
-            "croupier": 0.32,
-            "dropper": 0.2,
-            "pig_angry": 0.1,
-            "bruiser": 0.192,
-            "vault_pig": 0.224,
-            "pig_sniper": 0.277,
-            "pig_mechanic": 0.224
-          },
-          "mood": "vault"
-        },
-        {
-          "title": "Хранилище",
-          "count": 62,
-          "spawn_interval": 0.57,
-          "batch": 5,
-          "max_alive": 32,
-          "weights": {
-            "pig_guard": 0.22,
-            "croupier": 0.32,
-            "dropper": 0.2,
-            "pig_heavy": 0.1,
-            "bruiser": 0.192,
-            "vault_pig": 0.256,
-            "pig_sniper": 0.295,
-            "pig_mechanic": 0.238
-          },
-          "mood": "vault"
-        },
-        {
-          "title": "Mud Magnate · ФИНАЛ",
-          "count": 20,
-          "spawn_interval": 2.3,
-          "batch": 2,
-          "max_alive": 9,
-          "weights": {
-            "pig_guard": 0.45,
-            "croupier": 0.48,
-            "dropper": 0.25
-          },
-          "mood": "vault",
-          "boss": "mud_magnate"
-        }
-      ],
-      "variant": 2,
-      "power": 2.4,
-      "count_mult": 1.4
+     "title": "Бешеные",
+     "count": 36,
+     "spawn_interval": 0.782,
+     "batch": 4,
+     "max_alive": 22,
+     "weights": {
+      "rat_punk": 0.36,
+      "spark_rat": 0.16,
+      "spark_shank": 0.14,
+      "magnet_trapper": 0.12,
+      "dash_rat": 0.14,
+      "bomb_rat": 0.08,
+      "toxic_rat": 0.13,
+      "courier_rat": 0.18
+     },
+     "mood": "pink_haze"
+    },
+    {
+     "title": "Банда",
+     "count": 43,
+     "spawn_interval": 0.718,
+     "batch": 4,
+     "max_alive": 25,
+     "weights": {
+      "rat_punk": 0.3,
+      "spark_rat": 0.16,
+      "spark_shank": 0.14,
+      "magnet_trapper": 0.12,
+      "dash_rat": 0.12,
+      "gang_rat": 0.16,
+      "toxic_rat": 0.14,
+      "courier_rat": 0.18,
+      "trash_tank": 0.04
+     },
+     "mood": "toxic"
+    },
+    {
+     "title": "Облава",
+     "count": 50,
+     "spawn_interval": 0.644,
+     "batch": 5,
+     "max_alive": 28,
+     "weights": {
+      "rat_punk": 0.26,
+      "spark_rat": 0.18,
+      "spark_shank": 0.16,
+      "magnet_trapper": 0.14,
+      "dash_rat": 0.1,
+      "gang_rat": 0.16,
+      "toxic_rat": 0.15,
+      "courier_rat": 0.18,
+      "trash_tank": 0.04
+     },
+     "mood": "storm"
+    },
+    {
+     "title": "Последний рубеж",
+     "count": 60,
+     "spawn_interval": 0.57,
+     "batch": 5,
+     "max_alive": 32,
+     "weights": {
+      "rat_punk": 0.24,
+      "spark_rat": 0.18,
+      "spark_shank": 0.16,
+      "magnet_trapper": 0.14,
+      "dash_rat": 0.1,
+      "gang_rat": 0.18,
+      "toxic_rat": 0.16,
+      "courier_rat": 0.18,
+      "trash_tank": 0.04
+     },
+     "mood": "alarm"
+    },
+    {
+     "title": "Junk Overlord",
+     "count": 22,
+     "spawn_interval": 2.1,
+     "batch": 2,
+     "max_alive": 10,
+     "weights": {
+      "rat_punk": 0.45,
+      "spark_rat": 0.2,
+      "spark_shank": 0.2,
+      "bomb_rat": 0.15
+     },
+     "mood": "alarm",
+     "boss": "junk_overlord"
     }
-  ],
-  "difficulty": {
-    "hp_per_wave": 0.09,
-    "damage_per_wave": 0.055,
-    "speed_per_wave": 0.012,
-    "loop_hp": 1.9,
-    "loop_damage": 1.35,
-    "loop_count": 1.25,
-    "loop_interval": 0.9,
-    "loop_max_alive": 6,
-    "intermission": 3.5
+   ],
+   "variant": 0,
+   "power": 1.0,
+   "count_mult": 1.0,
+   "scenes": [
+    [
+     "trash_row",
+     2
+    ],
+    [
+     "power_station",
+     1
+    ],
+    [
+     "container_yard",
+     2
+    ],
+    [
+     "tire_shop",
+     1
+    ],
+    [
+     "ewaste",
+     1
+    ],
+    [
+     "checkpoint",
+     2
+    ],
+    [
+     "toxic_corner",
+     1
+    ]
+   ]
+  },
+  {
+   "id": "junkyard_2",
+   "title": "Неоновая Свалка",
+   "subtitle": "Глава 1 · локация 2",
+   "layout": "junkyard",
+   "floor": "res://assets/biome/ch1_floor.png",
+   "size": [
+    42,
+    52
+   ],
+   "music": "battle",
+   "grade": {
+    "shadow": [
+     0.1,
+     0.02,
+     0.16
+    ],
+    "highlight": [
+     0.06,
+     0.03,
+     -0.02
+    ]
+   },
+   "macro": 1.0,
+   "minimap": {
+    "floor": "#2a2744",
+    "lane": "#1f1f33",
+    "wall": "#6a5f8a",
+    "cover": "#8a7aa8",
+    "boss": "#ff2e63"
+   },
+   "border": [
+    "container",
+    "junk_pile",
+    "dumpster",
+    "tire_stack",
+    "fence",
+    "oil_barrels",
+    "generator",
+    "junk_pile",
+    "container",
+    "spruce",
+    "outskirts_fence",
+    "rocks"
+   ],
+   "cover_big": [
+    "junk_pile",
+    "container",
+    "generator",
+    "dumpster",
+    "crt_terminal",
+    "barricade",
+    "water_tower",
+    "shed",
+    "van",
+    "spruce"
+   ],
+   "cover_small": [
+    "tire_stack",
+    "oil_barrels",
+    "toxic_bags",
+    "cable_spool",
+    "bush",
+    "bush_low",
+    "rocks"
+   ],
+   "flat": [
+    "scrap_ramp",
+    "r_fence",
+    "r_floodlight",
+    "r_generator",
+    "r_dumpster",
+    "r_tires",
+    "r_barricade"
+   ],
+   "lamp": "floodlight",
+   "destructibles": {
+    "d_barrel": 5,
+    "d_crt": 3,
+    "d_toxic": 3,
+    "d_container": 2,
+    "d_junk": 3,
+    "d_bags": 2,
+    "d_dumpster": 2,
+    "d_cans": 3,
+    "d_crates": 3
+   },
+   "boss": "junk_overlord",
+   "escort": {
+    "enemy": "rat_punk",
+    "interval": 5.2,
+    "count": 4
+   },
+   "waves": [
+    {
+     "title": "Разминка",
+     "count": 12,
+     "spawn_interval": 1.15,
+     "batch": 2,
+     "max_alive": 10,
+     "weights": {
+      "rat_punk": 1.0
+     },
+     "mood": "clear"
+    },
+    {
+     "title": "Шпана с ломами",
+     "count": 17,
+     "spawn_interval": 1.012,
+     "batch": 2,
+     "max_alive": 12,
+     "weights": {
+      "rat_punk": 0.85,
+      "bomb_rat": 0.15,
+      "courier_rat": 0.12
+     },
+     "mood": "clear"
+    },
+    {
+     "title": "Искрящие",
+     "count": 22,
+     "spawn_interval": 0.92,
+     "batch": 3,
+     "max_alive": 14,
+     "weights": {
+      "rat_punk": 0.62,
+      "bomb_rat": 0.13,
+      "spark_rat": 0.25,
+      "toxic_rat": 0.16,
+      "courier_rat": 0.12
+     },
+     "mood": "pink_haze"
+    },
+    {
+     "title": "Из тени",
+     "count": 26,
+     "spawn_interval": 0.874,
+     "batch": 3,
+     "max_alive": 17,
+     "weights": {
+      "rat_punk": 0.5,
+      "spark_rat": 0.2,
+      "bomb_rat": 0.1,
+      "spark_shank": 0.26,
+      "toxic_rat": 0.176,
+      "courier_rat": 0.12,
+      "pigeon_bomber": 0.1
+     },
+     "mood": "toxic"
+    },
+    {
+     "title": "Шаман-Электрик",
+     "count": 31,
+     "spawn_interval": 0.828,
+     "batch": 3,
+     "max_alive": 19,
+     "weights": {
+      "rat_punk": 0.42,
+      "spark_rat": 0.18,
+      "spark_shank": 0.195,
+      "magnet_trapper": 0.195,
+      "bomb_rat": 0.1,
+      "toxic_rat": 0.192
+     },
+     "mood": "storm",
+     "miniboss": "electric_shaman"
+    },
+    {
+     "title": "Бешеные",
+     "count": 36,
+     "spawn_interval": 0.782,
+     "batch": 4,
+     "max_alive": 22,
+     "weights": {
+      "rat_punk": 0.36,
+      "spark_rat": 0.16,
+      "spark_shank": 0.182,
+      "magnet_trapper": 0.156,
+      "dash_rat": 0.14,
+      "bomb_rat": 0.08,
+      "toxic_rat": 0.208,
+      "courier_rat": 0.18,
+      "pigeon_bomber": 0.1,
+      "trash_tank": 0.08
+     },
+     "mood": "pink_haze"
+    },
+    {
+     "title": "Банда",
+     "count": 43,
+     "spawn_interval": 0.718,
+     "batch": 4,
+     "max_alive": 25,
+     "weights": {
+      "rat_punk": 0.3,
+      "spark_rat": 0.16,
+      "spark_shank": 0.182,
+      "magnet_trapper": 0.156,
+      "dash_rat": 0.12,
+      "gang_rat": 0.208,
+      "toxic_rat": 0.224,
+      "courier_rat": 0.18,
+      "pigeon_bomber": 0.1,
+      "trash_tank": 0.12
+     },
+     "mood": "toxic"
+    },
+    {
+     "title": "Облава",
+     "count": 50,
+     "spawn_interval": 0.644,
+     "batch": 5,
+     "max_alive": 28,
+     "weights": {
+      "rat_punk": 0.26,
+      "spark_rat": 0.18,
+      "spark_shank": 0.208,
+      "magnet_trapper": 0.182,
+      "dash_rat": 0.1,
+      "gang_rat": 0.208,
+      "toxic_rat": 0.24,
+      "courier_rat": 0.18,
+      "pigeon_bomber": 0.1,
+      "trash_tank": 0.12
+     },
+     "mood": "storm"
+    },
+    {
+     "title": "Последний рубеж",
+     "count": 60,
+     "spawn_interval": 0.57,
+     "batch": 5,
+     "max_alive": 32,
+     "weights": {
+      "rat_punk": 0.24,
+      "spark_rat": 0.18,
+      "spark_shank": 0.208,
+      "magnet_trapper": 0.182,
+      "dash_rat": 0.1,
+      "gang_rat": 0.234,
+      "toxic_rat": 0.256,
+      "courier_rat": 0.18,
+      "pigeon_bomber": 0.1,
+      "trash_tank": 0.12
+     },
+     "mood": "alarm"
+    },
+    {
+     "title": "Junk Overlord II",
+     "count": 22,
+     "spawn_interval": 2.1,
+     "batch": 2,
+     "max_alive": 10,
+     "weights": {
+      "rat_punk": 0.45,
+      "spark_rat": 0.2,
+      "spark_shank": 0.26,
+      "bomb_rat": 0.15
+     },
+     "mood": "alarm",
+     "boss": "junk_overlord"
+    }
+   ],
+   "variant": 1,
+   "power": 1.6,
+   "count_mult": 1.2,
+   "scenes": [
+    [
+     "watchman",
+     1
+    ],
+    [
+     "water_tower",
+     1
+    ],
+    [
+     "tree_line",
+     2
+    ],
+    [
+     "power_station",
+     1
+    ],
+    [
+     "container_yard",
+     1
+    ],
+    [
+     "trash_row",
+     1
+    ],
+    [
+     "tire_shop",
+     1
+    ],
+    [
+     "ewaste",
+     1
+    ],
+    [
+     "checkpoint",
+     2
+    ],
+    [
+     "toxic_corner",
+     1
+    ]
+   ]
+  },
+  {
+   "id": "junkyard_3",
+   "title": "Неоновая Свалка",
+   "subtitle": "Глава 1 · локация 3",
+   "layout": "junkyard",
+   "floor": "res://assets/biome/ch1_floor.png",
+   "size": [
+    44,
+    54
+   ],
+   "music": "battle",
+   "grade": {
+    "shadow": [
+     0.1,
+     0.02,
+     0.16
+    ],
+    "highlight": [
+     0.06,
+     0.03,
+     -0.02
+    ]
+   },
+   "macro": 1.0,
+   "minimap": {
+    "floor": "#2a2744",
+    "lane": "#1f1f33",
+    "wall": "#6a5f8a",
+    "cover": "#8a7aa8",
+    "boss": "#ff2e63"
+   },
+   "border": [
+    "spruce",
+    "outskirts_fence",
+    "bush",
+    "rocks",
+    "container",
+    "spruce",
+    "junk_pile",
+    "outskirts_fence",
+    "toxic_pipe"
+   ],
+   "cover_big": [
+    "van",
+    "shed",
+    "water_tower",
+    "toxic_pipe",
+    "spruce",
+    "junk_pile",
+    "container",
+    "generator"
+   ],
+   "cover_small": [
+    "bush",
+    "bush_low",
+    "rocks",
+    "tire_stack",
+    "oil_barrels"
+   ],
+   "flat": [
+    "scrap_ramp",
+    "r_fence",
+    "r_floodlight",
+    "r_generator",
+    "r_dumpster",
+    "r_tires",
+    "r_barricade"
+   ],
+   "lamp": "floodlight",
+   "destructibles": {
+    "d_barrel": 5,
+    "d_crt": 3,
+    "d_toxic": 3,
+    "d_container": 2,
+    "d_junk": 3,
+    "d_bags": 2,
+    "d_dumpster": 2,
+    "d_cans": 3,
+    "d_crates": 3
+   },
+   "boss": "junk_overlord",
+   "escort": {
+    "enemy": "rat_punk",
+    "interval": 5.2,
+    "count": 4
+   },
+   "waves": [
+    {
+     "title": "Разминка",
+     "count": 12,
+     "spawn_interval": 1.15,
+     "batch": 2,
+     "max_alive": 10,
+     "weights": {
+      "rat_punk": 1.0
+     },
+     "mood": "clear"
+    },
+    {
+     "title": "Шпана с ломами",
+     "count": 17,
+     "spawn_interval": 1.012,
+     "batch": 2,
+     "max_alive": 12,
+     "weights": {
+      "rat_punk": 0.85,
+      "bomb_rat": 0.15,
+      "courier_rat": 0.12
+     },
+     "mood": "clear"
+    },
+    {
+     "title": "Искрящие",
+     "count": 22,
+     "spawn_interval": 0.92,
+     "batch": 3,
+     "max_alive": 14,
+     "weights": {
+      "rat_punk": 0.62,
+      "bomb_rat": 0.13,
+      "spark_rat": 0.25,
+      "toxic_rat": 0.22,
+      "courier_rat": 0.12
+     },
+     "mood": "pink_haze"
+    },
+    {
+     "title": "Из тени",
+     "count": 26,
+     "spawn_interval": 0.874,
+     "batch": 3,
+     "max_alive": 17,
+     "weights": {
+      "rat_punk": 0.5,
+      "spark_rat": 0.2,
+      "bomb_rat": 0.1,
+      "spark_shank": 0.32,
+      "toxic_rat": 0.242,
+      "courier_rat": 0.12,
+      "pigeon_bomber": 0.1
+     },
+     "mood": "toxic"
+    },
+    {
+     "title": "Пивной Барон · ФИНАЛ",
+     "count": 31,
+     "spawn_interval": 0.828,
+     "batch": 3,
+     "max_alive": 19,
+     "weights": {
+      "rat_punk": 0.42,
+      "spark_rat": 0.18,
+      "spark_shank": 0.24,
+      "magnet_trapper": 0.24,
+      "bomb_rat": 0.1,
+      "toxic_rat": 0.264
+     },
+     "mood": "storm",
+     "miniboss": "sea_pirate"
+    },
+    {
+     "title": "Бешеные",
+     "count": 36,
+     "spawn_interval": 0.782,
+     "batch": 4,
+     "max_alive": 22,
+     "weights": {
+      "rat_punk": 0.36,
+      "spark_rat": 0.16,
+      "spark_shank": 0.224,
+      "magnet_trapper": 0.192,
+      "dash_rat": 0.14,
+      "bomb_rat": 0.08,
+      "toxic_rat": 0.286,
+      "courier_rat": 0.18,
+      "pigeon_bomber": 0.1,
+      "trash_tank": 0.08
+     },
+     "mood": "pink_haze"
+    },
+    {
+     "title": "Банда",
+     "count": 43,
+     "spawn_interval": 0.718,
+     "batch": 4,
+     "max_alive": 25,
+     "weights": {
+      "rat_punk": 0.3,
+      "spark_rat": 0.16,
+      "spark_shank": 0.224,
+      "magnet_trapper": 0.192,
+      "dash_rat": 0.12,
+      "gang_rat": 0.256,
+      "toxic_rat": 0.308,
+      "courier_rat": 0.18,
+      "pigeon_bomber": 0.1,
+      "trash_tank": 0.12
+     },
+     "mood": "toxic"
+    },
+    {
+     "title": "Облава",
+     "count": 50,
+     "spawn_interval": 0.644,
+     "batch": 5,
+     "max_alive": 28,
+     "weights": {
+      "rat_punk": 0.26,
+      "spark_rat": 0.18,
+      "spark_shank": 0.256,
+      "magnet_trapper": 0.224,
+      "dash_rat": 0.1,
+      "gang_rat": 0.256,
+      "toxic_rat": 0.33,
+      "courier_rat": 0.18,
+      "pigeon_bomber": 0.1,
+      "trash_tank": 0.12
+     },
+     "mood": "storm"
+    },
+    {
+     "title": "Последний рубеж",
+     "count": 60,
+     "spawn_interval": 0.57,
+     "batch": 5,
+     "max_alive": 32,
+     "weights": {
+      "rat_punk": 0.24,
+      "spark_rat": 0.18,
+      "spark_shank": 0.256,
+      "magnet_trapper": 0.224,
+      "dash_rat": 0.1,
+      "gang_rat": 0.288,
+      "toxic_rat": 0.352,
+      "courier_rat": 0.18,
+      "pigeon_bomber": 0.1,
+      "trash_tank": 0.12
+     },
+     "mood": "alarm"
+    },
+    {
+     "title": "Junk Overlord · ФИНАЛ",
+     "count": 22,
+     "spawn_interval": 2.1,
+     "batch": 2,
+     "max_alive": 10,
+     "weights": {
+      "rat_punk": 0.45,
+      "spark_rat": 0.2,
+      "spark_shank": 0.32,
+      "bomb_rat": 0.15
+     },
+     "mood": "alarm",
+     "boss": "junk_overlord"
+    }
+   ],
+   "variant": 2,
+   "power": 2.4,
+   "count_mult": 1.4,
+   "scenes": [
+    [
+     "watchman",
+     1
+    ],
+    [
+     "water_tower",
+     1
+    ],
+    [
+     "tree_line",
+     3
+    ],
+    [
+     "pipe_yard",
+     1
+    ],
+    [
+     "power_station",
+     1
+    ],
+    [
+     "container_yard",
+     1
+    ],
+    [
+     "tire_shop",
+     1
+    ],
+    [
+     "trash_row",
+     1
+    ],
+    [
+     "checkpoint",
+     1
+    ]
+   ]
+  },
+  {
+   "id": "bank",
+   "title": "Золотой Банк",
+   "subtitle": "Глава 2 · локация 1",
+   "layout": "bank",
+   "floor": "res://assets/biome/ch2_floor.png",
+   "size": [
+    40,
+    50
+   ],
+   "music": "knife",
+   "grade": {
+    "shadow": [
+     0.08,
+     0.03,
+     0.05
+    ],
+    "highlight": [
+     0.07,
+     0.05,
+     -0.01
+    ]
+   },
+   "macro": 0.35,
+   "minimap": {
+    "floor": "#d9bf86",
+    "lane": "#e89ab8",
+    "lawn": "#4f8f2e",
+    "wall": "#b08a3a",
+    "cover": "#f2d27a",
+    "boss": "#ff2e63"
+   },
+   "border": [
+    "railing",
+    "planter",
+    "railing_low",
+    "lamp_banner",
+    "railing",
+    "planter"
+   ],
+   "cover_big": [
+    "picnic_table",
+    "cake_cart",
+    "fountain",
+    "planter"
+   ],
+   "cover_small": [
+    "umbrella",
+    "column",
+    "cash_pile"
+   ],
+   "flat": [
+    "r_railing",
+    "r_fountain",
+    "r_statue"
+   ],
+   "lamp": "lamp_banner",
+   "destructibles": {
+    "cash_pile": 4,
+    "crystals": 3,
+    "umbrella": 3,
+    "column": 2,
+    "picnic_table": 2,
+    "cake_cart": 2
+   },
+   "boss": "mud_magnate",
+   "escort": {
+    "enemy": "pig_royal",
+    "interval": 5.6,
+    "count": 3
+   },
+   "waves": [
+    {
+     "title": "Охрана банка",
+     "count": 14,
+     "spawn_interval": 1.104,
+     "batch": 2,
+     "max_alive": 11,
+     "weights": {
+      "pig_guard": 1.0
+     },
+     "mood": "sunny"
+    },
+    {
+     "title": "Пикник со стрельбой",
+     "count": 19,
+     "spawn_interval": 1.012,
+     "batch": 2,
+     "max_alive": 13,
+     "weights": {
+      "pig_guard": 0.75,
+      "croupier": 0.25,
+      "pig_mechanic": 0.066,
+      "courier_rat": 0.12
+     },
+     "mood": "sunny"
+    },
+    {
+     "title": "Дивиденды",
+     "count": 24,
+     "spawn_interval": 0.92,
+     "batch": 3,
+     "max_alive": 15,
+     "weights": {
+      "pig_guard": 0.55,
+      "croupier": 0.2,
+      "dropper": 0.25,
+      "pig_sniper": 0.086,
+      "pig_mechanic": 0.072,
+      "courier_rat": 0.12,
+      "cash_collector": 0.14
+     },
+     "mood": "golden"
+    },
+    {
+     "title": "Крупная ставка",
+     "count": 29,
+     "spawn_interval": 0.874,
+     "batch": 3,
+     "max_alive": 17,
+     "weights": {
+      "pig_guard": 0.45,
+      "croupier": 0.2,
+      "dropper": 0.2,
+      "pig_angry": 0.15,
+      "pig_sniper": 0.094,
+      "pig_mechanic": 0.078,
+      "courier_rat": 0.12,
+      "pigeon_bomber": 0.1,
+      "cash_collector": 0.14
+     },
+     "mood": "golden"
+    },
+    {
+     "title": "Свинья-Магнат",
+     "count": 34,
+     "spawn_interval": 0.828,
+     "batch": 3,
+     "max_alive": 19,
+     "weights": {
+      "pig_guard": 0.38,
+      "croupier": 0.18,
+      "dropper": 0.18,
+      "pig_angry": 0.12,
+      "bruiser": 0.14,
+      "pig_sniper": 0.102,
+      "pig_mechanic": 0.084
+     },
+     "mood": "party",
+     "miniboss": "pig_magnate"
+    },
+    {
+     "title": "Вскрытие сейфа",
+     "count": 38,
+     "spawn_interval": 0.782,
+     "batch": 4,
+     "max_alive": 22,
+     "weights": {
+      "pig_guard": 0.32,
+      "croupier": 0.18,
+      "dropper": 0.18,
+      "pig_heavy": 0.12,
+      "bruiser": 0.1,
+      "vault_pig": 0.1,
+      "pig_sniper": 0.11,
+      "pig_mechanic": 0.09,
+      "courier_rat": 0.18,
+      "pigeon_bomber": 0.1,
+      "trash_tank": 0.08,
+      "cash_collector": 0.14
+     },
+     "mood": "party"
+    },
+    {
+     "title": "Инкассация",
+     "count": 46,
+     "spawn_interval": 0.718,
+     "batch": 4,
+     "max_alive": 25,
+     "weights": {
+      "pig_guard": 0.28,
+      "croupier": 0.18,
+      "dropper": 0.2,
+      "pig_heavy": 0.12,
+      "bruiser": 0.1,
+      "vault_pig": 0.12,
+      "pig_sniper": 0.118,
+      "pig_mechanic": 0.096,
+      "courier_rat": 0.18,
+      "pigeon_bomber": 0.1,
+      "trash_tank": 0.12,
+      "cash_collector": 0.14
+     },
+     "mood": "golden"
+    },
+    {
+     "title": "Биржевой крах",
+     "count": 53,
+     "spawn_interval": 0.644,
+     "batch": 5,
+     "max_alive": 28,
+     "weights": {
+      "pig_guard": 0.24,
+      "croupier": 0.2,
+      "dropper": 0.2,
+      "pig_angry": 0.1,
+      "bruiser": 0.12,
+      "vault_pig": 0.14,
+      "pig_sniper": 0.126,
+      "pig_mechanic": 0.102,
+      "courier_rat": 0.18,
+      "pigeon_bomber": 0.1,
+      "trash_tank": 0.12,
+      "cash_collector": 0.14
+     },
+     "mood": "vault"
+    },
+    {
+     "title": "Хранилище",
+     "count": 62,
+     "spawn_interval": 0.57,
+     "batch": 5,
+     "max_alive": 32,
+     "weights": {
+      "pig_guard": 0.22,
+      "croupier": 0.2,
+      "dropper": 0.2,
+      "pig_heavy": 0.1,
+      "bruiser": 0.12,
+      "vault_pig": 0.16,
+      "pig_sniper": 0.134,
+      "pig_mechanic": 0.108,
+      "courier_rat": 0.18,
+      "pigeon_bomber": 0.1,
+      "trash_tank": 0.12,
+      "cash_collector": 0.14
+     },
+     "mood": "vault"
+    },
+    {
+     "title": "Mud Magnate",
+     "count": 20,
+     "spawn_interval": 2.3,
+     "batch": 2,
+     "max_alive": 9,
+     "weights": {
+      "pig_guard": 0.45,
+      "croupier": 0.3,
+      "dropper": 0.25
+     },
+     "mood": "vault",
+     "boss": "mud_magnate"
+    }
+   ],
+   "variant": 0,
+   "power": 1.0,
+   "count_mult": 1.0
+  },
+  {
+   "id": "bank_2",
+   "title": "Золотой Банк",
+   "subtitle": "Глава 2 · локация 2",
+   "layout": "bank",
+   "floor": "res://assets/biome/ch2_floor.png",
+   "size": [
+    42,
+    52
+   ],
+   "music": "knife",
+   "grade": {
+    "shadow": [
+     0.08,
+     0.03,
+     0.05
+    ],
+    "highlight": [
+     0.07,
+     0.05,
+     -0.01
+    ]
+   },
+   "macro": 0.35,
+   "minimap": {
+    "floor": "#d9bf86",
+    "lane": "#e89ab8",
+    "lawn": "#4f8f2e",
+    "wall": "#b08a3a",
+    "cover": "#f2d27a",
+    "boss": "#ff2e63"
+   },
+   "border": [
+    "railing",
+    "planter",
+    "railing_low",
+    "lamp_banner",
+    "railing",
+    "planter"
+   ],
+   "cover_big": [
+    "picnic_table",
+    "cake_cart",
+    "fountain",
+    "planter"
+   ],
+   "cover_small": [
+    "umbrella",
+    "column",
+    "cash_pile"
+   ],
+   "flat": [
+    "r_railing",
+    "r_fountain",
+    "r_statue"
+   ],
+   "lamp": "lamp_banner",
+   "destructibles": {
+    "cash_pile": 4,
+    "crystals": 3,
+    "umbrella": 3,
+    "column": 2,
+    "picnic_table": 2,
+    "cake_cart": 2
+   },
+   "boss": "mud_magnate",
+   "escort": {
+    "enemy": "pig_royal",
+    "interval": 5.6,
+    "count": 3
+   },
+   "waves": [
+    {
+     "title": "Охрана банка",
+     "count": 14,
+     "spawn_interval": 1.104,
+     "batch": 2,
+     "max_alive": 11,
+     "weights": {
+      "pig_guard": 1.0
+     },
+     "mood": "sunny"
+    },
+    {
+     "title": "Пикник со стрельбой",
+     "count": 19,
+     "spawn_interval": 1.012,
+     "batch": 2,
+     "max_alive": 13,
+     "weights": {
+      "pig_guard": 0.75,
+      "croupier": 0.325,
+      "pig_mechanic": 0.106,
+      "courier_rat": 0.12
+     },
+     "mood": "sunny"
+    },
+    {
+     "title": "Дивиденды",
+     "count": 24,
+     "spawn_interval": 0.92,
+     "batch": 3,
+     "max_alive": 15,
+     "weights": {
+      "pig_guard": 0.55,
+      "croupier": 0.26,
+      "dropper": 0.25,
+      "pig_sniper": 0.138,
+      "pig_mechanic": 0.115,
+      "courier_rat": 0.12,
+      "cash_collector": 0.14
+     },
+     "mood": "golden"
+    },
+    {
+     "title": "Крупная ставка",
+     "count": 29,
+     "spawn_interval": 0.874,
+     "batch": 3,
+     "max_alive": 17,
+     "weights": {
+      "pig_guard": 0.45,
+      "croupier": 0.26,
+      "dropper": 0.2,
+      "pig_angry": 0.15,
+      "pig_sniper": 0.15,
+      "pig_mechanic": 0.125,
+      "courier_rat": 0.12,
+      "pigeon_bomber": 0.1,
+      "cash_collector": 0.14
+     },
+     "mood": "golden"
+    },
+    {
+     "title": "Свинья-Магнат II",
+     "count": 34,
+     "spawn_interval": 0.828,
+     "batch": 3,
+     "max_alive": 19,
+     "weights": {
+      "pig_guard": 0.38,
+      "croupier": 0.234,
+      "dropper": 0.18,
+      "pig_angry": 0.12,
+      "bruiser": 0.182,
+      "pig_sniper": 0.163,
+      "pig_mechanic": 0.134
+     },
+     "mood": "party",
+     "miniboss": "chef_boss"
+    },
+    {
+     "title": "Вскрытие сейфа",
+     "count": 38,
+     "spawn_interval": 0.782,
+     "batch": 4,
+     "max_alive": 22,
+     "weights": {
+      "pig_guard": 0.32,
+      "croupier": 0.234,
+      "dropper": 0.18,
+      "pig_heavy": 0.12,
+      "bruiser": 0.13,
+      "vault_pig": 0.13,
+      "pig_sniper": 0.176,
+      "pig_mechanic": 0.144,
+      "courier_rat": 0.18,
+      "pigeon_bomber": 0.1,
+      "trash_tank": 0.08,
+      "cash_collector": 0.14
+     },
+     "mood": "party"
+    },
+    {
+     "title": "Инкассация",
+     "count": 46,
+     "spawn_interval": 0.718,
+     "batch": 4,
+     "max_alive": 25,
+     "weights": {
+      "pig_guard": 0.28,
+      "croupier": 0.234,
+      "dropper": 0.2,
+      "pig_heavy": 0.12,
+      "bruiser": 0.13,
+      "vault_pig": 0.156,
+      "pig_sniper": 0.189,
+      "pig_mechanic": 0.154,
+      "courier_rat": 0.18,
+      "pigeon_bomber": 0.1,
+      "trash_tank": 0.12,
+      "cash_collector": 0.14
+     },
+     "mood": "golden"
+    },
+    {
+     "title": "Биржевой крах",
+     "count": 53,
+     "spawn_interval": 0.644,
+     "batch": 5,
+     "max_alive": 28,
+     "weights": {
+      "pig_guard": 0.24,
+      "croupier": 0.26,
+      "dropper": 0.2,
+      "pig_angry": 0.1,
+      "bruiser": 0.156,
+      "vault_pig": 0.182,
+      "pig_sniper": 0.202,
+      "pig_mechanic": 0.163,
+      "courier_rat": 0.18,
+      "pigeon_bomber": 0.1,
+      "trash_tank": 0.12,
+      "cash_collector": 0.14
+     },
+     "mood": "vault"
+    },
+    {
+     "title": "Хранилище",
+     "count": 62,
+     "spawn_interval": 0.57,
+     "batch": 5,
+     "max_alive": 32,
+     "weights": {
+      "pig_guard": 0.22,
+      "croupier": 0.26,
+      "dropper": 0.2,
+      "pig_heavy": 0.1,
+      "bruiser": 0.156,
+      "vault_pig": 0.208,
+      "pig_sniper": 0.214,
+      "pig_mechanic": 0.173,
+      "courier_rat": 0.18,
+      "pigeon_bomber": 0.1,
+      "trash_tank": 0.12,
+      "cash_collector": 0.14
+     },
+     "mood": "vault"
+    },
+    {
+     "title": "Mud Magnate II",
+     "count": 20,
+     "spawn_interval": 2.3,
+     "batch": 2,
+     "max_alive": 9,
+     "weights": {
+      "pig_guard": 0.45,
+      "croupier": 0.39,
+      "dropper": 0.25
+     },
+     "mood": "vault",
+     "boss": "mud_magnate"
+    }
+   ],
+   "variant": 1,
+   "power": 1.6,
+   "count_mult": 1.2
+  },
+  {
+   "id": "bank_3",
+   "title": "Золотой Банк",
+   "subtitle": "Глава 2 · локация 3",
+   "layout": "bank",
+   "floor": "res://assets/biome/ch2_floor.png",
+   "size": [
+    44,
+    54
+   ],
+   "music": "knife",
+   "grade": {
+    "shadow": [
+     0.08,
+     0.03,
+     0.05
+    ],
+    "highlight": [
+     0.07,
+     0.05,
+     -0.01
+    ]
+   },
+   "macro": 0.35,
+   "minimap": {
+    "floor": "#d9bf86",
+    "lane": "#e89ab8",
+    "lawn": "#4f8f2e",
+    "wall": "#b08a3a",
+    "cover": "#f2d27a",
+    "boss": "#ff2e63"
+   },
+   "border": [
+    "railing",
+    "planter",
+    "railing_low",
+    "lamp_banner",
+    "railing",
+    "planter"
+   ],
+   "cover_big": [
+    "picnic_table",
+    "cake_cart",
+    "fountain",
+    "planter"
+   ],
+   "cover_small": [
+    "umbrella",
+    "column",
+    "cash_pile"
+   ],
+   "flat": [
+    "r_railing",
+    "r_fountain",
+    "r_statue"
+   ],
+   "lamp": "lamp_banner",
+   "destructibles": {
+    "cash_pile": 4,
+    "crystals": 3,
+    "umbrella": 3,
+    "column": 2,
+    "picnic_table": 2,
+    "cake_cart": 2
+   },
+   "boss": "mud_magnate",
+   "escort": {
+    "enemy": "pig_royal",
+    "interval": 5.6,
+    "count": 3
+   },
+   "waves": [
+    {
+     "title": "Охрана банка",
+     "count": 14,
+     "spawn_interval": 1.104,
+     "batch": 2,
+     "max_alive": 11,
+     "weights": {
+      "pig_guard": 1.0
+     },
+     "mood": "sunny"
+    },
+    {
+     "title": "Пикник со стрельбой",
+     "count": 19,
+     "spawn_interval": 1.012,
+     "batch": 2,
+     "max_alive": 13,
+     "weights": {
+      "pig_guard": 0.75,
+      "croupier": 0.4,
+      "pig_mechanic": 0.145,
+      "courier_rat": 0.12
+     },
+     "mood": "sunny"
+    },
+    {
+     "title": "Дивиденды",
+     "count": 24,
+     "spawn_interval": 0.92,
+     "batch": 3,
+     "max_alive": 15,
+     "weights": {
+      "pig_guard": 0.55,
+      "croupier": 0.32,
+      "dropper": 0.25,
+      "pig_sniper": 0.189,
+      "pig_mechanic": 0.158,
+      "courier_rat": 0.12,
+      "cash_collector": 0.14
+     },
+     "mood": "golden"
+    },
+    {
+     "title": "Крупная ставка",
+     "count": 29,
+     "spawn_interval": 0.874,
+     "batch": 3,
+     "max_alive": 17,
+     "weights": {
+      "pig_guard": 0.45,
+      "croupier": 0.32,
+      "dropper": 0.2,
+      "pig_angry": 0.15,
+      "pig_sniper": 0.207,
+      "pig_mechanic": 0.172,
+      "courier_rat": 0.12,
+      "pigeon_bomber": 0.1,
+      "cash_collector": 0.14
+     },
+     "mood": "golden"
+    },
+    {
+     "title": "Свинья-Магнат · ФИНАЛ",
+     "count": 34,
+     "spawn_interval": 0.828,
+     "batch": 3,
+     "max_alive": 19,
+     "weights": {
+      "pig_guard": 0.38,
+      "croupier": 0.288,
+      "dropper": 0.18,
+      "pig_angry": 0.12,
+      "bruiser": 0.224,
+      "pig_sniper": 0.224,
+      "pig_mechanic": 0.185
+     },
+     "mood": "party",
+     "miniboss": "pig_magnate"
+    },
+    {
+     "title": "Вскрытие сейфа",
+     "count": 38,
+     "spawn_interval": 0.782,
+     "batch": 4,
+     "max_alive": 22,
+     "weights": {
+      "pig_guard": 0.32,
+      "croupier": 0.288,
+      "dropper": 0.18,
+      "pig_heavy": 0.12,
+      "bruiser": 0.16,
+      "vault_pig": 0.16,
+      "pig_sniper": 0.242,
+      "pig_mechanic": 0.198,
+      "courier_rat": 0.18,
+      "pigeon_bomber": 0.1,
+      "trash_tank": 0.08,
+      "cash_collector": 0.14
+     },
+     "mood": "party"
+    },
+    {
+     "title": "Инкассация",
+     "count": 46,
+     "spawn_interval": 0.718,
+     "batch": 4,
+     "max_alive": 25,
+     "weights": {
+      "pig_guard": 0.28,
+      "croupier": 0.288,
+      "dropper": 0.2,
+      "pig_heavy": 0.12,
+      "bruiser": 0.16,
+      "vault_pig": 0.192,
+      "pig_sniper": 0.26,
+      "pig_mechanic": 0.211,
+      "courier_rat": 0.18,
+      "pigeon_bomber": 0.1,
+      "trash_tank": 0.12,
+      "cash_collector": 0.14
+     },
+     "mood": "golden"
+    },
+    {
+     "title": "Биржевой крах",
+     "count": 53,
+     "spawn_interval": 0.644,
+     "batch": 5,
+     "max_alive": 28,
+     "weights": {
+      "pig_guard": 0.24,
+      "croupier": 0.32,
+      "dropper": 0.2,
+      "pig_angry": 0.1,
+      "bruiser": 0.192,
+      "vault_pig": 0.224,
+      "pig_sniper": 0.277,
+      "pig_mechanic": 0.224,
+      "courier_rat": 0.18,
+      "pigeon_bomber": 0.1,
+      "trash_tank": 0.12,
+      "cash_collector": 0.14
+     },
+     "mood": "vault"
+    },
+    {
+     "title": "Хранилище",
+     "count": 62,
+     "spawn_interval": 0.57,
+     "batch": 5,
+     "max_alive": 32,
+     "weights": {
+      "pig_guard": 0.22,
+      "croupier": 0.32,
+      "dropper": 0.2,
+      "pig_heavy": 0.1,
+      "bruiser": 0.192,
+      "vault_pig": 0.256,
+      "pig_sniper": 0.295,
+      "pig_mechanic": 0.238,
+      "courier_rat": 0.18,
+      "pigeon_bomber": 0.1,
+      "trash_tank": 0.12,
+      "cash_collector": 0.14
+     },
+     "mood": "vault"
+    },
+    {
+     "title": "Mud Magnate · ФИНАЛ",
+     "count": 20,
+     "spawn_interval": 2.3,
+     "batch": 2,
+     "max_alive": 9,
+     "weights": {
+      "pig_guard": 0.45,
+      "croupier": 0.48,
+      "dropper": 0.25
+     },
+     "mood": "vault",
+     "boss": "mud_magnate"
+    }
+   ],
+   "variant": 2,
+   "power": 2.4,
+   "count_mult": 1.4
   }
+ ],
+ "difficulty": {
+  "hp_per_wave": 0.09,
+  "damage_per_wave": 0.055,
+  "speed_per_wave": 0.012,
+  "loop_hp": 1.9,
+  "loop_damage": 1.35,
+  "loop_count": 1.25,
+  "loop_interval": 0.9,
+  "loop_max_alive": 6,
+  "intermission": 3.5
+ }
 }

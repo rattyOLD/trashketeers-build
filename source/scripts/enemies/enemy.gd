@@ -482,6 +482,11 @@ func _alt_scale() -> float:
 
 # --- Бой ----------------------------------------------------------------------------------------
 
+## Разовый толчок (разлёт осколков при делении).
+func push(impulse: Vector2) -> void:
+	_knockback += impulse
+
+
 func tick(delta: float, player: Player, nav: Callable = Callable()) -> void:
 	_target_pos = player.global_position
 	if data.heal_radius > 0.0:
