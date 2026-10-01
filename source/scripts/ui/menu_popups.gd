@@ -122,6 +122,10 @@ class Settings:
 			SaveService.apply_quality())
 		graphics.add_child(eco)
 		graphics.add_child(MenuPopups.small_hint("Телефон меньше греется. Включи, если игра лагает."))
+		var votes := MenuWidgets.PawToggle.new("Оценка реплик", LineVotes.enabled())
+		votes.toggled.connect(func(on: bool) -> void: SaveService.set_flag("line_votes_on", on))
+		graphics.add_child(votes)
+		graphics.add_child(MenuPopups.small_hint("Под репликой кнопки «+» оставить и «×» убрать. Твоих оценок: %d. Убранные реплики больше не появятся." % LineVotes.rated_count()))
 		var haptics := MenuWidgets.PawToggle.new("Вибрация", bool(SaveService.data.get("haptics", true)))
 		haptics.toggled.connect(func(on: bool) -> void:
 			SaveService.set_flag("haptics", on)
@@ -626,9 +630,9 @@ class Upgrades:
 	extends GlassPopup
 	signal purchased
 	const COLORS := {
-		"power": "#ff4d6d", "stamina": "#69f0ae", "armor": "#40c4ff", "rate": "#ff9a3c", "eye": "#ffe14d",
-		"boots": "#7cffcb", "dasher": "#b28dff", "magnet": "#ff6bd6", "patch": "#a8ff5e", "loot": "#ffd257",
-		"reroll": "#8ec5ff", "haggle": "#c792ff",
+		"power": "#ff4d6d", "stamina": "#69f0ae", "armor": "#40c4ff", "eye": "#ffe14d",
+		"boots": "#7cffcb", "magnet": "#ff6bd6", "loot": "#ffd257",
+		"reroll": "#8ec5ff", "vest": "#ffb347", "drone": "#7cd4ff", "logistics": "#c792ff", "headstart": "#ff7a5c", "cash": "#a8ff5e", "radar": "#5cf3ff",
 	}
 	var _list: VBoxContainer
 	var _balance: Label
@@ -637,6 +641,10 @@ class Upgrades:
 		super("ПРОКАЧКА")
 		_balance = UiStyle.label("", 26, UiStyle.GOLD, 6)
 		content.add_child(_balance)
+		var note := UiStyle.label("Действует только в режиме выживания. В сюжете все начинают с нуля, как в старых аркадах.", 18, UiStyle.TEXT_DIM, 4)
+		note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		note.custom_minimum_size = Vector2(520, 0)
+		content.add_child(note)
 		_list = MenuPopups.scroll_list(content)
 
 	func _refresh() -> void:
@@ -703,9 +711,11 @@ class Upgrades:
 				return "+%d HP" % roundi(bonus)
 			"reroll":
 				return "+%d" % roundi(bonus)
-			"patch":
-				return "+%.2f HP/с" % bonus
-			"armor", "haggle", "dasher":
+			"vest", "drone", "headstart", "radar":
+				return "+%d" % roundi(bonus)
+			"cash":
+				return "+%d" % roundi(bonus)
+			"armor":
 				return "-%d%%" % roundi(bonus * 100.0)
 			_:
 				return "+%d%%" % roundi(bonus * 100.0)

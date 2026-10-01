@@ -528,20 +528,16 @@ func _build_mod_chip() -> Control:
 
 func _on_mod_pressed() -> void:
 	SoundManager.play(&"ui_click", -4.0)
-	var id := RunMods.cycle()
+	var on := RunMods.toggle()
 	_refresh_mod_chip()
-	var info := RunMods.info(id)
 	if _mode_hint == null:
 		_mode_hint = HintBubble.new()
 		add_child(_mode_hint)
-	if not info.is_empty():
-		_mode_hint.show_for(_mod_chip, "%s. Монет за забег ×%.1f." % [info["desc"], RunMods.mult_of(id)])
-	elif id == RunMods.RANDOM:
-		_mode_hint.show_for(_mod_chip, "Один случайный модификатор на забег, у каждого свой множитель монет.")
+	_mode_hint.show_for(_mod_chip, "Каждый забег выпадет случайное условие: больше риска, больше монет." if on else "Обычный забег без условий.")
 
 
 func _refresh_mod_chip() -> void:
-	_mod_chip.text = RunMods.button_text(RunMods.chosen())
+	_mod_chip.text = RunMods.button_text()
 	_mod_chip.visible = _mode == Mode.SURVIVAL
 
 
@@ -716,6 +712,7 @@ func _on_weapon_changed(_weapon_id: StringName) -> void:
 func _refresh() -> void:
 	_avatar.queue_redraw()
 	_nick_label.text = SaveService.get_display_nickname()
+	_nick_label.add_theme_color_override("font_color", Cosmetics.nick_color(UiStyle.GOLD))
 	if _mode_buttons.size() > 2:
 		_mode_buttons[2].text = "СЮЖЕТ %d/6" % SaveService.story_shards()
 	if _lock_mark != null and _survival_locked():

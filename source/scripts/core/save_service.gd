@@ -45,6 +45,8 @@ const DEFAULTS := {
 	"selected_tier": 1,
 	"arsenal": {},
 	"perks": {},
+	"line_votes": {},
+	"line_votes_on": true,
 	"slot3": false,
 	"hero_levels": {},
 	"achievements": [],
@@ -177,16 +179,20 @@ const PERKS := {
 	"power": {"title": "Сила", "description": "+6% урона любым стволом", "step": 0.06, "max": 10, "cost": 120, "icon": "🔫", "theme": "Ржавый ствол — тоже ствол"},
 	"stamina": {"title": "Выносливость", "description": "+12 к максимуму здоровья", "step": 12.0, "max": 10, "cost": 100, "icon": "🥫", "theme": "Консервы из мусорки"},
 	"armor": {"title": "Броня из жести", "description": "-3% получаемого урона", "step": 0.03, "max": 10, "cost": 140, "icon": "🛡", "theme": "Крышка от бака"},
-	"rate": {"title": "Смазка", "description": "+2% скорострельности", "step": 0.02, "max": 10, "cost": 160, "icon": "🛢", "theme": "Машинное масло с помойки"},
 	"eye": {"title": "Меткий глаз", "description": "+1% шанса крита", "step": 0.01, "max": 10, "cost": 180, "icon": "🎯", "theme": "Очки сварщика"},
 	"boots": {"title": "Кроссовки", "description": "+2% скорости бега", "step": 0.02, "max": 8, "cost": 150, "icon": "👟", "theme": "Найдены в контейнере"},
-	"dasher": {"title": "Проворство", "description": "-4% перезарядки рывка", "step": 0.04, "max": 8, "cost": 200, "icon": "💨", "theme": "Хвост-руль"},
 	"magnet": {"title": "Магнит", "description": "+8% радиуса подбора добычи", "step": 0.08, "max": 8, "cost": 130, "icon": "🧲", "theme": "Магнит со свалки"},
-	"patch": {"title": "Пластырь", "description": "+0.15 HP/с регенерации", "step": 0.15, "max": 6, "cost": 260, "icon": "🩹", "theme": "Изолента лечит всё"},
 	"loot": {"title": "Хапуга", "description": "+4% монет за забег", "step": 0.04, "max": 10, "cost": 220, "icon": "💰", "theme": "Карманы побольше"},
+	"vest": {"title": "Бронежилет", "description": "+1 попадание, которое жилет гасит целиком (раз за забег)", "step": 1.0, "max": 3, "cost": 450, "icon": "🦺", "theme": "Жилет с прошлого сезона. Пули ещё в нём", "survival_only": true},
+	"drone": {"title": "Дрон-спутник", "description": "Стартовый дрон кружит вокруг и стреляет по крысам", "step": 1.0, "max": 2, "cost": 700, "icon": "🛸", "theme": "Собран из вентилятора и злости", "survival_only": true},
+	"logistics": {"title": "Логистика", "description": "+8% опыта в забеге", "step": 0.08, "max": 8, "cost": 170, "icon": "📦", "theme": "Нэлл всё записывает и прокачивает", "survival_only": true},
+	"headstart": {"title": "Разгон", "description": "Старт забега с +1 уровнем и выбором усиления", "step": 1.0, "max": 2, "cost": 650, "icon": "🚀", "theme": "Пропусти скучное начало", "survival_only": true},
+	"cash": {"title": "Стартовая касса", "description": "+40 орехов в начале забега (на реролл и усиления)", "step": 40.0, "max": 5, "cost": 140, "icon": "💵", "theme": "Заначка в носке", "survival_only": true},
+	"radar": {"title": "Чуткий радар", "description": "Миникарта подсвечивает элитных врагов и редкие ящики", "step": 1.0, "max": 2, "cost": 500, "icon": "📡", "theme": "Антенна из зонтика", "survival_only": true},
 	"reroll": {"title": "Реролл", "description": "+1 бесплатный реролл улучшений за забег", "step": 1.0, "max": 3, "cost": 600, "icon": "🎲", "theme": "Крысиные кости"},
-	"haggle": {"title": "Торговец", "description": "-12% цены платного реролла", "step": 0.12, "max": 5, "cost": 300, "icon": "🤝", "theme": "Торг у контейнеров"},
 }
+## Удалённые перки: уровни возвращаются монетами при загрузке сохранения.
+const REMOVED_PERKS := {"rate": 160, "dasher": 200, "patch": 260, "haggle": 300}
 const HERO_MAX_LEVEL := 8
 const HERO_HP_PER_LEVEL := 0.04
 const HERO_DAMAGE_PER_LEVEL := 0.03
@@ -285,6 +291,16 @@ func load_data() -> void:
 	changed.emit()
 
 
+func _refund_removed_perks() -> void:
+	var perks: Dictionary = data["perks"]
+	for perk_id in REMOVED_PERKS:
+		if not perks.has(perk_id):
+			continue
+		for i in int(perks[perk_id]):
+			data["nuts"] = int(data["nuts"]) + int(round(float(REMOVED_PERKS[perk_id]) * pow(PERK_COST_GROWTH, i) / 5.0) * 5.0)
+		perks.erase(perk_id)
+
+
 func _apply_text(text: String) -> void:
 	data = DEFAULTS.duplicate(true)
 	if not text.is_empty():
@@ -300,6 +316,7 @@ func _apply_text(text: String) -> void:
 			"ads_coins", "ads_gems", "gift_gem_day", "gift_gem_n", "vip_level", "vip_until", "insider_no"]:
 		data[key] = int(data[key])
 	_sanitize_arsenal()
+	_refund_removed_perks()
 	KnifeProgress.sanitize(data)
 	data["nickname"] = clean_nickname(str(data["nickname"]))
 	if str(data["nickname"]).length() < 2:
@@ -732,27 +749,34 @@ func unlocked_ranks() -> Array[String]:
 	for achievement in ACHIEVEMENTS:
 		if achievement.has("rank") and is_achieved(achievement["id"]):
 			list.append(str(achievement["id"]))
+	for key in Cosmetics.owned():
+		if Cosmetics.kind_of(str(key)) == "title":
+			list.append(str(key))
 	return list
 
 
-func cycle_rank() -> void:
-	var list := unlocked_ranks()
-	var order: Array[String] = ["-"]
-	order.append_array(list)
-	var current := str(data.get("rank_id", ""))
-	var index := order.find(current)
-	data["rank_id"] = order[(index + 1) % order.size()]
-	save_data()
-
-
-func get_rank() -> String:
-	var id := str(data.get("rank_id", ""))
-	if id.is_empty() or id == "-" or not is_achieved(id):
+func rank_text(id: String) -> String:
+	if Cosmetics.is_cosmetic(id):
+		return Cosmetics.title_of(id) if Cosmetics.owns(id) else ""
+	if not is_achieved(id):
 		return ""
 	for achievement in ACHIEVEMENTS:
 		if achievement["id"] == id:
 			return str(achievement.get("rank", ""))
 	return ""
+
+
+func cycle_rank() -> void:
+	var order: Array[String] = ["-"]
+	order.append_array(unlocked_ranks())
+	var current := str(data.get("rank_id", ""))
+	data["rank_id"] = order[(order.find(current) + 1) % order.size()]
+	save_data()
+
+
+func get_rank() -> String:
+	var id := str(data.get("rank_id", ""))
+	return "" if id.is_empty() or id == "-" else rank_text(id)
 
 
 func get_display_nickname() -> String:
@@ -1163,11 +1187,13 @@ func get_achievement_progress(achievement: Dictionary) -> float:
 ## рекорд волны, опыт аккаунта и трофейные стволы (сразу попадают в арсенал).
 ## summary: nuts, time, wave, kills, loot (Array [[id, tier], ...]). Возвращает {"record", "loot"}.
 func record_run(summary: Dictionary) -> Dictionary:
-	var nuts := int(round(maxi(int(summary.get("nuts", 0)), 0) * (1.0 + get_perk_bonus("loot") + CharacterDB.get_stat(get_character_id(), "coins") + Premium.coin_bonus())))
+	var boost_coins := 0.0 if int(data.get("boost_coins", 0)) <= 0 else Cosmetics.BOOST_COINS_BONUS
+	var nuts := int(round(maxi(int(summary.get("nuts", 0)), 0) * (1.0 + get_perk_bonus("loot") + CharacterDB.get_stat(get_character_id(), "coins") + Premium.coin_bonus() + boost_coins)))
 	var wave := int(summary.get("wave", 0))
 	data["nuts"] = get_nuts() + nuts
 	add_account_xp(int(round((int(summary.get("kills", 0)) + wave * 5) * (1.0 + Premium.xp_bonus()))))
 	BattlePass.add_points(BattlePass.run_points(wave))
+	Cosmetics.consume_boosts()
 	data["runs"] = int(data["runs"]) + 1
 	var is_record := wave > int(data["best_wave"])
 	if is_record:

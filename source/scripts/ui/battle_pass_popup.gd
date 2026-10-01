@@ -8,25 +8,32 @@ var _hero: VBoxContainer
 var _actions: VBoxContainer
 var _status: Label
 var _list: VBoxContainer
+var _scroll_box: VBoxContainer
 var _scroll_target: Control
 
+const ROAD_WIDTH := 110.0
+const ROW_HEIGHT := 132.0
+const ROW_GAP := 6.0
 const FEATURE_ITEM := "weapon:railgun_v1"
 const FEATURE_TEXT := "Пробивает всех на линии. Рывок заряжает следующий выстрел, серии убийств растят рельс-комбо. Главная вкусность сезона."
 
 
 func _init() -> void:
 	super("БОЕВОЙ ПРОПУСК")
+	_scroll_box = MenuPopups.scroll_list(content)
 	_hero = VBoxContainer.new()
 	_hero.add_theme_constant_override("separation", 8)
-	content.add_child(_hero)
+	_scroll_box.add_child(_hero)
 	_actions = VBoxContainer.new()
 	_actions.add_theme_constant_override("separation", 8)
-	content.add_child(_actions)
+	_scroll_box.add_child(_actions)
 	_status = UiStyle.label("", 18, UiStyle.TEXT_DIM, 4)
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_status.custom_minimum_size = Vector2(10, 0)
-	content.add_child(_status)
-	_list = MenuPopups.scroll_list(content)
+	_scroll_box.add_child(_status)
+	_list = VBoxContainer.new()
+	_list.add_theme_constant_override("separation", int(ROW_GAP))
+	_scroll_box.add_child(_list)
 
 
 ## Шапка: сезон, огромный уровень, дни и толстая полоса с подсказкой «до следующего уровня».
@@ -121,12 +128,15 @@ func _feature_card() -> Control:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 12)
 	panel.add_child(row)
-	var art_box := Control.new()
-	art_box.custom_minimum_size = Vector2(120, 60)
-	art_box.clip_contents = true
+	var art_box := FeatureGlow.new()
+	art_box.tint = color
+	art_box.custom_minimum_size = Vector2(150, 96)
 	art_box.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	var art := _item_art(FEATURE_ITEM, Vector2(120, 60))
+	art_box.clip_contents = true
+	var art := _item_art(FEATURE_ITEM, Vector2(150, 96))
 	art.set_anchors_preset(Control.PRESET_FULL_RECT)
+	art.pivot_offset = Vector2(75, 48)
+	art.rotation_degrees = -6.0
 	art_box.add_child(art)
 	row.add_child(art_box)
 	var texts := VBoxContainer.new()
@@ -222,9 +232,9 @@ func _refresh() -> void:
 func _scroll_to_target() -> void:
 	if _scroll_target == null or not is_instance_valid(_scroll_target):
 		return
-	var scroll := _list.get_parent().get_parent() as ScrollContainer
+	var scroll := _scroll_box.get_parent().get_parent() as ScrollContainer
 	if scroll != null:
-		scroll.scroll_vertical = maxi(int(_scroll_target.position.y) - 70, 0)
+		scroll.scroll_vertical = maxi(int(_list.position.y + _scroll_target.position.y) - 120, 0)
 
 
 func _milestone_card(milestone: Dictionary) -> Control:
@@ -256,6 +266,11 @@ func _item_art(item: String, art_size: Vector2) -> Control:
 		var weapon := WeaponDB.get_weapon(StringName(Economy.item_id(item)))
 		if weapon != null:
 			return WeaponIcons.IconRect.new(weapon.icon, weapon.effect_color, art_size)
+	if Cosmetics.is_cosmetic(item):
+		var art := CosmeticArt.new()
+		art.key = item
+		art.custom_minimum_size = art_size
+		return art
 	var tag := UiStyle.label(Economy.item_type_name(item).to_upper(), 18, Economy.rarity_color(Economy.item_rarity(item)), 5)
 	tag.custom_minimum_size = Vector2(art_size.x, 0)
 	return tag
@@ -288,12 +303,13 @@ func _buy() -> void:
 func _header_row() -> Control:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
-	var spacer := Control.new()
-	spacer.custom_minimum_size = Vector2(52, 0)
-	row.add_child(spacer)
-	for title in ["БЕСПЛАТНО", "ПРЕМИУМ"]:
-		var label := UiStyle.label(title, 20, UiStyle.NEON if title == "БЕСПЛАТНО" else Color("#d9a6ff"), 5)
-		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var labels := [["БЕСПЛАТНО", UiStyle.NEON], ["", UiStyle.TEXT], ["ПРЕМИУМ", Color("#d9a6ff")]]
+	for pair in labels:
+		var label := UiStyle.label(str(pair[0]), 20, pair[1], 5)
+		if str(pair[0]).is_empty():
+			label.custom_minimum_size = Vector2(ROAD_WIDTH, 0)
+		else:
+			label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(label)
 	return row
 
@@ -301,10 +317,14 @@ func _header_row() -> Control:
 func _row(tier: int, level: int) -> Control:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
-	var number := UiStyle.label(str(tier), 26, UiStyle.GOLD if tier <= level else UiStyle.TEXT_DIM, 6)
-	number.custom_minimum_size = Vector2(52, 0)
-	row.add_child(number)
 	row.add_child(_cell("free", tier))
+	var road := Road.new()
+	road.tier = tier
+	road.level = level
+	road.all_claimed = BattlePass.is_claimed("free", tier) and (BattlePass.is_claimed("prem", tier) or not BattlePass.is_premium())
+	road.step = ROW_HEIGHT + ROW_GAP
+	road.set_process(tier == level + 1)
+	row.add_child(road)
 	row.add_child(_cell("prem", tier))
 	return row
 
@@ -319,7 +339,7 @@ func _cell(track: String, tier: int) -> Control:
 	var border := Color("#2fae5f") if claimed else (UiStyle.GOLD if claimable else accent.darkened(0.5))
 	var panel := PanelContainer.new()
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	panel.custom_minimum_size = Vector2(0, 84)
+	panel.custom_minimum_size = Vector2(0, ROW_HEIGHT)
 	panel.add_theme_stylebox_override("panel", UiStyle.box(bg, border, 4 if claimable else 3, 16))
 	panel.modulate = Color(1, 1, 1, 0.55) if (locked_premium or (not claimable and not claimed)) else Color.WHITE
 	var column := VBoxContainer.new()
@@ -337,11 +357,11 @@ func _cell(track: String, tier: int) -> Control:
 		art.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		art.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		column.add_child(art)
-		var label := UiStyle.label(Economy.item_title(item), 16, Economy.rarity_color(Economy.item_rarity(item)), 4)
+		var item_name := Economy.item_title(item)
+		var label := UiStyle.label(item_name, 16 if item_name.length() <= 16 else 13, Economy.rarity_color(Economy.item_rarity(item)), 4)
 		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		label.clip_text = true
 		column.add_child(label)
-		panel.custom_minimum_size = Vector2(0, 124)
 		border = Economy.rarity_color(Economy.item_rarity(item)) if not claimed else border
 		var glow := UiStyle.box(bg, border, 5, 16)
 		if not claimed and Economy.item_rarity(item) in ["epic", "legendary"]:
@@ -383,3 +403,128 @@ func _amount(icon_path: String, text: String, color: Color) -> Control:
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.add_child(label)
 	return box
+
+
+## Дорога сезона: извилистая лента от узла к узлу, узел-медаль с номером уровня.
+class Road:
+	extends Control
+
+	var tier := 1
+	var level := 0
+	var all_claimed := false
+	var step := 138.0
+	var _time := 0.0
+
+	func _init() -> void:
+		custom_minimum_size = Vector2(ROAD_WIDTH, 0)
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	func _process(delta: float) -> void:
+		_time += delta
+		queue_redraw()
+
+	func _x(t: int) -> float:
+		return size.x * (0.3 if t % 2 == 1 else 0.7)
+
+	func _draw() -> void:
+		var node := Vector2(_x(tier), size.y * 0.5)
+		var lit := tier <= level
+		if tier < BattlePass.TIERS:
+			var finish := Vector2(_x(tier + 1), node.y + step)
+			var points := PackedVector2Array()
+			for i in 21:
+				var t := float(i) / 20.0
+				var q := 1.0 - t
+				var c1 := node + Vector2(0.0, step * 0.5)
+				var c2 := finish - Vector2(0.0, step * 0.5)
+				points.append(q * q * q * node + 3.0 * q * q * t * c1 + 3.0 * q * t * t * c2 + t * t * t * finish)
+			var passed := tier + 1 <= level
+			draw_polyline(points, Color("#ffb020") if passed else Color("#3a2d60"), 40.0, true)
+			draw_polyline(points, Color("#2a2536"), 32.0, true)
+			for i in range(0, 20, 2):
+				draw_line(points[i], points[i + 1], Color("#ffd23f") if passed else Color("#6a5d8a"), 3.0, true)
+		if tier % 5 == 0:
+			var side := 1.0 if tier % 2 == 1 else -1.0
+			var base := node + Vector2(side * 40.0, 22.0)
+			draw_colored_polygon(PackedVector2Array([base + Vector2(0, -22), base + Vector2(-11, 0), base + Vector2(11, 0)]), Color("#ff7a3d"))
+			draw_rect(Rect2(base + Vector2(-14, 0), Vector2(28, 5)), Color("#2a2536"))
+		var current := tier == level + 1
+		var radius := 25.0 + (2.0 * sin(_time * 5.0) if current else 0.0)
+		var fill := Color("#5a3d0a") if lit else (Color("#2a1f4a") if not current else Color("#7a5200"))
+		var ring := Color("#ffd23f") if (lit or current) else Color("#5a4a8a")
+		if current:
+			draw_circle(node, radius + 9.0, Color(ring, 0.25 + 0.15 * sin(_time * 5.0)))
+		draw_circle(node, radius + 3.0, Color("#140a24"))
+		draw_circle(node, radius, fill)
+		draw_arc(node, radius - 1.0, 0.0, TAU, 32, ring, 3.0, true)
+		if all_claimed:
+			draw_polyline(PackedVector2Array([node + Vector2(-9, 0), node + Vector2(-3, 7), node + Vector2(10, -8)]), Color("#5be37d"), 5.0, true)
+		else:
+			var font := get_theme_default_font()
+			var text := str(tier)
+			var font_size := 24
+			var width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+			draw_string(font, node + Vector2(-width * 0.5, 8.0), text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color.WHITE if (lit or current) else Color("#9a8cc0"))
+
+
+## Картинка косметики: рамка, цвет ника, титул-табличка, бустер-молния.
+class CosmeticArt:
+	extends Control
+
+	var key := ""
+
+	func _init() -> void:
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+
+	func _draw() -> void:
+		var c := size * 0.5
+		var r := minf(size.x, size.y) * 0.5 - 2.0
+		var rarity := Economy.rarity_color(Cosmetics.rarity_of(key))
+		match Cosmetics.kind_of(key):
+			"frame":
+				var tint := Cosmetics.color_of(key)
+				draw_circle(c, r, Color("#3a2d60"))
+				draw_arc(c, r - 2.0, 0.0, TAU, 32, Color(tint, 0.35), 9.0, true)
+				draw_arc(c, r - 2.0, 0.0, TAU, 32, tint, 5.0, true)
+			"color":
+				var tint := Cosmetics.color_of(key)
+				var font := get_theme_default_font()
+				var w := font.get_string_size("НИК", HORIZONTAL_ALIGNMENT_LEFT, -1, 24).x
+				draw_string(font, Vector2(c.x - w * 0.5, c.y + 8.0), "НИК", HORIZONTAL_ALIGNMENT_LEFT, -1, 24, tint)
+				draw_line(Vector2(c.x - w * 0.5, c.y + 14.0), Vector2(c.x + w * 0.5, c.y + 14.0), Color(tint, 0.6), 3.0)
+			"title":
+				var plate := Rect2(c - Vector2(36, 12), Vector2(72, 24))
+				draw_rect(plate.grow(2.0), Color("#140a24"))
+				draw_rect(plate, Color(rarity, 0.25))
+				draw_rect(plate, rarity, false, 2.0)
+				for i in 3:
+					draw_circle(Vector2(c.x - 18.0 + i * 18.0, c.y), 3.0, rarity)
+			_:
+				var bolt := PackedVector2Array([c + Vector2(4, -r), c + Vector2(-10, 4), c + Vector2(-1, 4), c + Vector2(-5, r), c + Vector2(11, -6), c + Vector2(1, -6)])
+				draw_colored_polygon(bolt, rarity)
+
+
+## Сияющий диск за главным призом сезона, медленно пульсирует.
+class FeatureGlow:
+	extends Control
+
+	var tint := Color.WHITE
+	var _time := 0.0
+
+	func _init() -> void:
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	func _process(delta: float) -> void:
+		_time += delta
+		queue_redraw()
+
+	func _draw() -> void:
+		var c := size * 0.5
+		var pulse := 0.5 + 0.5 * sin(_time * 2.4)
+		for i in 6:
+			var t := float(i) / 5.0
+			draw_circle(c, size.y * (0.56 - t * 0.36), Color(tint, 0.06 + 0.05 * t + 0.03 * pulse))
+		for i in 8:
+			var a := TAU * float(i) / 8.0 + _time * 0.3
+			draw_line(c + Vector2.from_angle(a) * size.y * 0.3, c + Vector2.from_angle(a) * size.y * (0.52 + 0.04 * pulse), Color(tint, 0.35), 3.0)

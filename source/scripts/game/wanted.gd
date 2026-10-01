@@ -23,11 +23,13 @@ const GROUPS: Array = [
 const AGENTS: Array[StringName] = [&"fed_bagel", &"fed_agent", &"fed_chief"]
 
 signal level_changed(level: int)
+signal chief_arrived
 
 var level := 0
 var _points := 0
 var _timer := BASE_INTERVAL
 var _game: Game
+var _chief_seen := false
 
 
 func setup(game: Game) -> void:
@@ -67,8 +69,9 @@ func _physics_process(delta: float) -> void:
 	var hp_mult := 1.0 + HP_PER_WAVE * director.wave_number
 	for id: StringName in GROUPS[level - 1]:
 		var data := ContentDB.get_enemy(id)
-		if data != null:
-			_game.enemies.spawn(data, _spawn_point(), hp_mult, 1.0)
+		if data != null and _game.enemies.spawn(data, _spawn_point(), hp_mult, 1.0) != null and id == &"fed_chief" and not _chief_seen:
+			_chief_seen = true
+			chief_arrived.emit()
 
 
 func _spawn_point() -> Vector2:

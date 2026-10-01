@@ -164,8 +164,9 @@ func _draw() -> void:
 				var r := maxf(6.0 * pool.scale.x / 2.0, 4.0)
 				draw_circle(c, r, Color(0.48, 1.0, 0.24, 0.28))
 				draw_arc(c, r, 0.0, TAU, 20, Color(0.48, 1.0, 0.24, 0.8), 1.5, true)
+	var radar := SaveService.get_perk_level("radar")
 	for object in _level.destructibles:
-		if object.kind == DestructibleObject.Kind.WEAPON_CRATE and object.is_intact() and object.visible:
+		if object.kind == DestructibleObject.Kind.WEAPON_CRATE and object.is_intact() and (object.visible or radar > 0):
 			var p := _to_map(origin, scale, object.global_position).clamp(field.position + Vector2.ONE * 4.0, field.end - Vector2.ONE * 4.0)
 			draw_rect(Rect2(p - Vector2.ONE * 4.5, Vector2.ONE * 9.0), Color(0, 0, 0, 0.7))
 			draw_rect(Rect2(p - Vector2.ONE * 3.0, Vector2.ONE * 6.0), object.get_rarity_color())
@@ -177,6 +178,9 @@ func _draw() -> void:
 	for enemy in _enemies.get_active():
 		if enemy.is_alive() and enemy != _director.boss and enemy != (events.marauder if events != null else null):
 			_dot(origin, scale, enemy.global_position, 2.0, Color("#ff4d6d"), true)
+			if radar > 0 and enemy.data.max_hp >= 120.0:
+				var ep := _to_map(origin, scale, enemy.global_position)
+				draw_arc(ep, 5.5 + sin(_time * 7.0), 0.0, TAU, 14, Color("#ffd23f"), 1.5, true)
 	if _director.boss != null and _director.boss.is_alive():
 		_diamond(origin, scale, _director.boss.global_position, 7.0 + sin(_time * 6.0), Color("#ffd23f"))
 	var portal := _level.get_portal()

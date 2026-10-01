@@ -58,8 +58,9 @@ func on_wave(is_boss: bool) -> void:
 		return
 	_run_waves += 1
 	if _run_waves == 1:
-		_play("first", true)
-		_king_record()
+		get_tree().create_timer(8.5, false).timeout.connect(func() -> void:
+			_play("first", true)
+			_king_record())
 	elif is_boss:
 		_play("boss", true)
 	elif randf() < WAVE_CHANCE:
@@ -105,6 +106,10 @@ func on_elite() -> void:
 func on_boss_down(weapon_id: StringName) -> void:
 	if weapon_id == QUIP_WEAPON:
 		_play("ded_boss", true)
+
+
+func on_chief() -> void:
+	_play("chief", true)
 
 
 func on_wanted(level: int) -> void:

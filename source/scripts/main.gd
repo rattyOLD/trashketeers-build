@@ -98,7 +98,7 @@ func _poll_orientation() -> void:
 		return
 	var w := float(JavaScriptBridge.eval("window.innerWidth"))
 	var h := float(JavaScriptBridge.eval("window.innerHeight"))
-	if (h > w) != Orient.portrait:
+	if Orient.wants_portrait(w, h) != Orient.portrait:
 		_on_window_resized()
 
 

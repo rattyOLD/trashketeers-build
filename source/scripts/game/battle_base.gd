@@ -52,6 +52,7 @@ var _shot_timer := 20.0
 var _fps_hist: Array[int] = []
 var _adapt_time := 0.0
 var _adapt_frames := 0
+var meta_enabled := true
 var _adapt_level := 0
 var camera: Camera2D
 var hud: Hud
@@ -80,17 +81,17 @@ func _spawn_player(at: Vector2, weapon: WeaponData, target_finder: Callable) -> 
 	player.position = at
 	player.fx = fx
 	var hero := SaveService.get_character_id()
-	var hero_level := SaveService.get_hero_level(hero) - 1
-	player.bonus_max_hp = SaveService.get_perk_bonus("stamina") + Player.BASE_MAX_HP * (CharacterDB.get_stat(hero, "hp") + SaveService.HERO_HP_PER_LEVEL * hero_level)
-	player.armor = SaveService.get_perk_bonus("armor")
+	var hero_level := SaveService.get_hero_level(hero) - 1 if meta_enabled else 0
+	var meta := 1.0 if meta_enabled else 0.0
+	player.bonus_max_hp = SaveService.get_perk_bonus("stamina") * meta + Player.BASE_MAX_HP * (CharacterDB.get_stat(hero, "hp") + SaveService.HERO_HP_PER_LEVEL * hero_level)
+	player.armor = SaveService.get_perk_bonus("armor") * meta
+	player.vest = int(SaveService.get_perk_bonus("vest") * meta)
 	player.dash_cooldown_mult = 1.0 + CharacterDB.get_stat(hero, "dash")
-	player.dash_cooldown_mult = maxf(player.dash_cooldown_mult - SaveService.get_perk_bonus("dasher"), 0.3)
-	stats.add_flat(&"damage_mult", SaveService.get_perk_bonus("power") + SaveService.HERO_DAMAGE_PER_LEVEL * hero_level)
-	stats.add_flat(&"fire_rate_mult", SaveService.get_perk_bonus("rate"))
-	stats.add_flat(&"crit_chance_add", SaveService.get_perk_bonus("eye"))
-	stats.add_flat(&"move_speed_mult", SaveService.get_perk_bonus("boots"))
-	stats.add_flat(&"magnet_mult", SaveService.get_perk_bonus("magnet"))
-	stats.add_flat(&"regen", SaveService.get_perk_bonus("patch"))
+	stats.add_flat(&"damage_mult", SaveService.get_perk_bonus("power") * meta + SaveService.HERO_DAMAGE_PER_LEVEL * hero_level)
+	stats.add_flat(&"crit_chance_add", SaveService.get_perk_bonus("eye") * meta)
+	stats.add_flat(&"move_speed_mult", SaveService.get_perk_bonus("boots") * meta)
+	stats.add_flat(&"magnet_mult", SaveService.get_perk_bonus("magnet") * meta)
+	stats.add_flat(&"drone_count", SaveService.get_perk_bonus("drone") * meta)
 	stats.add_flat(&"move_speed_mult", CharacterDB.get_stat(hero, "speed"))
 	stats.add_flat(&"crit_chance_add", CharacterDB.get_stat(hero, "crit"))
 	match hero:
@@ -520,4 +521,4 @@ class NameTag:
 	func _draw() -> void:
 		var font := ThemeDB.fallback_font
 		draw_string_outline(font, Vector2(-120, 0), text, HORIZONTAL_ALIGNMENT_CENTER, 240, 20, 7, Color(0.06, 0.03, 0.1, 0.9))
-		draw_string(font, Vector2(-120, 0), text, HORIZONTAL_ALIGNMENT_CENTER, 240, 20, Color(1, 1, 1, 0.95))
+		draw_string(font, Vector2(-120, 0), text, HORIZONTAL_ALIGNMENT_CENTER, 240, 20, Cosmetics.nick_color(Color(1, 1, 1, 0.95)))

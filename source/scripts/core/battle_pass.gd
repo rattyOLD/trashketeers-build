@@ -12,8 +12,15 @@ const DAILY_POINTS := 25
 const MAX_RUN_POINTS := 80
 const QUEST_POINTS := 20
 const SKIP_COST := 40
-const FREE_ITEMS := {10: "weapon:capgun_v1", 20: "skin:neon", 25: "weapon:harpoon_v1"}
-const PREMIUM_ITEMS := {1: "weapon:railgun_v1", 6: "weapon:coil_v1", 12: "weapon:sniper_v1", 18: "skin:gold", 24: "weapon:casino_v1", 30: "skin:star"}
+const FREE_ITEMS := {
+	2: "boost:coins", 4: "color:toxic", 7: "title:tax_evader", 10: "weapon:capgun_v1", 13: "frame:tin", 16: "boost:pass",
+	20: "skin:neon", 23: "title:rat_dentist", 25: "weapon:harpoon_v1", 28: "frame:caps", 30: "color:hot",
+}
+const PREMIUM_ITEMS := {
+	1: "weapon:railgun_v1", 2: "title:cashier", 4: "color:ice", 6: "weapon:coil_v1", 8: "frame:beer", 9: "title:lord_dump",
+	12: "weapon:sniper_v1", 14: "boost:coins", 15: "frame:neon", 17: "title:pigeon_dad", 18: "skin:gold", 21: "color:gold",
+	24: "weapon:casino_v1", 26: "title:beer_prophet", 27: "color:magma", 29: "frame:rail", 30: "skin:star",
+}
 const BONUS_POINTS := 400
 const BONUS_GEM_CHANCE_MIN := 0.06
 const BONUS_GEM_CHANCE_MAX := 0.22
@@ -61,7 +68,7 @@ static func tier_progress() -> float:
 
 static func add_points(amount: int) -> void:
 	var bp := _state()
-	var gained := int(round(amount * (1.0 + Premium.pass_bonus())))
+	var gained := int(round(amount * (1.0 + Premium.pass_bonus() + (Cosmetics.BOOST_PASS_BONUS if int(SaveService.data.get("boost_pass", 0)) > 0 else 0.0))))
 	bp["points"] = int(bp["points"]) + gained
 
 
@@ -112,7 +119,7 @@ static func claim(track: String, level: int) -> bool:
 	var item := str(prize["item"])
 	if not item.is_empty():
 		var rarity := Economy.item_rarity(item)
-		var repeat_ok := Economy.item_kind(item) == "weapon" and rarity != "legendary"
+		var repeat_ok := (Economy.item_kind(item) == "weapon" and rarity != "legendary") or Economy.item_kind(item) == "boost"
 		if Economy.owns_item(item) and not repeat_ok:
 			coins += int(Economy.DUPLICATE_COINS.get(rarity, 1000))
 		else:
@@ -216,6 +223,8 @@ const QUESTS := [
 	{"id": "runs", "title": "Сыграй 10 забегов", "stat": "runs", "goal": 10, "points": 60},
 	{"id": "bosses", "title": "Победи 3 боссов", "stat": "boss_kills", "goal": 3, "points": 80},
 	{"id": "kills", "title": "Убей 500 врагов", "stat": "kills", "goal": 500, "points": 60},
+	{"id": "bagels", "title": "Задержи 15 Бубликов", "stat": "k_fed_bagel", "goal": 15, "points": 70},
+	{"id": "spared", "title": "Пощади 3 боссов", "stat": "spared", "goal": 3, "points": 50},
 ]
 
 

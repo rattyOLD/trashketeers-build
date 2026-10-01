@@ -33,11 +33,14 @@ static func chosen() -> StringName:
 	return id if order().has(id) else NONE
 
 
-static func cycle() -> StringName:
-	var list := order()
-	var next := list[(list.find(chosen()) + 1) % list.size()]
-	SaveService.set_value("run_mod", String(next))
-	return next
+static func enabled() -> bool:
+	return chosen() != NONE
+
+
+static func toggle() -> bool:
+	var on := not enabled()
+	SaveService.set_value("run_mod", String(RANDOM if on else NONE))
+	return on
 
 
 static func resolve() -> void:
@@ -58,12 +61,8 @@ static func info(id: StringName) -> Dictionary:
 	return {}
 
 
-static func button_text(id: StringName) -> String:
-	if id == NONE:
-		return "МОДИФИКАТОР: нет"
-	if id == RANDOM:
-		return "МОДИФИКАТОР: случайный"
-	return "%s  ×%.1f" % [str(info(id)["title"]).to_upper(), mult_of(id)]
+static func button_text() -> String:
+	return "С МОДИФИКАТОРОМ: ДА" if enabled() else "С МОДИФИКАТОРОМ: НЕТ"
 
 
 static func mult_of(id: StringName) -> float:

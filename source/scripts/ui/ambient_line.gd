@@ -19,6 +19,10 @@ var _text: Label
 var _portrait: TextureRect
 var _frame: PanelContainer
 var _tail: Tail
+var _line: Dictionary = {}
+var _vote_row: HBoxContainer
+var _like: Button
+var _dislike: Button
 
 
 ## Хвостик пузыря: треугольник под плашкой в цвет рамки.
@@ -50,7 +54,8 @@ func setup(speakers: Dictionary) -> void:
 
 func push(lines: Array) -> void:
 	for line in lines:
-		_queue.append(line)
+		if not LineVotes.is_hidden(line):
+			_queue.append(line)
 	set_process(true)
 
 
@@ -73,14 +78,14 @@ func _build() -> void:
 	_panel = PanelContainer.new()
 	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	_panel.gui_input.connect(_on_panel_input)
-	_panel.anchor_left = 0.0
-	_panel.anchor_right = 1.0
+	_panel.anchor_left = 0.0 if Orient.portrait else 0.5
+	_panel.anchor_right = 1.0 if Orient.portrait else 0.5
 	_panel.anchor_top = 0.0
 	_panel.anchor_bottom = 0.0
-	_panel.offset_left = 28.0
-	_panel.offset_right = -28.0
-	_panel.offset_top = 352.0
-	_panel.offset_bottom = 353.0
+	_panel.offset_left = 28.0 if Orient.portrait else -380.0
+	_panel.offset_right = -28.0 if Orient.portrait else 380.0
+	_panel.offset_top = 352.0 if Orient.portrait else 470.0
+	_panel.offset_bottom = 353.0 if Orient.portrait else 471.0
 	_panel.visible = false
 	root.add_child(_panel)
 	_tail = Tail.new()
@@ -114,6 +119,12 @@ func _build() -> void:
 	_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_text.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	column.add_child(_text)
+	_vote_row = HBoxContainer.new()
+	_vote_row.add_theme_constant_override("separation", 8)
+	_vote_row.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	_like = _vote_button("+", Color("#5ee08a"), 1)
+	_dislike = _vote_button("×", Color("#ff5d73"), -1)
+	row.add_child(_vote_row)
 	set_process(false)
 
 
@@ -137,6 +148,26 @@ func _process(delta: float) -> void:
 		_current = false
 		_panel.visible = false
 		_tail.visible = false
+
+
+func _vote_button(text: String, color: Color, value: int) -> Button:
+	var b := UiStyle.button(text, color.darkened(0.45), 26, Vector2(52, 52))
+	b.focus_mode = Control.FOCUS_NONE
+	b.pressed.connect(func() -> void: _on_vote(value))
+	_vote_row.add_child(b)
+	return b
+
+
+func _on_vote(value: int) -> void:
+	if not _current:
+		return
+	LineVotes.cast(_line, value)
+	SoundManager.play(&"ui_confirm", -10.0)
+	_vote_row.visible = false
+	if value < 0:
+		_left = minf(_left, FADE)
+	else:
+		_left = minf(_left, 0.7)
 
 
 func _on_panel_input(event: InputEvent) -> void:
@@ -165,9 +196,11 @@ func _show(line: Dictionary) -> void:
 	_tail.fill = bubble
 	_tail.edge = Color(color, 0.9)
 	_tail.queue_redraw()
+	_line = line
+	_vote_row.visible = LineVotes.enabled() and LineVotes.vote_of(LineVotes.line_id(line)) == 0
 	var text := str(line.get("text", ""))
 	_text.text = text
-	_total = clampf(MIN_TIME + float(text.length()) * PER_CHAR, MIN_TIME, MAX_TIME)
+	_total = clampf(MIN_TIME + float(text.length()) * PER_CHAR, MIN_TIME, MAX_TIME) + (1.2 if _vote_row.visible else 0.0)
 	_left = _total
 	_current = true
 	_panel.modulate.a = 0.0

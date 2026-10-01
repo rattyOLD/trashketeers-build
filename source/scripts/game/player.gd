@@ -78,6 +78,7 @@ var _speed_buff := 0.0
 var _snare := 0.0
 var _stun := 0.0
 var shield := 0
+var vest := 0
 var shield_max := 0
 var _shield_timer := 0.0
 var _resist := 0.0
@@ -337,6 +338,14 @@ func take_damage(amount: float, _direction: Vector2 = Vector2.ZERO, _is_crit: bo
 		if fx != null:
 			fx.ring(global_position, SHIELD_COLOR, 70.0)
 			fx.burst(global_position + Vector2(0, -8), SHIELD_COLOR, 12, 260.0, 3.5)
+		return
+	if vest > 0:
+		vest -= 1
+		_invuln = 0.8
+		SoundManager.play(&"shield_up", -4.0, false)
+		if fx != null:
+			fx.ring(global_position, Color("#ffb347"), 70.0)
+			fx.burst(global_position + Vector2(0, -8), Color("#ffb347"), 14, 260.0, 3.5)
 		return
 	hp = maxf(hp - amount * (1.0 - armor) * (1.0 - _resist), 0.0)
 	_invuln = INVULN_TIME

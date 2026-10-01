@@ -224,7 +224,12 @@ class Avatar:
 			tex = get_texture_for(SaveService.get_character(), SaveService.get_selected_skin())
 		if tex != null:
 			Avatar.draw_round(self, tex, c, r - 5.0)
-		draw_arc(c, r - 2.0, 0.0, TAU, 40, UiStyle.NEON, 3.0, true)
+		var frame := Cosmetics.frame_color()
+		if frame.a > 0.0:
+			draw_arc(c, r - 2.0, 0.0, TAU, 40, Color(frame, 0.35), 9.0, true)
+			draw_arc(c, r - 2.0, 0.0, TAU, 40, frame, 5.0, true)
+		else:
+			draw_arc(c, r - 2.0, 0.0, TAU, 40, UiStyle.NEON, 3.0, true)
 
 	## Картинка строго внутри круга: полигон с UV вместо квадрата, чтобы углы не вылезали за рамку.
 	static func draw_round(item: CanvasItem, tex: Texture2D, center: Vector2, radius: float) -> void:

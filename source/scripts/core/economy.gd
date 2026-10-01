@@ -90,6 +90,8 @@ static func item_id(key: String) -> String:
 
 
 static func item_rarity(key: String) -> String:
+	if Cosmetics.is_cosmetic(key):
+		return Cosmetics.rarity_of(key)
 	match item_kind(key):
 		"weapon":
 			var w := WeaponDB.get_weapon(StringName(item_id(key)))
@@ -102,6 +104,8 @@ static func item_rarity(key: String) -> String:
 
 
 static func item_title(key: String) -> String:
+	if Cosmetics.is_cosmetic(key):
+		return Cosmetics.title_of(key)
 	match item_kind(key):
 		"weapon":
 			var w := WeaponDB.get_weapon(StringName(item_id(key)))
@@ -114,6 +118,8 @@ static func item_title(key: String) -> String:
 
 
 static func item_type_name(key: String) -> String:
+	if Cosmetics.is_cosmetic(key):
+		return Cosmetics.type_name(key)
 	match item_kind(key):
 		"weapon":
 			return "Ствол"
@@ -129,6 +135,8 @@ static func blueprint_title(key: String) -> String:
 
 
 static func owns_item(key: String) -> bool:
+	if Cosmetics.is_cosmetic(key):
+		return Cosmetics.owns(key)
 	match item_kind(key):
 		"weapon":
 			return SaveService.owns_weapon(StringName(item_id(key)))
@@ -406,6 +414,9 @@ static func grant_shards(key: String, count: int) -> Dictionary:
 
 ## Выдать предмет (из сундука, чертежей или магазина).
 static func give_item(key: String) -> void:
+	if Cosmetics.is_cosmetic(key):
+		Cosmetics.give(key)
+		return
 	match item_kind(key):
 		"weapon":
 			SaveService.add_weapon(StringName(item_id(key)), 1, false)

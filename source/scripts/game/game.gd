@@ -30,6 +30,7 @@ var level := 1
 var xp := 0
 var kills := 0
 var nuts := 0
+var _start_cash := 0
 var bosses_killed := 0
 var run_loot: Array = []
 ## Награды боссов за забег: неонит и чертежи (зачисляются в record_run).
@@ -124,6 +125,7 @@ func start(_weapon_id: StringName = &"") -> void:
 		chapter = StoryRun.map_chapter(chapter, story_mission)
 	map.build(layers, chapter)
 
+	meta_enabled = story_mission.is_empty()
 	var loadout := SaveService.get_loadout()
 	if not RunMods.only_shotguns(loadout):
 		loadout = WeaponDB.get_weapon(RunMods.SHOTGUN_IDS[0]).with_tier(1)
@@ -202,7 +204,7 @@ func start(_weapon_id: StringName = &"") -> void:
 	director.intermission_tick.connect(func(seconds: int) -> void: hud.show_countdown(seconds))
 	hud.upgrade_chosen.connect(_on_upgrade_chosen)
 	hud.reroll_requested.connect(_on_reroll_requested)
-	_rerolls_free = 1 + int(SaveService.get_perk_bonus("reroll")) + Premium.reroll_bonus()
+	_rerolls_free = 1 + int(SaveService.get_perk_bonus("reroll") * (1.0 if meta_enabled else 0.0)) + Premium.reroll_bonus()
 	WeaponPickup.auto_pick = bool(Controls.get_value("auto_pick"))
 	for pickup in _weapon_pickups:
 		pickup.expired.connect(_on_pickup_expired)
@@ -229,13 +231,15 @@ func start(_weapon_id: StringName = &"") -> void:
 	player.apply_run_stats(stats)
 	hud.set_xp(xp, _xp_needed(level), level)
 	hud.set_nuts(nuts)
+	_apply_run_start_perks()
 	hud.set_kills(kills)
 	hud.set_time(0.0)
 	hud.show_chapter(str(chapter.get("subtitle", "")), str(chapter.get("title", "")))
 	if story_mission.is_empty():
-		hud.toast("АДРЕНАЛИН!", "+35% скорострельности и +15% скорости на 20 с", Color("#ff7a3d"))
+		get_tree().create_timer(5.2, false).timeout.connect(func() -> void: hud.toast("АДРЕНАЛИН!", "+35% скорострельности и +15% скорости на 20 с", Color("#ff7a3d")))
 		if RunMods.active != RunMods.NONE:
 			hud.show_mod_badge(str(RunMods.info(RunMods.active)["title"]))
+			get_tree().create_timer(3.0, false).timeout.connect(func() -> void: hud.toast("МОДИФИКАТОР: %s" % str(RunMods.info(RunMods.active)["title"]).to_upper(), "%s. Монеты ×%.1f" % [RunMods.info(RunMods.active)["desc"], RunMods.mult_of(RunMods.active)], Color("#ff9a3d")))
 			SaveService.add_stat("mod_runs", 1, false)
 	SoundManager.play_music(StringName(str(chapter.get("music", "battle"))))
 	SoundManager.start_ambient()
@@ -247,6 +251,7 @@ func start(_weapon_id: StringName = &"") -> void:
 		add_child(wanted)
 		wanted.setup(self)
 		wanted.level_changed.connect(_on_wanted_level)
+		wanted.chief_arrived.connect(radio.on_chief)
 	if not story_mission.is_empty():
 		story = StoryRun.new()
 		add_child(story)
@@ -350,7 +355,7 @@ func _run_summary() -> Dictionary:
 		"kills": kills,
 		"level": level,
 		"time": director.elapsed,
-		"coins": RunMods.reward(nuts),
+		"coins": RunMods.reward(_earned()),
 		"gems": run_gems,
 		"bosses": bosses_killed,
 		"chapter": str(director.current_chapter().get("title", "")),
@@ -406,7 +411,8 @@ func _run_summary_lines() -> PackedStringArray:
 	return PackedStringArray([
 		"Волна %d · %s" % [maxi(director.wave_number, 1), director.current_chapter().get("title", "")],
 		"Врагов: %d · Уровень %d" % [kills, level],
-		"Время: %s · Монеты: %d%s" % [BattleBase.format_time(director.elapsed), RunMods.reward(nuts), " (×%.1f)" % RunMods.mult_of(RunMods.active) if RunMods.active != RunMods.NONE else ""],
+		"Время: %s · Монеты: %d%s" % [BattleBase.format_time(director.elapsed), RunMods.reward(_earned()), " (×%.1f)" % RunMods.mult_of(RunMods.active) if RunMods.active != RunMods.NONE else ""],
+		"Розыск: %s" % ("★".repeat(wanted.level) if wanted != null and wanted.level > 0 else "не искали"),
 	])
 
 
@@ -430,7 +436,10 @@ func _on_wave_started(number: int, title: String, mood: String, is_boss: bool) -
 		radio.on_wave(is_boss)
 	atmosphere.letterbox(true)
 	get_tree().create_timer(1.9, false).timeout.connect(func() -> void: atmosphere.letterbox(false))
-	hud.show_wave_intro(director.chapter_wave(), title, is_boss)
+	if director.elapsed < 4.0:
+		get_tree().create_timer(2.8, false).timeout.connect(func() -> void: hud.show_wave_intro(director.chapter_wave(), title, is_boss))
+	else:
+		hud.show_wave_intro(director.chapter_wave(), title, is_boss)
 	SoundManager.play(&"boss_spawn" if is_boss else &"ui_confirm", -2.0, false)
 	if director.chapter_wave() >= 2 and not is_boss:
 		map.airdrop(player.global_position)
@@ -1296,6 +1305,26 @@ func _check_clean_sweep() -> void:
 	fx.popup(player.global_position + Vector2(0, -100), "+%d" % bonus, Color("#ffd23f"), 30.0)
 
 
+func _earned() -> int:
+	return maxi(nuts - _start_cash, 0)
+
+
+func _apply_run_start_perks() -> void:
+	if story != null or not story_mission.is_empty():
+		return
+	_start_cash = int(SaveService.get_perk_bonus("cash"))
+	nuts += _start_cash
+	hud.set_nuts(nuts)
+	_sync_drones()
+	var boost := int(SaveService.get_perk_bonus("headstart"))
+	if boost > 0:
+		level += boost
+		_pending_levelups += boost
+		_level_up_open = true
+		hud.set_xp(xp, _xp_needed(level), level)
+		get_tree().create_timer(7.5, false).timeout.connect(_open_level_up)
+
+
 func _on_nuts_collected(amount: int) -> void:
 	nuts += int(amount * events.coin_mult + randf()) if events.coin_mult > 1.0 else amount
 	hud.set_nuts(nuts)
@@ -1318,7 +1347,7 @@ func _on_xp_collected(amount: int) -> void:
 func _gain_xp(amount: int) -> void:
 	if finished or story != null:
 		return
-	xp += amount
+	xp += int(round(amount * (1.0 + SaveService.get_perk_bonus("logistics"))))
 	var needed := _xp_needed(level)
 	var leveled := false
 	while xp >= needed:
@@ -1378,9 +1407,8 @@ func _open_level_up() -> void:
 
 func _reroll_cost() -> int:
 	var early := clampf(1.2 - float(level) * 0.025, 0.55, 1.2)
-	var haggle := 1.0 - SaveService.get_perk_bonus("haggle")
 	var deal := 0.5 if _reroll_deal else 1.0
-	return maxi(int(round(REROLL_BASE_COST * pow(REROLL_GROWTH, _rerolls_paid) * early * haggle * deal / 5.0)) * 5, 5)
+	return maxi(int(round(REROLL_BASE_COST * pow(REROLL_GROWTH, _rerolls_paid) * early * deal / 5.0)) * 5, 5)
 
 
 func _reroll_label() -> String:
@@ -1528,7 +1556,7 @@ func _record() -> Dictionary:
 		return {}
 	_recorded = true
 	return SaveService.record_run({
-		"nuts": RunMods.reward(nuts),
+		"nuts": RunMods.reward(_earned()),
 		"time": director.elapsed,
 		"wave": _waves_cleared(),
 		"kills": kills,

@@ -12,6 +12,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap">
 <style>
+@media (orientation: landscape) and (pointer: coarse) {
+	#rotate { display: flex !important; }
+}
 :root {
 	color-scheme: dark;
 	--night: #0d0a1c;
@@ -278,9 +281,9 @@ html, body {
 	animation: pulse 1.3s ease-in-out infinite;
 }
 @keyframes turn {
-	0%, 18% { transform: rotate(0deg); }
-	52%, 82% { transform: rotate(-90deg); }
-	100% { transform: rotate(0deg); }
+	0%, 18% { transform: rotate(-90deg); }
+	52%, 82% { transform: rotate(0deg); }
+	100% { transform: rotate(-90deg); }
 }
 @keyframes pulse { 0%, 100% { opacity: 0.45; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.15); } }
 #rotate h2 {
@@ -303,9 +306,9 @@ html, body {
 
 <div id="rotate">
 	<div class="phone"></div>
-	<h2>Поверни телефон</h2>
-	<p>Игра создана для <b>горизонтального</b> режима. Включи автоповорот экрана и переверни телефон.</p>
-	<p>Rotate your phone to landscape to play.</p>
+	<h2>Держи телефон вертикально</h2>
+	<p>Игра идёт только в <b>вертикальном</b> режиме. Переверни телефон, и всё продолжится.</p>
+	<p>Portrait mode only. Rotate your phone to play.</p>
 </div>
 
 <div id="boot">
@@ -347,6 +350,7 @@ html, body {
 			return setTimeout(function () { window.dispatchEvent(new Event('resize')); }, ms);
 		});
 	};
+	try { if (screen.orientation && screen.orientation.lock && window.matchMedia('(pointer: coarse)').matches) { screen.orientation.lock('portrait').catch(function () {}); } } catch (e) {}
 	window.addEventListener('orientationchange', kick);
 	window.addEventListener('resize', kick);
 	if (window.visualViewport) { window.visualViewport.addEventListener('resize', kick); }
@@ -354,7 +358,7 @@ html, body {
 </script>
 
 <script>
-window.__trash_build = {label: 'v34.138', time: '01.10 14:06'};
+window.__trash_build = {label: 'v34.140', time: '01.10 15:09'};
 document.getElementById('ver').textContent = 'Версия ' + window.__trash_build.label + ' · сборка от ' + window.__trash_build.time;
 </script>
 <script>
@@ -380,7 +384,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	// index.wasm / index.pck и отдаём ему уже скачанные и распакованные байты.
 	const FILES = {
 		wasm: { parts: [{url:"raccoon.core.0.wasm",bytes:5221065},{url:"raccoon.core.1.wasm",bytes:4165384}] },
-		pck: { parts: [{url:"raccoon.pack.0.wasm",bytes:11993863},{url:"raccoon.pack.1.wasm",bytes:12547244},{url:"raccoon.pack.2.wasm",bytes:3844990}] },
+		pck: { parts: [{url:"raccoon.pack.0.wasm",bytes:11993744},{url:"raccoon.pack.1.wasm",bytes:12547216},{url:"raccoon.pack.2.wasm",bytes:3865876}] },
 	};
 	const GODOT_CONFIG = {
 		args: [],
@@ -388,7 +392,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 		ensureCrossOriginIsolationHeaders: false,
 		executable: 'index',
 		experimentalVK: false,
-		fileSizes: { 'index.pck': 29338736, 'index.wasm': 43699190 },
+		fileSizes: { 'index.pck': 29362384, 'index.wasm': 43699190 },
 		focusCanvas: true,
 		gdextensionLibs: [],
 		onPrint: function () {
@@ -413,7 +417,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 
 	// Адрес сбора отчётов о вылетах (Google Apps Script / Supabase и т.п.); пусто — отчёты не отправляются.
 	const REPORT_URL = 'https://script.google.com/macros/s/AKfycbxVyy-SnRANW0Im-1Blne2TcUbca93WqzyBulpADwWWD7YH6x3KIygBYImTe8VfP5pp/exec';
-	const BUILD_ID_REPORT = '1790838375';
+	const BUILD_ID_REPORT = '1790842181';
 	const SESSION_ID = Math.random().toString(36).slice(2, 8);
 	const SESSION_START = Date.now();
 	const REPORT_CAP = 250;
@@ -619,7 +623,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	window.trkReport('session_start', gpuInfo() + ' | ' + navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + (window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio) + ' | screen ' + screen.width + 'x' + screen.height + ' | cores ' + (navigator.hardwareConcurrency || '?'));
 
 	// Вкладка могла висеть со старой версией: при возврате в неё сверяем номер сборки и предлагаем обновиться.
-	const BUILD_ID = '1790838375';
+	const BUILD_ID = '1790842181';
 	function checkVersion() {
 		fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (v) {
 			if (v && v.build && v.build !== BUILD_ID && !document.getElementById('newver')) {

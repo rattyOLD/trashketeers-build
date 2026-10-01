@@ -70,7 +70,6 @@ const TIPS := [
 	"Шутка: если бочка взрывается, это не баг. Это такая особенность жизни.",
 	"Шутка: рельсотрон в боевом пропуске. Барон его запомнит. И ты тоже.",
 	"Шутка: Нэлл говорит, что чай остыл. Она всегда говорит, что чай остыл.",
-	"Шутка: Игрок, если ты читаешь это на загрузке, то загрузка идёт слишком долго или ты просто любишь читать.",
 	"Шутка: смерть в игре — это не конец. Это повод попробовать ещё раз и ругаться тише.",
 	"Шутка: Рико не жадный. Он просто любит, когда монеты у него в кармане, а не на полу.",
 	"Шутка: некоторые враги дерутся за деньги, некоторые за идею. Крысы — за пиво.",
@@ -80,7 +79,6 @@ const TIPS := [
 	"Совет: секретные плиты в стенах ломаются, если стрелять по ним. Ищи трещины.",
 	"Совет: в сюжете перед боссом дают передышку. Пользуйся: подбери аптечку и выдохни.",
 	"Совет: пощадить босса или ограбить — выбор влияет на концовку и награду.",
-	"Совет: играть можно в любой ориентации — переверни телефон, как удобнее.",
 	"Совет: рывок даёт короткую неуязвимость — прыгай сквозь замах крысы.",
 	"Совет: «!» над крысой — она сейчас кинется. Рывок в сторону!",
 	"Совет: Бомбо-Крыса мигает перед взрывом. Её взрыв ранит и других крыс.",
@@ -110,8 +108,6 @@ const TIPS := [
 	"Совет: дубликаты героев превращаются в монеты, ничего не пропадает.",
 	"Совет: бесплатный сундук раз в несколько часов. Заходи, пока он не остыл.",
 	"Совет: перед боссом проверь здоровье. Термос с чаем никто не отменял.",
-	"Совет: игра создана для горизонтального экрана. Переверни телефон - Енот скажет спасибо.",
-	"Совет: не любишь альбомный режим? Енот тоже не любил диван, пока не попробовал.",
 	"Совет: критический урон любит скорострельные стволы. Пулемёт счастлив.",
 	"Совет: магнит подтягивает лут, но не пиццу. Пиццу приходится подбирать самому.",
 	"Совет: если крыса блестит - это не золото. Это бомбо-крыса. Беги.",
@@ -169,6 +165,10 @@ var _flash: ColorRect
 var _time := 0.0
 var _tracked: PackedStringArray = PackedStringArray()
 var _finishing := false
+var _cast_root: Node2D
+var _extras: Array[Extra] = []
+var _cast_timer := 2.2
+var _last_scene := ""
 
 
 func _init() -> void:
@@ -226,6 +226,8 @@ func _init() -> void:
 	_fx.draw.connect(_draw_fx)
 	_root.add_child(_fx)
 
+	_cast_root = Node2D.new()
+	_root.add_child(_cast_root)
 	_runner = Node2D.new()
 	_runner_hero = RaccoonVisual.new()
 	_runner_hero.aiming = false
@@ -233,7 +235,8 @@ func _init() -> void:
 	_runner.add_child(_runner_hero)
 	_root.add_child(_runner)
 
-	var tip := UiStyle.label(TIPS.pick_random(), 24, Color("#b5a9d6"), 6)
+	var tip_text: String = TIPS.pick_random()
+	var tip := UiStyle.label(tip_text, 24, Color("#b5a9d6"), 6)
 	tip.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	tip.anchor_left = 0.08
 	tip.anchor_right = 0.92
@@ -285,6 +288,7 @@ func _process(delta: float) -> void:
 	_bar.queue_redraw()
 	_percent.text = "%d%%" % int(shown_progress)
 	_animate_runner(delta)
+	_animate_cast(delta)
 	_update_particles(delta)
 	if shown_progress >= 100.0:
 		_finish()
@@ -446,6 +450,7 @@ func _finish() -> void:
 		_title.get_parent().visible = false
 		_bar.visible = false
 		_runner.visible = false
+		_cast_root.visible = false
 		_fx.visible = false
 		_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		transition_point.emit())
@@ -501,3 +506,136 @@ func _draw_bar() -> void:
 	var head := Vector2(fill_rect.end.x - 4.0, r.size.y * 0.5)
 	for k in 3:
 		_bar.draw_circle(head, 20.0 - k * 6.0, Color(FILL, 0.10 + 0.08 * k))
+
+
+# --- Массовка: враги и друзья пробегают мимо полосы загрузки ---------------------------------------------
+
+const SCENES: Array[String] = ["chase", "pigeon", "courier", "sniper", "parade", "pirate", "chef"]
+const MAX_EXTRAS := 6
+
+
+## Один персонаж массовки: кадровый лист, клип, движение и сценарий смены клипов.
+class Extra:
+	extends Node2D
+
+	var sprite := RigSprite.new()
+	var clip := "run"
+	var phase := 0.0
+	var vel := Vector2.ZERO
+	var ttl := 4.0
+	var follow: Node2D = null
+	var follow_offset := Vector2.ZERO
+	var bob := 0.0
+	var fade := 0.35
+	var steps: Array = []
+	var _t := 0.0
+	var _base_y := 0.0
+	var _ready_ok := false
+
+	func setup(sheet_id: String, size: float, face: float) -> bool:
+		add_child(sprite)
+		_ready_ok = sprite.setup_frames(sheet_id, 6.0)
+		scale = Vector2(size * face, size)
+		return _ready_ok
+
+	func start(at: Vector2) -> void:
+		position = at
+		_base_y = at.y
+
+	func tick(delta: float) -> bool:
+		_t += delta
+		ttl -= delta
+		for step: Array in steps:
+			if not bool(step[2]) and _t >= float(step[0]):
+				step[2] = true
+				clip = str(step[1])
+				phase = 0.0
+		var sheet := sprite.frame_sheet
+		if not FrameDB.has_clip(sheet, clip):
+			clip = "idle"
+		phase += delta * FrameDB.clip_fps(sheet, clip)
+		sprite.set_frame(FrameDB.clip_frame(sheet, clip, phase))
+		if follow != null:
+			position.x = follow.position.x + follow_offset.x
+		else:
+			position.x += vel.x * delta
+		position.y = _base_y + (sin(_t * 9.0) * bob if bob > 0.0 else 0.0)
+		modulate.a = clampf(minf(ttl, _t * 6.0) / fade, 0.0, 1.0) * (0.9 if bob > 0.0 else 1.0)
+		return ttl > 0.0
+
+
+func _animate_cast(delta: float) -> void:
+	var index := _extras.size() - 1
+	while index >= 0:
+		var extra := _extras[index]
+		if not extra.tick(delta):
+			extra.queue_free()
+			_extras.remove_at(index)
+		index -= 1
+	_cast_timer -= delta
+	if _cast_timer > 0.0 or _extras.size() > 0 or _finishing:
+		return
+	_cast_timer = randf_range(2.6, 4.2)
+	var scene: String = SCENES.pick_random()
+	if scene == _last_scene:
+		scene = SCENES[(SCENES.find(scene) + 1) % SCENES.size()]
+	_last_scene = scene
+	_run_scene(scene)
+
+
+func _spawn_extra(sheet_id: String, size: float, face: float, at: Vector2, clip: String, ttl: float) -> Extra:
+	if _extras.size() >= MAX_EXTRAS:
+		return null
+	var extra := Extra.new()
+	if not extra.setup(sheet_id, size, face):
+		extra.queue_free()
+		return null
+	extra.clip = clip
+	extra.ttl = ttl
+	_cast_root.add_child(extra)
+	extra.start(at)
+	_extras.append(extra)
+	return extra
+
+
+func _run_scene(scene: String) -> void:
+	var rect := _bar.get_global_rect()
+	var line := rect.position.y - 6.0
+	var lane := rect.position.y - 120.0
+	var left := rect.position.x - 80.0
+	var right := rect.end.x + 80.0
+	match scene:
+		"chase":
+			for i in 3:
+				var extra := _spawn_extra("rat_mad" if i == 1 else "rat_base", 0.62, 1.0, Vector2(_runner.position.x - 160.0 - i * 90.0, line), "run", 3.4)
+				if extra != null:
+					extra.follow = _runner
+					extra.follow_offset = Vector2(-170.0 - i * 90.0, 0.0)
+		"pigeon":
+			var extra := _spawn_extra("pigeon_bomber", 0.8, 1.0, Vector2(left, rect.position.y - 300.0), "run", 6.0)
+			if extra != null:
+				extra.vel = Vector2(rect.size.x / 4.5, 0.0)
+				extra.bob = 22.0
+		"courier":
+			var extra := _spawn_extra("courier_rat", 0.74, -1.0, Vector2(right, lane), "run", 3.6)
+			if extra != null:
+				extra.vel = Vector2(-rect.size.x / 1.9, 0.0)
+		"sniper":
+			var at := minf(_runner.position.x + 280.0, rect.end.x - 30.0)
+			var extra := _spawn_extra("pig_sniper", 0.62, -1.0, Vector2(at, line), "idle", 3.6)
+			if extra != null:
+				extra.steps = [[0.3, "windup", false], [1.0, "strike", false], [1.6, "hit", false], [2.2, "death", false]]
+				_start_act("shoot")
+		"parade":
+			for pair in [["trash_tank", 0.8, 0.0], ["cash_collector", 0.62, 150.0]]:
+				var extra := _spawn_extra(str(pair[0]), float(pair[1]), 1.0, Vector2(left - float(pair[2]), lane), "run", 7.5)
+				if extra != null:
+					extra.vel = Vector2(rect.size.x / 6.2, 0.0)
+		"pirate":
+			var extra := _spawn_extra("sea_pirate", 0.9, 1.0, Vector2(rect.position.x + rect.size.x * 0.18, lane), "idle", 3.8)
+			if extra != null:
+				extra.steps = [[0.4, "taunt", false], [2.6, "idle", false]]
+		"chef":
+			var extra := _spawn_extra("chef_boss", 0.92, -1.0, Vector2(right, lane), "run", 5.2)
+			if extra != null:
+				extra.vel = Vector2(-rect.size.x / 4.2, 0.0)

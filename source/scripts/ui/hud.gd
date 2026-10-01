@@ -73,7 +73,7 @@ var _story_bar: StoryBar
 var _minimap: Minimap
 var _toast_queue: Array = []
 var _toast_busy := false
-var _toast_y := 168.0
+var _toast_y := 168.0 if Orient.portrait else 440.0
 var _minimal := false
 var _wanted_label: Label
 var _low_hp := false
@@ -201,7 +201,7 @@ func dock_story_meter(meter: Control) -> void:
 
 func set_story_layout(minimap: Minimap) -> void:
 	_wave_box.visible = false
-	_toast_y = 556.0
+	_toast_y = 556.0 if Orient.portrait else 440.0
 	_story_bar = StoryBar.new()
 	_left_column.add_child(_story_bar)
 	_order_card = OrderCard.new()
@@ -213,11 +213,11 @@ func set_story_layout(minimap: Minimap) -> void:
 	_boss_bar.anchor_right = 1.0
 	_boss_bar.anchor_top = 0.0
 	_boss_bar.anchor_bottom = 0.0
-	_boss_bar.offset_left = 18.0
-	_boss_bar.offset_right = -164.0
-	_boss_bar.offset_top = 462.0
-	_boss_bar.offset_bottom = 546.0
-	UiStyle.anchor(_minimap_slot, Vector2(1.0, 0.0), Rect2(-150, 520, 132, 230))
+	_boss_bar.offset_left = 18.0 if Orient.portrait else 300.0
+	_boss_bar.offset_right = -164.0 if Orient.portrait else -300.0
+	_boss_bar.offset_top = 462.0 if Orient.portrait else 600.0
+	_boss_bar.offset_bottom = 546.0 if Orient.portrait else 684.0
+	UiStyle.anchor(_minimap_slot, Vector2(1.0, 0.0), Rect2(-150, 520, 132, 230) if Orient.portrait else Rect2(-150, 150, 132, 230))
 	_minimap = minimap
 	minimap.tapped.connect(func(overview: bool) -> void:
 		_hint.show_for(_minimap_slot, "Карта. Тап: %s." % ("крупный план" if overview else "вся карта")))
@@ -656,9 +656,17 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	margin.add_child(row)
 
 	var left := VBoxContainer.new()
-	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	left.add_theme_constant_override("separation", 6)
+	if Orient.portrait:
+		left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	else:
+		left.custom_minimum_size = Vector2(440, 0)
 	row.add_child(left)
+	if not Orient.portrait:
+		var gap := Control.new()
+		gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		row.add_child(gap)
 	_left_column = left
 
 	var hp_stack := Control.new()
@@ -754,7 +762,7 @@ func _build_boss_bar() -> Control:
 
 func _build_banner() -> Control:
 	_banner = UiStyle.label("", 34, UiStyle.DANGER, 10)
-	UiStyle.anchor(_banner, Vector2(0.5, 0.5), Rect2(-350, -380, 700, 110))
+	UiStyle.anchor(_banner, Vector2(0.5, 0.5), Rect2(-350, -380, 700, 110) if Orient.portrait else Rect2(-350, -280, 700, 80))
 	_banner.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_banner.visible = false
 	return _banner
@@ -764,16 +772,16 @@ func _build_wave_titles() -> Control:
 	var box := Control.new()
 	box.set_anchors_preset(Control.PRESET_FULL_RECT)
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_wave_title = UiStyle.label("", 78, UiStyle.GOLD, 16)
-	UiStyle.anchor(_wave_title, Vector2(0.5, 0.5), Rect2(-360, -250, 720, 110))
+	_wave_title = UiStyle.label("", 78 if Orient.portrait else 56, UiStyle.GOLD, 16)
+	UiStyle.anchor(_wave_title, Vector2(0.5, 0.5), Rect2(-360, -250, 720, 110) if Orient.portrait else Rect2(-360, -60, 720, 80))
 	_wave_title.visible = false
 	box.add_child(_wave_title)
 	_wave_sub = UiStyle.label("", 30, UiStyle.TEXT, 8)
-	UiStyle.anchor(_wave_sub, Vector2(0.5, 0.5), Rect2(-360, -150, 720, 50))
+	UiStyle.anchor(_wave_sub, Vector2(0.5, 0.5), Rect2(-360, -150, 720, 50) if Orient.portrait else Rect2(-360, 20, 720, 40))
 	_wave_sub.visible = false
 	box.add_child(_wave_sub)
 	_countdown = UiStyle.label("", 30, UiStyle.NEON, 8)
-	UiStyle.anchor(_countdown, Vector2(0.5, 0.5), Rect2(-360, -60, 720, 50))
+	UiStyle.anchor(_countdown, Vector2(0.5, 0.5), Rect2(-360, -60, 720, 50) if Orient.portrait else Rect2(-360, 70, 720, 40))
 	_countdown.visible = false
 	box.add_child(_countdown)
 	return box
