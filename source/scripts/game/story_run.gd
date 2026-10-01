@@ -38,6 +38,7 @@ var zone_index := -1
 var locked := false
 var gate_key := ""
 const IDLE_HINT := 9.0
+const IDLE_MOVE := 48.0
 const STRAGGLER_AFTER := 14.0
 const STRAGGLER_FAR := 640.0
 var waypoint: Node2D
@@ -77,7 +78,8 @@ var _end_y := 0.0
 var _idle := 0.0
 var _lock_clock := 0.0
 var _idle_hints := 0
-var _idle_mark := 0.0
+var _idle_pos := Vector2.ZERO
+var _last_idle_line := -1
 
 
 static func map_chapter(base: Dictionary, mission_id: String) -> Dictionary:
@@ -391,21 +393,40 @@ func _pull_stragglers(delta: float) -> void:
 
 
 func _tick_idle(delta: float) -> void:
-	if locked or game.director.boss != null:
-		_idle = 0.0
-		return
-	if absf(progress - _idle_mark) > 0.015:
-		_idle_mark = progress
+	var pos := game.player.global_position
+	if pos.distance_to(_idle_pos) > IDLE_MOVE:
+		_idle_pos = pos
 		_idle = 0.0
 		_idle_hints = 0
 		return
 	_idle += delta
-	if _idle >= IDLE_HINT:
-		_idle = 0.0
-		_idle_hints += 1
-		if _idle_hints % 2 == 0:
-			_spawn_wave({"enemies": {"rat_punk": 3}}, 1)
-		game.hud.show_banner("ВПЕРЁД! Иди вверх по стрелке", UiStyle.GOLD, 2.4)
+	if _idle < IDLE_HINT:
+		return
+	_idle = 0.0
+	_idle_hints += 1
+	_idle_line()
+	if not locked and game.director.boss == null and _idle_hints % 2 == 0:
+		_spawn_wave({"enemies": {"rat_punk": 3}}, 1)
+
+
+func _idle_line() -> void:
+	var lines: Dictionary = mission.get("idle_lines", {})
+	var pool_key := "locked" if locked else "free"
+	var who := "nell"
+	var boss: Enemy = game.director.boss
+	if boss != null and is_instance_valid(boss):
+		var boss_id := str(boss.data.id)
+		pool_key = "baron" if boss_id == "beer_baron" else "king"
+		who = pool_key
+	var pool: Array = lines.get(pool_key, [])
+	if pool.is_empty():
+		return
+	var index := randi() % pool.size()
+	if pool.size() > 1 and index == _last_idle_line:
+		index = (index + 1) % pool.size()
+	_last_idle_line = index
+	var speaker: Dictionary = speakers.get(who, {})
+	game.hud.toast(str(speaker.get("name", "НЭЛЛ")), str(pool[index]), Color(str(speaker.get("color", "#5ff2ff"))))
 
 
 func _check_zone() -> void:
@@ -495,11 +516,24 @@ func _bark(enemy: Enemy) -> void:
 
 
 func _update_waypoint() -> void:
+	if locked and game.director.boss == null and _pending_waves.is_empty():
+		game.story_target = _last_enemy()
+		return
 	if locked or game.director.boss != null:
 		game.story_target = null
 		return
 	waypoint.global_position = game.player.global_position + Vector2(0, -1100)
 	game.story_target = waypoint
+
+
+func _last_enemy() -> Node2D:
+	var found: Node2D = null
+	var count := 0
+	for enemy in _tracked:
+		if is_instance_valid(enemy) and enemy.pool_index >= 0 and enemy.is_alive():
+			count += 1
+			found = enemy
+	return found if count <= 2 else null
 
 
 func _begin(enc: Dictionary) -> void:
@@ -721,6 +755,7 @@ func _say(key: String, delay: float) -> void:
 	if not dialogs.has(key):
 		return
 	_seen[key] = true
+	SaveService.log_dialog(str(mission.get("id", "")), key)
 	_queue.append(dialogs[key])
 	get_tree().create_timer(delay, true, false, true).timeout.connect(_pump)
 

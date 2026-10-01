@@ -82,9 +82,33 @@ static func entries() -> Array:
 	]
 
 
+const DIALOG_TITLES := {
+	"intro": "Рация: начало", "gate": "Ворота Свалки", "toxic": "Токсики", "baron_pre": "Пивной Барон: встреча",
+	"baron_post": "Пивной Барон: после боя", "crate": "Ящик с ключом", "king_pre": "Король Хлама: встреча",
+	"king_dead": "Король Хлама: конец", "yard": "Двор", "scrap": "Искруны", "outro": "Перехват канала",
+}
+
+
+static func dialog_entries() -> Array:
+	var result: Array = []
+	var root: Dictionary = ConfigLoader.load_json(StoryRun.DATA_PATH)
+	var speakers: Dictionary = root.get("speakers", {})
+	for mission in root.get("missions", []):
+		var mission_id := str(mission.get("id", ""))
+		var dialogs: Dictionary = mission.get("dialogs", {})
+		for key in dialogs:
+			var lines: PackedStringArray = []
+			for line in dialogs[key]:
+				lines.append("%s: %s" % [str((speakers.get(str(line.get("who", "")), {}) as Dictionary).get("name", "")), str(line.get("text", ""))])
+			result.append({"title": "Запись рации: " + str(DIALOG_TITLES.get(key, key)), "hint": "Услышь этот диалог в сюжете",
+				"text": "\n".join(lines), "open": SaveService.has_dialog(mission_id, str(key))})
+	return result
+
+
 func _refresh() -> void:
 	MenuPopups.clear(_list)
 	var all := entries()
+	all.append_array(dialog_entries())
 	var opened := 0
 	for entry in all:
 		var e := entry as Dictionary

@@ -31,6 +31,7 @@ const DEFAULTS := {
 	"runs": 0,
 	"boss_kills": 0,
 	"story": {},
+	"story_log": {},
 	"friends": {},
 	"invite_used": "",
 	"invite_paid": [],
@@ -1135,6 +1136,18 @@ func record_run(summary: Dictionary) -> Dictionary:
 
 
 ## Босс побеждён — счётчик живой, чтобы ачивка открылась сразу.
+func log_dialog(mission_id: String, key: String) -> void:
+	var log: Dictionary = data["story_log"]
+	var id := "%s:%s" % [mission_id, key]
+	if not log.has(id):
+		log[id] = true
+		save_data()
+
+
+func has_dialog(mission_id: String, key: String) -> bool:
+	return (data["story_log"] as Dictionary).has("%s:%s" % [mission_id, key])
+
+
 func story_done(mission_id: String) -> bool:
 	return bool((data["story"] as Dictionary).get(mission_id, {}).get("done", false))
 
