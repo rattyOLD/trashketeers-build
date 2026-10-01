@@ -1,0 +1,29 @@
+{
+  "generator": "built-in imagegen",
+  "prompts": [
+    {
+      "key": "diary_1_fix",
+      "prompt": "Use case: precise-object-edit. Replace ONLY the tool in the little grey rat child's hands: one simple rusty straight screwdriver with narrow straight metal shaft and a small worn brown handle. Not a wrench, spanner or pliers. Preserve every other part exactly: Nell, child, helmet, reactor, warm paper, blank lower caption area, framing, colors and style. No text."
+    },
+    {
+      "key": "diary_2",
+      "prompt": "Nell watches lever while Dirty Magnate signs a blank contract above the console. Old paper illustration, blank lower caption area."
+    },
+    {
+      "key": "diary_3",
+      "prompt": "Use case: illustration-story. Production Nell diary page landscape960x540. Warm cream old paper filling canvas, tea stains, expressive pencil/charcoal cartoon thick contours and soft two-tone cel shading, sepia with pink/cyan neon accents. TOP75percent illustration, BOTTOM25percent completely blank paper for caption. No words, letters, digits, signature, fake writing. Preserve approved character identity. The city disaster: cylindrical civic waste-to-energy Barrel reactor bursts into EXACTLY SIX separate glowing mechanical shards around a central flash. Six countable large pieces, no other flying solid debris. Distant city reflected in pink gold light. Reactor is machine, not beer cask."
+    },
+    {
+      "key": "diary_4",
+      "prompt": "Use case: illustration-story. Production Nell diary page landscape960x540. Warm cream old paper filling canvas, tea stains, expressive pencil/charcoal cartoon thick contours and soft two-tone cel shading, sepia with pink/cyan neon accents. TOP75percent illustration, BOTTOM25percent completely blank paper for caption. No words, letters, digits, signature, fake writing. Preserve approved character identity. Adult Nell white rabbit engineer with cyan glasses, headphones, blue work clothes sits in control cabin holding walkie-talkie; behind is framed family photo showing Nell, grey rat engineer husband and little grey rat child. Tea cup on desk, warm lonely memory. No labels on photo."
+    },
+    {
+      "key": "diary_5",
+      "prompt": "Use case: illustration-story. Production Nell diary page landscape960x540. Warm cream old paper filling canvas, tea stains, expressive pencil/charcoal cartoon thick contours and soft two-tone cel shading, sepia with pink/cyan neon accents. TOP75percent illustration, BOTTOM25percent completely blank paper for caption. No words, letters, digits, signature, fake writing. Preserve approved character identity. Rico as SMALL grey/cream RACCOON CHILD with clear black eye mask sleeps curled inside glass laboratory capsule. Glowing parallel barcode scar strokes on chest, no digits. Soft cyan/pink lights, protective yet unsettling. No goggles or scarf, no other characters."
+    },
+    {
+      "key": "diary_6",
+      "prompt": "Use case: illustration-story. Production Nell diary page landscape960x540. Warm cream old paper filling canvas, tea stains, expressive pencil/charcoal cartoon thick contours and soft two-tone cel shading, sepia with pink/cyan neon accents. TOP75percent illustration, BOTTOM25percent completely blank paper for caption. No words, letters, digits, signature, fake writing. Preserve approved character identity. Close-up tea cup on windowsill, one tiny glowing pink/gold reactor shard resting ON THE RIM of cup, warm sunlight through window. Peaceful final memory. No characters, no writing."
+    }
+  ]
+}

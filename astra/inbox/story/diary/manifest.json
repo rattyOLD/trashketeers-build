@@ -1,0 +1,67 @@
+{
+  "brief": "astra/from_claude/BRIEF_v7_saga.md",
+  "block": "B",
+  "frameOrder": "left-to-right top-to-bottom",
+  "assets": [
+    {
+      "path": "astra/inbox/story/diary/diary_01.png",
+      "width": 960,
+      "height": 540,
+      "block": "B",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "diary_1_fix",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/diary/diary_02.png",
+      "width": 960,
+      "height": 540,
+      "block": "B",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "diary_2",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/diary/diary_03.png",
+      "width": 960,
+      "height": 540,
+      "block": "B",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "diary_3",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/diary/diary_04.png",
+      "width": 960,
+      "height": 540,
+      "block": "B",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "diary_4",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/diary/diary_05.png",
+      "width": 960,
+      "height": 540,
+      "block": "B",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "diary_5",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/diary/diary_06.png",
+      "width": 960,
+      "height": 540,
+      "block": "B",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "diary_6",
+      "frame": 0
+    }
+  ]
+}
