@@ -159,6 +159,7 @@ func restore_save(code: String) -> String:
 		return ""
 	var result := await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/restore_save", {"p_code": code})
 	if bool(result["ok"]) and result["data"] is String:
+		await _sync_badge()
 		return str(result["data"])
 	return ""
 
