@@ -1,0 +1,2475 @@
+{
+  "brief": "astra/from_claude/BRIEF_v8_survival_fx.md",
+  "block": "H4",
+  "frameOrder": "left-to-right top-to-bottom",
+  "assets": [
+    {
+      "path": "astra/inbox/story/enemies2/courier_rat_walk_down_1.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "courier_rat_walk_a",
+      "frame": 0,
+      "contentBounds": [
+        36,
+        29,
+        219,
+        227
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/courier_rat_walk_down_2.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "courier_rat_walk_a",
+      "frame": 1,
+      "contentBounds": [
+        42,
+        28,
+        213,
+        227
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/courier_rat_walk_down_3.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "courier_rat_walk_a",
+      "frame": 2,
+      "contentBounds": [
+        35,
+        21,
+        221,
+        234
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/courier_rat_walk_down_4.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "courier_rat_walk_a",
+      "frame": 3,
+      "contentBounds": [
+        34,
+        32,
+        222,
+        223
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/courier_rat_walk_left_1.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "courier_rat_walk_a",
+      "frame": 4,
+      "contentBounds": [
+        13,
+        34,
+        243,
+        221
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/courier_rat_walk_left_2.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "courier_rat_walk_a",
+      "frame": 5,
+      "contentBounds": [
+        17,
+        38,
+        239,
+        218
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/courier_rat_walk_left_3.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "courier_rat_walk_a",
+      "frame": 6,
+      "contentBounds": [
+        16,
+        36,
+        239,
+        219
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/courier_rat_walk_left_4.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "courier_rat_walk_a",
+      "frame": 7,
+      "contentBounds": [
+        15,
+        36,
+        241,
+        220
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/courier_rat_walk_a_sheet.png",
+      "width": 1024,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "columns": 4,
+      "rows": 2,
+      "cellWidth": 256,
+      "cellHeight": 256,
+      "frames": [
+        "courier_rat_walk_down_1",
+        "courier_rat_walk_down_2",
+        "courier_rat_walk_down_3",
+        "courier_rat_walk_down_4",
+        "courier_rat_walk_left_1",
+        "courier_rat_walk_left_2",
+        "courier_rat_walk_left_3",
+        "courier_rat_walk_left_4"
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/courier_rat_walk_right_1.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "courier_rat_walk_b",
+      "frame": 0,
+      "contentBounds": [
+        17,
+        40,
+        239,
+        215
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/courier_rat_walk_right_2.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "courier_rat_walk_b",
+      "frame": 1,
+      "contentBounds": [
+        18,
+        39,
+        237,
+        217
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/courier_rat_walk_right_3.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "courier_rat_walk_b",
+      "frame": 2,
+      "contentBounds": [
+        23,
+        42,
+        233,
+        213
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/courier_rat_walk_right_4.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "courier_rat_walk_b",
+      "frame": 3,
+      "contentBounds": [
+        13,
+        41,
+        243,
+        214
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/courier_rat_walk_up_1.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "courier_rat_walk_b",
+      "frame": 4,
+      "contentBounds": [
+        46,
+        34,
+        209,
+        222
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/courier_rat_walk_up_2.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "courier_rat_walk_b",
+      "frame": 5,
+      "contentBounds": [
+        46,
+        23,
+        209,
+        232
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/courier_rat_walk_up_3.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "courier_rat_walk_b",
+      "frame": 6,
+      "contentBounds": [
+        40,
+        30,
+        215,
+        225
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/courier_rat_walk_up_4.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "courier_rat_walk_b",
+      "frame": 7,
+      "contentBounds": [
+        54,
+        26,
+        202,
+        230
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/courier_rat_walk_b_sheet.png",
+      "width": 1024,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "columns": 4,
+      "rows": 2,
+      "cellWidth": 256,
+      "cellHeight": 256,
+      "frames": [
+        "courier_rat_walk_right_1",
+        "courier_rat_walk_right_2",
+        "courier_rat_walk_right_3",
+        "courier_rat_walk_right_4",
+        "courier_rat_walk_up_1",
+        "courier_rat_walk_up_2",
+        "courier_rat_walk_up_3",
+        "courier_rat_walk_up_4"
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/courier_rat_attack_1.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "courier_rat_combat",
+      "frame": 0,
+      "contentBounds": [
+        38,
+        54,
+        218,
+        201
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/courier_rat_attack_2.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "courier_rat_combat",
+      "frame": 1,
+      "contentBounds": [
+        24,
+        56,
+        232,
+        200
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/courier_rat_attack_3.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "courier_rat_combat",
+      "frame": 2,
+      "contentBounds": [
+        15,
+        55,
+        240,
+        201
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/courier_rat_death_1.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "courier_rat_combat",
+      "frame": 3,
+      "contentBounds": [
+        18,
+        52,
+        237,
+        204
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/courier_rat_death_2.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "courier_rat_combat",
+      "frame": 4,
+      "contentBounds": [
+        23,
+        51,
+        233,
+        204
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/courier_rat_death_3.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "courier_rat_combat",
+      "frame": 5,
+      "contentBounds": [
+        13,
+        70,
+        243,
+        185
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/courier_rat_combat_sheet.png",
+      "width": 512,
+      "height": 768,
+      "block": "H4",
+      "transparent": false,
+      "columns": 2,
+      "rows": 3,
+      "cellWidth": 256,
+      "cellHeight": 256,
+      "frames": [
+        "courier_rat_attack_1",
+        "courier_rat_attack_2",
+        "courier_rat_attack_3",
+        "courier_rat_death_1",
+        "courier_rat_death_2",
+        "courier_rat_death_3"
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/bomber_pigeon_walk_down_1.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "bomber_pigeon_walk_a",
+      "frame": 0,
+      "contentBounds": [
+        36,
+        25,
+        219,
+        231
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/bomber_pigeon_walk_down_2.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "bomber_pigeon_walk_a",
+      "frame": 1,
+      "contentBounds": [
+        31,
+        34,
+        225,
+        222
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/bomber_pigeon_walk_down_3.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "bomber_pigeon_walk_a",
+      "frame": 2,
+      "contentBounds": [
+        29,
+        25,
+        226,
+        231
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/bomber_pigeon_walk_down_4.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "bomber_pigeon_walk_a",
+      "frame": 3,
+      "contentBounds": [
+        34,
+        36,
+        222,
+        220
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/bomber_pigeon_walk_left_1.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "bomber_pigeon_walk_a",
+      "frame": 4,
+      "contentBounds": [
+        27,
+        23,
+        229,
+        232
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/bomber_pigeon_walk_left_2.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "bomber_pigeon_walk_a",
+      "frame": 5,
+      "contentBounds": [
+        35,
+        37,
+        221,
+        219
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/bomber_pigeon_walk_left_3.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "bomber_pigeon_walk_a",
+      "frame": 6,
+      "contentBounds": [
+        22,
+        25,
+        233,
+        230
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/bomber_pigeon_walk_left_4.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "bomber_pigeon_walk_a",
+      "frame": 7,
+      "contentBounds": [
+        36,
+        36,
+        220,
+        219
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/bomber_pigeon_walk_a_sheet.png",
+      "width": 1024,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "columns": 4,
+      "rows": 2,
+      "cellWidth": 256,
+      "cellHeight": 256,
+      "frames": [
+        "bomber_pigeon_walk_down_1",
+        "bomber_pigeon_walk_down_2",
+        "bomber_pigeon_walk_down_3",
+        "bomber_pigeon_walk_down_4",
+        "bomber_pigeon_walk_left_1",
+        "bomber_pigeon_walk_left_2",
+        "bomber_pigeon_walk_left_3",
+        "bomber_pigeon_walk_left_4"
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/bomber_pigeon_walk_right_1.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "bomber_pigeon_walk_b",
+      "frame": 0,
+      "contentBounds": [
+        26,
+        17,
+        229,
+        239
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/bomber_pigeon_walk_right_2.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "bomber_pigeon_walk_b",
+      "frame": 1,
+      "contentBounds": [
+        26,
+        37,
+        230,
+        219
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/bomber_pigeon_walk_right_3.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "bomber_pigeon_walk_b",
+      "frame": 2,
+      "contentBounds": [
+        29,
+        17,
+        227,
+        239
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/bomber_pigeon_walk_right_4.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "bomber_pigeon_walk_b",
+      "frame": 3,
+      "contentBounds": [
+        25,
+        38,
+        231,
+        218
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/bomber_pigeon_walk_up_1.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "bomber_pigeon_walk_b",
+      "frame": 4,
+      "contentBounds": [
+        13,
+        20,
+        243,
+        235
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/bomber_pigeon_walk_up_2.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "bomber_pigeon_walk_b",
+      "frame": 5,
+      "contentBounds": [
+        29,
+        28,
+        226,
+        227
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/bomber_pigeon_walk_up_3.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "bomber_pigeon_walk_b",
+      "frame": 6,
+      "contentBounds": [
+        15,
+        15,
+        241,
+        240
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/bomber_pigeon_walk_up_4.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "bomber_pigeon_walk_b",
+      "frame": 7,
+      "contentBounds": [
+        27,
+        29,
+        228,
+        227
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/bomber_pigeon_walk_b_sheet.png",
+      "width": 1024,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "columns": 4,
+      "rows": 2,
+      "cellWidth": 256,
+      "cellHeight": 256,
+      "frames": [
+        "bomber_pigeon_walk_right_1",
+        "bomber_pigeon_walk_right_2",
+        "bomber_pigeon_walk_right_3",
+        "bomber_pigeon_walk_right_4",
+        "bomber_pigeon_walk_up_1",
+        "bomber_pigeon_walk_up_2",
+        "bomber_pigeon_walk_up_3",
+        "bomber_pigeon_walk_up_4"
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/bomber_pigeon_attack_1.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "bomber_pigeon_combat",
+      "frame": 0,
+      "contentBounds": [
+        26,
+        26,
+        230,
+        229
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/bomber_pigeon_attack_2.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "bomber_pigeon_combat",
+      "frame": 1,
+      "contentBounds": [
+        16,
+        29,
+        240,
+        226
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/bomber_pigeon_attack_3.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "bomber_pigeon_combat",
+      "frame": 2,
+      "contentBounds": [
+        28,
+        25,
+        227,
+        230
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/bomber_pigeon_death_1.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "bomber_pigeon_combat",
+      "frame": 3,
+      "contentBounds": [
+        17,
+        23,
+        238,
+        232
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/bomber_pigeon_death_2.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "bomber_pigeon_combat",
+      "frame": 4,
+      "contentBounds": [
+        20,
+        25,
+        235,
+        231
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/bomber_pigeon_death_3.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "bomber_pigeon_combat",
+      "frame": 5,
+      "contentBounds": [
+        13,
+        41,
+        243,
+        215
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/bomber_pigeon_combat_sheet.png",
+      "width": 512,
+      "height": 768,
+      "block": "H4",
+      "transparent": false,
+      "columns": 2,
+      "rows": 3,
+      "cellWidth": 256,
+      "cellHeight": 256,
+      "frames": [
+        "bomber_pigeon_attack_1",
+        "bomber_pigeon_attack_2",
+        "bomber_pigeon_attack_3",
+        "bomber_pigeon_death_1",
+        "bomber_pigeon_death_2",
+        "bomber_pigeon_death_3"
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_tank_walk_down_1.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_tank_walk_a",
+      "frame": 0,
+      "contentBounds": [
+        35,
+        32,
+        221,
+        224
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_tank_walk_down_2.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_tank_walk_a",
+      "frame": 1,
+      "contentBounds": [
+        33,
+        31,
+        223,
+        224
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_tank_walk_down_3.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_tank_walk_a",
+      "frame": 2,
+      "contentBounds": [
+        35,
+        31,
+        221,
+        225
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_tank_walk_down_4.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_tank_walk_a",
+      "frame": 3,
+      "contentBounds": [
+        36,
+        34,
+        220,
+        222
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_tank_walk_left_1.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_tank_walk_a",
+      "frame": 4,
+      "contentBounds": [
+        16,
+        42,
+        240,
+        213
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_tank_walk_left_2.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_tank_walk_a",
+      "frame": 5,
+      "contentBounds": [
+        18,
+        47,
+        238,
+        209
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_tank_walk_left_3.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_tank_walk_a",
+      "frame": 6,
+      "contentBounds": [
+        17,
+        43,
+        239,
+        213
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_tank_walk_left_4.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_tank_walk_a",
+      "frame": 7,
+      "contentBounds": [
+        18,
+        44,
+        237,
+        211
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_tank_walk_a_sheet.png",
+      "width": 1024,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "columns": 4,
+      "rows": 2,
+      "cellWidth": 256,
+      "cellHeight": 256,
+      "frames": [
+        "trash_tank_walk_down_1",
+        "trash_tank_walk_down_2",
+        "trash_tank_walk_down_3",
+        "trash_tank_walk_down_4",
+        "trash_tank_walk_left_1",
+        "trash_tank_walk_left_2",
+        "trash_tank_walk_left_3",
+        "trash_tank_walk_left_4"
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_tank_walk_right_1.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_tank_walk_b",
+      "frame": 0,
+      "contentBounds": [
+        21,
+        39,
+        235,
+        216
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_tank_walk_right_2.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_tank_walk_b",
+      "frame": 1,
+      "contentBounds": [
+        26,
+        40,
+        230,
+        216
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_tank_walk_right_3.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_tank_walk_b",
+      "frame": 2,
+      "contentBounds": [
+        22,
+        36,
+        234,
+        220
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_tank_walk_right_4.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_tank_walk_b",
+      "frame": 3,
+      "contentBounds": [
+        24,
+        35,
+        232,
+        221
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_tank_walk_up_1.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_tank_walk_b",
+      "frame": 4,
+      "contentBounds": [
+        28,
+        31,
+        227,
+        225
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_tank_walk_up_2.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_tank_walk_b",
+      "frame": 5,
+      "contentBounds": [
+        32,
+        33,
+        224,
+        223
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_tank_walk_up_3.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_tank_walk_b",
+      "frame": 6,
+      "contentBounds": [
+        27,
+        33,
+        228,
+        223
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_tank_walk_up_4.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_tank_walk_b",
+      "frame": 7,
+      "contentBounds": [
+        35,
+        30,
+        221,
+        226
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_tank_walk_b_sheet.png",
+      "width": 1024,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "columns": 4,
+      "rows": 2,
+      "cellWidth": 256,
+      "cellHeight": 256,
+      "frames": [
+        "trash_tank_walk_right_1",
+        "trash_tank_walk_right_2",
+        "trash_tank_walk_right_3",
+        "trash_tank_walk_right_4",
+        "trash_tank_walk_up_1",
+        "trash_tank_walk_up_2",
+        "trash_tank_walk_up_3",
+        "trash_tank_walk_up_4"
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_tank_attack_1.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_tank_combat",
+      "frame": 0,
+      "contentBounds": [
+        39,
+        67,
+        216,
+        189
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_tank_attack_2.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_tank_combat",
+      "frame": 1,
+      "contentBounds": [
+        41,
+        56,
+        215,
+        199
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_tank_attack_3.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_tank_combat",
+      "frame": 2,
+      "contentBounds": [
+        13,
+        68,
+        243,
+        188
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_tank_death_1.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_tank_combat",
+      "frame": 4,
+      "contentBounds": [
+        32,
+        62,
+        224,
+        194
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_tank_death_2.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_tank_combat",
+      "frame": 5,
+      "contentBounds": [
+        28,
+        48,
+        227,
+        207
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_tank_death_3.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_tank_combat",
+      "frame": 6,
+      "contentBounds": [
+        30,
+        79,
+        226,
+        177
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_tank_combat_sheet.png",
+      "width": 1024,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "columns": 4,
+      "rows": 2,
+      "cellWidth": 256,
+      "cellHeight": 256,
+      "frames": [
+        "trash_tank_attack_1",
+        "trash_tank_attack_2",
+        "trash_tank_attack_3",
+        "trash_tank_death_1",
+        "trash_tank_death_2",
+        "trash_tank_death_3"
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/cash_collector_walk_down_1.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "cash_collector_walk_a",
+      "frame": 0,
+      "contentBounds": [
+        27,
+        33,
+        229,
+        223
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/cash_collector_walk_down_2.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "cash_collector_walk_a",
+      "frame": 1,
+      "contentBounds": [
+        32,
+        35,
+        224,
+        221
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/cash_collector_walk_down_3.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "cash_collector_walk_a",
+      "frame": 2,
+      "contentBounds": [
+        30,
+        33,
+        225,
+        223
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/cash_collector_walk_down_4.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "cash_collector_walk_a",
+      "frame": 3,
+      "contentBounds": [
+        33,
+        33,
+        223,
+        223
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/cash_collector_walk_left_1.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "cash_collector_walk_a",
+      "frame": 4,
+      "contentBounds": [
+        32,
+        33,
+        223,
+        223
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/cash_collector_walk_left_2.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "cash_collector_walk_a",
+      "frame": 5,
+      "contentBounds": [
+        36,
+        29,
+        220,
+        227
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/cash_collector_walk_left_3.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "cash_collector_walk_a",
+      "frame": 6,
+      "contentBounds": [
+        27,
+        32,
+        228,
+        224
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/cash_collector_walk_left_4.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "cash_collector_walk_a",
+      "frame": 7,
+      "contentBounds": [
+        34,
+        29,
+        222,
+        227
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/cash_collector_walk_a_sheet.png",
+      "width": 1024,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "columns": 4,
+      "rows": 2,
+      "cellWidth": 256,
+      "cellHeight": 256,
+      "frames": [
+        "cash_collector_walk_down_1",
+        "cash_collector_walk_down_2",
+        "cash_collector_walk_down_3",
+        "cash_collector_walk_down_4",
+        "cash_collector_walk_left_1",
+        "cash_collector_walk_left_2",
+        "cash_collector_walk_left_3",
+        "cash_collector_walk_left_4"
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/cash_collector_walk_right_1.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "cash_collector_walk_b",
+      "frame": 0,
+      "contentBounds": [
+        30,
+        33,
+        226,
+        223
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/cash_collector_walk_right_2.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "cash_collector_walk_b",
+      "frame": 1,
+      "contentBounds": [
+        32,
+        37,
+        224,
+        218
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/cash_collector_walk_right_3.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "cash_collector_walk_b",
+      "frame": 2,
+      "contentBounds": [
+        32,
+        39,
+        224,
+        217
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/cash_collector_walk_right_4.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "cash_collector_walk_b",
+      "frame": 3,
+      "contentBounds": [
+        28,
+        35,
+        228,
+        221
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/cash_collector_walk_up_1.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "cash_collector_walk_b",
+      "frame": 4,
+      "contentBounds": [
+        33,
+        28,
+        223,
+        228
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/cash_collector_walk_up_2.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "cash_collector_walk_b",
+      "frame": 5,
+      "contentBounds": [
+        37,
+        28,
+        219,
+        228
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/cash_collector_walk_up_3.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "cash_collector_walk_b",
+      "frame": 6,
+      "contentBounds": [
+        31,
+        27,
+        225,
+        229
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/cash_collector_walk_up_4.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "cash_collector_walk_b",
+      "frame": 7,
+      "contentBounds": [
+        35,
+        27,
+        221,
+        229
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/cash_collector_walk_b_sheet.png",
+      "width": 1024,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "columns": 4,
+      "rows": 2,
+      "cellWidth": 256,
+      "cellHeight": 256,
+      "frames": [
+        "cash_collector_walk_right_1",
+        "cash_collector_walk_right_2",
+        "cash_collector_walk_right_3",
+        "cash_collector_walk_right_4",
+        "cash_collector_walk_up_1",
+        "cash_collector_walk_up_2",
+        "cash_collector_walk_up_3",
+        "cash_collector_walk_up_4"
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/cash_collector_attack_1.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "cash_collector_combat",
+      "frame": 0,
+      "contentBounds": [
+        31,
+        48,
+        225,
+        207
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/cash_collector_attack_2.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "cash_collector_combat",
+      "frame": 1,
+      "contentBounds": [
+        32,
+        49,
+        223,
+        207
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/cash_collector_attack_3.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "cash_collector_combat",
+      "frame": 2,
+      "contentBounds": [
+        14,
+        46,
+        242,
+        209
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/cash_collector_death_1.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "cash_collector_combat",
+      "frame": 3,
+      "contentBounds": [
+        18,
+        51,
+        238,
+        205
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/cash_collector_death_2.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "cash_collector_combat",
+      "frame": 4,
+      "contentBounds": [
+        16,
+        54,
+        240,
+        201
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/cash_collector_death_3.png",
+      "width": 256,
+      "height": 256,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "cash_collector_combat",
+      "frame": 5,
+      "contentBounds": [
+        13,
+        53,
+        243,
+        202
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/cash_collector_combat_sheet.png",
+      "width": 512,
+      "height": 768,
+      "block": "H4",
+      "transparent": false,
+      "columns": 2,
+      "rows": 3,
+      "cellWidth": 256,
+      "cellHeight": 256,
+      "frames": [
+        "cash_collector_attack_1",
+        "cash_collector_attack_2",
+        "cash_collector_attack_3",
+        "cash_collector_death_1",
+        "cash_collector_death_2",
+        "cash_collector_death_3"
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_sea_pirate_walk_down_1.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_sea_pirate_walk_a",
+      "frame": 0,
+      "contentBounds": [
+        101,
+        29,
+        666,
+        483
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_sea_pirate_walk_down_2.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_sea_pirate_walk_a",
+      "frame": 1,
+      "contentBounds": [
+        123,
+        29,
+        644,
+        482
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_sea_pirate_walk_down_3.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_sea_pirate_walk_a",
+      "frame": 2,
+      "contentBounds": [
+        113,
+        31,
+        654,
+        480
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_sea_pirate_walk_down_4.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_sea_pirate_walk_a",
+      "frame": 3,
+      "contentBounds": [
+        113,
+        25,
+        655,
+        486
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_sea_pirate_walk_left_1.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_sea_pirate_walk_a",
+      "frame": 4,
+      "contentBounds": [
+        57,
+        38,
+        710,
+        474
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_sea_pirate_walk_left_2.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_sea_pirate_walk_a",
+      "frame": 5,
+      "contentBounds": [
+        86,
+        39,
+        682,
+        473
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_sea_pirate_walk_left_3.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_sea_pirate_walk_a",
+      "frame": 6,
+      "contentBounds": [
+        77,
+        35,
+        691,
+        476
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_sea_pirate_walk_left_4.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_sea_pirate_walk_a",
+      "frame": 7,
+      "contentBounds": [
+        79,
+        36,
+        688,
+        475
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_sea_pirate_walk_a_sheet.png",
+      "width": 3072,
+      "height": 1024,
+      "block": "H4",
+      "transparent": false,
+      "columns": 4,
+      "rows": 2,
+      "cellWidth": 768,
+      "cellHeight": 512,
+      "frames": [
+        "trash_sea_pirate_walk_down_1",
+        "trash_sea_pirate_walk_down_2",
+        "trash_sea_pirate_walk_down_3",
+        "trash_sea_pirate_walk_down_4",
+        "trash_sea_pirate_walk_left_1",
+        "trash_sea_pirate_walk_left_2",
+        "trash_sea_pirate_walk_left_3",
+        "trash_sea_pirate_walk_left_4"
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_sea_pirate_walk_right_1.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_sea_pirate_walk_b",
+      "frame": 0,
+      "contentBounds": [
+        104,
+        36,
+        664,
+        475
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_sea_pirate_walk_right_2.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_sea_pirate_walk_b",
+      "frame": 1,
+      "contentBounds": [
+        96,
+        34,
+        672,
+        477
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_sea_pirate_walk_right_3.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_sea_pirate_walk_b",
+      "frame": 2,
+      "contentBounds": [
+        90,
+        36,
+        678,
+        476
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_sea_pirate_walk_right_4.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_sea_pirate_walk_b",
+      "frame": 3,
+      "contentBounds": [
+        101,
+        41,
+        666,
+        471
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_sea_pirate_walk_up_1.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_sea_pirate_walk_b",
+      "frame": 4,
+      "contentBounds": [
+        166,
+        30,
+        601,
+        482
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_sea_pirate_walk_up_2.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_sea_pirate_walk_b",
+      "frame": 5,
+      "contentBounds": [
+        172,
+        36,
+        595,
+        475
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_sea_pirate_walk_up_3.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_sea_pirate_walk_b",
+      "frame": 6,
+      "contentBounds": [
+        160,
+        35,
+        607,
+        477
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_sea_pirate_walk_up_4.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_sea_pirate_walk_b",
+      "frame": 7,
+      "contentBounds": [
+        174,
+        38,
+        593,
+        473
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_sea_pirate_walk_b_sheet.png",
+      "width": 3072,
+      "height": 1024,
+      "block": "H4",
+      "transparent": false,
+      "columns": 4,
+      "rows": 2,
+      "cellWidth": 768,
+      "cellHeight": 512,
+      "frames": [
+        "trash_sea_pirate_walk_right_1",
+        "trash_sea_pirate_walk_right_2",
+        "trash_sea_pirate_walk_right_3",
+        "trash_sea_pirate_walk_right_4",
+        "trash_sea_pirate_walk_up_1",
+        "trash_sea_pirate_walk_up_2",
+        "trash_sea_pirate_walk_up_3",
+        "trash_sea_pirate_walk_up_4"
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_sea_pirate_attack_1.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_sea_pirate_combat",
+      "frame": 0,
+      "contentBounds": [
+        119,
+        82,
+        649,
+        430
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_sea_pirate_attack_2.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_sea_pirate_combat",
+      "frame": 1,
+      "contentBounds": [
+        69,
+        80,
+        699,
+        432
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_sea_pirate_attack_3.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_sea_pirate_combat",
+      "frame": 2,
+      "contentBounds": [
+        39,
+        67,
+        729,
+        444
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_sea_pirate_death_1.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_sea_pirate_combat",
+      "frame": 4,
+      "contentBounds": [
+        113,
+        82,
+        655,
+        430
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_sea_pirate_death_2.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_sea_pirate_combat",
+      "frame": 5,
+      "contentBounds": [
+        103,
+        113,
+        664,
+        399
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_sea_pirate_death_3.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_sea_pirate_combat",
+      "frame": 6,
+      "contentBounds": [
+        106,
+        126,
+        661,
+        385
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_sea_pirate_death_4.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_sea_pirate_combat",
+      "frame": 7,
+      "contentBounds": [
+        48,
+        126,
+        719,
+        385
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_sea_pirate_combat_sheet.png",
+      "width": 3072,
+      "height": 1024,
+      "block": "H4",
+      "transparent": false,
+      "columns": 4,
+      "rows": 2,
+      "cellWidth": 768,
+      "cellHeight": 512,
+      "frames": [
+        "trash_sea_pirate_attack_1",
+        "trash_sea_pirate_attack_2",
+        "trash_sea_pirate_attack_3",
+        "trash_sea_pirate_death_1",
+        "trash_sea_pirate_death_2",
+        "trash_sea_pirate_death_3",
+        "trash_sea_pirate_death_4"
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/chef_walk_down_1.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "chef_walk_a",
+      "frame": 0,
+      "contentBounds": [
+        114,
+        35,
+        653,
+        476
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/chef_walk_down_2.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "chef_walk_a",
+      "frame": 1,
+      "contentBounds": [
+        146,
+        32,
+        621,
+        479
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/chef_walk_down_3.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "chef_walk_a",
+      "frame": 2,
+      "contentBounds": [
+        126,
+        38,
+        641,
+        474
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/chef_walk_down_4.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "chef_walk_a",
+      "frame": 3,
+      "contentBounds": [
+        122,
+        35,
+        645,
+        476
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/chef_walk_left_1.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "chef_walk_a",
+      "frame": 4,
+      "contentBounds": [
+        96,
+        25,
+        672,
+        486
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/chef_walk_left_2.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "chef_walk_a",
+      "frame": 5,
+      "contentBounds": [
+        160,
+        30,
+        607,
+        482
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/chef_walk_left_3.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "chef_walk_a",
+      "frame": 6,
+      "contentBounds": [
+        107,
+        27,
+        660,
+        485
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/chef_walk_left_4.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "chef_walk_a",
+      "frame": 7,
+      "contentBounds": [
+        175,
+        28,
+        593,
+        483
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/chef_walk_a_sheet.png",
+      "width": 3072,
+      "height": 1024,
+      "block": "H4",
+      "transparent": false,
+      "columns": 4,
+      "rows": 2,
+      "cellWidth": 768,
+      "cellHeight": 512,
+      "frames": [
+        "chef_walk_down_1",
+        "chef_walk_down_2",
+        "chef_walk_down_3",
+        "chef_walk_down_4",
+        "chef_walk_left_1",
+        "chef_walk_left_2",
+        "chef_walk_left_3",
+        "chef_walk_left_4"
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/chef_walk_right_1.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "chef_walk_b",
+      "frame": 0,
+      "contentBounds": [
+        73,
+        46,
+        694,
+        466
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/chef_walk_right_2.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "chef_walk_b",
+      "frame": 1,
+      "contentBounds": [
+        95,
+        44,
+        673,
+        467
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/chef_walk_right_3.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "chef_walk_b",
+      "frame": 2,
+      "contentBounds": [
+        78,
+        46,
+        690,
+        466
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/chef_walk_right_4.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "chef_walk_b",
+      "frame": 3,
+      "contentBounds": [
+        38,
+        37,
+        729,
+        474
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/chef_walk_up_1.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "chef_walk_b",
+      "frame": 4,
+      "contentBounds": [
+        135,
+        37,
+        632,
+        474
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/chef_walk_up_2.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "chef_walk_b",
+      "frame": 5,
+      "contentBounds": [
+        154,
+        35,
+        613,
+        476
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/chef_walk_up_3.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "chef_walk_b",
+      "frame": 6,
+      "contentBounds": [
+        143,
+        34,
+        624,
+        477
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/chef_walk_up_4.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "chef_walk_b",
+      "frame": 7,
+      "contentBounds": [
+        160,
+        35,
+        607,
+        477
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/chef_walk_b_sheet.png",
+      "width": 3072,
+      "height": 1024,
+      "block": "H4",
+      "transparent": false,
+      "columns": 4,
+      "rows": 2,
+      "cellWidth": 768,
+      "cellHeight": 512,
+      "frames": [
+        "chef_walk_right_1",
+        "chef_walk_right_2",
+        "chef_walk_right_3",
+        "chef_walk_right_4",
+        "chef_walk_up_1",
+        "chef_walk_up_2",
+        "chef_walk_up_3",
+        "chef_walk_up_4"
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/chef_attack_1.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "chef_combat",
+      "frame": 0,
+      "contentBounds": [
+        148,
+        57,
+        620,
+        455
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/chef_attack_2.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "chef_combat",
+      "frame": 1,
+      "contentBounds": [
+        72,
+        70,
+        695,
+        442
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/chef_attack_3.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "chef_combat",
+      "frame": 2,
+      "contentBounds": [
+        38,
+        93,
+        729,
+        419
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/chef_death_1.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "chef_combat",
+      "frame": 4,
+      "contentBounds": [
+        176,
+        70,
+        592,
+        442
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/chef_death_2.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "chef_combat",
+      "frame": 5,
+      "contentBounds": [
+        88,
+        70,
+        679,
+        441
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/chef_death_3.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "chef_combat",
+      "frame": 6,
+      "contentBounds": [
+        73,
+        89,
+        694,
+        422
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/chef_death_4.png",
+      "width": 768,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "chef_combat",
+      "frame": 7,
+      "contentBounds": [
+        73,
+        135,
+        694,
+        377
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/chef_combat_sheet.png",
+      "width": 3072,
+      "height": 1024,
+      "block": "H4",
+      "transparent": false,
+      "columns": 4,
+      "rows": 2,
+      "cellWidth": 768,
+      "cellHeight": 512,
+      "frames": [
+        "chef_attack_1",
+        "chef_attack_2",
+        "chef_attack_3",
+        "chef_death_1",
+        "chef_death_2",
+        "chef_death_3",
+        "chef_death_4"
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_sea_pirate_portrait_normal.png",
+      "width": 512,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_sea_pirate_portraits",
+      "frame": 0,
+      "contentBounds": [
+        25,
+        37,
+        486,
+        475
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_sea_pirate_portrait_angry.png",
+      "width": 512,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "trash_sea_pirate_portraits",
+      "frame": 1,
+      "contentBounds": [
+        30,
+        37,
+        481,
+        475
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/trash_sea_pirate_portraits_sheet.png",
+      "width": 1024,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "columns": 2,
+      "rows": 1,
+      "cellWidth": 512,
+      "cellHeight": 512,
+      "frames": [
+        "trash_sea_pirate_portrait_normal",
+        "trash_sea_pirate_portrait_angry"
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/chef_portrait_normal.png",
+      "width": 512,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "chef_portraits",
+      "frame": 0,
+      "contentBounds": [
+        30,
+        31,
+        481,
+        480
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/chef_portrait_angry.png",
+      "width": 512,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "sourceSheet": "chef_portraits",
+      "frame": 1,
+      "contentBounds": [
+        25,
+        35,
+        486,
+        476
+      ]
+    },
+    {
+      "path": "astra/inbox/story/enemies2/chef_portraits_sheet.png",
+      "width": 1024,
+      "height": 512,
+      "block": "H4",
+      "transparent": false,
+      "columns": 2,
+      "rows": 1,
+      "cellWidth": 512,
+      "cellHeight": 512,
+      "frames": [
+        "chef_portrait_normal",
+        "chef_portrait_angry"
+      ]
+    }
+  ]
+}
