@@ -1,0 +1,157 @@
+{
+  "brief": "astra/from_claude/BRIEF_v7_saga.md",
+  "block": "A",
+  "frameOrder": "left-to-right top-to-bottom",
+  "assets": [
+    {
+      "path": "astra/inbox/story/portraits2/kiryusha_smile.png",
+      "width": 512,
+      "height": 512,
+      "block": "A",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "kiryusha",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/portraits2/kiryusha_cry.png",
+      "width": 512,
+      "height": 512,
+      "block": "A",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "kiryusha",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/portraits2/nell_young_normal.png",
+      "width": 512,
+      "height": 512,
+      "block": "A",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "nell_young",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/portraits2/nell_young_alarm.png",
+      "width": 512,
+      "height": 512,
+      "block": "A",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "nell_young",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/portraits2/dirty_magnate_charm.png",
+      "width": 512,
+      "height": 512,
+      "block": "A",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "dirty_magnate",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/portraits2/dirty_magnate_rage.png",
+      "width": 512,
+      "height": 512,
+      "block": "A",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "dirty_magnate",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/portraits2/godfather_pigeon_normal.png",
+      "width": 512,
+      "height": 512,
+      "block": "A",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "godfather_pigeon",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/portraits2/godfather_pigeon_angry.png",
+      "width": 512,
+      "height": 512,
+      "block": "A",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "godfather_pigeon",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/portraits2/white_raccoon_calm.png",
+      "width": 512,
+      "height": 512,
+      "block": "A",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "white_raccoon",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/portraits2/white_raccoon_empty.png",
+      "width": 512,
+      "height": 512,
+      "block": "A",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "white_raccoon",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/portraits2/emperor_normal.png",
+      "width": 512,
+      "height": 512,
+      "block": "A",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "emperor",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/portraits2/emperor_fury.png",
+      "width": 512,
+      "height": 512,
+      "block": "A",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "emperor",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/portraits2/rico_wounded.png",
+      "width": 512,
+      "height": 512,
+      "block": "A",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "rico_extra",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/portraits2/rico_smirk.png",
+      "width": 512,
+      "height": 512,
+      "block": "A",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "rico_extra",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/portraits2/emperor_unknown.png",
+      "width": 512,
+      "height": 512,
+      "block": "A",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "emperor_silhouette",
+      "frame": 0
+    }
+  ]
+}
