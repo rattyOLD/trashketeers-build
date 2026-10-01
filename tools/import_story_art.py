@@ -57,4 +57,6 @@ for f in sorted(os.listdir(SRC + 'heavy_barrel')):
     if f.endswith('_sheet.png'):
         continue
     put('heavy_barrel/' + f, 'hb/' + f)
+for n in ('hidden_wall_plate', 'hidden_crate_open', 'hidden_crate_closed', 'wall_debris_01', 'wall_debris_02', 'wall_debris_03', 'wall_debris_04', 'break_wall_intact', 'break_wall_cracked', 'break_wall_destroyed'):
+    put('terrain/%s.png' % n, 'terrain/%s.png' % n)
 print('ok')

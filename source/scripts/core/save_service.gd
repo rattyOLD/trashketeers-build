@@ -99,6 +99,7 @@ const DEFAULTS := {
 	"death_tips": 0,
 	"ad_chest_at": 0,
 	"changelog_seen": "",
+	"survival_intro_seen": false,
 }
 
 const CLOUD_DEBOUNCE := 2.5
@@ -197,6 +198,14 @@ const NELL_ORDERS := [
 	{"id": "clean", "title": "Пройди 2 зоны без урона", "stat": "story_clean_zones", "goal": 2, "nuts": 600, "dust": 3},
 	{"id": "ambush", "title": "Зачисти 3 засады", "stat": "story_ambushes", "goal": 3, "nuts": 500, "dust": 2},
 	{"id": "mission", "title": "Пройди миссию Свалки", "stat": "story_missions", "goal": 1, "nuts": 1000, "dust": 5},
+]
+const NELL_ORDERS_SURVIVAL := [
+	{"id": "kills", "title": "Убей 150 врагов", "stat": "kills", "goal": 150, "nuts": 350, "dust": 2},
+	{"id": "crates", "title": "Разбей 6 ящиков с оружием", "stat": "crates", "goal": 6, "nuts": 400, "dust": 2},
+	{"id": "boss", "title": "Победи босса", "stat": "boss_kills", "goal": 1, "nuts": 700, "dust": 4},
+	{"id": "dash", "title": "Сделай 60 рывков", "stat": "dashes", "goal": 60, "nuts": 300, "dust": 2},
+	{"id": "crit", "title": "Нанеси 80 критов", "stat": "crits", "goal": 80, "nuts": 350, "dust": 2},
+	{"id": "picks", "title": "Выбери 8 улучшений", "stat": "picks", "goal": 8, "nuts": 350, "dust": 2},
 ]
 const ACHIEVEMENTS := [
 	{"id": "first_blood", "title": "Первая кровь", "description": "Победить первую крысу. Она была чьей-то мамой, но это не точно", "stat": "kills", "goal": 1, "nuts": 20, "dust": 0},
@@ -1141,24 +1150,26 @@ func record_run(summary: Dictionary) -> Dictionary:
 
 ## Босс побеждён — счётчик живой, чтобы ачивка открылась сразу.
 ## Заказ Нэлл на сегодня: один в день, счёт от значения счётчика на начало дня.
-func nell_order() -> Dictionary:
-	var order: Dictionary = data["nell_order"]
+func nell_order(survival: bool = false) -> Dictionary:
+	var key := "nell_order_s" if survival else "nell_order"
+	var pool: Array = NELL_ORDERS_SURVIVAL if survival else NELL_ORDERS
+	var order: Dictionary = data.get(key, {})
 	if int(order.get("day", -1)) != today():
-		var index := (today() + get_player_id().hash()) % NELL_ORDERS.size()
-		var def: Dictionary = NELL_ORDERS[absi(index)]
+		var index := (today() + get_player_id().hash()) % pool.size()
+		var def: Dictionary = pool[absi(index)]
 		order = {"day": today(), "idx": absi(index), "base": get_stat(str(def["stat"])), "done": false}
-		data["nell_order"] = order
-	var spec: Dictionary = NELL_ORDERS[clampi(int(order["idx"]), 0, NELL_ORDERS.size() - 1)]
+		data[key] = order
+	var spec: Dictionary = pool[clampi(int(order["idx"]), 0, pool.size() - 1)]
 	var progress := clampi(get_stat(str(spec["stat"])) - int(order["base"]), 0, int(spec["goal"]))
 	return {"title": spec["title"], "goal": spec["goal"], "progress": progress, "done": bool(order["done"]), "nuts": spec["nuts"], "dust": spec["dust"]}
 
 
 ## Возвращает заказ, если он только что выполнен (награда выдаётся здесь), иначе пустой словарь.
-func nell_order_tick() -> Dictionary:
-	var info := nell_order()
+func nell_order_tick(survival: bool = false) -> Dictionary:
+	var info := nell_order(survival)
 	if bool(info["done"]) or int(info["progress"]) < int(info["goal"]):
 		return {}
-	(data["nell_order"] as Dictionary)["done"] = true
+	(data["nell_order_s" if survival else "nell_order"] as Dictionary)["done"] = true
 	add_coins(int(info["nuts"]))
 	add_gems(int(info["dust"]), false)
 	save_data()

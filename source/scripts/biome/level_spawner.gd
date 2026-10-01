@@ -651,6 +651,52 @@ func _build_story_walls() -> void:
 	_wall_block(body, Rect2i(RING_SIDE, RING_TOP, w / 2 - half - RING_SIDE, _boss_cells.y))
 	_wall_block(body, Rect2i(w / 2 + half, RING_TOP, w - RING_SIDE - w / 2 - half, _boss_cells.y))
 	_own(body, self)
+	_story_boss_visuals()
+
+
+func _tiled_sprite(path: String, rect: Rect2, scale_k: float, tint: Color = Color.WHITE) -> Sprite2D:
+	var tex: Texture2D = ArenaProp.texture_of(path)
+	if tex == null:
+		return null
+	var sprite := Sprite2D.new()
+	sprite.texture = tex
+	sprite.centered = false
+	sprite.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+	sprite.region_enabled = true
+	sprite.scale = Vector2.ONE * scale_k
+	sprite.region_rect = Rect2(Vector2.ZERO, rect.size / scale_k)
+	sprite.position = rect.position
+	sprite.modulate = tint
+	return sprite
+
+
+## Стены сюжетных комнат: полосы листов Астры вместо голой заливки; вертикальные тянутся по высоте.
+func _story_wall_visual(block: Rect2i) -> void:
+	if _story.is_empty() or block.size.x <= 0 or block.size.y <= 0:
+		return
+	var rect := _cells_rect(block.position, block.size)
+	var vertical := rect.size.y > rect.size.x
+	var tex_w := 192.0
+	var tex_h := 128.0
+	var k := rect.size.x / tex_w if vertical else rect.size.y / tex_h
+	var sprite := _tiled_sprite("res://assets/story/walls/%d.png" % (1 + randi() % 3), rect, k)
+	if sprite != null:
+		_own(sprite, self)
+
+
+## Тронный зал: плиты пола с жёлто-чёрной окантовкой и трон за спиной Короля.
+func _story_boss_visuals() -> void:
+	var floor_sprite := _tiled_sprite("res://assets/story/boss/floor_1.png", boss_rect, 0.5, Color(1, 1, 1, 0.92))
+	if floor_sprite != null:
+		_own(floor_sprite, self)
+	var throne: Texture2D = ArenaProp.texture_of("res://assets/story/boss/throne.png")
+	if throne != null:
+		var sprite := Sprite2D.new()
+		sprite.texture = throne
+		sprite.scale = Vector2.ONE * (340.0 / throne.get_width())
+		sprite.position = Vector2(boss_rect.get_center().x, boss_rect.position.y + 150.0)
+		sprite.z_index = 1
+		_own(sprite, self)
 
 
 func _wall_block(body: StaticBody2D, block: Rect2i) -> void:
@@ -667,6 +713,7 @@ func _wall_block(body: StaticBody2D, block: Rect2i) -> void:
 			var i := _index(Vector2i(x, y))
 			cells[i] = CellType.WALL
 			zones[i] = Zone.EDGE
+	_story_wall_visual(block)
 	var ids: Array = (chapter.get("border", []) as Array).filter(func(id: String) -> bool: return id == "container" or id == "junk_pile" or id == "dumpster")
 	if ids.is_empty():
 		return

@@ -41,6 +41,7 @@ var _weapon_holder: HBoxContainer
 var _daily: DailyPopup
 var _currency: CurrencyPopup
 var _vip: VipPopup
+var _mode_intro: ModeIntroPopup
 var _pass: BattlePassPopup
 var _odds: OddsPopup
 var _mode_buttons: Array[Button] = []
@@ -113,6 +114,7 @@ func _build() -> void:
 	_chests.changed.connect(_refresh)
 	_changelog = ChangelogPopup.new()
 	_changelog.changed.connect(_refresh)
+	_mode_intro = ModeIntroPopup.new()
 	_vip = VipPopup.new()
 	_vip.changed.connect(_refresh)
 	_pass = BattlePassPopup.new()
@@ -128,7 +130,7 @@ func _build() -> void:
 	_settings.editor_requested.connect(func() -> void: _editor.open())
 	for popup in [_achievements, _chronicle, _friends]:
 		popup.closed.connect(_back_to_profile.bind(popup))
-	for popup in [_settings, _shop, _skins, _armory, _upgrades, _achievements, _profile, _chronicle, _friends, _tester, _chests, _changelog, _daily, _currency, _vip, _pass, _odds]:
+	for popup in [_settings, _shop, _skins, _armory, _upgrades, _achievements, _profile, _chronicle, _friends, _tester, _chests, _changelog, _daily, _currency, _vip, _pass, _odds, _mode_intro]:
 		add_child(popup)
 		popup.closed.connect(_refresh)
 	_refresh()
@@ -475,12 +477,19 @@ func _build_modes() -> Control:
 		var button := UiStyle.button(titles[i], UiStyle.PANEL, 22 if Orient.portrait else 20, Vector2(0, 68 if Orient.portrait else 60))
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.toggle_mode = true
-		button.pressed.connect(_select_mode.bind(i))
+		button.pressed.connect(_on_mode_pressed.bind(i))
 		row.add_child(button)
 		_mode_buttons.append(button)
 	_select_mode(Mode.STORY if _survival_locked() else Mode.SURVIVAL)
 	_mode_buttons[2].text = "СЮЖЕТ %d/6" % SaveService.story_shards()
 	return row
+
+
+func _on_mode_pressed(mode: int) -> void:
+	_select_mode(mode)
+	if _mode == Mode.SURVIVAL and not bool(SaveService.data.get("survival_intro_seen", false)):
+		SaveService.set_flag("survival_intro_seen", true)
+		_mode_intro.open()
 
 
 func _survival_locked() -> bool:

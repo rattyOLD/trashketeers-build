@@ -17,7 +17,7 @@ signal chapter_cleared(chapter_index: int)
 enum Phase { WAITING, INTRO, FIGHT, INTERMISSION, PORTAL }
 
 const FIRST_WAVE_DELAY := 0.8
-const INTRO_TIME := 2.0
+const INTRO_TIME := 1.2
 const SPAWN_MARGIN := 90.0
 const SPAWN_DEPTH := 260.0
 const GATE_SHARE := 0.45

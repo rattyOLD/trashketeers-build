@@ -13,6 +13,9 @@ const STONE_LIGHT := Color("#8c8a9c")
 const CRACK := Color("#2a2838")
 const SEAM := Color("#5ff2ff")
 const FLASH_TIME := 0.07
+const PLATE := "res://assets/story/terrain/hidden_wall_plate.png"
+const CRATE := "res://assets/story/terrain/hidden_crate_open.png"
+const DEBRIS := "res://assets/story/terrain/wall_debris_0%d.png"
 
 var entry: Dictionary = {}
 var side := 1.0
@@ -70,6 +73,14 @@ func _draw() -> void:
 		return
 	var jitter := Vector2(randf_range(-2.5, 2.5), 0.0) * _shake
 	draw_set_transform(jitter, 0.0, Vector2.ONE)
+	var plate: Texture2D = ArenaProp.texture_of(PLATE)
+	if plate != null:
+		var tint := Color(1.6, 1.6, 1.6) if _flash > 0.0 else Color.WHITE
+		draw_texture_rect(plate, Rect2(-66.0, -66.0, 132.0, 132.0), false, tint)
+		var pulse := 0.12 + 0.1 * sin(_time * 3.0)
+		draw_circle(Vector2(18.0, 0.0), 26.0, Color(SEAM, pulse))
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		return
 	var body := STONE.lerp(Color.WHITE, 0.7) if _flash > 0.0 else STONE
 	draw_rect(Rect2(-half, SIZE).grow(3.0), LINE)
 	draw_rect(Rect2(-half, SIZE), body)
@@ -104,5 +115,12 @@ func _draw_breach(half: Vector2) -> void:
 		var size := Vector2(14, 9)
 		draw_rect(Rect2(p - size * 0.5, size).grow(1.5), LINE)
 		draw_rect(Rect2(p - size * 0.5, size), STONE.darkened(0.12 + 0.06 * absf(p.x) / 30.0))
+	var crate: Texture2D = ArenaProp.texture_of(CRATE)
+	if crate != null and str(entry.get("kind", "cache")) == "cache":
+		draw_texture_rect(crate, Rect2(-52.0, floor_y - 62.0, 104.0, 78.0), false)
+	for i in 3:
+		var bit: Texture2D = ArenaProp.texture_of(DEBRIS % (1 + i))
+		if bit != null:
+			draw_texture_rect(bit, Rect2(-40.0 + i * 36.0, half.y - 30.0 + (i % 2) * 8.0, 40.0, 40.0), false)
 	draw_rect(Rect2(-half + Vector2(2, 0), Vector2(5, SIZE.y)), Color(0, 0, 0, 0.35))
 	draw_rect(Rect2(half - Vector2(7, half.y * 2.0 - 0.0), Vector2(5, SIZE.y)), Color(0, 0, 0, 0.35))

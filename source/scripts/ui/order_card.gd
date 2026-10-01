@@ -2,7 +2,9 @@ class_name OrderCard
 extends Control
 ## Карточка ежедневного заказа Нэлл в сюжетном HUD: бумажный ярлык, название и полоса прогресса.
 
-const SIZE := Vector2(360.0, 62.0)
+signal pressed
+
+const SIZE := Vector2(430.0, 62.0)
 const INK := Color("#5ff2ff")
 const DONE := Color("#7cff6b")
 const GOAL_H := 26.0
@@ -19,7 +21,8 @@ var _goals: Array = []
 
 func _init() -> void:
 	custom_minimum_size = SIZE
-	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	mouse_filter = Control.MOUSE_FILTER_STOP
+	gui_input.connect(_on_gui_input)
 	_panel = UiStyle.box(Color(0.04, 0.06, 0.12, 0.62), Color(INK, 0.75), 3, 10)
 	visible = false
 
@@ -109,3 +112,12 @@ func _draw() -> void:
 		draw_rect(track, Color(color, 0.5), false, 1.0)
 		draw_string(font, Vector2(SIZE.x - 62.0, y + 17.0), "%d/%d" % [gp, gg], HORIZONTAL_ALIGNMENT_RIGHT, 52.0, 15, color)
 		y += GOAL_H
+
+
+func _on_gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		pressed.emit()
+		accept_event()
+	elif event is InputEventScreenTouch and event.pressed:
+		pressed.emit()
+		accept_event()

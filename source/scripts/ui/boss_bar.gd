@@ -4,7 +4,7 @@ extends Control
 ## неоновых драконьих крыльев, полоса ослепительно-белая; при ярости (< 30% ХП) шкала
 ## резко вспыхивает и становится ядовито-розовой. Для обычных боссов — строгая рамка.
 
-const BAR_HEIGHT := 26.0
+const BAR_HEIGHT := 34.0
 const WING_WIDTH := 70.0
 const OUTLINE := Color("#1a0033")
 const WING_NEON := Color("#00ffff")
@@ -16,6 +16,8 @@ const FLASH_TIME := 0.5
 var winged := false
 var title := ""
 var value := 1.0
+var hp_now := 0.0
+var hp_max := 0.0
 var posture := -1.0
 var broken := false
 
@@ -23,6 +25,8 @@ var _fury := false
 var _flash := 0.0
 var _time := 0.0
 var _font: Font
+var _back := UiStyle.box(Color("#140f24"), OUTLINE, 4, 10)
+var _fill := UiStyle.box(PLAIN_BAR, OUTLINE, 4, 10)
 
 
 func _init() -> void:
@@ -48,6 +52,8 @@ func set_title(boss_title: String) -> void:
 
 func set_health(hp: float, max_hp: float) -> void:
 	value = clampf(hp / maxf(max_hp, 1.0), 0.0, 1.0)
+	hp_now = hp
+	hp_max = max_hp
 	queue_redraw()
 
 
@@ -85,14 +91,22 @@ func _draw() -> void:
 	if winged:
 		_draw_wing(bar_rect, -1.0)
 		_draw_wing(bar_rect, 1.0)
-	draw_rect(bar_rect.grow(4.0), OUTLINE)
-	draw_rect(bar_rect, Color("#140f24"))
+	draw_style_box(_back, bar_rect.grow(4.0))
 	var fill_color := PLAIN_BAR
 	if winged:
 		fill_color = FURY_PINK if _fury else WHITE_BAR
+	elif _fury:
+		fill_color = FURY_PINK
 	var fill := Rect2(bar_rect.position, Vector2(bar_rect.size.x * value, bar_rect.size.y))
-	draw_rect(fill, fill_color)
-	draw_rect(Rect2(fill.position, Vector2(fill.size.x, 5.0)), Color(1, 1, 1, 0.35))
+	if fill.size.x >= 8.0:
+		_fill.bg_color = fill_color
+		_fill.set_content_margin_all(0)
+		draw_style_box(_fill, fill)
+		draw_rect(Rect2(fill.position + Vector2(6.0, 3.0), Vector2(fill.size.x - 12.0, 4.0)), Color(1, 1, 1, 0.3))
+	var label := "%d / %d" % [ceili(hp_now), roundi(hp_max)]
+	var text_y := bar_rect.position.y + bar_rect.size.y * 0.5 + 8.0
+	draw_string_outline(_font, Vector2(bar_rect.position.x, text_y), label, HORIZONTAL_ALIGNMENT_CENTER, bar_rect.size.x, 22, 6, OUTLINE)
+	draw_string(_font, Vector2(bar_rect.position.x, text_y), label, HORIZONTAL_ALIGNMENT_CENTER, bar_rect.size.x, 22, Color.WHITE)
 	if posture >= 0.0:
 		var pr := Rect2(bar_rect.position + Vector2(bar_rect.size.x * 0.15, bar_rect.size.y + 9.0), Vector2(bar_rect.size.x * 0.7, 9.0))
 		draw_rect(pr.grow(3.0), OUTLINE)

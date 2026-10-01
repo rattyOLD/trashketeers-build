@@ -198,6 +198,7 @@ func start(_weapon_id: StringName = &"") -> void:
 	player.weapon_controller.overdrive_changed.connect(_on_overdrive_changed)
 	player.weapon_controller.overdrive_fired.connect(_on_overdrive_fired)
 	hud.slot_pressed.connect(_switch_slot)
+	hud.orders_requested.connect(_open_orders)
 	hud.interact_pressed.connect(_try_pick)
 	hud.weapon_swiped.connect(_cycle_weapon)
 	_refresh_slots()
@@ -299,6 +300,11 @@ func _update_hud_timer() -> void:
 		hud.set_story_status(story.score, story.lives, story.zone_number(), story.zone_count(), story.zone_name(), story.enemies_left(), SaveService.nell_order(), story.goal_rows())
 		return
 	hud.set_wave(maxi(director.wave_number, 1), director.get_enemies_left())
+	hud.set_survival_order(SaveService.nell_order(true))
+	var done := SaveService.nell_order_tick(true)
+	if not done.is_empty():
+		hud.toast("ЗАКАЗ НЭЛЛ ВЫПОЛНЕН", "%s. Награда: +%d монет, +%d неонита" % [done["title"], done["nuts"], done["dust"]], Color("#5ff2ff"))
+		SoundManager.play(&"level_up", -4.0, false)
 
 
 func _run_summary() -> Dictionary:
@@ -754,8 +760,50 @@ func _on_miniboss_killed(boss: Enemy, at: Vector2) -> void:
 	var reward := Economy.boss_reward(director.chapter_index, director.loop)
 	run_gems += int(int(reward["gems"]) * 0.5)
 	hud.toast("МИНИ-БОСС", "+%s" % Economy.format_gems(int(int(reward["gems"]) * 0.5)), Color("#ff7ae0"))
-	_drop_weapon(_roll_weapon("epic" if randf() < 0.5 else "rare"), at, true)
 	fx.confetti(at, 30)
+	if story != null:
+		_drop_weapon(_roll_weapon("epic" if randf() < 0.5 else "rare"), at, true)
+	else:
+		_offer_mini_choice(boss, at, 0)
+
+
+const MINI_CHOICE_RETRIES := 12
+
+
+## Мини-босс на коленях: пощадить (полное лечение, реролл, редкий ствол) или ограбить (эпик, +50% неонита).
+func _offer_mini_choice(boss: Enemy, at: Vector2, attempt: int) -> void:
+	get_tree().create_timer(1.4 if attempt == 0 else 0.7, true, false, true).timeout.connect(func() -> void:
+		if finished or player == null or player.is_dead:
+			return
+		if (_level_up_open or get_tree().paused) and attempt < MINI_CHOICE_RETRIES:
+			_offer_mini_choice(boss, at, attempt + 1)
+			return
+		var name := boss.data.display_name
+		var panel := ChoiceCard.new()
+		add_child(panel)
+		panel.chosen.connect(func(index: int) -> void: _on_mini_choice(index, name, at))
+		panel.open({
+			"title": "%s на коленях" % name,
+			"text": "%s ползёт к тебе и бормочет: «Только не добивай! Я заплачу! Или расскажу, где пиво!» Решай, енот." % name,
+			"color": "#ffb020",
+			"options": [
+				{"label": "ПОЩАДИТЬ", "note": "Полное лечение, +1 бесплатный реролл и редкий ствол. Нэлл будет в шоке."},
+				{"label": "ОГРАБИТЬ", "note": "Эпический ствол и +50% неонита за мини-босса. Без лечения."},
+			]}))
+
+
+func _on_mini_choice(index: int, name: String, at: Vector2) -> void:
+	if index == 0:
+		player.heal(player.max_hp)
+		_rerolls_free += 1
+		_drop_weapon(_roll_weapon("rare"), at, true)
+		hud.toast("ПОЩАДА", "Нэлл: Ты его пожалел? Он тебя бы нет. Но ладно, красиво.", Color("#5ff2ff"))
+	else:
+		var extra := int(int(Economy.boss_reward(director.chapter_index, director.loop)["gems"]) * 0.25)
+		run_gems += extra
+		_drop_weapon(_roll_weapon("epic"), at, true)
+		pickups.spawn_xp_gold(at, 20)
+		hud.toast("ГРАБЁЖ", "+%s. Нэлл: Грабёж! Мне нравится. Записала." % Economy.format_gems(extra), Color("#ffb020"))
 
 
 func _on_boss_killed(boss: Enemy, at: Vector2) -> void:
@@ -920,6 +968,14 @@ func _drop_weapon(weapon: WeaponData, at: Vector2, loot: bool, delay: float = 0.
 			pickup.drop(weapon, at, loot, delay)
 			return
 	_weapon_pickups[0].drop(weapon, at, loot, delay)
+
+
+func _open_orders() -> void:
+	if player == null or player.is_dead or get_tree().paused:
+		return
+	var screen := OrdersScreen.new()
+	add_child(screen)
+	screen.open(SaveService.nell_order(story == null), story.goal_rows() if story != null else [])
 
 
 func _refresh_slots() -> void:

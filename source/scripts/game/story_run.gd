@@ -196,7 +196,7 @@ func goal_rows() -> Array:
 	if total > 0:
 		rows.append({"title": "Пленники", "progress": rescued, "goal": total, "done": rescued >= total})
 	var parts := HeavyBarrel.TOTAL_PARTS if barrel.active else barrel.parts
-	rows.append({"title": "Детали ствола", "progress": parts, "goal": HeavyBarrel.TOTAL_PARTS, "done": parts >= HeavyBarrel.TOTAL_PARTS})
+	rows.append({"title": "Детали", "progress": parts, "goal": HeavyBarrel.TOTAL_PARTS, "done": parts >= HeavyBarrel.TOTAL_PARTS})
 	if not secrets.is_empty():
 		rows.append({"title": "Тайники", "progress": secrets_found, "goal": secrets.size(), "done": secrets_found >= secrets.size()})
 	return rows

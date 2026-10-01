@@ -15,6 +15,7 @@ signal skill_pressed
 signal slot_pressed(index: int)
 signal interact_pressed
 signal weapon_swiped
+signal orders_requested
 signal pause_pressed
 signal resume_pressed
 signal revive_requested(with_ad: bool)
@@ -194,17 +195,30 @@ func dock_story_meter(meter: Control) -> void:
 
 func set_story_layout(minimap: Minimap) -> void:
 	_wave_box.visible = false
-	_toast_y = 360.0
+	_toast_y = 556.0
 	_story_bar = StoryBar.new()
 	_left_column.add_child(_story_bar)
 	_order_card = OrderCard.new()
+	_order_card.pressed.connect(func() -> void: orders_requested.emit())
 	_left_column.add_child(_order_card)
 	_story_bar.chip_tapped.connect(func(chip: Control, text: String) -> void: _hint.show_for(chip, text))
-	UiStyle.anchor(_boss_bar, Vector2(0.5, 0.0), Rect2(-300, 190, 600, 96))
-	UiStyle.anchor(_minimap_slot, Vector2(1.0, 0.0), Rect2(-150, 440, 132, 230))
+	UiStyle.anchor(_boss_bar, Vector2(0.5, 0.0), Rect2(-240, 462, 480, 84))
+	UiStyle.anchor(_minimap_slot, Vector2(1.0, 0.0), Rect2(-150, 520, 132, 230))
 	_minimap = minimap
 	minimap.tapped.connect(func(overview: bool) -> void:
 		_hint.show_for(_minimap_slot, "Карта: ты, враги, ворота, пленники. Тап — %s." % ("крупный план" if overview else "вся карта")))
+
+
+func set_survival_order(order: Dictionary) -> void:
+	if _order_card == null:
+		var spacer := Control.new()
+		spacer.custom_minimum_size = Vector2(0.0, 58.0)
+		spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_left_column.add_child(spacer)
+		_order_card = OrderCard.new()
+		_order_card.pressed.connect(func() -> void: orders_requested.emit())
+		_left_column.add_child(_order_card)
+	_order_card.set_order(str(order.get("title", "")), int(order.get("progress", 0)), int(order.get("goal", 1)), bool(order.get("done", false)))
 
 
 func set_story_status(score: int, lives: int, zone_number: int, zone_count: int, zone_name: String, enemies_left: int = -1, order: Dictionary = {}, goals: Array = []) -> void:
@@ -285,6 +299,7 @@ func set_wave(number: int, enemies_left: int) -> void:
 ## Сюжетный режим без ио-механик: скрываем опыт и уровень.
 func set_story_mode() -> void:
 	_xp_row.visible = false
+	_slot_bar.visible = false
 
 
 func set_wave_text(text: String) -> void:
