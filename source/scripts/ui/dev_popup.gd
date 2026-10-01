@@ -3,7 +3,12 @@ extends GlassPopup
 ## Панель DeV: серверная статистика, жалобы, стоп-слова, выдача Insider и проверка сервера.
 ## Все действия проверяются на сервере (is_dev по аккаунту), здесь только интерфейс.
 
-const HEALTH_RPCS: Array[String] = ["sync_profile_v2", "my_badge", "claim_badge", "inbox", "dev_stats", "dev_reports", "dev_words"]
+const HEALTH_RPCS := {
+	"my_badge": {}, "claim_badge": {"p_secret": "x"}, "inbox": {}, "list_requests": {}, "list_blocks": {}, "unread_total": {},
+	"request_friend": {"p_code": "ZZZZZZ"}, "friend_profile": {"p_code": "ZZZZZZ"}, "send_message": {"p_code": "ZZZZZZ", "p_body": ""},
+	"get_messages": {"p_code": "ZZZZZZ", "p_after": 0}, "dev_stats": {}, "dev_reports": {}, "dev_words": {}, "dev_badge_log": {},
+	"dev_password_log": {}, "dev_accounts": {"p_query": ""},
+}
 
 var _status: Label
 var _list: VBoxContainer
@@ -300,10 +305,10 @@ func _report_row(item: Dictionary) -> Control:
 func _check_health() -> void:
 	_health_label.text = "Проверяю..."
 	var lines: Array[String] = []
-	for name in HEALTH_RPCS:
-		var r := await Cloud._call(HTTPClient.METHOD_POST, "/rest/v1/rpc/" + name, {})
+	for name: String in HEALTH_RPCS:
+		var r := await Cloud._call(HTTPClient.METHOD_POST, "/rest/v1/rpc/" + name, HEALTH_RPCS[name])
 		var code := int(r["code"])
-		var mark := "нет на сервере" if code == 404 else ("ок" if code < 500 else "ошибка %d" % code)
+		var mark := "НЕТ на сервере (нужен SQL)" if code == 404 else ("ок" if code < 400 else "ответ %d" % code)
 		lines.append("%s: %s" % [name, mark])
 		if not is_instance_valid(_health_label):
 			return

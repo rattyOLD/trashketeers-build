@@ -24,6 +24,8 @@ var friend_code := ""
 var recovery_code := ""
 var email := ""
 var online := false
+var last_error := ""
+var _last_sync := 0
 var unread := 0
 
 var _uid := ""
@@ -76,6 +78,7 @@ func sync_profile() -> bool:
 		var rows: Variant = result["data"]
 		if rows is Array and (rows as Array).size() > 0 and (rows as Array)[0] is Dictionary:
 			friend_code = str(((rows as Array)[0] as Dictionary).get("friend_code", ""))
+			_last_sync = Time.get_ticks_msec() / 1000
 			profile_synced.emit()
 	if has_code():
 		await _sync_badge()
@@ -311,7 +314,8 @@ func _email_status(reply: Dictionary, linking: bool) -> String:
 # --- Социальная часть: заявки, профили, личные сообщения ------------------------------------
 
 func _rpc(name: String, body: Dictionary) -> Dictionary:
-	if not await sync_profile():
+	var fresh := has_code() and Time.get_ticks_msec() / 1000 - _last_sync < 90
+	if not fresh and not await sync_profile():
 		return {"ok": false, "code": 0, "data": null}
 	return await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/" + name, body)
 
@@ -418,6 +422,9 @@ func _call(method: int, path: String, body: Variant, extra: PackedStringArray = 
 			headers[1] = "Authorization: Bearer " + _access
 			reply = await _raw(method, URL + path, headers, JSON.stringify(body) if body != null else "")
 	online = int(reply["code"]) > 0
+	if not bool(reply["ok"]):
+		var detail := str(reply["data"]).left(120) if reply["data"] != null else ""
+		last_error = "%s -> HTTP %d %s" % [path.get_slice("/", 4).get_slice("?", 0), int(reply["code"]), detail]
 	return reply
 
 

@@ -272,7 +272,7 @@ func _build_online(list: VBoxContainer) -> void:
 		elif result == "limit":
 			_say("Лимит друзей или заявок исчерпан")
 		else:
-			_say("Нет связи с сервером. Попробуй позже"))
+			_say("Не вышло: %s" % (Cloud.last_error if not Cloud.last_error.is_empty() else "нет связи с сервером")))
 	row.add_child(add)
 	edit.text_submitted.connect(func(_t: String) -> void: add.pressed.emit())
 	list.add_child(row)
