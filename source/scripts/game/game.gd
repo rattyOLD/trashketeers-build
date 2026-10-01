@@ -189,9 +189,6 @@ func start(_weapon_id: StringName = &"") -> void:
 	director.intermission_tick.connect(func(seconds: int) -> void: hud.show_countdown(seconds))
 	hud.upgrade_chosen.connect(_on_upgrade_chosen)
 	hud.reroll_requested.connect(_on_reroll_requested)
-	hud.upgrade_pressed.connect(func() -> void:
-		MainMenuUI.open_upgrades_next = true
-		_on_menu_pressed())
 	_rerolls_free = 1 + int(SaveService.get_perk_bonus("reroll")) + Premium.reroll_bonus()
 	WeaponPickup.auto_pick = bool(Controls.get_value("auto_pick"))
 	for pickup in _weapon_pickups:
@@ -337,6 +334,8 @@ func _death_tip() -> String:
 			"Слабовато. В Прокачке есть чем это исправить."].pick_random()
 	else:
 		text = ["Ты опять отлетел. Иди качнись, пока не поздно.",
+			"Снова отлетел. В Прокачке это можно исправить.",
+			"Слабовато. Иди качнись.",
 			"Не получается? В Прокачке можно стать сильнее.",
 			"Умираешь часто: качни выживаемость. Долго бьёшь босса: качни урон."].pick_random()
 	var cheapest := 1 << 30
@@ -897,6 +896,10 @@ func story_result(victory: bool, lines: PackedStringArray) -> void:
 		return
 	hud.hide_revive()
 	Platform.send_report("story", "mission=%s victory=%s score=%d kills=%d lives=%d time=%ds killed_by=%s" % [story_mission, victory, story.score, story.kills, story.lives, int(director.elapsed), Player.last_source])
+	if not victory:
+		var tip := _death_tip()
+		if not tip.is_empty():
+			lines.append(tip)
 	_show_result(victory, lines, "МИССИЯ ВЫПОЛНЕНА" if victory else "МИССИЯ ПРОВАЛЕНА")
 
 

@@ -394,3 +394,28 @@ static func _apply_visuals(w: WeaponData, d: Dictionary, resolve_texture: Callab
 		w.sprite_scale = Vector2.ONE * maxf(d["bullet_scale"], 0.01)
 
 	w.bullet_modulate = w.effect_color if tint else Color.WHITE
+
+
+## Короткое описание поведения снаряда по параметрам ствола.
+func behavior_text() -> String:
+	var parts: PackedStringArray = []
+	if kind == "melee":
+		parts.append("ближний бой: удар по дуге")
+	else:
+		if projectiles_per_shot > 1:
+			parts.append("%d снарядов веером" % projectiles_per_shot)
+		if piercing:
+			parts.append("пробивает врагов")
+		if ricochet_count > 0:
+			parts.append("рикошет ×%d" % ricochet_count)
+		if homing > 0.0:
+			parts.append("самонаведение")
+		if explosion_radius > 0.0:
+			parts.append("взрыв при попадании")
+		if burn > 0.0:
+			parts.append("поджигает")
+		if knockback > 220.0:
+			parts.append("сильно отбрасывает")
+		if parts.is_empty():
+			parts.append("точный одиночный выстрел" if fire_interval >= 0.2 else "быстрая очередь")
+	return ", ".join(parts).capitalize()

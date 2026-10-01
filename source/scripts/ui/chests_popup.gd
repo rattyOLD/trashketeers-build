@@ -8,6 +8,7 @@ signal odds_requested(chest_id: String)
 var _list: VBoxContainer
 var _balance: Label
 var _pity: Label
+var _pity_bar: ProgressBar
 var _busy := false
 
 
@@ -19,12 +20,20 @@ func _init() -> void:
 	_pity.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_pity.custom_minimum_size = Vector2(560, 0)
 	content.add_child(_pity)
+	_pity_bar = ProgressBar.new()
+	_pity_bar.max_value = 1.0
+	_pity_bar.show_percentage = false
+	_pity_bar.custom_minimum_size = Vector2(0, 18)
+	_pity_bar.add_theme_stylebox_override("background", UiStyle.box(Color("#1f1738"), Color("#3a2d60"), 2, 9))
+	_pity_bar.add_theme_stylebox_override("fill", UiStyle.box(Color("#b34dff"), Color("#b34dff"), 0, 9))
+	content.add_child(_pity_bar)
 	_list = MenuPopups.scroll_list(content)
 
 
 func _refresh() -> void:
 	_balance.text = "%s · %s" % [SaveService.format_coins(SaveService.get_coins()), Economy.format_gems(SaveService.get_gems())]
-	_pity.text = "До гарантии: %d открытий - герой или эпик/легендарка" % Economy.opens_to_guarantee()
+	_pity.text = "До гарантии: %d/%d · герой или эпик/легендарка" % [Economy.pity(), Economy.PITY_GUARANTEE]
+	_pity_bar.value = float(Economy.pity()) / float(Economy.PITY_GUARANTEE)
 	MenuPopups.clear(_list)
 	_list.add_child(UiStyle.label("БЕСПЛАТНО ЗА РЕКЛАМУ", 24, UiStyle.NEON, 6))
 	_list.add_child(_make_ad_chest())
@@ -85,6 +94,11 @@ func _make_chest(chest_id: String) -> Control:
 	coin_button.disabled = not coins_ok
 	coin_button.pressed.connect(func() -> void: _open(chest_id, false))
 	row.add_child(coin_button)
+	var price := Economy.chest_price(chest_id, false)
+	if SaveService.get_coins() >= price * 5:
+		var multi := UiStyle.button("×5", Color("#c98a1a"), 21, Vector2(84, 62))
+		multi.pressed.connect(func() -> void: _open_many(chest_id, 5))
+		row.add_child(multi)
 	if int(chest["gems"]) > 0:
 		var gems_ok := Economy.can_afford(chest_id, true)
 		var gem_button := UiStyle.button("ИЛИ · %s" % Economy.format_gems(Economy.chest_price(chest_id, true)), Color("#b34dff") if gems_ok else UiStyle.PANEL, 21, Vector2(0, 62))
@@ -132,10 +146,10 @@ func _make_ads() -> Control:
 
 func _ad_card(title: String, subtitle: String, icon_path: String, chip: String, color: Color, enabled: bool, action: Callable) -> Control:
 	var button := Button.new()
-	button.custom_minimum_size = Vector2(0, 122)
+	button.custom_minimum_size = Vector2(0, 96)
 	button.focus_mode = Control.FOCUS_NONE
 	button.disabled = not enabled
-	var base := color if enabled else UiStyle.PANEL
+	var base := color.darkened(0.42) if enabled else UiStyle.PANEL
 	button.add_theme_stylebox_override("normal", UiStyle.button_box(base, false))
 	button.add_theme_stylebox_override("hover", UiStyle.button_box(base.lightened(0.06), false))
 	button.add_theme_stylebox_override("pressed", UiStyle.button_box(base.lightened(0.1), true))
@@ -149,7 +163,7 @@ func _ad_card(title: String, subtitle: String, icon_path: String, chip: String, 
 	var ticket := TextureRect.new()
 	ticket.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ticket.texture = ArenaProp.texture_of("res://assets/ui/hub/ad_ticket.png")
-	ticket.custom_minimum_size = Vector2(84, 84)
+	ticket.custom_minimum_size = Vector2(64, 64)
 	ticket.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	ticket.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	ticket.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -160,7 +174,7 @@ func _ad_card(title: String, subtitle: String, icon_path: String, chip: String, 
 	texts.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	texts.alignment = BoxContainer.ALIGNMENT_CENTER
 	texts.add_theme_constant_override("separation", 2)
-	var head := UiStyle.label(title, 30, UiStyle.TEXT if enabled else UiStyle.TEXT_DIM, 8)
+	var head := UiStyle.label(title, 26, UiStyle.TEXT if enabled else UiStyle.TEXT_DIM, 7)
 	head.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	texts.add_child(head)
 	var sub := UiStyle.label(subtitle, 17, Color(UiStyle.TEXT, 0.85) if enabled else UiStyle.TEXT_DIM, 4)
@@ -176,7 +190,7 @@ func _ad_card(title: String, subtitle: String, icon_path: String, chip: String, 
 	var icon := TextureRect.new()
 	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	icon.texture = ArenaProp.texture_of(icon_path)
-	icon.custom_minimum_size = Vector2(96, 96)
+	icon.custom_minimum_size = Vector2(72, 72)
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -204,6 +218,20 @@ func _open(chest_id: String, with_gems: bool) -> void:
 	if rewards.is_empty():
 		return
 	_show_reveal(rewards, chest_id)
+
+
+func _open_many(chest_id: String, count: int) -> void:
+	if _busy:
+		return
+	var all: Array[Dictionary] = []
+	for i in count:
+		var rewards := Economy.open_chest(chest_id, false)
+		if rewards.is_empty():
+			break
+		all.append_array(rewards)
+	if all.is_empty():
+		return
+	_show_reveal(all, chest_id)
 
 
 func _show_reveal(rewards: Array[Dictionary], chest_id: String) -> void:

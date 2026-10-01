@@ -304,6 +304,8 @@ func _finish_ad(ok: bool) -> void:
 
 ## style: "light" | "medium" | "heavy" | "rigid" | "soft". Вне Telegram — короткая вибрация (Android).
 func haptic(style: String = "light") -> void:
+	if not bool(SaveService.data.get("haptics", true)):
+		return
 	if is_telegram:
 		_js("Telegram.WebApp.HapticFeedback.impactOccurred(%s);" % JSON.stringify(style))
 	elif is_web:
@@ -313,6 +315,8 @@ func haptic(style: String = "light") -> void:
 
 ## kind: "success" | "warning" | "error".
 func haptic_notify(kind: String) -> void:
+	if not bool(SaveService.data.get("haptics", true)):
+		return
 	if is_telegram:
 		_js("Telegram.WebApp.HapticFeedback.notificationOccurred(%s);" % JSON.stringify(kind))
 	elif is_web:
@@ -320,6 +324,8 @@ func haptic_notify(kind: String) -> void:
 
 
 func haptic_select() -> void:
+	if not bool(SaveService.data.get("haptics", true)):
+		return
 	if is_telegram:
 		_js("Telegram.WebApp.HapticFeedback.selectionChanged();")
 

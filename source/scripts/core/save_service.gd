@@ -58,6 +58,7 @@ const DEFAULTS := {
 	"glow_on": true,
 	"fx_lite": false,
 	"eco_fps": false,
+	"haptics": true,
 	"minimap": true,
 	"show_fps": false,
 	"tips_off": false,

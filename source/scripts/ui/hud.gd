@@ -140,6 +140,7 @@ func build(currency_icon: Texture2D, weapon: WeaponData) -> void:
 	_result = ResultPanel.new()
 	_result.restart_pressed.connect(func() -> void: restart_pressed.emit())
 	_result.menu_pressed.connect(func() -> void: menu_pressed.emit())
+	_result.upgrade_pressed.connect(func() -> void: upgrade_pressed.emit())
 	_root.add_child(_result)
 
 	_revive = BattlePanels.RevivePanel.new()

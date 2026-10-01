@@ -158,6 +158,9 @@ func _setup_common(camera_bounds: Rect2, currency_icon: Texture2D) -> void:
 	hud.resume_pressed.connect(_close_pause)
 	hud.restart_pressed.connect(func() -> void: restart_requested.emit())
 	hud.menu_pressed.connect(_on_menu_pressed)
+	hud.upgrade_pressed.connect(func() -> void:
+		MainMenuUI.open_upgrades_next = true
+		_on_menu_pressed())
 	hud.set_health(player.hp, player.max_hp)
 
 

@@ -4,6 +4,7 @@ extends Control
 
 signal restart_pressed
 signal menu_pressed
+signal upgrade_pressed
 
 var _panel: PanelContainer
 var _box: VBoxContainer
@@ -13,6 +14,7 @@ var _stats_card: PanelContainer
 var _stats_rows: VBoxContainer
 var _tip_card: PanelContainer
 var _tip_label: Label
+var _upgrade_button: Button
 
 
 func _init() -> void:
@@ -62,6 +64,11 @@ func _init() -> void:
 	buttons.vertical = Orient.portrait
 	buttons.add_theme_constant_override("separation", 14)
 	_box.add_child(buttons)
+	_upgrade_button = UiStyle.button("ПРОКАЧАТЬСЯ", Color("#2fae5f"), 28, Vector2(0, 76))
+	_upgrade_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_upgrade_button.pressed.connect(func() -> void: upgrade_pressed.emit())
+	_upgrade_button.visible = false
+	buttons.add_child(_upgrade_button)
 	var again := UiStyle.button("ЕЩЁ РАЗ", UiStyle.HOT, 32, Vector2(0, 96 if Orient.portrait else 76))
 	again.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	again.size_flags_stretch_ratio = 1.0 if Orient.portrait else 1.5
@@ -91,6 +98,7 @@ func open(victory: bool, lines: PackedStringArray, title: String = "") -> void:
 	_stats_card.visible = _stats_rows.get_child_count() > 0
 	_tip_label.text = "\n".join(notes)
 	_tip_card.visible = not notes.is_empty()
+	_upgrade_button.visible = not victory
 	visible = true
 	UiStyle.pop_in(_panel)
 

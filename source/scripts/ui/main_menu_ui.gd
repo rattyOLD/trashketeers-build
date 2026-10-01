@@ -264,7 +264,8 @@ func _add_capsule(row: HBoxContainer, icon_texture: Texture2D, kind: String) -> 
 		if tapped:
 			SoundManager.play(&"ui_click")
 			_currency.open_kind(kind))
-	var style := UiStyle.box(Color(CAPSULE, 0.92), UiStyle.OUTLINE, 4, 30)
+	var accent := Color("#b34dff") if kind == "gems" else Color("#ffb020")
+	var style := UiStyle.box(Color(CAPSULE, 0.92).lerp(accent, 0.22), accent, 4, 30)
 	style.content_margin_left = 8
 	style.content_margin_right = 8
 	capsule.add_theme_stylebox_override("panel", style)
@@ -303,8 +304,9 @@ func _make_side_button(key: String, icon_path: String, caption_text: String, rig
 	if right:
 		button.anchor_left = 1.0
 		button.anchor_right = 1.0
-		button.offset_left = -100.0
-		button.offset_right = -4.0
+		var edge := 4.0 + column * (px + 8.0)
+		button.offset_right = -edge
+		button.offset_left = -edge - px
 	else:
 		button.offset_left = 4.0 + column * (px + 8.0)
 		button.offset_right = 4.0 + column * (px + 8.0) + px
@@ -408,23 +410,26 @@ func _build_stage() -> Control:
 	if Orient.portrait:
 		stage.add_child(_make_side_button("gift", "res://assets/ui/hub/daily_gift.png", "ПОДАРОК", false, 8.0, func() -> void: _daily.open()))
 		stage.add_child(_make_side_button("chest", "res://assets/ui/hub/chest_free.png", "БЕСПЛАТНО", false, 132.0, func() -> void: _chests.open()))
-		stage.add_child(_make_side_button("friends", "res://assets/ui/hub/friends.png", "ДРУЗЬЯ", false, 256.0, func() -> void: _friends.open()))
 		stage.add_child(_make_side_button("news", "res://assets/ui/hub/news.png", "ОБНОВЛЕНИЯ", true, 8.0, func() -> void: _changelog.open()))
 		stage.add_child(_make_side_button("pass", "res://assets/ui/hub/pass.png", "ПРОПУСК", true, 124.0, func() -> void: _pass.open()))
 		stage.add_child(_make_side_button("vip", "res://assets/ui/hub/vip.png", "VIP", true, 224.0, func() -> void: _vip.open()))
 	else:
-		var row := [
+		var left := [
 			["gift", "res://assets/ui/hub/daily_gift.png", "ПОДАРОК", func() -> void: _daily.open()],
 			["chest", "res://assets/ui/hub/chest_free.png", "БЕСПЛАТНО", func() -> void: _chests.open()],
-			["news", "res://assets/ui/hub/news.png", "ОБНОВЛЕНИЯ", func() -> void: _changelog.open()],
+		]
+		var right := [
 			["pass", "res://assets/ui/hub/pass.png", "ПРОПУСК", func() -> void: _pass.open()],
 			["vip", "res://assets/ui/hub/vip.png", "VIP", func() -> void: _vip.open()],
-			["friends", "res://assets/ui/hub/friends.png", "ДРУЗЬЯ", func() -> void: _friends.open()],
+			["news", "res://assets/ui/hub/news.png", "ОБНОВЛЕНИЯ", func() -> void: _changelog.open()],
 		]
-		for i in row.size():
-			var spec: Array = row[i]
+		for i in left.size():
+			var spec: Array = left[i]
 			stage.add_child(_make_side_button(spec[0], spec[1], spec[2], false, 6.0, spec[3], i, 76.0))
-	for key in (["pass", "vip", "friends"] if Orient.portrait else ["gift", "chest", "news", "pass", "vip", "friends"]):
+		for i in right.size():
+			var spec: Array = right[i]
+			stage.add_child(_make_side_button(spec[0], spec[1], spec[2], true, 6.0, spec[3], i, 76.0))
+	for key in (["pass", "vip"] if Orient.portrait else ["gift", "chest", "news", "pass", "vip"]):
 		(_side_buttons[key]["caption"] as Label).visible = true
 	stage.add_child(_build_tester_button())
 	stage.gui_input.connect(func(event: InputEvent) -> void:
@@ -474,6 +479,7 @@ func _build_modes() -> Control:
 		row.add_child(button)
 		_mode_buttons.append(button)
 	_select_mode(Mode.SURVIVAL)
+	_mode_buttons[2].text = "СЮЖЕТ %d/6" % SaveService.story_shards()
 	return row
 
 
@@ -484,10 +490,10 @@ func _select_mode(mode: int) -> void:
 		var active := i == mode
 		var b := _mode_buttons[i]
 		b.set_pressed_no_signal(active)
-		var style := UiStyle.box(Color(colors[i]).darkened(0.62) if active else Color(0.08, 0.05, 0.16, 0.75), colors[i] if active else UiStyle.OUTLINE, 5 if active else 3, 20)
+		var style := UiStyle.box(Color(colors[i]).darkened(0.62) if active else Color(0.08, 0.05, 0.16, 0.75), colors[i] if active else (Color(colors[i], 0.9) if i == 2 else UiStyle.OUTLINE), 5 if active else (4 if i == 2 else 3), 20)
 		for state in ["normal", "hover", "pressed", "hover_pressed"]:
 			b.add_theme_stylebox_override(state, style)
-		b.add_theme_color_override("font_color", colors[i] if active else UiStyle.TEXT_DIM)
+		b.add_theme_color_override("font_color", colors[i] if active or i == 2 else UiStyle.TEXT_DIM)
 		b.add_theme_color_override("font_pressed_color", colors[i])
 		b.add_theme_color_override("font_hover_pressed_color", colors[i])
 
@@ -525,8 +531,15 @@ func _build_weapon_chip() -> Control:
 	_record_label.clip_text = true
 	_record_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	texts.add_child(_record_label)
-	var change := UiStyle.label("СМЕНИТЬ", 18, Color("#ffb020"), 4)
+	var change := PanelContainer.new()
 	change.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var pill := UiStyle.box(Color("#ffb020").darkened(0.45), Color("#ffb020"), 3, 18)
+	pill.set_content_margin_all(8)
+	change.add_theme_stylebox_override("panel", pill)
+	var change_text := UiStyle.label("СМЕНИТЬ", 22, Color("#ffd257"), 5)
+	change_text.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	change.add_child(change_text)
+	change.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	_weapon_holder.add_child(change)
 	return chip
 
@@ -597,6 +610,8 @@ func _on_weapon_changed(_weapon_id: StringName) -> void:
 
 func _refresh() -> void:
 	_nick_label.text = SaveService.get_display_nickname()
+	if _mode_buttons.size() > 2:
+		_mode_buttons[2].text = "СЮЖЕТ %d/6" % SaveService.story_shards()
 	_level_label.text = "LVL %d" % SaveService.get_account_level() + (" · VIP %d" % Premium.level() if Premium.level() > 0 else "")
 	_xp_bar.value = SaveService.get_level_progress()
 	_nuts_label.text = str(SaveService.get_nuts())

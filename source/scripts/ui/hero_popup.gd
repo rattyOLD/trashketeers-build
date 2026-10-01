@@ -168,15 +168,15 @@ func _build_header(character: Dictionary, rarity: String, accent: Color) -> Cont
 
 func _build_passive(character: Dictionary, accent: Color) -> Control:
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", UiStyle.box(UiStyle.PANEL_LIGHT, accent, 3, 18))
+	panel.add_theme_stylebox_override("panel", UiStyle.box(Color(accent, 0.18), accent, 5, 18))
 	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 2)
+	column.add_theme_constant_override("separation", 4)
 	panel.add_child(column)
 	var passive: Dictionary = character.get("passive", {})
-	var head := UiStyle.label("ПАССИВКА: %s" % str(passive.get("title", "-")).to_upper(), 21, UiStyle.GOLD, 5)
+	var head := UiStyle.label("ПАССИВКА: %s" % str(passive.get("title", "-")).to_upper(), 24, UiStyle.GOLD, 6)
 	head.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	column.add_child(head)
-	var text := UiStyle.label(str(passive.get("text", "Особых способностей нет")), 18, UiStyle.TEXT, 4)
+	var text := UiStyle.label(str(passive.get("text", "Особых способностей нет")), 20, UiStyle.TEXT, 5)
 	text.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	text.custom_minimum_size = Vector2(500, 0)

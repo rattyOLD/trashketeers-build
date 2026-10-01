@@ -110,6 +110,11 @@ class Settings:
 			SaveService.set_flag("eco_fps", on)
 			SaveService.apply_quality())
 		graphics.add_child(eco)
+		var haptics := MenuWidgets.PawToggle.new("Вибрация", bool(SaveService.data.get("haptics", true)))
+		haptics.toggled.connect(func(on: bool) -> void:
+			SaveService.set_flag("haptics", on)
+			Platform.haptic("medium"))
+		graphics.add_child(haptics)
 		var eco_hint := UiStyle.label("Телефон меньше греется и дольше держит заряд. Включи, если игра лагает или нагревает телефон.", 19, UiStyle.TEXT_DIM, 4)
 		eco_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		graphics.add_child(eco_hint)
@@ -487,6 +492,10 @@ class Armory:
 		var stats := UiStyle.label("Урон %d · %.1f выстр/с · DPS %d" % [roundi(weapon.damage), 1.0 / weapon.fire_interval, roundi(weapon.get_dps())], 18, UiStyle.TEXT_DIM, 4)
 		stats.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 		info.add_child(stats)
+		var behavior := UiStyle.label(base.behavior_text(), 17, UiStyle.NEON, 4)
+		behavior.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		behavior.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		info.add_child(behavior)
 		if WeaponData.TRAITS.has(String(base.trait_id)):
 			var trait_label := UiStyle.label(WeaponData.TRAITS[String(base.trait_id)], 16, UiStyle.GOLD, 4)
 			trait_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
@@ -616,6 +625,14 @@ class Upgrades:
 	func _refresh() -> void:
 		_balance.text = "Баланс: " + SaveService.format_coins(SaveService.get_nuts())
 		MenuPopups.clear(_list)
+		var spent := 0
+		for perk_id in SaveService.PERKS:
+			spent += SaveService.get_perk_level(perk_id)
+		if spent == 0:
+			var tip := UiStyle.label("Новичку: начни со «Здоровья» и «Силы», это самая заметная прибавка. Монеты берутся из забегов.", 20, Color("#ffe2b8"), 5)
+			tip.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			tip.custom_minimum_size = Vector2(520, 0)
+			_list.add_child(tip)
 		for perk_id in SaveService.PERKS:
 			_list.add_child(_make_card(perk_id))
 
