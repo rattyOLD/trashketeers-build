@@ -209,3 +209,47 @@ static func claim_bonus() -> Dictionary:
 		SaveService.add_coins_silent(int(prize["amount"]))
 	SaveService.save_data()
 	return prize
+
+
+## Задания сезона: прогресс считается от снимка статистики на момент первого открытия сезона.
+const QUESTS := [
+	{"id": "runs", "title": "Сыграй 10 забегов", "stat": "runs", "goal": 10, "points": 60},
+	{"id": "bosses", "title": "Победи 3 боссов", "stat": "boss_kills", "goal": 3, "points": 80},
+	{"id": "kills", "title": "Убей 500 врагов", "stat": "kills", "goal": 500, "points": 60},
+]
+
+
+static func _quest_base(quest: Dictionary) -> int:
+	var bp := _state()
+	if not bp.has("q0"):
+		bp["q0"] = {}
+	var base: Dictionary = bp["q0"]
+	var stat := str(quest["stat"])
+	if not base.has(stat):
+		base[stat] = SaveService.get_stat(stat)
+		SaveService.save_data()
+	return int(base[stat])
+
+
+static func quest_progress(quest: Dictionary) -> int:
+	return clampi(SaveService.get_stat(str(quest["stat"])) - _quest_base(quest), 0, int(quest["goal"]))
+
+
+static func quest_claimed(quest: Dictionary) -> bool:
+	return (_state().get("qclaimed", []) as Array).has(str(quest["id"]))
+
+
+static func quest_ready(quest: Dictionary) -> bool:
+	return not quest_claimed(quest) and quest_progress(quest) >= int(quest["goal"])
+
+
+static func claim_quest(quest: Dictionary) -> bool:
+	if not quest_ready(quest):
+		return false
+	var bp := _state()
+	if not bp.has("qclaimed"):
+		bp["qclaimed"] = []
+	(bp["qclaimed"] as Array).append(str(quest["id"]))
+	add_points(int(quest["points"]))
+	SaveService.save_data()
+	return true

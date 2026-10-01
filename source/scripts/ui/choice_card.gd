@@ -44,38 +44,73 @@ func open(card: Dictionary) -> void:
 	box.custom_minimum_size = Vector2(width, 0)
 	box.add_theme_constant_override("separation", 12)
 	panel.add_child(box)
-	box.add_child(UiStyle.label("ВЫБОР", 22, UiStyle.TEXT_DIM, 4))
-	var title := UiStyle.label(str(card.get("title", "")).to_upper(), 36, color, 9)
+	var title := UiStyle.label(str(card.get("title", "")).to_upper(), 30, color, 8)
 	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	title.custom_minimum_size = Vector2(width - 20.0, 0)
 	box.add_child(title)
 	var image_path := str(card.get("image", ""))
 	if not image_path.is_empty() and ResourceLoader.exists(image_path):
 		var picture := TextureRect.new()
 		picture.texture = load(image_path) as Texture2D
-		picture.custom_minimum_size = Vector2(0, 230)
+		picture.custom_minimum_size = Vector2(0, 190)
 		picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		box.add_child(picture)
-	var text := UiStyle.label(str(card.get("text", "")), 24, UiStyle.TEXT, 6)
+	var text_plate := PanelContainer.new()
+	text_plate.add_theme_stylebox_override("panel", UiStyle.box(Color(0, 0, 0, 0.35), Color(color, 0.35), 2, 14))
+	box.add_child(text_plate)
+	var text := UiStyle.label(str(card.get("text", "")), 21, UiStyle.TEXT, 5)
 	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	text.custom_minimum_size = Vector2(width - 50.0, 0)
-	box.add_child(text)
+	text.custom_minimum_size = Vector2(width - 60.0, 0)
+	text_plate.add_child(text)
 	var options: Array = card.get("options", [])
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	box.add_child(row)
+	var cell := (width - 12.0 * maxi(options.size() - 1, 0)) / maxf(options.size(), 1)
 	for i in options.size():
-		var option: Dictionary = options[i]
-		var button := UiStyle.button(str(option.get("label", "")), color.darkened(0.3) if i == 0 else UiStyle.PANEL_LIGHT, 26, Vector2(0, 76))
-		var icon_path := str(option.get("icon", ""))
-		if not icon_path.is_empty() and ResourceLoader.exists(icon_path):
-			button.icon = load(icon_path) as Texture2D
-			button.expand_icon = true
-			button.add_theme_constant_override("icon_max_width", 64)
-		button.pressed.connect(_pick.bind(i))
-		box.add_child(button)
-		var note := UiStyle.label(str(option.get("note", "")), 18, UiStyle.TEXT_DIM, 4)
-		note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		note.custom_minimum_size = Vector2(width - 50.0, 0)
-		box.add_child(note)
+		row.add_child(_make_option(options[i], i, color, cell))
 	SoundManager.play(&"ui_confirm", -6.0)
+
+
+func _make_option(option: Dictionary, index: int, color: Color, cell: float) -> Button:
+	var accent := color if index == 0 else Color("#ff7a3d")
+	var button := Button.new()
+	button.custom_minimum_size = Vector2(cell, 210)
+	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	button.focus_mode = Control.FOCUS_NONE
+	for state in ["normal", "hover", "pressed"]:
+		var tone := accent.darkened(0.62).lerp(Color.WHITE, 0.0 if state == "normal" else 0.08)
+		button.add_theme_stylebox_override(state, UiStyle.box(tone, accent, 5 if state != "pressed" else 7, 20))
+	button.pressed.connect(_pick.bind(index))
+	var column := VBoxContainer.new()
+	column.set_anchors_preset(Control.PRESET_FULL_RECT)
+	column.offset_left = 8
+	column.offset_right = -8
+	column.offset_top = 8
+	column.offset_bottom = -8
+	column.alignment = BoxContainer.ALIGNMENT_CENTER
+	column.add_theme_constant_override("separation", 4)
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	button.add_child(column)
+	var icon_path := str(option.get("icon", ""))
+	if not icon_path.is_empty() and ResourceLoader.exists(icon_path):
+		var icon := TextureRect.new()
+		icon.texture = load(icon_path) as Texture2D
+		icon.custom_minimum_size = Vector2(0, 64)
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		column.add_child(icon)
+	var label := UiStyle.label(str(option.get("label", "")), 24, UiStyle.TEXT, 6)
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	column.add_child(label)
+	var note := UiStyle.label(str(option.get("note", "")), 16, Color(UiStyle.TEXT, 0.92), 4)
+	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	note.custom_minimum_size = Vector2(cell - 36.0, 0)
+	note.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	column.add_child(note)
+	return button
 
 
 func _pick(index: int) -> void:

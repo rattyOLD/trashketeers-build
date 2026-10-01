@@ -155,6 +155,8 @@ func _start_story(weapon_id: StringName) -> void:
 			game.hud.toast("КОРОЛЬ ХЛАМА", "Мои колонки! Они стоили мне трёх мусоровозов!", Color("#ff5a5a"))
 		if _debug_hash == "story:choice":
 			game.story._offer_choice("informant")
+		if _debug_hash == "story:mini":
+			game._show_mini_card("Пивной Барон", "beer_baron", game.player.global_position)
 		if _debug_hash == "story:tip":
 			game.story.tip_weapon(game._roll_weapon("legendary"))
 		if _debug_hash.begins_with("story:jump"):

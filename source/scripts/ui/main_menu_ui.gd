@@ -44,6 +44,7 @@ var _currency: CurrencyPopup
 var _vip: VipPopup
 var _mode_intro: ModeIntroPopup
 var _pass: BattlePassPopup
+var _season_pill: Button
 var _odds: OddsPopup
 var _mode_buttons: Array[Button] = []
 var _settings: MenuPopups.Settings
@@ -415,6 +416,20 @@ func _build_stage() -> Control:
 	_preview = MenuWidgets.RaccoonPreview.new(SaveService.get_skin(), 2.5)
 	_preview.set_anchors_preset(Control.PRESET_FULL_RECT)
 	stage.add_child(_preview)
+	_season_pill = Button.new()
+	_season_pill.text = "СЕЗОН: РЕЛЬСОТРОН В ПРОПУСКЕ"
+	_season_pill.focus_mode = Control.FOCUS_NONE
+	_season_pill.add_theme_font_size_override("font_size", 16)
+	_season_pill.add_theme_color_override("font_color", Color("#2a1600"))
+	for state in ["normal", "hover", "pressed"]:
+		_season_pill.add_theme_stylebox_override(state, UiStyle.box(Color("#ffc93c"), Color("#fff1b0"), 3, 18))
+	_season_pill.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_season_pill.offset_left = -140.0
+	_season_pill.offset_right = 140.0
+	_season_pill.offset_top = 4.0
+	_season_pill.offset_bottom = 40.0
+	_season_pill.pressed.connect(func() -> void: _pass.open())
+	stage.add_child(_season_pill)
 	if Orient.portrait:
 		stage.add_child(_make_side_button("gift", "res://assets/ui/hub/daily_gift.png", "ПОДАРОК", false, 8.0, func() -> void: _daily.open()))
 		stage.add_child(_make_side_button("chest", "res://assets/ui/hub/chest_free.png", "БЕСПЛАТНО", false, 132.0, func() -> void: _chests.open()))
@@ -689,6 +704,7 @@ func _refresh() -> void:
 	_set_side_alert("news", ChangelogPopup.has_unseen())
 	if _nav_pass != null:
 		_nav_pass.badge = BattlePass.has_unclaimed()
+		_season_pill.visible = not BattlePass.is_claimed("prem", 1)
 		_nav_pass.queue_redraw()
 	_set_side_alert("vip", false)
 	if _nav_upgrades != null:

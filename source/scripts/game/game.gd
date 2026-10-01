@@ -254,8 +254,11 @@ func _exit_tree() -> void:
 
 
 ## Приоритет автоприцела: ближайший враг, если его нет — ближайший разрушаемый объект.
+var _target_nearest := bool(SaveService.data.get("target_nearest", false))
+
+
 func _find_target(from: Vector2, max_distance: float) -> Node2D:
-	var enemy := enemies.find_priority(from, max_distance)
+	var enemy := enemies.find_nearest(from, max_distance) if _target_nearest else enemies.find_priority(from, max_distance)
 	if enemy != null:
 		return enemy
 	if story != null:
@@ -815,20 +818,22 @@ func _offer_mini_choice(boss: Enemy, at: Vector2, attempt: int) -> void:
 		if (_level_up_open or get_tree().paused) and attempt < MINI_CHOICE_RETRIES:
 			_offer_mini_choice(boss, at, attempt + 1)
 			return
-		var name := boss.data.display_name
-		var panel := ChoiceCard.new()
-		add_child(panel)
-		var boss_id := String(boss.data.id)
-		panel.chosen.connect(func(index: int) -> void: _on_mini_choice(index, name, at, boss_id))
-		panel.open({
-			"title": "%s на коленях" % name,
-			"text": "%s ползёт к тебе и бормочет: «Только не добивай! Я заплачу! Или расскажу, где пиво!» Решай, енот." % name,
-			"color": "#ffb020",
-			"image": _surrender_art(String(boss.data.id)),
-			"options": [
-				{"label": "ПОЩАДИТЬ", "icon": "res://assets/story/surrender/choice_spare.png", "note": "Полное лечение, +1 бесплатный реролл и редкий ствол. Нэлл будет в шоке."},
-				{"label": "ОГРАБИТЬ", "icon": "res://assets/story/surrender/choice_loot.png", "note": "Эпический ствол и +50% неонита за мини-босса. Без лечения."},
-			]}))
+		_show_mini_card(boss.data.display_name, String(boss.data.id), at))
+
+
+func _show_mini_card(name: String, boss_id: String, at: Vector2) -> void:
+	var panel := ChoiceCard.new()
+	add_child(panel)
+	panel.chosen.connect(func(index: int) -> void: _on_mini_choice(index, name, at, boss_id))
+	panel.open({
+		"title": "%s на коленях" % name,
+		"text": "«Только не добивай! Я заплачу! Или расскажу, где пиво!» Решай, енот.",
+		"color": "#ffb020",
+		"image": _surrender_art(boss_id),
+		"options": [
+			{"label": "ПОЩАДИТЬ", "icon": "res://assets/story/surrender/choice_spare.png", "note": "Полное лечение, бесплатный реролл, редкий ствол."},
+			{"label": "ОГРАБИТЬ", "icon": "res://assets/story/surrender/choice_loot.png", "note": "Эпический ствол и +50% неонита. Без лечения."},
+		]})
 
 
 func _surrender_art(boss_id: String) -> String:

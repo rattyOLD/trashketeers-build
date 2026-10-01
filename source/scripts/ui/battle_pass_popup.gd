@@ -68,6 +68,46 @@ func _build_hero(level: int) -> void:
 	_hero.add_child(panel)
 	if not BattlePass.is_claimed("prem", 1):
 		_hero.add_child(_feature_card())
+	_hero.add_child(_quests_card())
+
+
+## Задания сезона: три строки с полосой и кнопкой награды в очках пропуска.
+func _quests_card() -> Control:
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#0f1a24"), Color("#00e5ff"), 3, 18))
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 6)
+	panel.add_child(column)
+	column.add_child(UiStyle.label("ЗАДАНИЯ СЕЗОНА", 18, UiStyle.NEON, 5))
+	for quest: Dictionary in BattlePass.QUESTS:
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 8)
+		column.add_child(row)
+		var texts := VBoxContainer.new()
+		texts.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		texts.add_theme_constant_override("separation", 2)
+		row.add_child(texts)
+		var progress := BattlePass.quest_progress(quest)
+		var goal := int(quest["goal"])
+		var title := UiStyle.label("%s · %d/%d" % [quest["title"], progress, goal], 16, UiStyle.TEXT if not BattlePass.quest_claimed(quest) else UiStyle.TEXT_DIM, 4)
+		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		title.clip_text = true
+		texts.add_child(title)
+		var bar := UiStyle.progress_bar(Color("#00e5ff"), 10)
+		bar.max_value = float(goal)
+		bar.value = float(progress)
+		texts.add_child(bar)
+		var claimed := BattlePass.quest_claimed(quest)
+		var ready := BattlePass.quest_ready(quest)
+		var button := UiStyle.button("ГОТОВО" if claimed else "+%d" % int(quest["points"]), Color("#2fae5f") if ready else UiStyle.PANEL, 16, Vector2(86, 40))
+		button.disabled = not ready
+		button.pressed.connect(func() -> void:
+			if BattlePass.claim_quest(quest):
+				SoundManager.play(&"star_dust")
+				changed.emit()
+				_refresh())
+		row.add_child(button)
+	return panel
 
 
 ## Главный приз сезона: отдельная карточка с описанием и кнопкой.
@@ -81,7 +121,14 @@ func _feature_card() -> Control:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 12)
 	panel.add_child(row)
-	row.add_child(_item_art(FEATURE_ITEM, Vector2(170, 80)))
+	var art_box := Control.new()
+	art_box.custom_minimum_size = Vector2(120, 60)
+	art_box.clip_contents = true
+	art_box.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	var art := _item_art(FEATURE_ITEM, Vector2(120, 60))
+	art.set_anchors_preset(Control.PRESET_FULL_RECT)
+	art_box.add_child(art)
+	row.add_child(art_box)
 	var texts := VBoxContainer.new()
 	texts.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	texts.add_theme_constant_override("separation", 2)
