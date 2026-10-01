@@ -64,6 +64,7 @@ func _refresh() -> void:
 	var open := Tester.flag("survival_open")
 	var open_button := UiStyle.button("Выживание: %s" % ("ОТКРЫТО" if open else "закрыто"), Color("#2fae5f") if open else UiStyle.PANEL_LIGHT, 21, Vector2(0, 62))
 	open_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_fit(open_button)
 	open_button.pressed.connect(func() -> void:
 		Tester.toggle("survival_open")
 		changed.emit()
@@ -90,6 +91,7 @@ func _refresh() -> void:
 		button.pressed.connect(func() -> void:
 			Tester.toggle(name)
 			_refresh())
+		_fit(button)
 		_list.add_child(button)
 
 	_section("СТАРТ БОЯ")
@@ -177,6 +179,7 @@ func _grid() -> GridContainer:
 func _action(grid: GridContainer, text: String, action: Callable) -> void:
 	var button := UiStyle.button(text, UiStyle.PANEL_LIGHT, 21, Vector2(0, 62))
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_fit(button)
 	button.pressed.connect(func() -> void:
 		var message: String = action.call()
 		SoundManager.play(&"ui_confirm")
@@ -184,6 +187,13 @@ func _action(grid: GridContainer, text: String, action: Callable) -> void:
 		_refresh()
 		_status.text = message)
 	grid.add_child(button)
+
+
+## Текст кнопки переносится на вторую строку, а не раздвигает окно вправо.
+func _fit(button: Button) -> void:
+	button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	button.clip_text = true
+	button.custom_minimum_size.x = 0.0
 
 
 func _restore_scroll(pos: int) -> void:

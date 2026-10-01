@@ -3,7 +3,7 @@ extends GlassPopup
 ## Друзья без сервера: визитка с портретом (картинка для отправки), добавление друзей по коду визитки,
 ## код приглашения с бонусом обоим. Значки «прошёл миссию» берутся из визитки друга.
 
-const CARD_SIZE := Vector2(640, 360)
+const CARD_SIZE := Vector2(960, 540)
 const MISSION_COUNT := 6
 const BOARD_METRICS := [
 	{"title": "Волна", "key": "w", "unit": "волна"},
@@ -41,19 +41,20 @@ func _refresh() -> void:
 	list.add_child(_section("МОЯ ВИЗИТКА"))
 	var card := CardView.new()
 	card.info = SaveService.card_info()
+	card.qr_text = SaveService.card_qr_text()
 	card.custom_minimum_size = Vector2(panel_width() - 110.0, (panel_width() - 110.0) * CARD_SIZE.y / CARD_SIZE.x)
 	list.add_child(card)
 	var share := UiStyle.button("ПОДЕЛИТЬСЯ КАРТИНКОЙ", UiStyle.HOT, 24, Vector2(0, 64))
 	share.pressed.connect(func() -> void:
-		var link := SaveService.card_link()
-		var caption := "Моя визитка в Trash Squad. Открой ссылку, и мы подружимся: %s" % link if not link.is_empty() else "Моя визитка в Trash Squad"
+		var link := SaveService.card_qr_text()
+		var caption := "Я в Trash Squad. Сканируй QR или жми ссылку, и мы подружимся: %s" % link if not link.is_empty() else "Моя визитка в Trash Squad"
 		var note := Platform.share_image(_image_b64, "trashsquad_card.png", caption)
 		_say(note if not note.is_empty() else "Картинка готовится или не поддерживается здесь. Отправь код визитки ниже")
 	)
 	list.add_child(share)
 	var link_card := UiStyle.button("Отправить ссылку-визитку", UiStyle.PANEL_LIGHT, 22, Vector2(0, 56))
 	link_card.pressed.connect(func() -> void:
-		var link := SaveService.card_link()
+		var link := SaveService.card_qr_text()
 		if link.is_empty():
 			_say("Ссылка есть только в браузерной версии. Отправь код визитки ниже")
 			return
@@ -216,6 +217,21 @@ func _build_online(list: VBoxContainer) -> void:
 			DisplayServer.clipboard_set(Cloud.friend_code)
 			_say("ID скопирован. Отправь его другу"))
 	list.add_child(copy)
+	var keep := UiStyle.button("Ссылка-вход: вернуть аккаунт, если слетит", UiStyle.HOT, 21, Vector2(0, 58))
+	keep.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	keep.pressed.connect(func() -> void:
+		keep.disabled = true
+		_say("Готовлю ссылку...")
+		var code := await Cloud.upload_save()
+		if not is_instance_valid(keep):
+			return
+		keep.disabled = false
+		var base := Platform.page_url()
+		if code.is_empty() or base.is_empty():
+			_say("Нет связи с сервером. Попробуй позже")
+			return
+		_say(Platform.share("Моя ссылка-вход в Trash Squad. Сохрани её в «Избранное»: если аккаунт слетит, открой ссылку, и прогресс вернётся.", "%s?restore=%s" % [base, code.uri_encode()])))
+	list.add_child(keep)
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
 	var edit := _edit("ID друга (из его профиля)")
@@ -450,12 +466,17 @@ func _say(text: String) -> void:
 func _render_card() -> void:
 	_render_token += 1
 	var token := _render_token
+	if not Cloud.has_code():
+		await Cloud.sync_profile()
+		if not is_instance_valid(self) or token != _render_token:
+			return
 	var viewport := SubViewport.new()
 	viewport.size = Vector2i(CARD_SIZE)
 	viewport.transparent_bg = false
 	viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 	var card := CardView.new()
 	card.info = SaveService.card_info()
+	card.qr_text = SaveService.card_qr_text()
 	card.size = CARD_SIZE
 	viewport.add_child(card)
 	add_child(viewport)
@@ -490,11 +511,14 @@ class AvatarView:
 		draw_arc(c, r - 1.5, 0.0, TAU, 36, UiStyle.NEON, 3.0, true)
 
 
-## Сама визитка: рисуется в виртуальных 640x360 и масштабируется под размер контрола.
+## Сама визитка: рисуется в виртуальных 960x540 и масштабируется под размер контрола.
 class CardView:
 	extends Control
 
 	var info: Dictionary = {}
+	var qr_text := ""
+	var _qr: QrCode
+	var _qr_for := ""
 
 	func _init() -> void:
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -506,34 +530,62 @@ class CardView:
 		var w := FriendsPopup.CARD_SIZE.x
 		var h := FriendsPopup.CARD_SIZE.y
 		draw_rect(Rect2(0, 0, w, h), Color("#140c26"))
-		draw_rect(Rect2(0, 0, w, 96), Color("#241a40"))
-		draw_rect(Rect2(0, 92, w, 4), UiStyle.HOT)
-		draw_rect(Rect2(0, h - 56, w, 56), Color("#0d0819"))
-		draw_rect(Rect2(3, 3, w - 6, h - 6), UiStyle.NEON, false, 6.0)
-		var c := Vector2(112, 196)
-		draw_circle(c, 88.0, UiStyle.OUTLINE)
-		draw_circle(c, 83.0, Color("#3a2d60"))
-		var tex := MenuWidgets.Avatar.get_texture_for(CharacterDB.get_character(str(info.get("c", ""))), str(info.get("s", "classic")))
-		if tex != null:
-			draw_texture_rect(tex, Rect2(c - Vector2.ONE * 80.0, Vector2.ONE * 160.0), false)
-		draw_arc(c, 86.0, 0.0, TAU, 48, UiStyle.NEON, 5.0, true)
+		draw_rect(Rect2(0, h * 0.5, w, h * 0.5), Color("#1a1030"))
+		draw_rect(Rect2(0, 0, w, 130), Color("#241a40"))
+		draw_rect(Rect2(0, 126, w, 5), UiStyle.HOT)
+		draw_rect(Rect2(0, h - 64, w, 64), Color("#0d0819"))
+		draw_rect(Rect2(4, 4, w - 8, h - 8), UiStyle.NEON, false, 8.0)
 		var badge := Insider.badge_of(int(info.get("ins", -1)))
 		var nick := str(info.get("n", "Енот"))
-		_text(font, nick if badge.is_empty() else "%s %s" % [badge, nick], Vector2(28, 62), 44, UiStyle.TEXT, w - 56.0)
+		_text(font, nick if badge.is_empty() else "%s %s" % [badge, nick], Vector2(48, 90), 62, UiStyle.TEXT, 600.0)
+		_text(font, "TRASH SQUAD", Vector2(w - 330, 84), 34, UiStyle.GOLD, 290.0, HORIZONTAL_ALIGNMENT_RIGHT)
+		var c := Vector2(170, 330)
+		draw_circle(c, 126.0, UiStyle.OUTLINE)
+		draw_circle(c, 120.0, Color("#3a2d60"))
+		var tex := MenuWidgets.Avatar.get_texture_for(CharacterDB.get_character(str(info.get("c", ""))), str(info.get("s", "classic")))
+		if tex != null:
+			draw_texture_rect(tex, Rect2(c - Vector2.ONE * 114.0, Vector2.ONE * 228.0), false)
+		draw_arc(c, 123.0, 0.0, TAU, 64, UiStyle.NEON, 7.0, true)
 		var level := int(info.get("lv", 1))
-		_text(font, MenuPopups.Profile.rank_for(level).to_upper(), Vector2(230, 138), 24, Color("#ff9a3d"), 380.0)
-		_text(font, "УРОВЕНЬ %d" % level, Vector2(230, 176), 28, UiStyle.TEXT, 380.0)
-		_text(font, "Волна %d · Боссов %d" % [int(info.get("w", 0)), int(info.get("bk", 0))], Vector2(230, 212), 24, UiStyle.TEXT_DIM, 390.0)
-		_text(font, "СЮЖЕТ: осколки %d/6" % int(info.get("sh", 0)), Vector2(230, 252), 24, UiStyle.GOLD, 390.0)
+		_text(font, MenuPopups.Profile.rank_for(level).to_upper(), Vector2(330, 196), 30, Color("#ff9a3d"), 340.0)
+		_text(font, "УРОВЕНЬ %d" % level, Vector2(330, 252), 54, UiStyle.TEXT, 340.0)
+		var stats := [["ВОЛНА", str(int(info.get("w", 0))), UiStyle.NEON], ["БОССЫ", str(int(info.get("bk", 0))), UiStyle.HOT], ["ОСКОЛКИ", "%d/6" % int(info.get("sh", 0)), UiStyle.GOLD]]
+		for i in stats.size():
+			var rect := Rect2(330 + i * 116, 282, 108, 84)
+			draw_rect(rect, Color("#2a1f4a"))
+			draw_rect(rect, stats[i][2], false, 3.0)
+			_text(font, str(stats[i][1]), rect.position + Vector2(0, 44), 38, UiStyle.TEXT, rect.size.x, HORIZONTAL_ALIGNMENT_CENTER)
+			_text(font, str(stats[i][0]), rect.position + Vector2(0, 72), 17, UiStyle.TEXT_DIM, rect.size.x, HORIZONTAL_ALIGNMENT_CENTER)
 		var done: Array = info.get("m", []) as Array
 		for i in FriendsPopup.MISSION_COUNT:
 			var passed := done.has("m%d" % (i + 1))
-			var rect := Rect2(230 + i * 64, 268, 56, 36)
+			var rect := Rect2(330 + i * 56, 392, 50, 40)
 			draw_rect(rect, Color("#35c46a") if passed else Color("#3a2d60"))
 			draw_rect(rect, UiStyle.OUTLINE, false, 3.0)
-			_text(font, "М%d" % (i + 1), rect.position + Vector2(0, 27), 22, UiStyle.TEXT if passed else UiStyle.TEXT_DIM, 56.0, HORIZONTAL_ALIGNMENT_CENTER)
-		_text(font, "TRASHKETEERS.IO", Vector2(28, h - 20), 26, UiStyle.NEON, 300.0)
-		_text(font, "ID %s" % str(info.get("id", "")), Vector2(w - 330, h - 20), 22, UiStyle.TEXT_DIM, 300.0, HORIZONTAL_ALIGNMENT_RIGHT)
+			_text(font, "М%d" % (i + 1), rect.position + Vector2(0, 29), 22, UiStyle.TEXT if passed else UiStyle.TEXT_DIM, rect.size.x, HORIZONTAL_ALIGNMENT_CENTER)
+		_draw_qr(font)
+		_text(font, "Енот-налётчик против крыс и свиней", Vector2(40, h - 22), 24, UiStyle.TEXT_DIM, 520.0)
+		var friend_code := str(info.get("fc", ""))
+		if not friend_code.is_empty():
+			_text(font, "ID %s" % friend_code, Vector2(w - 330, h - 20), 32, UiStyle.NEON, 290.0, HORIZONTAL_ALIGNMENT_RIGHT)
+
+	func _draw_qr(font: Font) -> void:
+		var plate := Rect2(704, 160, 208, 208)
+		draw_rect(plate.grow(8.0), UiStyle.OUTLINE)
+		draw_rect(plate, Color.WHITE)
+		if not qr_text.is_empty():
+			if _qr_for != qr_text:
+				_qr = QrCode.encode(qr_text)
+				_qr_for = qr_text
+			if _qr != null:
+				var cell := floorf(plate.size.x / float(_qr.size + 4))
+				var origin := plate.position + (plate.size - Vector2.ONE * cell * _qr.size) * 0.5
+				for y in _qr.size:
+					for x in _qr.size:
+						if _qr.is_dark(x, y):
+							draw_rect(Rect2(origin + Vector2(x, y) * cell, Vector2.ONE * cell), Color("#140c26"))
+		_text(font, "СКАНИРУЙ И ДОБАВЬ", Vector2(692, 412), 23, UiStyle.TEXT, 232.0, HORIZONTAL_ALIGNMENT_CENTER)
+		_text(font, "ЕНОТА В ДРУЗЬЯ", Vector2(692, 442), 23, UiStyle.HOT, 232.0, HORIZONTAL_ALIGNMENT_CENTER)
 
 	func _text(font: Font, text: String, at: Vector2, font_size: int, color: Color, width: float, align: HorizontalAlignment = HORIZONTAL_ALIGNMENT_LEFT) -> void:
 		draw_string_outline(font, at, text, align, width, font_size, 7, UiStyle.OUTLINE)

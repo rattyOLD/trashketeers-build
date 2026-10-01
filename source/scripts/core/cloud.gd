@@ -9,6 +9,7 @@ const EMAIL_LOGIN := false
 const URL := "https://ylclwkprhhlzavhahrko.supabase.co"
 const KEY := "sb_publishable_7xeZ6_3lc4Bi44z35wf4BQ__P6Maunz"
 const SESSION_KEY := "trk_cloud_session"
+const LOST_KEY := "trk_cloud_lost"
 const RECOVERY_KEY := "trk_recovery_code"
 const EMAIL_KEY := "trk_cloud_email"
 const UPLOAD_DELAY := 8.0
@@ -253,8 +254,17 @@ func _ensure_session() -> bool:
 		var reply := await _raw(HTTPClient.METHOD_POST, URL + "/auth/v1/token?grant_type=refresh_token", headers, JSON.stringify({"refresh_token": _refresh}))
 		ok = _store_session(reply)
 		if not ok and int(reply["code"]) >= 400 and int(reply["code"]) < 500:
-			_refresh = ""
-			_uid = ""
+			await get_tree().create_timer(1.5).timeout
+			var parsed: Variant = JSON.parse_string(Platform.storage_get(SESSION_KEY))
+			var newer := str((parsed as Dictionary).get("refresh", "")) if parsed is Dictionary else ""
+			if not newer.is_empty() and newer != _refresh:
+				_refresh = newer
+				reply = await _raw(HTTPClient.METHOD_POST, URL + "/auth/v1/token?grant_type=refresh_token", headers, JSON.stringify({"refresh_token": _refresh}))
+				ok = _store_session(reply)
+			if not ok and int(reply["code"]) >= 400 and int(reply["code"]) < 500:
+				Platform.storage_set(LOST_KEY, JSON.stringify({"uid": _uid, "code": friend_code}))
+				_refresh = ""
+				_uid = ""
 	if not ok and _refresh.is_empty():
 		ok = _store_session(await _raw(HTTPClient.METHOD_POST, URL + "/auth/v1/signup", headers, "{}"))
 	_session_busy = false

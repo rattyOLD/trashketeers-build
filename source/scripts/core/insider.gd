@@ -34,7 +34,7 @@ static func parse(code: String) -> int:
 static func badge_of(number: int) -> String:
 	if number < 0:
 		return ""
-	return "[Dev]" if number == 0 else "[Insider]"
+	return "[DeV]" if number == 0 else "[Tester]"
 
 
 ## Отозванные номера (утёкшие коды): список в data/insider_revoked.json, номер 0 отозвать нельзя.

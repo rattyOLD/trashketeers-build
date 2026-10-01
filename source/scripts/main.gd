@@ -86,17 +86,51 @@ func _ready() -> void:
 
 
 func _accept_card_link() -> void:
+	var dev := Platform.consume_url_param("dev")
+	if not dev.is_empty() and SaveService.activate_insider(dev) == "ok":
+		_toast_note("Режим DeV включён")
+	var restore := Platform.consume_url_param("restore")
+	if not restore.is_empty():
+		_toast_note("Возвращаю аккаунт...")
+		var text := await Cloud.restore_save(restore)
+		if not text.is_empty() and SaveService.import_code(text):
+			Cloud.recovery_code = restore
+			Platform.storage_set(Cloud.RECOVERY_KEY, restore)
+			_toast_note("Аккаунт вернулся. Прогресс на месте")
+			_show_menu()
+		else:
+			_toast_note("Ссылка-вход не сработала. Проверь, что скопировал её целиком")
+		return
+	var friend := Platform.consume_url_param("f")
+	if not friend.is_empty():
+		var result := await Cloud.add_friend(friend.strip_edges().to_upper())
+		match result:
+			"ok":
+				_toast_note("Друг добавлен. Открой «Друзья», чтобы посмотреть")
+			"self":
+				_toast_note("Это твоя собственная ссылка. С собой дружить можно и без неё")
+			"not_found":
+				_toast_note("Такого игрока нет. Ссылка устарела или скопирована не целиком")
+			"limit":
+				_toast_note("Друзей уже максимум")
+			_:
+				_toast_note("Нет связи с сервером. Открой ссылку ещё раз, когда появится интернет")
+		return
 	var code := Platform.consume_url_param("card")
 	if code.is_empty():
 		return
-	var result: String = SaveService.add_friend(code)
-	var text := "Визитка по ссылке не подошла"
-	if result == "ok" or result == "bonus":
+	var card_result: String = SaveService.add_friend(code)
+	var note := "Визитка по ссылке не подошла"
+	if card_result == "ok" or card_result == "bonus":
 		var added := SaveService.get_friends()
 		var who := str((added[0] as Dictionary).get("n", "Енот")) if not added.is_empty() else "Енот"
-		text = "%s теперь в друзьях" % who if result == "ok" else "%s в друзьях: +%d монет и +%d неонита" % [who, SaveService.INVITE_COINS, SaveService.INVITE_GEMS]
-	elif result == "self":
-		text = "Это твоя собственная визитка. С собой дружить можно и без ссылки"
+		note = "%s теперь в друзьях" % who if card_result == "ok" else "%s в друзьях: +%d монет и +%d неонита" % [who, SaveService.INVITE_COINS, SaveService.INVITE_GEMS]
+	elif card_result == "self":
+		note = "Это твоя собственная визитка. С собой дружить можно и без ссылки"
+	_toast_note(note)
+
+
+func _toast_note(text: String) -> void:
 	var layer := CanvasLayer.new()
 	layer.layer = 90
 	add_child(layer)

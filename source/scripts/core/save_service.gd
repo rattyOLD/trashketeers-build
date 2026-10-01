@@ -19,6 +19,7 @@ signal achievement_unlocked(achievement: Dictionary)
 signal reloaded
 
 const STORAGE_KEY := "battle_raccoon_save_v1"
+const DEV_KEY := "trk_dev"
 const START_WEAPON := "pistol_v1"
 const DEFAULTS := {
 	"nuts": 0,
@@ -636,7 +637,7 @@ func invite_code() -> String:
 
 func card_info() -> Dictionary:
 	return {
-		"id": get_player_id(), "n": get_nickname(), "c": get_character_id(), "s": get_selected_skin(),
+		"id": get_player_id(), "fc": Cloud.friend_code, "n": get_nickname(), "c": get_character_id(), "s": get_selected_skin(),
 		"lv": get_account_level(), "w": get_stat("best_wave"), "sh": story_shards(), "m": story_done_ids(),
 		"bk": int(data["boss_kills"]), "ins": get_insider(), "inv": str(data["invite_used"]), "sc": data["story_best"],
 	}
@@ -684,6 +685,16 @@ func card_link() -> String:
 	if base.is_empty():
 		return ""
 	return "%s?card=%s" % [base, card_code().uri_encode()]
+
+
+## Короткая ссылка для друзей (по серверному ID) или, пока ID нет, ссылка с зашитой визиткой.
+func card_qr_text() -> String:
+	var base := Platform.page_url()
+	if base.is_empty():
+		return ""
+	if Cloud.has_code():
+		return "%s?f=%s" % [base, Cloud.friend_code]
+	return card_link()
 
 
 func get_friends() -> Array:
@@ -768,8 +779,14 @@ func get_nickname() -> String:
 
 ## Номер инсайдера (0 — разработчик) или -1.
 func get_insider() -> int:
+	if is_dev():
+		return 0
 	var number := int(data["insider_no"])
-	return -1 if Insider.is_revoked(number) else number
+	return 1 if number < 0 or Insider.is_revoked(number) else number
+
+
+func is_dev() -> bool:
+	return int(data["insider_no"]) == 0 or Platform.storage_get(DEV_KEY) == "1"
 
 
 func get_badge() -> String:
@@ -827,6 +844,8 @@ func activate_insider(code: String) -> String:
 	if Insider.is_revoked(number):
 		return "revoked"
 	data["insider_no"] = number
+	if number == 0:
+		Platform.storage_set(DEV_KEY, "1")
 	save_data()
 	return "ok"
 
@@ -842,8 +861,8 @@ func import_code(code: String) -> bool:
 
 ## ID игрока: номер инсайдера, Telegram-аккаунт, если запущено в Telegram, иначе постоянный локальный номер.
 func get_player_id() -> String:
-	if get_insider() >= 0:
-		return "%03d" % get_insider()
+	if int(data["insider_no"]) >= 0:
+		return "%03d" % int(data["insider_no"])
 	var uid := Platform.user_id()
 	if not uid.is_empty():
 		return uid

@@ -840,7 +840,7 @@ class Profile:
 		list.add_child(MenuPopups.small_hint("Если у друга другой номер, пусть откроет игру заново или нажмёт на розовую плашку обновления."))
 		list.add_child(_section("Облачное сохранение"))
 		list.add_child(_cloud_block())
-		list.add_child(_section("Тестер и сохранение"))
+		list.add_child(_section("Сохранение и реплики"))
 		list.add_child(_insider_block())
 
 	func _rank_button() -> Control:
@@ -946,7 +946,7 @@ class Profile:
 		edit.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		edit.custom_minimum_size = Vector2(0, 56)
 		SearchBar.style(edit, 22)
-		SearchBar.attach_touch_input(edit, "Код тестера")
+		SearchBar.attach_touch_input(edit, placeholder)
 		return edit
 
 	func _cloud_block() -> Control:
@@ -1016,47 +1016,13 @@ class Profile:
 	func _insider_block() -> Control:
 		var box := VBoxContainer.new()
 		box.add_theme_constant_override("separation", 10)
-		var status := UiStyle.label("", 22, UiStyle.NEON, 6)
-		status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		var votes_box := VBoxContainer.new()
 		votes_box.add_theme_constant_override("separation", 6)
 		var votes := MenuWidgets.PawToggle.new("Оценка реплик", bool(SaveService.data.get("line_votes_on", true)))
 		votes.toggled.connect(func(on: bool) -> void: SaveService.set_flag("line_votes_on", on))
 		votes_box.add_child(votes)
 		votes_box.add_child(MenuPopups.small_hint("Под репликой в бою кнопки «+» оставить и «×» убрать. Оценено: %d. Убранные реплики больше не появятся." % LineVotes.rated_count()))
-		var refresh := func() -> void:
-			var number := SaveService.get_insider()
-			status.text = "Статус: %s, номер %03d" % [SaveService.get_badge(), number] if number >= 0 else "Есть код тестера? Введи его и получи плашку возле ника."
-			votes_box.visible = number >= 0
-		refresh.call()
-		box.add_child(status)
 		box.add_child(votes_box)
-		var code_row := HBoxContainer.new()
-		code_row.add_theme_constant_override("separation", 8)
-		var code_edit := _styled_edit("INS-001-XXXX")
-		code_row.add_child(code_edit)
-		var apply := UiStyle.button("ПРИМЕНИТЬ", UiStyle.HOT, 22, Vector2(200, 56))
-		var paint := func(color: Color) -> void:
-			apply.add_theme_stylebox_override("normal", UiStyle.button_box(color, false))
-			apply.add_theme_stylebox_override("hover", UiStyle.button_box(color.lightened(0.06), false))
-			apply.add_theme_stylebox_override("pressed", UiStyle.button_box(color.lightened(0.1), true))
-			apply.add_theme_stylebox_override("hover_pressed", UiStyle.button_box(color.lightened(0.1), true))
-		apply.pressed.connect(func() -> void:
-			var result: String = SaveService.activate_insider(code_edit.text)
-			if result == "ok":
-				code_edit.text = ""
-				refresh.call()
-			else:
-				status.text = "Код отозван." if result == "revoked" else "Код не подошёл. Проверь буквы и цифры."
-			apply.text = "ПРИНЯТО" if result == "ok" else ("ОТОЗВАН" if result == "revoked" else "НЕВЕРНО")
-			paint.call(Color("#35c46a") if result == "ok" else Color("#d63a4f"))
-			get_tree().create_timer(1.6).timeout.connect(func() -> void:
-				if is_instance_valid(apply):
-					apply.text = "ПРИМЕНИТЬ"
-					paint.call(UiStyle.HOT)))
-		code_row.add_child(apply)
-		code_edit.text_submitted.connect(func(_t: String) -> void: apply.pressed.emit())
-		box.add_child(code_row)
 		var copy := UiStyle.button("Скопировать код сохранения", UiStyle.PANEL_LIGHT, 22, Vector2(0, 56))
 		copy.pressed.connect(func() -> void:
 			DisplayServer.clipboard_set(SaveService.export_code())
@@ -1165,19 +1131,34 @@ class Profile:
 	func _friends_bar() -> Control:
 		var panel := PanelContainer.new()
 		panel.mouse_filter = Control.MOUSE_FILTER_STOP
+		panel.custom_minimum_size = Vector2(0, 96)
 		panel.gui_input.connect(func(event: InputEvent) -> void:
 			var tapped: bool = (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT) or (event is InputEventScreenTouch and event.pressed)
 			if tapped:
 				SoundManager.play(&"ui_click")
 				friends_requested.emit())
-		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#2f2452"), Color(UiStyle.HOT, 0.7), 3, 16))
+		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#6b2a8f"), UiStyle.HOT, 4, 18))
 		var head := HBoxContainer.new()
 		head.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		var title := UiStyle.label("Друзья и визитка - открыть", 24, UiStyle.TEXT, 6)
-		title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		head.add_theme_constant_override("separation", 12)
+		var texts := VBoxContainer.new()
+		texts.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		texts.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var title := UiStyle.label("ДРУЗЬЯ", 34, UiStyle.TEXT, 8)
 		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-		head.add_child(title)
-		head.add_child(UiStyle.label(str(SaveService.get_friends().size()), 28, UiStyle.HOT, 8))
+		texts.add_child(title)
+		var sub := UiStyle.label("Визитка, рейтинг, профили друзей", 18, UiStyle.TEXT_DIM, 4)
+		sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		texts.add_child(sub)
+		head.add_child(texts)
+		var badge := PanelContainer.new()
+		badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		badge.custom_minimum_size = Vector2(64, 64)
+		badge.add_theme_stylebox_override("panel", UiStyle.box(Color("#ff2ea6"), UiStyle.OUTLINE, 3, 32))
+		var count := UiStyle.label(str(SaveService.get_friends().size()), 32, Color.WHITE, 8)
+		count.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		badge.add_child(count)
+		head.add_child(badge)
 		panel.add_child(head)
 		return panel
 

@@ -34,6 +34,7 @@ func _ready() -> void:
 	is_web = OS.has_feature("web")
 	if not is_web:
 		return
+	_js("if (navigator.storage && navigator.storage.persist) { navigator.storage.persist(); } return true;")
 	is_telegram = _js_bool("!!(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData)")
 	if is_telegram:
 		_js("Telegram.WebApp.ready(); Telegram.WebApp.expand(); if (Telegram.WebApp.disableVerticalSwipes) Telegram.WebApp.disableVerticalSwipes();")
