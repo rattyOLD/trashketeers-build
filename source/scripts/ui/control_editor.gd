@@ -16,6 +16,7 @@ var _size_slider: HSlider
 var _selected_label: Label
 var _joystick_slider: HSlider
 var _opacity_slider: HSlider
+var _element_opacity_slider: HSlider
 var _fixed_toggle: Button
 var _swipe_toggle: Button
 var _preset_buttons: Array[Button] = []
@@ -28,6 +29,11 @@ func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	visible = false
 	z_index = 100
+
+
+func select(id: String) -> void:
+	if Controls.ELEMENTS.has(id):
+		_selected = id
 
 
 func open() -> void:
@@ -86,7 +92,7 @@ func _build() -> void:
 	_summary = VBoxContainer.new()
 	_summary.add_theme_constant_override("separation", 8)
 	_body.add_child(_summary)
-	var hint := UiStyle.label("Тащи кнопки пальцем. Тап по кнопке — выбрать её для настройки размера.", 18, UiStyle.TEXT_DIM, 4)
+	var hint := UiStyle.label("Тащи кнопки пальцем. Тап по кнопке выбирает её: ниже её размер и прозрачность.", 18, UiStyle.TEXT_DIM, 4)
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_summary.add_child(hint)
 
@@ -101,6 +107,11 @@ func _build() -> void:
 			_sync())
 		hand_row.add_child(b)
 	_summary.add_child(hand_row)
+	var big := UiStyle.button("БОЛЬШИЕ ПАЛЬЦЫ", UiStyle.PANEL_LIGHT, 22, Vector2(0, 58))
+	big.pressed.connect(func() -> void:
+		Controls.apply_big(bool(Controls.get_value("left_handed")))
+		_sync())
+	_summary.add_child(big)
 
 	_selected_label = UiStyle.label("", 22, UiStyle.NEON, 5)
 	_selected_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
@@ -110,10 +121,14 @@ func _build() -> void:
 		Controls.set_element(_selected, float(e["x"]), float(e["y"]), v)
 		Controls.save()
 		_place_all())
+	_element_opacity_slider = _slider(_summary, "Прозрачность кнопки", 0.2, 1.0, func(v: float) -> void:
+		Controls.set_element_opacity(_selected, v)
+		Controls.save()
+		_place_all())
 	_joystick_slider = _slider(_summary, "Размер джойстика", 0.7, 1.5, func(v: float) -> void:
 		Controls.set_value("joystick_scale", v)
 		queue_redraw())
-	_opacity_slider = _slider(_summary, "Прозрачность кнопок", 0.3, 1.0, func(v: float) -> void:
+	_opacity_slider = _slider(_summary, "Прозрачность всех", 0.3, 1.0, func(v: float) -> void:
 		Controls.set_value("opacity", v)
 		_place_all())
 
@@ -203,6 +218,7 @@ func _sync() -> void:
 	_size_slider.set_value_no_signal(float(e["s"]))
 	_joystick_slider.set_value_no_signal(float(Controls.get_value("joystick_scale")))
 	_opacity_slider.set_value_no_signal(float(Controls.get_value("opacity")))
+	_element_opacity_slider.set_value_no_signal(Controls.element_opacity(_selected))
 	_fixed_toggle.text = "Джойстик: %s" % ("фиксированный" if bool(Controls.get_value("joystick_fixed")) else "плавающий")
 	_swipe_toggle.text = "Свайп смены ствола: %s" % ("вкл" if bool(Controls.get_value("swipe_switch")) else "выкл")
 	for i in _preset_buttons.size():
@@ -215,7 +231,7 @@ func _place_all() -> void:
 	for id in _items:
 		var base: Vector2 = BattleControls.slots_base_size(count) if id == "slots" else Vector2.ZERO
 		Controls.place(_items[id], id, size, base)
-		_items[id].modulate.a = float(Controls.get_value("opacity"))
+		_items[id].modulate.a = float(Controls.get_value("opacity")) * Controls.element_opacity(id)
 		_items[id].queue_redraw()
 	queue_redraw()
 

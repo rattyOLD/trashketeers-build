@@ -106,10 +106,15 @@ class InteractButton:
 	extends Control
 	signal pressed
 
+	## Подбор срабатывает при отпускании короткого касания: долгое удержание открывает правку кнопки.
+	const HOLD_TAP_MS := 900
+
 	var weapon: WeaponData
 	var note := ""
 	var editor_preview := false
 	var _time := 0.0
+	var _touch := -1
+	var _down := 0
 
 	func _init() -> void:
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -131,10 +136,19 @@ class InteractButton:
 
 	func _input(event: InputEvent) -> void:
 		if editor_preview or not visible or get_tree().paused:
+			_touch = -1
 			return
-		if event is InputEventScreenTouch and event.pressed:
-			if get_global_rect().grow(14.0).has_point((event as InputEventScreenTouch).position):
-				pressed.emit()
+		if event is InputEventScreenTouch:
+			var touch := event as InputEventScreenTouch
+			if touch.pressed:
+				if _touch == -1 and get_global_rect().grow(14.0).has_point(touch.position):
+					_touch = touch.index
+					_down = Time.get_ticks_msec()
+					get_viewport().set_input_as_handled()
+			elif touch.index == _touch:
+				_touch = -1
+				if Time.get_ticks_msec() - _down < HOLD_TAP_MS:
+					pressed.emit()
 				get_viewport().set_input_as_handled()
 
 	func _draw() -> void:

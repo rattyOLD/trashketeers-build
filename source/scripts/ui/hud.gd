@@ -58,6 +58,8 @@ var _rail_combo: Label
 var _slot_bar: BattleControls.SlotBar
 var _interact: BattleControls.InteractButton
 var _layout_revision := -1
+var _hold: LayoutHold
+var _editor: ControlEditor
 var _minimap_slot: Control
 var _level_up: LevelUpPanel
 var _result: ResultPanel
@@ -171,6 +173,14 @@ func build(currency_icon: Texture2D, weapon: WeaponData) -> void:
 			if not panels.has(child):
 				UiStyle.boost_labels(child, HUD_TEXT_BOOST)
 	_wire_hints()
+	_hold = LayoutHold.new()
+	_hold.targets = {
+		"dash": _hold_dash,
+		"slots": _hold_slots,
+		"interact": _hold_interact,
+	}
+	_hold.requested.connect(_open_layout_editor)
+	_root.add_child(_hold)
 	_dash.held.connect(func() -> void: _hint.show_for(_dash, "Рывок: быстрый бросок от удара."))
 	_slot_bar.slot_held.connect(_on_slot_held)
 
@@ -341,6 +351,37 @@ func set_interact(weapon: WeaponData, note: String = "") -> void:
 	_interact.show_for(weapon, note)
 
 
+func _hold_dash() -> Control:
+	if _skill.visible:
+		return _skill
+	return _dash
+
+
+func _hold_slots() -> Control:
+	return _slot_bar
+
+
+func _hold_interact() -> Control:
+	return _interact
+
+
+## Правка кнопки прямо в бою: пауза, перетаскивание, размер и прозрачность выбранной кнопки.
+func _open_layout_editor(id: String) -> void:
+	if _editor != null or get_tree().paused or _result.visible or _revive.visible:
+		return
+	get_tree().paused = true
+	_editor = ControlEditor.new()
+	_root.add_child(_editor)
+	_editor.size = _root.size
+	_editor.select(id)
+	_editor.closed.connect(func() -> void:
+		_editor.queue_free()
+		_editor = null
+		apply_layout()
+		get_tree().paused = false)
+	_editor.open()
+
+
 func apply_layout() -> void:
 	if _root == null or _slot_bar == null:
 		return
@@ -351,8 +392,10 @@ func apply_layout() -> void:
 	Controls.place(_interact, "interact", area)
 	_resolve_button_overlap(area)
 	var opacity := clampf(float(Controls.get_value("opacity")), 0.3, 1.0)
-	for item in [_dash, _slot_bar, _skill]:
-		item.modulate.a = opacity
+	_dash.modulate.a = opacity * Controls.element_opacity("dash")
+	_skill.modulate.a = opacity * Controls.element_opacity("dash")
+	_slot_bar.modulate.a = opacity * Controls.element_opacity("slots")
+	_interact.modulate.a = Controls.element_opacity("interact")
 	joystick.modulate.a = opacity
 	_layout_revision = Controls.revision
 

@@ -113,6 +113,15 @@ static func set_element(id: String, x: float, y: float, scale: float) -> void:
 	e["s"] = clampf(scale, 0.6, 1.6)
 
 
+## Прозрачность отдельной кнопки (множитель к общей прозрачности).
+static func element_opacity(id: String) -> float:
+	return clampf(float(element(id).get("o", 1.0)), 0.2, 1.0)
+
+
+static func set_element_opacity(id: String, value: float) -> void:
+	element(id)["o"] = clampf(value, 0.2, 1.0)
+
+
 static func get_value(key: String) -> Variant:
 	return config()[key]
 
@@ -126,6 +135,17 @@ static func weapon_slot_count() -> int:
 	if not SaveService.has_slot3():
 		return 2
 	return clampi(int(config()["weapon_slots"]), 2, 3)
+
+
+## Готовая раскладка «Большие пальцы»: крупные кнопки с запасом между ними.
+static func apply_big(left_handed: bool) -> void:
+	apply_preset(left_handed)
+	var cx := 0.13 if left_handed else 0.87
+	set_element("dash", cx, 0.72, 1.4)
+	set_element("slots", cx, 0.46, 1.25)
+	set_element("interact", 0.5, 0.8, 1.35)
+	set_value("joystick_scale", 1.3)
+	save()
 
 
 static func apply_preset(left_handed: bool) -> void:
