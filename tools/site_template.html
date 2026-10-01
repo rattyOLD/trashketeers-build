@@ -12,6 +12,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap">
 <style>
+@media (orientation: landscape) and (pointer: coarse) {
+	#rotate { display: flex !important; }
+}
 :root {
 	color-scheme: dark;
 	--night: #0d0a1c;
@@ -278,9 +281,9 @@ html, body {
 	animation: pulse 1.3s ease-in-out infinite;
 }
 @keyframes turn {
-	0%, 18% { transform: rotate(0deg); }
-	52%, 82% { transform: rotate(-90deg); }
-	100% { transform: rotate(0deg); }
+	0%, 18% { transform: rotate(-90deg); }
+	52%, 82% { transform: rotate(0deg); }
+	100% { transform: rotate(-90deg); }
 }
 @keyframes pulse { 0%, 100% { opacity: 0.45; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.15); } }
 #rotate h2 {
@@ -303,9 +306,9 @@ html, body {
 
 <div id="rotate">
 	<div class="phone"></div>
-	<h2>Поверни телефон</h2>
-	<p>Игра создана для <b>горизонтального</b> режима. Включи автоповорот экрана и переверни телефон.</p>
-	<p>Rotate your phone to landscape to play.</p>
+	<h2>Держи телефон вертикально</h2>
+	<p>Игра идёт только в <b>вертикальном</b> режиме. Переверни телефон, и всё продолжится.</p>
+	<p>Portrait mode only. Rotate your phone to play.</p>
 </div>
 
 <div id="boot">
@@ -347,6 +350,7 @@ html, body {
 			return setTimeout(function () { window.dispatchEvent(new Event('resize')); }, ms);
 		});
 	};
+	try { if (screen.orientation && screen.orientation.lock && window.matchMedia('(pointer: coarse)').matches) { screen.orientation.lock('portrait').catch(function () {}); } } catch (e) {}
 	window.addEventListener('orientationchange', kick);
 	window.addEventListener('resize', kick);
 	if (window.visualViewport) { window.visualViewport.addEventListener('resize', kick); }
