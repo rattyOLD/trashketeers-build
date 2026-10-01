@@ -1,0 +1,82 @@
+{
+  "generator": "built-in imagegen",
+  "prompts": [
+    {
+      "key": "ui_friends",
+      "cols": 1,
+      "rows": 1,
+      "cw": 256,
+      "ch": 256,
+      "ow": 128,
+      "oh": 128,
+      "names": [
+        "friends_icon"
+      ],
+      "prompt": "Production neon-trash cartoon UI icons. Thick dark outlines, two-tone cel shading, rusty gold hardware pink/cyan neon. Frontview crisp smallsize readability, exact grid no lines labels. Complete centered icons on #FF00FF unless transparent alpha requested. No letters, digits, text, watermark, pixelart. Two friendly raccoons shoulder to shoulder, greycreamfur blackeyemasks, oneorangegoggles redscarf anothertealscarf. Compact round friends hub icon.",
+      "block": "G",
+      "dir": "ui",
+      "path": "/workspace/scratch/a777a22c1d4f/generated_images/exec-f0ab8789-ccac-4d18-bc14-dfab1f369261.png"
+    },
+    {
+      "key": "ui_missions_fix",
+      "cols": 6,
+      "rows": 2,
+      "cw": 192,
+      "ch": 192,
+      "ow": 96,
+      "oh": 96,
+      "names": [
+        "mission_1_locked",
+        "mission_2_locked",
+        "mission_3_locked",
+        "mission_4_locked",
+        "mission_5_locked",
+        "mission_6_locked",
+        "mission_1_complete",
+        "mission_2_complete",
+        "mission_3_complete",
+        "mission_4_complete",
+        "mission_5_complete",
+        "mission_6_complete"
+      ],
+      "prompt": "Use case: precise-object-edit. Preserve this 6columns2rows mission-badge sheet: same outer gears, colors, locks on top row, checkmarks on bottom row, all positions, spacing, camera and cartoon style. Change ONLY all six central emblems to irregular broken MECHANICAL REACTOR SHARDS of the civic Barrel, with jagged metal edges and luminous internal cores. Each column is a different shard shape and palette: pink junk fragment, gold bank fragment, indigo roof fragment, cyan icy fragment, orange-green city fragment, pink-gold heart-reactor fragment. Every shard must match exactly between its locked top version and completed bottom version. These are broken machine pieces, not coin/paw emblem, play triangle, heart, map or gemstone. Top locked core dim, bottom completed core bright. No letters, digits, labels. Pure #FF00FF outside badges. Entire icons contained with clear magenta margins.",
+      "block": "G",
+      "dir": "ui",
+      "path": "/workspace/scratch/a777a22c1d4f/generated_images/exec-ba4f8cfa-5652-4ac5-a924-8cdaace28615.png"
+    },
+    {
+      "key": "ui_card",
+      "cols": 1,
+      "rows": 1,
+      "cw": 640,
+      "ch": 360,
+      "alpha": true,
+      "names": [
+        "visiting_card_frame"
+      ],
+      "prompt": "Production neon-trash cartoon UI icons. Thick dark outlines, two-tone cel shading, rusty gold hardware pink/cyan neon. Frontview crisp smallsize readability, exact grid no lines labels. Complete centered icons on #FF00FF unless transparent alpha requested. No letters, digits, text, watermark, pixelart. One EMPTY wide16:9 visitingcardFRAME640x360. Thinblackrust border neonpinkcyan tubes goldrivetedcorners, entireCENTER genuinelyTRANSPARENT alpha andoutsidealso transparent. Border24px large empty transparent opening, no widgets orcharacters.",
+      "block": "G",
+      "dir": "ui",
+      "path": "/workspace/scratch/a777a22c1d4f/generated_images/exec-85ecdf24-158e-4049-859e-141a2c12e089.png"
+    },
+    {
+      "key": "ui_ranks",
+      "cols": 4,
+      "rows": 1,
+      "cw": 256,
+      "ch": 256,
+      "ow": 128,
+      "oh": 128,
+      "names": [
+        "rank_rust_can",
+        "rank_bronze",
+        "rank_silver",
+        "rank_gold_crown"
+      ],
+      "prompt": "Production neon-trash cartoon UI icons. Thick dark outlines, two-tone cel shading, rusty gold hardware pink/cyan neon. Frontview crisp smallsize readability, exact grid no lines labels. Complete centered icons on #FF00FF unless transparent alpha requested. No letters, digits, text, watermark, pixelart. 4rankstamps single row: rusty dented tin can; bronzemedal star; silvermedal star; goldmedallion withgoldcrown. NO letters C/B/A/S. Same visualscale.",
+      "block": "G",
+      "dir": "ui",
+      "path": "/workspace/scratch/a777a22c1d4f/generated_images/exec-e52a1dbc-ad53-40f8-967e-86ef449ff128.png"
+    }
+  ]
+}

@@ -1,0 +1,187 @@
+{
+  "brief": "astra/from_claude/BRIEF_v7_saga.md",
+  "block": "G",
+  "frameOrder": "left-to-right top-to-bottom",
+  "assets": [
+    {
+      "path": "astra/inbox/story/ui/friends_icon.png",
+      "width": 128,
+      "height": 128,
+      "block": "G",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "ui_friends",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/ui/mission_1_locked.png",
+      "width": 96,
+      "height": 96,
+      "block": "G",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "ui_missions_fix",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/ui/mission_2_locked.png",
+      "width": 96,
+      "height": 96,
+      "block": "G",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "ui_missions_fix",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/ui/mission_3_locked.png",
+      "width": 96,
+      "height": 96,
+      "block": "G",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "ui_missions_fix",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/ui/mission_4_locked.png",
+      "width": 96,
+      "height": 96,
+      "block": "G",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "ui_missions_fix",
+      "frame": 3
+    },
+    {
+      "path": "astra/inbox/story/ui/mission_5_locked.png",
+      "width": 96,
+      "height": 96,
+      "block": "G",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "ui_missions_fix",
+      "frame": 4
+    },
+    {
+      "path": "astra/inbox/story/ui/mission_6_locked.png",
+      "width": 96,
+      "height": 96,
+      "block": "G",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "ui_missions_fix",
+      "frame": 5
+    },
+    {
+      "path": "astra/inbox/story/ui/mission_1_complete.png",
+      "width": 96,
+      "height": 96,
+      "block": "G",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "ui_missions_fix",
+      "frame": 6
+    },
+    {
+      "path": "astra/inbox/story/ui/mission_2_complete.png",
+      "width": 96,
+      "height": 96,
+      "block": "G",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "ui_missions_fix",
+      "frame": 7
+    },
+    {
+      "path": "astra/inbox/story/ui/mission_3_complete.png",
+      "width": 96,
+      "height": 96,
+      "block": "G",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "ui_missions_fix",
+      "frame": 8
+    },
+    {
+      "path": "astra/inbox/story/ui/mission_4_complete.png",
+      "width": 96,
+      "height": 96,
+      "block": "G",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "ui_missions_fix",
+      "frame": 9
+    },
+    {
+      "path": "astra/inbox/story/ui/mission_5_complete.png",
+      "width": 96,
+      "height": 96,
+      "block": "G",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "ui_missions_fix",
+      "frame": 10
+    },
+    {
+      "path": "astra/inbox/story/ui/mission_6_complete.png",
+      "width": 96,
+      "height": 96,
+      "block": "G",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "ui_missions_fix",
+      "frame": 11
+    },
+    {
+      "path": "astra/inbox/story/ui/visiting_card_frame.png",
+      "width": 640,
+      "height": 360,
+      "block": "G",
+      "transparent": true,
+      "texture": false,
+      "sourceSheet": "ui_card",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/ui/rank_rust_can.png",
+      "width": 128,
+      "height": 128,
+      "block": "G",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "ui_ranks",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/ui/rank_bronze.png",
+      "width": 128,
+      "height": 128,
+      "block": "G",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "ui_ranks",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/ui/rank_silver.png",
+      "width": 128,
+      "height": 128,
+      "block": "G",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "ui_ranks",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/ui/rank_gold_crown.png",
+      "width": 128,
+      "height": 128,
+      "block": "G",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "ui_ranks",
+      "frame": 3
+    }
+  ]
+}
