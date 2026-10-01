@@ -54,6 +54,7 @@ var _skins: MenuPopups.Shop
 var _tester: TesterPopup
 var _stage: Control
 var _tester_button: Button
+var _account_banner: Control
 var _chests: ChestsPopup
 var _changelog: ChangelogPopup
 var _armory: MenuPopups.Armory
@@ -223,6 +224,51 @@ func _build_landscape_layout() -> Control:
 	side.add_child(_build_play())
 	column.add_child(_build_dock())
 	return column
+
+
+## Плашка «Заведи аккаунт» под верхней панелью: не перекрывает экран и не спорит с клавиатурой, как всплывающее окно.
+## Тап — открыть окно аккаунта, крестик — убрать до следующего раза.
+func show_account_banner(text: String) -> void:
+	if is_instance_valid(_account_banner):
+		return
+	var bar := PanelContainer.new()
+	bar.add_theme_stylebox_override("panel", UiStyle.box(Color("#3a1030"), Color("#ff2ea6"), 3, 16))
+	bar.anchor_left = 0.5
+	bar.anchor_right = 0.5
+	bar.offset_left = -minf(COLUMN_WIDTH, get_viewport_rect().size.x - 24.0) * 0.5
+	bar.offset_right = -bar.offset_left
+	bar.offset_top = 112.0 if Orient.portrait else 96.0
+	bar.mouse_filter = Control.MOUSE_FILTER_STOP
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 10)
+	bar.add_child(row)
+	var label := UiStyle.label(text, 19, UiStyle.TEXT, 4)
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	label.custom_minimum_size = Vector2(maxf(bar.offset_right * 2.0 - 230.0, 160.0), 0)
+	row.add_child(label)
+	var go := UiStyle.button("ЗАВЕСТИ", UiStyle.HOT, 20, Vector2(132, 52))
+	go.pressed.connect(func() -> void:
+		bar.queue_free()
+		_account.open())
+	row.add_child(go)
+	var shut := UiStyle.button("X", UiStyle.PANEL_LIGHT, 20, Vector2(52, 52))
+	shut.pressed.connect(bar.queue_free)
+	row.add_child(shut)
+	bar.gui_input.connect(func(event: InputEvent) -> void:
+		if (event is InputEventMouseButton and event.pressed) or (event is InputEventScreenTouch and event.pressed):
+			bar.queue_free()
+			_account.open())
+	add_child(bar)
+	move_child(bar, _settings.get_index())
+	_account_banner = bar
+	bar.modulate.a = 0.0
+	bar.position.y -= 40.0
+	var tween := bar.create_tween().set_parallel(true)
+	tween.tween_property(bar, "modulate:a", 1.0, 0.35)
+	tween.tween_property(bar, "position:y", bar.position.y + 40.0, 0.45).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
 func _build_top_bar() -> Control:

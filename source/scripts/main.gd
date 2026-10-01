@@ -320,11 +320,9 @@ func _maybe_nag_account(menu: MainMenuUI) -> void:
 	if runs < 1 or shown >= 2 or (shown == 1 and runs < 5):
 		return
 	Platform.storage_set("trk_acct_nag", str(shown + 1))
-	menu._account.intro = "Первый забег позади, енот! Заведи логин и пароль, и прогресс не пропадёт, даже если телефон сойдёт с ума или браузер всё забудет."
 	get_tree().create_timer(1.2).timeout.connect(func() -> void:
 		if is_instance_valid(menu):
-			menu._account.open()
-			menu._account.intro = "")
+			menu.show_account_banner("Первый забег позади, енот! Заведи логин и пароль: прогресс не пропадёт, даже если телефон сойдёт с ума." if shown == 0 else "Пятый забег, а аккаунта всё нет. Енот волнуется: заведи логин, пока прогресс цел."))
 
 
 func _start_game(weapon_id: StringName) -> void:
