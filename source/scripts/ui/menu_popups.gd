@@ -506,7 +506,7 @@ class Armory:
 		var title := UiStyle.label(weapon.get_title(), 26, weapon.get_rarity_color(), 7)
 		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 		info.add_child(title)
-		var stats := UiStyle.label("Урон %d · %.1f выстр/с · DPS %d" % [roundi(weapon.damage), 1.0 / weapon.fire_interval, roundi(weapon.get_dps())], 18, UiStyle.TEXT_DIM, 4)
+		var stats := UiStyle.label("Урон %d · %.1f %s · DPS %d" % [roundi(weapon.damage), 1.0 / weapon.fire_interval, "ударов/с" if weapon.is_melee() else "выстр/с", roundi(weapon.get_dps())], 18, UiStyle.TEXT_DIM, 4)
 		stats.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 		info.add_child(stats)
 		var behavior := UiStyle.label(base.behavior_text(), 17, UiStyle.NEON, 4)
