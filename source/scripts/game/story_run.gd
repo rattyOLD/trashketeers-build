@@ -99,6 +99,7 @@ static func map_chapter(base: Dictionary, mission_id: String) -> Dictionary:
 
 func setup(owner_game: Game, mission_id: String) -> bool:
 	game = owner_game
+	BossBrain.mute_bonus = 0.0
 	var root := ConfigLoader.load_json(DATA_PATH)
 	speakers = root.get("speakers", {})
 	for entry in root.get("missions", []):
@@ -185,7 +186,23 @@ func enemies_left() -> int:
 	return left
 
 
+func order_text() -> String:
+	var info := SaveService.nell_order()
+	if bool(info["done"]):
+		return "ЗАКАЗ НЭЛЛ ВЫПОЛНЕН"
+	return "ЗАКАЗ НЭЛЛ: %s %d/%d" % [info["title"], info["progress"], info["goal"]]
+
+
+func _count(stat: String, amount: int = 1) -> void:
+	SaveService.add_stat(stat, amount, false)
+	var done := SaveService.nell_order_tick()
+	if not done.is_empty():
+		game.hud.toast("ЗАКАЗ НЭЛЛ ВЫПОЛНЕН", "%s. Награда: +%d монет, +%d неонита" % [done["title"], done["nuts"], done["dust"]], Color("#5ff2ff"))
+		SoundManager.play(&"level_up", -4.0, false)
+
+
 func on_kill(data: EnemyData) -> void:
+	_count("story_kills")
 	kills += 1
 	score += BOSS_POINTS if data.is_boss() else maxi(int(data.max_hp / 4.0), 10) * 10
 
@@ -214,6 +231,11 @@ func result_lines(victory: bool) -> PackedStringArray:
 	lines.append("Детали ствола: %d из %d" % [barrel.parts if not barrel.active else HeavyBarrel.TOTAL_PARTS, HeavyBarrel.TOTAL_PARTS])
 	lines.append("Жизни: %d из %d" % [lives, START_LIVES])
 	lines.append("Время: %s" % BattleBase.format_time(game.director.elapsed))
+	if victory:
+		var friend := SaveService.friend_best(str(mission.get("id", "")))
+		if not friend.is_empty():
+			var mine := score + bonus
+			lines.append("Рекорд друга %s: %d%s" % [friend["name"], friend["score"], " (ты обошёл)" if mine > int(friend["score"]) else ""])
 	if victory and flawless():
 		lines.append("БЕЗ ЕДИНОГО УРОНА: ранг S")
 	if victory:
@@ -306,6 +328,7 @@ func nearest_secret(from: Vector2, max_distance: float) -> Node2D:
 
 func _on_secret_broken(secret: StorySecret) -> void:
 	secrets_found += 1
+	_count("story_secrets")
 	score += SECRET_POINTS
 	var at := secret.global_position
 	game.fx.dust(at, 14, 120.0)
@@ -439,6 +462,7 @@ func _check_zone() -> void:
 		return
 	if zone_index >= 0 and not _zone_hit:
 		score += CLEAN_ZONE_POINTS
+		_count("story_clean_zones")
 		game.fx.popup(game.player.global_position + Vector2(0, -110), "БЕЗ УРОНА +%d" % CLEAN_ZONE_POINTS, Color("#7cff6b"), 30.0)
 	_zone_hit = false
 	zone_index = index
@@ -497,12 +521,13 @@ func _tick_captives() -> void:
 
 func _on_captive_freed(captive: Captive) -> void:
 	rescued += 1
+	_count("story_rescued")
 	score += RESCUE_POINTS
 	game.player.heal(game.player.max_hp * RESCUE_HEAL)
 	game.fx.popup(captive.global_position + Vector2(0, -80), "СПАСЁН +%d" % RESCUE_POINTS, Color("#ffd257"), 32.0)
 	game.fx.ring(captive.global_position, Color("#ffd257"), 120.0)
 	game.pickups.spawn_xp_gold(captive.global_position, 5)
-	SaveService.add_stat("story_rescued")
+
 	game.hud.toast("ПЛЕННИК ОСВОБОЖДЁН", "Спасено: %d · +%d очков" % [rescued, RESCUE_POINTS], Color("#ffd257"))
 
 
@@ -524,6 +549,35 @@ func _update_waypoint() -> void:
 		return
 	waypoint.global_position = game.player.global_position + Vector2(0, -1100)
 	game.story_target = waypoint
+
+
+func _offer_choice(key: String) -> void:
+	var choices: Dictionary = mission.get("choices", {})
+	if not choices.has(key):
+		return
+	var card: Dictionary = choices[key]
+	get_tree().create_timer(1.6, true, false, true).timeout.connect(func() -> void:
+		if game == null or game.finished or game.player == null or game.player.is_dead:
+			return
+		var panel := ChoiceCard.new()
+		game.add_child(panel)
+		panel.chosen.connect(_on_choice.bind(card))
+		panel.open(card))
+
+
+func _on_choice(index: int, card: Dictionary) -> void:
+	var option: Dictionary = (card["options"] as Array)[index]
+	var effect := str(option.get("effect", ""))
+	SaveService.set_story_choice(str(mission.get("id", "")), effect)
+	if effect == "spare":
+		BossBrain.mute_bonus = 2.0
+		game.hud.toast("ШНЫРЬ СВОБОДЕН", "Оглушение Короля после колонок: +2 с", Color("#b07cff"))
+	else:
+		BossBrain.mute_bonus = 0.0
+		game._drop_weapon(game._roll_weapon("epic"), game.player.global_position + Vector2(0, -90), true)
+		_drop_medkit(game.player.global_position + Vector2(70, -80))
+		game.hud.toast("НАГРАДА КОРОЛЯ", "Эпический ствол и аптечка рядом", Color("#ffd257"))
+	_say(str(option.get("say", "")), 0.5)
 
 
 func _last_enemy() -> Node2D:
@@ -647,6 +701,9 @@ func _check_clear() -> void:
 	if _boss_alive:
 		return
 	locked = false
+	if _active.has("choice"):
+		_offer_choice(str(_active["choice"]))
+	_count("story_ambushes")
 	game.map.open_story_gate(gate_key)
 	_min_trigger = float(_active.get("at", 0.0)) + LevelSpawner.DOOR_LEAD + EXIT_MARGIN
 	checkpoint = game.player.global_position
@@ -735,12 +792,15 @@ func finish() -> void:
 		SaveService.add_stat("story_all_rescued", 1, false)
 	if flawless():
 		SaveService.add_stat("story_flawless", 1, false)
-	SaveService.add_stat("story_missions", 1)
+	_count("story_missions")
 	game.story_target = null
 	game.hud.show_banner("ОСКОЛОК %d/6 ПОЛУЧЕН!" % shards, UiStyle.GOLD, 2.8)
 	_after_queue = game.story_finished
 	_say("king_dead", 1.6)
 	_say("outro", 1.7)
+	var made := SaveService.story_choice(str(mission.get("id", "")))
+	if not made.is_empty():
+		_say("after_" + made, 1.8)
 
 
 func _open_crate() -> void:

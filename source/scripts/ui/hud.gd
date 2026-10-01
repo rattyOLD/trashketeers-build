@@ -67,6 +67,7 @@ var _run_result: BattlePanels.RunResultPanel
 var _chapter_card: BattlePanels.ChapterCard
 var _hint: HintBubble
 var _left_column: VBoxContainer
+var _order_label: Label
 var _story_bar: StoryBar
 var _minimap: Minimap
 var _toast_queue: Array = []
@@ -193,6 +194,10 @@ func set_story_layout(minimap: Minimap) -> void:
 	_wave_box.visible = false
 	_story_bar = StoryBar.new()
 	_left_column.add_child(_story_bar)
+	_order_label = UiStyle.label("", 18, Color("#5ff2ff"), 5)
+	_order_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	_order_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_left_column.add_child(_order_label)
 	_story_bar.chip_tapped.connect(func(chip: Control, text: String) -> void: _hint.show_for(chip, text))
 	UiStyle.anchor(_boss_bar, Vector2(0.5, 0.0), Rect2(-300, 190, 600, 96))
 	UiStyle.anchor(_minimap_slot, Vector2(1.0, 0.0), Rect2(-216, 300, 198, 340))
@@ -201,7 +206,9 @@ func set_story_layout(minimap: Minimap) -> void:
 		_hint.show_for(_minimap_slot, "Карта: ты, враги, ворота, пленники. Тап — %s." % ("крупный план" if overview else "вся карта")))
 
 
-func set_story_status(score: int, lives: int, zone_number: int, zone_count: int, zone_name: String, enemies_left: int = -1) -> void:
+func set_story_status(score: int, lives: int, zone_number: int, zone_count: int, zone_name: String, enemies_left: int = -1, order_text: String = "") -> void:
+	if _order_label != null:
+		_order_label.text = order_text
 	if _story_bar != null:
 		_story_bar.update(score, lives, zone_number, zone_count, zone_name, enemies_left)
 

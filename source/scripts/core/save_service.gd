@@ -32,6 +32,9 @@ const DEFAULTS := {
 	"boss_kills": 0,
 	"story": {},
 	"story_log": {},
+	"nell_order": {},
+	"story_best": {},
+	"story_choice": {},
 	"friends": {},
 	"invite_used": "",
 	"invite_paid": [],
@@ -186,6 +189,14 @@ const PERK_COST_GROWTH := 1.36
 const SLOT3_PRICE := 250
 
 ## stat — ключ в data["stats"], goal — порог; награды — монеты и Звёздная Пыль.
+const NELL_ORDERS := [
+	{"id": "kills", "title": "Убей 40 врагов", "stat": "story_kills", "goal": 40, "nuts": 400, "dust": 2},
+	{"id": "rescue", "title": "Освободи 2 пленников", "stat": "story_rescued", "goal": 2, "nuts": 500, "dust": 3},
+	{"id": "secret", "title": "Найди 2 тайника", "stat": "story_secrets", "goal": 2, "nuts": 450, "dust": 2},
+	{"id": "clean", "title": "Пройди 2 зоны без урона", "stat": "story_clean_zones", "goal": 2, "nuts": 600, "dust": 3},
+	{"id": "ambush", "title": "Зачисти 3 засады", "stat": "story_ambushes", "goal": 3, "nuts": 500, "dust": 2},
+	{"id": "mission", "title": "Пройди миссию Свалки", "stat": "story_missions", "goal": 1, "nuts": 1000, "dust": 5},
+]
 const ACHIEVEMENTS := [
 	{"id": "first_blood", "title": "Первая кровь", "description": "Победить первую крысу", "stat": "kills", "goal": 1, "nuts": 20, "dust": 0},
 	{"id": "exterminator", "title": "Дератизатор", "description": "Победить 300 крыс", "stat": "kills", "goal": 300, "nuts": 150, "dust": 0},
@@ -568,7 +579,7 @@ func card_info() -> Dictionary:
 	return {
 		"id": get_player_id(), "n": get_nickname(), "c": get_character_id(), "s": get_selected_skin(),
 		"lv": get_account_level(), "w": get_stat("best_wave"), "sh": story_shards(), "m": story_done_ids(),
-		"bk": int(data["boss_kills"]), "ins": get_insider(), "inv": str(data["invite_used"]),
+		"bk": int(data["boss_kills"]), "ins": get_insider(), "inv": str(data["invite_used"]), "sc": data["story_best"],
 	}
 
 
@@ -620,6 +631,14 @@ func remove_friend(friend_id: String) -> void:
 
 
 ## "ok", "bonus" (друг пришёл по твоему приглашению, награда выдана), "self", "bad".
+static func clean_scores(raw: Variant) -> Dictionary:
+	var result := {}
+	if typeof(raw) == TYPE_DICTIONARY:
+		for key in raw:
+			result[str(key).substr(0, 12)] = clampi(int(raw[key]), 0, 99999999)
+	return result
+
+
 func add_friend(code: String) -> String:
 	var parts := code.strip_edges().split(".")
 	if parts.size() != 3 or parts[0] != "TRF1" or not parts[1].is_valid_int():
@@ -643,7 +662,7 @@ func add_friend(code: String) -> String:
 	var clean := {
 		"id": friend_id, "n": str(card.get("n", "Енот")).substr(0, 16), "c": str(card.get("c", "")), "s": str(card.get("s", "classic")),
 		"lv": int(card.get("lv", 1)), "w": int(card.get("w", 0)), "sh": int(card.get("sh", 0)), "bk": int(card.get("bk", 0)),
-		"ins": int(card.get("ins", -1)), "m": card.get("m", []) if typeof(card.get("m", [])) == TYPE_ARRAY else [],
+		"ins": int(card.get("ins", -1)), "sc": clean_scores(card.get("sc", {})), "m": card.get("m", []) if typeof(card.get("m", [])) == TYPE_ARRAY else [],
 		"added": int((friends.get(friend_id, {}) as Dictionary).get("added", Time.get_unix_time_from_system())),
 	}
 	friends[friend_id] = clean
@@ -1136,6 +1155,55 @@ func record_run(summary: Dictionary) -> Dictionary:
 
 
 ## Босс побеждён — счётчик живой, чтобы ачивка открылась сразу.
+## Заказ Нэлл на сегодня: один в день, счёт от значения счётчика на начало дня.
+func nell_order() -> Dictionary:
+	var order: Dictionary = data["nell_order"]
+	if int(order.get("day", -1)) != today():
+		var index := (today() + get_player_id().hash()) % NELL_ORDERS.size()
+		var def: Dictionary = NELL_ORDERS[absi(index)]
+		order = {"day": today(), "idx": absi(index), "base": get_stat(str(def["stat"])), "done": false}
+		data["nell_order"] = order
+	var spec: Dictionary = NELL_ORDERS[clampi(int(order["idx"]), 0, NELL_ORDERS.size() - 1)]
+	var progress := clampi(get_stat(str(spec["stat"])) - int(order["base"]), 0, int(spec["goal"]))
+	return {"title": spec["title"], "goal": spec["goal"], "progress": progress, "done": bool(order["done"]), "nuts": spec["nuts"], "dust": spec["dust"]}
+
+
+## Возвращает заказ, если он только что выполнен (награда выдаётся здесь), иначе пустой словарь.
+func nell_order_tick() -> Dictionary:
+	var info := nell_order()
+	if bool(info["done"]) or int(info["progress"]) < int(info["goal"]):
+		return {}
+	(data["nell_order"] as Dictionary)["done"] = true
+	add_coins(int(info["nuts"]))
+	add_gems(int(info["dust"]), false)
+	save_data()
+	return info
+
+
+func friend_best(mission_id: String) -> Dictionary:
+	var best := {}
+	for friend in (data["friends"] as Dictionary).values():
+		var scores: Dictionary = (friend as Dictionary).get("sc", {})
+		var value := int(scores.get(mission_id, 0))
+		if value > int(best.get("score", 0)):
+			best = {"name": str(friend.get("n", "Друг")), "score": value}
+	return best
+
+
+func record_story_best(mission_id: String, score: int) -> void:
+	var best: Dictionary = data["story_best"]
+	best[mission_id] = maxi(score, int(best.get(mission_id, 0)))
+
+
+func story_choice(mission_id: String) -> String:
+	return str((data["story_choice"] as Dictionary).get(mission_id, ""))
+
+
+func set_story_choice(mission_id: String, value: String) -> void:
+	(data["story_choice"] as Dictionary)[mission_id] = value
+	save_data()
+
+
 func log_dialog(mission_id: String, key: String) -> void:
 	var log: Dictionary = data["story_log"]
 	var id := "%s:%s" % [mission_id, key]
@@ -1164,6 +1232,7 @@ func story_complete(mission_id: String, shards: int, score: int = 0) -> void:
 	var story: Dictionary = data["story"]
 	var best := maxi(score, int((story.get(mission_id, {}) as Dictionary).get("best", 0)))
 	story[mission_id] = {"done": true, "shards": shards, "best": best}
+	record_story_best(mission_id, best)
 	save_data()
 
 

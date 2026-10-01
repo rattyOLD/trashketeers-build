@@ -32,6 +32,7 @@ const BASS_INTERVAL := 8.0
 const BASS_WINDUP_TIME := 0.9
 const BASS_BULLETS := 12
 const MUTE_TIME := 4.0
+static var mute_bonus := 0.0
 const SUITE_INTERVAL := 12.0
 const SUITE_COUNT := 2.0
 const GOLD_SHELL_TIME := 4.0
@@ -248,7 +249,7 @@ func _tick_speakers(delta: float) -> void:
 	var alive := _count_speakers()
 	if alive < _speakers_alive:
 		if alive == 0:
-			enemy.posture_stun = MUTE_TIME
+			enemy.posture_stun = MUTE_TIME + mute_bonus
 			enemy.request_fx("muted")
 		else:
 			enemy.request_fx("speaker_down", float(alive))
