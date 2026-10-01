@@ -52,6 +52,7 @@ func _load() -> void:
 	var is_self := friend_code == Cloud.friend_code
 	if is_self:
 		return
+	_body.add_child(_compare_block(info))
 	if not is_friend:
 		var accept := UiStyle.button("ПРИНЯТЬ ЗАЯВКУ", Color("#2fae5f"), 24, Vector2(0, 62))
 		accept.pressed.connect(func() -> void:
@@ -90,6 +91,52 @@ func _load() -> void:
 		if is_instance_valid(self) and done:
 			changed.emit()
 			close()))
+
+
+const COMPARE_ROWS := [["УРОВЕНЬ", "lv"], ["ЛУЧШАЯ ВОЛНА", "w"], ["БОССОВ УБИТО", "bk"], ["ОСКОЛКИ СЮЖЕТА", "sh"], ["КРЫС УБИТО", "k"], ["ЗАБЕГОВ", "r"]]
+const VERDICT_WIN := ["Ты его размазал. Скромно промолчи.", "Счёт в твою пользу. Можно написать «изи» и убежать.", "Енот-чемпион на связи. Он пусть тренируется."]
+const VERDICT_LOSE := ["Он впереди. Но свалка большая, догонишь.", "Тебя обошли. Пора кого-нибудь пострелять.", "Проигрываешь. Зато красиво выглядишь."]
+const VERDICT_DRAW := ["Ничья. Два енота, один мусорный бак.", "Идёте ноздря в ноздрю. Кто-то должен моргнуть."]
+
+
+## Сравнение «ты против него»: по каждой строке подсвечивается победитель, внизу шуточный вердикт.
+func _compare_block(theirs: Dictionary) -> Control:
+	var mine := SaveService.public_stats()
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 6)
+	box.add_child(UiStyle.label("ТЫ ПРОТИВ НЕГО", 24, UiStyle.GOLD, 7))
+	var my_wins := 0
+	var his_wins := 0
+	for entry in COMPARE_ROWS:
+		var key := str((entry as Array)[1])
+		var a := int(mine.get(key, 0))
+		var b := int(theirs.get(key, 0))
+		if a > b:
+			my_wins += 1
+		elif b > a:
+			his_wins += 1
+		var panel := PanelContainer.new()
+		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#2a1f4a"), Color(UiStyle.NEON, 0.35), 2, 12))
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 8)
+		panel.add_child(row)
+		var left := UiStyle.label(str(a), 26, Color("#5fe08a") if a > b else (UiStyle.TEXT_DIM if a < b else UiStyle.TEXT), 6)
+		left.custom_minimum_size = Vector2(110, 0)
+		row.add_child(left)
+		var title := UiStyle.label(str((entry as Array)[0]), 18, UiStyle.TEXT_DIM, 4)
+		title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		title.clip_text = true
+		row.add_child(title)
+		var right := UiStyle.label(str(b), 26, Color("#5fe08a") if b > a else (UiStyle.TEXT_DIM if b < a else UiStyle.TEXT), 6)
+		right.custom_minimum_size = Vector2(110, 0)
+		row.add_child(right)
+		box.add_child(panel)
+	var verdict_list: Array = VERDICT_WIN if my_wins > his_wins else (VERDICT_LOSE if his_wins > my_wins else VERDICT_DRAW)
+	var verdict := UiStyle.label("%d:%d. %s" % [my_wins, his_wins, str(verdict_list.pick_random())], 20, UiStyle.NEON, 5)
+	verdict.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	verdict.custom_minimum_size = Vector2(panel_width() - 110.0, 0)
+	box.add_child(verdict)
+	return box
 
 
 func _load_again() -> void:

@@ -43,7 +43,7 @@ with open(os.path.join(build, "index.pck"), "rb") as src:
     pck_raw = src.read()
 with open(os.path.join(build, "index.wasm"), "rb") as src:
     raw = src.read()
-for extra in ("manifest.webmanifest", "sw.js", "icon180.png", "icon192.png", "icon512.png"):
+for extra in ("manifest.webmanifest", "sw.js", "icon180.png", "icon192.png", "icon512.png", "og.jpg"):
     shutil.copy("/home/claude/trashketeers-build/tools/" + extra, os.path.join(site, extra))
 shutil.copy("/home/claude/raccoon/web/audio_unlock.js", os.path.join(site, "audio_unlock.js"))
 shutil.copy("/home/claude/raccoon/web/render_scale.js", os.path.join(site, "render_scale.js"))

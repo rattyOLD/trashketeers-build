@@ -8,6 +8,16 @@
 <link rel="manifest" href="manifest.webmanifest">
 <title>Trash Squad</title>
 <meta name="theme-color" content="#0d0a1c">
+<meta name="description" content="Бесплатный шутер про енота-налётчика. Открывается прямо в браузере, крысы уже заждались.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Trash Squad">
+<meta property="og:title" content="Trash Squad: енот, свалка и немного хаоса">
+<meta property="og:description" content="Тебя зовут на свалку. Бесплатно, без установки, прямо в браузере. Крысы и свиньи уже в предвкушении.">
+<meta property="og:image" content="https://rattyold.github.io/trashketeers-build/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://rattyold.github.io/trashketeers-build/og.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap">
@@ -365,7 +375,7 @@ html, body {
 </script>
 
 <script>
-window.__trash_build = {label: 'v34.169', time: '01.10 21:20'};
+window.__trash_build = {label: 'v34.170', time: '01.10 21:26'};
 document.getElementById('ver').textContent = 'Версия ' + window.__trash_build.label + ' · сборка от ' + window.__trash_build.time;
 </script>
 <script>
@@ -391,7 +401,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	// index.wasm / index.pck и отдаём ему уже скачанные и распакованные байты.
 	const FILES = {
 		wasm: { parts: [{url:"raccoon.core.0.wasm",bytes:5221065},{url:"raccoon.core.1.wasm",bytes:4165384}] },
-		pck: { parts: [{url:"raccoon.pack.0.wasm",bytes:11992897},{url:"raccoon.pack.1.wasm",bytes:12547325},{url:"raccoon.pack.2.wasm",bytes:3947783}] },
+		pck: { parts: [{url:"raccoon.pack.0.wasm",bytes:11992739},{url:"raccoon.pack.1.wasm",bytes:12547247},{url:"raccoon.pack.2.wasm",bytes:3953657}] },
 	};
 	const GODOT_CONFIG = {
 		args: [],
@@ -399,7 +409,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 		ensureCrossOriginIsolationHeaders: false,
 		executable: 'index',
 		experimentalVK: false,
-		fileSizes: { 'index.pck': 29426160, 'index.wasm': 43699190 },
+		fileSizes: { 'index.pck': 29432896, 'index.wasm': 43699190 },
 		focusCanvas: true,
 		gdextensionLibs: [],
 		onPrint: function () {
@@ -424,7 +434,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 
 	// Адрес сбора отчётов о вылетах (Google Apps Script / Supabase и т.п.); пусто — отчёты не отправляются.
 	const REPORT_URL = 'https://script.google.com/macros/s/AKfycbxVyy-SnRANW0Im-1Blne2TcUbca93WqzyBulpADwWWD7YH6x3KIygBYImTe8VfP5pp/exec';
-	const BUILD_ID_REPORT = '1790864425';
+	const BUILD_ID_REPORT = '1790864770';
 	const SESSION_ID = Math.random().toString(36).slice(2, 8);
 	const SESSION_START = Date.now();
 	const REPORT_CAP = 250;
@@ -630,7 +640,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	window.trkReport('session_start', gpuInfo() + ' | ' + navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + (window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio) + ' | screen ' + screen.width + 'x' + screen.height + ' | cores ' + (navigator.hardwareConcurrency || '?'));
 
 	// Вкладка могла висеть со старой версией: при возврате в неё сверяем номер сборки и предлагаем обновиться.
-	const BUILD_ID = '1790864425';
+	const BUILD_ID = '1790864770';
 	function checkVersion() {
 		fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (v) {
 			if (v && v.build && v.build !== BUILD_ID && !document.getElementById('newver')) {
