@@ -25,6 +25,7 @@ var recovery_code := ""
 var email := ""
 var online := false
 var last_error := ""
+var _raw_note := ""
 var _last_sync := 0
 var unread := 0
 
@@ -430,6 +431,7 @@ func send_vote(line_id: String, value: int, who: String, line_text: String) -> v
 func _call(method: int, path: String, body: Variant, extra: PackedStringArray = PackedStringArray()) -> Dictionary:
 	if not await _ensure_session():
 		online = false
+		last_error = "сессия не создана (%s)" % _raw_note
 		return {"ok": false, "code": 0, "data": null}
 	var headers := PackedStringArray(["apikey: " + KEY, "Authorization: Bearer " + _access, "Content-Type: application/json"])
 	headers.append_array(extra)
@@ -452,12 +454,15 @@ func _raw(method: int, url: String, headers: PackedStringArray, body: String) ->
 	add_child(request)
 	if request.request(url, headers, method, body) != OK:
 		request.queue_free()
+		_raw_note = "запрос не ушёл"
 		return {"ok": false, "code": 0, "data": null}
 	var reply: Array = await request.request_completed
 	request.queue_free()
 	if int(reply[0]) != HTTPRequest.RESULT_SUCCESS:
+		_raw_note = "нет ответа, код сети %d" % int(reply[0])
 		return {"ok": false, "code": 0, "data": null}
 	var code := int(reply[1])
+	_raw_note = "HTTP %d" % code
 	var text := (reply[3] as PackedByteArray).get_string_from_utf8()
 	var parsed: Variant = JSON.parse_string(text) if not text.is_empty() else null
 	return {"ok": code >= 200 and code < 300, "code": code, "data": parsed}
