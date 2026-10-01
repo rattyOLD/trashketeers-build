@@ -1,0 +1,317 @@
+{
+  "brief": "astra/from_claude/BRIEF_v8_survival_fx.md",
+  "block": "H2",
+  "frameOrder": "left-to-right top-to-bottom",
+  "assets": [
+    {
+      "path": "astra/inbox/story/fx_liquid/beer_splash_01.png",
+      "width": 256,
+      "height": 256,
+      "block": "H2",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "beer_splash",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/fx_liquid/beer_splash_02.png",
+      "width": 256,
+      "height": 256,
+      "block": "H2",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "beer_splash",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/fx_liquid/beer_splash_03.png",
+      "width": 256,
+      "height": 256,
+      "block": "H2",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "beer_splash",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/fx_liquid/beer_splash_04.png",
+      "width": 256,
+      "height": 256,
+      "block": "H2",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "beer_splash",
+      "frame": 3
+    },
+    {
+      "path": "astra/inbox/story/fx_liquid/beer_splash_05.png",
+      "width": 256,
+      "height": 256,
+      "block": "H2",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "beer_splash",
+      "frame": 4
+    },
+    {
+      "path": "astra/inbox/story/fx_liquid/beer_splash_06.png",
+      "width": 256,
+      "height": 256,
+      "block": "H2",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "beer_splash",
+      "frame": 5
+    },
+    {
+      "path": "astra/inbox/story/fx_liquid/beer_puddle_01.png",
+      "width": 256,
+      "height": 256,
+      "block": "H2",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "beer_puddles",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/fx_liquid/beer_puddle_02.png",
+      "width": 256,
+      "height": 256,
+      "block": "H2",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "beer_puddles",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/fx_liquid/beer_puddle_03.png",
+      "width": 256,
+      "height": 256,
+      "block": "H2",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "beer_puddles",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/fx_liquid/beer_puddle_04.png",
+      "width": 256,
+      "height": 256,
+      "block": "H2",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "beer_puddles",
+      "frame": 3
+    },
+    {
+      "path": "astra/inbox/story/fx_liquid/beer_drying_01.png",
+      "width": 256,
+      "height": 256,
+      "block": "H2",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "beer_puddles",
+      "frame": 4
+    },
+    {
+      "path": "astra/inbox/story/fx_liquid/beer_drying_02.png",
+      "width": 256,
+      "height": 256,
+      "block": "H2",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "beer_puddles",
+      "frame": 5
+    },
+    {
+      "path": "astra/inbox/story/fx_liquid/beer_foam_01.png",
+      "width": 256,
+      "height": 256,
+      "block": "H2",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "beer_foam",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/fx_liquid/beer_foam_02.png",
+      "width": 256,
+      "height": 256,
+      "block": "H2",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "beer_foam",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/fx_liquid/beer_foam_03.png",
+      "width": 256,
+      "height": 256,
+      "block": "H2",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "beer_foam",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/fx_liquid/beer_foam_04.png",
+      "width": 256,
+      "height": 256,
+      "block": "H2",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "beer_foam",
+      "frame": 3
+    },
+    {
+      "path": "astra/inbox/story/fx_liquid/vomit_splash_01.png",
+      "width": 256,
+      "height": 256,
+      "block": "H2",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "vomit_splash",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/fx_liquid/vomit_splash_02.png",
+      "width": 256,
+      "height": 256,
+      "block": "H2",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "vomit_splash",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/fx_liquid/vomit_splash_03.png",
+      "width": 256,
+      "height": 256,
+      "block": "H2",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "vomit_splash",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/fx_liquid/vomit_splash_04.png",
+      "width": 256,
+      "height": 256,
+      "block": "H2",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "vomit_splash",
+      "frame": 3
+    },
+    {
+      "path": "astra/inbox/story/fx_liquid/vomit_splash_05.png",
+      "width": 256,
+      "height": 256,
+      "block": "H2",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "vomit_splash",
+      "frame": 4
+    },
+    {
+      "path": "astra/inbox/story/fx_liquid/vomit_splash_06.png",
+      "width": 256,
+      "height": 256,
+      "block": "H2",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "vomit_splash",
+      "frame": 5
+    },
+    {
+      "path": "astra/inbox/story/fx_liquid/vomit_puddle_01.png",
+      "width": 256,
+      "height": 256,
+      "block": "H2",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "vomit_puddles",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/fx_liquid/vomit_puddle_02.png",
+      "width": 256,
+      "height": 256,
+      "block": "H2",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "vomit_puddles",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/fx_liquid/vomit_puddle_03.png",
+      "width": 256,
+      "height": 256,
+      "block": "H2",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "vomit_puddles",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/fx_liquid/beer_drop_small.png",
+      "width": 64,
+      "height": 64,
+      "block": "H2",
+      "transparent": true,
+      "texture": false,
+      "sourceSheet": "liquid_projectiles",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/fx_liquid/beer_drop_medium.png",
+      "width": 64,
+      "height": 64,
+      "block": "H2",
+      "transparent": true,
+      "texture": false,
+      "sourceSheet": "liquid_projectiles",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/fx_liquid/beer_drop_large.png",
+      "width": 64,
+      "height": 64,
+      "block": "H2",
+      "transparent": true,
+      "texture": false,
+      "sourceSheet": "liquid_projectiles",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/fx_liquid/vomit_drop_small.png",
+      "width": 64,
+      "height": 64,
+      "block": "H2",
+      "transparent": true,
+      "texture": false,
+      "sourceSheet": "liquid_projectiles",
+      "frame": 3
+    },
+    {
+      "path": "astra/inbox/story/fx_liquid/vomit_drop_medium.png",
+      "width": 64,
+      "height": 64,
+      "block": "H2",
+      "transparent": true,
+      "texture": false,
+      "sourceSheet": "liquid_projectiles",
+      "frame": 4
+    },
+    {
+      "path": "astra/inbox/story/fx_liquid/vomit_drop_large.png",
+      "width": 64,
+      "height": 64,
+      "block": "H2",
+      "transparent": true,
+      "texture": false,
+      "sourceSheet": "liquid_projectiles",
+      "frame": 5
+    }
+  ]
+}

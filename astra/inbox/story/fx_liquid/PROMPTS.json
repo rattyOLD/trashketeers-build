@@ -1,0 +1,121 @@
+{
+  "generator": "built-in imagegen",
+  "prompts": [
+    {
+      "key": "beer_splash",
+      "block": "H2",
+      "cols": 3,
+      "rows": 2,
+      "cw": 512,
+      "ch": 512,
+      "ow": 256,
+      "oh": 256,
+      "names": [
+        "beer_splash_01",
+        "beer_splash_02",
+        "beer_splash_03",
+        "beer_splash_04",
+        "beer_splash_05",
+        "beer_splash_06"
+      ],
+      "prompt": "Use case: stylized-concept. Production 2D cartoon top-down 3/4 liquid VFX sprites for Trashketeers. Thick dark outlines, two-tone cel shading, luminous saturated highlights; no pixel art, no photo, no text, no labels, no frames. Clean evenly spaced grid on flat solid #FF00FF, all particles contained inside their own cell with 48px safe margins. Keep consistent center anchor and coherent evolution of effect. 1536x1024 sheet, 3 columns 2 rows, six successive explosion frames in reading order: 1 compact amber beer impact with white foam, 2 expanding crown, 3 large burst with flying droplets, 4 outward dispersed droplets and foam, 5 smaller falling droplets, 6 last tiny fading droplets. No container, no bottle, no boss.",
+      "dir": "fx_liquid"
+    },
+    {
+      "key": "beer_puddles",
+      "block": "H2",
+      "cols": 3,
+      "rows": 2,
+      "cw": 512,
+      "ch": 512,
+      "ow": 256,
+      "oh": 256,
+      "names": [
+        "beer_puddle_01",
+        "beer_puddle_02",
+        "beer_puddle_03",
+        "beer_puddle_04",
+        "beer_drying_01",
+        "beer_drying_02"
+      ],
+      "prompt": "Use case: stylized-concept. Production 2D cartoon top-down 3/4 liquid VFX sprites for Trashketeers. Thick dark outlines, two-tone cel shading, luminous saturated highlights; no pixel art, no photo, no text, no labels, no frames. Clean evenly spaced grid on flat solid #FF00FF, all particles contained inside their own cell with 48px safe margins. Keep consistent center anchor and coherent evolution of effect. 1536x1024 sheet 3 columns 2 rows, six separate flat ground decals seen top-down: cells 1-4 four different irregular fresh amber beer puddle outlines with small white foam bubbles and wet shine. Cell5 partially drying darker amber stain, little foam, cell6 almost dry muted dark brown stain with thin dry edge. Keep puddles low flat decals, no upright splash, no ground disc.",
+      "dir": "fx_liquid"
+    },
+    {
+      "key": "beer_foam",
+      "block": "H2",
+      "cols": 2,
+      "rows": 2,
+      "cw": 512,
+      "ch": 512,
+      "ow": 256,
+      "oh": 256,
+      "names": [
+        "beer_foam_01",
+        "beer_foam_02",
+        "beer_foam_03",
+        "beer_foam_04"
+      ],
+      "prompt": "Use case: stylized-concept. Production 2D cartoon top-down 3/4 liquid VFX sprites for Trashketeers. Thick dark outlines, two-tone cel shading, luminous saturated highlights; no pixel art, no photo, no text, no labels, no frames. Clean evenly spaced grid on flat solid #FF00FF, all particles contained inside their own cell with 48px safe margins. Keep consistent center anchor and coherent evolution of effect. 1024x1024 sheet 2 columns 2 rows, four sequential foam cap frames in reading order: small cream-white foam mound, larger swelling round bubbles, maximum billowing foam crown, bursting bubbles with scattered small white foam blobs. Golden amber edge, no beer mug or container.",
+      "dir": "fx_liquid"
+    },
+    {
+      "key": "vomit_splash",
+      "block": "H2",
+      "cols": 3,
+      "rows": 2,
+      "cw": 512,
+      "ch": 512,
+      "ow": 256,
+      "oh": 256,
+      "names": [
+        "vomit_splash_01",
+        "vomit_splash_02",
+        "vomit_splash_03",
+        "vomit_splash_04",
+        "vomit_splash_05",
+        "vomit_splash_06"
+      ],
+      "prompt": "Use case: stylized-concept. Production 2D cartoon top-down 3/4 liquid VFX sprites for Trashketeers. Thick dark outlines, two-tone cel shading, luminous saturated highlights; no pixel art, no photo, no text, no labels, no frames. Clean evenly spaced grid on flat solid #FF00FF, all particles contained inside their own cell with 48px safe margins. Keep consistent center anchor and coherent evolution of effect. 1536x1024 sheet 3 columns 2 rows, six successive cartoon boss vomit impact frames: compact lime-yellow slime blob, expanding spout, large splash crown, widely scattered green-yellow globules, few falling blobs, tiny final droplets. Comical gross goo, no realistic body fluids, no character, no food particles, no container.",
+      "dir": "fx_liquid"
+    },
+    {
+      "key": "vomit_puddles",
+      "block": "H2",
+      "cols": 3,
+      "rows": 1,
+      "cw": 512,
+      "ch": 512,
+      "ow": 256,
+      "oh": 256,
+      "names": [
+        "vomit_puddle_01",
+        "vomit_puddle_02",
+        "vomit_puddle_03"
+      ],
+      "prompt": "Use case: stylized-concept. Production 2D cartoon top-down 3/4 liquid VFX sprites for Trashketeers. Thick dark outlines, two-tone cel shading, luminous saturated highlights; no pixel art, no photo, no text, no labels, no frames. Clean evenly spaced grid on flat solid #FF00FF, all particles contained inside their own cell with 48px safe margins. Keep consistent center anchor and coherent evolution of effect. 1536x512 sheet 3 columns one row, three separate irregular green-yellow slime/vomit puddle decals seen top-down; varied outlines, glossy green globules, yellow foam bubbles. Low flat wet puddles, no upright splash, no ground disc.",
+      "dir": "fx_liquid"
+    },
+    {
+      "key": "liquid_projectiles",
+      "block": "H2",
+      "alpha": true,
+      "cols": 3,
+      "rows": 2,
+      "cw": 512,
+      "ch": 512,
+      "ow": 64,
+      "oh": 64,
+      "names": [
+        "beer_drop_small",
+        "beer_drop_medium",
+        "beer_drop_large",
+        "vomit_drop_small",
+        "vomit_drop_medium",
+        "vomit_drop_large"
+      ],
+      "prompt": "Use case: stylized-concept. Production 2D cartoon liquid projectile sprite sheet 1536x1024, 3 columns 2 rows of equal square cells. Genuinely transparent background with preserved alpha and no magenta. Top row: amber beer droplet bullet small medium large (diameter 24%,38%,52% of each cell), teardrop points toward upper right. Bottom row: green-yellow vomit/slime bullet small medium large, same sizes and orientation. Semi-transparent liquid interiors with opaque dark contour and small bright white highlight. Thick readable 2D cartoon contours, two-tone soft cel shading. One isolated drop per cell, all six centered; no trail, no text, no ground shadow, no extra particles.",
+      "dir": "fx_liquid"
+    }
+  ]
+}
