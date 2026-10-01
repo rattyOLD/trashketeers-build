@@ -247,6 +247,8 @@ const ACHIEVEMENTS := [
 	{"id": "dirty_tax", "title": "Налоговая проверка", "rank": "Налоговая", "description": "Победить 30 Инкассаторов. Декларацию сдавать некому", "stat": "k_cash_collector", "goal": 30, "nuts": 260, "dust": 3},
 	{"id": "dirty_pirate", "title": "Гроза морей", "rank": "Гроза морей", "description": "Победить 5 Пиратов Мусорных Морей. Море мусора, а гроза ты", "stat": "k_sea_pirate", "goal": 5, "nuts": 260, "dust": 3},
 	{"id": "dirty_masochist", "title": "Любитель острых ощущений", "rank": "Мазохист", "description": "Сыграть 10 забегов с модификатором. Тебе мало, да?", "stat": "mod_runs", "goal": 10, "nuts": 300, "dust": 4},
+	{"id": "dirty_wanted", "title": "Враг Бюро", "rank": "Враг Бюро", "description": "Дойти до пяти звёзд розыска 3 раза. Шеф уже выучил твой адрес", "stat": "wanted_max", "goal": 3, "nuts": 400, "dust": 5},
+	{"id": "dirty_scars", "title": "Карта сокровищ", "rank": "Шрамированный", "description": "Потерять 10 жизней в сюжете. Живого места нет, зато характер", "stat": "scars", "goal": 10, "nuts": 250, "dust": 3},
 	{"id": "dirty_bossdown", "title": "Боссодав", "rank": "Боссодав", "description": "Победить 25 боссов. Они уже собираются в профсоюз", "stat": "boss_kills", "goal": 25, "nuts": 500, "dust": 6},
 ]
 
@@ -725,9 +727,27 @@ func get_badge() -> String:
 
 
 ## Ник с плашкой статуса — для меню и таблички над Енотом.
+func unlocked_ranks() -> Array[String]:
+	var list: Array[String] = []
+	for achievement in ACHIEVEMENTS:
+		if achievement.has("rank") and is_achieved(achievement["id"]):
+			list.append(str(achievement["id"]))
+	return list
+
+
+func cycle_rank() -> void:
+	var list := unlocked_ranks()
+	var order: Array[String] = ["-"]
+	order.append_array(list)
+	var current := str(data.get("rank_id", ""))
+	var index := order.find(current)
+	data["rank_id"] = order[(index + 1) % order.size()]
+	save_data()
+
+
 func get_rank() -> String:
 	var id := str(data.get("rank_id", ""))
-	if id.is_empty() or not is_achieved(id):
+	if id.is_empty() or id == "-" or not is_achieved(id):
 		return ""
 	for achievement in ACHIEVEMENTS:
 		if achievement["id"] == id:

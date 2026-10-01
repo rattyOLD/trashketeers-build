@@ -92,6 +92,7 @@ var _portal: Portal
 var story_mission := ""
 var story: StoryRun
 var radio: SurvivalRadio
+var wanted: Wanted
 var liquids: LiquidFx
 var story_target: Node2D
 var _switching := false
@@ -242,6 +243,10 @@ func start(_weapon_id: StringName = &"") -> void:
 		radio = SurvivalRadio.new()
 		add_child(radio)
 		radio.setup(self, player)
+		wanted = Wanted.new()
+		add_child(wanted)
+		wanted.setup(self)
+		wanted.level_changed.connect(_on_wanted_level)
 	if not story_mission.is_empty():
 		story = StoryRun.new()
 		add_child(story)
@@ -746,6 +751,11 @@ func _on_enemy_died(enemy: Enemy) -> void:
 			radio.on_elite()
 	SaveService.add_stat("kills", 1, false)
 	SaveService.add_stat("k_" + String(data.id), 1, false)
+	if wanted != null:
+		var bounty := wanted.on_kill(data)
+		if bounty > 0:
+			pickups.spawn(at + Vector2(0, -8), bounty)
+			fx.popup(at + Vector2(0, -60), "РОЗЫСК +%d" % bounty, Color("#ff7a7a"), 26.0)
 	status.on_enemy_died(enemy, at)
 	dash_trail.on_enemy_died()
 	pickups.spawn_xp(at, data.xp)
@@ -763,6 +773,15 @@ func _on_enemy_died(enemy: Enemy) -> void:
 	SoundManager.play(&"enemy_death")
 	add_shake(0.1)
 	hitstop(KILL_HITSTOP)
+
+
+func _on_wanted_level(level: int) -> void:
+	hud.set_wanted(level)
+	hud.toast("РОЗЫСК %s" % "★".repeat(level), "Бюро Расчистки выслало агентов. За каждого платят награду.", Color("#ff5a5a"))
+	if level >= 5:
+		SaveService.add_stat("wanted_max", 1)
+	if radio != null:
+		radio.on_wanted(level)
 
 
 func _on_enemy_exploded(_enemy: Enemy, at: Vector2, radius: float, damage: float) -> void:
@@ -912,6 +931,8 @@ func _on_boss_killed(boss: Enemy, at: Vector2) -> void:
 	# Узел босса вернётся в пул и достанется обычному врагу — ссылку снимаем сразу,
 	# иначе эскорт, стрелка и мини-карта «увидят босса» в случайной крысе.
 	var mini := director.is_mini_wave()
+	if radio != null:
+		radio.on_boss_down(player.weapon_controller.base_weapon.id)
 	director.on_boss_killed()
 	if mini:
 		_on_miniboss_killed(boss, at)

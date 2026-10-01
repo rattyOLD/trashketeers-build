@@ -801,6 +801,7 @@ class Profile:
 				child.queue_free()
 		var list := MenuPopups.scroll_list(content)
 		list.add_child(_build_header())
+		list.add_child(_rank_button())
 		list.add_child(_section("РЕКОРДЫ"))
 		var records := GridContainer.new()
 		records.columns = 3
@@ -827,6 +828,17 @@ class Profile:
 		list.add_child(_friends_bar())
 		list.add_child(_section("Тестер и сохранение"))
 		list.add_child(_insider_block())
+
+	func _rank_button() -> Control:
+		var have := SaveService.unlocked_ranks().size()
+		var current := SaveService.get_rank()
+		var text := "ТИТУЛ: %s" % (current if not current.is_empty() else "нет")
+		var b := UiStyle.button(text if have > 0 else "ТИТУЛЫ: получи грязную ачивку", UiStyle.PANEL_LIGHT, 22, Vector2(0, 60))
+		b.disabled = have == 0
+		b.pressed.connect(func() -> void:
+			SaveService.cycle_rank()
+			_refresh())
+		return b
 
 	func _num(value: int) -> String:
 		return SaveService.format_coins(value) if value >= 10000 else str(value)

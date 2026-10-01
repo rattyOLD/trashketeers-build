@@ -75,6 +75,7 @@ var _toast_queue: Array = []
 var _toast_busy := false
 var _toast_y := 168.0
 var _minimal := false
+var _wanted_label: Label
 var _low_hp := false
 var _pulse := 0.0
 
@@ -503,6 +504,16 @@ func show_countdown(seconds: int) -> void:
 	tween.tween_property(_countdown, "scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_BACK)
 	tween.tween_interval(0.55)
 	tween.tween_property(_countdown, "modulate:a", 0.0, 0.2)
+
+
+func set_wanted(level: int) -> void:
+	if _wanted_label == null:
+		_wanted_label = UiStyle.label("", 18, Color("#ff6a6a"), 5)
+		_wanted_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		_wanted_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_left_column.add_child(_wanted_label)
+	_wanted_label.text = ("РОЗЫСК %s" % "★".repeat(level)) if level > 0 else ""
+	_wanted_label.visible = level > 0
 
 
 func show_mod_badge(title: String) -> void:

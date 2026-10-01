@@ -287,6 +287,11 @@ func try_respawn() -> bool:
 		return true
 	lives -= 1
 	lives_lost += 1
+	SaveService.add_stat("scars", 1)
+	var scars := SaveService.get_stat("scars")
+	if [1, 5, 15, 40].has(scars):
+		var scar_text: Dictionary = {1: "Первый шрам. Нэлл: Это не дефект, это стиль.", 5: "Пять шрамов. Нэлл: Ты уже похож на карту сокровищ.", 15: "15 шрамов. Рико: Я теперь на ощупь читаю.", 40: "40 шрамов. Нэлл: Живого места нет. Зато характер."}
+		get_tree().create_timer(4.6, false).timeout.connect(func() -> void: game.hud.toast("ШРАМ №%d" % scars, str(scar_text[scars]), Color("#ff9a8a")))
 	game.hud.show_banner("ЖИЗНЬ ПОТЕРЯНА · ОСТАЛОСЬ %d" % lives, UiStyle.DANGER, 1.6)
 	var quips: Array = mission.get("death_lines", [])
 	if not quips.is_empty():
