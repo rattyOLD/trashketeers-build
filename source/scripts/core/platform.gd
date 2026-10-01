@@ -409,6 +409,11 @@ func consume_url_param(key: String) -> String:
 	return str(value) if typeof(value) == TYPE_STRING else ""
 
 
+## Перезагрузка страницы без ?restore= в адресе (иначе мини-апка вернёт прежний аккаунт).
+func reload_clean() -> void:
+	_js("history.replaceState(null, '', location.pathname); location.reload(); return true;")
+
+
 ## Telegram: нативное окно «Поделиться»; браузер: navigator.share или копирование в буфер.
 ## Возвращает текст-подсказку для тоста.
 func share(text: String, url: String) -> String:

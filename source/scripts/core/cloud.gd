@@ -255,6 +255,14 @@ func login_account(login: String, password: String) -> String:
 	return "ok"
 
 
+## Выход: прогресс сперва уходит в облако, затем на устройстве остаётся чистая игра. Вернуться можно логином и паролем.
+func logout() -> void:
+	await upload_save()
+	for key in [SESSION_KEY, LOST_KEY, RECOVERY_KEY, EMAIL_KEY, BADGE_SECRET_KEY, BADGE_UID_KEY, SaveService.BADGE_KEY, "trk_badge_seen", "trk_acct_nag", SaveService.STORAGE_KEY]:
+		Platform.storage_set(key, "")
+	Platform.reload_clean()
+
+
 ## Смена пароля у вошедшего аккаунта: "ok", "weak" или "offline".
 func change_password(password: String) -> String:
 	if not await _ensure_session():

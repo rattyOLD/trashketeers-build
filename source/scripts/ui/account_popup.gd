@@ -47,6 +47,22 @@ func _render_logged() -> void:
 		if is_instance_valid(save):
 			_say("Сохранено." if not code.is_empty() else "Нет связи с сервером."))
 	_body.add_child(save)
+	var out := UiStyle.button("ВЫЙТИ ИЗ АККАУНТА", Color("#a3283e"), 22, Vector2(0, 58))
+	var armed := [false]
+	out.pressed.connect(func() -> void:
+		if not armed[0]:
+			armed[0] = true
+			out.text = "ТОЧНО? Прогресс останется в облаке"
+			get_tree().create_timer(3.5).timeout.connect(func() -> void:
+				if is_instance_valid(out):
+					armed[0] = false
+					out.text = "ВЫЙТИ ИЗ АККАУНТА")
+			return
+		out.disabled = true
+		out.text = "Сохраняю и выхожу..."
+		await Cloud.logout())
+	_body.add_child(out)
+	_body.add_child(MenuPopups.small_hint("После выхода игра станет чистой. Вернёшь всё, войдя этим же логином и паролем."))
 
 
 func _render_guest() -> void:
@@ -104,7 +120,7 @@ func _render_guest() -> void:
 		else:
 			_say("Вход выполнен. В облаке пока нет сохранения, играй: оно появится само."))
 	_body.add_child(login)
-	_body.add_child(MenuPopups.small_hint("Если забыл пароль, вернуть его нельзя: заведи новый аккаунт. Код восстановления в профиле спасёт прогресс."))
+	_body.add_child(MenuPopups.small_hint("Запиши пароль: мы его не видим и вернуть не сможем. Если забудешь, поможет только DeV (сбросит на временный)."))
 
 
 func _say(text: String) -> void:

@@ -11,6 +11,8 @@ var _stats_label: Label
 var _reports_box: VBoxContainer
 var _words_label: Label
 var _log_label: Label
+var _find: LineEdit
+var _found: VBoxContainer
 var _reset_login: LineEdit
 var _reset_pass: LineEdit
 var _reset_log: Label
@@ -51,6 +53,14 @@ func _refresh() -> void:
 	_list.add_child(_wrap("Ссылка показывается один раз и копируется в буфер. DeV-ссылка работает на 3 входа, Insider на 50 (нужен SQL v9)."))
 
 	_list.add_child(UiStyle.label("СБРОС ПАРОЛЯ ИГРОКА", 22, UiStyle.TEXT_DIM, 5))
+	_find = _field("Поиск: логин, ник или ID")
+	_list.add_child(_find)
+	var find_button := UiStyle.button("Найти аккаунты", UiStyle.PANEL_LIGHT, 21, Vector2(0, 52))
+	find_button.pressed.connect(_search_accounts)
+	_list.add_child(find_button)
+	_found = VBoxContainer.new()
+	_found.add_theme_constant_override("separation", 6)
+	_list.add_child(_found)
 	_reset_login = _field("Логин игрока")
 	_list.add_child(_reset_login)
 	_reset_pass = _field("Новый временный пароль (от 6 знаков)")
@@ -168,6 +178,30 @@ func _load_all() -> void:
 	_load_words()
 	_load_log()
 	_load_reset_log()
+
+
+func _search_accounts() -> void:
+	var r := await Cloud.dev_call("dev_accounts", {"p_query": _find.text})
+	if not is_instance_valid(_found):
+		return
+	for child in _found.get_children():
+		child.queue_free()
+	if int(r["code"]) == 404:
+		_found.add_child(_wrap("Нужен SQL v13 (schema_v13_dev_accounts.sql)"))
+		return
+	var rows := Cloud._rows(r)
+	if rows.is_empty():
+		_found.add_child(_wrap("Ничего не найдено"))
+		return
+	for row: Variant in rows:
+		var d := row as Dictionary
+		var login := str(d.get("login", ""))
+		var b := UiStyle.button("%s · %s · %s" % [login, d.get("nickname"), d.get("friend_code")], UiStyle.PANEL_LIGHT, 19, Vector2(0, 50))
+		b.clip_text = true
+		b.pressed.connect(func() -> void:
+			_reset_login.text = login
+			_status.text = "Логин «%s» подставлен в сброс пароля" % login)
+		_found.add_child(b)
 
 
 func _reset_password() -> void:
