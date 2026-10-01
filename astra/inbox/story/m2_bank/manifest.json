@@ -1,0 +1,347 @@
+{
+  "brief": "astra/from_claude/BRIEF_v7_saga.md",
+  "block": "C",
+  "frameOrder": "left-to-right top-to-bottom",
+  "assets": [
+    {
+      "path": "astra/inbox/story/m2_bank/floor_marble.png",
+      "width": 256,
+      "height": 256,
+      "block": "C",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "bank_floor",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/m2_bank/floor_carpet.png",
+      "width": 256,
+      "height": 256,
+      "block": "C",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "bank_floor",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/m2_bank/floor_grille.png",
+      "width": 256,
+      "height": 256,
+      "block": "C",
+      "transparent": false,
+      "texture": true,
+      "sourceSheet": "bank_floor",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/m2_bank/wall_gold.png",
+      "width": 192,
+      "height": 128,
+      "block": "C",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "bank_walls",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/m2_bank/wall_vault.png",
+      "width": 192,
+      "height": 128,
+      "block": "C",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "bank_walls",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/m2_bank/wall_laser.png",
+      "width": 192,
+      "height": 128,
+      "block": "C",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "bank_walls",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/m2_bank/safe_closed.png",
+      "width": 256,
+      "height": 256,
+      "block": "C",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "bank_safe",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/m2_bank/safe_damaged.png",
+      "width": 256,
+      "height": 256,
+      "block": "C",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "bank_safe",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/m2_bank/safe_broken.png",
+      "width": 256,
+      "height": 256,
+      "block": "C",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "bank_safe",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/m2_bank/laser_on.png",
+      "width": 384,
+      "height": 64,
+      "block": "C",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "bank_lasers",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/m2_bank/laser_warning.png",
+      "width": 384,
+      "height": 64,
+      "block": "C",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "bank_lasers",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/m2_bank/laser_off.png",
+      "width": 384,
+      "height": 64,
+      "block": "C",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "bank_lasers",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/m2_bank/laser_blink_01.png",
+      "width": 384,
+      "height": 64,
+      "block": "C",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "bank_lasers",
+      "frame": 3
+    },
+    {
+      "path": "astra/inbox/story/m2_bank/laser_blink_02.png",
+      "width": 384,
+      "height": 64,
+      "block": "C",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "bank_lasers",
+      "frame": 4
+    },
+    {
+      "path": "astra/inbox/story/m2_bank/laser_blink_03.png",
+      "width": 384,
+      "height": 64,
+      "block": "C",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "bank_lasers",
+      "frame": 5
+    },
+    {
+      "path": "astra/inbox/story/m2_bank/laser_blink_04.png",
+      "width": 384,
+      "height": 64,
+      "block": "C",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "bank_lasers",
+      "frame": 6
+    },
+    {
+      "path": "astra/inbox/story/m2_bank/cash_register.png",
+      "width": 256,
+      "height": 256,
+      "block": "C",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "bank_props",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/m2_bank/bank_counter.png",
+      "width": 256,
+      "height": 256,
+      "block": "C",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "bank_props",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/m2_bank/chandelier_falling_01.png",
+      "width": 256,
+      "height": 256,
+      "block": "C",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "bank_props",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/m2_bank/chandelier_falling_02.png",
+      "width": 256,
+      "height": 256,
+      "block": "C",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "bank_props",
+      "frame": 3
+    },
+    {
+      "path": "astra/inbox/story/m2_bank/gold_cart.png",
+      "width": 256,
+      "height": 256,
+      "block": "C",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "bank_props",
+      "frame": 4
+    },
+    {
+      "path": "astra/inbox/story/m2_bank/security_booth.png",
+      "width": 256,
+      "height": 256,
+      "block": "C",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "bank_props",
+      "frame": 5
+    },
+    {
+      "path": "astra/inbox/story/m2_bank/coin_press.png",
+      "width": 256,
+      "height": 256,
+      "block": "C",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "bank_props",
+      "frame": 6
+    },
+    {
+      "path": "astra/inbox/story/m2_bank/teller_window.png",
+      "width": 256,
+      "height": 256,
+      "block": "C",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "bank_props",
+      "frame": 7
+    },
+    {
+      "path": "astra/inbox/story/m2_bank/boss_vault_decor.png",
+      "width": 512,
+      "height": 384,
+      "block": "C",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "bank_boss",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/m2_bank/poster_blank_01.png",
+      "width": 160,
+      "height": 200,
+      "block": "C",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "bank_posters_fix",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/m2_bank/poster_blank_02.png",
+      "width": 160,
+      "height": 200,
+      "block": "C",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "bank_posters_fix",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/m2_bank/poster_blank_03.png",
+      "width": 160,
+      "height": 200,
+      "block": "C",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "bank_posters_fix",
+      "frame": 2
+    },
+    {
+      "path": "astra/inbox/story/m2_bank/poster_blank_04.png",
+      "width": 160,
+      "height": 200,
+      "block": "C",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "bank_posters_fix",
+      "frame": 3
+    },
+    {
+      "path": "astra/inbox/story/m2_bank/poster_blank_05.png",
+      "width": 160,
+      "height": 200,
+      "block": "C",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "bank_posters_fix",
+      "frame": 4
+    },
+    {
+      "path": "astra/inbox/story/m2_bank/poster_blank_06.png",
+      "width": 160,
+      "height": 200,
+      "block": "C",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "bank_posters_fix",
+      "frame": 5
+    },
+    {
+      "path": "astra/inbox/story/m2_bank/poster_blank_07.png",
+      "width": 160,
+      "height": 200,
+      "block": "C",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "bank_posters_fix",
+      "frame": 6
+    },
+    {
+      "path": "astra/inbox/story/m2_bank/poster_blank_08.png",
+      "width": 160,
+      "height": 200,
+      "block": "C",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "bank_posters_fix",
+      "frame": 7
+    },
+    {
+      "path": "astra/inbox/story/m2_bank/poster_blank_09.png",
+      "width": 160,
+      "height": 200,
+      "block": "C",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "bank_posters_fix",
+      "frame": 8
+    }
+  ]
+}
