@@ -92,6 +92,7 @@ var _portal: Portal
 var story_mission := ""
 var story: StoryRun
 var radio: SurvivalRadio
+var liquids: LiquidFx
 var story_target: Node2D
 var _switching := false
 
@@ -106,6 +107,8 @@ func start(_weapon_id: StringName = &"") -> void:
 		for variant in enemy_data.rig_variants:
 			RigSprite.prewarm(variant, Enemy.RIG_MARGIN)
 	_build_layers()
+	liquids = LiquidFx.new()
+	layers.decals.add_child(liquids)
 	map = LevelSpawner.new()
 	layers.floor_layer.add_child(map)
 	pickups = PickupManager.new()
@@ -596,7 +599,8 @@ func _on_enemy_fx(_enemy: Enemy, kind: String, at: Vector2, radius: float) -> vo
 			var foamy := kind == "beer_puke"
 			fx.burst(at, Color("#ffcf4a") if not foamy else Color("#f6e3a0"), 4, 200.0, 3.0)
 			fx.burst(at, Color("#fff6dc"), 3, 140.0, 2.4)
-			fx.splat(at, Color("#d98a12", 0.55), 26.0 if not foamy else 34.0, 2.6)
+			liquids.splash(at, 1 if foamy else 0, 44.0 if not foamy else 56.0)
+			liquids.puddle(at, 1 if foamy else 0, 34.0 if not foamy else 46.0, 2.8)
 		"muzzle":
 			fx.muzzle_flash(at, (player.global_position - at).angle(), Color("#ffb347"), 1.4)
 		"summon":
@@ -780,7 +784,7 @@ func _on_miniboss_killed(boss: Enemy, at: Vector2) -> void:
 	else:
 		_offer_mini_choice(boss, at, 0)
 		if radio != null:
-			radio.on_mini_boss()
+			radio.on_mini_boss(String(player.weapon_controller.base_weapon.id))
 
 
 const MINI_CHOICE_RETRIES := 12
@@ -797,7 +801,8 @@ func _offer_mini_choice(boss: Enemy, at: Vector2, attempt: int) -> void:
 		var name := boss.data.display_name
 		var panel := ChoiceCard.new()
 		add_child(panel)
-		panel.chosen.connect(func(index: int) -> void: _on_mini_choice(index, name, at))
+		var boss_id := String(boss.data.id)
+		panel.chosen.connect(func(index: int) -> void: _on_mini_choice(index, name, at, boss_id))
 		panel.open({
 			"title": "%s на коленях" % name,
 			"text": "%s ползёт к тебе и бормочет: «Только не добивай! Я заплачу! Или расскажу, где пиво!» Решай, енот." % name,
@@ -814,7 +819,7 @@ func _surrender_art(boss_id: String) -> String:
 	return "" if who.is_empty() else "res://assets/story/surrender/%s_surrender.png" % who
 
 
-func _on_mini_choice(index: int, name: String, at: Vector2) -> void:
+func _on_mini_choice(index: int, name: String, at: Vector2, boss_id: String) -> void:
 	if index == 0:
 		player.heal(player.max_hp)
 		_rerolls_free += 1
@@ -826,6 +831,31 @@ func _on_mini_choice(index: int, name: String, at: Vector2) -> void:
 		_drop_weapon(_roll_weapon("epic"), at, true)
 		pickups.spawn_xp_gold(at, 20)
 		hud.toast("ГРАБЁЖ", "+%s. Нэлл: Грабёж! Мне нравится. Записала." % Economy.format_gems(extra), Color("#ffb020"))
+		_show_looted(boss_id)
+
+
+func _show_looted(boss_id: String) -> void:
+	var path := _surrender_art(boss_id).replace("_surrender", "_looted")
+	if path.is_empty() or not ResourceLoader.exists(path):
+		return
+	var layer := CanvasLayer.new()
+	layer.layer = 60
+	add_child(layer)
+	var picture := TextureRect.new()
+	picture.texture = load(path) as Texture2D
+	picture.set_anchors_preset(Control.PRESET_CENTER)
+	picture.custom_minimum_size = Vector2(300, 300)
+	picture.size = Vector2(300, 300)
+	picture.position = Vector2(-150, -190)
+	picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	picture.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	picture.modulate.a = 0.0
+	layer.add_child(picture)
+	var tween := create_tween()
+	tween.tween_property(picture, "modulate:a", 1.0, 0.2)
+	tween.tween_interval(1.6)
+	tween.tween_property(picture, "modulate:a", 0.0, 0.4)
+	tween.tween_callback(layer.queue_free)
 
 
 func _on_boss_killed(boss: Enemy, at: Vector2) -> void:

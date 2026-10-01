@@ -64,4 +64,14 @@ for who in ('baron', 'shaman', 'magnate'):
         put('surrender/%s_%s.png' % (who, state), 'surrender/%s_%s.png' % (who, state), True, (384, 384))
 for n in ('choice_spare', 'choice_loot'):
     put('surrender/%s.png' % n, 'surrender/%s.png' % n, True)
+LQ = '/home/claude/raccoon/assets/vfx/liquid/'
+os.makedirs(LQ, exist_ok=True)
+for f in sorted(os.listdir(SRC + 'fx_liquid')):
+    if not f.endswith('.png'):
+        continue
+    im = Image.open(SRC + 'fx_liquid/' + f)
+    if '_drop_' in f:
+        im.convert('RGBA').save(LQ + f, optimize=True)
+    else:
+        key(im).resize((160, 160), Image.LANCZOS).save(LQ + f, optimize=True)
 print('ok')
