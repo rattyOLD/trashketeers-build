@@ -64,7 +64,7 @@ begin
   select p.friend_code into code from public.profiles p where p.id = uid;
   if code is null then
     loop
-      code := upper(substr(translate(encode(gen_random_bytes(6), 'base64'), '+/=Il1O0', 'XYZABCD'), 1, 6));
+      code := upper(substr(translate(md5(random()::text || clock_timestamp()::text), '01', 'XY'), 1, 6));
       exit when not exists (select 1 from public.profiles p where p.friend_code = code);
     end loop;
     insert into public.profiles (id, nickname, friend_code, best_wave, insider)
