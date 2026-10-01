@@ -16,6 +16,10 @@ const SHOT_STEP := 30.0
 const ADAPT_WINDOW := 5.0
 const ADAPT_FPS := 38.0
 const ADAPT_MAX := 4
+## Первые секунды боя (прогрев шейдеров и загрузка) FPS всегда низкий: не реагируем на них.
+const ADAPT_WARMUP := 25.0
+## Сколько окон подряд FPS должен быть ниже порога, чтобы снизить качество.
+const ADAPT_STRIKES := 2
 const ADAPT_HARD_FPS := 26.0
 const PERF_SAMPLE_FRAMES := 1500
 const SPIKE_MS := 140.0
@@ -42,6 +46,7 @@ var hero_skills: HeroSkills
 var _perf_last_usec := 0
 var _perf_frames: PackedFloat32Array = PackedFloat32Array()
 var _perf_age := 0.0
+var _adapt_strikes := 0
 var _perf_resume_guard := 0
 var _context_timer := 0.0
 var _spikes_sent := 0
@@ -240,7 +245,7 @@ func _perf_context() -> String:
 ## Динамическое качество: если 5 секунд подряд средний FPS ниже порога — упрощаем эффекты, затем снижаем разрешение холста.
 ## Изменения действуют только в этом бою; настройки игрока не трогаем. На «Красиво» разрешение и FPS не снижаются: игрок выбрал максимум сам.
 func _adapt_quality(delta: float) -> void:
-	if _perf_age < 8.0 or _adapt_level >= ADAPT_MAX:
+	if _perf_age < ADAPT_WARMUP or _adapt_level >= ADAPT_MAX:
 		return
 	_adapt_time += delta
 	_adapt_frames += 1
@@ -250,7 +255,12 @@ func _adapt_quality(delta: float) -> void:
 	_adapt_time = 0.0
 	_adapt_frames = 0
 	if fps >= (ADAPT_FPS if _adapt_level < 2 else ADAPT_HARD_FPS):
+		_adapt_strikes = 0
 		return
+	_adapt_strikes += 1
+	if _adapt_strikes < ADAPT_STRIKES:
+		return
+	_adapt_strikes = 0
 	_adapt_level += 1
 	if SaveService.get_quality() >= 2 and _adapt_level != 1:
 		return
