@@ -1,3 +1,4 @@
+import hashlib
 import gzip, os, shutil, sys
 
 scratch = os.path.dirname(os.path.abspath(__file__))
@@ -35,7 +36,10 @@ def write_parts(raw, prefix, chunk):
         assert len(data) < 15 * 1024 * 1024 - 65536, name
         with open(os.path.join(site, name), "wb") as dst:
             dst.write(data)
-        parts.append('{url:"%s",bytes:%d}' % (name, len(data)))
+        # Хеш содержимого в адресе: загрузчик берёт части с cache: 'force-cache', и без него браузер навсегда
+        # отдавал старый пак (новая страница + старая игра). Неизменённые части по-прежнему берутся из кэша.
+        digest = hashlib.sha1(data).hexdigest()[:12]
+        parts.append('{url:"%s?h=%s",bytes:%d}' % (name, digest, len(data)))
     return "[" + ",".join(parts) + "]"
 
 

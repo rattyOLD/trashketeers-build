@@ -936,6 +936,14 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	function downloadPart(key, index) {
 		const part = FILES[key].parts[index];
 		return fetch(part.url, { cache: 'force-cache' }).then(function (response) {
+			// Размер не совпал с ожидаемым: в кэше чужая версия части. Качаем заново мимо кэша.
+			const size = Number(response.headers.get('content-length') || 0);
+			if (response.ok && size > 0 && !response.headers.get('content-encoding') && size !== part.bytes && !part.retried) {
+				part.retried = true;
+				return fetch(part.url, { cache: 'reload' });
+			}
+			return response;
+		}).then(function (response) {
 			if (!response.ok) {
 				throw new Error('HTTP ' + response.status + ' на ' + part.url);
 			}
