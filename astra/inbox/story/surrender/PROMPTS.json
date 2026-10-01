@@ -1,0 +1,25 @@
+{
+  "generator": "built-in imagegen",
+  "prompts": [
+    {
+      "key": "baron_surrender",
+      "prompt": "Use case: stylized-concept. Production 2D cartoon game art for Trashketeers, thick dark outline, soft two-tone cel shading, rust and gold, pink/cyan neon accents. Match the provided reference character EXACTLY; no photorealism, no pixel art, no text, no labels, no borders, no watermark. Flat solid #FF00FF background, no shadows or gradients on background. Create a 2-column by 1-row sheet, 1024x512, equal 512x512 cells, characters contained within cell with generous 32px margins. Waist-up kneeling/compressed defeated posture, readable expressions. Left cell: surrender, both hands raised, sweating pleading grimace, weapon discarded beside him. Right cell: same boss robbed of clothes/equipment, wearing modest opaque boxer shorts, bashfully covering belly/shorts with arms, sack of confiscated loot beside him. Nonsexual comic humiliation, no nudity. Same proportions, facial identity and viewing angle across cells. Beer Baron is the fat brown RAT from reference, not a pig: big round ears, rodent muzzle, buck teeth, round belly with same pink cat graffiti. Left has gold crown, dark sunglasses and wooden beer barrel with GOLD hoops and rivets, foam on top, NO TAP. Gun on ground. Right stripped of armor, crown, glasses and barrel; same rat face and belly graffiti, plain red boxers; crown, glasses, gold hoops at loot sack. User correction: wooden brown staves, gold hoops, rivets, lid edging; removed matching barrel by sack in looted frame.",
+      "reference": "/workspace/scratch/a777a22c1d4f/story_export/portraits/baron_normal.png"
+    },
+    {
+      "key": "shaman_surrender",
+      "prompt": "Use case: stylized-concept. Production 2D cartoon game art for Trashketeers, thick dark outline, soft two-tone cel shading, rust and gold, pink/cyan neon accents. Match the provided reference character EXACTLY; no photorealism, no pixel art, no text, no labels, no borders, no watermark. Flat solid #FF00FF background, no shadows or gradients on background. Create a 2-column by 1-row sheet, 1024x512, equal 512x512 cells, characters contained within cell with generous 32px margins. Waist-up kneeling/compressed defeated posture, readable expressions. Left cell: surrender, both hands raised, sweating pleading grimace, weapon discarded beside him. Right cell: same boss robbed of clothes/equipment, wearing modest opaque boxer shorts, bashfully covering belly/shorts with arms, sack of confiscated loot beside him. Nonsexual comic humiliation, no nudity. Same proportions, facial identity and viewing angle across cells. Shaman is the gray rat wizard from reference: huge ears, blue/teal hooded robe with gold trim, copper blue-electricity staff dropped on ground on left. Right no robe or staff, same gray rat with large ears and rat tail, modest blue boxers, blue robe and electric staff beside sack.",
+      "reference": "/workspace/scratch/7b217288ccb7/v8/references/shaman.png"
+    },
+    {
+      "key": "magnate_surrender",
+      "prompt": "Use case: stylized-concept. Production 2D cartoon game art for Trashketeers, thick dark outline, soft two-tone cel shading, rust and gold, pink/cyan neon accents. Match the provided reference character EXACTLY; no photorealism, no pixel art, no text, no labels, no borders, no watermark. Flat solid #FF00FF background, no shadows or gradients on background. Create a 2-column by 1-row sheet, 1024x512, equal 512x512 cells, characters contained within cell with generous 32px margins. Waist-up kneeling/compressed defeated posture, readable expressions. Left cell: surrender, both hands raised, sweating pleading grimace, weapon discarded beside him. Right cell: same boss robbed of clothes/equipment, wearing modest opaque boxer shorts, bashfully covering belly/shorts with arms, sack of confiscated loot beside him. Nonsexual comic humiliation, no nudity. Same proportions, facial identity and viewing angle across cells. Pig Magnate is the fat pink pig from reference, pig snout, black top hat with tiny gold crown, sunglasses, red white-fur coat, gold safe armor and coin cannon discarded beside him on left. Right same pink pig without top hat, sunglasses, coat or safe armor, modest gold-colored boxers, golden armor and hat beside sack.",
+      "reference": "/workspace/scratch/a777a22c1d4f/v7/export/portraits2/dirty_magnate_charm.png"
+    },
+    {
+      "key": "choice_icons",
+      "prompt": "Use case: stylized-concept. Two separate game choice icons on a 1024x512 sheet, 2 columns one row, equal square 512x512 cells, 64px margins. Match thick dark outlines and soft two-tone cel shading of supplied game UI reference. Left icon: white sock tied to a short twig as surrender flag, simple bright readable silhouette, small cyan accent. Right icon: raccoon gloved paw gripping neck of an orange-brown cloth sack overflowing golden coins, small pink/cyan accents. Solid #FF00FF background, no cast shadow, no text, no labels, no frame, no watermark, no extra icons.",
+      "reference": "/workspace/scratch/7b217288ccb7/project_sources/08-IMG_1584.jpeg"
+    }
+  ]
+}

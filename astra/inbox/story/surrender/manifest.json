@@ -1,0 +1,87 @@
+{
+  "brief": "astra/from_claude/BRIEF_v8_survival_fx.md",
+  "block": "H1",
+  "frameOrder": "left-to-right top-to-bottom",
+  "assets": [
+    {
+      "path": "astra/inbox/story/surrender/baron_surrender.png",
+      "width": 512,
+      "height": 512,
+      "block": "H1",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "baron_surrender",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/surrender/baron_looted.png",
+      "width": 512,
+      "height": 512,
+      "block": "H1",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "baron_surrender",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/surrender/shaman_surrender.png",
+      "width": 512,
+      "height": 512,
+      "block": "H1",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "shaman_surrender",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/surrender/shaman_looted.png",
+      "width": 512,
+      "height": 512,
+      "block": "H1",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "shaman_surrender",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/surrender/magnate_surrender.png",
+      "width": 512,
+      "height": 512,
+      "block": "H1",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "magnate_surrender",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/surrender/magnate_looted.png",
+      "width": 512,
+      "height": 512,
+      "block": "H1",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "magnate_surrender",
+      "frame": 1
+    },
+    {
+      "path": "astra/inbox/story/surrender/choice_spare.png",
+      "width": 128,
+      "height": 128,
+      "block": "H1",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "choice_icons",
+      "frame": 0
+    },
+    {
+      "path": "astra/inbox/story/surrender/choice_loot.png",
+      "width": 128,
+      "height": 128,
+      "block": "H1",
+      "transparent": false,
+      "texture": false,
+      "sourceSheet": "choice_icons",
+      "frame": 1
+    }
+  ]
+}
