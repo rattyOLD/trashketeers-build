@@ -97,7 +97,10 @@ func _accept_card_link() -> void:
 				Platform.storage_set("trk_badge_seen", str(level))
 				_show_badge_welcome(level)
 		else:
-			_toast_note("Ссылка не сработала: сервер не принял секрет (или v7 ещё не выполнена)")
+			if SaveService.get_insider() >= 0:
+				_toast_note("Твой тег %s уже на месте, эта ссылка своё отработала" % SaveService.get_badge())
+			else:
+				_toast_note("Ссылка не действует: она уже использована или заменена. Попроси новую")
 	var restore := Platform.consume_url_param("restore")
 	if not restore.is_empty() and restore.strip_edges().to_upper() == Platform.storage_get(Cloud.RECOVERY_KEY).to_upper():
 		restore = ""
