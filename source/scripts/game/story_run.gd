@@ -56,6 +56,7 @@ var _min_trigger := 0.0
 var _captives: Array = []
 var _enemy_lines: Dictionary = {}
 var _zone_hit := false
+var _ever_hit := false
 var _active: Dictionary = {}
 var _tracked: Array = []
 var _pending_waves: Array = []
@@ -112,7 +113,9 @@ func setup(owner_game: Game, mission_id: String) -> bool:
 	var meter := HeavyBarrel.Meter.new()
 	meter.bind(barrel)
 	game.hud.dock_story_meter(meter)
-	game.player.damaged.connect(func(_amount: float) -> void: _zone_hit = true)
+	game.player.damaged.connect(func(_amount: float) -> void:
+		_zone_hit = true
+		_ever_hit = true)
 	_start_y = game.map.player_start.y
 	_end_y = game.map.boss_point.y
 	waypoint = Node2D.new()
@@ -185,7 +188,13 @@ func on_kill(data: EnemyData) -> void:
 	score += BOSS_POINTS if data.is_boss() else maxi(int(data.max_hp / 4.0), 10) * 10
 
 
+func flawless() -> bool:
+	return not _ever_hit and lives == START_LIVES and lives_lost == 0
+
+
 func rank() -> String:
+	if finished_mission and flawless():
+		return "S"
 	var total := score + lives * LIFE_BONUS
 	for i in RANK_STEPS.size():
 		if total >= RANK_STEPS[i]:
@@ -203,6 +212,8 @@ func result_lines(victory: bool) -> PackedStringArray:
 	lines.append("Детали ствола: %d из %d" % [barrel.parts if not barrel.active else HeavyBarrel.TOTAL_PARTS, HeavyBarrel.TOTAL_PARTS])
 	lines.append("Жизни: %d из %d" % [lives, START_LIVES])
 	lines.append("Время: %s" % BattleBase.format_time(game.director.elapsed))
+	if victory and flawless():
+		lines.append("БЕЗ ЕДИНОГО УРОНА: ранг S")
 	if victory:
 		lines.append("Ранг: %s" % rank())
 	elif not str(mission.get("fail_line", "")).is_empty():
@@ -466,6 +477,7 @@ func _on_captive_freed(captive: Captive) -> void:
 	game.fx.popup(captive.global_position + Vector2(0, -80), "СПАСЁН +%d" % RESCUE_POINTS, Color("#ffd257"), 32.0)
 	game.fx.ring(captive.global_position, Color("#ffd257"), 120.0)
 	game.pickups.spawn_xp_gold(captive.global_position, 5)
+	SaveService.add_stat("story_rescued")
 	game.hud.toast("ПЛЕННИК ОСВОБОЖДЁН", "Спасено: %d · +%d очков" % [rescued, RESCUE_POINTS], Color("#ffd257"))
 
 
@@ -681,6 +693,11 @@ func finish() -> void:
 	finished_mission = true
 	var shards := int(mission.get("shards", 1))
 	SaveService.story_complete(str(mission.get("id", "")), shards, score + lives * LIFE_BONUS)
+	if not _captives.is_empty() and rescued >= _captives.size():
+		SaveService.add_stat("story_all_rescued", 1, false)
+	if flawless():
+		SaveService.add_stat("story_flawless", 1, false)
+	SaveService.add_stat("story_missions", 1)
 	game.story_target = null
 	game.hud.show_banner("ОСКОЛОК %d/6 ПОЛУЧЕН!" % shards, UiStyle.GOLD, 2.8)
 	_after_queue = game.story_finished
