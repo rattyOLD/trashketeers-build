@@ -641,7 +641,8 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 			checkVersion();
 		}
 	});
-	setTimeout(checkVersion, 8000);
+	setTimeout(checkVersion, 1500);
+	setInterval(checkVersion, 300000);
 	// Закэшированная страница старой сборки: один раз принудительно перезагружаемся на свежую.
 	fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (v) {
 		if (v && v.build && v.build !== BUILD_ID) {

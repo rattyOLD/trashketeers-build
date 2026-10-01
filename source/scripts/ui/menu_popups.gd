@@ -832,6 +832,11 @@ class Profile:
 		list.add_child(_achievements_bar())
 		list.add_child(_chronicle_bar())
 		list.add_child(_friends_bar())
+		list.add_child(_section("Версия игры"))
+		var version := UiStyle.label(Platform.build_label() if not Platform.build_label().is_empty() else "локальная сборка", 30, UiStyle.GOLD, 7)
+		version.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		list.add_child(version)
+		list.add_child(MenuPopups.small_hint("Если у друга другой номер, пусть откроет игру заново или нажмёт на розовую плашку обновления."))
 		list.add_child(_section("Тестер и сохранение"))
 		list.add_child(_insider_block())
 
