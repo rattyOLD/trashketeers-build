@@ -22,6 +22,11 @@ func _init(tag_level: int) -> void:
 	level = tag_level
 
 
+func open() -> void:
+	SoundManager.play(&"level_up" if level == 0 else &"achievement")
+	super()
+
+
 func _refresh() -> void:
 	var keep := content.get_child(0)
 	for child in content.get_children():

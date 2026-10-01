@@ -93,7 +93,9 @@ func _accept_card_link() -> void:
 		var level := await Cloud.claim_badge(badge_code)
 		if level >= 0:
 			_show_menu()
-			_show_badge_welcome(level)
+			if Platform.storage_get("trk_badge_seen") != str(level):
+				Platform.storage_set("trk_badge_seen", str(level))
+				_show_badge_welcome(level)
 		else:
 			_toast_note("Ссылка не сработала: сервер не принял секрет (или v7 ещё не выполнена)")
 	var restore := Platform.consume_url_param("restore")

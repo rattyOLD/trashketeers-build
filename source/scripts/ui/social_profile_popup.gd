@@ -91,6 +91,11 @@ func _load() -> void:
 			var r := await Cloud.dev_call("dev_set_chat_ban", {"p_code": friend_code, "p_banned": true})
 			if is_instance_valid(self):
 				_status.text = "Чат для этого игрока отключён" if bool(r["ok"]) and str(r["data"]) == "ok" else "Не вышло (нужен DeV и SQL v7)"))
+	if SaveService.is_dev():
+		_body.add_child(_two_tap("DeV: выдать Insider", UiStyle.PANEL_LIGHT, func() -> void:
+			var r := await Cloud.dev_call("dev_set_badge", {"p_code": friend_code, "p_level": 1})
+			if is_instance_valid(self):
+				_status.text = "Insider выдан" if bool(r["ok"]) and str(r["data"]) == "ok" else "Не вышло (игрок уже DeV или нет SQL v7)"))
 	_body.add_child(_two_tap("Заблокировать", Color("#a3283e"), func() -> void:
 		var done := await Cloud.block_user(friend_code)
 		if is_instance_valid(self) and done:

@@ -45,7 +45,7 @@ func _refresh() -> void:
 	_list.add_child(UiStyle.label("ССЫЛКИ ДЛЯ ТЕГОВ", 22, UiStyle.TEXT_DIM, 5))
 	_list.add_child(_link_button("Новая ссылка DeV (старая умрёт)", 0, "dev"))
 	_list.add_child(_link_button("Новая ссылка Insider (старая умрёт)", 1, "insider"))
-	_list.add_child(_wrap("Ссылка показывается один раз и копируется в буфер. DeV-ссылка работает на 3 входа, Insider — без лимита до замены."))
+	_list.add_child(_wrap("Ссылка показывается один раз и копируется в буфер. DeV-ссылка работает на 3 входа, Insider на 50 (нужен SQL v9)."))
 
 	_list.add_child(UiStyle.label("ЖУРНАЛ ТЕГОВ", 22, UiStyle.TEXT_DIM, 5))
 	_log_label = _wrap("...")
@@ -144,6 +144,8 @@ func _load_all() -> void:
 		_stats_label.text = "Игроков: %s · онлайн за час: %s · за сутки: %s\nДружб: %s · сообщений за сутки: %s (всего %s)\nОткрытых жалоб: %s · в бане чата: %s\nDeV-аккаунтов: %s · Insider: %s" % [
 			s.get("players"), s.get("active_1h"), s.get("active_24h"), s.get("friendships"),
 			s.get("messages_24h"), s.get("messages_all"), s.get("reports_open"), s.get("banned"), s.get("devs"), s.get("insiders")]
+		if int(s.get("devs", 1)) > 1:
+			_stats_label.text += "\nDeV-аккаунтов несколько (твои телефон и мини-апка считаются). Если их больше, чем твоих устройств, перевыпусти ссылку и проверь журнал тегов."
 	else:
 		_stats_label.text = "Нет доступа: тег DeV не подтверждён сервером. Открой секретную ссылку ?dev=… заново."
 		return

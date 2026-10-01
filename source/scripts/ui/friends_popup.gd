@@ -749,8 +749,11 @@ class CardView:
 			draw_circle(Vector2(40, h - 20), 300.0 - i * 40.0, Color(UiStyle.HOT, 0.012 + i * 0.005))
 		for i in range(-6, 22):
 			draw_line(Vector2(i * 64.0, 0), Vector2(i * 64.0 + 320.0, h), Color(1, 1, 1, 0.025), 2.0)
-		draw_style_box(UiStyle.box(Color(0, 0, 0, 0), UiStyle.NEON, 6, 30), Rect2(5, 5, w - 10, h - 10))
-		draw_style_box(UiStyle.box(Color(0, 0, 0, 0), Color(UiStyle.HOT, 0.8), 2, 26), Rect2(15, 15, w - 30, h - 30))
+		var ins := int(info.get("ins", -1))
+		var outer := UiStyle.GOLD if ins == 0 else (UiStyle.HOT if ins > 0 else UiStyle.NEON)
+		var inner := Color(UiStyle.GOLD, 0.8) if ins == 0 else (Color(UiStyle.NEON, 0.8) if ins > 0 else Color(UiStyle.HOT, 0.8))
+		draw_style_box(UiStyle.box(Color(0, 0, 0, 0), outer, 6 if ins < 0 else 8, 30), Rect2(5, 5, w - 10, h - 10))
+		draw_style_box(UiStyle.box(Color(0, 0, 0, 0), inner, 2, 26), Rect2(15, 15, w - 30, h - 30))
 
 	func _wordmark(font: Font, right_top: Vector2) -> void:
 		var first := "TRASH "
