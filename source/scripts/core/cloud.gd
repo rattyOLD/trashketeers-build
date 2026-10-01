@@ -7,10 +7,13 @@ signal profile_synced
 const URL := "https://ylclwkprhhlzavhahrko.supabase.co"
 const KEY := "sb_publishable_7xeZ6_3lc4Bi44z35wf4BQ__P6Maunz"
 const SESSION_KEY := "trk_cloud_session"
+const RECOVERY_KEY := "trk_recovery_code"
+const UPLOAD_DELAY := 8.0
 const TIMEOUT := 10.0
 const EXPIRY_MARGIN := 60
 
 var friend_code := ""
+var recovery_code := ""
 var online := false
 
 var _uid := ""
@@ -19,11 +22,13 @@ var _refresh := ""
 var _expires := 0
 var _session_busy := false
 var _profile_busy := false
+var _upload_pending := false
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_load_session()
+	recovery_code = Platform.storage_get(RECOVERY_KEY)
 	if Platform.is_web:
 		get_tree().create_timer(4.0).timeout.connect(sync_profile)
 
@@ -70,6 +75,46 @@ func list_friends() -> Dictionary:
 	if not await sync_profile():
 		return {"ok": false, "items": []}
 	var result := await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/list_friends", {})
+	var items: Array = []
+	if bool(result["ok"]) and result["data"] is Array:
+		items = result["data"] as Array
+	return {"ok": bool(result["ok"]), "items": items}
+
+
+## Откладывает выгрузку сохранения, чтобы серия вызовов превратилась в один запрос.
+func queue_upload() -> void:
+	if _upload_pending or not Platform.is_web:
+		return
+	_upload_pending = true
+	get_tree().create_timer(UPLOAD_DELAY).timeout.connect(func() -> void:
+		_upload_pending = false
+		upload_save())
+
+
+## Кладёт сохранение в облако и возвращает код восстановления (пусто, если связи нет).
+func upload_save() -> String:
+	if not await sync_profile():
+		return ""
+	var result := await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/upload_save", {"p_data": SaveService.export_code()})
+	if bool(result["ok"]) and result["data"] is String and not str(result["data"]).is_empty():
+		recovery_code = str(result["data"])
+		Platform.storage_set(RECOVERY_KEY, recovery_code)
+	return recovery_code
+
+
+## Возвращает код сохранения из облака по коду восстановления или пустую строку.
+func restore_save(code: String) -> String:
+	if not await sync_profile():
+		return ""
+	var result := await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/restore_save", {"p_code": code})
+	if bool(result["ok"]) and result["data"] is String:
+		return str(result["data"])
+	return ""
+
+
+## {"ok": bool, "items": [{nickname, best_wave, insider}]} — лучшие игроки по волне.
+func top_waves(limit: int = 20) -> Dictionary:
+	var result := await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/top_waves", {"p_limit": limit})
 	var items: Array = []
 	if bool(result["ok"]) and result["data"] is Array:
 		items = result["data"] as Array

@@ -1232,6 +1232,7 @@ func record_run(summary: Dictionary) -> Dictionary:
 	quest_add("rats", int(summary.get("kills", 0)))
 	check_achievements()
 	save_data()
+	Cloud.queue_upload()
 	return {"record": is_record, "loot": summary.get("loot", [])}
 
 

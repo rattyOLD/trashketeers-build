@@ -837,6 +837,8 @@ class Profile:
 		version.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		list.add_child(version)
 		list.add_child(MenuPopups.small_hint("Если у друга другой номер, пусть откроет игру заново или нажмёт на розовую плашку обновления."))
+		list.add_child(_section("Облачное сохранение"))
+		list.add_child(_cloud_block())
 		list.add_child(_section("Тестер и сохранение"))
 		list.add_child(_insider_block())
 
@@ -920,10 +922,19 @@ class Profile:
 		xp.max_value = 1.0
 		xp.value = SaveService.get_level_progress()
 		info.add_child(xp)
-		var id_button := UiStyle.button("ID: %s" % SaveService.get_player_id(), UiStyle.PANEL_LIGHT, 20, Vector2(0, 46))
+		var id_button := UiStyle.button("", UiStyle.PANEL_LIGHT, 20, Vector2(0, 46))
+		var paint_id := func() -> void:
+			id_button.text = "ID для друзей: %s" % Cloud.friend_code if Cloud.has_code() else "ID: ищу связь..."
+		paint_id.call()
+		if not Cloud.has_code():
+			Cloud.sync_profile()
+			Cloud.profile_synced.connect(func() -> void:
+				if is_instance_valid(id_button):
+					paint_id.call(), CONNECT_ONE_SHOT)
 		id_button.pressed.connect(func() -> void:
-			DisplayServer.clipboard_set(SaveService.get_player_id())
-			id_button.text = "ID скопирован")
+			if Cloud.has_code():
+				DisplayServer.clipboard_set(Cloud.friend_code)
+				id_button.text = "ID скопирован")
 		info.add_child(id_button)
 		head.add_child(info)
 		return panel
@@ -936,6 +947,64 @@ class Profile:
 		SearchBar.style(edit, 22)
 		SearchBar.attach_touch_input(edit, "Код тестера")
 		return edit
+
+	func _cloud_block() -> Control:
+		var box := VBoxContainer.new()
+		box.add_theme_constant_override("separation", 10)
+		var status := UiStyle.label("Код восстановления: %s" % (Cloud.recovery_code if not Cloud.recovery_code.is_empty() else "ещё не сохранялось"), 22, UiStyle.GOLD, 6)
+		status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		box.add_child(status)
+		box.add_child(MenuPopups.small_hint("Сохраняется само после забега. Код нужен, чтобы вернуть прогресс на другом устройстве или после очистки браузера. Запиши его."))
+		var save := UiStyle.button("Сохранить в облако сейчас", UiStyle.PANEL_LIGHT, 22, Vector2(0, 56))
+		save.pressed.connect(func() -> void:
+			save.disabled = true
+			save.text = "Сохраняю..."
+			var code := await Cloud.upload_save()
+			if not is_instance_valid(save):
+				return
+			save.disabled = false
+			save.text = "Сохранено" if not code.is_empty() else "Нет связи с сервером"
+			if not code.is_empty():
+				status.text = "Код восстановления: %s" % code)
+		box.add_child(save)
+		var copy := UiStyle.button("Скопировать код восстановления", UiStyle.PANEL_LIGHT, 22, Vector2(0, 56))
+		copy.pressed.connect(func() -> void:
+			if not Cloud.recovery_code.is_empty():
+				DisplayServer.clipboard_set(Cloud.recovery_code)
+				copy.text = "Код скопирован")
+		box.add_child(copy)
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 8)
+		var edit := _styled_edit("Код восстановления")
+		row.add_child(edit)
+		var restore := UiStyle.button("ВЕРНУТЬ", UiStyle.HOT, 22, Vector2(170, 56))
+		var armed := [false]
+		restore.pressed.connect(func() -> void:
+			if edit.text.strip_edges().is_empty():
+				return
+			if not armed[0]:
+				armed[0] = true
+				restore.text = "ТОЧНО?"
+				get_tree().create_timer(3.0).timeout.connect(func() -> void:
+					if is_instance_valid(restore):
+						armed[0] = false
+						restore.text = "ВЕРНУТЬ")
+				return
+			armed[0] = false
+			restore.text = "..."
+			var saved := await Cloud.restore_save(edit.text)
+			if not is_instance_valid(restore):
+				return
+			if not saved.is_empty() and SaveService.import_code(saved):
+				restore.text = "ГОТОВО"
+				Cloud.recovery_code = edit.text.strip_edges().to_upper()
+				Platform.storage_set(Cloud.RECOVERY_KEY, Cloud.recovery_code)
+			else:
+				restore.text = "НЕ НАЙДЕНО")
+		row.add_child(restore)
+		box.add_child(row)
+		box.add_child(MenuPopups.small_hint("«Вернуть» заменяет прогресс на этом устройстве сохранением из облака."))
+		return box
 
 	func _insider_block() -> Control:
 		var box := VBoxContainer.new()

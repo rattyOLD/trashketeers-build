@@ -36,6 +36,7 @@ func _refresh() -> void:
 	list.add_child(_status)
 
 	_build_online(list)
+	_build_top(list)
 
 	list.add_child(_section("МОЯ ВИЗИТКА"))
 	var card := CardView.new()
@@ -149,32 +150,76 @@ func _refresh() -> void:
 var _friends_box: VBoxContainer
 var _board_box: VBoxContainer
 var _online_box: VBoxContainer
+var _top_box: VBoxContainer
 var _online_note: Label
 var _online_code: Label
 
 
+func _build_top(list: VBoxContainer) -> void:
+	list.add_child(_section("ТОП ИГРОКОВ ПО ВОЛНЕ"))
+	_top_box = VBoxContainer.new()
+	_top_box.add_theme_constant_override("separation", 6)
+	list.add_child(_top_box)
+	_load_top()
+
+
+func _load_top() -> void:
+	var result := await Cloud.top_waves(20)
+	if not is_instance_valid(_top_box):
+		return
+	MenuPopups.clear(_top_box)
+	var items: Array = result["items"]
+	if not bool(result["ok"]) or items.is_empty():
+		var note := UiStyle.label("Пока пусто или нет связи.", 18, UiStyle.TEXT_DIM, 4)
+		_top_box.add_child(note)
+		return
+	for i in items.size():
+		var item: Dictionary = items[i]
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 10)
+		var medal: Color = MEDALS[i] if i < MEDALS.size() else UiStyle.TEXT_DIM
+		var place := UiStyle.label(str(i + 1), 24, medal, 6)
+		place.custom_minimum_size = Vector2(40, 0)
+		row.add_child(place)
+		var badge := Insider.badge_of(int(item.get("insider", -1)))
+		var nick := str(item.get("nickname", "Енот"))
+		var name_label := UiStyle.label(nick if badge.is_empty() else "%s %s" % [badge, nick], 22, UiStyle.TEXT, 5)
+		name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		name_label.clip_text = true
+		row.add_child(name_label)
+		row.add_child(UiStyle.label("волна %d" % int(item.get("best_wave", 0)), 20, UiStyle.GOLD, 5))
+		_top_box.add_child(row)
+
+
 func _build_online(list: VBoxContainer) -> void:
 	list.add_child(_section("ОНЛАЙН-ДРУЗЬЯ"))
-	_online_code = UiStyle.label("Код: ...", 28, UiStyle.GOLD, 7)
+	_online_code = UiStyle.label("Твой ID: ...", 28, UiStyle.GOLD, 7)
 	list.add_child(_online_code)
 	_online_note = UiStyle.label("Подключаюсь к серверу...", 18, UiStyle.TEXT_DIM, 4)
 	_online_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_online_note.custom_minimum_size = Vector2(panel_width() - 110.0, 0)
 	list.add_child(_online_note)
-	var copy := UiStyle.button("Скопировать мой онлайн-код", UiStyle.PANEL_LIGHT, 22, Vector2(0, 56))
+	var copy := UiStyle.button("Скопировать мой ID", UiStyle.PANEL_LIGHT, 22, Vector2(0, 56))
 	copy.pressed.connect(func() -> void:
 		if Cloud.has_code():
 			DisplayServer.clipboard_set(Cloud.friend_code)
-			_say("Онлайн-код скопирован. Отправь его другу"))
+			_say("ID скопирован. Отправь его другу"))
 	list.add_child(copy)
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
-	var edit := _edit("Онлайн-код друга")
+	var edit := _edit("ID друга (из его профиля)")
 	row.add_child(edit)
 	var add := UiStyle.button("ДОБАВИТЬ", UiStyle.HOT, 22, Vector2(190, 56))
 	add.pressed.connect(func() -> void:
 		var code := edit.text.strip_edges()
 		if code.is_empty():
+			return
+		if code.begins_with("TRF1."):
+			var card_result: String = SaveService.add_friend(code)
+			_say("Друг добавлен по визитке" if card_result == "ok" or card_result == "bonus" else "Визитка не подошла")
+			edit.text = ""
+			_refresh_list_only()
 			return
 		add.disabled = true
 		var result := await Cloud.add_friend(code)
@@ -207,12 +252,12 @@ func _load_online() -> void:
 	if not is_instance_valid(_online_box):
 		return
 	MenuPopups.clear(_online_box)
-	_online_code.text = "Код: %s" % Cloud.friend_code if Cloud.has_code() else "Код: нет связи"
+	_online_code.text = "Твой ID: %s" % Cloud.friend_code if Cloud.has_code() else "Твой ID: нет связи"
 	if not bool(result["ok"]):
 		_online_note.text = "Нет связи с сервером. Остальное в игре работает как обычно."
 		return
 	var items: Array = result["items"]
-	_online_note.text = "Друзья по коду видят твой ник и рекорд волны." if not items.is_empty() else "Пока никого. Отправь другу свой код или введи его код."
+	_online_note.text = "Друзья по коду видят твой ник и рекорд волны." if not items.is_empty() else "Пока никого. Отправь другу свой ID или введи ID друга."
 	for item in items:
 		if item is Dictionary:
 			_online_box.add_child(_online_row(item as Dictionary))
