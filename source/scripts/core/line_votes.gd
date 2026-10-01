@@ -28,4 +28,5 @@ static func cast(line: Dictionary, value: int) -> void:
 	(SaveService.data["line_votes"] as Dictionary)[id] = value
 	SaveService.save_data()
 	var text := str(line.get("text", "")).replace("|", "/")
+	Cloud.send_vote(id, value, str(line.get("who", "")), str(line.get("text", "")))
 	Platform.send_report("line_vote", "%s|%d|%s|%s|ins%03d" % [id, value, str(line.get("who", "")), text, SaveService.get_insider()])

@@ -35,6 +35,8 @@ func _refresh() -> void:
 	_status.custom_minimum_size = Vector2(panel_width() - 110.0, 0)
 	list.add_child(_status)
 
+	_build_online(list)
+
 	list.add_child(_section("МОЯ ВИЗИТКА"))
 	var card := CardView.new()
 	card.info = SaveService.card_info()
@@ -146,6 +148,106 @@ func _refresh() -> void:
 
 var _friends_box: VBoxContainer
 var _board_box: VBoxContainer
+var _online_box: VBoxContainer
+var _online_note: Label
+var _online_code: Label
+
+
+func _build_online(list: VBoxContainer) -> void:
+	list.add_child(_section("ОНЛАЙН-ДРУЗЬЯ"))
+	_online_code = UiStyle.label("Код: ...", 28, UiStyle.GOLD, 7)
+	list.add_child(_online_code)
+	_online_note = UiStyle.label("Подключаюсь к серверу...", 18, UiStyle.TEXT_DIM, 4)
+	_online_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_online_note.custom_minimum_size = Vector2(panel_width() - 110.0, 0)
+	list.add_child(_online_note)
+	var copy := UiStyle.button("Скопировать мой онлайн-код", UiStyle.PANEL_LIGHT, 22, Vector2(0, 56))
+	copy.pressed.connect(func() -> void:
+		if Cloud.has_code():
+			DisplayServer.clipboard_set(Cloud.friend_code)
+			_say("Онлайн-код скопирован. Отправь его другу"))
+	list.add_child(copy)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	var edit := _edit("Онлайн-код друга")
+	row.add_child(edit)
+	var add := UiStyle.button("ДОБАВИТЬ", UiStyle.HOT, 22, Vector2(190, 56))
+	add.pressed.connect(func() -> void:
+		var code := edit.text.strip_edges()
+		if code.is_empty():
+			return
+		add.disabled = true
+		var result := await Cloud.add_friend(code)
+		if not is_instance_valid(add):
+			return
+		add.disabled = false
+		if result == "ok":
+			edit.text = ""
+			_say("Друг добавлен")
+			_load_online()
+		elif result == "not_found":
+			_say("Такого кода нет. Проверь буквы")
+		elif result == "self":
+			_say("Это твой собственный код")
+		elif result == "limit":
+			_say("Друзей уже максимум")
+		else:
+			_say("Нет связи с сервером. Попробуй позже"))
+	row.add_child(add)
+	edit.text_submitted.connect(func(_t: String) -> void: add.pressed.emit())
+	list.add_child(row)
+	_online_box = VBoxContainer.new()
+	_online_box.add_theme_constant_override("separation", 8)
+	list.add_child(_online_box)
+	_load_online()
+
+
+func _load_online() -> void:
+	var result := await Cloud.list_friends()
+	if not is_instance_valid(_online_box):
+		return
+	MenuPopups.clear(_online_box)
+	_online_code.text = "Код: %s" % Cloud.friend_code if Cloud.has_code() else "Код: нет связи"
+	if not bool(result["ok"]):
+		_online_note.text = "Нет связи с сервером. Остальное в игре работает как обычно."
+		return
+	var items: Array = result["items"]
+	_online_note.text = "Друзья по коду видят твой ник и рекорд волны." if not items.is_empty() else "Пока никого. Отправь другу свой код или введи его код."
+	for item in items:
+		if item is Dictionary:
+			_online_box.add_child(_online_row(item as Dictionary))
+
+
+func _online_row(friend: Dictionary) -> Control:
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#2f2452"), Color(UiStyle.NEON, 0.6), 3, 14))
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 10)
+	panel.add_child(row)
+	var badge := Insider.badge_of(int(friend.get("insider", -1)))
+	var nick := str(friend.get("nickname", "Енот"))
+	var name_label := UiStyle.label(nick if badge.is_empty() else "%s %s" % [badge, nick], 24, UiStyle.TEXT, 6)
+	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	name_label.clip_text = true
+	row.add_child(name_label)
+	row.add_child(UiStyle.label("волна %d" % int(friend.get("best_wave", 0)), 22, UiStyle.GOLD, 6))
+	var remove := UiStyle.button("X", Color("#a3283e"), 22, Vector2(52, 52))
+	var armed := [false]
+	remove.pressed.connect(func() -> void:
+		if not armed[0]:
+			armed[0] = true
+			remove.text = "?"
+			get_tree().create_timer(2.0).timeout.connect(func() -> void:
+				if is_instance_valid(remove):
+					armed[0] = false
+					remove.text = "X")
+			return
+		await Cloud.remove_friend(str(friend.get("friend_code", "")))
+		if is_instance_valid(self):
+			_load_online())
+	row.add_child(remove)
+	return panel
 var _board_metric := 0
 
 
