@@ -50,7 +50,20 @@ shutil.copy("/home/claude/raccoon/web/render_scale.js", os.path.join(site, "rend
 page = open("/home/claude/trashketeers-build/tools/site_template.html", encoding="utf-8").read()
 import json as _json
 _studio = str(_json.load(open("/home/claude/raccoon/data/brand.json")).get("studio", "")).strip()
-page = page.replace("__STUDIO_LINE__", ('<p class="studio">Сделано командой %s</p>' % _studio) if _studio else "")
+MUG = (
+    '<svg class="mug" viewBox="0 0 64 64" width="34" height="34" aria-hidden="true">'
+    '<path d="M14 24h30v28a6 6 0 0 1-6 6H20a6 6 0 0 1-6-6z" fill="#ffb020" stroke="#1a0033" stroke-width="3"/>'
+    '<path d="M44 30h6a6 6 0 0 1 0 14h-6" fill="none" stroke="#1a0033" stroke-width="3"/>'
+    '<path d="M44 30h6a6 6 0 0 1 0 14h-6" fill="none" stroke="#c3bfd8" stroke-width="1.2"/>'
+    '<circle cx="19" cy="22" r="7" fill="#fff6dc" stroke="#1a0033" stroke-width="2.5"/>'
+    '<circle cx="29" cy="18" r="8" fill="#fff6dc" stroke="#1a0033" stroke-width="2.5"/>'
+    '<circle cx="39" cy="22" r="7" fill="#fff6dc" stroke="#1a0033" stroke-width="2.5"/>'
+    '<path d="M16 28l-1-9 8 4zM42 28l1-9-8 4z" fill="#5a5470" stroke="#1a0033" stroke-width="2"/>'
+    '<rect x="17" y="36" width="24" height="9" rx="4.5" fill="#1a0033"/>'
+    '<circle cx="24" cy="40.5" r="2.4" fill="#fff"/><circle cx="34" cy="40.5" r="2.4" fill="#fff"/>'
+    '<ellipse cx="29" cy="47" rx="3" ry="2" fill="#1a0033"/></svg>'
+)
+page = page.replace("__STUDIO_LINE__", ('<p class="studio">' + MUG + '<span>Сделано командой %s</span>' % _studio + MUG + '</p>') if _studio else "")
 page = page.replace("__WASM_PARTS__", write_parts(raw, "raccoon.core", 24 * 1024 * 1024))
 page = page.replace("__PCK_PARTS__", write_parts(pck_raw, "raccoon.pack", 12 * 1024 * 1024))
 import time

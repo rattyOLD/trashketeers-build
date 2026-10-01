@@ -1,7 +1,7 @@
 class_name AmbientLine
 extends CanvasLayer
 ## Фоновая реплика сюжета: компактная плашка с портретом, игру не ставит на паузу и не ловит касания.
-## Реплики идут по очереди, каждая живёт по длине текста; тап по плашке не нужен.
+## Реплики идут по очереди, каждая живёт по длине текста; тап по плашке сразу убирает реплику.
 
 const MIN_TIME := 2.8
 const MAX_TIME := 8.0
@@ -52,7 +52,8 @@ func _build() -> void:
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(root)
 	_panel = PanelContainer.new()
-	_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	_panel.gui_input.connect(_on_panel_input)
 	_panel.anchor_left = 0.0
 	_panel.anchor_right = 1.0
 	_panel.anchor_top = 0.0
@@ -107,6 +108,13 @@ func _process(delta: float) -> void:
 	if _left <= 0.0:
 		_current = false
 		_panel.visible = false
+
+
+func _on_panel_input(event: InputEvent) -> void:
+	var tapped: bool = (event is InputEventMouseButton and event.pressed) or (event is InputEventScreenTouch and event.pressed)
+	if tapped and _current:
+		_left = minf(_left, FADE)
+		get_viewport().set_input_as_handled()
 
 
 func _show(line: Dictionary) -> void:

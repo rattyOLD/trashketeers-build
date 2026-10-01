@@ -118,7 +118,11 @@ html, body {
 	font-variant-numeric: tabular-nums;
 }
 #boot .studio {
-	margin: 10px 0 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	margin: 12px 0 0;
 	font-size: 13px;
 	letter-spacing: 2px;
 	color: #5ff2ff;
@@ -300,7 +304,7 @@ html, body {
 	<p id="status">Подключаемся к свалке…</p>
 	<p id="tip"></p>
 	<p class="ver" id="ver"></p>
-	
+	<p class="studio"><svg class="mug" viewBox="0 0 64 64" width="34" height="34" aria-hidden="true"><path d="M14 24h30v28a6 6 0 0 1-6 6H20a6 6 0 0 1-6-6z" fill="#ffb020" stroke="#1a0033" stroke-width="3"/><path d="M44 30h6a6 6 0 0 1 0 14h-6" fill="none" stroke="#1a0033" stroke-width="3"/><path d="M44 30h6a6 6 0 0 1 0 14h-6" fill="none" stroke="#c3bfd8" stroke-width="1.2"/><circle cx="19" cy="22" r="7" fill="#fff6dc" stroke="#1a0033" stroke-width="2.5"/><circle cx="29" cy="18" r="8" fill="#fff6dc" stroke="#1a0033" stroke-width="2.5"/><circle cx="39" cy="22" r="7" fill="#fff6dc" stroke="#1a0033" stroke-width="2.5"/><path d="M16 28l-1-9 8 4zM42 28l1-9-8 4z" fill="#5a5470" stroke="#1a0033" stroke-width="2"/><rect x="17" y="36" width="24" height="9" rx="4.5" fill="#1a0033"/><circle cx="24" cy="40.5" r="2.4" fill="#fff"/><circle cx="34" cy="40.5" r="2.4" fill="#fff"/><ellipse cx="29" cy="47" rx="3" ry="2" fill="#1a0033"/></svg><span>Сделано командой Beer Party Studio</span><svg class="mug" viewBox="0 0 64 64" width="34" height="34" aria-hidden="true"><path d="M14 24h30v28a6 6 0 0 1-6 6H20a6 6 0 0 1-6-6z" fill="#ffb020" stroke="#1a0033" stroke-width="3"/><path d="M44 30h6a6 6 0 0 1 0 14h-6" fill="none" stroke="#1a0033" stroke-width="3"/><path d="M44 30h6a6 6 0 0 1 0 14h-6" fill="none" stroke="#c3bfd8" stroke-width="1.2"/><circle cx="19" cy="22" r="7" fill="#fff6dc" stroke="#1a0033" stroke-width="2.5"/><circle cx="29" cy="18" r="8" fill="#fff6dc" stroke="#1a0033" stroke-width="2.5"/><circle cx="39" cy="22" r="7" fill="#fff6dc" stroke="#1a0033" stroke-width="2.5"/><path d="M16 28l-1-9 8 4zM42 28l1-9-8 4z" fill="#5a5470" stroke="#1a0033" stroke-width="2"/><rect x="17" y="36" width="24" height="9" rx="4.5" fill="#1a0033"/><circle cx="24" cy="40.5" r="2.4" fill="#fff"/><circle cx="34" cy="40.5" r="2.4" fill="#fff"/><ellipse cx="29" cy="47" rx="3" ry="2" fill="#1a0033"/></svg></p>
 	<p id="error" hidden></p>
 	<button id="retry" type="button" hidden>Попробовать ещё раз</button>
 </div>
@@ -336,7 +340,7 @@ html, body {
 </script>
 
 <script>
-window.__trash_build = {label: 'v34.121', time: '01.10 10:50'};
+window.__trash_build = {label: 'v34.123', time: '01.10 11:08'};
 document.getElementById('ver').textContent = 'Версия ' + window.__trash_build.label + ' · сборка от ' + window.__trash_build.time;
 </script>
 <script>
@@ -362,7 +366,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	// index.wasm / index.pck и отдаём ему уже скачанные и распакованные байты.
 	const FILES = {
 		wasm: { parts: [{url:"raccoon.core.0.wasm",bytes:5221065},{url:"raccoon.core.1.wasm",bytes:4165384}] },
-		pck: { parts: [{url:"raccoon.pack.0.wasm",bytes:11992262},{url:"raccoon.pack.1.wasm",bytes:12536586},{url:"raccoon.pack.2.wasm",bytes:1203003}] },
+		pck: { parts: [{url:"raccoon.pack.0.wasm",bytes:11992118},{url:"raccoon.pack.1.wasm",bytes:12536628},{url:"raccoon.pack.2.wasm",bytes:1205061}] },
 	};
 	const GODOT_CONFIG = {
 		args: [],
@@ -370,7 +374,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 		ensureCrossOriginIsolationHeaders: false,
 		executable: 'index',
 		experimentalVK: false,
-		fileSizes: { 'index.pck': 26655328, 'index.wasm': 43699190 },
+		fileSizes: { 'index.pck': 26658288, 'index.wasm': 43699190 },
 		focusCanvas: true,
 		gdextensionLibs: [],
 		onPrint: function () {
@@ -395,7 +399,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 
 	// Адрес сбора отчётов о вылетах (Google Apps Script / Supabase и т.п.); пусто — отчёты не отправляются.
 	const REPORT_URL = 'https://script.google.com/macros/s/AKfycbxVyy-SnRANW0Im-1Blne2TcUbca93WqzyBulpADwWWD7YH6x3KIygBYImTe8VfP5pp/exec';
-	const BUILD_ID_REPORT = '1790826650';
+	const BUILD_ID_REPORT = '1790827680';
 	const SESSION_ID = Math.random().toString(36).slice(2, 8);
 	const SESSION_START = Date.now();
 	const REPORT_CAP = 250;
@@ -601,7 +605,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	window.trkReport('session_start', gpuInfo() + ' | ' + navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + (window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio) + ' | screen ' + screen.width + 'x' + screen.height + ' | cores ' + (navigator.hardwareConcurrency || '?'));
 
 	// Вкладка могла висеть со старой версией: при возврате в неё сверяем номер сборки и предлагаем обновиться.
-	const BUILD_ID = '1790826650';
+	const BUILD_ID = '1790827680';
 	function checkVersion() {
 		fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (v) {
 			if (v && v.build && v.build !== BUILD_ID && !document.getElementById('newver')) {

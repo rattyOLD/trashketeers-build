@@ -77,6 +77,7 @@ class Settings:
 	var _slot_hint: Label
 	var _slot_confirm := false
 	var _keys: KeyBinds
+	var _credits: CreditsPopup
 
 	func _init() -> void:
 		super("НАСТРОЙКИ")
@@ -205,8 +206,14 @@ class Settings:
 		_slot_hint = UiStyle.label("", 19, UiStyle.TEXT_DIM, 4)
 		_slot_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		controls.add_child(_slot_hint)
+		var about := MenuPopups.section_card(list, "О ПРОЕКТЕ")
+		var credits_button := UiStyle.button("СОЗДАТЕЛИ", UiStyle.PANEL_LIGHT, 24, Vector2(0, 76))
+		credits_button.pressed.connect(func() -> void: _credits.open())
+		about.add_child(credits_button)
 		_keys = KeyBinds.new()
 		add_child(_keys)
+		_credits = CreditsPopup.new()
+		add_child(_credits)
 
 	func _on_slot_pressed(n: int) -> void:
 		if n == 3 and not SaveService.has_slot3():
