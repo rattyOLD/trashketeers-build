@@ -118,11 +118,13 @@ static func keep_pivot_centered(control: Control) -> void:
 ## Пружинящее появление (Elastic по ТЗ).
 static func pop_in(control: Control, duration: float = 0.6) -> void:
 	keep_pivot_centered(control)
-	control.scale = Vector2(0.55, 0.55)
+	var user_scale: float = float(control.get_meta(&"ui_scale", 1.0))
+	var user_alpha: float = float(control.get_meta(&"ui_alpha", 1.0))
+	control.scale = Vector2(0.55, 0.55) * user_scale
 	control.modulate.a = 0.0
 	var tween := control.create_tween().set_parallel(true)
-	tween.tween_property(control, "scale", Vector2.ONE, duration).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
-	tween.tween_property(control, "modulate:a", 1.0, duration * 0.3)
+	tween.tween_property(control, "scale", Vector2.ONE * user_scale, duration).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+	tween.tween_property(control, "modulate:a", user_alpha, duration * 0.3)
 
 
 static func pulse(control: Control, amount: float = 0.06, period: float = 0.9) -> void:

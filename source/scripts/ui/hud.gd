@@ -59,7 +59,10 @@ var _slot_bar: BattleControls.SlotBar
 var _interact: BattleControls.InteractButton
 var _layout_revision := -1
 var _hold: LayoutHold
-var _editor: ControlEditor
+var _editor: BattleLayoutEditor
+var _pause_button: Button
+var _story_meter: Control
+var _items_clock := 0.0
 var _minimap_slot: Control
 var _level_up: LevelUpPanel
 var _result: ResultPanel
@@ -179,6 +182,9 @@ func build(currency_icon: Texture2D, weapon: WeaponData) -> void:
 		"slots": _hold_slots,
 		"interact": _hold_interact,
 	}
+	for id in Controls.HUD_ELEMENTS:
+		if id != "pause":
+			_hold.targets[id] = hud_node.bind(id)
 	_hold.requested.connect(_open_layout_editor)
 	_root.add_child(_hold)
 	_dash.held.connect(func() -> void: _hint.show_for(_dash, "Рывок: быстрый бросок от удара."))
@@ -204,6 +210,7 @@ func _on_slot_held(index: int) -> void:
 
 ## Сюжет: на месте опыта — шкала деталей супер-ствола и плашки очков, жизней и зоны.
 func dock_story_meter(meter: Control) -> void:
+	_story_meter = meter
 	meter.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	_left_column.add_child(meter)
 	HintBubble.attach(meter, _hint, "Детали супер-ствола. Собери все 6 из зачищенных комнат и получишь 30 секунд режима аннигиляции.")
@@ -365,18 +372,154 @@ func _hold_interact() -> Control:
 	return _interact
 
 
-## Правка кнопки прямо в бою: пауза, перетаскивание, размер и прозрачность выбранной кнопки.
+func hud_node(id: String) -> Control:
+	match id:
+		"hp":
+			return _hp_label.get_parent() as Control
+		"xp":
+			return _xp_row
+		"coins":
+			return _nuts_row
+		"pause":
+			return _pause_button
+		"time":
+			return _time_label
+		"kills":
+			return _kills_label
+		"loot":
+			return _loot_label
+		"fps":
+			return _fps_label
+		"wave":
+			return _wave_box
+		"boss":
+			return _boss_bar
+		"minimap":
+			return _minimap_slot
+		"order":
+			return _order_card
+		"story_bar":
+			return _story_bar
+		"story_meter":
+			return _story_meter
+		"wanted":
+			return _wanted_label
+	return null
+
+
+func element_node(id: String) -> Control:
+	match id:
+		"dash":
+			return _hold_dash()
+		"slots":
+			return _slot_bar
+		"interact":
+			return _interact
+	return hud_node(id)
+
+
+func editable_ids() -> Array[String]:
+	var ids: Array[String] = []
+	for id in ["dash", "slots", "interact"]:
+		if _visible_node(element_node(id)):
+			ids.append(id)
+	for id in Controls.HUD_ELEMENTS:
+		if _visible_node(hud_node(id)):
+			ids.append(id)
+	return ids
+
+
+func element_rect(id: String) -> Rect2:
+	var node := element_node(id)
+	if not _visible_node(node):
+		return Rect2()
+	return Rect2(node.get_global_position(), node.size * node.get_global_transform().get_scale())
+
+
+func _visible_node(node: Control) -> bool:
+	return node != null and node.is_visible_in_tree() and node.size.x > 1.0
+
+
+func _pin(node: Control, center: Vector2) -> void:
+	if not node.has_meta("hud_orig"):
+		node.set_meta("hud_orig", {
+			"anchors": [node.anchor_left, node.anchor_top, node.anchor_right, node.anchor_bottom],
+			"offsets": [node.offset_left, node.offset_top, node.offset_right, node.offset_bottom],
+			"size": node.size,
+		})
+		var parent := node.get_parent() as Control
+		for side in [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]:
+			node.set_anchor(side as Side, 0.0, true, false)
+		node.top_level = true
+		if parent is Container:
+			(parent as Container).queue_sort()
+	var orig: Dictionary = node.get_meta("hud_orig")
+	var base: Vector2 = orig["size"]
+	node.size = base
+	node.position = center - base * 0.5
+
+
+func _unpin(node: Control) -> void:
+	if not node.has_meta("hud_orig"):
+		return
+	var orig: Dictionary = node.get_meta("hud_orig")
+	node.remove_meta("hud_orig")
+	node.top_level = false
+	var anchors: Array = orig["anchors"]
+	var offsets: Array = orig["offsets"]
+	node.anchor_left = float(anchors[0])
+	node.anchor_top = float(anchors[1])
+	node.anchor_right = float(anchors[2])
+	node.anchor_bottom = float(anchors[3])
+	node.offset_left = float(offsets[0])
+	node.offset_top = float(offsets[1])
+	node.offset_right = float(offsets[2])
+	node.offset_bottom = float(offsets[3])
+	var parent := node.get_parent() as Control
+	if parent is Container:
+		(parent as Container).queue_sort()
+
+
+func _apply_hud_items() -> void:
+	var area := _root.size
+	for id in Controls.HUD_ELEMENTS:
+		var node := hud_node(id)
+		if node == null:
+			continue
+		var item := Controls.hud_item(id)
+		var factor := clampf(float(item.get("s", 1.0)), 0.5, 1.8)
+		var alpha := clampf(float(item.get("o", 1.0)), 0.2, 1.0)
+		if item.has("x") and item.has("y"):
+			var base: Vector2 = node.get_meta("hud_orig")["size"] if node.has_meta("hud_orig") else node.size
+			if base.x > 1.0:
+				_pin(node, Vector2(float(item["x"]) * area.x, float(item["y"]) * area.y))
+		else:
+			_unpin(node)
+		node.pivot_offset = node.size * 0.5
+		node.set_meta("ui_scale", factor)
+		node.set_meta("ui_alpha", alpha)
+		node.scale = Vector2.ONE * factor
+		node.modulate.a = alpha
+
+
+## Правка интерфейса прямо в бою: пауза, фон прозрачный, любой элемент двигается, меняет размер и прозрачность.
 func _open_layout_editor(id: String) -> void:
 	if _editor != null or get_tree().paused or _result.visible or _revive.visible:
 		return
 	get_tree().paused = true
-	_editor = ControlEditor.new()
+	var fake_boss := not _boss_bar.visible
+	if fake_boss:
+		show_boss("Босс", 1.0, 1.0)
+	_editor = BattleLayoutEditor.new()
+	_editor.hud = self
 	_root.add_child(_editor)
 	_editor.size = _root.size
 	_editor.select(id)
 	_editor.closed.connect(func() -> void:
 		_editor.queue_free()
 		_editor = null
+		if fake_boss:
+			hide_boss()
 		apply_layout()
 		get_tree().paused = false)
 	_editor.open()
@@ -397,6 +540,7 @@ func apply_layout() -> void:
 	_slot_bar.modulate.a = opacity * Controls.element_opacity("slots")
 	_interact.modulate.a = Controls.element_opacity("interact")
 	joystick.modulate.a = opacity
+	_apply_hud_items()
 	_layout_revision = Controls.revision
 
 
@@ -618,7 +762,9 @@ func is_pause_open() -> bool:
 
 
 func _process(delta: float) -> void:
-	if _layout_revision != Controls.revision:
+	_items_clock += delta
+	if _layout_revision != Controls.revision or _items_clock >= 0.25:
+		_items_clock = 0.0
 		apply_layout()
 	if _hp_flash > 0.0:
 		_hp_flash = maxf(_hp_flash - delta * 3.0, 0.0)
@@ -760,6 +906,7 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	_nuts_label = UiStyle.label("0", 32, UiStyle.GOLD, 8)
 	_nuts_row.add_child(_nuts_label)
 	var pause := UiStyle.button("", UiStyle.GOLD, 26, Vector2(72, 72))
+	_pause_button = pause
 	var pause_icon := BattlePanels.icon_rect(BattlePanels.icon("pause"), 40)
 	pause_icon.set_anchors_preset(Control.PRESET_CENTER)
 	pause_icon.offset_left = -20

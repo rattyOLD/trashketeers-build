@@ -4,6 +4,13 @@ extends RefCounted
 ## жесты, переназначение клавиш и пять пресетов. Хранится в SaveService.data["controls"].
 
 const ELEMENTS := ["dash", "slots", "interact"]
+## Остальные элементы боевого интерфейса, которые игрок может двигать, масштабировать и делать прозрачными.
+const HUD_ELEMENTS := ["hp", "xp", "coins", "pause", "time", "kills", "loot", "fps", "wave", "boss", "minimap", "order", "story_bar", "story_meter", "wanted"]
+const HUD_TITLES := {
+	"hp": "ЗДОРОВЬЕ", "xp": "ОПЫТ", "coins": "МОНЕТЫ", "pause": "ПАУЗА", "time": "ВРЕМЯ", "kills": "ВРАГИ",
+	"loot": "ЛУТ НА КАРТЕ", "fps": "СЧЁТЧИК FPS", "wave": "ВОЛНА", "boss": "ПОЛОСА БОССА", "minimap": "МИНИКАРТА",
+	"order": "ЗАДАНИЕ", "story_bar": "ОЧКИ, ЖИЗНИ, ЗОНА", "story_meter": "ДЕТАЛИ СУПЕР-СТВОЛА", "wanted": "РОЗЫСК",
+}
 const ELEMENT_TITLES := {"dash": "РЫВОК", "slots": "СЛОТЫ ОРУЖИЯ", "interact": "ВЗЯТЬ"}
 const ELEMENT_SIZE := {"dash": Vector2(160, 160), "slots": Vector2(96, 96), "interact": Vector2(250, 96)}
 const PRESET_SLOTS := 3
@@ -52,6 +59,7 @@ static func default_config(left_handed: bool = false) -> Dictionary:
 			"slots": {"x": cx, "y": 0.54, "s": 1.0},
 			"interact": {"x": 0.5, "y": 0.8, "s": 1.0},
 		},
+		"hud": {},
 		"layout_v": 6,
 		"keys": {},
 		"presets": {},
@@ -113,6 +121,77 @@ static func set_element(id: String, x: float, y: float, scale: float) -> void:
 	e["s"] = clampf(scale, 0.6, 1.6)
 
 
+static func title_of(id: String) -> String:
+	return str(ELEMENT_TITLES.get(id, HUD_TITLES.get(id, id)))
+
+
+static func is_hud_element(id: String) -> bool:
+	return HUD_ELEMENTS.has(id)
+
+
+## Настройки элемента интерфейса: x/y (центр, доли экрана; нет — стоит на месте), s (масштаб), o (прозрачность).
+static func hud_item(id: String) -> Dictionary:
+	var all: Dictionary = config().get("hud", {})
+	return all.get(id, {})
+
+
+static func hud_set(id: String, values: Dictionary) -> void:
+	var cfg := config()
+	if not cfg.has("hud"):
+		cfg["hud"] = {}
+	var all: Dictionary = cfg["hud"]
+	var item: Dictionary = all.get(id, {})
+	for key in values:
+		item[key] = values[key]
+	all[id] = item
+
+
+static func hud_reset(id: String) -> void:
+	var all: Dictionary = config().get("hud", {})
+	all.erase(id)
+	if ELEMENTS.has(id):
+		var base := default_config(bool(config().get("left_handed", false)))
+		(config()["layout"] as Dictionary)[id] = (base["layout"] as Dictionary)[id]
+	save()
+
+
+static func hud_reset_all() -> void:
+	config()["hud"] = {}
+	for id in ELEMENTS:
+		hud_reset(id)
+	save()
+
+
+## Масштаб любого элемента (кнопки раскладки или элемента интерфейса).
+static func scale_of(id: String) -> float:
+	if ELEMENTS.has(id):
+		return float(element(id)["s"])
+	return clampf(float(hud_item(id).get("s", 1.0)), 0.5, 1.8)
+
+
+static func opacity_of(id: String) -> float:
+	if ELEMENTS.has(id):
+		return element_opacity(id)
+	return clampf(float(hud_item(id).get("o", 1.0)), 0.2, 1.0)
+
+
+static func set_scale_of(id: String, value: float) -> void:
+	if ELEMENTS.has(id):
+		var e := element(id)
+		set_element(id, float(e["x"]), float(e["y"]), value)
+	else:
+		hud_set(id, {"s": clampf(value, 0.5, 1.8)})
+	save()
+
+
+static func set_opacity_of(id: String, value: float) -> void:
+	if ELEMENTS.has(id):
+		set_element_opacity(id, value)
+	else:
+		hud_set(id, {"o": clampf(value, 0.2, 1.0)})
+	save()
+
+
 ## Прозрачность отдельной кнопки (множитель к общей прозрачности).
 static func element_opacity(id: String) -> float:
 	return clampf(float(element(id).get("o", 1.0)), 0.2, 1.0)
@@ -156,6 +235,7 @@ static func apply_preset(left_handed: bool) -> void:
 		fresh[key] = config()[key]
 	fresh["presets"] = keep_presets
 	fresh["keys"] = keep_keys
+	fresh["hud"] = config().get("hud", {})
 	SaveService.data["controls"] = fresh
 	save()
 

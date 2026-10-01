@@ -29,7 +29,7 @@ func _init() -> void:
 func _hit(point: Vector2) -> String:
 	for id in targets:
 		var control: Control = (targets[id] as Callable).call()
-		if control != null and control.is_visible_in_tree() and control.get_global_rect().grow(8.0).has_point(point):
+		if control != null and control.is_visible_in_tree() and Rect2(control.get_global_position(), control.size * control.get_global_transform().get_scale()).grow(8.0).has_point(point):
 			return str(id)
 	return ""
 
