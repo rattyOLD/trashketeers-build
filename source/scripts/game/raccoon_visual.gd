@@ -45,6 +45,14 @@ const ARM_MIN := -1.05
 const ARM_MAX := 1.2
 ## Угол руки без цели: ствол опущен вперёд-вниз.
 const RELAXED_ANGLE := 0.55
+## Как енот несёт оружие, пока не целится: [стоя, на бегу]. Угол вниз положителен; на бегу ствол поднимается,
+## чтобы не смотреть в пол, тяжёлое лежит на плече, клинок держится вверх.
+const CARRY_SIDEARM := [0.3, 0.05]
+const CARRY_LONG := [0.4, 0.0]
+const CARRY_HEAVY := [0.35, -0.12]
+const CARRY_MELEE := [-0.35, -0.7]
+const SIDEARMS := [&"pistol", &"revolver", &"scrap_pistol", &"blaster", &"capgun", &"slingshot", &"golden_smg", &"harpoon", &"coil", &"casino"]
+const HEAVY_GUNS := [&"launcher", &"mortar", &"minigun", &"lmg", &"railgun", &"flamer", &"heavy_barrel", &"magnet", &"toaster", &"prism"]
 const GUN_SCALE := 0.7
 const SHADOW_OFFSET := Vector2(0, 18)
 const SHADOW_RADIUS := 30.0
@@ -123,6 +131,7 @@ var _bob := 0.0
 var _squash := 1.0
 var _stretch := 1.0
 var _sway := 0.0
+var _carry_lag := 0.0
 var _hop := 0.0
 var _aim_local := 0.0
 var _env := Color(0, 0, 0)
@@ -415,9 +424,11 @@ func update_motion(velocity: Vector2, aim: Vector2, delta: float) -> void:
 	_twitch_r.update(0.0, delta)
 	_update_face(delta)
 	_update_pose()
-	var target := RELAXED_ANGLE
+	var target := _carry_angle()
 	if aiming and aim.length_squared() > 0.0001:
-		target = _local_angle(aim)
+		target = _local_angle(aim) + sin(_gait) * 0.012 * _run
+	_carry_lag = lerpf(_carry_lag, clampf(-local_accel * 0.00022, -0.14, 0.14), clampf(9.0 * delta, 0.0, 1.0))
+	target += _carry_lag * (0.35 if aiming else 1.0)
 	_gun_angle = lerp_angle(_gun_angle, target, clampf(AIM_SMOOTH * delta, 0.0, 1.0))
 	_aim_local = lerpf(_aim_local, clampf(_gun_angle, -0.9, 0.9) if aiming else 0.0, clampf(8.0 * delta, 0.0, 1.0))
 	_apply_rig()
@@ -757,6 +768,18 @@ func _arm_xform(local_angle: float) -> Transform2D:
 
 
 ## Мировое направление ствола из локального угла руки.
+func _carry_angle() -> float:
+	var pair: Array = CARRY_LONG
+	if melee_active:
+		pair = CARRY_MELEE
+	elif weapon_icon in SIDEARMS:
+		pair = CARRY_SIDEARM
+	elif weapon_icon in HEAVY_GUNS:
+		pair = CARRY_HEAVY
+	var idle_breath := sin(_breath) * 0.015
+	return lerpf(float(pair[0]) + idle_breath, float(pair[1]), _run) + sin(_gait) * 0.05 * _run
+
+
 func _gun_direction(local_angle: float) -> Vector2:
 	return Vector2(cos(local_angle) * _facing, sin(local_angle)).rotated(_sway)
 
