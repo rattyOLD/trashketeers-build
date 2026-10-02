@@ -25,6 +25,8 @@ func _init() -> void:
 	content.add_child(_finale)
 	_button = UiStyle.button("ЗАБРАТЬ", Color("#2fae5f"), 32, Vector2(0, 92))
 	_button.pressed.connect(_claim)
+	_button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART   # длинная надпись «Уже забрано…» не должна растягивать окно за экран
+	_button.clip_text = true
 	content.add_child(_button)
 
 

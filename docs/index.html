@@ -415,7 +415,7 @@ html, body {
 </script>
 
 <script>
-window.__trash_build = {label: 'v35.219', time: '02.10 16:13'};
+window.__trash_build = {label: 'v35.220', time: '02.10 16:51'};
 document.getElementById('ver').textContent = 'Версия ' + window.__trash_build.label + ' · сборка от ' + window.__trash_build.time;
 </script>
 <script>
@@ -480,7 +480,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	// index.wasm / index.pck и отдаём ему уже скачанные и распакованные байты.
 	const FILES = {
 		wasm: { parts: [{url:"raccoon.core.0.wasm?h=4cbe7e5f476b",bytes:5221065},{url:"raccoon.core.1.wasm?h=a8fbc151befa",bytes:4165384}] },
-		pck: { parts: [{url:"raccoon.pack.0.wasm?h=cb8638ca32c8",bytes:11989712},{url:"raccoon.pack.1.wasm?h=cb0fc5c3c1d8",bytes:12547414},{url:"raccoon.pack.2.wasm?h=d8835e485fb7",bytes:5154783}] },
+		pck: { parts: [{url:"raccoon.pack.0.wasm?h=9aaf9c9e0255",bytes:11989741},{url:"raccoon.pack.1.wasm?h=82606c4a03b5",bytes:12547538},{url:"raccoon.pack.2.wasm?h=0c9676d681bc",bytes:5154704}] },
 	};
 	const GODOT_CONFIG = {
 		args: [],
@@ -513,7 +513,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 
 	// Адрес сбора отчётов о вылетах (Google Apps Script / Supabase и т.п.); пусто — отчёты не отправляются.
 	const REPORT_URL = 'https://script.google.com/macros/s/AKfycbxVyy-SnRANW0Im-1Blne2TcUbca93WqzyBulpADwWWD7YH6x3KIygBYImTe8VfP5pp/exec';
-	const BUILD_ID_REPORT = '1790932423';
+	const BUILD_ID_REPORT = '1790934672';
 	const SESSION_ID = Math.random().toString(36).slice(2, 8);
 	const SESSION_START = Date.now();
 	const REPORT_CAP = 250;
@@ -730,7 +730,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	window.trkReport('session_start', gpuInfo() + ' | ' + navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + (window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio) + ' | screen ' + screen.width + 'x' + screen.height + ' | cores ' + (navigator.hardwareConcurrency || '?'));
 
 	// Вкладка могла висеть со старой версией: при возврате в неё сверяем номер сборки и предлагаем обновиться.
-	const BUILD_ID = '1790932423';
+	const BUILD_ID = '1790934672';
 	// Важное обновление: старая сборка дальше не работает, иначе аккаунты и сохранения ломаются старым кодом.
 	function blockOldBuild(v) {
 		const wall = document.createElement('div');

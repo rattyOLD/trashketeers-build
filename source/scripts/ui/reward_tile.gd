@@ -85,11 +85,11 @@ func _amount_row(icon_path: String, text: String, color: Color) -> Control:
 	pill.add_child(hbox)
 	var icon := TextureRect.new()
 	icon.texture = ArenaProp.texture_of(icon_path)
-	icon.custom_minimum_size = Vector2(22, 22)
+	icon.custom_minimum_size = Vector2(20, 20)
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	hbox.add_child(icon)
-	hbox.add_child(UiStyle.label(text, 22, color, 5))
+	hbox.add_child(UiStyle.label(text, 20, color, 5))
 	return pill
 
 
