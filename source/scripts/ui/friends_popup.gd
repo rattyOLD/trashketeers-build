@@ -292,7 +292,13 @@ func _load_online() -> void:
 		return
 	MenuPopups.clear(box)
 	if not bool(result["ok"]):
-		box.add_child(_wrap_label("Нет связи с сервером (%s)" % Cloud.last_error))
+		var note := _wrap_label("Нет связи с сервером (%s)\nПроверяю связь..." % Cloud.last_error)
+		box.add_child(note)
+		var report := await Cloud.ping()
+		if is_instance_valid(note):
+			note.text = "Нет связи с сервером (%s)\n%s" % [Cloud.last_error, report]
+			DisplayServer.clipboard_set(report)
+			note.text += "\n(отчёт скопирован, вставь в чат)"
 		return
 	var items: Array = result["items"]
 	if items.is_empty():

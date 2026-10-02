@@ -40,13 +40,21 @@ func _render_logged() -> void:
 		var result := await Cloud.change_password(pass_edit.text)
 		if is_instance_valid(change):
 			pass_edit.text = ""
-			_say("Пароль изменён." if result == "ok" else ("Слишком простой пароль." if result == "weak" else "Нет связи с сервером.")))
+			if result == "ok":
+				_say("Пароль изменён.")
+			elif result == "weak":
+				_say("Слишком простой пароль.")
+			else:
+				_diagnose())
 	_body.add_child(change)
 	var save := UiStyle.button("СОХРАНИТЬ В ОБЛАКО СЕЙЧАС", UiStyle.PANEL_LIGHT, 22, Vector2(0, 58))
 	save.pressed.connect(func() -> void:
 		var code := await Cloud.upload_save()
 		if is_instance_valid(save):
-			_say("Сохранено." if not code.is_empty() else "Нет связи с сервером."))
+			if code.is_empty():
+				_diagnose()
+			else:
+				_say("Сохранено."))
 	_body.add_child(save)
 	var out := UiStyle.button("ВЫЙТИ ИЗ АККАУНТА", Color("#a3283e"), 22, Vector2(0, 58))
 	var armed := [false]
@@ -101,7 +109,7 @@ func _render_guest() -> void:
 		elif result == "confirm":
 			_say("Сервер просит подтверждение почты: владельцу надо отключить Confirm email в Supabase (Authentication, Providers, Email).")
 		elif result == "offline":
-			_say("Нет связи с сервером. Нажми «ПРОВЕРИТЬ СВЯЗЬ» и пришли код: %s" % Cloud.error_code())
+			_diagnose()
 		else:
 			_say("Не получилось. Проверь логин (латиница, цифры, «_»)%s" % ((". Сервер ответил: " + Cloud.last_error.left(120)) if not Cloud.last_error.is_empty() else "")))
 	_body.add_child(create)
@@ -114,7 +122,10 @@ func _render_guest() -> void:
 			return
 		login.disabled = false
 		if result != "ok":
-			_say(("Нет связи с сервером. Нажми «ПРОВЕРИТЬ СВЯЗЬ». Код: %s" % Cloud.error_code()) if result == "offline" else "Логин или пароль не подошли.")
+			if result == "offline":
+				_diagnose()
+			else:
+				_say("Логин или пароль не подошли.")
 			return
 		# Сначала читаем облако, и только потом синхронизируем профиль: иначе гостевой ник и статистика
 		# с этого устройства затёрли бы ник аккаунта на сервере.
@@ -146,14 +157,21 @@ func _render_guest() -> void:
 	var check := UiStyle.button("ПРОВЕРИТЬ СВЯЗЬ", UiStyle.PANEL_LIGHT, 20, Vector2(0, 52))
 	check.pressed.connect(func() -> void:
 		check.disabled = true
-		_say("Проверяю...")
-		var report := await Cloud.ping()
+		await _diagnose()
 		if is_instance_valid(check):
-			check.disabled = false
-			DisplayServer.clipboard_set(report)
-			_say("%s\n(скопировано, вставь в чат)" % report))
+			check.disabled = false)
 	_body.add_child(check)
 	_body.add_child(MenuPopups.small_hint("Запиши пароль: мы его не видим и вернуть не сможем. Если забудешь, поможет только DeV (сбросит на временный)."))
+
+
+## Сам проверяет связь, когда сервер не ответил: показывает отчёт и копирует его в буфер.
+func _diagnose() -> void:
+	var code := Cloud.error_code()
+	_say("Нет связи с сервером. Проверяю...")
+	var report := await Cloud.ping()
+	if is_instance_valid(_status):
+		DisplayServer.clipboard_set(report)
+		_say("Нет связи с сервером %s\n%s\n(отчёт скопирован, вставь в чат)" % [code, report])
 
 
 func _say(text: String) -> void:
