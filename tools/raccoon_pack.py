@@ -24,6 +24,6 @@ for clip, n in COUNTS.items():
         out.paste(cell, ((i % 4) * 480, (i // 4) * 320))
     out.save(f"{OUT}/assets/heroes/raccoon_{clip}.png", optimize=True)
 grip = json.load(open(f"{SRC}/raccoon_grip.json"))
-scaled = {c: [[round(v * K, 1) for v in p[:2]] for p in pts] for c, pts in grip.items() if c in GRIP}
+scaled = {c: [[round(v * K, 1) for v in p[:4]] for p in pts] for c, pts in grip.items() if c in GRIP}
 json.dump(scaled, open(f"{OUT}/data/raccoon_grip.json", "w"))
 print({c: len(v) for c, v in scaled.items()})

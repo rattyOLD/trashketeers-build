@@ -8,10 +8,10 @@ func _ready() -> void:
 	bg.color = Color("#2a2540")
 	bg.size = Vector2(720, 400)
 	add_child(bg)
-	var poses := [[Vector2.ZERO, Vector2(1, 0), "rifle"], [Vector2(230, 0), Vector2(1, 0.3), "rifle"], [Vector2(230, 0), Vector2(-1, -0.2), "pistol"]]
+	var poses := [[Vector2.ZERO, Vector2(1, 0), "rifle"], [Vector2.ZERO, Vector2(1, -0.9), "rifle"], [Vector2.ZERO, Vector2(1, 0.9), "rifle"], [Vector2(230, 0), Vector2(-1, -0.2), "pistol"]]
 	for i in poses.size():
 		var v := RaccoonVisual.new()
-		v.position = Vector2(130 + i * 230, 250)
+		v.position = Vector2(90 + i * 170, 250)
 		v.weapon_icon = StringName(poses[i][2])
 		add_child(v)
 		v.apply_look(CharacterDB.get_character("raccoon"), {})

@@ -34,6 +34,7 @@ const CLIP_CELL := Vector2(480, 320)
 const CLIP_FEET := 304.0
 const CLIP_COUNTS := {"idle": 8, "run": 8, "shoot": 4, "hit": 4, "dash": 6, "death": 8, "revive": 6}
 const HIT_CLIP_TIME := 0.2
+const CLIP_AIM_LIMIT := 0.4
 const DASH_CLIP_TIME := 0.16
 const IDLE_FPS := 7.0
 const SHOOT_ANIM_TIME := 0.24
@@ -84,6 +85,7 @@ var _reviving := false
 var _clip_frames: Dictionary = {}
 var _clip_grip: Dictionary = {}
 var _clip_grip_px := Vector2(300, 200)
+var _clip_support_px := Vector2(380, 200)
 var _shoot_t := 0.0
 var arm: Sprite2D
 var _arm_material: ShaderMaterial
@@ -314,6 +316,8 @@ func _clip_pick() -> void:
 	if idx < points.size():
 		var p: Array = points[idx]
 		_clip_grip_px = Vector2(float(p[0]), float(p[1]))
+		if p.size() >= 4:
+			_clip_support_px = Vector2(float(p[2]), float(p[3]))
 
 
 func _leave_hero() -> void:
@@ -816,6 +820,13 @@ func _draw_gun_layer() -> void:
 	else:
 		dir = dir.rotated(-_climb * _facing)
 	var paw := _paw_at(_gun_angle)
+	if _clip_mode and not melee_active:
+		# Ствол лежит на двух нарисованных лапах: линия хват → опора, прицел отклоняет его не больше чем на ~23°.
+		var support := _sprite_xform() * (_clip_support_px + hero.offset)
+		var base := support - paw
+		if base.length() > 4.0:
+			var diff := clampf(angle_difference(base.angle(), dir.angle()), -CLIP_AIM_LIMIT, CLIP_AIM_LIMIT)
+			dir = base.normalized().rotated(diff)
 	if _hero_mode and not _clip_mode:
 		# В покадровом режиме руки уже нарисованы в кадрах, старую руку поверх не рисуем.
 		var shoulder := _sprite_xform() * _hero_shoulder
