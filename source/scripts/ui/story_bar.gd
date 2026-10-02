@@ -33,6 +33,26 @@ func _init() -> void:
 	_score_chip.size_flags_stretch_ratio = 1.5
 
 
+## Узкий вариант: плашки стоят под полосой здоровья справа от портрета.
+func compact() -> void:
+	add_theme_constant_override("separation", 6)
+	var pad := Control.new()
+	pad.custom_minimum_size = Vector2(34, 0)
+	pad.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(pad)
+	move_child(pad, 0)
+	for chip in [_score_chip, _lives_chip, _zone_chip, _foes_chip]:
+		var style := (chip as PanelContainer).get_theme_stylebox("panel") as StyleBoxFlat
+		style.content_margin_left = 8
+		style.content_margin_right = 8
+		style.content_margin_top = 3
+		style.content_margin_bottom = 3
+		var row := (chip as PanelContainer).get_child(0)
+		(row as HBoxContainer).add_theme_constant_override("separation", 5)
+		(row.get_child(0) as Label).add_theme_font_size_override("font_size", 14)
+		(row.get_child(1) as Label).add_theme_font_size_override("font_size", 20)
+
+
 func chips() -> Array[Control]:
 	return [_score_chip, _lives_chip, _zone_chip]
 

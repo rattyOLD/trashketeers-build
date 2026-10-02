@@ -74,6 +74,8 @@ var _hold: LayoutHold
 var _editor: BattleLayoutEditor
 var _pause_button: Button
 var _story_meter: Control
+var _bars_box: VBoxContainer
+var _chips_row: HBoxContainer
 var _items_clock := 0.0
 var _minimap_slot: Control
 var _level_up: LevelUpPanel
@@ -230,17 +232,19 @@ func _on_slot_held(index: int) -> void:
 func dock_story_meter(meter: Control) -> void:
 	_story_meter = meter
 	meter.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	_left_column.add_child(meter)
+	_chips_row.add_child(meter)
 	_dock_barks()
 	HintBubble.attach(meter, _hint, "Детали супер-ствола. Собери все 6 из зачищенных комнат и получишь 30 секунд режима аннигиляции.")
 
 
 func set_story_layout(minimap: Minimap) -> void:
+	_xp_row.visible = false
 	_wave_box.visible = false
 	_enemies_chip.visible = false
 	_toast_y = 556.0 if Orient.portrait else 440.0
 	_story_bar = StoryBar.new()
-	_left_column.add_child(_story_bar)
+	_story_bar.compact()
+	_bars_box.add_child(_story_bar)
 	_order_card = OrderCard.new()
 	_order_card.minimal = _minimal
 	_order_card.pressed.connect(func() -> void: orders_requested.emit())
@@ -248,7 +252,7 @@ func set_story_layout(minimap: Minimap) -> void:
 	_story_bar.chip_tapped.connect(func(chip: Control, text: String) -> void: _hint.show_for(chip, text))
 	_dock_barks()
 	if Orient.portrait:
-		UiStyle.anchor(_boss_bar, Vector2(0.5, 0.0), Rect2(-240, 462, 480, 84))
+		UiStyle.anchor(_boss_bar, Vector2(0.5, 0.0), Rect2(-240, 440, 480, 84))
 	else:
 		_boss_bar.anchor_left = 0.0
 		_boss_bar.anchor_right = 1.0
@@ -258,7 +262,7 @@ func set_story_layout(minimap: Minimap) -> void:
 		_boss_bar.offset_right = -300.0
 		_boss_bar.offset_top = 600.0
 		_boss_bar.offset_bottom = 684.0
-	UiStyle.anchor(_minimap_slot, Vector2(1.0, 0.0), Rect2(-150, 520, 132, 230) if Orient.portrait else Rect2(-150, 150, 132, 230))
+	UiStyle.anchor(_minimap_slot, Vector2(1.0, 0.0), Rect2(-150, 176, 132, 230) if Orient.portrait else Rect2(-150, 150, 132, 230))
 	_minimap = minimap
 	minimap.tapped.connect(func(overview: bool) -> void:
 		_hint.show_for(_minimap_slot, "Карта. Тап: %s." % ("крупный план" if overview else "вся карта")))
@@ -951,7 +955,7 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 
 	var left := VBoxContainer.new()
 	left.add_theme_constant_override("separation", 6)
-	left.custom_minimum_size = Vector2(580 if Orient.portrait else 440, 0)
+	left.custom_minimum_size = Vector2(548 if Orient.portrait else 440, 0)
 	row.add_child(left)
 	var gap := Control.new()
 	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -967,6 +971,7 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	left.add_child(head)
 	var bars := VBoxContainer.new()
 	bars.add_theme_constant_override("separation", 4)
+	_bars_box = bars
 	bars.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	bars.anchor_right = 1.0
 	bars.offset_left = 92.0
@@ -1026,6 +1031,7 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	_level_badge.add_child(_level_label)
 
 	var chips := HBoxContainer.new()
+	_chips_row = chips
 	chips.add_theme_constant_override("separation", 8)
 	chips.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	left.add_child(chips)
