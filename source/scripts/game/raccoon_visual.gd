@@ -32,7 +32,9 @@ const SPRITE_SCALE := 0.36
 const CLIP_SCALE := 0.434
 const CLIP_CELL := Vector2(480, 320)
 const CLIP_FEET := 304.0
-const CLIP_COUNTS := {"idle": 8, "run": 8, "shoot": 4}
+const CLIP_COUNTS := {"idle": 8, "run": 8, "shoot": 4, "hit": 4, "dash": 6, "death": 8, "revive": 6}
+const HIT_CLIP_TIME := 0.2
+const DASH_CLIP_TIME := 0.16
 const IDLE_FPS := 7.0
 const SHOOT_ANIM_TIME := 0.24
 const ARM_REST := 0.055
@@ -77,6 +79,8 @@ var _hero_cfg: Dictionary = {}
 var _hero_frames: Array[AtlasTexture] = []
 var _hero_shoulder := Vector2.ZERO
 var _clip_mode := false
+var _dash_t := 0.0
+var _reviving := false
 var _clip_frames: Dictionary = {}
 var _clip_grip: Dictionary = {}
 var _clip_grip_px := Vector2(300, 200)
@@ -286,7 +290,20 @@ func _sc() -> float:
 func _clip_pick() -> void:
 	var clip := "idle"
 	var idx := int(_time * IDLE_FPS) % 8
-	if _shoot_t > 0.0 and _run < 0.3:
+	if _dead:
+		if _reviving:
+			clip = "revive"
+			idx = clampi(int((1.0 - _death_t) * 6.0), 0, 5)
+		else:
+			clip = "death"
+			idx = clampi(int(_death_t * 8.0), 0, 7)
+	elif dashing:
+		clip = "dash"
+		idx = clampi(int(_dash_t / DASH_CLIP_TIME * 6.0), 0, 5)
+	elif _hurt > HURT_TIME - HIT_CLIP_TIME:
+		clip = "hit"
+		idx = clampi(int((HURT_TIME - _hurt) / HIT_CLIP_TIME * 4.0), 0, 3)
+	elif _shoot_t > 0.0 and _run < 0.3:
 		clip = "shoot"
 		idx = clampi(int((1.0 - _shoot_t / SHOOT_ANIM_TIME) * 4.0), 0, 3)
 	elif _run > 0.12:
@@ -366,6 +383,7 @@ func update_motion(velocity: Vector2, aim: Vector2, delta: float) -> void:
 	_gait += delta * (5.0 + 9.0 * _run) * (0.6 + 0.4 * clampf(speed / 240.0, 0.0, 1.4))
 	_breath += delta * (2.4 + 2.0 * _run)
 	_dash_blend = move_toward(_dash_blend, 1.0 if dashing else 0.0, delta * 12.0)
+	_dash_t = _dash_t + delta if dashing else 0.0
 	aim_direction = aim
 	var look_x := aim.x if absf(aim.x) > 0.05 else velocity.x
 	if absf(look_x) > 0.05 and signf(look_x) != _facing:
@@ -457,11 +475,13 @@ func _redraw_dead(_v: float) -> void:
 
 ## Возрождение: плавно поднимаем енота из позы смерти.
 func revive() -> void:
+	_reviving = true
 	var tween := create_tween()
 	tween.tween_property(self, "_death_t", 0.0, 0.45).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	tween.parallel().tween_method(func(_v: float) -> void: _refresh(), 0.0, 1.0, 0.45)
 	tween.tween_callback(func() -> void:
 		_dead = false
+		_reviving = false
 		_refresh()
 		cheer())
 
@@ -583,7 +603,7 @@ func _update_pose() -> void:
 		_hop = sin(clampf(c / 0.55, 0.0, 1.0) * PI) * 22.0
 		if c < 0.1:
 			_squash -= 0.12 * (1.0 - c / 0.1)
-	if _dead:
+	if _dead and not _clip_mode:
 		var launch := clampf(_death_t / 0.45, 0.0, 1.0)
 		var settle := clampf((_death_t - 0.6) / 0.4, 0.0, 1.0)
 		_bob = -34.0 * sin(launch * PI) - 7.0 * sin(settle * PI)
@@ -592,8 +612,12 @@ func _update_pose() -> void:
 	elif _clip_mode:
 		# Ход и дыхание уже нарисованы в кадрах: подпрыгивание и наклон кодом не нужны.
 		_bob = 0.0
-		_squash = 1.0 + (_squash - 1.0 - sin(_gait * 2.0) * 0.025 * _run)
+		_stretch = 1.0
+		_squash = 1.0 + (_squash - 1.0 - sin(_gait * 2.0) * 0.025 * _run + 0.14 * _dash_blend)
 		_sway -= 0.03 * _facing * _run
+		if _dead:
+			_squash = 1.0
+			_sway = 0.0
 
 
 ## Трансформ «пиксели текстуры относительно точки опоры → локальные координаты узла».
@@ -792,7 +816,8 @@ func _draw_gun_layer() -> void:
 	else:
 		dir = dir.rotated(-_climb * _facing)
 	var paw := _paw_at(_gun_angle)
-	if _hero_mode:
+	if _hero_mode and not _clip_mode:
+		# В покадровом режиме руки уже нарисованы в кадрах, старую руку поверх не рисуем.
 		var shoulder := _sprite_xform() * _hero_shoulder
 		var arm_tex := _hero_arm_texture()
 		if arm_tex != null:
