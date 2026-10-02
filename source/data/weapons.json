@@ -1071,7 +1071,7 @@
       "weapon_id": "heavy_barrel",
       "display_name": "Супер-ствол",
       "short_name": "СУПЕРСТВОЛ",
-      "icon": "blaster",
+      "icon": "heavy_barrel",
       "rarity": "legendary",
       "enemy_only": true,
       "loot_weight": 0.0,
