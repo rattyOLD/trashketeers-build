@@ -331,6 +331,7 @@ func _apply_text(text: String) -> void:
 			"daily_day", "daily_streak", "quest_day", "invites_sent", "saved_at", "chest_pity", "chest_opens", "ads_day",
 			"ads_coins", "ads_gems", "gift_gem_day", "gift_gem_n", "vip_level", "vip_until", "insider_no"]:
 		data[key] = int(data[key])
+	_refund_retired_weapons()
 	_sanitize_arsenal()
 	_refund_removed_perks()
 	KnifeProgress.sanitize(data)
@@ -1180,6 +1181,28 @@ func get_loadout() -> WeaponData:
 			tier = best_tier(id)
 		return WeaponDB.get_weapon(id).with_tier(tier)
 	return WeaponDB.get_weapon(StringName(START_WEAPON)).with_tier(1)
+
+
+## Оружие, снятое с выдачи: копии конвертируются в орехи (цена качества за каждую копию, T2 = 2 копии и т.д.).
+const RETIRED_WEAPONS := {"rail_needle_v1": "epic"}
+
+
+func _refund_retired_weapons() -> void:
+	var raw: Variant = data.get("arsenal", {})
+	if typeof(raw) != TYPE_DICTIONARY:
+		return
+	for key in RETIRED_WEAPONS:
+		if not (raw as Dictionary).has(key):
+			continue
+		var copies := 0
+		var counts: Variant = (raw as Dictionary)[key]
+		if typeof(counts) == TYPE_ARRAY:
+			for i in (counts as Array).size():
+				copies += int(counts[i]) * (1 << i)
+		data["nuts"] = int(data["nuts"]) + copies * int(Economy.DUPLICATE_COINS.get(RETIRED_WEAPONS[key], 150))
+		(raw as Dictionary).erase(key)
+		if str(data.get("selected_weapon", "")) == key:
+			data["selected_weapon"] = START_WEAPON
 
 
 func _sanitize_arsenal() -> void:
