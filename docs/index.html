@@ -398,24 +398,51 @@ html, body {
 
 	// Экранная клавиатура на iOS не меняет размер страницы, а сдвигает «видимое окно» вниз. Пока печатают в поле игры,
 	// держим холст в видимой части (сдвиг на offsetTop), игра сама сожмёт окно по высоте видимой области.
+	// Браузерные поля ввода лежат поверх холста по координатам игры, поэтому после каждого сдвига их кладём заново.
 	var vv = window.visualViewport;
 	if (vv) {
+		var relayout = function () {
+			var cv = document.getElementById('canvas');
+			if (!cv) { return; }
+			var r = cv.getBoundingClientRect();
+			document.querySelectorAll('input[id^=trk_in_]').forEach(function (el) {
+				var d = el.dataset;
+				if (!d.gx) { return; }
+				var k = r.width / Number(d.vw);
+				el.style.left = (r.left + Number(d.gx) * k) + 'px';
+				el.style.top = (r.top + Number(d.gy) * k) + 'px';
+				el.style.width = (Number(d.gw) * k) + 'px';
+				el.style.height = (Number(d.gh) * k) + 'px';
+			});
+		};
+		window.__trkRelayout = relayout;
+		var typingUntil = 0;
 		var follow = function () {
 			var cv = document.getElementById('canvas');
 			if (!cv) { return; }
 			var typing = !!(document.activeElement && String(document.activeElement.id).indexOf('trk_in_') === 0);
-			cv.style.transform = typing && vv.offsetTop > 0 ? 'translateY(' + vv.offsetTop + 'px)' : '';
+			if (typing) { typingUntil = Date.now() + 700; }
+			var want = (typing || Date.now() < typingUntil) && vv.offsetTop > 0 ? 'translateY(' + vv.offsetTop + 'px)' : '';
+			if (cv.style.transform !== want) {
+				cv.style.transform = want;
+				relayout();
+			}
 		};
+		var loop = function () {
+			if (Date.now() < typingUntil || (document.activeElement && String(document.activeElement.id).indexOf('trk_in_') === 0)) { follow(); }
+			requestAnimationFrame(loop);
+		};
+		requestAnimationFrame(loop);
 		vv.addEventListener('resize', follow);
 		vv.addEventListener('scroll', follow);
-		document.addEventListener('focusin', function () { setTimeout(follow, 60); setTimeout(follow, 420); });
-		document.addEventListener('focusout', function () { setTimeout(follow, 60); setTimeout(follow, 420); });
+		document.addEventListener('focusin', function () { typingUntil = Date.now() + 700; follow(); });
+		document.addEventListener('focusout', function () { typingUntil = Date.now() + 700; });
 	}
 })();
 </script>
 
 <script>
-window.__trash_build = {label: 'v35.222', time: '02.10 17:30'};
+window.__trash_build = {label: 'v35.224', time: '02.10 17:43'};
 document.getElementById('ver').textContent = 'Версия ' + window.__trash_build.label + ' · сборка от ' + window.__trash_build.time;
 </script>
 <script>
@@ -480,7 +507,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	// index.wasm / index.pck и отдаём ему уже скачанные и распакованные байты.
 	const FILES = {
 		wasm: { parts: [{url:"raccoon.core.0.wasm?h=4cbe7e5f476b",bytes:5221065},{url:"raccoon.core.1.wasm?h=a8fbc151befa",bytes:4165384}] },
-		pck: { parts: [{url:"raccoon.pack.0.wasm?h=e86e54d377f4",bytes:11989740},{url:"raccoon.pack.1.wasm?h=3dad21408378",bytes:12547530},{url:"raccoon.pack.2.wasm?h=ef75687e7199",bytes:5156750}] },
+		pck: { parts: [{url:"raccoon.pack.0.wasm?h=12cffaf5bcf8",bytes:11989741},{url:"raccoon.pack.1.wasm?h=805d450e6143",bytes:12547496},{url:"raccoon.pack.2.wasm?h=254a3704cecb",bytes:5156853}] },
 	};
 	const GODOT_CONFIG = {
 		args: [],
@@ -488,7 +515,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 		ensureCrossOriginIsolationHeaders: false,
 		executable: 'index',
 		experimentalVK: false,
-		fileSizes: { 'index.pck': 30651920, 'index.wasm': 43699190 },
+		fileSizes: { 'index.pck': 30652064, 'index.wasm': 43699190 },
 		focusCanvas: true,
 		gdextensionLibs: [],
 		onPrint: function () {
@@ -513,7 +540,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 
 	// Адрес сбора отчётов о вылетах (Google Apps Script / Supabase и т.п.); пусто — отчёты не отправляются.
 	const REPORT_URL = 'https://script.google.com/macros/s/AKfycbxVyy-SnRANW0Im-1Blne2TcUbca93WqzyBulpADwWWD7YH6x3KIygBYImTe8VfP5pp/exec';
-	const BUILD_ID_REPORT = '1790937014';
+	const BUILD_ID_REPORT = '1790937789';
 	const SESSION_ID = Math.random().toString(36).slice(2, 8);
 	const SESSION_START = Date.now();
 	const REPORT_CAP = 250;
@@ -730,7 +757,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	window.trkReport('session_start', gpuInfo() + ' | ' + navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + (window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio) + ' | screen ' + screen.width + 'x' + screen.height + ' | cores ' + (navigator.hardwareConcurrency || '?'));
 
 	// Вкладка могла висеть со старой версией: при возврате в неё сверяем номер сборки и предлагаем обновиться.
-	const BUILD_ID = '1790937014';
+	const BUILD_ID = '1790937789';
 	// Важное обновление: старая сборка дальше не работает, иначе аккаунты и сохранения ломаются старым кодом.
 	function blockOldBuild(v) {
 		const wall = document.createElement('div');

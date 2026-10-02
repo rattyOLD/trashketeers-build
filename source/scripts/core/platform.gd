@@ -490,12 +490,14 @@ if (!el) {
   document.body.appendChild(el);
 }
 el.type = %s; el.placeholder = %s; el.maxLength = %d; el.style.color = %s; el.style.caretColor = '#ff2ea6'; el.classList.toggle('trk_dark', %s);
+el.dataset.vw = %f; el.dataset.gx = %f; el.dataset.gy = %f; el.dataset.gw = %f; el.dataset.gh = %f;
 el.style.left = (r.left + %f * k) + 'px'; el.style.top = (r.top + %f * k) + 'px';
 el.style.width = (%f * k) + 'px'; el.style.height = (%f * k) + 'px';
 el.style.fontSize = Math.max(16, %f * k) + 'px'; el.style.display = 'block';
 if (!document.getElementById('trk_in_css')) { var st = document.createElement('style'); st.id = 'trk_in_css'; st.textContent = 'input[id^=trk_in_]::placeholder{font-size:0.72em;color:#8a82a0;opacity:1} input.trk_dark::placeholder{color:#8f86b3}'; document.head.appendChild(st); }
 """ % [view.x, JSON.stringify(id), JSON.stringify("password" if secret else "text"), JSON.stringify(placeholder), max_length if max_length > 0 else 500,
 		JSON.stringify("#f2ecff" if dark else "#1a1030"), "true" if dark else "false",
+		view.x, rect.position.x, rect.position.y, rect.size.x, rect.size.y,
 		rect.position.x, rect.position.y, rect.size.x, rect.size.y, font_px])
 
 

@@ -152,7 +152,8 @@ class Settings:
 		var paste := LineEdit.new()
 		paste.placeholder_text = "Вставь код TRS1..."
 		paste.custom_minimum_size = Vector2(0, 66)
-		paste.add_theme_font_size_override("font_size", 22)
+		SearchBar.style(paste, 22)
+		SearchBar.attach_touch_input(paste, "Вставь код TRS1...")
 		backup.add_child(paste)
 		var restore := UiStyle.button("ВОССТАНОВИТЬ ИЗ КОДА", Color("#b03a5a"), 22, Vector2(0, 66))
 		var armed := [false]

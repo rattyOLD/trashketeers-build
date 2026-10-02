@@ -398,18 +398,45 @@ html, body {
 
 	// Экранная клавиатура на iOS не меняет размер страницы, а сдвигает «видимое окно» вниз. Пока печатают в поле игры,
 	// держим холст в видимой части (сдвиг на offsetTop), игра сама сожмёт окно по высоте видимой области.
+	// Браузерные поля ввода лежат поверх холста по координатам игры, поэтому после каждого сдвига их кладём заново.
 	var vv = window.visualViewport;
 	if (vv) {
+		var relayout = function () {
+			var cv = document.getElementById('canvas');
+			if (!cv) { return; }
+			var r = cv.getBoundingClientRect();
+			document.querySelectorAll('input[id^=trk_in_]').forEach(function (el) {
+				var d = el.dataset;
+				if (!d.gx) { return; }
+				var k = r.width / Number(d.vw);
+				el.style.left = (r.left + Number(d.gx) * k) + 'px';
+				el.style.top = (r.top + Number(d.gy) * k) + 'px';
+				el.style.width = (Number(d.gw) * k) + 'px';
+				el.style.height = (Number(d.gh) * k) + 'px';
+			});
+		};
+		window.__trkRelayout = relayout;
+		var typingUntil = 0;
 		var follow = function () {
 			var cv = document.getElementById('canvas');
 			if (!cv) { return; }
 			var typing = !!(document.activeElement && String(document.activeElement.id).indexOf('trk_in_') === 0);
-			cv.style.transform = typing && vv.offsetTop > 0 ? 'translateY(' + vv.offsetTop + 'px)' : '';
+			if (typing) { typingUntil = Date.now() + 700; }
+			var want = (typing || Date.now() < typingUntil) && vv.offsetTop > 0 ? 'translateY(' + vv.offsetTop + 'px)' : '';
+			if (cv.style.transform !== want) {
+				cv.style.transform = want;
+				relayout();
+			}
 		};
+		var loop = function () {
+			if (Date.now() < typingUntil || (document.activeElement && String(document.activeElement.id).indexOf('trk_in_') === 0)) { follow(); }
+			requestAnimationFrame(loop);
+		};
+		requestAnimationFrame(loop);
 		vv.addEventListener('resize', follow);
 		vv.addEventListener('scroll', follow);
-		document.addEventListener('focusin', function () { setTimeout(follow, 60); setTimeout(follow, 420); });
-		document.addEventListener('focusout', function () { setTimeout(follow, 60); setTimeout(follow, 420); });
+		document.addEventListener('focusin', function () { typingUntil = Date.now() + 700; follow(); });
+		document.addEventListener('focusout', function () { typingUntil = Date.now() + 700; });
 	}
 })();
 </script>

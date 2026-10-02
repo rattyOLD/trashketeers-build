@@ -31,7 +31,7 @@ func _process(_delta: float) -> void:
 			_hide()
 		return
 	var rect := field.get_global_rect()
-	if not _inside_scroll(rect):
+	if not _focused and not _inside_scroll(rect):
 		if _shown:
 			_hide()
 		return
