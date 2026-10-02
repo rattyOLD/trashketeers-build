@@ -491,7 +491,7 @@ func _on_chapter_cleared(_chapter_index: int) -> void:
 	_portal = map.open_portal(Color("#b84dff"), Color("#00f5ff") if next.get("layout", "") != "bank" else Color("#ffd257"))
 	if not _portal.entered.is_connected(_enter_portal):
 		_portal.entered.connect(_enter_portal)
-	hud.show_banner("ПОРТАЛ ОТКРЫТ!\nВперёд — %s" % (str(next.get("title", "")) + " · " + str(next.get("subtitle", "")).get_slice("· ", 1)).to_upper(), Color("#b8f0ff"), 3.2)
+	hud.show_banner("ПОРТАЛ ОТКРЫТ!\nВперёд — %s" % str(next.get("title", "")).to_upper(), Color("#b8f0ff"), 3.2)
 	SoundManager.play(&"shield_up", 0.0, false)
 
 

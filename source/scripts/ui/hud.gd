@@ -129,11 +129,13 @@ func build(currency_icon: Texture2D, weapon: WeaponData) -> void:
 	_barks.custom_minimum_size = Vector2(400, 150)
 	_barks.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	_left_column.add_child(_barks)
-	_rail_combo = UiStyle.label("", 46, UiStyle.GOLD, 12)
+	_rail_combo = UiStyle.label("", 28, UiStyle.GOLD, 8)
 	_rail_combo.anchor_left = 0.0
-	_rail_combo.anchor_right = 1.0
-	_rail_combo.offset_top = 250.0
-	_rail_combo.offset_bottom = 320.0
+	_rail_combo.anchor_right = 0.0
+	_rail_combo.offset_left = 18.0
+	_rail_combo.offset_right = 18.0 + LEFT_W
+	_rail_combo.offset_top = 214.0
+	_rail_combo.offset_bottom = 250.0
 	_rail_combo.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_rail_combo.visible = false
 	_root.add_child(_rail_combo)
@@ -245,6 +247,8 @@ func set_story_layout(minimap: Minimap) -> void:
 	_wave_box.visible = false
 	_enemies_chip.visible = false
 	_toast_y = 700.0 if Orient.portrait else 440.0
+	_rail_combo.offset_top = 456.0
+	_rail_combo.offset_bottom = 496.0
 	_story_bar = StoryBar.new()
 	_story_bar.compact()
 	_bars_box.add_child(_story_bar)
@@ -396,9 +400,13 @@ func set_wave(number: int, enemies_left: int, chapter: int = 0, alive: int = -1)
 	if _barks != null and number != _wave_last:
 		_barks.say("start" if _wave_last < 0 else "wave")
 	_wave_last = number
-	_wave_label.text = "ГЛ.%d · ВОЛНА %d" % [chapter, number] if chapter > 0 else "ВОЛНА %d" % number
+	var wave_text := "ГЛ.%d · ВОЛНА %d" % [chapter, number] if chapter > 0 else "ВОЛНА %d" % number
+	_wave_label.text = wave_text
+	if Orient.portrait:
+		_wave_box.visible = false
 	_enemies_chip.visible = enemies_left > 0 and not _minimal and _story_bar == null
-	_enemies_label.text = "%d · %d" % [enemies_left, alive] if alive >= 0 else str(enemies_left)
+	# Сначала волна, ниже: сколько осталось убить и сколько врагов сейчас на карте.
+	_enemies_label.text = ("%s\nосталось %d · на карте %d" % [wave_text, enemies_left, alive]) if alive >= 0 else ("%s\nосталось %d" % [wave_text, enemies_left])
 
 
 ## Сюжетный режим без ио-механик: скрываем опыт и уровень.
@@ -655,7 +663,7 @@ func set_rail_combo(count: int) -> void:
 	var heat := clampf(float(count) / 60.0, 0.0, 1.0)
 	_rail_combo.add_theme_color_override("font_color", UiStyle.GOLD.lerp(Color("#ff4fd8"), heat))
 	_rail_combo.pivot_offset = _rail_combo.size * 0.5
-	_rail_combo.scale = Vector2.ONE * (1.18 + 0.1 * heat)
+	_rail_combo.scale = Vector2.ONE * (1.1 + 0.08 * heat)
 	create_tween().tween_property(_rail_combo, "scale", Vector2.ONE, 0.18)
 
 
@@ -674,7 +682,7 @@ func set_minimap(minimap: Control) -> void:
 
 ## Тап по миникарте выживания: увеличить (в два раза) или вернуть как было.
 func _on_minimap_enlarge(big: bool) -> void:
-	var rect := Rect2(-314, 192, 296, 296) if big else Rect2(-194, 192, 176, 176)
+	var rect := Rect2(-314, 176, 296, 296) if big else Rect2(-194, 176, 176, 176)
 	UiStyle.anchor(_minimap_slot, Vector2(1.0, 0.0), rect)
 	if _barks != null:
 		_barks.visible = not big
@@ -1056,6 +1064,8 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	_build_wave_chip()
 	_enemies_chip = _chip(BattlePanels.icon("skull"))
 	_enemies_label = _enemies_chip.get_child(0).get_child(1) as Label
+	_enemies_label.add_theme_font_size_override("font_size", 15)
+	_enemies_label.add_theme_constant_override("line_spacing", -3)
 	chips.add_child(_enemies_chip)
 	_kills_chip = _chip(BattlePanels.icon("swords"))
 	_kills_label = _kills_chip.get_child(0).get_child(1) as Label
@@ -1107,7 +1117,7 @@ func _build_wave_chip() -> Control:
 	_wave_box = PanelContainer.new()
 	_wave_box.add_theme_stylebox_override("panel", UiStyle.box(Color(0.138, 0.132, 0.124, 0.6), Color(UiStyle.GOLD, 0.7), 3, 20))
 	_wave_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	UiStyle.anchor(_wave_box, Vector2(1.0, 0.0), Rect2(-194, 140, 176, 34))
+	UiStyle.anchor(_wave_box, Vector2(1.0, 0.0), Rect2(-194, 164, 176, 34))
 	_wave_label = UiStyle.label("ВОЛНА 1", 15, UiStyle.GOLD, 4)
 	_wave_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_wave_box.add_child(_wave_label)
@@ -1166,7 +1176,7 @@ func _build_wave_titles() -> Control:
 func _build_minimap_slot() -> Control:
 	_minimap_slot = Control.new()
 	_minimap_slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	UiStyle.anchor(_minimap_slot, Vector2(1.0, 0.0), Rect2(-194, 192, 176, 176))
+	UiStyle.anchor(_minimap_slot, Vector2(1.0, 0.0), Rect2(-194, 176, 176, 176))
 	return _minimap_slot
 
 

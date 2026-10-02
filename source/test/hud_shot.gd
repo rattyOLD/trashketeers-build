@@ -8,17 +8,19 @@ func _ready() -> void:
 		SaveService.data["character"] = OS.get_environment("HUD_CHAR")
 		var own: Array = SaveService.data.get("characters", [])
 		own.append(OS.get_environment("HUD_CHAR"))
+	SaveService.data["show_fps"] = true
 	var game := Game.new()
 	if story:
 		game.story_mission = "m1"
 	add_child(game)
 	game.start(&"")
-	await get_tree().create_timer(3.5).timeout
+	await get_tree().create_timer(1.2).timeout
 	if not story:
 		game.hud.set_wave(3, 12, 0, 25)
 		game.hud.set_kills(50)
 		game.hud.set_xp(280, 1000, int(OS.get_environment("HUD_LVL") if OS.get_environment("HUD_LVL") != "" else "12"))
 		game.hud.set_health(float(OS.get_environment("HUD_HP")) if OS.get_environment("HUD_HP") != "" else 100.0, 100.0)
+	game.hud.set_rail_combo(8)
 	if OS.get_environment("HUD_CHAT") == "1":
 		var barks: HudBarks = game.hud._barks
 		if OS.get_environment("HUD_LONG") == "1":

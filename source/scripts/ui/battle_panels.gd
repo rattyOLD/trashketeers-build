@@ -84,13 +84,13 @@ class ChapterCard:
 
 	func _init() -> void:
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
-		UiStyle.anchor(self, Vector2(0.5, 0.5), Rect2(-360, -330, 720, 170) if Orient.portrait else Rect2(-360, -260, 720, 170))
+		UiStyle.anchor(self, Vector2(0.5, 0.0), Rect2(-360, 530, 720, 150) if Orient.portrait else Rect2(-360, 250, 720, 150))
 		visible = false
 		_chapter = UiStyle.label("", 28, UiStyle.NEON, 8)
 		_chapter.set_anchors_preset(Control.PRESET_TOP_WIDE)
 		_chapter.offset_bottom = 40
 		add_child(_chapter)
-		_title = UiStyle.label("", 64 if Orient.portrait else 46, UiStyle.GOLD, 14)
+		_title = UiStyle.label("", 50 if Orient.portrait else 46, UiStyle.GOLD, 12)
 		_title.set_anchors_preset(Control.PRESET_TOP_WIDE)
 		_title.offset_top = 36
 		_title.offset_bottom = 120
@@ -114,8 +114,9 @@ class ChapterCard:
 		_line.pivot_offset = Vector2(180, 2)
 		_tween = create_tween().set_parallel(true)
 		_tween.tween_property(self, "modulate:a", 1.0, 0.35)
-		_tween.tween_property(self, "offset_top", -330.0, 0.5).from(-390.0).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-		_tween.tween_property(self, "offset_bottom", -160.0, 0.5).from(-220.0).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		var top := 530.0 if Orient.portrait else 250.0
+		_tween.tween_property(self, "offset_top", top, 0.5).from(top - 50.0).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		_tween.tween_property(self, "offset_bottom", top + 150.0, 0.5).from(top + 100.0).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		_tween.tween_property(_line, "scale:x", 1.0, 0.5).set_delay(0.25)
 		_tween.chain().tween_interval(2.3)
 		_tween.chain().tween_property(self, "modulate:a", 0.0, 0.5)

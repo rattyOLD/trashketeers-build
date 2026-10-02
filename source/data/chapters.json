@@ -4,7 +4,7 @@
   {
    "id": "junkyard",
    "title": "Неоновая Свалка",
-   "subtitle": "Глава 1 · локация 1",
+   "subtitle": "Глава 1",
    "layout": "junkyard",
    "floor": "res://assets/biome/ch1_floor.png",
    "size": [
@@ -293,7 +293,7 @@
   {
    "id": "junkyard_2",
    "title": "Неоновая Свалка",
-   "subtitle": "Глава 1 · локация 2",
+   "subtitle": "Глава 1",
    "layout": "junkyard",
    "floor": "res://assets/biome/ch1_floor.png",
    "size": [
@@ -610,7 +610,7 @@
   {
    "id": "junkyard_3",
    "title": "Неоновая Свалка",
-   "subtitle": "Глава 1 · локация 3",
+   "subtitle": "Глава 1",
    "layout": "junkyard",
    "floor": "res://assets/biome/ch1_floor.png",
    "size": [
@@ -916,7 +916,7 @@
   {
    "id": "bank",
    "title": "Золотой Банк",
-   "subtitle": "Глава 2 · локация 1",
+   "subtitle": "Глава 2",
    "layout": "bank",
    "floor": "res://assets/biome/ch2_floor.png",
    "size": [
@@ -1174,7 +1174,7 @@
   {
    "id": "bank_2",
    "title": "Золотой Банк",
-   "subtitle": "Глава 2 · локация 2",
+   "subtitle": "Глава 2",
    "layout": "bank",
    "floor": "res://assets/biome/ch2_floor.png",
    "size": [
@@ -1432,7 +1432,7 @@
   {
    "id": "bank_3",
    "title": "Золотой Банк",
-   "subtitle": "Глава 2 · локация 3",
+   "subtitle": "Глава 2",
    "layout": "bank",
    "floor": "res://assets/biome/ch2_floor.png",
    "size": [
