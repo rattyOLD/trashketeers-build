@@ -210,6 +210,50 @@ func _texture_rect(path: String, side: float) -> Control:
 	return rect
 
 
+## Склеивает одинаковое: все монеты — одной строкой, опыт — одной, одинаковые чертежи — суммой.
+func _merged_rewards() -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	var coins := 0
+	var gems := 0
+	var xp := 0
+	var shards: Dictionary = {}
+	var shard_rarity: Dictionary = {}
+	var shard_order: Array[String] = []
+	for reward in _rewards:
+		var type := str(reward.get("type", ""))
+		match type:
+			"coins":
+				coins += int(reward.get("amount", 0))
+			"gems":
+				gems += int(reward.get("amount", 0))
+			"xp":
+				xp += int(reward.get("amount", 0))
+			"shard":
+				var key := str(reward.get("subtitle", ""))
+				if not shards.has(key):
+					shard_order.append(key)
+					shards[key] = 0
+					shard_rarity[key] = str(reward.get("rarity", "common"))
+				shards[key] = int(shards[key]) + int(reward.get("amount", 1))
+			_:
+				var line := str(reward.get("title", ""))
+				var subtitle := str(reward.get("subtitle", ""))
+				if not subtitle.is_empty():
+					line += " · " + subtitle
+				out.append({"line": line, "rarity": str(reward.get("rarity", "common"))})
+	var head: Array[Dictionary] = []
+	if coins > 0:
+		head.append({"line": SaveService.format_coins(coins), "rarity": "common"})
+	if gems > 0:
+		head.append({"line": Economy.format_gems(gems), "rarity": "epic"})
+	if xp > 0:
+		head.append({"line": "+%d опыта" % xp, "rarity": "common"})
+	for key in shard_order:
+		head.append({"line": "Чертёж ×%d · %s" % [int(shards[key]), key], "rarity": str(shard_rarity[key])})
+	head.append_array(out)
+	return head
+
+
 func _show_summary() -> void:
 	_stage = 2
 	_hint.text = ""
@@ -220,18 +264,23 @@ func _show_summary() -> void:
 	column.add_theme_constant_override("separation", 10)
 	panel.add_child(column)
 	column.add_child(UiStyle.label("ПОЛУЧЕНО", 44, UiStyle.GOLD, 12))
-	for reward in _rewards:
-		var color: Color = WeaponData.RARITY_COLORS.get(str(reward.get("rarity", "common")), Color.WHITE)
-		var line := str(reward.get("title", ""))
-		var subtitle := str(reward.get("subtitle", ""))
-		if not subtitle.is_empty() and str(reward.get("type", "")) != "shard":
-			line += " · " + subtitle
-		elif str(reward.get("type", "")) == "shard":
-			line += " · " + subtitle
-		var label := UiStyle.label(line, 24, color, 6)
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.custom_minimum_size = Vector2(540, 0)
+	var list := VBoxContainer.new()
+	list.add_theme_constant_override("separation", 8)
+	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(list)
+	column.add_child(scroll)
+	for entry in _merged_rewards():
+		var color: Color = WeaponData.RARITY_COLORS.get(str(entry["rarity"]), Color.WHITE)
+		var label := UiStyle.label(str(entry["line"]), 24, color, 6)
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		label.custom_minimum_size = Vector2(520, 0)
-		column.add_child(label)
+		label.custom_minimum_size = Vector2(500, 0)
+		list.add_child(label)
+	# Высота списка не больше экрана: «ПОЛУЧЕНО» и «ЗАБРАТЬ» всегда видны, длинный список прокручивается.
+	var room := maxf(160.0, get_viewport_rect().size.y - 330.0)
+	scroll.custom_minimum_size.y = minf(room, float(maxi(1, list.get_child_count())) * 40.0)
 	var done := UiStyle.button("ЗАБРАТЬ", Color("#2fae5f"), 32, Vector2(0, 80))
 	done.pressed.connect(func() -> void:
 		SoundManager.play(&"ui_confirm")

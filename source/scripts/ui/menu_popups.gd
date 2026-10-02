@@ -72,6 +72,8 @@ class Settings:
 		"Тени, цветокоррекция, полные эффекты, 1.5×",
 		"Всё включено, свечение, 2×. Для мощных устройств",
 	]
+	const FPS_CAPS: Array[int] = [30, 60, 120]
+	var _fps_buttons: Array[Button] = []
 	var _quality_buttons: Array[Button] = []
 	var _quality_hint: Label
 	var _min_hud: MenuWidgets.PawToggle
@@ -115,11 +117,21 @@ class Settings:
 		_lite = MenuWidgets.PawToggle.new("Упрощённые эффекты", SaveService.is_fx_lite())
 		_lite.toggled.connect(func(on: bool) -> void: SaveService.set_flag("fx_lite", on))
 		graphics.add_child(_lite)
-		var eco := MenuWidgets.PawToggle.new("Экономия заряда", bool(SaveService.data.get("eco_fps", false)))
-		eco.toggled.connect(func(on: bool) -> void:
-			SaveService.set_flag("eco_fps", on)
-			SaveService.apply_quality())
-		graphics.add_child(eco)
+		graphics.add_child(UiStyle.label("Кадров в секунду", 22, UiStyle.TEXT_DIM, 4))
+		var fps_row := HBoxContainer.new()
+		fps_row.add_theme_constant_override("separation", 10)
+		graphics.add_child(fps_row)
+		for cap: int in FPS_CAPS:
+			var fb := UiStyle.button("%d" % cap, UiStyle.PANEL_LIGHT, 24, Vector2(0, 64))
+			fb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			fb.pressed.connect(func() -> void:
+				SaveService.set_fps_cap(cap)
+				_refresh())
+			fps_row.add_child(fb)
+			_fps_buttons.append(fb)
+		var fps_hint := UiStyle.label("30 экономит заряд и греется меньше, 120 — только для экранов 120 Гц", 19, UiStyle.TEXT_DIM, 4)
+		fps_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		graphics.add_child(fps_hint)
 		var haptics := MenuWidgets.PawToggle.new("Вибрация", bool(SaveService.data.get("haptics", true)))
 		haptics.toggled.connect(func(on: bool) -> void:
 			SaveService.set_flag("haptics", on)
@@ -240,6 +252,10 @@ class Settings:
 			var color := UiStyle.NEON.darkened(0.25) if i == q else UiStyle.PANEL_LIGHT
 			for state in ["normal", "hover"]:
 				_quality_buttons[i].add_theme_stylebox_override(state, UiStyle.button_box(color, false))
+		for i in _fps_buttons.size():
+			var fcolor := UiStyle.NEON.darkened(0.25) if FPS_CAPS[i] == SaveService.get_fps_cap() else UiStyle.PANEL_LIGHT
+			for fstate in ["normal", "hover"]:
+				_fps_buttons[i].add_theme_stylebox_override(fstate, UiStyle.button_box(fcolor, false))
 		_quality_hint.text = QUALITY_HINTS[q] + ("\nИгра закрылась во время боя, поэтому графика снижена автоматически." if bool(SaveService.data.get("crash_downgraded", false)) else "")
 		_fps.set_pressed_no_signal(bool(SaveService.data["show_fps"]))
 		_lite.set_pressed_no_signal(SaveService.is_fx_lite())

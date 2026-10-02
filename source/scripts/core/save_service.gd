@@ -477,6 +477,20 @@ func get_quality() -> int:
 	return clampi(q, 0, 2)
 
 
+## Лимит кадров: 30, 60 или 120. Старая «Экономия заряда» = 30.
+func get_fps_cap() -> int:
+	var cap := int(data.get("fps_cap", 0))
+	if cap == 0:
+		return 30 if bool(data.get("eco_fps", false)) else 60
+	return cap if cap in [30, 60, 120] else 60
+
+
+func set_fps_cap(cap: int) -> void:
+	data["fps_cap"] = cap if cap in [30, 60, 120] else 60
+	save_data()
+	apply_quality()
+
+
 func set_quality(q: int) -> void:
 	data["quality"] = clampi(q, 0, 2)
 	save_data()
@@ -486,7 +500,7 @@ func set_quality(q: int) -> void:
 func apply_quality() -> void:
 	var caps := [1.5, 2.0, 2.5] if Platform.is_touch() else [1.25, 2.0, 3.0]
 	Platform.set_render_cap(caps[get_quality()])
-	Engine.max_fps = 30 if bool(data.get("eco_fps", false)) else 60
+	Engine.max_fps = get_fps_cap()
 
 
 func is_minimap_enabled() -> bool:
