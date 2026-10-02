@@ -255,7 +255,7 @@ class MoodOver:
 		# пластырь
 		draw_set_transform(Vector2(s * 0.7, s * 0.6), -0.5, Vector2.ONE)
 		draw_rect(Rect2(-17, -6, 34, 12), Color("#e8c9a0"))
-		draw_rect(Rect2(-17, -6, 34, 12), Color("#180e22"), false, 2.0)
+		draw_rect(Rect2(-17, -6, 34, 12), Color("#08151d"), false, 2.0)
 		draw_circle(Vector2(-6, 0), 1.6, Color("#b88e60"))
 		draw_circle(Vector2(6, 0), 1.6, Color("#b88e60"))
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)

@@ -628,7 +628,7 @@ func _draw_reactions(id: int) -> void:
 	for emoji: String in counts:
 		var chip := PanelContainer.new()
 		var mine_too := str(state.get("mine", "")) == emoji
-		var style := UiStyle.box(Color("#3a2d60") if not mine_too else Color("#5a2a80"), UiStyle.NEON if mine_too else Color(UiStyle.NEON, 0.3), 2, 14)
+		var style := UiStyle.box(Color("#1c4256") if not mine_too else Color("#5a2a80"), UiStyle.NEON if mine_too else Color(UiStyle.NEON, 0.3), 2, 14)
 		style.content_margin_left = 6
 		style.content_margin_right = 8
 		style.content_margin_top = 2
@@ -1022,13 +1022,13 @@ class PeerAvatar:
 		var c := size * 0.5
 		var r := minf(size.x, size.y) * 0.5
 		draw_circle(c, r, UiStyle.OUTLINE)
-		draw_circle(c, r - 3.0, Color("#3a2d60"))
+		draw_circle(c, r - 3.0, Color("#1c4256"))
 		var tex := PeerAvatar.portrait_of(character)
 		if tex != null:
 			MenuWidgets.Avatar.draw_round(self, tex, c, r - 4.0)
 		if online:
 			var dot := c + Vector2(r * 0.7, r * 0.7)
-			draw_circle(dot, 9.0, Color("#1a1030"))
+			draw_circle(dot, 9.0, Color("#0c1d29"))
 			draw_circle(dot, 6.5, Color("#35c46a"))
 
 
@@ -1076,7 +1076,7 @@ class ChatIcon:
 			return
 		var c := size * 0.5
 		var r := minf(size.x, size.y) * 0.5 - 2.0
-		var bg := UiStyle.HOT if kind == Kind.SEND else Color("#3a2d60")
+		var bg := UiStyle.HOT if kind == Kind.SEND else Color("#1c4256")
 		if is_pressed():
 			bg = bg.lightened(0.2)
 		draw_circle(c, r, bg)
@@ -1108,4 +1108,4 @@ class FileGlyph:
 		draw_colored_polygon(PackedVector2Array([Vector2(4, 2), Vector2(26, 2), Vector2(36, 12), Vector2(36, 46), Vector2(4, 46)]), Color("#5ff2ff"))
 		draw_colored_polygon(PackedVector2Array([Vector2(26, 2), Vector2(36, 12), Vector2(26, 12)]), Color("#1d8fb0"))
 		for i in 3:
-			draw_line(Vector2(10, 22 + i * 7), Vector2(30, 22 + i * 7), Color("#1a1030"), 2.0)
+			draw_line(Vector2(10, 22 + i * 7), Vector2(30, 22 + i * 7), Color("#0c1d29"), 2.0)

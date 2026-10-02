@@ -452,7 +452,7 @@ func _render_top() -> void:
 		var mine := bool(d.get("mine", false))
 		var panel := PanelContainer.new()
 		panel.name = "Top_%d" % int(d.get("place", 0))
-		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#3a2f12") if mine else Color("#2a2046"), UiStyle.GOLD if mine else UiStyle.OUTLINE, 3, 14))
+		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#3a2f12") if mine else Color("#12303f"), UiStyle.GOLD if mine else UiStyle.OUTLINE, 3, 14))
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 10)
 		panel.add_child(row)
@@ -497,7 +497,7 @@ func _render_recent() -> void:
 		var code := str(e.get("code", ""))
 		var panel := PanelContainer.new()
 		panel.name = "Recent_" + code
-		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#2a2046"), UiStyle.OUTLINE, 3, 16))
+		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#12303f"), UiStyle.OUTLINE, 3, 16))
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 8)
 		panel.add_child(row)
@@ -598,7 +598,7 @@ func _friend_row(f: Dictionary) -> Control:
 	var panel := PanelContainer.new()
 	panel.name = "Friend_" + code
 	var tag := int(f.get("insider", -1))
-	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#2a2046"), Color("#35c46a") if online else Color(UiStyle.OUTLINE, 1.0), 3, 16))
+	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#12303f"), Color("#35c46a") if online else Color(UiStyle.OUTLINE, 1.0), 3, 16))
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	panel.gui_input.connect(func(event: InputEvent) -> void:
 		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:

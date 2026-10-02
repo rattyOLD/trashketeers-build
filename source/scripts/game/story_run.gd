@@ -1081,8 +1081,8 @@ class Medkit:
 	func _draw() -> void:
 		var bob := sin(_time * 4.0) * 3.0
 		draw_circle(Vector2(0, bob + 8), 26.0, Color(0.0, 0.0, 0.0, 0.25))
-		draw_rect(Rect2(-20, bob - 20, 40, 40), Color("#f4f0ff"), true)
-		draw_rect(Rect2(-20, bob - 20, 40, 40), Color("#180e22"), false, 4.0)
+		draw_rect(Rect2(-20, bob - 20, 40, 40), Color("#eefbff"), true)
+		draw_rect(Rect2(-20, bob - 20, 40, 40), Color("#08151d"), false, 4.0)
 		draw_rect(Rect2(-5, bob - 15, 10, 30), Color("#ff3b5c"), true)
 		draw_rect(Rect2(-15, bob - 5, 30, 10), Color("#ff3b5c"), true)
 

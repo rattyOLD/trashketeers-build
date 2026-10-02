@@ -26,7 +26,7 @@ const CRATE_GREEN_LIGHT := Color("#6f9e4f")
 const CRATE_METAL := Color("#b8bfcc")
 const DROP_GRAVITY := 2600.0
 const FLASH_TIME := 0.06
-const LINE := Color("#1a0f2a")
+const LINE := Color("#0b1a26")
 const LINE_WIDTH := 3.0
 const BLAST_TIME := 0.42
 ## Эффект разрушения: [цвета обломков, число обломков, цвет искр (прозрачный — без искр), число искр].

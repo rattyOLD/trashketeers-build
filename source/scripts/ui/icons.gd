@@ -2,7 +2,7 @@ class_name Icons
 extends RefCounted
 ## Процедурные иконки валют (кэшируются): не тянем PNG ради 24-пиксельных значков.
 
-const OUTLINE := Color("#180e22")
+const OUTLINE := Color("#08151d")
 
 static var _star_dust: ImageTexture
 

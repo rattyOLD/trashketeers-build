@@ -439,7 +439,7 @@ class Road:
 				var c2 := finish - Vector2(0.0, step * 0.5)
 				points.append(q * q * q * node + 3.0 * q * q * t * c1 + 3.0 * q * t * t * c2 + t * t * t * finish)
 			var passed := tier + 1 <= level
-			draw_polyline(points, Color("#ffb020") if passed else Color("#3a2d60"), 40.0, true)
+			draw_polyline(points, Color("#ffb020") if passed else Color("#1c4256"), 40.0, true)
 			draw_polyline(points, Color("#2a2536"), 32.0, true)
 			for i in range(0, 20, 2):
 				draw_line(points[i], points[i + 1], Color("#ffd23f") if passed else Color("#6a5d8a"), 3.0, true)
@@ -484,7 +484,7 @@ class CosmeticArt:
 		match Cosmetics.kind_of(key):
 			"frame":
 				var tint := Cosmetics.color_of(key)
-				draw_circle(c, r, Color("#3a2d60"))
+				draw_circle(c, r, Color("#1c4256"))
 				draw_arc(c, r - 2.0, 0.0, TAU, 32, Color(tint, 0.35), 9.0, true)
 				draw_arc(c, r - 2.0, 0.0, TAU, 32, tint, 5.0, true)
 			"color":

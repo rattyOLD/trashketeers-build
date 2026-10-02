@@ -8,7 +8,7 @@ extends RefCounted
 ## в единицах ствола. Остальные (гранатомёт, огнемёт, бластеры) — процедурные силуэты: контуры
 ## (Geometry2D.offset_polygon) считаются один раз на тип и кэшируются.
 
-const OUTLINE := Color("#180e22")
+const OUTLINE := Color("#08151d")
 const TIER_COLORS := [Color("#b9c2d9"), Color("#5be37d"), Color("#4dc3ff"), Color("#c98bff"), Color("#ffd257")]
 const OUTLINE_WIDTH := 2.6
 const METAL := Color("#3b3752")

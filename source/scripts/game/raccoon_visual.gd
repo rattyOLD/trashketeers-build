@@ -16,7 +16,7 @@ extends Node2D
 ## перекраска одежды/шарфа/ремней/металла + слой аксессуаров в развёртке спрайта).
 
 const RIG_ID := "raccoon"
-const OUTLINE := Color("#180e22")
+const OUTLINE := Color("#08151d")
 const FLASH_TIME := 0.12
 const HURT_TIME := 0.35
 const PICKUP_TIME := 0.3

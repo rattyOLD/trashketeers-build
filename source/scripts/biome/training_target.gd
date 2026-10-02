@@ -6,7 +6,7 @@ signal broken(target: TrainingTarget)
 
 const HP := 45.0
 const SIZE := Vector2(86.0, 86.0)
-const LINE := Color("#1a0f2a")
+const LINE := Color("#0b1a26")
 const WOOD := Color("#9a6a3a")
 const WOOD_LIGHT := Color("#c48c52")
 const RED := Color("#ff3b5c")

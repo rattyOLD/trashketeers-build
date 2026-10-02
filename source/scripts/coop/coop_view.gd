@@ -119,7 +119,7 @@ func _draw() -> void:
 		var hue := fmod(float(int(e["type"])) * 0.137, 1.0)
 		var color := Color.from_hsv(hue, 0.6, 0.95)
 		var radius := 17.0 * WORLD_SCALE * 1.3
-		draw_circle(at, radius + 2.0, Color("#1a0033"))
+		draw_circle(at, radius + 2.0, Color("#071b25"))
 		draw_circle(at, radius, color)
 		if float(e["frac"]) < 0.999:
 			draw_rect(Rect2(at + Vector2(-radius, -radius - 8.0), Vector2(radius * 2.0, 4.0)), Color(0, 0, 0, 0.6))
@@ -156,7 +156,7 @@ func _draw_player(id: int, state: Dictionary) -> void:
 		draw_circle(at, radius, Color(0.3, 0.3, 0.3, 0.5))
 		return
 	if bool(state["downed"]):
-		draw_circle(at, radius + 4.0, Color("#1a0033"))
+		draw_circle(at, radius + 4.0, Color("#071b25"))
 		draw_circle(at, radius, Color(0.45, 0.45, 0.5))
 		var pulse := 0.5 + 0.5 * sin(_time * 6.0)
 		draw_arc(at, radius + 10.0, 0.0, TAU, 32, Color(1, 0.2, 0.3, 0.4 + 0.5 * pulse), 3.0)
@@ -165,7 +165,7 @@ func _draw_player(id: int, state: Dictionary) -> void:
 			draw_arc(at, radius + 18.0, -PI * 0.5, -PI * 0.5 + TAU * progress, 32, color, 5.0)
 		_text(at + Vector2(0, -radius - 28.0), "ПОДНИМИ!", 16, Color("#ffd257"))
 	else:
-		draw_circle(at, radius + 3.0, Color("#1a0033"))
+		draw_circle(at, radius + 3.0, Color("#071b25"))
 		draw_circle(at, radius, color)
 		var aim := float(state["aim"])
 		draw_line(at, at + Vector2.from_angle(aim) * (radius + 10.0), Color.WHITE, 3.0)
@@ -200,7 +200,7 @@ func _draw_hud() -> void:
 		var me: Dictionary = _players[my_id]
 		var frac := clampf(float(me["hp"]) / HP_MAX, 0.0, 1.0)
 		var bar := Rect2(Vector2(24.0, size.y - 52.0), Vector2(260.0, 22.0))
-		draw_rect(bar.grow(3.0), Color("#1a0033"))
+		draw_rect(bar.grow(3.0), Color("#071b25"))
 		draw_rect(bar, Color(0, 0, 0, 0.6))
 		draw_rect(Rect2(bar.position, Vector2(bar.size.x * frac, bar.size.y)), Color("#35c46a") if frac > 0.3 else Color("#ff4d6d"))
 		if bool(me["downed"]):
@@ -215,5 +215,5 @@ func _draw_hud() -> void:
 func _text(at: Vector2, text: String, font_size: int, color: Color) -> void:
 	var width := _font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
 	var pos := at - Vector2(width * 0.5, 0.0)
-	draw_string_outline(_font, pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, 6, Color("#1a0033"))
+	draw_string_outline(_font, pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, 6, Color("#071b25"))
 	draw_string(_font, pos, text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, color)

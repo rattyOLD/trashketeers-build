@@ -3,15 +3,15 @@ extends RefCounted
 ## Фабрики стилизованных контролов: жирный тёмный контур, скруглённые плашки, неон.
 ## Всё строится кодом, чтобы UI не зависел от .tres-тем и легко правился в одном месте.
 
-const OUTLINE := Color("#180e22")
-const PANEL := Color("#2a2046")
-const PANEL_LIGHT := Color("#3a2d60")
+const OUTLINE := Color("#08151d")
+const PANEL := Color("#12303f")
+const PANEL_LIGHT := Color("#1c4256")
 const NEON := Color("#00e5ff")
 const HOT := Color("#ff2ea6")
 const GOLD := Color("#ffd257")
 const DANGER := Color("#ff3b5c")
-const TEXT := Color("#f4f0ff")
-const TEXT_DIM := Color("#b5a9d6")
+const TEXT := Color("#eefbff")
+const TEXT_DIM := Color("#9fc9d8")
 
 
 static func box(bg: Color, border: Color = OUTLINE, border_width: int = 4, radius: int = 18) -> StyleBoxFlat:
@@ -49,7 +49,7 @@ static var _kit_cache: Dictionary = {}
 ## Какой из четырёх нарисованных цветов кнопки ближе к заказанному оттенку. Серые и тёмные кнопки: фиолетовая «стальная».
 static func _kit_family(color: Color) -> String:
 	if color.s < 0.3 or color.v < 0.4:
-		return "purple"
+		return "teal"
 	var h := color.h
 	if h < 0.04 or h > 0.93:
 		return "red"
@@ -57,7 +57,7 @@ static func _kit_family(color: Color) -> String:
 		return "gold"
 	if h < 0.46:
 		return "green"
-	return "purple"
+	return "teal"
 
 
 ## Кнопка из рисованной плашки: девять частей, углы с заклёпками не растягиваются.
@@ -95,7 +95,7 @@ static func button(text: String, color: Color, font_size: int = 30, min_size: Ve
 	b.add_theme_color_override("font_outline_color", OUTLINE)
 	b.add_theme_constant_override("outline_size", 8)
 	b.add_theme_color_override("font_disabled_color", Color(TEXT, 0.55))
-	var small := min_size.y < 66.0 or font_size <= 22
+	var small := min_size.y < 100.0 or font_size <= 30
 	var family := _kit_family(color)
 	if KIT_ON and ResourceLoader.exists(KIT_DIR + "btn_%s_normal.png" % family):
 		b.add_theme_stylebox_override("normal", kit_box(family, "normal", small))

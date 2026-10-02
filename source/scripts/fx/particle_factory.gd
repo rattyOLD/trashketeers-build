@@ -5,7 +5,7 @@ extends RefCounted
 ## Текстуры частиц процедурные и кэшируются: ни одного PNG ради 12-пиксельных осколков.
 ## local_coords = false: выпущенные частицы остаются в мире, даже если эмиттер двигается.
 
-const OUTLINE := Color("#1a0f2a")
+const OUTLINE := Color("#0b1a26")
 
 static var _textures: Dictionary = {}
 

@@ -236,7 +236,7 @@ func show_account_banner(text: String) -> void:
 	if is_instance_valid(_account_banner):
 		return
 	var bar := PanelContainer.new()
-	bar.add_theme_stylebox_override("panel", UiStyle.box(Color("#3a1030"), Color("#ff2ea6"), 3, 16))
+	bar.add_theme_stylebox_override("panel", UiStyle.box(Color("#0f2a38"), Color("#00e5ff"), 3, 16))
 	bar.anchor_left = 0.5
 	bar.anchor_right = 0.5
 	bar.offset_left = -minf(COLUMN_WIDTH, get_viewport_rect().size.x - 24.0) * 0.5
@@ -342,7 +342,7 @@ func _add_capsule(row: HBoxContainer, icon_texture: Texture2D, kind: String) -> 
 		if tapped:
 			SoundManager.play(&"ui_click")
 			_currency.open_kind(kind))
-	var accent := Color("#b34dff") if kind == "gems" else Color("#ffb020")
+	var accent := Color("#35c8ff") if kind == "gems" else Color("#ffb020")
 	var style := UiStyle.box(Color(CAPSULE, 0.92).lerp(accent, 0.22), accent, 4, 30)
 	style.content_margin_left = 8
 	style.content_margin_right = 8
@@ -744,7 +744,7 @@ func _select_mode(mode: int) -> void:
 	_mode = mode
 	if _mod_chip != null:
 		_mod_chip.visible = mode == Mode.SURVIVAL
-	var colors := [Color("#ffb020"), Color("#7df9ff"), Color("#ff7ae0")]
+	var colors := [Color("#ffb020"), Color("#7df9ff"), Color("#7cff6b")]
 	for i in _mode_buttons.size():
 		var active := i == mode
 		var b := _mode_buttons[i]
@@ -807,7 +807,7 @@ func _build_weapon_chip() -> Control:
 
 func _build_dock() -> Control:
 	var dock := PanelContainer.new()
-	var style := UiStyle.box(Color(0.05, 0.03, 0.12, 0.88), Color("#3a2d60"), 3, 28)
+	var style := UiStyle.box(Color(0.05, 0.03, 0.12, 0.88), Color("#1c4256"), 3, 28)
 	style.content_margin_left = 10
 	style.content_margin_right = 10
 	style.content_margin_top = 6
@@ -824,7 +824,7 @@ func _build_nav() -> Control:
 		[MenuWidgets.NavButton.Kind.UPGRADES, "ПРОКАЧКА", Color("#ff4d6d"), func() -> void: _upgrades.open(), "upgrade"],
 		[MenuWidgets.NavButton.Kind.FRIENDS, "ДРУЗЬЯ", Color("#ffd257"), func() -> void: _friends.open(), "friends"],
 		[MenuWidgets.NavButton.Kind.SKINS, "ГЕРОИ", Color("#00e5ff"), func() -> void: _shop.open(), "hero"],
-		[MenuWidgets.NavButton.Kind.OUTFITS, "СКИНЫ", Color("#ff5ce1"), func() -> void: _skins.open(), "outfit"],
+		[MenuWidgets.NavButton.Kind.OUTFITS, "СКИНЫ", Color("#7cff6b"), func() -> void: _skins.open(), "outfit"],
 	]
 	for item in items:
 		var button := MenuWidgets.NavButton.new(item[0], item[1], item[2], ArenaProp.texture_of("res://assets/ui/hub/%s.png" % item[4]))
@@ -924,7 +924,7 @@ class _NotifyDot:
 		custom_minimum_size = Vector2(24, 24)
 
 	func _draw() -> void:
-		draw_circle(Vector2(12, 12), 12.0, Color("#1a0f2a"))
+		draw_circle(Vector2(12, 12), 12.0, Color("#0b1a26"))
 		draw_circle(Vector2(12, 12), 9.0, UiStyle.DANGER)
 
 
@@ -1006,10 +1006,10 @@ class LogoText:
 		var io_width := font.get_string_size("Squad", HORIZONTAL_ALIGNMENT_LEFT, -1, io_size).x
 		var start := Vector2(-(width + io_width + 14.0) * 0.5, 0)
 		draw_string_outline(font, start + Vector2(0, 10), title, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, 34, Color(0, 0, 0, 0.45))
-		draw_string_outline(font, start, title, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, 26, Color("#1a0f2a"))
+		draw_string_outline(font, start, title, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, 26, Color("#0b1a26"))
 		draw_string(font, start, title, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color("#ffc93c"))
 		draw_string(font, start + Vector2(0, -4), title, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color(1.0, 0.93, 0.55, 0.55))
 		var io := start + Vector2(width + 14, 0)
-		draw_string_outline(font, io, "Squad", HORIZONTAL_ALIGNMENT_LEFT, -1, io_size, 20, Color("#1a0f2a"))
+		draw_string_outline(font, io, "Squad", HORIZONTAL_ALIGNMENT_LEFT, -1, io_size, 20, Color("#0b1a26"))
 		draw_string(font, io, "Squad", HORIZONTAL_ALIGNMENT_LEFT, -1, io_size, Color("#00f5ff"))
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)

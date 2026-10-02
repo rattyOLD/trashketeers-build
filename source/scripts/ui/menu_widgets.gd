@@ -3,7 +3,7 @@ extends RefCounted
 ## Нарисованные кодом элементы меню из паспорта интерфейса: иконки кнопок, лапки-тумблеры,
 ## круглая аватарка и размытый задник биома. Всё с тёмной мультяшной обводкой.
 
-const LINE := Color("#1a0f2a")
+const LINE := Color("#0b1a26")
 const GEAR := Color("#e0e0e0")
 
 
@@ -187,7 +187,7 @@ class PawToggle:
 		draw_string(font, Vector2(0, size.y * 0.5 + 12), caption, HORIZONTAL_ALIGNMENT_LEFT, size.x - 120, 32, UiStyle.TEXT)
 		var c := Vector2(size.x - 56, size.y * 0.5 + 6)
 		var pad := Color("#ff9fc4") if on else Color("#5a5068")
-		var fur := Color("#f4f0ff") if on else Color("#3a3552")
+		var fur := Color("#eefbff") if on else Color("#3a3552")
 		draw_circle(c, 26.0 + 3.0, LINE)
 		draw_circle(c, 26.0, fur)
 		draw_circle(c + Vector2(0, 4), 12.0, pad)
@@ -215,7 +215,7 @@ class Avatar:
 		var c := size * 0.5
 		var r := minf(size.x, size.y) * 0.5
 		draw_circle(c, r, LINE)
-		draw_circle(c, r - 4.0, Color("#3a2d60"))
+		draw_circle(c, r - 4.0, Color("#1c4256"))
 		var tex: Texture2D = null
 		var custom := str(SaveService.data.get("avatar", ""))
 		if not custom.is_empty():

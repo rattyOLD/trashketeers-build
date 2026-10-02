@@ -194,7 +194,7 @@ class DamagePortrait:
 		var c := size * 0.5
 		var r := minf(size.x, size.y) * 0.5
 		draw_circle(c, r - 1.0, Color("#140a1c"))
-		draw_circle(c, r - 5.0, Color("#3a2d60"))
+		draw_circle(c, r - 5.0, Color("#1c4256"))
 
 
 ## Лицо: портрет, вырезанный кругом (полигон с UV).
@@ -256,7 +256,7 @@ class Over:
 				draw_circle(Vector2(x, size.y * (0.62 + 0.3 * fall)), 2.6 * (1.0 - fall * 0.5), Color(0.8, 0.05, 0.1, 0.9 * (1.0 - fall)))
 		# Оправа.
 		var rust := Color("#c9722b").lerp(Color("#8a2a1a"), d * 0.8)
-		draw_arc(c, r - 3.5, 0.0, TAU, 48, Color("#1a1030"), 8.0, true)
+		draw_arc(c, r - 3.5, 0.0, TAU, 48, Color("#0c1d29"), 8.0, true)
 		draw_arc(c, r - 3.5, 0.0, TAU, 48, rust, 4.5, true)
 		for i in 4:
 			var a := TAU * i / 4.0 + PI / 4.0

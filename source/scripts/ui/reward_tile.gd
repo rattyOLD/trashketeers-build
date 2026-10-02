@@ -16,7 +16,7 @@ func _init(title: String, coins: int, gems: int, tier: int, state: State, big: b
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	custom_minimum_size = Vector2(0, 176 if big else 168)
 	var accent := [Color("#7fa6ff"), Color("#c98bff"), UiStyle.GOLD][clampi(tier, 0, 2)] as Color
-	var bg := Color("#3a2d60")
+	var bg := Color("#1c4256")
 	var border := UiStyle.OUTLINE
 	match state:
 		State.CURRENT:

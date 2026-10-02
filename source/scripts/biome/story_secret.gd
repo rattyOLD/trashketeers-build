@@ -7,7 +7,7 @@ signal broken(secret: StorySecret)
 
 const HP := 140.0
 const SIZE := Vector2(78.0, 128.0)
-const LINE := Color("#1a0f2a")
+const LINE := Color("#0b1a26")
 const STONE := Color("#6d6a7a")
 const STONE_LIGHT := Color("#8c8a9c")
 const CRACK := Color("#2a2838")

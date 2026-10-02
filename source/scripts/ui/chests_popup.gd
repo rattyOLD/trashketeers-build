@@ -32,7 +32,7 @@ func _init() -> void:
 	_pity_bar.max_value = 1.0
 	_pity_bar.show_percentage = false
 	_pity_bar.custom_minimum_size = Vector2(0, 16)
-	_pity_bar.add_theme_stylebox_override("background", UiStyle.box(Color("#0f0a1e"), Color("#3a2d60"), 2, 8))
+	_pity_bar.add_theme_stylebox_override("background", UiStyle.box(Color("#0f0a1e"), Color("#1c4256"), 2, 8))
 	_pity_bar.add_theme_stylebox_override("fill", UiStyle.box(Color("#b34dff"), Color("#b34dff"), 0, 8))
 	pity_box.add_child(_pity_bar)
 	content.add_child(pity_card)

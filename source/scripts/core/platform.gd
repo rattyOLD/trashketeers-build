@@ -484,7 +484,7 @@ var r = c.getBoundingClientRect(); var k = r.width / %f;
 var id = 'trk_in_' + %s; var el = document.getElementById(id);
 if (!el) {
   el = document.createElement('input'); el.id = id; el.autocomplete = 'off'; el.setAttribute('autocapitalize', 'sentences');
-  el.style.cssText = 'position:fixed;z-index:20;box-sizing:border-box;border:0;outline:0;background:transparent;color:#1a1030;padding:0 14px;font-family:system-ui,-apple-system,sans-serif;-webkit-appearance:none;border-radius:16px';
+  el.style.cssText = 'position:fixed;z-index:20;box-sizing:border-box;border:0;outline:0;background:transparent;color:#0c1d29;padding:0 14px;font-family:system-ui,-apple-system,sans-serif;-webkit-appearance:none;border-radius:16px';
   el.addEventListener('keydown', function (e) { if (e.key === 'Enter') { el.dataset.enter = '1'; e.preventDefault(); } });
   el.addEventListener('input', function () { el.dataset.changed = '1'; });
   document.body.appendChild(el);
@@ -496,7 +496,7 @@ el.style.width = (%f * k) + 'px'; el.style.height = (%f * k) + 'px';
 el.style.fontSize = Math.max(16, %f * k) + 'px'; el.style.display = 'block';
 if (!document.getElementById('trk_in_css')) { var st = document.createElement('style'); st.id = 'trk_in_css'; st.textContent = 'input[id^=trk_in_]::placeholder{font-size:0.72em;color:#8a82a0;opacity:1} input.trk_dark::placeholder{color:#8f86b3}'; document.head.appendChild(st); }
 """ % [view.x, JSON.stringify(id), JSON.stringify("password" if secret else "text"), JSON.stringify(placeholder), max_length if max_length > 0 else 500,
-		JSON.stringify("#f2ecff" if dark else "#1a1030"), "true" if dark else "false",
+		JSON.stringify("#f2ecff" if dark else "#0c1d29"), "true" if dark else "false",
 		view.x, rect.position.x, rect.position.y, rect.size.x, rect.size.y,
 		rect.position.x, rect.position.y, rect.size.x, rect.size.y, font_px])
 

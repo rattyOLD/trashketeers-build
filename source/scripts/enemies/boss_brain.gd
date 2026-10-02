@@ -1103,8 +1103,8 @@ func _draw_zone(canvas: Node2D, at: Vector2, radius: float, t: float) -> void:
 func _draw_magnet(canvas: Node2D, head: Vector2, t: float) -> void:
 	canvas.draw_line(head + Vector2(0, -900.0), head, Color("#2a2838"), 7.0)
 	canvas.draw_arc(head + Vector2(0, 6), 30.0, 0.0, PI, 20, Color("#d63a4f"), 12.0, true)
-	canvas.draw_rect(Rect2(head + Vector2(-36, 4), Vector2(14, 22)), Color("#f4f0ff"), true)
-	canvas.draw_rect(Rect2(head + Vector2(22, 4), Vector2(14, 22)), Color("#f4f0ff"), true)
+	canvas.draw_rect(Rect2(head + Vector2(-36, 4), Vector2(14, 22)), Color("#eefbff"), true)
+	canvas.draw_rect(Rect2(head + Vector2(22, 4), Vector2(14, 22)), Color("#eefbff"), true)
 	for k in 3:
 		canvas.draw_arc(head + Vector2(0, 26), 34.0 + 18.0 * k * t, 0.2, PI - 0.2, 16, Color(MAGNET, 0.6 - 0.15 * k), 3.0, true)
 

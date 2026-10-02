@@ -25,7 +25,7 @@ const CRYSTAL_DARK := Color("#2a6fa8")
 const FIELD := Color("#9ff6ff")
 const ART := "res://assets/raid/ice_shield.png"
 const DAMAGE_RED := Color("#ff2244")
-const LINE := Color("#1a0033")
+const LINE := Color("#071b25")
 const SHADOW_DRAW_LENGTH := 900.0
 
 var durability := MAX_DURABILITY

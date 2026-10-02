@@ -314,7 +314,7 @@ func _draw_dummy(at: Vector2, s: float, hit: float) -> void:
 	draw_line(Vector2(c.x, floor_y), Vector2(c.x, c.y + 24.0 * s), Color("#5a4630"), 8.0 * s)
 	draw_rect(Rect2(c.x - 26.0 * s, floor_y - 6.0, 52.0 * s, 8.0), Color("#2c2438"))
 	var body := Color("#c9ccd8").lerp(Color.WHITE, hit)
-	draw_circle(c, 34.0 * s, Color("#180e22"))
+	draw_circle(c, 34.0 * s, Color("#08151d"))
 	draw_circle(c, 30.0 * s, body)
 	draw_circle(c, 22.0 * s, Color("#d9344f").lerp(Color.WHITE, hit))
 	draw_circle(c, 14.0 * s, body)
@@ -434,7 +434,7 @@ func _draw_melee() -> void:
 			var a := smoothstep(0.0, 0.2, u) * (1.0 - smoothstep(0.45, 1.0, u))
 			_draw_slash(pivot, a, lerpf(-1.0, 1.0, eased) * weapon.arc_rad * 0.3 * (-1.0 if _swings % 2 == 0 else 1.0), lerpf(0.85, 1.05, eased))
 	WeaponIcons.draw(self, weapon.icon, center, scale_factor, angle, weapon.effect_color)
-	draw_circle(pivot, 5.0, Color("#180e22"))
+	draw_circle(pivot, 5.0, Color("#08151d"))
 	draw_circle(pivot, 3.0, Color("#f3d1a8"))
 
 

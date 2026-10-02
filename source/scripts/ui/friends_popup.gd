@@ -408,7 +408,7 @@ func _social_row(friend: Dictionary) -> Control:
 	var code := str(friend.get("friend_code", ""))
 	var nick := str(friend.get("nickname", "Енот"))
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#2f2452"), Color(UiStyle.NEON, 0.6), 3, 14))
+	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#1b3d50"), Color(UiStyle.NEON, 0.6), 3, 14))
 	_tappable(panel, _open_profile.bind(code))
 	var row := HBoxContainer.new()
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -431,7 +431,7 @@ func _social_row(friend: Dictionary) -> Control:
 	name_label.clip_text = true
 	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	text.add_child(name_label)
-	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#2f2452"), Color(UiStyle.NEON, 0.6) if tag < 0 else Insider.color_of(tag, UiStyle.TEXT), 3, 16))
+	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#1b3d50"), Color(UiStyle.NEON, 0.6) if tag < 0 else Insider.color_of(tag, UiStyle.TEXT), 3, 16))
 	var preview := "" if friend.get("last_body") == null else ChatPopup.preview_of(str(friend.get("last_body")))
 	var when := "" if friend.get("last_at") == null else ChatPopup._clock_label(str(friend.get("last_at")))
 	var sub_text := (preview.left(30) + ("  · " + when if not when.is_empty() else "")) if not preview.is_empty() else ("в сети" if online else "волна %d" % int(friend.get("best_wave", 0)))
@@ -490,7 +490,7 @@ func _request_row(request: Dictionary) -> Control:
 
 func _online_row(friend: Dictionary) -> Control:
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#2f2452"), Color(UiStyle.NEON, 0.6), 3, 14))
+	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#1b3d50"), Color(UiStyle.NEON, 0.6), 3, 14))
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 10)
 	panel.add_child(row)
@@ -543,7 +543,7 @@ func _fill_board() -> void:
 func _board_row(entry: Dictionary, place: int, key: String, unit: String) -> Control:
 	var me := bool(entry.get("me", false))
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#2f2452") if not me else Color("#173a4a"), UiStyle.NEON if me else Color(UiStyle.OUTLINE, 1.0), 3, 14))
+	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#1b3d50") if not me else Color("#173a4a"), UiStyle.NEON if me else Color(UiStyle.OUTLINE, 1.0), 3, 14))
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 10)
 	panel.add_child(row)
@@ -581,7 +581,7 @@ func _fill_friends() -> void:
 
 func _friend_row(friend: Dictionary) -> Control:
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#2f2452"), Color(UiStyle.NEON, 0.6), 3, 16))
+	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#1b3d50"), Color(UiStyle.NEON, 0.6), 3, 16))
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 12)
 	panel.add_child(row)
@@ -629,7 +629,7 @@ func _mission_badges(done: Array, shards: int) -> Control:
 	for i in MISSION_COUNT:
 		var passed := done.has("m%d" % (i + 1))
 		var chip := PanelContainer.new()
-		var chip_box := UiStyle.box(Color("#35c46a") if passed else Color("#3a2d60"), UiStyle.OUTLINE, 2, 8)
+		var chip_box := UiStyle.box(Color("#35c46a") if passed else Color("#1c4256"), UiStyle.OUTLINE, 2, 8)
 		chip_box.content_margin_left = 5
 		chip_box.content_margin_right = 5
 		chip_box.content_margin_top = 1
@@ -704,7 +704,7 @@ class AvatarView:
 		var c := size * 0.5
 		var r := minf(size.x, size.y) * 0.5
 		draw_circle(c, r, UiStyle.OUTLINE)
-		draw_circle(c, r - 3.0, Color("#3a2d60"))
+		draw_circle(c, r - 3.0, Color("#1c4256"))
 		var tex := MenuWidgets.Avatar.get_texture_for(CharacterDB.get_character(character_id), skin_id)
 		if tex != null:
 			draw_texture_rect(tex, Rect2(c - Vector2.ONE * (r - 4.0), Vector2.ONE * (r - 4.0) * 2.0), false)

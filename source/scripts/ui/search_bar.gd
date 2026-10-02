@@ -35,7 +35,7 @@ static func matches(query: String, haystack: String) -> bool:
 
 static func style(field: LineEdit, font_size: int) -> void:
 	field.add_theme_font_size_override("font_size", font_size)
-	field.add_theme_color_override("font_color", Color("#1a1030"))
+	field.add_theme_color_override("font_color", Color("#0c1d29"))
 	field.add_theme_color_override("font_placeholder_color", Color("#8a82a0"))
 	field.add_theme_color_override("caret_color", Color("#ff2ea6"))
 	field.add_theme_stylebox_override("normal", UiStyle.box(Color("#ffffff"), UiStyle.OUTLINE, 4, 16))
@@ -65,6 +65,6 @@ static func restore_colors(field: LineEdit) -> void:
 		field.add_theme_color_override("font_placeholder_color", Color("#8f86b3"))
 		field.add_theme_color_override("caret_color", Color("#ff2ea6"))
 		return
-	field.add_theme_color_override("font_color", Color("#1a1030"))
+	field.add_theme_color_override("font_color", Color("#0c1d29"))
 	field.add_theme_color_override("font_placeholder_color", Color("#8a82a0"))
 	field.add_theme_color_override("caret_color", Color("#ff2ea6"))

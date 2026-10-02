@@ -6,7 +6,7 @@ extends Control
 
 const BAR_HEIGHT := 34.0
 const WING_WIDTH := 70.0
-const OUTLINE := Color("#1a0033")
+const OUTLINE := Color("#071b25")
 const WING_NEON := Color("#00ffff")
 const WHITE_BAR := Color("#ffffff")
 const FURY_PINK := Color("#ff2ea6")

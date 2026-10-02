@@ -1396,7 +1396,7 @@ class Profile:
 	func _tile(title: String, value: String, icon: String, accent: Color, big: bool) -> Control:
 		var panel := PanelContainer.new()
 		panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var box := UiStyle.box(Color("#2f2452"), Color(accent, 0.75), 3, 16)
+		var box := UiStyle.box(Color("#1b3d50"), Color(accent, 0.75), 3, 16)
 		panel.add_theme_stylebox_override("panel", box)
 		var body: BoxContainer = VBoxContainer.new() if big else HBoxContainer.new()
 		body.add_theme_constant_override("separation", 8 if not big else 2)
@@ -1435,7 +1435,7 @@ class Profile:
 			if tapped:
 				SoundManager.play(&"ui_click")
 				chronicle_requested.emit())
-		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#2f2452"), Color(UiStyle.NEON, 0.7), 3, 16))
+		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#1b3d50"), Color(UiStyle.NEON, 0.7), 3, 16))
 		var head := HBoxContainer.new()
 		head.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		var title := UiStyle.label("Летопись - читать", 24, UiStyle.TEXT, 6)
@@ -1490,7 +1490,7 @@ class Profile:
 			if tapped:
 				SoundManager.play(&"ui_click")
 				achievements_requested.emit())
-		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#2f2452"), Color(UiStyle.GOLD, 0.7), 3, 16))
+		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#1b3d50"), Color(UiStyle.GOLD, 0.7), 3, 16))
 		var column := VBoxContainer.new()
 		column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		column.add_theme_constant_override("separation", 6)

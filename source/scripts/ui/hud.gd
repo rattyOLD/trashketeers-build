@@ -1008,7 +1008,7 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	_portrait.set_character(SaveService.get_character())
 	head.add_child(_portrait)
 	_level_badge = PanelContainer.new()
-	_level_badge.add_theme_stylebox_override("panel", UiStyle.box(Color("#1a1030"), UiStyle.GOLD, 3, 10))
+	_level_badge.add_theme_stylebox_override("panel", UiStyle.box(Color("#0c1d29"), UiStyle.GOLD, 3, 10))
 	_level_badge.custom_minimum_size = Vector2(40, 32)
 	_level_badge.position = Vector2(62, 70)
 	_level_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE

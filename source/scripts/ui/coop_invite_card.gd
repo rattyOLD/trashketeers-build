@@ -77,7 +77,7 @@ func _ready() -> void:
 	_bar_back = Control.new()
 	_bar_back.custom_minimum_size = Vector2(0, 10)
 	var back := ColorRect.new()
-	back.color = Color("#2f2452")
+	back.color = Color("#1b3d50")
 	back.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_bar_back.add_child(back)
 	_bar = ColorRect.new()

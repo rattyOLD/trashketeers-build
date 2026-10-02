@@ -1326,7 +1326,7 @@ func _draw_aim() -> void:
 func _draw_alert() -> void:
 	var top := Vector2(0, -data.radius * 3.0 * _size_mult - 22.0 - (data.hover if data.flying else 0.0))
 	var font := ThemeDB.fallback_font
-	draw_string_outline(font, top + Vector2(-20, 0), "!", HORIZONTAL_ALIGNMENT_CENTER, 40, 40, 10, Color("#180e22"))
+	draw_string_outline(font, top + Vector2(-20, 0), "!", HORIZONTAL_ALIGNMENT_CENTER, 40, 40, 10, Color("#08151d"))
 	draw_string(font, top + Vector2(-20, 0), "!", HORIZONTAL_ALIGNMENT_CENTER, 40, 40, Color("#ffe14d"))
 
 
