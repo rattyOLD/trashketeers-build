@@ -20,7 +20,7 @@ func _init() -> void:
 	_balance = UiStyle.label("", 24, UiStyle.GOLD, 6)
 	content.add_child(_balance)
 	var pity_card := PanelContainer.new()
-	pity_card.add_theme_stylebox_override("panel", UiStyle.box(Color("#1a1330"), Color("#b34dff"), 3, 16))
+	pity_card.add_theme_stylebox_override("panel", UiStyle.box(Color("#0e2230"), Color("#35c8ff"), 3, 16))
 	var pity_box := VBoxContainer.new()
 	pity_box.add_theme_constant_override("separation", 4)
 	pity_card.add_child(pity_box)
@@ -32,8 +32,8 @@ func _init() -> void:
 	_pity_bar.max_value = 1.0
 	_pity_bar.show_percentage = false
 	_pity_bar.custom_minimum_size = Vector2(0, 16)
-	_pity_bar.add_theme_stylebox_override("background", UiStyle.box(Color("#0f0a1e"), Color("#1c4256"), 2, 8))
-	_pity_bar.add_theme_stylebox_override("fill", UiStyle.box(Color("#b34dff"), Color("#b34dff"), 0, 8))
+	_pity_bar.add_theme_stylebox_override("background", UiStyle.box(Color("#0c191e"), Color("#1c4256"), 2, 8))
+	_pity_bar.add_theme_stylebox_override("fill", UiStyle.box(Color("#35c8ff"), Color("#35c8ff"), 0, 8))
 	pity_box.add_child(_pity_bar)
 	content.add_child(pity_card)
 	_list = MenuPopups.scroll_list(content)
@@ -126,7 +126,7 @@ func _make_chest(chest_id: String) -> Control:
 	row.add_child(coin_button)
 	if int(chest["gems"]) > 0:
 		var gems_ok := Economy.can_afford(chest_id, true)
-		var gem_button := UiStyle.button(Economy.format_gems(Economy.chest_price(chest_id, true)), Color("#b34dff") if gems_ok else UiStyle.PANEL, 21, Vector2(0, 58))
+		var gem_button := UiStyle.button(Economy.format_gems(Economy.chest_price(chest_id, true)), Color("#35c8ff") if gems_ok else UiStyle.PANEL, 21, Vector2(0, 58))
 		gem_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		gem_button.disabled = not gems_ok
 		gem_button.pressed.connect(func() -> void: _open(chest_id, true))
@@ -198,7 +198,7 @@ func _make_ads() -> Control:
 	row.add_theme_constant_override("separation", 10)
 	for kind in ["coins", "gems"]:
 		var left := Economy.ads_left(kind)
-		var color := Color("#e0a020") if kind == "coins" else Color("#b34dff")
+		var color := Color("#e0a020") if kind == "coins" else Color("#35c8ff")
 		var title := "+%s" % SaveService.format_coins(Economy.AD_COINS) if kind == "coins" else "НЕОНИТ 1-5"
 		var button := UiStyle.button("%s\n%s" % [title, ("реклама · ещё %d" % left) if left > 0 else "завтра снова"], color.darkened(0.45) if left > 0 else UiStyle.PANEL, 16, Vector2(0, 70))
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL

@@ -312,7 +312,7 @@ func _draw_dummy(at: Vector2, s: float, hit: float) -> void:
 	var shake := Vector2(sin(_t * 70.0) * 3.0 * hit, 0.0)
 	var c := at + shake + Vector2(hit * 5.0, 0.0)
 	draw_line(Vector2(c.x, floor_y), Vector2(c.x, c.y + 24.0 * s), Color("#5a4630"), 8.0 * s)
-	draw_rect(Rect2(c.x - 26.0 * s, floor_y - 6.0, 52.0 * s, 8.0), Color("#2c2438"))
+	draw_rect(Rect2(c.x - 26.0 * s, floor_y - 6.0, 52.0 * s, 8.0), Color("#243238"))
 	var body := Color("#c9ccd8").lerp(Color.WHITE, hit)
 	draw_circle(c, 34.0 * s, Color("#08151d"))
 	draw_circle(c, 30.0 * s, body)

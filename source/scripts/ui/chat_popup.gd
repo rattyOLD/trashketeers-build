@@ -29,8 +29,8 @@ const TEASES: Array[String] = [
 ]
 const REACTIONS: Array[String] = ["like", "lol", "fire"]
 const LONG_PRESS := 0.42
-const MINE_BG := Color("#7a2f9e")
-const THEIR_BG := Color("#2b2148")
+const MINE_BG := Color("#45839e")
+const THEIR_BG := Color("#213c48")
 const CHECK_BLUE := Color("#5ff2ff")
 
 static var _texture_cache: Dictionary = {}
@@ -497,7 +497,7 @@ func _open_message_menu(column: VBoxContainer, id: int, mine: bool) -> void:
 	Platform.haptic("medium")
 	var menu := PanelContainer.new()
 	menu.add_to_group("chat_menu")
-	var style := UiStyle.box(Color("#1d1536"), UiStyle.NEON, 2, 26)
+	var style := UiStyle.box(Color("#162c36"), UiStyle.NEON, 2, 26)
 	style.content_margin_left = 10
 	style.content_margin_right = 10
 	style.content_margin_top = 4
@@ -628,7 +628,7 @@ func _draw_reactions(id: int) -> void:
 	for emoji: String in counts:
 		var chip := PanelContainer.new()
 		var mine_too := str(state.get("mine", "")) == emoji
-		var style := UiStyle.box(Color("#1c4256") if not mine_too else Color("#5a2a80"), UiStyle.NEON if mine_too else Color(UiStyle.NEON, 0.3), 2, 14)
+		var style := UiStyle.box(Color("#1c4256") if not mine_too else Color("#336980"), UiStyle.NEON if mine_too else Color(UiStyle.NEON, 0.3), 2, 14)
 		style.content_margin_left = 6
 		style.content_margin_right = 8
 		style.content_margin_top = 2
@@ -761,7 +761,7 @@ func _show_gallery() -> void:
 		else:
 			var tile := PanelContainer.new()
 			tile.custom_minimum_size = Vector2(side, side)
-			tile.add_theme_stylebox_override("panel", UiStyle.box(Color("#2b2148"), Color(UiStyle.NEON, 0.4), 2, 14))
+			tile.add_theme_stylebox_override("panel", UiStyle.box(Color("#213c48"), Color(UiStyle.NEON, 0.4), 2, 14))
 			var inner := VBoxContainer.new()
 			inner.alignment = BoxContainer.ALIGNMENT_CENTER
 			inner.add_child(FileGlyph.new())
@@ -1045,7 +1045,7 @@ class ReadMark:
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	func _draw() -> void:
-		var color := ChatPopup.CHECK_BLUE if seen else Color("#9a92b8")
+		var color := ChatPopup.CHECK_BLUE if seen else Color("#9aafb8")
 		_tick(Vector2(2, 8), color)
 		if seen:
 			_tick(Vector2(10, 8), color)

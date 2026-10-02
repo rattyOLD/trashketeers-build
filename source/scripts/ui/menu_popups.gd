@@ -10,7 +10,7 @@ static func list_height() -> float:
 static func scroll_list(parent: Control) -> VBoxContainer:
 	var scroll := DragScroll.new()
 	scroll.custom_minimum_size = Vector2(0, list_height())
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.scroll_deadzone = 16
 	scroll.follow_focus = true
 	var bar := scroll.get_v_scroll_bar()
@@ -302,10 +302,25 @@ class Shop:
 			_refresh())
 		content.add_child(search)
 		_list = MenuPopups.scroll_list(content)
+		if skins_mode:
+			_balance.visible = false
+			search.visible = false
 
 	func _refresh() -> void:
 		_balance.text = "%s · %s" % [SaveService.format_coins(SaveService.get_coins()), Economy.format_gems(SaveService.get_gems())]
 		MenuPopups.clear(_list)
+		if _skins_mode:
+			var soon := UiStyle.label("СКОРО", 64, UiStyle.GOLD, 10)
+			soon.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			soon.custom_minimum_size = Vector2(520, 160)
+			soon.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+			_list.add_child(soon)
+			var note := UiStyle.label("Наряды и скины для героев вернутся в новом арте.", 22, UiStyle.TEXT_DIM, 4)
+			note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			note.custom_minimum_size = Vector2(520, 0)
+			_list.add_child(note)
+			return
 		if not _skins_mode:
 			for character in CharacterDB.all():
 				if SearchBar.matches(_query, "%s %s" % [character["title"], character.get("description", "")]):
@@ -369,13 +384,13 @@ class Shop:
 			var path := str(character.get("portrait", ""))
 			if ResourceLoader.exists(path):
 				portrait.texture = load(path)
-			portrait.custom_minimum_size = Vector2(150, 130)
+			portrait.custom_minimum_size = Vector2(110, 110)
 			portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 			portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 			row.add_child(portrait)
 		else:
 			var preview := MenuWidgets.RaccoonPreview.new(SaveService.get_skin(), 1.0, character)
-			preview.custom_minimum_size = Vector2(150, 130)
+			preview.custom_minimum_size = Vector2(110, 110)
 			row.add_child(preview)
 		var extra := str(character.get("traits", ""))
 		var passive: Dictionary = character.get("passive", {})
@@ -384,20 +399,20 @@ class Shop:
 		_info(row, character["title"], str(character.get("description", "")), extra)
 		var action: Button
 		if bool(character.get("coming_soon", false)):
-			action = UiStyle.button("Скоро", UiStyle.PANEL, 22, Vector2(150, 70))
+			action = UiStyle.button("Скоро", UiStyle.PANEL, 22, Vector2(124, 64))
 			action.disabled = true
 		elif selected:
-			action = UiStyle.button("Выбран", UiStyle.PANEL, 22, Vector2(150, 70))
+			action = UiStyle.button("Выбран", UiStyle.PANEL, 22, Vector2(124, 64))
 			action.disabled = true
 		elif SaveService.owns_character(id):
-			action = UiStyle.button("Выбрать", UiStyle.NEON.darkened(0.3), 22, Vector2(150, 70))
+			action = UiStyle.button("Выбрать", UiStyle.NEON.darkened(0.3), 22, Vector2(124, 64))
 			action.pressed.connect(func() -> void:
 				SaveService.select_character(id)
 				SoundManager.play(&"ui_confirm")
 				skin_changed.emit()
 				_refresh())
 		else:
-			action = UiStyle.button(_price_text(int(character["price"]), character["currency"]), UiStyle.HOT, 20, Vector2(150, 70))
+			action = UiStyle.button(_price_text(int(character["price"]), character["currency"]), UiStyle.HOT, 20, Vector2(124, 64))
 			action.disabled = int(SaveService.data[character["currency"]]) < int(character["price"])
 			action.pressed.connect(func() -> void:
 				if SaveService.buy_character(id):
@@ -680,7 +695,7 @@ class Armory:
 		var top := HBoxContainer.new()
 		top.add_theme_constant_override("separation", 10)
 		column.add_child(top)
-		var art := WeaponIcons.IconRect.new(base.icon, base.effect_color, Vector2(130, 70))
+		var art := WeaponIcons.IconRect.new(base.icon, base.effect_color, Vector2(104, 60))
 		art.tier = tier if base.rarity != "legendary" else 0
 		top.add_child(_icon_frame(art, base.get_rarity_color()))
 		var info := VBoxContainer.new()
@@ -688,9 +703,11 @@ class Armory:
 		top.add_child(info)
 		var title := UiStyle.label(weapon.get_title(), 26, weapon.get_rarity_color(), 7)
 		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		info.add_child(title)
 		var stats := UiStyle.label("Урон %d · %.1f %s · DPS %d" % [roundi(weapon.damage), 1.0 / weapon.fire_interval, "ударов/с" if weapon.is_melee() else "выстр/с", roundi(weapon.get_dps())], 18, UiStyle.TEXT_DIM, 4)
 		stats.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		stats.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		info.add_child(stats)
 		var behavior := UiStyle.label(_behavior(base), 17, UiStyle.NEON, 4)
 		behavior.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
@@ -703,7 +720,7 @@ class Armory:
 			info.add_child(trait_label)
 		if selected:
 			info.add_child(UiStyle.label("В РУКАХ", 18, UiStyle.NEON, 4))
-		var look := UiStyle.button("ОБЗОР", UiStyle.PANEL, 18, Vector2(104, 54))
+		var look := UiStyle.button("ОБЗОР", UiStyle.PANEL, 16, Vector2(88, 48))
 		look.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 		look.pressed.connect(func() -> void: _open_detail(base.id, tier))
 		top.add_child(look)
@@ -761,21 +778,22 @@ class Armory:
 	func _make_buy_row(weapon: WeaponData, verb: String) -> Control:
 		if not Economy.is_buyable(weapon):
 			return null
-		var row := HBoxContainer.new()
-		row.add_theme_constant_override("separation", 10)
+		var row := HFlowContainer.new()
+		row.add_theme_constant_override("h_separation", 10)
+		row.add_theme_constant_override("v_separation", 8)
 		var coins := Economy.shop_price(weapon)
 		if coins > 0:
 			var afford := SaveService.get_coins() >= coins
 			var b := UiStyle.button("%s · %s" % [verb, SaveService.format_coins(coins)], Color("#e0a020") if afford else UiStyle.PANEL, 20, Vector2(0, 54))
-			b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			b.custom_minimum_size.x = 250.0
 			b.disabled = not afford
 			b.pressed.connect(func() -> void: _buy(weapon, false))
 			row.add_child(b)
 		var gems := Economy.shop_gem_price(weapon)
 		if gems > 0:
 			var afford_gems := SaveService.get_gems() >= gems
-			var g := UiStyle.button("%s · %s" % [verb if coins <= 0 else "ИЛИ", Economy.format_gems(gems)], Color("#b34dff") if afford_gems else UiStyle.PANEL, 20, Vector2(0, 54))
-			g.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			var g := UiStyle.button("%s · %s" % [verb if coins <= 0 else "ИЛИ", Economy.format_gems(gems)], Color("#35c8ff") if afford_gems else UiStyle.PANEL, 20, Vector2(0, 54))
+			g.custom_minimum_size.x = 200.0
 			g.disabled = not afford_gems
 			g.pressed.connect(func() -> void: _buy(weapon, true))
 			row.add_child(g)
@@ -797,13 +815,14 @@ class Armory:
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 10)
 		column.add_child(row)
-		var icon := WeaponIcons.IconRect.new(weapon.icon, Color("#4a4460"), Vector2(130, 70))
+		var icon := WeaponIcons.IconRect.new(weapon.icon, Color("#445860"), Vector2(130, 70))
 		row.add_child(_icon_frame(icon, weapon.get_rarity_color().darkened(0.3)))
 		var info := VBoxContainer.new()
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(info)
 		var title := UiStyle.label(weapon.display_name, 24, weapon.get_rarity_color(), 6)
 		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		info.add_child(title)
 		var hint := "Чертёж — награда Ледяного налёта" if weapon.unlock_blueprint != &"" else "%s · в магазине или из ящиков" % WeaponData.RARITY_NAMES[weapon.rarity]
 		var hint_label := UiStyle.label(hint, 18, UiStyle.TEXT_DIM, 4)
@@ -819,7 +838,7 @@ class Armory:
 			trait_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 			trait_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			info.add_child(trait_label)
-		var look := UiStyle.button("ОБЗОР", UiStyle.PANEL, 18, Vector2(104, 54))
+		var look := UiStyle.button("ОБЗОР", UiStyle.PANEL, 16, Vector2(88, 48))
 		look.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 		look.pressed.connect(func() -> void: _open_detail(weapon.id, 1))
 		row.add_child(look)
@@ -837,7 +856,7 @@ class Upgrades:
 	const COLORS := {
 		"power": "#ff4d6d", "stamina": "#69f0ae", "armor": "#40c4ff", "eye": "#ffe14d",
 		"boots": "#7cffcb", "magnet": "#ff6bd6", "loot": "#ffd257",
-		"reroll": "#8ec5ff", "vest": "#ffb347", "drone": "#7cd4ff", "logistics": "#c792ff", "headstart": "#ff7a5c", "cash": "#a8ff5e", "radar": "#5cf3ff",
+		"reroll": "#8ec5ff", "vest": "#ffb347", "drone": "#7cd4ff", "logistics": "#a8e5ff", "headstart": "#ff7a5c", "cash": "#a8ff5e", "radar": "#5cf3ff",
 	}
 	var _list: VBoxContainer
 	var _balance: Label
@@ -1042,7 +1061,7 @@ class Profile:
 		grid.add_theme_constant_override("v_separation", 12)
 		grid.add_child(_tile("Убито крыс", _num(SaveService.get_stat("kills")), "skull", UiStyle.DANGER, false))
 		grid.add_child(_tile("Забегов", _num(SaveService.get_stat("runs")), "play", UiStyle.NEON, false))
-		grid.add_child(_tile("В игре", _duration(SaveService.get_stat("time_played")), "clock", Color("#b46bff"), false))
+		grid.add_child(_tile("В игре", _duration(SaveService.get_stat("time_played")), "clock", Color("#89dbff"), false))
 		grid.add_child(_tile("Монет собрано", _num(SaveService.get_stat("nuts_total")), "", UiStyle.GOLD, false))
 		list.add_child(grid)
 		var fav := _favorite_hero()
@@ -1200,7 +1219,7 @@ class Profile:
 	func _build_header() -> Control:
 		var level := SaveService.get_account_level()
 		var panel := PanelContainer.new()
-		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#241a40"), Color("#c9722b"), 5, 24))
+		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#1a3540"), Color("#c9722b"), 5, 24))
 		var head := HBoxContainer.new()
 		head.add_theme_constant_override("separation", 18)
 		panel.add_child(head)
@@ -1455,7 +1474,7 @@ class Profile:
 			if tapped:
 				SoundManager.play(&"ui_click")
 				friends_requested.emit())
-		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#6b2a8f"), UiStyle.HOT, 4, 18))
+		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#3e778f"), UiStyle.HOT, 4, 18))
 		var head := HBoxContainer.new()
 		head.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		head.add_theme_constant_override("separation", 12)

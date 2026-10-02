@@ -48,7 +48,7 @@ class IconButton:
 		for side in [-1.0, 1.0]:
 			var lens := Rect2(glasses + Vector2(side * 16 - 12, -8), Vector2(24, 16))
 			draw_rect(lens.grow(3), LINE)
-			draw_rect(lens, Color("#b84dff"))
+			draw_rect(lens, Color("#71d4ff"))
 			draw_line(lens.position + Vector2(4, 4), lens.position + Vector2(10, 4), Color(1, 1, 1, 0.7), 2.0)
 
 	## Скрещённые патроны и гаечный ключ.
@@ -100,7 +100,7 @@ class GearButton:
 		loop.append(teeth[0])
 		draw_polyline(loop, LINE, 3.0, true)
 		draw_circle(c, 9.0, LINE)
-		draw_circle(c, 6.0, Color("#3a3552"))
+		draw_circle(c, 6.0, Color("#354952"))
 
 
 ## Кнопка «на весь экран»: четыре уголка, при включённом режиме уголки смотрят внутрь.
@@ -151,7 +151,7 @@ class FullscreenButton:
 		var box := Rect2(size * 0.22, size * 0.56)
 		var arm := 11.0
 		draw_rect(Rect2(Vector2.ZERO, size).grow(-4.0), Color(0.08, 0.06, 0.16, 0.85), true)
-		draw_rect(Rect2(Vector2.ZERO, size).grow(-4.0), Color("#7b6ad8"), false, 3.0)
+		draw_rect(Rect2(Vector2.ZERO, size).grow(-4.0), Color("#80bed8"), false, 3.0)
 		for corner in 4:
 			var origin := box.position + Vector2(box.size.x * (corner % 2), box.size.y * (corner / 2))
 			var sx := 1.0 if corner % 2 == 0 else -1.0
@@ -186,8 +186,8 @@ class PawToggle:
 		draw_string_outline(font, Vector2(0, size.y * 0.5 + 12), caption, HORIZONTAL_ALIGNMENT_LEFT, size.x - 120, 32, 8, LINE)
 		draw_string(font, Vector2(0, size.y * 0.5 + 12), caption, HORIZONTAL_ALIGNMENT_LEFT, size.x - 120, 32, UiStyle.TEXT)
 		var c := Vector2(size.x - 56, size.y * 0.5 + 6)
-		var pad := Color("#ff9fc4") if on else Color("#5a5068")
-		var fur := Color("#eefbff") if on else Color("#3a3552")
+		var pad := Color("#ff9fc4") if on else Color("#506168")
+		var fur := Color("#eefbff") if on else Color("#354952")
 		draw_circle(c, 26.0 + 3.0, LINE)
 		draw_circle(c, 26.0, fur)
 		draw_circle(c + Vector2(0, 4), 12.0, pad)
@@ -368,7 +368,7 @@ class StageBackdrop:
 	func _draw() -> void:
 		var horizon := size.y * 0.62
 		for layer in 3:
-			var shade := Color("#2a1a4a").lerp(Color("#140c28"), layer * 0.4)
+			var shade := Color("#1e3d4a").lerp(Color("#102128"), layer * 0.4)
 			var y := horizon - 120.0 + layer * 55.0
 			var x := -40.0 + layer * 35.0
 			while x < size.x + 40.0:
@@ -546,7 +546,7 @@ class NavButton:
 				draw_circle(c + Vector2(20, -18), 8.0, Color("#8e8aa6"))
 				draw_circle(c, 27.0, LINE)
 				draw_circle(c, 24.0, Color("#8e8aa6"))
-				draw_rect(Rect2(c + Vector2(-20, -8), Vector2(40, 12)), Color("#231d33"))
+				draw_rect(Rect2(c + Vector2(-20, -8), Vector2(40, 12)), Color("#1d2c33"))
 				draw_circle(c + Vector2(-9, -2), 4.0, Color.WHITE)
 				draw_circle(c + Vector2(9, -2), 4.0, Color.WHITE)
 				draw_circle(c + Vector2(0, 10), 4.0, LINE)

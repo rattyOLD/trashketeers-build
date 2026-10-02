@@ -25,7 +25,7 @@ var _fury := false
 var _flash := 0.0
 var _time := 0.0
 var _font: Font
-var _back := UiStyle.box(Color("#140f24"), OUTLINE, 4, 10)
+var _back := UiStyle.box(Color("#0f1e24"), OUTLINE, 4, 10)
 var _fill := UiStyle.box(PLAIN_BAR, OUTLINE, 4, 10)
 
 
@@ -110,7 +110,7 @@ func _draw() -> void:
 	if posture >= 0.0:
 		var pr := Rect2(bar_rect.position + Vector2(bar_rect.size.x * 0.15, bar_rect.size.y + 9.0), Vector2(bar_rect.size.x * 0.7, 9.0))
 		draw_rect(pr.grow(3.0), OUTLINE)
-		draw_rect(pr, Color("#140f24"))
+		draw_rect(pr, Color("#0f1e24"))
 		var pcolor := Color("#ffe27a") if broken else Color("#5cf3ff").lerp(Color("#ffffff"), posture * 0.6)
 		draw_rect(Rect2(pr.position, Vector2(pr.size.x * posture, pr.size.y)), pcolor)
 		if broken:

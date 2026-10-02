@@ -61,7 +61,7 @@ func open(card: Dictionary) -> void:
 	box.add_child(joke)
 
 	var stats := PanelContainer.new()
-	var stats_style := UiStyle.box(Color("#1f1738"), Color(color, 0.45), 3, 16)
+	var stats_style := UiStyle.box(Color("#172e38"), Color(color, 0.45), 3, 16)
 	stats_style.set_content_margin_all(12)
 	stats.add_theme_stylebox_override("panel", stats_style)
 	box.add_child(stats)

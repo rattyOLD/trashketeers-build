@@ -42,11 +42,17 @@ static func _sprite(kind: StringName) -> Dictionary:
 			_sprites[StringName(str(raw["icon"]))] = {
 				"texture": tex,
 				"unit": unit,
+				"length": float(raw.get("length", 74.0)),
 				"center": center,
 				"grip": (Vector2(float(grip[0]), float(grip[1])) - center) * unit,
 				"muzzle": (Vector2(float(muzzle_px[0]), float(muzzle_px[1])) - center) * unit,
 			}
 	return _sprites.get(kind, {})
+
+
+## Длина нарисованного оружия (для размера в руке), 74 если рисунка нет.
+static func length_of(kind: StringName) -> float:
+	return float(_sprite(kind).get("length", 74.0))
 
 
 ## Крупный рисунок ствола при сильном уменьшении без мипмапов превращается в шум («кашу»):

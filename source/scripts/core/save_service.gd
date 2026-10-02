@@ -994,9 +994,9 @@ func owns_skin(skin_id: String) -> bool:
 	return (data["skins"] as Array).has(skin_id)
 
 
+## Скины временно убраны из игры (раздел «Скоро»): всегда «Классика», купленные и выбранные не применяются.
 func get_selected_skin() -> String:
-	var skin: String = data["selected_skin"]
-	return skin if SKINS.has(skin) and owns_skin(skin) else "classic"
+	return "classic"
 
 
 func get_skin() -> Dictionary:

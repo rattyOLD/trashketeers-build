@@ -51,7 +51,7 @@ func _init() -> void:
 ## Плашка-крючок: история продолжится в онлайне (НейроЕнот украл осколки). Пока только анонс.
 func _online_plate() -> Control:
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", UiStyle.box(Color(0.14, 0.07, 0.24, 0.95), Color("#b07cff"), 4, 18))
+	panel.add_theme_stylebox_override("panel", UiStyle.box(Color(0.14, 0.07, 0.24, 0.95), Color("#96e0ff"), 4, 18))
 	var label := UiStyle.label("Продолжи свою историю в онлайне: отомсти НейроЕноту и верни все 6 осколков.", 19, Color("#e9d6ff"), 4)
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.custom_minimum_size = Vector2(500, 0)

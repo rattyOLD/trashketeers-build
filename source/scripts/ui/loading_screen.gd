@@ -17,7 +17,7 @@ extends CanvasLayer
 signal transition_point
 signal finished
 
-const BG := Color("#0b0418")
+const BG := Color("#0a1418")
 const FRAME := Color("#2e7bff")
 const FILL := Color("#39ff14")
 const PHRASES := [
@@ -288,7 +288,7 @@ func _init() -> void:
 	card_col.add_child(tip)
 	_root.add_child(card)
 
-	var build := UiStyle.label("Версия %s" % Platform.build_label(), 18, Color("#8f84b8"), 4)
+	var build := UiStyle.label("Версия %s" % Platform.build_label(), 18, Color("#8eacb8"), 4)
 	build.anchor_left = 0.0
 	build.anchor_right = 1.0
 	build.anchor_top = 1.0
@@ -512,7 +512,7 @@ func _draw_bar() -> void:
 	glow.shadow_size = 14
 	_bar.draw_style_box(glow, r)
 	var track := StyleBoxFlat.new()
-	track.bg_color = Color("#120a2a")
+	track.bg_color = Color("#11222a")
 	track.set_corner_radius_all(BAR_RADIUS)
 	track.set_border_width_all(3)
 	track.border_color = FRAME
@@ -688,8 +688,8 @@ func _run_scene(scene: String) -> void:
 class Scenery:
 	extends Control
 	const LAYERS := [
-		{"base": 0.60, "speed": 14.0, "color": Color("#150b2c"), "seed": 3.0, "height": 120.0},
-		{"base": 0.66, "speed": 32.0, "color": Color("#1d1040"), "seed": 11.0, "height": 90.0},
+		{"base": 0.60, "speed": 14.0, "color": Color("#12242c"), "seed": 3.0, "height": 120.0},
+		{"base": 0.66, "speed": 32.0, "color": Color("#1a3440"), "seed": 11.0, "height": 90.0},
 	]
 	var _t := 0.0
 
@@ -706,8 +706,8 @@ class Scenery:
 	func _draw() -> void:
 		var w := size.x
 		var h := size.y
-		draw_rect(Rect2(0, 0, w, h * 0.45), Color("#120726"))
-		draw_rect(Rect2(0, h * 0.45, w, h * 0.2), Color("#1a0c36"))
+		draw_rect(Rect2(0, 0, w, h * 0.45), Color("#0f1f26"))
+		draw_rect(Rect2(0, h * 0.45, w, h * 0.2), Color("#162c36"))
 		for i in 26:
 			var sx := _hash(float(i) * 1.7) * w
 			var sy := _hash(float(i) * 3.1) * h * 0.4
@@ -717,7 +717,7 @@ class Scenery:
 		for k in 4:
 			draw_circle(moon, 70.0 - k * 14.0, Color("#ffb347", 0.04 + 0.03 * k))
 		draw_circle(moon, 34.0, Color("#ffe9b8", 0.9))
-		draw_circle(moon + Vector2(10, -6), 30.0, Color("#120726", 0.35))
+		draw_circle(moon + Vector2(10, -6), 30.0, Color("#0f1f26", 0.35))
 		for layer: Dictionary in LAYERS:
 			var base: float = h * float(layer["base"])
 			var spd: float = float(layer["speed"])
@@ -737,4 +737,4 @@ class Scenery:
 				elif r < 0.25:
 					draw_rect(Rect2(x + bw * 0.2, base - bh - 26.0, 8.0, 26.0), col)
 				x += 160.0
-		draw_rect(Rect2(0, h * 0.66, w, h * 0.34), Color("#10081f", 0.55))
+		draw_rect(Rect2(0, h * 0.66, w, h * 0.34), Color("#0c191f", 0.55))

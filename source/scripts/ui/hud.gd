@@ -1356,7 +1356,7 @@ class PausePanel:
 		box.add_child(_chips)
 
 		var sound := PanelContainer.new()
-		var sound_style := UiStyle.box(Color("#1f1738"), Color(UiStyle.NEON, 0.35), 3, 18)
+		var sound_style := UiStyle.box(Color("#172e38"), Color(UiStyle.NEON, 0.35), 3, 18)
 		sound_style.set_content_margin_all(14)
 		sound.add_theme_stylebox_override("panel", sound_style)
 		box.add_child(sound)
@@ -1370,7 +1370,7 @@ class PausePanel:
 		tools.add_theme_constant_override("separation", 10)
 		box.add_child(tools)
 		tools.add_child(_tool_button("ГРАФИКА", Color("#2a86c9"), func() -> void: _open_settings()))
-		tools.add_child(_tool_button("УПРАВЛЕНИЕ", Color("#8a4fd6"), func() -> void: _open_editor()))
+		tools.add_child(_tool_button("УПРАВЛЕНИЕ", Color("#6ab6d6"), func() -> void: _open_editor()))
 		tools.add_child(_tool_button("ТЕСТЕР", Color("#c98b1a"), func() -> void: _open_tester()))
 
 		_tips_button = UiStyle.button("", Color("#2d6a5a"), 22, Vector2(0, 60))
@@ -1435,7 +1435,7 @@ class PausePanel:
 			for part in parts:
 				var chip := PanelContainer.new()
 				chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-				chip.add_theme_stylebox_override("panel", UiStyle.box(Color("#1f1738"), Color(UiStyle.GOLD, 0.55), 3, 14))
+				chip.add_theme_stylebox_override("panel", UiStyle.box(Color("#172e38"), Color(UiStyle.GOLD, 0.55), 3, 14))
 				chip.add_child(UiStyle.label(part, 22 if parts.size() > 1 else 24, UiStyle.TEXT, 5))
 				row.add_child(chip)
 			_chips.add_child(row)
@@ -1471,7 +1471,7 @@ class VolumeSlider:
 		slider.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		slider.custom_minimum_size = Vector2(0, 44)
 		slider.focus_mode = Control.FOCUS_NONE
-		var track := UiStyle.box(Color("#140f24"), UiStyle.OUTLINE, 3, 10)
+		var track := UiStyle.box(Color("#0f1e24"), UiStyle.OUTLINE, 3, 10)
 		track.content_margin_top = 6
 		track.content_margin_bottom = 6
 		slider.add_theme_stylebox_override("slider", track)

@@ -40,7 +40,7 @@ func _init() -> void:
 func _build_hero(level: int) -> void:
 	MenuPopups.clear(_hero)
 	var panel := PanelContainer.new()
-	var box := UiStyle.box(Color("#1d1038"), Color("#b34dff"), 4, 22)
+	var box := UiStyle.box(Color("#0e2230"), Color("#35c8ff"), 4, 22)
 	box.shadow_color = Color(0.7, 0.3, 1.0, 0.35)
 	box.shadow_size = 10
 	panel.add_theme_stylebox_override("panel", box)
@@ -49,7 +49,7 @@ func _build_hero(level: int) -> void:
 	panel.add_child(column)
 	var top := HBoxContainer.new()
 	column.add_child(top)
-	var season := UiStyle.label("СЕЗОН %d" % BattlePass.season(), 22, Color("#d9a6ff"), 5)
+	var season := UiStyle.label("СЕЗОН %d" % BattlePass.season(), 22, Color("#b8eaff"), 5)
 	season.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	season.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(season)
@@ -156,7 +156,7 @@ func _feature_card() -> Control:
 	desc.custom_minimum_size = Vector2(10, 0)
 	texts.add_child(desc)
 	if not BattlePass.is_premium():
-		var buy := UiStyle.button("ПОЛУЧИТЬ С ПРЕМИУМОМ · %s" % Premium.price_text(BattlePass.price()), Color("#b34dff"), 17, Vector2(0, 46))
+		var buy := UiStyle.button("ПОЛУЧИТЬ С ПРЕМИУМОМ · %s" % Premium.price_text(BattlePass.price()), Color("#35c8ff"), 17, Vector2(0, 46))
 		buy.pressed.connect(_buy)
 		texts.add_child(buy)
 	else:
@@ -192,7 +192,7 @@ func _refresh() -> void:
 		_refresh())
 	_actions.add_child(claim)
 	if not BattlePass.is_premium() and BattlePass.is_claimed("prem", 1):
-		var buy := UiStyle.button("ОТКРЫТЬ ПРЕМИУМ · %s" % Premium.price_text(BattlePass.price()), Color("#b34dff"), 26, Vector2(0, 76))
+		var buy := UiStyle.button("ОТКРЫТЬ ПРЕМИУМ · %s" % Premium.price_text(BattlePass.price()), Color("#35c8ff"), 26, Vector2(0, 76))
 		buy.pressed.connect(_buy)
 		_actions.add_child(buy)
 	if level >= BattlePass.TIERS:
@@ -207,7 +207,7 @@ func _refresh() -> void:
 		_actions.add_child(_milestone_card(milestone))
 	if BattlePass.tier() < BattlePass.TIERS:
 		var can_skip_n := mini(SaveService.get_gems() / BattlePass.SKIP_COST, BattlePass.TIERS - BattlePass.tier())
-		var skip := UiStyle.button("ПРОПУСТИТЬ УРОВЕНЬ · %s (можно: %d)" % [Economy.format_gems(BattlePass.SKIP_COST), can_skip_n], Color("#b34dff") if BattlePass.can_skip() else UiStyle.PANEL, 17, Vector2(0, 50))
+		var skip := UiStyle.button("ПРОПУСТИТЬ УРОВЕНЬ · %s (можно: %d)" % [Economy.format_gems(BattlePass.SKIP_COST), can_skip_n], Color("#35c8ff") if BattlePass.can_skip() else UiStyle.PANEL, 17, Vector2(0, 50))
 		skip.disabled = not BattlePass.can_skip()
 		skip.pressed.connect(func() -> void:
 			if BattlePass.skip_tier():
@@ -303,7 +303,7 @@ func _buy() -> void:
 func _header_row() -> Control:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
-	var labels := [["БЕСПЛАТНО", UiStyle.NEON], ["", UiStyle.TEXT], ["ПРЕМИУМ", Color("#d9a6ff")]]
+	var labels := [["БЕСПЛАТНО", UiStyle.NEON], ["", UiStyle.TEXT], ["ПРЕМИУМ", Color("#b8eaff")]]
 	for pair in labels:
 		var label := UiStyle.label(str(pair[0]), 20, pair[1], 5)
 		if str(pair[0]).is_empty():
@@ -334,7 +334,7 @@ func _cell(track: String, tier: int) -> Control:
 	var claimed := BattlePass.is_claimed(track, tier)
 	var claimable := BattlePass.can_claim(track, tier)
 	var locked_premium := track == "prem" and not BattlePass.is_premium()
-	var accent := Color("#b34dff") if track == "prem" else Color("#00e5ff")
+	var accent := Color("#35c8ff") if track == "prem" else Color("#00e5ff")
 	var bg := Color("#233a33") if claimed else (Color(0.28, 0.21, 0.07, 0.98) if claimable else UiStyle.PANEL_LIGHT)
 	var border := Color("#2fae5f") if claimed else (UiStyle.GOLD if claimable else accent.darkened(0.5))
 	var panel := PanelContainer.new()
@@ -350,7 +350,7 @@ func _cell(track: String, tier: int) -> Control:
 	if int(prize["coins"]) > 0:
 		column.add_child(_amount("res://assets/ui/hub/coin.png", "+%d" % int(prize["coins"]), UiStyle.TEXT))
 	if int(prize["gems"]) > 0:
-		column.add_child(_amount("res://assets/ui/hub/neonite.png", "+%d" % int(prize["gems"]), Color("#d9a6ff")))
+		column.add_child(_amount("res://assets/ui/hub/neonite.png", "+%d" % int(prize["gems"]), Color("#b8eaff")))
 	var item := str(prize["item"])
 	if not item.is_empty():
 		var art := _item_art(item, Vector2(90, 34))
@@ -373,7 +373,7 @@ func _cell(track: String, tier: int) -> Control:
 		done.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		column.add_child(done)
 	elif locked_premium:
-		var lock := UiStyle.label("ПРЕМИУМ", 15, Color("#d9a6ff"), 4)
+		var lock := UiStyle.label("ПРЕМИУМ", 15, Color("#b8eaff"), 4)
 		lock.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		column.add_child(lock)
 	if claimable:
@@ -440,21 +440,21 @@ class Road:
 				points.append(q * q * q * node + 3.0 * q * q * t * c1 + 3.0 * q * t * t * c2 + t * t * t * finish)
 			var passed := tier + 1 <= level
 			draw_polyline(points, Color("#ffb020") if passed else Color("#1c4256"), 40.0, true)
-			draw_polyline(points, Color("#2a2536"), 32.0, true)
+			draw_polyline(points, Color("#253136"), 32.0, true)
 			for i in range(0, 20, 2):
-				draw_line(points[i], points[i + 1], Color("#ffd23f") if passed else Color("#6a5d8a"), 3.0, true)
+				draw_line(points[i], points[i + 1], Color("#ffd23f") if passed else Color("#5d7c8a"), 3.0, true)
 		if tier % 5 == 0:
 			var side := 1.0 if tier % 2 == 1 else -1.0
 			var base := node + Vector2(side * 40.0, 22.0)
 			draw_colored_polygon(PackedVector2Array([base + Vector2(0, -22), base + Vector2(-11, 0), base + Vector2(11, 0)]), Color("#ff7a3d"))
-			draw_rect(Rect2(base + Vector2(-14, 0), Vector2(28, 5)), Color("#2a2536"))
+			draw_rect(Rect2(base + Vector2(-14, 0), Vector2(28, 5)), Color("#253136"))
 		var current := tier == level + 1
 		var radius := 25.0 + (2.0 * sin(_time * 5.0) if current else 0.0)
-		var fill := Color("#5a3d0a") if lit else (Color("#2a1f4a") if not current else Color("#7a5200"))
-		var ring := Color("#ffd23f") if (lit or current) else Color("#5a4a8a")
+		var fill := Color("#5a3d0a") if lit else (Color("#1f3d4a") if not current else Color("#7a5200"))
+		var ring := Color("#ffd23f") if (lit or current) else Color("#4a778a")
 		if current:
 			draw_circle(node, radius + 9.0, Color(ring, 0.25 + 0.15 * sin(_time * 5.0)))
-		draw_circle(node, radius + 3.0, Color("#140a24"))
+		draw_circle(node, radius + 3.0, Color("#0e1e24"))
 		draw_circle(node, radius, fill)
 		draw_arc(node, radius - 1.0, 0.0, TAU, 32, ring, 3.0, true)
 		if all_claimed:
@@ -464,7 +464,7 @@ class Road:
 			var text := str(tier)
 			var font_size := 24
 			var width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
-			draw_string(font, node + Vector2(-width * 0.5, 8.0), text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color.WHITE if (lit or current) else Color("#9a8cc0"))
+			draw_string(font, node + Vector2(-width * 0.5, 8.0), text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color.WHITE if (lit or current) else Color("#96b4c0"))
 
 
 ## Картинка косметики: рамка, цвет ника, титул-табличка, бустер-молния.
@@ -495,7 +495,7 @@ class CosmeticArt:
 				draw_line(Vector2(c.x - w * 0.5, c.y + 14.0), Vector2(c.x + w * 0.5, c.y + 14.0), Color(tint, 0.6), 3.0)
 			"title":
 				var plate := Rect2(c - Vector2(36, 12), Vector2(72, 24))
-				draw_rect(plate.grow(2.0), Color("#140a24"))
+				draw_rect(plate.grow(2.0), Color("#0e1e24"))
 				draw_rect(plate, Color(rarity, 0.25))
 				draw_rect(plate, rarity, false, 2.0)
 				for i in 3:

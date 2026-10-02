@@ -47,7 +47,7 @@ func _ready() -> void:
 	var width := minf(GlassPopup.panel_width(), 520.0) - 60.0
 	var card := PanelContainer.new()
 	card.custom_minimum_size = Vector2(width, 0)
-	card.add_theme_stylebox_override("panel", UiStyle.box(Color("#1d1536"), UiStyle.NEON, 6, 30))
+	card.add_theme_stylebox_override("panel", UiStyle.box(Color("#162c36"), UiStyle.NEON, 6, 30))
 	center.add_child(card)
 	var margin := MarginContainer.new()
 	for side in ["left", "right"]:
@@ -102,7 +102,7 @@ func _ready() -> void:
 		declined.emit()
 		queue_free())
 	column.add_child(decline)
-	var mute := UiStyle.button("ЗАГЛУШИТЬ ПРИГЛАШЕНИЯ", Color("#3a2b5e"), 16, Vector2(0, 42))
+	var mute := UiStyle.button("ЗАГЛУШИТЬ ПРИГЛАШЕНИЯ", Color("#2b4f5e"), 16, Vector2(0, 42))
 	mute.name = "MuteInvite"
 	column.add_child(mute)
 	var options := VBoxContainer.new()

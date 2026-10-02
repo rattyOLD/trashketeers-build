@@ -127,7 +127,7 @@ func _compare_block(theirs: Dictionary) -> Control:
 		elif b > a:
 			his_wins += 1
 		var panel := PanelContainer.new()
-		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#2a1f4a"), Color(UiStyle.NEON, 0.35), 2, 12))
+		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#1f3d4a"), Color(UiStyle.NEON, 0.35), 2, 12))
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 8)
 		panel.add_child(row)

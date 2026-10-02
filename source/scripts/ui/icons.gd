@@ -22,7 +22,7 @@ static func star_dust() -> ImageTexture:
 			if star <= 1.18:
 				color = OUTLINE
 			if star <= 1.0:
-				color = Color("#fff4fe").lerp(Color("#c8a8ff"), clampf(star, 0.0, 1.0))
+				color = Color("#fff4fe").lerp(Color("#b9eaff"), clampf(star, 0.0, 1.0))
 			if p.length() < 2.5:
 				color = Color.WHITE
 			image.set_pixel(x, y, color)

@@ -35,9 +35,9 @@ const CLIP_CELL := Vector2(480, 320)
 const CLIP_FEET := 304.0
 const CLIP_COUNTS := {"idle": 8, "run": 8, "shoot": 4, "hit": 4, "dash": 6, "death": 8, "revive": 6}
 const HIT_CLIP_TIME := 0.2
-const CLIP_AIM_LIMIT := 0.26
+const CLIP_AIM_LIMIT := 0.95
 ## Рисованный енот крупнее старого, а ствол на нём должен читаться силуэтом, а не пятном.
-const CLIP_GUN_BOOST := 1.15
+const CLIP_GUN_BOOST := 1.5
 const DASH_CLIP_TIME := 0.16
 const IDLE_FPS := 7.0
 const SHOOT_ANIM_TIME := 0.24
@@ -209,7 +209,7 @@ func apply_look(character: Dictionary, skin: Dictionary) -> void:
 	skin_effect = str(skin.get("effect", ""))
 	if not _rig_ok:
 		return
-	if character.has("sprite") and (not bool(character["sprite"].get("classic_only", false)) or (skin.get("look", {}) as Dictionary).is_empty()):
+	if character.has("sprite"):
 		_enter_hero(character["sprite"])
 		return
 	_leave_hero()
@@ -812,9 +812,31 @@ func _gun_center(paw: Vector2, dir: Vector2, kick_amount: float) -> Vector2:
 	return paw - grip - dir * kick_amount + lift
 
 
+## Размер оружия в руке: лесенка по длине рисунка (пистолет < ПП < автомат < пулемёт < снайперка < рельсотрон)
+## и по классу в ближнем бою (нож < меч < топор < молот).
+const GUN_LADDER := [[56.0, 1.35], [70.0, 1.55], [84.0, 1.85], [94.0, 2.0], [100.0, 2.05], [130.0, 2.1]]
+const MELEE_HELD := {"melee_knife": 1.15, "melee_pigeon": 1.15, "melee_shield": 1.45, "melee_crowbar": 1.6, "melee_fireaxe": 1.75,
+	"melee_iceaxe": 1.75, "melee_katana": 1.6, "melee_junkblade": 1.7, "melee_sledge": 2.0, "melee_graviton": 2.0}
+
+
+func _ladder_mult() -> float:
+	var length := WeaponIcons.length_of(weapon_icon)
+	var prev: Array = GUN_LADDER[0]
+	if length <= float(prev[0]):
+		return float(prev[1])
+	for step: Array in GUN_LADDER:
+		if length <= float(step[0]):
+			var t := inverse_lerp(float(prev[0]), float(step[0]), length)
+			return lerpf(float(prev[1]), float(step[1]), t)
+		prev = step
+	return float(prev[1])
+
+
 func _weapon_scale() -> float:
-	if _clip_mode and not melee_active:
-		return GUN_SCALE * CLIP_GUN_BOOST
+	if _clip_mode:
+		if melee_active:
+			return GUN_SCALE * melee_scale * float(MELEE_HELD.get(String(weapon_icon), 1.6))
+		return GUN_SCALE * _ladder_mult()
 	return GUN_SCALE * (melee_scale * 1.15 if melee_active else 1.0)
 
 

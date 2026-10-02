@@ -356,7 +356,7 @@ func _add_capsule(row: HBoxContainer, icon_texture: Texture2D, kind: String) -> 
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	box.add_child(icon)
-	var label := UiStyle.label("0", 24, Color("#2a1f40"), 0)
+	var label := UiStyle.label("0", 24, Color("#1f3640"), 0)
 	label.add_theme_color_override("font_shadow_color", Color(1, 1, 1, 0.8))
 	label.add_theme_constant_override("shadow_offset_x", 1)
 	label.add_theme_constant_override("shadow_offset_y", 2)

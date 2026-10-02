@@ -109,7 +109,7 @@ func _to_screen(world: Vector2) -> Vector2:
 
 
 func _draw() -> void:
-	draw_rect(Rect2(Vector2.ZERO, size), Color("#14102a"))
+	draw_rect(Rect2(Vector2.ZERO, size), Color("#11222a"))
 	_draw_floor()
 	for id: int in _enemies:
 		var e: Dictionary = _enemies[id]
@@ -191,7 +191,7 @@ func _draw_hud() -> void:
 	var waves := int(snap.get("waves", 0))
 	var enemies := (snap.get("e", []) as Array).size()
 	_text(Vector2(size.x * 0.5, 42.0), "ВОЛНА %d / %d" % [wave, waves], 28, Color.WHITE)
-	_text(Vector2(size.x * 0.5, 72.0), "Врагов: %d" % enemies, 18, Color("#c9c0ff"))
+	_text(Vector2(size.x * 0.5, 72.0), "Врагов: %d" % enemies, 18, Color("#cdf0ff"))
 	if int(snap.get("phase", 0)) == CoopArena.Phase.INTERMISSION:
 		_text(size * 0.5 + Vector2(0, -120.0), "ВОЛНА ОЧИЩЕНА", 40, Color("#ffd257"))
 	elif int(snap.get("phase", 0)) == CoopArena.Phase.INTRO:

@@ -20,7 +20,7 @@ const HUB_ICONS := {
 	"minimap": "res://assets/ui/hud/minimap.png",
 	"coin_cap": "res://assets/ui/hud/coin_cap.png",
 }
-const NEONITE := Color("#c77dff")
+const NEONITE := Color("#97e0ff")
 
 
 static func icon(name: String) -> Texture2D:
@@ -142,7 +142,7 @@ class TimerRing:
 		var c := size * 0.5
 		var r := minf(size.x, size.y) * 0.46
 		draw_circle(c, r + 6.0, UiStyle.OUTLINE)
-		draw_circle(c, r, Color("#1c1433"))
+		draw_circle(c, r, Color("#142a33"))
 		var urgent := fraction < 0.3
 		var color := UiStyle.DANGER if urgent else UiStyle.NEON
 		draw_arc(c, r - 10.0, -PI * 0.5, -PI * 0.5 + TAU * fraction, 64, color, 16.0, true)
@@ -280,7 +280,7 @@ class StatTile:
 	func _init(texture: Texture2D, caption: String, color: Color) -> void:
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
 		size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var style := UiStyle.box(Color("#1f1738"), Color(color, 0.9), 4, 18)
+		var style := UiStyle.box(Color("#172e38"), Color(color, 0.9), 4, 18)
 		style.set_content_margin_all(10)
 		add_theme_stylebox_override("panel", style)
 		var column := VBoxContainer.new()

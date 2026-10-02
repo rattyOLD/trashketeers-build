@@ -224,5 +224,5 @@ class PortraitTile:
 		draw_arc(c + Vector2(0, -6), 11.0, PI, TAU, 14, Color("#d8d0ff"), 5.0, true)
 		var body := Rect2(c + Vector2(-17, -6), Vector2(34, 26))
 		draw_rect(body.grow(3.0), Color("#071b25"))
-		draw_rect(body, Color("#ffd257") if _state == 1 else Color("#8f84b8"))
+		draw_rect(body, Color("#ffd257") if _state == 1 else Color("#8eacb8"))
 		draw_circle(c + Vector2(0, 6), 4.0, Color("#071b25"))

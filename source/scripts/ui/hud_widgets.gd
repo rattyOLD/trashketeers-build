@@ -52,7 +52,7 @@ class TexBar:
 		elif frac > 0.0:
 			draw_rect(Rect2(inner.position, Vector2(inner.size.x * frac, inner.size.y)), Color("#e8283f"), true)
 		if frame == null:
-			draw_rect(Rect2(Vector2.ZERO, size), Color("#7b6ad8"), false, 3.0)
+			draw_rect(Rect2(Vector2.ZERO, size), Color("#80bed8"), false, 3.0)
 			return
 		var fw := float(frame.get_width())
 		var fh := float(frame.get_height())
@@ -193,7 +193,7 @@ class DamagePortrait:
 	func _draw() -> void:
 		var c := size * 0.5
 		var r := minf(size.x, size.y) * 0.5
-		draw_circle(c, r - 1.0, Color("#140a1c"))
+		draw_circle(c, r - 1.0, Color("#0b171c"))
 		draw_circle(c, r - 5.0, Color("#1c4256"))
 
 

@@ -108,7 +108,7 @@ static func button(text: String, color: Color, font_size: int = 30, min_size: Ve
 		b.add_theme_stylebox_override("hover", button_box(color.lightened(0.06), false))
 		b.add_theme_stylebox_override("pressed", button_box(color.lightened(0.1), true))
 		b.add_theme_stylebox_override("hover_pressed", button_box(color.lightened(0.1), true))
-		b.add_theme_stylebox_override("disabled", button_box(color.darkened(0.45).lerp(Color("#3a3450"), 0.5), false))
+		b.add_theme_stylebox_override("disabled", button_box(color.darkened(0.45).lerp(Color("#344850"), 0.5), false))
 	b.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 	b.pressed.connect(func() -> void: SoundManager.play(&"ui_click"))
 	return b
@@ -149,7 +149,7 @@ static func progress_bar(fill: Color, height: float) -> ProgressBar:
 	bar.show_percentage = false
 	bar.custom_minimum_size = Vector2(0, height)
 	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	bar.add_theme_stylebox_override("background", box(Color("#140f24"), OUTLINE, 4, 10))
+	bar.add_theme_stylebox_override("background", box(Color("#0f1e24"), OUTLINE, 4, 10))
 	var fill_box := box(fill, OUTLINE, 4, 10)
 	fill_box.set_content_margin_all(0)
 	bar.add_theme_stylebox_override("fill", fill_box)

@@ -12,6 +12,7 @@ func _ready() -> void:
 		"Chests": func() -> Control: return ChestsPopup.new(),
 		"Hero": func() -> Control: return HeroPopup.new(),
 		"Armory": func() -> Control: return MenuPopups.Armory.new(),
+		"Skins": func() -> Control: return MenuPopups.Shop.new(true),
 	}.get(key)
 	var popup := (maker as Callable).call() as Control
 	add_child(popup)

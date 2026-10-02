@@ -41,7 +41,7 @@ func _ready() -> void:
 	var width := minf(GlassPopup.panel_width(), 600.0) - 40.0
 	var card := PanelContainer.new()
 	card.custom_minimum_size = Vector2(width, 0)
-	card.add_theme_stylebox_override("panel", UiStyle.box(Color("#1d1536"), UiStyle.GOLD, 5, 28))
+	card.add_theme_stylebox_override("panel", UiStyle.box(Color("#162c36"), UiStyle.GOLD, 5, 28))
 	center.add_child(card)
 	var margin := MarginContainer.new()
 	for side in ["left", "right"]:

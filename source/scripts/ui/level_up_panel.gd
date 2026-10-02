@@ -39,7 +39,7 @@ func _init() -> void:
 	_cards = BoxContainer.new()
 	_cards.add_theme_constant_override("separation", 14)
 	_box.add_child(_cards)
-	_reroll = UiStyle.button("", Color("#7a3bd1"), 21, Vector2(600, 54))
+	_reroll = UiStyle.button("", Color("#59add1"), 21, Vector2(600, 54))
 	_reroll.pressed.connect(func() -> void:
 		if visible:
 			reroll_requested.emit())

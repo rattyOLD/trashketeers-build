@@ -22,7 +22,7 @@ const COIN_PACKS := [
 	{"coins": 70000, "cost": 560, "tag": "ЛУЧШАЯ ЦЕНА"},
 ]
 const STARTER := {"id": "starter", "gems": 300, "coins": 6000, "price": "$1.99"}
-const GEM_COLOR := Color("#b34dff")
+const GEM_COLOR := Color("#35c8ff")
 const COIN_COLOR := Color("#e0a020")
 
 var _kind := "gems"
@@ -189,7 +189,7 @@ func _make_pack(index: int, pack: Dictionary) -> Control:
 	amount_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(amount_label)
 	var price_text := str(pack["price"]) if gems else "%d неонит" % int(pack["cost"])
-	var price := UiStyle.label(price_text, 24, UiStyle.GOLD if gems else Color("#d9a6ff"), 5)
+	var price := UiStyle.label(price_text, 24, UiStyle.GOLD if gems else Color("#b8eaff"), 5)
 	price.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	price.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(price)
