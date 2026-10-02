@@ -248,8 +248,9 @@ class Avatar:
 			return _cache[key]
 		if character.has("portrait") and character.has("sprite"):
 			var portrait := str(character["portrait"])
-			if ResourceLoader.exists(portrait):
-				var image := (load(portrait) as Texture2D).get_image()
+			var loaded: Texture2D = load(portrait) as Texture2D if ResourceLoader.exists(portrait) else null
+			if loaded != null:
+				var image := loaded.get_image()
 				if image.is_compressed():
 					image.decompress()
 				var cropped := ImageTexture.create_from_image(image)

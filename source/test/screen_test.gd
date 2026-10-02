@@ -10,6 +10,25 @@ func _ready() -> void:
 	if screen.mode != CoopScreen.Mode.MENU:
 		print("FAIL: меню не открылось")
 		fails += 1
+	screen.show_demo()
+	await get_tree().process_frame
+	for node_name in ["FriendsPanel", "Tab_friends", "Tab_recent", "Tab_requests", "StartButton", "Invite_ABC123", "Chat_ABC123"]:
+		if screen.find_child(node_name, true, false) == null:
+			print("FAIL: в лобби нет " + node_name)
+			fails += 1
+	(screen.find_child("Tab_requests", true, false) as Button).pressed.emit()
+	await get_tree().process_frame
+	if screen.find_child("Accept_NEW001", true, false) == null:
+		print("FAIL: вкладка заявок пустая")
+		fails += 1
+	screen._remember_partner({"code": "ABC123", "name": "Тест", "c": "", "s": "classic", "lv": 3})
+	(screen.find_child("Tab_recent", true, false) as Button).pressed.emit()
+	await get_tree().process_frame
+	if screen.find_child("Recent_ABC123", true, false) == null:
+		print("FAIL: недавние не показываются")
+		fails += 1
+	screen._room = {}
+	screen._tab = "friends"
 	screen._start_trainer()
 	await get_tree().process_frame
 	var view: CoopView = screen._view

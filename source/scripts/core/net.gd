@@ -17,6 +17,7 @@ const TEST_PREFIX := "test:"
 ## Только для автотестов (запуск с аргументом --net-test): токены вида «test:Ник» принимаются без Supabase.
 var insecure_test := false
 var profiles: Dictionary = {}   # peer_id -> {id, nickname, insider}
+var tokens: Dictionary = {}     # peer_id -> JWT (только в памяти сервера, нужен для проверки дружбы; никуда не пишется)
 var _wired := false
 
 
@@ -85,6 +86,7 @@ func disconnect_all() -> void:
 		multiplayer.multiplayer_peer.close()
 	multiplayer.multiplayer_peer = null
 	profiles.clear()
+	tokens.clear()
 
 
 func say_to_all(text: String) -> void:
@@ -109,8 +111,9 @@ func _attach(peer: MultiplayerPeer) -> void:
 			if multiplayer.is_server():
 				joined.emit(id, profiles.get(id, {})))
 		api.peer_disconnected.connect(func(id: int) -> void:
+			left.emit(id)   # подписчики ещё видят профиль уходящего
 			profiles.erase(id)
-			left.emit(id))
+			tokens.erase(id))
 		api.connection_failed.connect(func() -> void: failed.emit("connection_failed"))
 		api.server_disconnected.connect(func() -> void: failed.emit("server_disconnected"))
 	multiplayer.multiplayer_peer = peer
@@ -141,6 +144,7 @@ func _on_auth(id: int, data: PackedByteArray) -> void:
 		multiplayer.multiplayer_peer.disconnect_peer(id)
 		return
 	profiles[id] = profile
+	tokens[id] = data.get_string_from_utf8()
 	api.send_auth(id, PackedByteArray([1]))
 	api.complete_auth(id)
 
@@ -152,11 +156,31 @@ func verify_token(jwt: String) -> Dictionary:
 		return {}
 	if jwt.begins_with(TEST_PREFIX):
 		var who := jwt.trim_prefix(TEST_PREFIX)
-		return {"id": jwt, "nickname": who, "friend_code": "T" + who.to_upper(), "insider": -1} if insecure_test else {}
+		return {"id": jwt, "nickname": who, "friend_code": "T" + who.to_upper(), "insider": -1, "c": "", "s": "classic", "lv": 1} if insecure_test else {}
 	var user := await Cloud.fetch_with_token("/auth/v1/user", jwt)
 	var uid := str(user.get("id", ""))
 	if uid.is_empty():
 		return {}
-	var rows := await Cloud.fetch_with_token("/rest/v1/profiles?id=eq.%s&select=id,nickname,insider,friend_code" % uid, jwt)
+	var rows := await Cloud.fetch_with_token("/rest/v1/profiles?id=eq.%s&select=id,nickname,insider,friend_code,stats" % uid, jwt)
 	var row: Variant = rows.get("row", {})
-	return row as Dictionary if row is Dictionary else {}
+	if not row is Dictionary:
+		return {}
+	return _with_look(row as Dictionary)
+
+
+## Герой, скин и уровень для лобби: берём из публичной статистики профиля и проверяем форму (только безопасные id).
+func _with_look(row: Dictionary) -> Dictionary:
+	var stats: Variant = row.get("stats", {})
+	var out := row.duplicate()
+	out.erase("stats")
+	var look: Dictionary = stats if stats is Dictionary else {}
+	for key in ["c", "s"]:
+		var value := str(look.get(key, ""))
+		var ok := not value.is_empty() and value.length() <= 24
+		for i in value.length():
+			var ch := value.unicode_at(i)
+			if not ((ch >= 97 and ch <= 122) or (ch >= 48 and ch <= 57) or ch == 95):
+				ok = false
+		out[key] = value if ok else ("" if key == "c" else "classic")
+	out["lv"] = clampi(int(look.get("lv", 1)), 1, 999)
+	return out

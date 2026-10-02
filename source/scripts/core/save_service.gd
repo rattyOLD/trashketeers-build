@@ -110,6 +110,10 @@ const DEFAULTS := {
 	"death_tips": 0,
 	"ad_chest_at": 0,
 	"changelog_seen": "",
+	"whatsnew_seen": "",
+	"coop_mute_until": 0,
+	"coop_muted_codes": [],
+	"coop_recent": [],
 	"survival_intro_seen": false,
 	"survival_unlock_seen": false,
 }

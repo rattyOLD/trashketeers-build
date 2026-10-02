@@ -82,8 +82,8 @@ func _ready() -> void:
 		elif url_hash == "#camp":
 			_debug_hash = "camp"
 			_show_menu()
-		elif url_hash == "#coop":
-			_debug_hash = "coop"
+		elif url_hash == "#coop" or url_hash == "#coopdemo":
+			_debug_hash = url_hash.substr(1)
 			_show_menu()
 		elif url_hash.begins_with("#raid"):
 			_debug_hash = url_hash.substr(1)
@@ -258,10 +258,15 @@ func _show_menu() -> void:
 		SaveService.add_nuts(1000)
 		menu._camp.open.call_deferred()
 		_debug_hash = ""
-	elif _debug_hash == "coop":
+	elif _debug_hash == "coop" or _debug_hash == "coopdemo":
+		var demo := _debug_hash == "coopdemo"
 		_debug_hash = ""
 		var coop := CoopScreen.new()
+		coop.name = "CoopScreen"
+		coop.auto_create = not demo
 		menu.add_child(coop)
+		if demo:
+			coop.show_demo()
 		coop.closed.connect(coop.queue_free)
 
 

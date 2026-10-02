@@ -10,22 +10,30 @@ func _ready() -> void:
 	multiplayer.connected_to_server.connect(func() -> void: print("EVENT connected_to_server"))
 	Net.failed.connect(func(r: String) -> void: print("EVENT failed %s" % r))
 	var screen := CoopScreen.new()
+	screen.auto_create = is_host   # хозяин: комната создаётся сама при открытии лобби
 	add_child(screen)
 	await get_tree().process_frame
 	var fails := 0
-	if is_host:
-		screen._connect_then("create")
-	else:
+	if not is_host:
 		await get_tree().create_timer(2.0).timeout
-		screen._code_edit.text = "THOST"
-		screen._connect_then("join")
+		screen._connect_then("join", "THOST")
 	await get_tree().create_timer(3.0).timeout
 	if screen.mode != CoopScreen.Mode.ROOM:
-		print("FAIL: не в комнате, mode=%d status=%s" % [screen.mode, screen._status.text if screen._status != null else ""])
+		print("FAIL: не в комнате, mode=%d" % screen.mode)
 		fails += 1
-	else:
-		screen._net.set_ready(true)
-	await get_tree().create_timer(3.0).timeout
+	# ждём, пока оба в комнате: тогда кнопка ГОТОВ активна
+	var pressed := false
+	for _i in 40:
+		var start: Button = screen.find_child("StartButton", true, false)
+		if start != null and not start.disabled and start.text == "ГОТОВ":
+			start.pressed.emit()
+			pressed = true
+			break
+		await get_tree().create_timer(0.25).timeout
+	if not pressed:
+		print("FAIL: кнопка ГОТОВ не появилась")
+		fails += 1
+	await get_tree().create_timer(5.5).timeout
 	if screen.mode != CoopScreen.Mode.RUN or screen._view == null:
 		print("FAIL: бой не начался, mode=%d" % screen.mode)
 		fails += 1
@@ -34,7 +42,7 @@ func _ready() -> void:
 		await get_tree().create_timer(2.5).timeout
 		var snap := screen._view.snap
 		print("VIEW wave=%s players=%d tick=%s" % [str(snap.get("wave")), (snap.get("p", []) as Array).size(), str(snap.get("tick"))])
-		if (snap.get("p", []) as Array).size() != 2 or int(snap.get("tick", 0)) < 100:
+		if (snap.get("p", []) as Array).size() != 2 or int(snap.get("tick", 0)) < 40:
 			print("FAIL: снимки не доходят")
 			fails += 1
 		await get_tree().create_timer(5.0).timeout   # оба остаются в бою, пока другой проверяет

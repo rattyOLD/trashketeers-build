@@ -427,6 +427,15 @@ func _social_row(friend: Dictionary) -> Control:
 	sub.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	text.add_child(sub)
 	row.add_child(text)
+	if not CoopScreen.host().is_empty():
+		var play := UiStyle.button("КООП", Color("#00a5b8"), 20, Vector2(96, 52))
+		play.name = "CoopInviteButton"
+		play.pressed.connect(func() -> void:
+			var menu := get_parent()
+			if menu != null and menu.has_method("open_coop"):
+				close()
+				menu.call("open_coop", "", code))
+		row.add_child(play)
 	var unread := int(friend.get("unread", 0))
 	var chat := UiStyle.button("ЧАТ" if unread == 0 else "ЧАТ %d" % unread, UiStyle.HOT if unread > 0 else UiStyle.PANEL_LIGHT, 20, Vector2(128, 52))
 	chat.pressed.connect(func() -> void: _open_chat(code, nick, character))

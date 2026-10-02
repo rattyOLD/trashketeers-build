@@ -6,6 +6,7 @@ signal profile_synced
 signal unread_changed
 ## Сессия аккаунта с логином слетела: игра просит войти заново (новый гость не создаётся).
 signal session_lost_changed
+signal coop_invite_received(invite: Dictionary)
 
 ## Вход по почте скрыт, пока в Supabase не настроены SMTP и шаблоны писем.
 const EMAIL_LOGIN := true
@@ -60,6 +61,7 @@ var _backup_busy := false
 var _errors_busy := false
 var _backup_soon := false
 var _last_score := -1
+var _invites_seen: Dictionary = {}
 var _hidden_callback: JavaScriptObject
 
 
@@ -79,6 +81,12 @@ func _ready() -> void:
 		add_child(poll)
 		poll.start()
 		get_tree().create_timer(9.0).timeout.connect(refresh_unread)
+		var invites := Timer.new()
+		invites.wait_time = 20.0
+		invites.timeout.connect(poll_coop_invites)
+		add_child(invites)
+		invites.start()
+		get_tree().create_timer(11.0).timeout.connect(poll_coop_invites)
 		var backup := Timer.new()
 		backup.wait_time = BACKUP_EVERY
 		backup.timeout.connect(_auto_backup)
@@ -732,6 +740,41 @@ func refresh_unread() -> void:
 		if count != unread:
 			unread = count
 			unread_changed.emit()
+
+
+## Приглашения в кооп: свежие входящие. Каждое приглашение сообщается один раз.
+func poll_coop_invites() -> void:
+	if not has_code() or CoopScreen.host().is_empty():
+		return
+	var result := await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/coop_inbox", {})
+	for row in _rows(result):
+		if row is Dictionary:
+			var invite := row as Dictionary
+			var id := int(invite.get("id", 0))
+			if id > 0 and not _invites_seen.has(id):
+				_invites_seen[id] = true
+				coop_invite_received.emit(invite)
+
+
+## "ok", "not_friends", "blocked", "banned", "rate", "bad", "auth", "offline", "no_server".
+func send_coop_invite(code: String, room: String) -> String:
+	var result := await _rpc("send_coop_invite", {"p_code": code, "p_room": room})
+	if not social_ready(result):
+		return "no_server"
+	return str(result["data"]) if bool(result["ok"]) else "offline"
+
+
+## Код комнаты при принятии, "declined" / "expired" / "bad", либо "offline".
+func answer_coop_invite(id: int, accept: bool) -> String:
+	var result := await _rpc("coop_invite_answer", {"p_id": id, "p_accept": accept})
+	return str(result["data"]) if bool(result["ok"]) else "offline"
+
+
+## POST с чужим токеном (игровой сервер проверяет право игрока войти в комнату).
+func post_with_token(path: String, body: Dictionary, jwt: String) -> Dictionary:
+	var headers := PackedStringArray(["apikey: " + KEY, "Authorization: Bearer " + jwt, "Content-Type: application/json"])
+	var reply := await _raw(HTTPClient.METHOD_POST, URL + path, headers, JSON.stringify(body))
+	return {"ok": bool(reply["ok"]), "code": int(reply["code"]), "data": reply["data"]}
 
 
 func send_vote(line_id: String, value: int, who: String, line_text: String) -> void:

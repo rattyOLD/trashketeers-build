@@ -52,6 +52,8 @@ func _client(is_host: bool) -> void:
 		if is_host == false and states.size() == 1:
 			pass)
 	_coop.room_error.connect(func(code: String) -> void: errors.append(code))
+	var notices: Array[String] = []
+	_coop.notice.connect(func(kind: String, who: String) -> void: notices.append("%s:%s" % [kind, who]))
 	_coop.snapshot_received.connect(func(data: Dictionary) -> void:
 		seen[0] += 1
 		best_enemies[0] = maxi(best_enemies[0], (data["e"] as Array).size()))
@@ -62,6 +64,9 @@ func _client(is_host: bool) -> void:
 	if is_host:
 		_coop.create_room()
 	else:
+		_coop.join_room("a!")                       # плохой код -> bad_code
+		_coop._join_room.rpc_id(1, "THOST", 0)      # старая версия -> old_version
+		await get_tree().create_timer(0.5).timeout
 		_coop.join_room("THOST")
 	await get_tree().create_timer(1.0).timeout
 	_coop.set_ready(true)
@@ -76,10 +81,14 @@ func _client(is_host: bool) -> void:
 	await get_tree().create_timer(12.0).timeout
 	var last_members := 0
 	var running := false
+	var counted := false
 	for state in states:
 		last_members = maxi(last_members, (state["members"] as Array).size())
 		running = bool(state["running"]) or running
-	print("%s states=%d members=%d running=%s snapshots=%d max_enemies=%d errors=%s" % [tag, states.size(), last_members, str(running), seen[0], best_enemies[0], str(errors)])
-	var ok: bool = seen[0] > 40 and best_enemies[0] > 0 and last_members == 2 and running and errors.is_empty()
+		counted = counted or float(state["countdown"]) > 0.0
+	print("%s states=%d members=%d running=%s snapshots=%d max_enemies=%d errors=%s countdown=%s notices=%s" % [tag, states.size(), last_members, str(running), seen[0], best_enemies[0], str(errors), str(counted), str(notices)])
+	var errors_ok := errors.is_empty() if is_host else errors == ["bad_code", "old_version"]
+	var notices_ok := notices == ["joined:GUEST"] if is_host else notices.size() <= 1 and (notices.is_empty() or notices[0] == "left:HOST")
+	var ok: bool = seen[0] > 40 and best_enemies[0] > 0 and last_members == 2 and running and errors_ok and counted and notices_ok
 	print("%s_DONE %s" % [tag, "OK" if ok else "FAIL"])
 	get_tree().quit(0 if ok else 4)

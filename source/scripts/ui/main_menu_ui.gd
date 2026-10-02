@@ -66,6 +66,7 @@ var _achievements: MenuPopups.Achievements
 var _from_profile := false
 var _chronicle: ChroniclePopup
 var _friends: FriendsPopup
+var _coop_button: Button
 var _backdrop: MenuBackdrop
 ## Кнопка «Прокачаться» на экране смерти: хаб сразу открывает Прокачку.
 static var open_upgrades_next := false
@@ -146,6 +147,7 @@ func _build() -> void:
 		if is_instance_valid(_nav_friends):
 			_nav_friends.set("badge", Cloud.unread > 0)
 			_nav_friends.queue_redraw())
+	Cloud.coop_invite_received.connect(_show_coop_invite)
 	_editor = ControlEditor.new()
 	add_child(_editor)
 	_settings.editor_requested.connect(func() -> void: _editor.open())
@@ -156,6 +158,7 @@ func _build() -> void:
 		popup.closed.connect(_refresh)
 	_refresh()
 	UiStyle.pop_in(column, 0.8)
+	get_tree().create_timer(1.6).timeout.connect(_maybe_whats_new)
 
 
 ## Закрыл окно, открытое из профиля: возвращаемся в меню (раньше снова открывался профиль, и казалось,
@@ -182,6 +185,7 @@ func _build_portrait_layout() -> Control:
 	column.add_child(_build_stage())
 	column.add_child(_build_weapon_chip())
 	column.add_child(_build_modes())
+	column.add_child(_build_coop_button())
 	column.add_child(_build_mod_chip())
 	column.add_child(_build_play())
 	column.add_child(_build_dock())
@@ -219,6 +223,7 @@ func _build_landscape_layout() -> Control:
 	side.add_child(_build_logo())
 	side.add_child(_build_weapon_chip())
 	side.add_child(_build_modes())
+	side.add_child(_build_coop_button())
 	side.add_child(_build_mod_chip())
 	side.add_child(_build_play())
 	column.add_child(_build_dock())
@@ -587,6 +592,80 @@ func _build_modes() -> Control:
 		SaveService.set_flag("survival_unlock_seen", true)
 		_lock_mark.play_open.call_deferred()
 	return row
+
+
+## Отдельное окно коопа на двоих («Выживание»): тренировка, комната, приглашения друзей.
+func _build_coop_button() -> Control:
+	var button := UiStyle.button("КООП: ВЫЖИВАНИЕ НА ДВОИХ", Color("#00a5b8"), 22 if Orient.portrait else 20, Vector2(0, 58 if Orient.portrait else 50))
+	button.name = "CoopButton"
+	_coop_button = button
+	button.pressed.connect(func() -> void: open_coop())
+	return button
+
+
+func open_coop(join_code: String = "", invite_code: String = "") -> void:
+	if get_node_or_null("CoopScreen") != null:
+		return
+	var coop := CoopScreen.new()
+	coop.name = "CoopScreen"
+	coop.join_code = join_code
+	coop.invite_code = invite_code
+	add_child(coop)
+	coop.closed.connect(func() -> void: _refresh())
+
+
+## Приглашение друга в кооп: большая карточка по центру на 30 секунд. «ПРИНЯТЬ» открывает комнату друга.
+func _show_coop_invite(invite: Dictionary) -> void:
+	var from_code := str(invite.get("from_code", ""))
+	if get_node_or_null("CoopScreen") != null:
+		return   # уже в окне коопа: не мешаем бою и лобби
+	if CoopMute.blocks(from_code):
+		return   # заглушено: тихо пропускаем
+	var news := get_node_or_null("WhatsNew")
+	if news != null:
+		await news.tree_exited   # сначала «Что нового», потом приглашение
+		if CoopMute.blocks(from_code):
+			return
+	var old := get_node_or_null("CoopInviteCard")
+	if old != null:
+		old.queue_free()
+	var card := CoopInviteCard.new(invite)
+	card.name = "CoopInviteCard"
+	var id := int(invite.get("id", 0))
+	card.accepted.connect(func() -> void:
+		var room := await Cloud.answer_coop_invite(id, true)
+		if is_instance_valid(card):
+			card.queue_free()
+		if room.length() >= 3 and room.to_upper() == room:
+			open_coop(room)
+		else:
+			var note := UiStyle.label("Приглашение уже недействительно" if room != "offline" else "Нет связи с сервером", 20, UiStyle.TEXT, 5)
+			note.set_anchors_preset(Control.PRESET_CENTER_TOP)
+			note.offset_top = 20.0
+			note.offset_left = -260.0
+			note.offset_right = 260.0
+			note.z_index = 80
+			add_child(note)
+			get_tree().create_timer(2.5).timeout.connect(note.queue_free))
+	card.declined.connect(func() -> void: Cloud.answer_coop_invite(id, false))
+	card.muted.connect(func(kind: String) -> void:
+		match kind:
+			"hour": CoopMute.mute_all(CoopMute.HOUR)
+			"day": CoopMute.mute_all(CoopMute.DAY)
+			"all": CoopMute.mute_all(-1)
+			"friend": CoopMute.mute_friend(from_code)
+		Cloud.answer_coop_invite(id, false))
+	add_child(card)
+
+
+## Один раз после каждой обновы: плашка «Что нового». Не мешает вопросам нового игрока (вход, аккаунт).
+func _maybe_whats_new() -> void:
+	if get_node_or_null("CoopScreen") != null or not WhatsNewPopup.should_show() or Cloud.waiting_choice or Cloud.session_lost or get_node_or_null("WhatsNew") != null:
+		return
+	var popup := WhatsNewPopup.new()
+	popup.name = "WhatsNew"
+	popup.open_changelog.connect(func() -> void: _changelog.open())
+	add_child(popup)
 
 
 func _build_mod_chip() -> Control:
