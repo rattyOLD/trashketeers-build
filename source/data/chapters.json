@@ -1176,7 +1176,25 @@
    ],
    "variant": 0,
    "power": 1.0,
-   "count_mult": 1.0
+   "count_mult": 1.0,
+   "scenes": [
+    [
+     "teller_row",
+     2
+    ],
+    [
+     "vault_guard",
+     2
+    ],
+    [
+     "gold_dock",
+     2
+    ],
+    [
+     "picnic_set",
+     2
+    ]
+   ]
   },
   {
    "id": "bank_2",
@@ -1441,7 +1459,25 @@
    ],
    "variant": 1,
    "power": 1.6,
-   "count_mult": 1.2
+   "count_mult": 1.2,
+   "scenes": [
+    [
+     "teller_row",
+     2
+    ],
+    [
+     "vault_guard",
+     2
+    ],
+    [
+     "gold_dock",
+     2
+    ],
+    [
+     "picnic_set",
+     1
+    ]
+   ]
   },
   {
    "id": "bank_3",
@@ -1706,7 +1742,25 @@
    ],
    "variant": 2,
    "power": 2.4,
-   "count_mult": 1.4
+   "count_mult": 1.4,
+   "scenes": [
+    [
+     "teller_row",
+     2
+    ],
+    [
+     "vault_guard",
+     2
+    ],
+    [
+     "gold_dock",
+     2
+    ],
+    [
+     "picnic_set",
+     1
+    ]
+   ]
   }
  ],
  "difficulty": {

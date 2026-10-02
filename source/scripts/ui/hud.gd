@@ -920,10 +920,18 @@ func _next_toast() -> void:
 		_toast_busy = false
 		return
 	_toast_busy = true
+	if _chapter_card != null and _chapter_card.visible:
+		# Не лезем поверх заставки главы: ждём, пока она уйдёт.
+		get_tree().create_timer(0.4, false).timeout.connect(_next_toast)
+		return
 	var item: Array = _toast_queue.pop_front()
 	var half := minf(300.0, (_root.size.x - 36.0) * 0.5)
-	_toast.offset_left = -half
-	_toast.offset_right = half
+	var shift := 0.0
+	if Orient.portrait and _story_bar == null:
+		half = 250.0
+		shift = -50.0  # правый край левее колонки слотов оружия
+	_toast.offset_left = -half + shift
+	_toast.offset_right = half + shift
 	_toast_title.custom_minimum_size.x = half * 2.0 - 40.0
 	_toast_text.custom_minimum_size.x = half * 2.0 - 40.0
 	_toast.custom_minimum_size = Vector2(half * 2.0, 0.0)
