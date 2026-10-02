@@ -134,6 +134,18 @@ var _fc_tint := PackedColorArray()
 var _fc_next := 0
 ## Вспышки-спрайты (взрыв бочки, брызги шампанского): растут и тают.
 const SPRITE_FLASH_POOL := 22
+const CASING_POOL := 16
+const CASING_LIFE := 0.7
+const CASING_TEX := {
+	"pistol": preload("res://assets/vfx/casing_pistol.png"),
+	"shotgun": preload("res://assets/vfx/casing_shotgun.png"),
+	"large": preload("res://assets/vfx/casing_large.png"),
+}
+var _cs_nodes: Array[Sprite2D] = []
+var _cs_vel := PackedVector2Array()
+var _cs_life := PackedFloat32Array()
+var _cs_spin := PackedFloat32Array()
+var _cs_next := 0
 var _sf_nodes: Array[Sprite2D] = []
 var _sf_life := PackedFloat32Array()
 var _sf_total := PackedFloat32Array()
@@ -192,6 +204,16 @@ func _init() -> void:
 		flash_sprite.visible = false
 		add_child(flash_sprite)
 		_sf_nodes.append(flash_sprite)
+
+	_cs_vel.resize(CASING_POOL)
+	_cs_life.resize(CASING_POOL)
+	_cs_spin.resize(CASING_POOL)
+	for i in CASING_POOL:
+		var casing_sprite := Sprite2D.new()
+		casing_sprite.visible = false
+		casing_sprite.scale = Vector2.ONE * 0.42
+		add_child(casing_sprite)
+		_cs_nodes.append(casing_sprite)
 
 	_sparks = DrawLayer.new()
 	_sparks.painter = _draw_sparks
@@ -253,6 +275,22 @@ func sprite_flash(texture: Texture2D, at: Vector2, width: float, life: float, an
 	node.visible = true
 	_sf_life[k] = life
 	_sf_total[k] = life
+
+
+## Гильза вылетает вправо от направления стрельбы, кувыркается и гаснет. Пул маленький: самое старое перезаписывается.
+func eject_casing(at: Vector2, aim: Vector2, kind: String) -> void:
+	var k := _cs_next
+	_cs_next = (_cs_next + 1) % CASING_POOL
+	var node := _cs_nodes[k]
+	node.texture = CASING_TEX.get(kind, CASING_TEX["pistol"])
+	node.global_position = at
+	node.rotation = randf() * TAU
+	node.modulate = Color.WHITE
+	node.visible = true
+	var side := aim.orthogonal().normalized()
+	_cs_vel[k] = side * randf_range(70.0, 130.0) + Vector2(0.0, randf_range(-60.0, -20.0)) - aim * randf_range(10.0, 40.0)
+	_cs_life[k] = CASING_LIFE
+	_cs_spin[k] = randf_range(-14.0, 14.0)
 
 
 func burst(at: Vector2, color: Color, count: int, speed: float = 240.0, size: float = 3.5) -> void:
@@ -492,6 +530,19 @@ func _process(delta: float) -> void:
 		var t := 1.0 - _sf_life[i] / _sf_total[i]
 		node.scale = Vector2(1.0, _sf_flip[i]) * _sf_base[i] * (0.7 + 0.55 * (1.0 - pow(1.0 - t, 3.0)))
 		node.modulate.a = clampf((1.0 - t) * 1.6, 0.0, 1.0)
+	for i in CASING_POOL:
+		if _cs_life[i] <= 0.0:
+			continue
+		_cs_life[i] -= delta
+		var cn := _cs_nodes[i]
+		if _cs_life[i] <= 0.0:
+			cn.visible = false
+			continue
+		_cs_vel[i] *= pow(0.02, delta)
+		_cs_vel[i].y += 260.0 * delta
+		cn.global_position += _cs_vel[i] * delta
+		cn.rotation += _cs_spin[i] * delta
+		cn.modulate.a = clampf(_cs_life[i] / 0.25, 0.0, 1.0)
 	for i in LIGHT_POOL:
 		if _light_life[i] > 0.0:
 			_light_life[i] = maxf(_light_life[i] - delta, 0.0)

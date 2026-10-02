@@ -484,9 +484,30 @@ func _on_player_fired(weapon: WeaponData, origin: Vector2, direction: Vector2) -
 			fx.sprite_flash(flash_tex, origin + direction * 2.0, WeaponVfx.muzzle_width(weapon), 0.09, direction.angle(), WeaponVfx.MUZZLE_PIVOT)
 		else:
 			fx.muzzle_flash(origin + direction * 4.0, direction.angle(), weapon.effect_color, 0.7 + 0.25 * weapon.recoil)
+	_eject_casing(weapon, origin, direction)
 	_kick -= direction * 2.2 * weapon.recoil
 	if weapon.recoil >= 1.8:
 		add_shake(0.08 * weapon.recoil)
+
+
+const NO_CASING := [&"blaster", &"coil", &"prism", &"rail", &"railgun", &"magnet", &"toaster", &"casino", &"launcher", &"mortar", &"flamer", &"slingshot", &"harpoon", &"capgun", &"heavy_barrel"]
+var _casing_gap := 0.0
+
+
+## Гильзы только у огнестрела. Скорострельные стволы выбрасывают каждую вторую-третью, чтобы не было каши.
+func _eject_casing(weapon: WeaponData, origin: Vector2, direction: Vector2) -> void:
+	if weapon.is_melee() or weapon.icon in NO_CASING:
+		return
+	var now := Time.get_ticks_msec() / 1000.0
+	if now < _casing_gap:
+		return
+	_casing_gap = now + maxf(weapon.fire_interval, 0.14)
+	var kind := "pistol"
+	if weapon.icon in [&"shotgun", &"pump"]:
+		kind = "shotgun"
+	elif weapon.icon in [&"sniper", &"lmg", &"minigun", &"revolver"]:
+		kind = "large"
+	fx.eject_casing(origin + direction * 6.0, direction, kind)
 
 
 func _on_explosion(at: Vector2, radius: float, color: Color, _team: Bullet.Team) -> void:

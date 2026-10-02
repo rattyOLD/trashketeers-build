@@ -24,7 +24,7 @@ signal revive_declined
 var joystick: VirtualJoystick
 
 var _root: Control
-var _hp_bar: HudWidgets.TexBar
+var _hp_bar: HudWidgets.OutlineBar
 var _hp_label: Label
 var _hp_last := -1.0
 var _level_last := -1
@@ -32,7 +32,7 @@ var _wave_last := -1
 var _kills_last := 0
 var _low_said := false
 var _hp_flash := 0.0
-var _xp_bar: HudWidgets.TexBar
+var _xp_bar: HudWidgets.OutlineBar
 var _xp_title: Label
 var _portrait: HudWidgets.DamagePortrait
 var _xp_row: HBoxContainer
@@ -54,6 +54,7 @@ var _level_badge: Control
 var _boss_bar: BossBar
 var _banner: Label
 var _wave_title: Label
+var _title_tween: Tween
 var _wave_sub: Label
 var _countdown: Label
 var _toast: PanelContainer
@@ -119,9 +120,8 @@ func build(currency_icon: Texture2D, weapon: WeaponData) -> void:
 	_root.move_child(_minimap_slot, 0)
 	_root.add_child(_wave_box)
 	_barks = HudBarks.new()
-	_barks.custom_minimum_size = Vector2(362, 130)
-	_barks.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
-	_left_column.add_child(_barks)
+	UiStyle.anchor(_barks, Vector2(1.0, 0.0), Rect2(-388, 192, 176, 176))
+	_root.add_child(_barks)
 	_rail_combo = UiStyle.label("", 46, UiStyle.GOLD, 12)
 	_rail_combo.anchor_left = 0.0
 	_rail_combo.anchor_right = 1.0
@@ -659,8 +659,10 @@ func set_minimap(minimap: Control) -> void:
 
 ## Тап по миникарте выживания: увеличить (в два раза) или вернуть как было.
 func _on_minimap_enlarge(big: bool) -> void:
-	var rect := Rect2(-314, 192, 296, 296) if big else Rect2(-176, 192, 158, 158)
+	var rect := Rect2(-314, 192, 296, 296) if big else Rect2(-194, 192, 176, 176)
 	UiStyle.anchor(_minimap_slot, Vector2(1.0, 0.0), rect)
+	if _barks != null:
+		_barks.visible = not big
 	_hint.show_for(_minimap_slot, "Карта крупно. Тап по ней: уменьшить." if big else "Карта обычная. Тап: увеличить.")
 
 
@@ -791,10 +793,12 @@ func toast(title: String, text: String, color: Color = UiStyle.GOLD) -> void:
 
 
 func show_level_up(choices: Array[UpgradeData], level: int, stats: RunStats, bonus: bool = false, reroll_text: String = "", reroll_ok: bool = false) -> void:
+	_clear_wave_titles()
 	_level_up.open(choices, level, stats, bonus, reroll_text, reroll_ok)
 
 
 func show_result(victory: bool, lines: PackedStringArray, title: String = "", can_upgrade: bool = true) -> void:
+	_clear_wave_titles()
 	_pause.visible = false
 	_hide_thermos()
 	_result.open(victory, lines, title, can_upgrade)
@@ -805,6 +809,7 @@ func show_chapter(subtitle: String, title: String, accent: Color = UiStyle.NEON)
 
 
 func show_revive(cost: int, gems: int, ad_available: bool, summary: Dictionary) -> void:
+	_clear_wave_titles()
 	_pause.visible = false
 	_level_up.visible = false
 	_revive.open(cost, gems, ad_available, summary)
@@ -819,6 +824,7 @@ func revive_failed(message: String) -> void:
 
 
 func show_run_result(summary: Dictionary) -> void:
+	_clear_wave_titles()
 	_pause.visible = false
 	_hide_thermos()
 	_revive.close()
@@ -826,6 +832,7 @@ func show_run_result(summary: Dictionary) -> void:
 
 
 func show_pause(lines: PackedStringArray) -> void:
+	_clear_wave_titles()
 	_pause.open(lines)
 
 
@@ -848,13 +855,25 @@ func _process(delta: float) -> void:
 		_fps_label.text = "%d FPS" % Engine.get_frames_per_second()
 
 
+## Любое окно поверх боя (пауза, прокачка, итог) сразу убирает крупную надпись волны, иначе она торчит из-под окна.
+func _clear_wave_titles() -> void:
+	if _title_tween != null and _title_tween.is_valid():
+		_title_tween.kill()
+	for label in [_wave_title, _wave_sub]:
+		if label != null:
+			label.modulate.a = 0.0
+
+
 func _animate_titles(hold: float) -> void:
 	for label in [_wave_title, _wave_sub]:
 		label.visible = true
 		label.modulate.a = 0.0
 	UiStyle.keep_pivot_centered(_wave_title)
 	_wave_title.scale = Vector2.ONE * 2.2
+	if _title_tween != null and _title_tween.is_valid():
+		_title_tween.kill()
 	var tween := _wave_title.create_tween().set_parallel(true)
+	_title_tween = tween
 	tween.tween_property(_wave_title, "scale", Vector2.ONE, 0.45).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	tween.tween_property(_wave_title, "modulate:a", 1.0, 0.2)
 	tween.tween_property(_wave_sub, "modulate:a", 1.0, 0.3).set_delay(0.2)
@@ -925,38 +944,34 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 
 	var left := VBoxContainer.new()
 	left.add_theme_constant_override("separation", 6)
-	if Orient.portrait:
-		left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	else:
-		left.custom_minimum_size = Vector2(440, 0)
+	left.custom_minimum_size = Vector2(580 if Orient.portrait else 440, 0)
 	row.add_child(left)
-	if not Orient.portrait:
-		var gap := Control.new()
-		gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		row.add_child(gap)
+	var gap := Control.new()
+	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(gap)
 	_left_column = left
 
 	# Шапка как в современных мобильных экшенах: портрет с уровнем, широкие полосы HP и опыта, ниже ряд плашек.
 	# Оправа портрета и полоса здоровья стыкуются в одну деталь: полоса «выходит» из-под кольца.
 	var head := Control.new()
-	head.custom_minimum_size = Vector2(0, 124)
+	head.custom_minimum_size = Vector2(0, 108)
 	head.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	left.add_child(head)
 	var bars := VBoxContainer.new()
 	bars.add_theme_constant_override("separation", 4)
 	bars.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	bars.anchor_right = 1.0
-	bars.offset_left = 98.0
-	bars.offset_top = 14.0
+	bars.offset_left = 92.0
+	bars.offset_top = 10.0
 	head.add_child(bars)
 	var hp_stack := Control.new()
-	hp_stack.custom_minimum_size = Vector2(0, 52)
+	hp_stack.custom_minimum_size = Vector2(0, 40)
 	bars.add_child(hp_stack)
-	_hp_bar = HudWidgets.TexBar.new("hp_frame", ["hp_fill_normal", "hp_fill_low", "hp_fill_pulse"])
+	_hp_bar = HudWidgets.OutlineBar.new(HudWidgets.OutlineBar.HP_COLORS)
 	_hp_bar.set_anchors_preset(Control.PRESET_FULL_RECT)
 	hp_stack.add_child(_hp_bar)
-	_hp_label = UiStyle.label("", 24, UiStyle.TEXT, 6)
+	_hp_label = UiStyle.label("", 22, UiStyle.TEXT, 6)
 	_hp_label.set_anchors_preset(Control.PRESET_FULL_RECT)
 	hp_stack.add_child(_hp_label)
 
@@ -965,20 +980,21 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	_xp_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	bars.add_child(_xp_row)
 	var xp_gap := Control.new()
-	xp_gap.custom_minimum_size = Vector2(26, 0)
+	xp_gap.custom_minimum_size = Vector2(0, 0)
 	xp_gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_xp_row.add_child(xp_gap)
 	_xp_title = UiStyle.label("УР 1", 20, UiStyle.NEON, 5)
-	_xp_title.custom_minimum_size = Vector2(54, 0)
+	_xp_title.custom_minimum_size = Vector2(0, 0)
+	_xp_title.visible = false
 	_xp_row.add_child(_xp_title)
 	var xp_stack := Control.new()
 	xp_stack.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	xp_stack.custom_minimum_size = Vector2(0, 30)
+	xp_stack.custom_minimum_size = Vector2(0, 24)
 	_xp_row.add_child(xp_stack)
-	_xp_bar = HudWidgets.TexBar.new("xp_frame", ["xp_fill"])
+	_xp_bar = HudWidgets.OutlineBar.new(HudWidgets.OutlineBar.XP_COLORS)
 	_xp_bar.set_anchors_preset(Control.PRESET_FULL_RECT)
 	xp_stack.add_child(_xp_bar)
-	_xp_label = UiStyle.label("0/10", 16, UiStyle.TEXT, 4)
+	_xp_label = UiStyle.label("0/10", 15, UiStyle.TEXT, 4)
 	_xp_label.set_anchors_preset(Control.PRESET_FULL_RECT)
 	xp_stack.add_child(_xp_label)
 
@@ -989,7 +1005,7 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	_level_badge = PanelContainer.new()
 	_level_badge.add_theme_stylebox_override("panel", UiStyle.box(Color("#1a1030"), UiStyle.GOLD, 3, 10))
 	_level_badge.custom_minimum_size = Vector2(40, 32)
-	_level_badge.position = Vector2(68, 84)
+	_level_badge.position = Vector2(62, 70)
 	_level_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	head.add_child(_level_badge)
 	_level_label = UiStyle.label("1", 22, UiStyle.GOLD, 5)
@@ -1054,7 +1070,7 @@ func _build_wave_chip() -> Control:
 	_wave_box = PanelContainer.new()
 	_wave_box.add_theme_stylebox_override("panel", UiStyle.box(Color(0.08, 0.05, 0.15, 0.6), Color(UiStyle.GOLD, 0.7), 3, 20))
 	_wave_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	UiStyle.anchor(_wave_box, Vector2(1.0, 0.0), Rect2(-176, 140, 158, 34))
+	UiStyle.anchor(_wave_box, Vector2(1.0, 0.0), Rect2(-194, 140, 176, 34))
 	_wave_label = UiStyle.label("ВОЛНА 1", 15, UiStyle.GOLD, 4)
 	_wave_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_wave_box.add_child(_wave_label)
@@ -1078,7 +1094,7 @@ func _chip(icon: Texture2D) -> PanelContainer:
 
 func _build_boss_bar() -> Control:
 	_boss_bar = BossBar.new()
-	UiStyle.anchor(_boss_bar, Vector2(0.5, 0.0), Rect2(-240, 262, 480, 84))
+	UiStyle.anchor(_boss_bar, Vector2(0.5, 0.0), Rect2(-240, 384, 480, 84))
 	_boss_bar.visible = false
 	return _boss_bar
 
@@ -1113,7 +1129,7 @@ func _build_wave_titles() -> Control:
 func _build_minimap_slot() -> Control:
 	_minimap_slot = Control.new()
 	_minimap_slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	UiStyle.anchor(_minimap_slot, Vector2(1.0, 0.0), Rect2(-176, 192, 158, 158))
+	UiStyle.anchor(_minimap_slot, Vector2(1.0, 0.0), Rect2(-194, 192, 176, 176))
 	return _minimap_slot
 
 

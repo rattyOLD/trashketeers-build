@@ -5,12 +5,13 @@ extends Control
 
 const PATH := "res://data/chatter.json"
 const SHOW_TIME := 7.0
-const MAX_LINES := 3
+const MAX_LINES := 2
 const COOLDOWN := 9.0
 const IDLE_MIN := 26.0
 const IDLE_MAX := 42.0
 
 var _list: VBoxContainer
+var _title: Label
 var _panel: PanelContainer
 var _speakers: Dictionary = {}
 var _events: Dictionary = {}
@@ -26,15 +27,22 @@ func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_rng.randomize()
 	_panel = PanelContainer.new()
-	_panel.add_theme_stylebox_override("panel", UiStyle.box(Color(0.05, 0.03, 0.1, 0.72), Color(UiStyle.NEON, 0.6), 3, 14))
+	_panel.add_theme_stylebox_override("panel", UiStyle.box(Color(0.05, 0.03, 0.1, 0.72), Color(UiStyle.NEON, 0.6), 3, 12))
 	_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_panel.visible = false
+	_panel.clip_contents = true
 	add_child(_panel)
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 2)
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_panel.add_child(column)
+	_title = UiStyle.label("РАЦИЯ", 14, Color(UiStyle.NEON, 0.7), 3)
+	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	column.add_child(_title)
 	_list = VBoxContainer.new()
-	_list.add_theme_constant_override("separation", 4)
+	_list.add_theme_constant_override("separation", 3)
 	_list.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_panel.add_child(_list)
+	column.add_child(_list)
 	_load()
 	set_process(true)
 
@@ -95,7 +103,6 @@ func _push(who: String, text: String) -> void:
 func _refresh() -> void:
 	for child in _list.get_children():
 		child.queue_free()
-	_panel.visible = not _lines.is_empty()
 	for entry: Array in _lines:
 		var info: Dictionary = _speakers.get(entry[0], {})
 		var row := RichTextLabel.new()
@@ -103,7 +110,7 @@ func _refresh() -> void:
 		row.fit_content = true
 		row.scroll_active = false
 		row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		row.add_theme_font_size_override("normal_font_size", 20)
-		row.add_theme_font_size_override("bold_font_size", 20)
+		row.add_theme_font_size_override("normal_font_size", 17)
+		row.add_theme_font_size_override("bold_font_size", 17)
 		row.text = "[b][color=%s]%s:[/color][/b] %s" % [str(info.get("color", "#ffffff")), str(info.get("name", "")), entry[1]]
 		_list.add_child(row)

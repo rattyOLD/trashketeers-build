@@ -61,6 +61,52 @@ class TexBar:
 		draw_texture_rect_region(frame, Rect2(size.x - end_w, 0, end_w, size.y), Rect2(fw - END_SRC, 0, END_SRC, fh))
 
 
+## Простая полоса: тёмная подложка, цветная заливка и обводка. Без рисованной рамки, места занимает мало.
+class OutlineBar:
+	extends Control
+
+	const HP_COLORS: Array[Color] = [Color("#3fdc55"), Color("#ffb020"), Color("#ff3b3b")]
+	const XP_COLORS: Array[Color] = [Color("#35e6ff")]
+
+	var colors: Array[Color] = HP_COLORS
+	var max_value := 1.0:
+		set(v):
+			max_value = maxf(v, 0.001)
+			queue_redraw()
+	var value := 0.0:
+		set(v):
+			value = v
+			queue_redraw()
+	var fill_index := 0:
+		set(v):
+			fill_index = v
+			queue_redraw()
+	var _back := StyleBoxFlat.new()
+	var _fill := StyleBoxFlat.new()
+
+	func _init(palette: Array[Color] = HP_COLORS) -> void:
+		colors = palette
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_back.bg_color = Color(0.04, 0.02, 0.08, 0.82)
+		_back.border_color = Color(0.96, 0.92, 1.0, 0.9)
+		_back.set_border_width_all(3)
+		_back.set_corner_radius_all(9)
+		_fill.set_corner_radius_all(6)
+
+	func _draw() -> void:
+		draw_style_box(_back, Rect2(Vector2.ZERO, size))
+		var frac := clampf(value / max_value, 0.0, 1.0)
+		if frac <= 0.0:
+			return
+		var inner := Rect2(Vector2(4, 4), size - Vector2(8, 8))
+		var width := maxf(inner.size.x * frac, 12.0)
+		var base: Color = colors[clampi(fill_index, 0, colors.size() - 1)]
+		_fill.bg_color = base
+		draw_style_box(_fill, Rect2(inner.position, Vector2(width, inner.size.y)))
+		# Светлая полоска сверху даёт объём без текстур.
+		draw_rect(Rect2(inner.position + Vector2(6, 2), Vector2(maxf(width - 12.0, 0.0), inner.size.y * 0.28)), Color(1, 1, 1, 0.22), true)
+
+
 ## Портрет в круглой оправе. Лицо — нарисованный портрет того героя, за которого играют; по мере потери
 ## здоровья подставляются кадры «ему больно» (assets/ui/portraits/hud/<герой>_<0..3>.png, их рисует Астра).
 ## Пока кадров нет, лицо перекашивается и краснеет кодом.

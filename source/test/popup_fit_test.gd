@@ -37,6 +37,7 @@ func _ready() -> void:
 		"BadgeWelcome": func() -> Control: return BadgeWelcomePopup.new(1),
 	}
 	var bad := 0
+	var overlaps := 0
 	for key: String in makers:
 		var sub := SubViewport.new()
 		sub.size = Vector2i(720, 1280)
@@ -58,7 +59,11 @@ func _ready() -> void:
 			if not ok:
 				bad += 1
 				print("FAIL %s rect=%s" % [key, str(r)])
+		for line in TextOverlap.find(popup):
+			overlaps += 1
+			print("OVERLAP %s: %s" % [key, line])
 		sub.queue_free()
 		await get_tree().process_frame
+	print("TEXT_OVERLAPS ", overlaps)
 	print("POPUP_FIT_TEST ", "PASS" if bad == 0 else "FAIL %d" % bad)
 	get_tree().quit(0 if bad == 0 else 1)

@@ -7,5 +7,7 @@ func _ready() -> void:
 	var main := scene.instantiate()
 	add_child(main)
 	await get_tree().create_timer(3.0).timeout
+	for line in TextOverlap.find(main):
+		print("OVERLAP menu: ", line)
 	get_viewport().get_texture().get_image().save_png("/tmp/anim/menu.png")
 	get_tree().quit()

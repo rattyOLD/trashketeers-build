@@ -22,7 +22,7 @@ func _ready() -> void:
 		var barks: HudBarks = game.hud._barks
 		barks.push_line("nell", "Рико, ты там цел?")
 		barks.push_line("rico", "Цел. Местами.")
-		barks.push_line("nell", "Прекращай коллекционировать царапины.")
+		barks.push_line("nell", "Хватит собирать царапины.")
 		await get_tree().process_frame
 		print("BARKS ", barks.get_global_rect())
 	if OS.get_environment("HUD_MAP") == "1" and game.hud._minimap != null:
@@ -42,6 +42,27 @@ func _ready() -> void:
 				var inter: Rect2 = (rects[ids[i]] as Rect2).intersection(rects[ids[j]])
 				if inter.size.x > 2.0 and inter.size.y > 2.0:
 					print("OVERLAP ", ids[i], " x ", ids[j], " ", inter)
+	for line in TextOverlap.find(game.hud):
+		print("OVERLAP text: ", line)
+	var panel := OS.get_environment("HUD_PANEL")
+	if panel != "":
+		var lines := PackedStringArray(["Волна: 12", "Убито: 345", "Время: 12:34", "Оружие: Мусорный Дробовик Т3", "Очень длинная строка для проверки переносов и наложения текста"])
+		match panel:
+			"pause":
+				game.hud.show_pause(lines)
+			"result":
+				game.hud.show_result(true, lines, "ПОБЕДА", true)
+			"lose":
+				game.hud.show_result(false, lines, "", true)
+			"levelup":
+				var choices := game.stats.roll_choices(ContentDB.get_upgrades(), 3, 0.2, 0)
+				game.hud.show_level_up(choices, 5, game.stats, false, "РЕРОЛЛ · 20 орехов", true)
+			"revive":
+				game.hud.show_revive(120, 5, true, {"wave": 12, "kills": 345})
+		await get_tree().create_timer(1.0).timeout
+		for line in TextOverlap.find(game.hud):
+			print("OVERLAP panel ", panel, ": ", line)
+		get_viewport().get_texture().get_image().save_png("/tmp/anim/hud_panel_%s.png" % panel)
 	print("RECTS ", rects)
 	get_viewport().get_texture().get_image().save_png("/tmp/anim/hud_%s.png" % ("story" if story else "surv" + OS.get_environment("HUD_HP") + OS.get_environment("HUD_CHAR")))
 	get_tree().quit()
