@@ -24,6 +24,7 @@ end
 $fn$;
 
 -- Реакции последних 100 сообщений переписки: [{id, mine_emoji, their_emoji}], только где они есть.
+drop function if exists public.chat_reactions(text);
 create or replace function public.chat_reactions(p_code text)
 returns table (id bigint, mine text, theirs text)
 language plpgsql security definer set search_path = public as $fn$
