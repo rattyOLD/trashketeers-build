@@ -16,7 +16,7 @@ const ENTRIES := [
 	["res://assets/story/portraits/baron.png", "Барон", "stat:k_beer_baron", 1, "Победи Пивного Барона"],
 	["res://assets/story/portraits/baron_alt.png", "Барон ржёт", "stat:k_beer_baron", 3, "Победи Барона 3 раза"],
 	["res://assets/story/portraits/king.png", "Король Хлама", "shards", 1, "Забери 1 осколок Бочки"],
-	["res://assets/story/portraits/king_alt.png", "Король злой", "shards", 6, "Собери все 6 осколков"],
+	["res://assets/story/portraits/king_alt.png", "Король злой", "shards", 6, "Собери все 6 печатей"],
 	["res://assets/story/portraits/toxic.png", "Токсик", "stat:k_toxic_rat", 100, "Победи 100 Токсичных крыс"],
 	["", "???", "never", 0, "Недоступно"],
 	["", "???", "never", 0, "Недоступно"],

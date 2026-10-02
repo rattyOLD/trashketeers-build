@@ -295,7 +295,7 @@ func rank() -> String:
 
 
 func result_lines(victory: bool) -> PackedStringArray:
-	var lines := PackedStringArray([title() if not victory else "ОСКОЛОК %d/6 ПОЛУЧЕН" % int(mission.get("shard_no", mission.get("shards", 1)))])
+	var lines := PackedStringArray([title() if not victory else "ПЕЧАТЬ %d/6 ПОЛУЧЕНА" % int(mission.get("shard_no", mission.get("shards", 1)))])
 	var bonus := lives * LIFE_BONUS if victory else 0
 	lines.append("Очки: %d" % (score + bonus))
 	lines.append("Убито: %d" % kills)
@@ -1023,9 +1023,10 @@ func finish() -> void:
 		SaveService.add_stat("story_flawless", 1, false)
 	_count("story_missions")
 	game.story_target = null
-	game.hud.show_banner("ОСКОЛОК %d/6 ПОЛУЧЕН!" % int(mission.get("shard_no", shards)), UiStyle.GOLD, 2.8)
+	game.hud.show_banner("ПЕЧАТЬ %d/6 ПОЛУЧЕНА!" % int(mission.get("shard_no", shards)), UiStyle.GOLD, 2.8)
 	_after_queue = game.story_finished
 	_say(_dialog_key("boss_dead", "king_dead"), 1.6)
+	_say(_dialog_key("friend", ""), 1.65)
 	_say("outro", 1.7)
 	var made := SaveService.story_choice(str(mission.get("id", "")))
 	if not made.is_empty():

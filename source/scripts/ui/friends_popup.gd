@@ -7,7 +7,7 @@ const CARD_SIZE := Vector2(960, 540)
 const MISSION_COUNT := 6
 const BOARD_METRICS := [
 	{"title": "Волна", "key": "w", "unit": "волна"},
-	{"title": "Сюжет", "key": "sh", "unit": "осколков"},
+	{"title": "Сюжет", "key": "sh", "unit": "печатей"},
 	{"title": "Уровень", "key": "lv", "unit": "ур."},
 ]
 const MEDALS := [Color("#ffd257"), Color("#c9d3e6"), Color("#d08a4a")]

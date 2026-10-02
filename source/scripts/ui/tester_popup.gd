@@ -90,7 +90,7 @@ func _refresh() -> void:
 	_action(story, "Засчитать миссию 1", func() -> String:
 		SaveService.story_complete("m1", 1, 0)
 		SaveService.add_stat("story_missions", 1, false)
-		return "Миссия 1 засчитана, осколков: %d" % SaveService.story_shards())
+		return "Миссия 1 засчитана, печатей: %d" % SaveService.story_shards())
 	_action(story, "Показать мишень снова", func() -> String:
 		SaveService.data["train_again"] = true
 		SaveService.save_data()
