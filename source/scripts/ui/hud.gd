@@ -120,8 +120,10 @@ func build(currency_icon: Texture2D, weapon: WeaponData) -> void:
 	_root.move_child(_minimap_slot, 0)
 	_root.add_child(_wave_box)
 	_barks = HudBarks.new()
-	UiStyle.anchor(_barks, Vector2(1.0, 0.0), Rect2(-388, 192, 176, 176))
-	_root.add_child(_barks)
+	# Рация живёт в левой колонке под заданиями: так её не перекрывают ни карта, ни плашка заказа.
+	_barks.custom_minimum_size = Vector2(330, 128)
+	_barks.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_left_column.add_child(_barks)
 	_rail_combo = UiStyle.label("", 46, UiStyle.GOLD, 12)
 	_rail_combo.anchor_left = 0.0
 	_rail_combo.anchor_right = 1.0
@@ -1007,13 +1009,19 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	_portrait.position = Vector2(0, 0)
 	_portrait.set_character(SaveService.get_character())
 	head.add_child(_portrait)
+	# Значок уровня: круглая «медаль», приваренная к рамке портрета снизу справа, как её продолжение.
 	_level_badge = PanelContainer.new()
-	_level_badge.add_theme_stylebox_override("panel", UiStyle.box(Color("#262422"), UiStyle.GOLD, 3, 10))
-	_level_badge.custom_minimum_size = Vector2(40, 32)
-	_level_badge.position = Vector2(62, 70)
+	var medal := UiStyle.box(Color("#1d1f1e"), UiStyle.NEON, 4, 20)
+	medal.set_content_margin_all(0)
+	medal.shadow_color = Color(0, 0, 0, 0.55)
+	medal.shadow_size = 3
+	_level_badge.add_theme_stylebox_override("panel", medal)
+	_level_badge.custom_minimum_size = Vector2(36, 36)
+	_level_badge.position = Vector2(72, 68)
 	_level_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	head.add_child(_level_badge)
-	_level_label = UiStyle.label("1", 22, UiStyle.GOLD, 5)
+	_level_label = UiStyle.label("1", 20, UiStyle.GOLD, 4)
+	_level_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_level_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_level_badge.add_child(_level_label)
 

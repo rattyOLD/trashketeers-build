@@ -1056,23 +1056,25 @@ class ReadMark:
 
 ## Круглые кнопки панели ввода: стикеры, вложение, отправить. Нарисованы, чтобы не зависеть от шрифта.
 class ChatIcon:
-	extends Button
+	extends TextureButton
 	enum Kind { STICKER, ATTACH, SEND }
 	var kind: Kind
 
 	func _init(which: Kind) -> void:
 		kind = which
 		custom_minimum_size = Vector2(60, 60)
-		flat = true
 		focus_mode = Control.FOCUS_NONE
-
-	func _draw() -> void:
+		ignore_texture_size = true
+		stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
 		var art_id: String = ["stickers", "attach", "send"][kind]
 		var path := "res://assets/ui/chat/%s.png" % art_id
 		if ResourceLoader.exists(path):
-			var tex: Texture2D = load(path)
-			var pad := 4.0 if not is_pressed() else 8.0
-			draw_texture_rect(tex, Rect2(Vector2(pad, pad), size - Vector2(pad, pad) * 2.0), false)
+			texture_normal = load(path) as Texture2D
+		button_down.connect(func() -> void: modulate = Color(0.75, 0.75, 0.75))
+		button_up.connect(func() -> void: modulate = Color.WHITE)
+
+	func _draw() -> void:
+		if texture_normal != null:
 			return
 		var c := size * 0.5
 		var r := minf(size.x, size.y) * 0.5 - 2.0
