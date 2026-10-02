@@ -50,6 +50,13 @@ func _refresh() -> void:
 		dev.closed.connect(dev.queue_free)
 		dev.open())
 	_list.add_child(panel)
+	var coop := UiStyle.button("КООП НА ДВОИХ (тест): тренировка с ботом", UiStyle.PANEL_LIGHT, 22, Vector2(0, 64))
+	_fit(coop)
+	coop.pressed.connect(func() -> void:
+		var screen := CoopScreen.new()
+		add_child(screen)
+		screen.closed.connect(screen.queue_free))
+	_list.add_child(coop)
 
 	_section("ВЫДАЧА")
 	var grid := _grid()

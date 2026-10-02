@@ -46,6 +46,8 @@ var tick_count := 0
 var time := 0.0
 var won := false
 
+var bots: Dictionary = {}        # id -> true: управляются самой ареной (тренировка и тесты)
+
 var _enemy_defs: Dictionary = {}     # enemy_id -> def
 var _type_index: Dictionary = {}     # enemy_id -> int (для снимков)
 var _types: Array[String] = []
@@ -98,6 +100,47 @@ func add_player(id: int) -> void:
 
 func remove_player(id: int) -> void:
 	players.erase(id)
+	bots.erase(id)
+
+
+func set_bot(id: int, value: bool = true) -> void:
+	if value:
+		bots[id] = true
+	else:
+		bots.erase(id)
+
+
+## Простой бот: держится рядом с живым игроком, бежит поднимать сбитого, уходит от ближайших врагов.
+func _bot_input(id: int) -> void:
+	var me: Dictionary = players[id]
+	var pos := Vector2(float(me["x"]), float(me["y"]))
+	var goal := pos
+	var downed_friend := -1
+	var friend := -1
+	for other_id: int in players:
+		if other_id == id or bots.has(other_id):
+			continue
+		var o: Dictionary = players[other_id]
+		if not bool(o["alive"]):
+			continue
+		if bool(o["downed"]):
+			downed_friend = other_id
+		elif friend < 0:
+			friend = other_id
+	if downed_friend >= 0:
+		goal = Vector2(float(players[downed_friend]["x"]), float(players[downed_friend]["y"]))
+	elif friend >= 0:
+		var f: Dictionary = players[friend]
+		goal = Vector2(float(f["x"]), float(f["y"])) + Vector2.from_angle(time * 0.8) * 170.0
+	var near := _nearest_enemy(pos, 180.0)
+	var move := (goal - pos)
+	if move.length() < 40.0:
+		move = Vector2.ZERO
+	if near >= 0 and downed_friend < 0:
+		var away := pos - Vector2(float(enemies[near]["x"]), float(enemies[near]["y"]))
+		move = move.normalized() * 0.4 + away.normalized() * 0.9
+	var dir := move / 120.0 if move.length() < 120.0 else move.normalized()
+	set_input(id, dir)
 
 
 ## Вход игрока: только направление движения. Длину и мусор (NaN, огромные значения) режем здесь, клиенту не верим.
@@ -115,6 +158,9 @@ func tick(dt: float = TICK) -> void:
 		return
 	tick_count += 1
 	time += dt
+	for bot_id: int in bots.keys():
+		if players.has(bot_id) and bool((players[bot_id] as Dictionary)["alive"]):
+			_bot_input(bot_id)
 	_tick_players(dt)
 	_tick_phase(dt)
 	_tick_enemies(dt)

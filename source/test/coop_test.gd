@@ -1,49 +1,70 @@
 extends Node
-## Сетевой тест коопа: сервер + два бота-клиента. godot --headless --path . res://test/coop_test.tscn -- --net-test server|client [--ws]
-## Клиенты шлют движение, получают снимки; сервер считает арену и выдаёт итоги.
+## Сетевой тест комнат и боя: сервер + два клиента (хозяин и гость).
+## godot --headless --path . res://test/coop_test.tscn -- --net-test server|host|guest [--ws]
+## Хозяин создаёт комнату, гость входит по коду, оба жмут «готов», сервер запускает арену, оба шлют движение и получают снимки.
 
 var _coop: CoopNet
+var _log := PackedStringArray()
 
 
 func _ready() -> void:
 	_coop = CoopNet.new()
 	_coop.name = "CoopNet"
-	add_child(_coop)
-	if "server" in OS.get_cmdline_user_args():
+	get_tree().root.add_child.call_deferred(_coop)   # путь /root/CoopNet должен совпадать на сервере и у клиентов
+	await get_tree().process_frame
+	var args := OS.get_cmdline_user_args()
+	if "server" in args:
 		_server()
 	else:
-		_client()
+		_client("host" in args)
 
 
 func _server() -> void:
-	var ids: Array[int] = []
-	Net.joined.connect(func(id: int, _profile: Dictionary) -> void:
-		ids.append(id)
-		print("SERVER joined %d" % id)
-		if ids.size() == 2:
-			print("SERVER arena start %s" % str(_coop.start_server_arena(0, ids))))
+	Net.joined.connect(func(id: int, profile: Dictionary) -> void: print("SERVER joined %d %s code=%s" % [id, str(profile.get("nickname")), str(profile.get("friend_code"))]))
 	if not Net.start_server(17777, 17778):
 		get_tree().quit(2)
 		return
-	await get_tree().create_timer(16.0).timeout
-	var ok := _coop.arena != null and _coop.arena.tick_count > 100
-	var res := _coop.arena.results() if _coop.arena != null else {}
-	print("SERVER ticks=%d enemies=%d results=%s" % [_coop.arena.tick_count if _coop.arena != null else 0, _coop.arena.alive_enemy_count() if _coop.arena != null else 0, JSON.stringify(res)])
+	var stat := [0, 0]   # тики, участники (массив: лямбда копирует числа, а не ссылается на них)
+	var timer := Timer.new()
+	timer.wait_time = 0.5
+	timer.timeout.connect(func() -> void:
+		for code: String in _coop.rooms:
+			var room: Dictionary = _coop.rooms[code]
+			stat[0] = maxi(stat[0], int(room["ticks"]))
+			stat[1] = maxi(stat[1], (room["members"] as Array).size()))
+	add_child(timer)
+	timer.start()
+	await get_tree().create_timer(22.0).timeout
+	var ok: bool = stat[0] > 200 and stat[1] == 2
+	print("SERVER ticks=%d members=%d" % [stat[0], stat[1]])
 	print("SERVER_DONE %s" % ("OK" if ok else "FAIL"))
 	get_tree().quit(0 if ok else 3)
 
 
-func _client() -> void:
+func _client(is_host: bool) -> void:
+	var tag := "HOST" if is_host else "GUEST"
 	var seen := [0]
 	var best_enemies := [0]
-	var last_wave := [0]
+	var states: Array[Dictionary] = []
+	var errors: Array[String] = []
+	_coop.room_state.connect(func(state: Dictionary) -> void:
+		states.append(state)
+		if is_host == false and states.size() == 1:
+			pass)
+	_coop.room_error.connect(func(code: String) -> void: errors.append(code))
 	_coop.snapshot_received.connect(func(data: Dictionary) -> void:
 		seen[0] += 1
-		best_enemies[0] = maxi(best_enemies[0], (data["e"] as Array).size())
-		last_wave[0] = int(data["wave"]))
+		best_enemies[0] = maxi(best_enemies[0], (data["e"] as Array).size()))
 	if not Net.connect_to("127.0.0.1", 17777, 17778):
 		get_tree().quit(2)
 		return
+	await get_tree().create_timer(1.5 if is_host else 3.0).timeout
+	if is_host:
+		_coop.create_room()
+	else:
+		_coop.join_room("THOST")
+	await get_tree().create_timer(1.0).timeout
+	_coop.set_ready(true)
 	var t := 0.0
 	var timer := Timer.new()
 	timer.wait_time = 0.05
@@ -52,8 +73,13 @@ func _client() -> void:
 		_coop.send_move(Vector2.from_angle(t * 0.7)))
 	add_child(timer)
 	timer.start()
-	await get_tree().create_timer(13.0).timeout
-	print("CLIENT snapshots=%d max_enemies=%d wave=%d" % [seen[0], best_enemies[0], last_wave[0]])
-	var ok: bool = seen[0] > 40 and best_enemies[0] > 0
-	print("CLIENT_DONE %s" % ("OK" if ok else "FAIL"))
+	await get_tree().create_timer(12.0).timeout
+	var last_members := 0
+	var running := false
+	for state in states:
+		last_members = maxi(last_members, (state["members"] as Array).size())
+		running = bool(state["running"]) or running
+	print("%s states=%d members=%d running=%s snapshots=%d max_enemies=%d errors=%s" % [tag, states.size(), last_members, str(running), seen[0], best_enemies[0], str(errors)])
+	var ok: bool = seen[0] > 40 and best_enemies[0] > 0 and last_members == 2 and running and errors.is_empty()
+	print("%s_DONE %s" % [tag, "OK" if ok else "FAIL"])
 	get_tree().quit(0 if ok else 4)

@@ -60,14 +60,19 @@ func connect_to(host: String, port_udp: int = PORT_UDP, port_ws: int = PORT_WS) 
 		var ws := WebSocketMultiplayerPeer.new()
 		var url := host if host.begins_with("ws") else "wss://%s" % host
 		if host.begins_with("localhost") or host.begins_with("127."):
-			url = "ws://%s:%d" % [host, port_ws]
+			url = "ws://%s" % host if host.contains(":") else "ws://%s:%d" % [host, port_ws]
 		if ws.create_client(url) != OK:
 			failed.emit("ws_client")
 			return false
 		peer = ws
 	else:
 		var enet := ENetMultiplayerPeer.new()
-		if enet.create_client(host, port_udp) != OK:
+		var address := host
+		var port := port_udp
+		if host.contains(":"):   # «адрес:порт»
+			address = host.get_slice(":", 0)
+			port = int(host.get_slice(":", 1))
+		if enet.create_client(address, port) != OK:
 			failed.emit("enet_client")
 			return false
 		peer = enet
@@ -117,7 +122,11 @@ func _on_authenticating(id: int) -> void:
 		return
 	var token := Cloud.access_token()
 	if token.is_empty() and insecure_test:
-		token = TEST_PREFIX + ("player%d" % (randi() % 1000))
+		var wanted := ""
+		for arg in OS.get_cmdline_user_args():
+			if arg.begins_with("--net-name="):
+				wanted = arg.trim_prefix("--net-name=")
+		token = TEST_PREFIX + (wanted if not wanted.is_empty() else "player%d" % (randi() % 1000))
 	(multiplayer as SceneMultiplayer).send_auth(id, token.to_utf8_buffer())
 
 
@@ -142,11 +151,12 @@ func verify_token(jwt: String) -> Dictionary:
 	if jwt.is_empty():
 		return {}
 	if jwt.begins_with(TEST_PREFIX):
-		return {"id": jwt, "nickname": jwt.trim_prefix(TEST_PREFIX), "insider": -1} if insecure_test else {}
+		var who := jwt.trim_prefix(TEST_PREFIX)
+		return {"id": jwt, "nickname": who, "friend_code": "T" + who.to_upper(), "insider": -1} if insecure_test else {}
 	var user := await Cloud.fetch_with_token("/auth/v1/user", jwt)
 	var uid := str(user.get("id", ""))
 	if uid.is_empty():
 		return {}
-	var rows := await Cloud.fetch_with_token("/rest/v1/profiles?id=eq.%s&select=id,nickname,insider" % uid, jwt)
+	var rows := await Cloud.fetch_with_token("/rest/v1/profiles?id=eq.%s&select=id,nickname,insider,friend_code" % uid, jwt)
 	var row: Variant = rows.get("row", {})
 	return row as Dictionary if row is Dictionary else {}

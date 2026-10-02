@@ -82,6 +82,9 @@ func _ready() -> void:
 		elif url_hash == "#camp":
 			_debug_hash = "camp"
 			_show_menu()
+		elif url_hash == "#coop":
+			_debug_hash = "coop"
+			_show_menu()
 		elif url_hash.begins_with("#raid"):
 			_debug_hash = url_hash.substr(1)
 			_start_raid.call_deferred(SaveService.get_selected_weapon())
@@ -255,6 +258,11 @@ func _show_menu() -> void:
 		SaveService.add_nuts(1000)
 		menu._camp.open.call_deferred()
 		_debug_hash = ""
+	elif _debug_hash == "coop":
+		_debug_hash = ""
+		var coop := CoopScreen.new()
+		menu.add_child(coop)
+		coop.closed.connect(coop.queue_free)
 
 
 ## Чистое устройство: до создания гостя спрашиваем «Уже играл?». Закрыл окно — значит новенький, заводим гостя.
