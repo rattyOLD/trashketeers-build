@@ -14,6 +14,7 @@ const COVER := Color("#d0812f")
 const PORTAL := Color("#b46bff")
 
 signal tapped(overview: bool)
+signal enlarge_toggled(enlarged: bool)
 
 const RAIL_W := 10.0
 const TITLE_H := 18.0
@@ -21,6 +22,7 @@ const ZONE_TINTS: Array[Color] = [Color("#2a86c9"), Color("#8a4fd6"), Color("#c9
 
 var story: StoryRun
 var overview := false
+var enlarged := false
 var _last_tap_ms := 0
 var _stretch := 1.0
 var events: MapEvents
@@ -41,7 +43,7 @@ func setup(level: LevelSpawner, player: Player, enemies: EnemyManager, director:
 	_player = player
 	_enemies = enemies
 	_director = director
-	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	mouse_filter = Control.MOUSE_FILTER_STOP
 	clip_contents = true
 	_panel = UiStyle.box(Color(0.05, 0.04, 0.1, 0.86), RUST, 4, 16)
 	_panel.shadow_color = Color(0, 0, 0, 0.45)
@@ -60,8 +62,6 @@ func set_story(run: StoryRun) -> void:
 
 
 func _gui_input(event: InputEvent) -> void:
-	if story == null:
-		return
 	var pressed := (event is InputEventMouseButton and (event as InputEventMouseButton).pressed) \
 		or (event is InputEventScreenTouch and (event as InputEventScreenTouch).pressed)
 	if not pressed:
@@ -70,6 +70,11 @@ func _gui_input(event: InputEvent) -> void:
 	if now - _last_tap_ms < 250:
 		return
 	_last_tap_ms = now
+	if story == null:
+		enlarged = not enlarged
+		enlarge_toggled.emit(enlarged)
+		accept_event()
+		return
 	overview = not overview
 	queue_redraw()
 	tapped.emit(overview)

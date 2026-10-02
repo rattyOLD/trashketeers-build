@@ -24,11 +24,17 @@ signal revive_declined
 var joystick: VirtualJoystick
 
 var _root: Control
-var _hp_bar: ProgressBar
+var _hp_bar: HudWidgets.TexBar
 var _hp_label: Label
 var _hp_last := -1.0
+var _level_last := -1
+var _wave_last := -1
+var _kills_last := 0
+var _low_said := false
 var _hp_flash := 0.0
-var _xp_bar: ProgressBar
+var _xp_bar: HudWidgets.TexBar
+var _xp_title: Label
+var _portrait: HudWidgets.DamagePortrait
 var _xp_row: HBoxContainer
 var _level_label: Label
 var _xp_label: Label
@@ -40,6 +46,11 @@ var _loot_label: Label
 var _fps_label: Label
 var _wave_label: Label
 var _wave_box: PanelContainer
+var _barks: HudBarks
+var _enemies_chip: PanelContainer
+var _enemies_label: Label
+var _kills_chip: PanelContainer
+var _level_badge: Control
 var _boss_bar: BossBar
 var _banner: Label
 var _wave_title: Label
@@ -101,12 +112,16 @@ func build(currency_icon: Texture2D, weapon: WeaponData) -> void:
 	_root.add_child(joystick)
 
 	_root.add_child(_build_top_bar(currency_icon))
-	_root.add_child(_build_wave_chip())
 	_root.add_child(_build_boss_bar())
 	_root.add_child(_build_banner())
 	_root.add_child(_build_wave_titles())
 	_root.add_child(_build_minimap_slot())
 	_root.move_child(_minimap_slot, 0)
+	_root.add_child(_wave_box)
+	_barks = HudBarks.new()
+	_barks.custom_minimum_size = Vector2(362, 130)
+	_barks.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	_left_column.add_child(_barks)
 	_rail_combo = UiStyle.label("", 46, UiStyle.GOLD, 12)
 	_rail_combo.anchor_left = 0.0
 	_rail_combo.anchor_right = 1.0
@@ -167,7 +182,7 @@ func build(currency_icon: Texture2D, weapon: WeaponData) -> void:
 	_run_result.upgrade_pressed.connect(func() -> void: upgrade_pressed.emit())
 	_root.add_child(_run_result)
 	_fps_label.visible = bool(SaveService.data["show_fps"]) and not _minimal
-	_kills_label.visible = not _minimal
+	_kills_chip.visible = not _minimal
 	_hint = HintBubble.new()
 	_root.add_child(_hint)
 	if Platform.is_touch():
@@ -196,7 +211,8 @@ func _wire_hints() -> void:
 	HintBubble.attach(_hp_label.get_parent(), _hint, "Здоровье. Лечат аптечки, освобождённые пленники и вход в новую зону.")
 	HintBubble.attach(_nuts_row, _hint, "Монеты, собранные за забег.")
 	HintBubble.attach(_time_label, _hint, "Время забега.")
-	HintBubble.attach(_kills_label, _hint, "Сколько врагов побеждено за забег.")
+	HintBubble.attach(_kills_chip, _hint, "Сколько врагов побеждено за забег.")
+	HintBubble.attach(_enemies_chip, _hint, "Сколько врагов осталось в волне · сколько их сейчас на карте.")
 	HintBubble.attach(_loot_label, _hint, "Оружие, которое лежит на карте и ждёт, когда его подберут.")
 
 
@@ -213,11 +229,13 @@ func dock_story_meter(meter: Control) -> void:
 	_story_meter = meter
 	meter.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	_left_column.add_child(meter)
+	_dock_barks()
 	HintBubble.attach(meter, _hint, "Детали супер-ствола. Собери все 6 из зачищенных комнат и получишь 30 секунд режима аннигиляции.")
 
 
 func set_story_layout(minimap: Minimap) -> void:
 	_wave_box.visible = false
+	_enemies_chip.visible = false
 	_toast_y = 556.0 if Orient.portrait else 440.0
 	_story_bar = StoryBar.new()
 	_left_column.add_child(_story_bar)
@@ -226,14 +244,18 @@ func set_story_layout(minimap: Minimap) -> void:
 	_order_card.pressed.connect(func() -> void: orders_requested.emit())
 	_left_column.add_child(_order_card)
 	_story_bar.chip_tapped.connect(func(chip: Control, text: String) -> void: _hint.show_for(chip, text))
-	_boss_bar.anchor_left = 0.0
-	_boss_bar.anchor_right = 1.0
-	_boss_bar.anchor_top = 0.0
-	_boss_bar.anchor_bottom = 0.0
-	_boss_bar.offset_left = 18.0 if Orient.portrait else 300.0
-	_boss_bar.offset_right = -164.0 if Orient.portrait else -300.0
-	_boss_bar.offset_top = 462.0 if Orient.portrait else 600.0
-	_boss_bar.offset_bottom = 546.0 if Orient.portrait else 684.0
+	_dock_barks()
+	if Orient.portrait:
+		UiStyle.anchor(_boss_bar, Vector2(0.5, 0.0), Rect2(-240, 462, 480, 84))
+	else:
+		_boss_bar.anchor_left = 0.0
+		_boss_bar.anchor_right = 1.0
+		_boss_bar.anchor_top = 0.0
+		_boss_bar.anchor_bottom = 0.0
+		_boss_bar.offset_left = 300.0
+		_boss_bar.offset_right = -300.0
+		_boss_bar.offset_top = 600.0
+		_boss_bar.offset_bottom = 684.0
 	UiStyle.anchor(_minimap_slot, Vector2(1.0, 0.0), Rect2(-150, 520, 132, 230) if Orient.portrait else Rect2(-150, 150, 132, 230))
 	_minimap = minimap
 	minimap.tapped.connect(func(overview: bool) -> void:
@@ -256,6 +278,7 @@ func set_survival_order(order: Dictionary) -> void:
 		_order_card.minimal = _minimal
 		_order_card.pressed.connect(func() -> void: orders_requested.emit())
 		_left_column.add_child(_order_card)
+		_dock_barks()
 	_order_card.set_order(str(order.get("title", "")), int(order.get("progress", 0)), int(order.get("goal", 1)), bool(order.get("done", false)))
 
 
@@ -273,18 +296,34 @@ func set_health(hp: float, max_hp: float) -> void:
 	_hp_bar.max_value = max_hp
 	if _hp_last >= 0.0 and hp > _hp_last + 0.3 and hp < max_hp + 0.01:
 		_hp_flash = maxf(_hp_flash, clampf((hp - _hp_last) / 6.0, 0.35, 1.0))
+	var healed := _hp_last >= 0.0 and hp > _hp_last + max_hp * 0.2
 	_hp_last = hp
 	_low_hp = max_hp > 0.0 and hp / max_hp < 0.3 and hp > 0.0
+	if _barks != null:
+		if _low_hp and not _low_said:
+			_low_said = true
+			_barks.say("low_hp", true)
+		elif hp / maxf(max_hp, 1.0) > 0.6:
+			_low_said = false
+		if healed:
+			_barks.say("heal")
 	if not _low_hp:
 		_hp_bar.modulate = Color.WHITE
 	_hp_bar.value = hp
+	var frac := hp / maxf(max_hp, 1.0)
+	_hp_bar.fill_index = 0 if frac > 0.35 else (1 if frac > 0.15 else 2)
+	_portrait.set_health(frac)
 	_hp_label.text = "%d / %d" % [ceili(hp), roundi(max_hp)]
 
 
 func set_xp(xp: int, needed: int, level: int) -> void:
 	_xp_bar.max_value = needed
 	_xp_bar.value = xp
-	_level_label.text = "УР %d" % level
+	if _barks != null and _level_last >= 0 and level > _level_last:
+		_barks.say("level", true)
+	_level_last = level
+	_level_label.text = str(level)
+	_xp_title.text = "УР %d" % level
 	_xp_label.text = "%d/%d" % [xp, needed]
 
 
@@ -318,7 +357,9 @@ func set_time_text(text: String, color: Color = UiStyle.TEXT) -> void:
 ## Налёт: без опыта, волн, мини-карты и счётчика крыс.
 func configure_for_raid() -> void:
 	_xp_row.visible = false
-	_kills_label.visible = false
+	_level_badge.visible = false
+	_kills_chip.visible = false
+	_enemies_chip.visible = false
 	_wave_box.visible = false
 	_minimap_slot.visible = false
 
@@ -330,22 +371,25 @@ func set_loot_left(count: int) -> void:
 
 
 func set_kills(kills: int) -> void:
+	if _barks != null and kills / 100 > _kills_last / 100:
+		_barks.say("kills")
+	_kills_last = kills
 	_kills_label.text = "Убито: %d" % kills
 
 
 func set_wave(number: int, enemies_left: int, chapter: int = 0, alive: int = -1) -> void:
-	var head := "ГЛАВА %d · ВОЛНА %d" % [chapter, number] if chapter > 0 else "ВОЛНА %d" % number
-	if enemies_left <= 0 or _minimal:
-		_wave_label.text = head
-	elif alive >= 0:
-		_wave_label.text = "%s\nосталось %d · на карте %d" % [head, enemies_left, alive]
-	else:
-		_wave_label.text = "%s\nещё %d" % [head, enemies_left]
+	if _barks != null and number != _wave_last:
+		_barks.say("start" if _wave_last < 0 else "wave")
+	_wave_last = number
+	_wave_label.text = "ГЛ.%d · ВОЛНА %d" % [chapter, number] if chapter > 0 else "ВОЛНА %d" % number
+	_enemies_chip.visible = enemies_left > 0 and not _minimal and _story_bar == null
+	_enemies_label.text = "%d · %d" % [enemies_left, alive] if alive >= 0 else str(enemies_left)
 
 
 ## Сюжетный режим без ио-механик: скрываем опыт и уровень.
 func set_story_mode() -> void:
 	_xp_row.visible = false
+	_level_badge.visible = false
 	_slot_bar.visible = false
 
 
@@ -397,13 +441,15 @@ func hud_node(id: String) -> Control:
 		"time":
 			return _time_label
 		"kills":
-			return _kills_label
+			return _kills_chip
 		"loot":
 			return _loot_label
 		"fps":
 			return _fps_label
 		"wave":
 			return _wave_box
+		"barks":
+			return _barks
 		"boss":
 			return _boss_bar
 		"minimap":
@@ -608,12 +654,22 @@ func set_minimap(minimap: Control) -> void:
 	_minimap_slot.add_child(minimap)
 	minimap.visible = SaveService.is_minimap_enabled()
 	_minimap_slot.visible = minimap.visible
+	minimap.enlarge_toggled.connect(_on_minimap_enlarge)
+
+
+## Тап по миникарте выживания: увеличить (в два раза) или вернуть как было.
+func _on_minimap_enlarge(big: bool) -> void:
+	var rect := Rect2(-314, 192, 296, 296) if big else Rect2(-176, 192, 158, 158)
+	UiStyle.anchor(_minimap_slot, Vector2(1.0, 0.0), rect)
+	_hint.show_for(_minimap_slot, "Карта крупно. Тап по ней: уменьшить." if big else "Карта обычная. Тап: увеличить.")
 
 
 # --- Босс, баннеры, заставки ------------------------------------------------------------------
 
 func show_boss(boss_name: String, hp: float, max_hp: float, winged: bool = false) -> void:
 	_boss_bar.configure(boss_name, winged)
+	if _barks != null and not _boss_bar.visible:
+		_barks.say("boss", true)
 	update_boss(hp, max_hp)
 	_boss_bar.visible = true
 	UiStyle.pop_in(_boss_bar, 0.5)
@@ -713,6 +769,7 @@ func set_wanted(level: int) -> void:
 		_wanted_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 		_wanted_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_left_column.add_child(_wanted_label)
+		_dock_barks()
 	_wanted_label.text = ("РОЗЫСК %s" % "★".repeat(level)) if level > 0 else ""
 	_wanted_label.visible = level > 0
 
@@ -722,6 +779,7 @@ func show_mod_badge(title: String) -> void:
 	badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_left_column.add_child(badge)
+	_dock_barks()
 	if RunMods.has(&"no_dash"):
 		_dash.modulate.a = 0.25
 
@@ -846,6 +904,13 @@ func _next_toast() -> void:
 
 # --- Построение ----------------------------------------------------------------------------------
 
+## Чат друзей всегда в конце левой колонки: под заданием и прочими плашками.
+func _dock_barks() -> void:
+	if _barks == null or _left_column == null or _barks.get_parent() != _left_column:
+		return
+	_left_column.move_child(_barks, _left_column.get_child_count() - 1)
+
+
 func _build_top_bar(currency_icon: Texture2D) -> Control:
 	var margin := MarginContainer.new()
 	margin.set_anchors_preset(Control.PRESET_TOP_WIDE)
@@ -872,32 +937,77 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 		row.add_child(gap)
 	_left_column = left
 
+	# Шапка как в современных мобильных экшенах: портрет с уровнем, широкие полосы HP и опыта, ниже ряд плашек.
+	# Оправа портрета и полоса здоровья стыкуются в одну деталь: полоса «выходит» из-под кольца.
+	var head := Control.new()
+	head.custom_minimum_size = Vector2(0, 124)
+	head.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	left.add_child(head)
+	var bars := VBoxContainer.new()
+	bars.add_theme_constant_override("separation", 4)
+	bars.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bars.anchor_right = 1.0
+	bars.offset_left = 98.0
+	bars.offset_top = 14.0
+	head.add_child(bars)
 	var hp_stack := Control.new()
-	hp_stack.custom_minimum_size = Vector2(0, 46)
-	left.add_child(hp_stack)
-	_hp_bar = UiStyle.progress_bar(Color("#ff3b5c"), 46)
+	hp_stack.custom_minimum_size = Vector2(0, 52)
+	bars.add_child(hp_stack)
+	_hp_bar = HudWidgets.TexBar.new("hp_frame", ["hp_fill_normal", "hp_fill_low", "hp_fill_pulse"])
 	_hp_bar.set_anchors_preset(Control.PRESET_FULL_RECT)
 	hp_stack.add_child(_hp_bar)
-	_hp_label = UiStyle.label("", 26, UiStyle.TEXT, 6)
+	_hp_label = UiStyle.label("", 24, UiStyle.TEXT, 6)
 	_hp_label.set_anchors_preset(Control.PRESET_FULL_RECT)
 	hp_stack.add_child(_hp_label)
 
 	_xp_row = HBoxContainer.new()
-	_xp_row.add_theme_constant_override("separation", 8)
-	left.add_child(_xp_row)
-	_level_label = UiStyle.label("УР 1", 20, UiStyle.NEON, 5)
-	_level_label.custom_minimum_size = Vector2(60, 0)
-	_xp_row.add_child(_level_label)
+	_xp_row.add_theme_constant_override("separation", 6)
+	_xp_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bars.add_child(_xp_row)
+	var xp_gap := Control.new()
+	xp_gap.custom_minimum_size = Vector2(26, 0)
+	xp_gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_xp_row.add_child(xp_gap)
+	_xp_title = UiStyle.label("УР 1", 20, UiStyle.NEON, 5)
+	_xp_title.custom_minimum_size = Vector2(54, 0)
+	_xp_row.add_child(_xp_title)
 	var xp_stack := Control.new()
 	xp_stack.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	xp_stack.custom_minimum_size = Vector2(0, 20)
+	xp_stack.custom_minimum_size = Vector2(0, 30)
 	_xp_row.add_child(xp_stack)
-	_xp_bar = UiStyle.progress_bar(UiStyle.NEON, 20)
+	_xp_bar = HudWidgets.TexBar.new("xp_frame", ["xp_fill"])
 	_xp_bar.set_anchors_preset(Control.PRESET_FULL_RECT)
 	xp_stack.add_child(_xp_bar)
-	_xp_label = UiStyle.label("0/10", 14, UiStyle.TEXT, 4)
+	_xp_label = UiStyle.label("0/10", 16, UiStyle.TEXT, 4)
 	_xp_label.set_anchors_preset(Control.PRESET_FULL_RECT)
 	xp_stack.add_child(_xp_label)
+
+	_portrait = HudWidgets.DamagePortrait.new()
+	_portrait.position = Vector2(0, 0)
+	_portrait.set_character(SaveService.get_character())
+	head.add_child(_portrait)
+	_level_badge = PanelContainer.new()
+	_level_badge.add_theme_stylebox_override("panel", UiStyle.box(Color("#1a1030"), UiStyle.GOLD, 3, 10))
+	_level_badge.custom_minimum_size = Vector2(40, 32)
+	_level_badge.position = Vector2(68, 84)
+	_level_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	head.add_child(_level_badge)
+	_level_label = UiStyle.label("1", 22, UiStyle.GOLD, 5)
+	_level_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_level_badge.add_child(_level_label)
+
+	var chips := HBoxContainer.new()
+	chips.add_theme_constant_override("separation", 8)
+	chips.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	left.add_child(chips)
+	_build_wave_chip()
+	_enemies_chip = _chip(BattlePanels.icon("skull"))
+	_enemies_label = _enemies_chip.get_child(0).get_child(1) as Label
+	chips.add_child(_enemies_chip)
+	_kills_chip = _chip(BattlePanels.icon("swords"))
+	_kills_label = _kills_chip.get_child(0).get_child(1) as Label
+	_kills_label.text = "Убито: 0"
+	chips.add_child(_kills_chip)
 
 	var right := VBoxContainer.new()
 	right.custom_minimum_size = Vector2(180, 0)
@@ -930,9 +1040,6 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	_time_label = UiStyle.label("0:00", 26, UiStyle.TEXT, 6)
 	_time_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	right.add_child(_time_label)
-	_kills_label = UiStyle.label("Убито: 0", 17, UiStyle.TEXT_DIM, 4)
-	_kills_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	right.add_child(_kills_label)
 	_loot_label = UiStyle.label("", 17, UiStyle.GOLD, 4)
 	_loot_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_loot_label.visible = false
@@ -947,11 +1054,26 @@ func _build_wave_chip() -> Control:
 	_wave_box = PanelContainer.new()
 	_wave_box.add_theme_stylebox_override("panel", UiStyle.box(Color(0.08, 0.05, 0.15, 0.6), Color(UiStyle.GOLD, 0.7), 3, 20))
 	_wave_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	UiStyle.anchor(_wave_box, Vector2(0.5, 0.0), Rect2(-140, 98, 280, 36))
-	_wave_label = UiStyle.label("ВОЛНА 1", 19, UiStyle.GOLD, 5)
+	UiStyle.anchor(_wave_box, Vector2(1.0, 0.0), Rect2(-176, 140, 158, 34))
+	_wave_label = UiStyle.label("ВОЛНА 1", 15, UiStyle.GOLD, 4)
 	_wave_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_wave_box.add_child(_wave_label)
 	return _wave_box
+
+
+## Плашка шапки: иконка и подпись в рамке.
+func _chip(icon: Texture2D) -> PanelContainer:
+	var chip := PanelContainer.new()
+	chip.add_theme_stylebox_override("panel", UiStyle.box(Color(0.08, 0.05, 0.15, 0.72), Color(UiStyle.TEXT_DIM, 0.55), 3, 16))
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 6)
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	chip.add_child(row)
+	row.add_child(BattlePanels.icon_rect(icon, 26))
+	var label := UiStyle.label("", 19, UiStyle.TEXT, 5)
+	row.add_child(label)
+	chip.custom_minimum_size = Vector2(0, 38)
+	return chip
 
 
 func _build_boss_bar() -> Control:
@@ -991,7 +1113,7 @@ func _build_wave_titles() -> Control:
 func _build_minimap_slot() -> Control:
 	_minimap_slot = Control.new()
 	_minimap_slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	UiStyle.anchor(_minimap_slot, Vector2(1.0, 0.0), Rect2(-176, 214, 158, 158))
+	UiStyle.anchor(_minimap_slot, Vector2(1.0, 0.0), Rect2(-176, 192, 158, 158))
 	return _minimap_slot
 
 

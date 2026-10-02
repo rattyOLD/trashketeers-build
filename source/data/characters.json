@@ -17,6 +17,7 @@
    },
    "traits": "Сбалансирован",
    "portrait": "res://assets/ui/portraits/vagabond.png",
+   "hud_portrait": "res://assets/ui/portraits/rico.png",
    "passive": {
     "title": "Чутьё мусорщика",
     "text": "Радиус подбора добычи +50%"
