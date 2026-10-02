@@ -18,6 +18,9 @@ func _ready() -> void:
 	add_child(popup)
 	if popup is GlassPopup:
 		(popup as GlassPopup).open()
+	if popup is HeroPopup and OS.get_environment("HERO_IDX") != "":
+		(popup as HeroPopup)._index = int(OS.get_environment("HERO_IDX"))
+		(popup as HeroPopup)._refresh()
 	await get_tree().create_timer(1.2).timeout
 	for line in TextOverlap.find(popup):
 		print("OVERLAP ", line)

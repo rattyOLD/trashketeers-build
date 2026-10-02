@@ -34,7 +34,7 @@ const SHOP_GEM_PRICES := {"epic": 90, "legendary": 220}
 ## Донатные флагманы дороже обычных легендарок.
 const SHOP_GEM_OVERRIDE := {"railgun_v1": 480}
 const DUPLICATE_COINS := {"common": 150, "rare": 400, "epic": 1000, "legendary": 2500}
-const HERO_RARITY := {"red_panda": "rare", "snow": "rare", "night": "rare", "neon_hopper": "epic", "fluffy_chemist": "epic", "pigeon_mafioso": "epic"}
+const HERO_RARITY := {"red_panda": "rare", "snow": "rare", "night": "rare", "neon_hopper": "epic", "fluffy_chemist": "epic", "pigeon_mafioso": "epic", "sniper_f": "epic", "medic_f": "epic"}
 const SKIN_RARITY := {"punk": "common", "bandit": "common", "neon": "rare", "gold": "epic", "star": "legendary"}
 const FIRST_BOSS_GEMS := 15
 

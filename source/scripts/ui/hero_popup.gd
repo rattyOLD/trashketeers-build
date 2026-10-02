@@ -93,14 +93,29 @@ func _build_stage(character: Dictionary, accent: Color, owned: bool) -> Control:
 	_stage.custom_minimum_size = Vector2(0, 290)
 	panel.add_child(_stage)
 	var skin: Dictionary = SaveService.get_skin()
-	_preview = MenuWidgets.RaccoonPreview.new(skin, 1.55, character)
-	_preview.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_preview.modulate = Color.WHITE if owned else Color(0.414, 0.397, 0.373, 1.0)
-	_stage.add_child(_preview)
-	_stage.gui_input.connect(func(event: InputEvent) -> void:
-		var tapped: bool = (event is InputEventMouseButton and event.pressed) or (event is InputEventScreenTouch and event.pressed)
-		if tapped:
-			_preview.fire_burst())
+	_preview = null
+	if bool(character.get("coming_soon", false)):
+		# Герой ещё в разработке: вместо рига показываем иконку-силуэт и «СКОРО».
+		var icon := TextureRect.new()
+		var icon_path := str(character.get("portrait", ""))
+		if ResourceLoader.exists(icon_path):
+			icon.texture = load(icon_path)
+		icon.set_anchors_preset(Control.PRESET_FULL_RECT)
+		icon.offset_top = 40.0
+		icon.offset_bottom = -20.0
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_stage.add_child(icon)
+	else:
+		_preview = MenuWidgets.RaccoonPreview.new(skin, 1.55, character)
+		_preview.set_anchors_preset(Control.PRESET_FULL_RECT)
+		_preview.modulate = Color.WHITE if owned else Color(0.414, 0.397, 0.373, 1.0)
+		_stage.add_child(_preview)
+		_stage.gui_input.connect(func(event: InputEvent) -> void:
+			var tapped: bool = (event is InputEventMouseButton and event.pressed) or (event is InputEventScreenTouch and event.pressed)
+			if tapped and _preview != null:
+				_preview.fire_burst())
 	_flash = ColorRect.new()
 	_flash.color = Color(1, 1, 1, 0)
 	_flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -111,8 +126,8 @@ func _build_stage(character: Dictionary, accent: Color, owned: bool) -> Control:
 	_burst.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_burst.color = accent
 	_stage.add_child(_burst)
-	if not owned:
-		var lock := UiStyle.label("НЕ ОТКРЫТ", 26, Color(1, 1, 1, 0.9), 8)
+	if not owned or bool(character.get("coming_soon", false)):
+		var lock := UiStyle.label("СКОРО" if bool(character.get("coming_soon", false)) else "НЕ ОТКРЫТ", 26, Color(1, 1, 1, 0.9), 8)
 		lock.set_anchors_preset(Control.PRESET_CENTER_TOP)
 		lock.offset_left = -100.0
 		lock.offset_right = 100.0
