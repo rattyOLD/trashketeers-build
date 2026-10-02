@@ -154,6 +154,7 @@ func start(_weapon_id: StringName = &"") -> void:
 	director = WaveDirector.new()
 	add_child(director)
 	director.setup(enemies, player, map)
+	director.run_stats = stats
 	director.story_mode = not story_mission.is_empty()
 
 	_arrow = TargetArrow.new()
@@ -351,6 +352,7 @@ func _update_hud_timer() -> void:
 func _tick_order() -> void:
 	var done := SaveService.nell_order_tick()
 	if not done.is_empty():
+		hud.order_completed(done)
 		hud.toast("ЗАКАЗ НЭЛЛ ВЫПОЛНЕН", "%s. Награда: +%d монет, +%d неонита" % [done["title"], done["nuts"], done["dust"]], Color("#5ff2ff"))
 		SoundManager.play(&"level_up", -4.0, false)
 

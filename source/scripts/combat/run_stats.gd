@@ -95,6 +95,17 @@ static func capped(key: StringName, raw: float) -> float:
 	return minf(cap, knee + (raw - knee) * OVER_KNEE_SLOPE)
 
 
+## «Мощь» билда: урон × скорострельность × число снарядов × живучесть. 1.0 — голый герой.
+## По ней выживание подтягивает врагов (см. WaveDirector.adaptive_factor).
+func power() -> float:
+	var dmg := 1.0 + get_stat(&"damage_mult")
+	var rate := 1.0 + get_stat(&"fire_rate_mult")
+	var shots := 1.0 + 0.25 * get_stat(&"extra_projectiles")
+	var tough := (1.0 + get_stat(&"max_hp_add") / 200.0) / maxf(1.0 - get_stat(&"damage_resist"), 0.3)
+	var crit := 1.0 + 0.5 * get_stat(&"crit_chance_add")
+	return dmg * rate * shots * tough * crit
+
+
 func get_stat(key: StringName) -> float:
 	var raw: float = _values.get(key, 0.0)
 	return raw if uncapped else RunStats.capped(key, raw)

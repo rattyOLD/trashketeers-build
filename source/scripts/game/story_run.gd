@@ -222,6 +222,7 @@ func _count(stat: String, amount: int = 1) -> void:
 	SaveService.add_stat(stat, amount, false)
 	var done := SaveService.nell_order_tick()
 	if not done.is_empty():
+		game.hud.order_completed(done)
 		game.hud.toast("ЗАКАЗ НЭЛЛ ВЫПОЛНЕН", "%s. Награда: +%d монет, +%d неонита" % [done["title"], done["nuts"], done["dust"]], Color("#5ff2ff"))
 		SoundManager.play(&"level_up", -4.0, false)
 

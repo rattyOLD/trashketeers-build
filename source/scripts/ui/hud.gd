@@ -240,6 +240,12 @@ func set_story_layout(minimap: Minimap) -> void:
 		_hint.show_for(_minimap_slot, "Карта. Тап: %s." % ("крупный план" if overview else "вся карта")))
 
 
+## Заказ Нэлл выполнен: плашка вспыхивает и сменяется новым заказом.
+func order_completed(info: Dictionary) -> void:
+	if _order_card != null:
+		_order_card.celebrate(str(info.get("title", "")), int(info.get("goal", 1)))
+
+
 func set_survival_order(order: Dictionary) -> void:
 	if _order_card == null:
 		var spacer := Control.new()
@@ -332,9 +338,9 @@ func set_wave(number: int, enemies_left: int, chapter: int = 0, alive: int = -1)
 	if enemies_left <= 0 or _minimal:
 		_wave_label.text = head
 	elif alive >= 0:
-		_wave_label.text = "%s · осталось %d · на карте %d" % [head, enemies_left, alive]
+		_wave_label.text = "%s\nосталось %d · на карте %d" % [head, enemies_left, alive]
 	else:
-		_wave_label.text = "%s · ещё %d" % [head, enemies_left]
+		_wave_label.text = "%s\nещё %d" % [head, enemies_left]
 
 
 ## Сюжетный режим без ио-механик: скрываем опыт и уровень.
@@ -945,8 +951,9 @@ func _build_wave_chip() -> Control:
 	_wave_box = PanelContainer.new()
 	_wave_box.add_theme_stylebox_override("panel", UiStyle.box(Color(0.08, 0.05, 0.15, 0.6), Color(UiStyle.GOLD, 0.7), 3, 20))
 	_wave_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	UiStyle.anchor(_wave_box, Vector2(0.5, 0.0), Rect2(-100, 98, 200, 36))
+	UiStyle.anchor(_wave_box, Vector2(0.5, 0.0), Rect2(-140, 98, 280, 36))
 	_wave_label = UiStyle.label("ВОЛНА 1", 19, UiStyle.GOLD, 5)
+	_wave_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_wave_box.add_child(_wave_label)
 	return _wave_box
 

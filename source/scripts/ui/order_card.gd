@@ -19,6 +19,11 @@ var _panel: StyleBoxFlat
 var _goals: Array = []
 ## «Минимальный худ»: карточка не показывается вовсе.
 var minimal := false
+## Показ «выполнено»: плашка горит зелёным, потом гаснет, и появляется следующий заказ.
+const CELEBRATE_TIME := 1.6
+const FADE_TIME := 0.35
+var _celebrate := 0.0
+var _pending: Array = []
 
 
 func _init() -> void:
@@ -29,7 +34,27 @@ func _init() -> void:
 	visible = false
 
 
+## Заказ только что выполнен: показываем «ГОТОВО», затем плашка гаснет и уступает место новому заказу.
+func celebrate(title: String, goal: int) -> void:
+	if minimal:
+		return
+	visible = true
+	_celebrate = CELEBRATE_TIME
+	_title = title
+	_goal = maxi(goal, 1)
+	_progress = _goal
+	_done = true
+	_shown = 1.0
+	_flash = 1.0
+	modulate.a = 1.0
+	set_process(true)
+	queue_redraw()
+
+
 func set_order(title: String, progress: int, goal: int, done: bool) -> void:
+	if _celebrate > 0.0:
+		_pending = [title, progress, goal, done]
+		return
 	if title.is_empty() or minimal:
 		visible = false
 		return
@@ -65,6 +90,22 @@ func set_goals(goals: Array) -> void:
 
 
 func _process(delta: float) -> void:
+	if _celebrate > 0.0:
+		_celebrate -= delta
+		_flash = maxf(_flash, 0.5 if int(_celebrate * 6.0) % 2 == 0 else 0.0)
+		modulate.a = clampf(_celebrate / FADE_TIME, 0.0, 1.0)
+		queue_redraw()
+		if _celebrate <= 0.0:
+			var next := _pending
+			_pending = []
+			_shown = 0.0
+			_done = false
+			_progress = 0
+			if not next.is_empty():
+				set_order(str(next[0]), int(next[1]), int(next[2]), bool(next[3]))
+			var tween := create_tween()
+			tween.tween_property(self, "modulate:a", 1.0, FADE_TIME)
+		return
 	var target := 1.0 if _done else float(_progress) / float(_goal)
 	_shown = move_toward(_shown, target, delta * 1.6)
 	_flash = maxf(_flash - delta * 2.0, 0.0)

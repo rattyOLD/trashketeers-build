@@ -52,5 +52,16 @@ func _ready() -> void:
 	for wave in [1, 20, 40, 80]:
 		var late := maxf(float(wave) - float(d["late_start"]), 0.0)
 		print("WAVE %d late hp x%.2f dmg x%.2f" % [wave, 1.0 + late * float(d["late_hp"]), 1.0 + late * float(d["late_damage"])])
+	# 6. адаптивная сложность: только вверх, с потолком, монотонна по мощи
+	var maxed_power := stats.power()
+	for wave in [5, 20, 40, 80]:
+		var prev_f := 0.0
+		for pw in [1.0, 2.0, 4.0, 8.0, 16.0, 40.0, maxed_power]:
+			var f := WaveDirector.adaptive_factor(pw, wave)
+			if f < 1.0 or f > WaveDirector.ADAPT_MAX + 0.0001 or f < prev_f - 0.0001:
+				fails += 1
+				print("FAIL adapt wave=%d power=%.1f f=%.2f" % [wave, pw, f])
+			prev_f = f
+		print("ADAPT wave %d: weak(2) x%.2f mid(8) x%.2f strong(16) x%.2f maxed(%.0f) x%.2f" % [wave, WaveDirector.adaptive_factor(2.0, wave), WaveDirector.adaptive_factor(8.0, wave), WaveDirector.adaptive_factor(16.0, wave), maxed_power, WaveDirector.adaptive_factor(maxed_power, wave)])
 	print("BALANCE_TEST ", "PASS" if fails == 0 else "FAIL %d" % fails)
 	get_tree().quit(0 if fails == 0 else 1)

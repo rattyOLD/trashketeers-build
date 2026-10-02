@@ -215,6 +215,7 @@ const RUN_PAYOUT := 1.4
 const SLOT3_PRICE := 250
 
 ## stats — ключи в data["stats"] (суммируются), goal — порог; один заказ на день для сюжета и выживания.
+const NELL_ORDERS_PER_DAY := 8
 const NELL_ORDERS := [
 	{"id": "kills", "title": "Убей 120 врагов", "stats": ["kills"], "goal": 120, "nuts": 350, "dust": 2},
 	{"id": "kills_big", "title": "Убей 300 врагов", "stats": ["kills"], "goal": 300, "nuts": 700, "dust": 4},
@@ -1357,9 +1358,19 @@ func nell_order_tick() -> Dictionary:
 	var info := nell_order()
 	if bool(info["done"]) or int(info["progress"]) < int(info["goal"]):
 		return {}
-	(data["nell_daily"] as Dictionary)["done"] = true
+	var daily: Dictionary = data["nell_daily"]
 	add_coins(int(info["nuts"]))
 	add_gems(int(info["dust"]), false)
+	# Выполненный заказ сразу заменяется новым (не больше NELL_ORDERS_PER_DAY в день, чтобы не раздувать награды).
+	var finished := int(daily.get("n", 0)) + 1
+	daily["n"] = finished
+	if finished < NELL_ORDERS_PER_DAY:
+		var next_index := (int(daily["idx"]) + 1) % NELL_ORDERS.size()
+		daily["idx"] = next_index
+		daily["base"] = _order_total(NELL_ORDERS[next_index])
+		daily["done"] = false
+	else:
+		daily["done"] = true
 	save_data()
 	return info
 

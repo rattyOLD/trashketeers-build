@@ -29,6 +29,10 @@ const GATE_MIN_DISTANCE := 520.0
 const ESCORT_GAP := 60.0
 const BOSS_RETRY_DELAY := 0.5
 const WAVES_PER_CHAPTER := 10
+## Ожидаемая мощь билда к волне: 1 + EXPECT_PER_WAVE × (волна − 1). Сильнее ожидаемого — враги растут.
+const EXPECT_PER_WAVE := 0.1
+const ADAPT_GAIN := 0.35
+const ADAPT_MAX := 2.5
 ## Отставшие враги (застряли, убежали далеко) переносятся ближе к Еноту — иначе волна может
 ## не закончиться из-за одной потерянной крысы.
 const LEASH_DISTANCE := 1500.0
@@ -67,6 +71,9 @@ var _boss_pending := false
 var _softlock_timer := 0.0
 const SOFTLOCK_TIME := 15.0
 var _boss_dead_time := -1.0
+## Билд игрока: по его мощи враги подтягиваются под него (только вверх, потолок ADAPT_MAX).
+var run_stats: RunStats
+var adapt := 1.0
 var _hp_mult := 1.0
 var _dmg_mult := 1.0
 var _interval := 1.0
@@ -88,6 +95,12 @@ func setup(enemies: EnemyManager, player: Player, level: LevelSpawner) -> void:
 
 func attach_level(level: LevelSpawner) -> void:
 	_level = level
+
+
+## Множитель адаптивной сложности (1…ADAPT_MAX) для заданной мощи билда и номера волны. Слабее ожидаемого — 1.
+static func adaptive_factor(power: float, wave: int) -> float:
+	var expected := 1.0 + EXPECT_PER_WAVE * float(maxi(wave, 1) - 1)
+	return clampf(1.0 + ADAPT_GAIN * (power / expected - 1.0), 1.0, ADAPT_MAX)
 
 
 func get_damage_mult() -> float:
@@ -213,7 +226,13 @@ func _start_wave(number: int) -> void:
 	var late := maxf(float(number) - float(d["late_start"]), 0.0)
 	_hp_mult *= 1.0 + late * float(d["late_hp"])
 	_dmg_mult *= 1.0 + late * float(d["late_damage"])
-	remaining_to_spawn = int(ceil(float(_wave["count"]) * pow(float(d["loop_count"]), loop) * float(_chapter.get("count_mult", 1.0))))
+	adapt = adaptive_factor(run_stats.power(), number) if run_stats != null else 1.0
+	_hp_mult *= adapt
+	if not OS.get_environment("TRK_DEBUG").is_empty():
+		print("ADAPT wave %d power %.1f x%.2f" % [number, run_stats.power() if run_stats != null else 0.0, adapt])
+	_dmg_mult *= 1.0 + (adapt - 1.0) * 0.5
+	var count_adapt := 1.0 + (adapt - 1.0) * 0.35
+	remaining_to_spawn = int(ceil(float(_wave["count"]) * pow(float(d["loop_count"]), loop) * float(_chapter.get("count_mult", 1.0)) * count_adapt))
 	_interval = maxf(float(_wave["spawn_interval"]) * pow(float(d["loop_interval"]), loop), 0.25)
 	_max_alive = int(_wave["max_alive"]) + int(d["loop_max_alive"]) * loop
 	_boss_pending = false
