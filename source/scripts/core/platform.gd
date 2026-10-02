@@ -506,6 +506,21 @@ el.dataset.enter = ''; el.dataset.changed = ''; return out;
 	return parsed as Dictionary if parsed is Dictionary else {}
 
 
+## Сколько логических пикселей холста закрыла экранная клавиатура (iOS не меняет размер страницы, а сужает «видимое окно»).
+## Пока открыто браузерное поле, страница в шаблоне сдвигает холст за видимой областью, поэтому закрыт всегда низ.
+func keyboard_inset() -> float:
+	if not is_web:
+		return 0.0
+	var view := get_viewport().get_visible_rect().size
+	var value: Variant = _js("""
+var vv = window.visualViewport; var c = document.getElementById('canvas') || document.querySelector('canvas'); if (!vv || !c) return 0;
+var h = c.getBoundingClientRect().height; if (h <= 0) return 0;
+var hidden = Math.max(0, h - vv.height);
+return hidden / h * %f;
+""" % view.y)
+	return maxf(0.0, float(value)) if value is float or value is int else 0.0
+
+
 ## Сейчас печатают в браузерном поле (открыта экранная клавиатура).
 func native_input_active() -> bool:
 	return is_web and _js_bool("!!(document.activeElement && String(document.activeElement.id).indexOf('trk_in_') === 0)")

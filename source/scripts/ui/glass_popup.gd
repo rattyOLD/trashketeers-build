@@ -21,6 +21,7 @@ var _glass: ColorRect
 var _frame: Panel
 var _title: Label
 var _center: CenterContainer
+var _lifted := false
 var _closing := false
 ## Поверх окна открыт полноэкранный слой (просмотр фото, галерея): браузерное поле ввода прячется.
 var overlays := 0
@@ -168,10 +169,35 @@ func _watch_inputs(node: Node) -> void:
 func _lift(up: bool) -> void:
 	if not Orient.portrait:
 		return
+	_lifted = up
+	set_process(up)
+	if up:
+		_apply_lift()
+	else:
+		_center.anchor_top = 0.0
+		_center.anchor_bottom = 1.0
+		_center.offset_top = 0.0
+		_center.offset_bottom = 0.0
+
+
+## Пока открыта клавиатура, окно целиком умещается над ней (высота берётся из видимой области браузера).
+## Если страница размер не меняла (Android) и клавиатуры «не видно», окно просто уходит в верхнюю половину.
+func _apply_lift() -> void:
+	var inset := Platform.keyboard_inset()
 	_center.anchor_top = 0.0
-	_center.anchor_bottom = 0.5 if up else 1.0
-	_center.offset_top = 40.0 if up else 0.0
-	_center.offset_bottom = 0.0
+	if inset > 60.0:
+		_center.anchor_bottom = 1.0
+		_center.offset_top = 24.0
+		_center.offset_bottom = -inset
+	else:
+		_center.anchor_bottom = 0.5
+		_center.offset_top = 40.0
+		_center.offset_bottom = 0.0
+
+
+func _process(_delta: float) -> void:
+	if _lifted:
+		_apply_lift()
 
 
 func _sync_glass() -> void:

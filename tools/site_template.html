@@ -395,6 +395,22 @@ html, body {
 	window.addEventListener('resize', judge);
 	window.addEventListener('resize', kick);
 	if (window.visualViewport) { window.visualViewport.addEventListener('resize', kick); }
+
+	// Экранная клавиатура на iOS не меняет размер страницы, а сдвигает «видимое окно» вниз. Пока печатают в поле игры,
+	// держим холст в видимой части (сдвиг на offsetTop), игра сама сожмёт окно по высоте видимой области.
+	var vv = window.visualViewport;
+	if (vv) {
+		var follow = function () {
+			var cv = document.getElementById('canvas');
+			if (!cv) { return; }
+			var typing = !!(document.activeElement && String(document.activeElement.id).indexOf('trk_in_') === 0);
+			cv.style.transform = typing && vv.offsetTop > 0 ? 'translateY(' + vv.offsetTop + 'px)' : '';
+		};
+		vv.addEventListener('resize', follow);
+		vv.addEventListener('scroll', follow);
+		document.addEventListener('focusin', function () { setTimeout(follow, 60); setTimeout(follow, 420); });
+		document.addEventListener('focusout', function () { setTimeout(follow, 60); setTimeout(follow, 420); });
+	}
 })();
 </script>
 

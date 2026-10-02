@@ -395,11 +395,27 @@ html, body {
 	window.addEventListener('resize', judge);
 	window.addEventListener('resize', kick);
 	if (window.visualViewport) { window.visualViewport.addEventListener('resize', kick); }
+
+	// Экранная клавиатура на iOS не меняет размер страницы, а сдвигает «видимое окно» вниз. Пока печатают в поле игры,
+	// держим холст в видимой части (сдвиг на offsetTop), игра сама сожмёт окно по высоте видимой области.
+	var vv = window.visualViewport;
+	if (vv) {
+		var follow = function () {
+			var cv = document.getElementById('canvas');
+			if (!cv) { return; }
+			var typing = !!(document.activeElement && String(document.activeElement.id).indexOf('trk_in_') === 0);
+			cv.style.transform = typing && vv.offsetTop > 0 ? 'translateY(' + vv.offsetTop + 'px)' : '';
+		};
+		vv.addEventListener('resize', follow);
+		vv.addEventListener('scroll', follow);
+		document.addEventListener('focusin', function () { setTimeout(follow, 60); setTimeout(follow, 420); });
+		document.addEventListener('focusout', function () { setTimeout(follow, 60); setTimeout(follow, 420); });
+	}
 })();
 </script>
 
 <script>
-window.__trash_build = {label: 'v35.218', time: '02.10 15:55'};
+window.__trash_build = {label: 'v35.219', time: '02.10 16:13'};
 document.getElementById('ver').textContent = 'Версия ' + window.__trash_build.label + ' · сборка от ' + window.__trash_build.time;
 </script>
 <script>
@@ -464,7 +480,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	// index.wasm / index.pck и отдаём ему уже скачанные и распакованные байты.
 	const FILES = {
 		wasm: { parts: [{url:"raccoon.core.0.wasm?h=4cbe7e5f476b",bytes:5221065},{url:"raccoon.core.1.wasm?h=a8fbc151befa",bytes:4165384}] },
-		pck: { parts: [{url:"raccoon.pack.0.wasm?h=4f1fa17009b1",bytes:11989687},{url:"raccoon.pack.1.wasm?h=184e97140326",bytes:12547520},{url:"raccoon.pack.2.wasm?h=72631cce3059",bytes:5153529}] },
+		pck: { parts: [{url:"raccoon.pack.0.wasm?h=cb8638ca32c8",bytes:11989712},{url:"raccoon.pack.1.wasm?h=cb0fc5c3c1d8",bytes:12547414},{url:"raccoon.pack.2.wasm?h=d8835e485fb7",bytes:5154783}] },
 	};
 	const GODOT_CONFIG = {
 		args: [],
@@ -472,7 +488,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 		ensureCrossOriginIsolationHeaders: false,
 		executable: 'index',
 		experimentalVK: false,
-		fileSizes: { 'index.pck': 30648384, 'index.wasm': 43699190 },
+		fileSizes: { 'index.pck': 30649680, 'index.wasm': 43699190 },
 		focusCanvas: true,
 		gdextensionLibs: [],
 		onPrint: function () {
@@ -497,7 +513,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 
 	// Адрес сбора отчётов о вылетах (Google Apps Script / Supabase и т.п.); пусто — отчёты не отправляются.
 	const REPORT_URL = 'https://script.google.com/macros/s/AKfycbxVyy-SnRANW0Im-1Blne2TcUbca93WqzyBulpADwWWD7YH6x3KIygBYImTe8VfP5pp/exec';
-	const BUILD_ID_REPORT = '1790931323';
+	const BUILD_ID_REPORT = '1790932423';
 	const SESSION_ID = Math.random().toString(36).slice(2, 8);
 	const SESSION_START = Date.now();
 	const REPORT_CAP = 250;
@@ -714,7 +730,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	window.trkReport('session_start', gpuInfo() + ' | ' + navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + (window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio) + ' | screen ' + screen.width + 'x' + screen.height + ' | cores ' + (navigator.hardwareConcurrency || '?'));
 
 	// Вкладка могла висеть со старой версией: при возврате в неё сверяем номер сборки и предлагаем обновиться.
-	const BUILD_ID = '1790931323';
+	const BUILD_ID = '1790932423';
 	// Важное обновление: старая сборка дальше не работает, иначе аккаунты и сохранения ломаются старым кодом.
 	function blockOldBuild(v) {
 		const wall = document.createElement('div');

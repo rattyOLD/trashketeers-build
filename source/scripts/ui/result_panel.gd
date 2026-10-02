@@ -41,6 +41,8 @@ func _init() -> void:
 	_panel.add_child(_box)
 
 	_title = UiStyle.label("", 46, UiStyle.GOLD, 11)
+	_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART   # длинные заголовки переносятся, а не растягивают рамку за экран
+	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_box.add_child(_title)
 	_subtitle = UiStyle.label("", 22, UiStyle.TEXT, 6)
 	_subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -86,6 +88,7 @@ const LOSE_TITLES := ["ЕНОТ ПОВЕРЖЕН", "ЕНОТ ОТДЫХАЕТ", 
 
 
 func open(victory: bool, lines: PackedStringArray, title: String = "", can_upgrade: bool = true) -> void:
+	_fit_width()
 	_title.text = title if not title.is_empty() else (WIN_TITLES.pick_random() if victory else LOSE_TITLES.pick_random())
 	_title.add_theme_color_override("font_color", UiStyle.GOLD if victory else UiStyle.DANGER)
 	_subtitle.text = lines[0] if not lines.is_empty() else ""
@@ -107,13 +110,26 @@ func open(victory: bool, lines: PackedStringArray, title: String = "", can_upgra
 	UiStyle.pop_in(_panel)
 
 
+## Рамка не шире экрана: по бокам остаётся поле, внутри всё переносится по словам.
+func _fit_width() -> void:
+	var wide := 560.0 if Orient.portrait else 720.0
+	var avail := get_viewport_rect().size.x - 56.0
+	_box.custom_minimum_size = Vector2(clampf(minf(wide, avail), 240.0, wide), 0)
+
+
 func _stat_row(key: String, value: String) -> Control:
 	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
 	var left := UiStyle.label(key, 22, UiStyle.TEXT_DIM, 4)
 	left.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	left.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	left.size_flags_stretch_ratio = 1.1
 	row.add_child(left)
 	var right := UiStyle.label(value, 26, UiStyle.GOLD, 5)
 	right.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	right.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	right.size_flags_stretch_ratio = 1.0
 	row.add_child(right)
 	return row
