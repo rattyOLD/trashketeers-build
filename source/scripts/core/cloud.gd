@@ -761,6 +761,24 @@ func _call(method: int, path: String, body: Variant, extra: PackedStringArray = 
 	return reply
 
 
+## Токен текущей сессии (для входа на игровой сервер). Пустая строка, если сессии нет.
+func access_token() -> String:
+	return _access
+
+
+## GET с чужим токеном (игровой сервер проверяет токен игрока). Ответ: {"ok", "code", "data"}, для списка ещё "row" (первая строка).
+func fetch_with_token(path: String, jwt: String) -> Dictionary:
+	var headers := PackedStringArray(["apikey: " + KEY, "Authorization: Bearer " + jwt])
+	var reply := await _raw(HTTPClient.METHOD_GET, URL + path, headers, "")
+	var out: Dictionary = {"ok": bool(reply["ok"]), "code": int(reply["code"]), "data": reply["data"]}
+	var data: Variant = reply["data"]
+	if data is Dictionary:
+		out.merge(data as Dictionary)
+	elif data is Array and not (data as Array).is_empty() and (data as Array)[0] is Dictionary:
+		out["row"] = (data as Array)[0]
+	return out
+
+
 ## Проверка связи: что отвечает, а что нет. Возвращает короткий отчёт для экрана и для тестера.
 func ping() -> String:
 	var headers := PackedStringArray(["apikey: " + KEY])
