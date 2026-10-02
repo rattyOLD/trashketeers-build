@@ -156,7 +156,7 @@ func verify_token(jwt: String) -> Dictionary:
 		return {}
 	if jwt.begins_with(TEST_PREFIX):
 		var who := jwt.trim_prefix(TEST_PREFIX)
-		return {"id": jwt, "nickname": who, "friend_code": "T" + who.to_upper(), "insider": -1, "c": "", "s": "classic", "lv": 1} if insecure_test else {}
+		return {"id": jwt, "nickname": who, "friend_code": "T" + who.to_upper(), "insider": -1, "c": "", "s": "classic", "lv": 1, "rating": 0, "tier": "Ржавый"} if insecure_test else {}
 	var user := await Cloud.fetch_with_token("/auth/v1/user", jwt)
 	var uid := str(user.get("id", ""))
 	if uid.is_empty():
@@ -165,7 +165,13 @@ func verify_token(jwt: String) -> Dictionary:
 	var row: Variant = rows.get("row", {})
 	if not row is Dictionary:
 		return {}
-	return _with_look(row as Dictionary)
+	var profile := _with_look(row as Dictionary)
+	# Рейтинг коопа читаем с токеном самого игрока, он покажется в слоте лобби.
+	var rating := await Cloud.post_with_token("/rest/v1/rpc/coop_my_rating", {}, jwt)
+	var data: Variant = rating.get("data")
+	profile["rating"] = int((data as Dictionary).get("rating", 0)) if bool(rating["ok"]) and data is Dictionary else 0
+	profile["tier"] = str((data as Dictionary).get("tier", "Ржавый")) if bool(rating["ok"]) and data is Dictionary else "Ржавый"
+	return profile
 
 
 ## Герой, скин и уровень для лобби: берём из публичной статистики профиля и проверяем форму (только безопасные id).

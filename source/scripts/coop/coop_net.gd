@@ -26,6 +26,8 @@ var countdown := 3.0
 # --- состояние сервера ---
 var rooms: Dictionary = {}       # code -> {host, members: Array[int], ready: Dictionary, arena: CoopArena, acc: float, ticks: int}
 var _peer_room: Dictionary = {}  # peer_id -> code
+## Последний отчёт о забеге (для автотестов и отладки на сервере).
+var last_report: Dictionary = {}
 var _ops: Dictionary = {}        # peer_id -> Array[float] времена последних операций с комнатой
 
 
@@ -79,7 +81,7 @@ func _create_room(protocol: int = 0) -> void:
 	if rooms.has(code):
 		_error(id, "room_exists")
 		return
-	rooms[code] = {"host": id, "members": [id], "ready": {}, "arena": null, "acc": 0.0, "ticks": 0, "countdown": -1.0}
+	rooms[code] = {"host": id, "members": [id], "ready": {}, "arena": null, "acc": 0.0, "ticks": 0, "countdown": -1.0, "uids": {}}
 	_peer_room[id] = code
 	_broadcast_state(code)
 
@@ -271,6 +273,9 @@ func _end_run(code: String) -> void:
 	var results := arena.results()
 	results["names"] = _names(room["members"])
 	for member: int in room["members"]:
+		(room["uids"] as Dictionary)[member] = str((Net.profiles.get(member, {}) as Dictionary).get("id", ""))
+	_report_run(results, room["uids"] as Dictionary)
+	for member: int in room["members"]:
 		_finished.rpc_id(member, results)
 	run_finished.emit(results)
 	room["arena"] = null
@@ -295,6 +300,7 @@ func _remove_peer(id: int) -> void:
 	room["countdown"] = -1.0
 	var arena := room["arena"] as CoopArena
 	if arena != null:
+		(room["uids"] as Dictionary)[id] = str((Net.profiles.get(id, {}) as Dictionary).get("id", ""))   # профиль уходящего нужен для штрафа
 		arena.remove_player(id)
 	if (room["members"] as Array).is_empty():
 		rooms.erase(code)
@@ -336,6 +342,52 @@ func _limited(id: int) -> bool:
 	return false
 
 
+## Тело запроса coop_submit_run. uid_by_peer: peer_id -> id аккаунта (игроки без аккаунта пропускаются).
+static func build_report(run_id: String, results: Dictionary, uid_by_peer: Dictionary) -> Dictionary:
+	var players: Array = []
+	var stats: Dictionary = results.get("players", {})
+	for peer: Variant in stats:
+		var uid := str(uid_by_peer.get(peer, uid_by_peer.get(int(peer), "")))
+		if uid.is_empty() or uid.begins_with(Net.TEST_PREFIX):
+			continue
+		var p := stats[peer] as Dictionary
+		players.append({"uid": uid, "kills": int(p.get("kills", 0)), "damage": int(p.get("damage", 0)), "revives": int(p.get("revives", 0)),
+			"downs": int(p.get("downs", 0)), "left": bool(p.get("left", false)), "coins": int(p.get("coins", 0)), "xp": int(p.get("xp", 0))})
+	return {"run_id": run_id, "waves": int(results.get("waves_cleared", 0)), "seconds": int(results.get("seconds", 0)), "won": bool(results.get("won", false)), "players": players}
+
+
+static func new_run_id() -> String:
+	var crypto := Crypto.new()
+	var bytes := crypto.generate_random_bytes(16)
+	bytes[6] = (bytes[6] & 0x0f) | 0x40
+	bytes[8] = (bytes[8] & 0x3f) | 0x80
+	var hex := bytes.hex_encode()
+	return "%s-%s-%s-%s-%s" % [hex.substr(0, 8), hex.substr(8, 4), hex.substr(12, 4), hex.substr(16, 4), hex.substr(20, 12)]
+
+
+## Сервер записывает итоги забега в базу ключом service_role из окружения (SUPABASE_SERVICE_KEY). Награды и очки считает база.
+func _report_run(results: Dictionary, uids: Dictionary) -> void:
+	last_report = build_report(new_run_id(), results, uids)
+	if Net.insecure_test or (last_report["players"] as Array).is_empty():
+		return
+	var key := OS.get_environment("SUPABASE_SERVICE_KEY")
+	if key.is_empty():
+		push_warning("CoopNet: SUPABASE_SERVICE_KEY не задан, итоги забега не записаны")
+		return
+	_send_report(last_report.duplicate(true), key)
+
+
+func _send_report(report: Dictionary, key: String) -> void:
+	for attempt in 4:
+		var reply := await Cloud.post_service("/rest/v1/rpc/coop_submit_run", {"p_run": report}, key)
+		var answer := str(reply["data"])
+		if bool(reply["ok"]) and answer in ["ok", "dup", "short", "bad"]:
+			print("CoopNet: итоги %s -> %s" % [str(report["run_id"]), answer])
+			return
+		await get_tree().create_timer(2.0 * float(attempt + 1)).timeout
+	push_error("CoopNet: итоги забега %s не записаны после 4 попыток" % str(report["run_id"]))
+
+
 func _names(members: Array) -> Dictionary:
 	var out: Dictionary = {}
 	for member: int in members:
@@ -351,7 +403,7 @@ func _state_of(code: String) -> Dictionary:
 		var profile: Dictionary = Net.profiles.get(member, {})
 		list.append({"id": member, "name": str(profile.get("nickname", "Енот")), "ready": bool((room["ready"] as Dictionary).get(member, false)),
 			"host": member == int(room["host"]), "insider": int(profile.get("insider", -1)),
-			"c": str(profile.get("c", "")), "s": str(profile.get("s", "classic")), "lv": int(profile.get("lv", 1)), "code": str(profile.get("friend_code", ""))})
+			"c": str(profile.get("c", "")), "s": str(profile.get("s", "classic")), "lv": int(profile.get("lv", 1)), "code": str(profile.get("friend_code", "")), "rating": int(profile.get("rating", 0)), "tier": str(profile.get("tier", ""))})
 	return {"code": code, "members": list, "running": room["arena"] != null, "min": min_players, "max": MAX_MEMBERS,
 		"countdown": maxf(float(room.get("countdown", -1.0)), -1.0)}
 

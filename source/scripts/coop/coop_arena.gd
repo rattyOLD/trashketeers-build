@@ -59,6 +59,7 @@ var _spawn_left := 0
 var _spawn_timer := 0.0
 var _rng := RandomNumberGenerator.new()
 var _waves_cleared := 0
+var left: Dictionary = {}   # id -> статистика ушедших игроков
 var _hp_mult := 1.0
 var _dmg_mult := 1.0
 var _spd_mult := 1.0
@@ -95,10 +96,13 @@ func type_names() -> Array[String]:
 func add_player(id: int) -> void:
 	var index := players.size()
 	players[id] = {"x": -80.0 + 160.0 * float(index), "y": 0.0, "hp": PLAYER_HP, "downed": false, "bleed": 0.0, "revive": 0.0,
-		"fire_cd": 0.0, "aim": 0.0, "in_x": 0.0, "in_y": 0.0, "kills": 0, "damage": 0.0, "alive": true}
+		"fire_cd": 0.0, "aim": 0.0, "in_x": 0.0, "in_y": 0.0, "kills": 0, "damage": 0.0, "alive": true, "revives": 0, "downs": 0}
 
 
+## Ушедший посреди забега: его статистика остаётся для итогов (награды нет, рейтинг штрафуется).
 func remove_player(id: int) -> void:
+	if players.has(id):
+		left[id] = players[id]
 	players.erase(id)
 	bots.erase(id)
 
@@ -190,7 +194,10 @@ func results() -> Dictionary:
 		var p: Dictionary = players[id]
 		var coins := mini(int(p["kills"]) + _waves_cleared * 10 + (50 if won else 0), REWARD_COINS_CAP)
 		var xp := mini(int(float(p["damage"]) / 40.0) + _waves_cleared * 5, REWARD_XP_CAP)
-		out[id] = {"kills": int(p["kills"]), "damage": int(float(p["damage"])), "coins": coins, "xp": xp}
+		out[id] = {"kills": int(p["kills"]), "damage": int(float(p["damage"])), "coins": coins, "xp": xp, "revives": int(p["revives"]), "downs": int(p["downs"]), "left": false}
+	for id: int in left:
+		var l: Dictionary = left[id]
+		out[id] = {"kills": int(l["kills"]), "damage": int(float(l["damage"])), "coins": 0, "xp": 0, "revives": int(l["revives"]), "downs": int(l["downs"]), "left": true}
 	return {"won": won, "waves_cleared": _waves_cleared, "seconds": int(time), "players": out}
 
 
@@ -231,6 +238,7 @@ func _tick_players(dt: float) -> void:
 
 func _tick_revive(id: int, p: Dictionary, dt: float) -> void:
 	var helper := false
+	var helper_id := -1
 	var pos := Vector2(float(p["x"]), float(p["y"]))
 	for other_id: int in players:
 		if other_id == id:
@@ -238,6 +246,7 @@ func _tick_revive(id: int, p: Dictionary, dt: float) -> void:
 		var o: Dictionary = players[other_id]
 		if bool(o["alive"]) and not bool(o["downed"]) and Vector2(float(o["x"]), float(o["y"])).distance_to(pos) <= REVIVE_RANGE:
 			helper = true
+			helper_id = other_id
 			break
 	if helper:
 		p["revive"] = float(p["revive"]) + dt
@@ -246,6 +255,8 @@ func _tick_revive(id: int, p: Dictionary, dt: float) -> void:
 			p["hp"] = REVIVE_HP
 			p["revive"] = 0.0
 			p["bleed"] = 0.0
+			if players.has(helper_id):
+				(players[helper_id] as Dictionary)["revives"] = int((players[helper_id] as Dictionary)["revives"]) + 1
 			player_revived.emit(id)
 	else:
 		p["revive"] = maxf(float(p["revive"]) - dt, 0.0)
@@ -390,6 +401,7 @@ func _hurt_player(id: int, amount: float) -> void:
 	p["hp"] = maxf(float(p["hp"]) - amount, 0.0)
 	if float(p["hp"]) <= 0.0:
 		p["downed"] = true
+		p["downs"] = int(p["downs"]) + 1
 		p["bleed"] = 0.0
 		p["revive"] = 0.0
 		player_downed.emit(id)

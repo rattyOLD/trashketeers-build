@@ -804,6 +804,30 @@ func _call(method: int, path: String, body: Variant, extra: PackedStringArray = 
 	return reply
 
 
+## Забрать начисленные сервером награды за кооп. {"ok", "coins", "xp", "runs", "rating", "tier", "last_delta", "last_run_age"} или {} при сбое.
+func coop_claim_rewards() -> Dictionary:
+	var result := await _rpc("coop_claim_rewards", {})
+	return result["data"] as Dictionary if bool(result["ok"]) and result["data"] is Dictionary else {}
+
+
+## {"ok", "rating", "tier", "season", "runs", "best_wave"} или {}.
+func coop_my_rating() -> Dictionary:
+	var result := await _rpc("coop_my_rating", {})
+	return result["data"] as Dictionary if bool(result["ok"]) and result["data"] is Dictionary else {}
+
+
+## scope: "friends" или "global". Строки: {place, nickname, rating, tier, mine}.
+func coop_top(scope: String) -> Array:
+	return _rows(await _rpc("coop_top", {"p_scope": scope}))
+
+
+## POST от имени игрового сервера (ключ service_role берётся из окружения VPS и больше нигде не хранится).
+func post_service(path: String, body: Dictionary, service_key: String) -> Dictionary:
+	var headers := PackedStringArray(["apikey: " + service_key, "Authorization: Bearer " + service_key, "Content-Type: application/json"])
+	var reply := await _raw(HTTPClient.METHOD_POST, URL + path, headers, JSON.stringify(body))
+	return {"ok": bool(reply["ok"]), "code": int(reply["code"]), "data": reply["data"]}
+
+
 ## Токен текущей сессии (для входа на игровой сервер). Пустая строка, если сессии нет.
 func access_token() -> String:
 	return _access

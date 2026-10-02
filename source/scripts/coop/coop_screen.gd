@@ -41,6 +41,9 @@ var _friends_box: VBoxContainer
 var _tab := "friends"          # friends | recent | requests
 var _requests: Array = []
 var _failed_note := ""
+var _pending_checked := false
+var _top_scope := "friends"
+var _top: Array = []
 
 
 ## Адрес игрового сервера: настройка тестера, иначе data/platform.json. Пусто: комнат на сервере пока нет.
@@ -156,7 +159,7 @@ func _show_lobby() -> void:
 			other = m
 	var online := not members.is_empty()
 	if me.is_empty():
-		me = {"name": SaveService.get_nickname(), "c": SaveService.get_character_id(), "s": SaveService.get_selected_skin(), "lv": SaveService.get_account_level(), "ready": false, "host": true}
+		me = {"name": SaveService.get_nickname(), "c": SaveService.get_character_id(), "s": SaveService.get_selected_skin(), "lv": SaveService.get_account_level(), "ready": false, "host": true, "rating": int(SaveService.data.get("coop_rating", 0)), "tier": str(SaveService.data.get("coop_tier", "Ржавый"))}
 	var slots := HBoxContainer.new()
 	slots.add_theme_constant_override("separation", 14)
 	slots.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -193,6 +196,7 @@ func _show_lobby() -> void:
 	if SaveService.get_insider() >= 0:
 		_body.add_child(_host_field())   # только для тестеров, внизу
 	_load_friends()
+	_claim_pending()
 
 
 ## Показ лобби с выдуманной комнатой (для скриншотов и проверки вёрстки, адрес #coopdemo).
@@ -254,6 +258,8 @@ func _slot_card(info: Dictionary, color: Color, is_me: bool) -> Control:
 	name_label.clip_text = true
 	column.add_child(name_label)
 	column.add_child(UiStyle.label("УР. %d  ·  %s" % [int(info.get("lv", 1)), MenuPopups.Profile.rank_for(int(info.get("lv", 1)))] if not bool(info.get("bot", false)) else "учебный", 17, UiStyle.GOLD, 4))
+	if not bool(info.get("bot", false)) and not str(info.get("tier", "")).is_empty():
+		column.add_child(UiStyle.label("%s  ·  %d" % [str(info.get("tier", "")), int(info.get("rating", 0))], 16, Color("#ff9a3d"), 4))
 	var state := "ГОТОВ" if ready else "ждёт"
 	if bool(info.get("bot", false)):
 		state = "всегда готов"
@@ -342,7 +348,7 @@ func _friends_panel() -> Control:
 	margin.add_child(column)
 	var tabs := HBoxContainer.new()
 	tabs.add_theme_constant_override("separation", 8)
-	var tab_defs := [["friends", "ДРУЗЬЯ"], ["recent", "НЕДАВНИЕ"], ["requests", "ЗАЯВКИ" if _requests.is_empty() else "ЗАЯВКИ %d" % _requests.size()]]
+	var tab_defs := [["friends", "ДРУЗЬЯ"], ["recent", "НЕДАВНИЕ"], ["requests", "ЗАЯВКИ" if _requests.is_empty() else "ЗАЯВКИ %d" % _requests.size()], ["top", "ТОП"]]
 	for def: Array in tab_defs:
 		var active := _tab == str(def[0])
 		var tab := UiStyle.button(str(def[1]), UiStyle.HOT if active else UiStyle.PANEL_LIGHT, 16, Vector2(0, 46))
@@ -408,7 +414,9 @@ func _render_friends() -> void:
 	if not Cloud.has_code() and not Net.insecure_test and _friends.is_empty():
 		_friends_box.add_child(_wrap("Создай аккаунт в настройках, и друзья появятся здесь."))
 		return
-	if _tab == "recent":
+	if _tab == "top":
+		_render_top()
+	elif _tab == "recent":
 		_render_recent()
 	elif _tab == "requests":
 		_render_requests()
@@ -418,6 +426,52 @@ func _render_friends() -> void:
 		for friend: Variant in _friends:
 			if friend is Dictionary:
 				_friends_box.add_child(_friend_row(friend as Dictionary))
+
+
+## Топ сезона: среди друзей или общий. Очки считает сервер.
+func _render_top() -> void:
+	var switch := HBoxContainer.new()
+	switch.add_theme_constant_override("separation", 8)
+	for def: Array in [["friends", "СРЕДИ ДРУЗЕЙ"], ["global", "ВСЕ ИГРОКИ"]]:
+		var b := UiStyle.button(str(def[1]), UiStyle.HOT if _top_scope == str(def[0]) else UiStyle.PANEL_LIGHT, 15, Vector2(0, 42))
+		b.name = "TopScope_" + str(def[0])
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.pressed.connect(func() -> void:
+			_top_scope = str(def[0])
+			_load_top())
+		switch.add_child(b)
+	_friends_box.add_child(switch)
+	if _top.is_empty():
+		_friends_box.add_child(_wrap("В этом сезоне пока никого. Сыграй забег вдвоём, и ты в таблице."))
+		_load_top.call_deferred()
+		return
+	for row_data: Variant in _top:
+		if not row_data is Dictionary:
+			continue
+		var d := row_data as Dictionary
+		var mine := bool(d.get("mine", false))
+		var panel := PanelContainer.new()
+		panel.name = "Top_%d" % int(d.get("place", 0))
+		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#3a2f12") if mine else Color("#2a2046"), UiStyle.GOLD if mine else UiStyle.OUTLINE, 3, 14))
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 10)
+		panel.add_child(row)
+		var place := UiStyle.label(str(int(d.get("place", 0))), 22, UiStyle.GOLD, 5)
+		place.custom_minimum_size = Vector2(44, 0)
+		row.add_child(place)
+		var name_label := UiStyle.label(str(d.get("nickname", "Енот")), 20, UiStyle.TEXT, 5)
+		name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		name_label.clip_text = true
+		row.add_child(name_label)
+		row.add_child(UiStyle.label("%s  ·  %d" % [str(d.get("tier", "")), int(d.get("rating", 0))], 16, Color("#ff9a3d"), 4))
+		_friends_box.add_child(panel)
+
+
+func _load_top() -> void:
+	_top = await Cloud.coop_top(_top_scope)
+	if _tab == "top":
+		_render_friends()
 
 
 func _friend_codes() -> Array:
@@ -863,8 +917,16 @@ func _show_results(results: Dictionary) -> void:
 		var who := str(names.get(id, names.get(int(id), "Енот")))
 		_body.add_child(UiStyle.label("%s: убито %d, урон %d" % [who, int(p["kills"]), int(p["damage"])], 22, UiStyle.TEXT, 5))
 		if not bool(results.get("practice", false)):
-			_body.add_child(UiStyle.label("награда: %d монет, %d опыта" % [int(p["coins"]), int(p["xp"])], 18, UiStyle.GOLD, 4))
-	_body.add_child(_wrap("Тренировка: награды не выдаются." if bool(results.get("practice", false)) else "Награды проверит и выдаст сервер."))
+			var extra := "  ·  подняла напарника: %d" % int(p.get("revives", 0)) if int(p.get("revives", 0)) > 0 else ""
+			_body.add_child(UiStyle.label("награда по расчёту: %d монет, %d опыта%s" % [int(p["coins"]), int(p["xp"]), extra], 17, UiStyle.TEXT_DIM, 4))
+	if bool(results.get("practice", false)):
+		_body.add_child(_wrap("Тренировка: награды и очки не выдаются."))
+	else:
+		var reward_box := VBoxContainer.new()
+		reward_box.name = "RewardBox"
+		reward_box.add_theme_constant_override("separation", 6)
+		_body.add_child(reward_box)
+		_claim_reward(reward_box)
 	var again := UiStyle.button("В МЕНЮ КООПА", UiStyle.HOT, 24, Vector2(0, 66))
 	again.pressed.connect(func() -> void:
 		if _net != null and mode == Mode.RESULTS and not _room.is_empty():
@@ -873,6 +935,71 @@ func _show_results(results: Dictionary) -> void:
 		else:
 			_show_menu())
 	_body.add_child(again)
+
+
+## Награды и очки считает и записывает сервер; клиент только забирает своё (один раз). Сервер пишет в базу через секунду-две, поэтому спрашиваем несколько раз.
+func _claim_reward(box: VBoxContainer) -> void:
+	var status := UiStyle.label("Сервер считает награду...", 20, UiStyle.TEXT_DIM, 4)
+	status.name = "RewardStatus"
+	box.add_child(status)
+	if not Cloud.has_code():
+		status.text = "Награды выдаются игрокам с аккаунтом."
+		return
+	for attempt in 7:
+		await get_tree().create_timer(1.5 if attempt == 0 else 2.0).timeout
+		if not is_instance_valid(status):
+			return
+		var got := await Cloud.coop_claim_rewards()
+		if not bool(got.get("ok", false)):
+			continue
+		var fresh := int(got.get("last_run_age", -1))
+		if int(got.get("runs", 0)) > 0 or (fresh >= 0 and fresh < 90 and attempt >= 1):
+			_apply_claim(got)
+			if is_instance_valid(status):
+				_show_claim(box, status, got)
+			return
+	if is_instance_valid(status):
+		status.text = "Не дождались сервера. Награда не пропадёт: заберёшь её при следующем входе в кооп."
+
+
+func _apply_claim(got: Dictionary) -> void:
+	var coins := int(got.get("coins", 0))
+	var xp := int(got.get("xp", 0))
+	if coins > 0:
+		SaveService.add_coins(coins)
+	if xp > 0:
+		SaveService.add_account_xp(xp)
+	SaveService.data["coop_rating"] = int(got.get("rating", 0))
+	SaveService.data["coop_tier"] = str(got.get("tier", "Ржавый"))
+	SaveService.save_data()
+
+
+func _show_claim(box: VBoxContainer, status: Label, got: Dictionary) -> void:
+	var delta := int(got.get("last_delta", 0))
+	status.text = "Получено: %d монет, %d опыта" % [int(got.get("coins", 0)), int(got.get("xp", 0))]
+	status.add_theme_color_override("font_color", UiStyle.GOLD)
+	var rating := UiStyle.label("Рейтинг коопа: %d (%s%d)  ·  %s" % [int(got.get("rating", 0)), "+" if delta >= 0 else "", delta, str(got.get("tier", ""))], 22, Color("#35c46a") if delta >= 0 else Color("#ff4d6d"), 5)
+	rating.name = "RatingLine"
+	box.add_child(rating)
+
+
+## При входе в лобби: забираем награды, которые не успели получить после прошлых забегов, и обновляем свой рейтинг.
+func _claim_pending() -> void:
+	if _pending_checked or not Cloud.has_code():
+		return
+	_pending_checked = true
+	var got := await Cloud.coop_claim_rewards()
+	if not bool(got.get("ok", false)) or not is_inside_tree():
+		return
+	if int(got.get("coins", 0)) > 0 or int(got.get("xp", 0)) > 0:
+		_apply_claim(got)
+		_toast("Получено за кооп: %d монет, %d опыта" % [int(got.get("coins", 0)), int(got.get("xp", 0))])
+	else:
+		SaveService.data["coop_rating"] = int(got.get("rating", 0))
+		SaveService.data["coop_tier"] = str(got.get("tier", "Ржавый"))
+		SaveService.save_data()
+	if mode == Mode.MENU or mode == Mode.ROOM:
+		_show_lobby()
 
 
 # =========================== вспомогательное ===========================

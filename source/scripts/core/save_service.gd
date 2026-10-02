@@ -114,6 +114,8 @@ const DEFAULTS := {
 	"coop_mute_until": 0,
 	"coop_muted_codes": [],
 	"coop_recent": [],
+	"coop_rating": 0,
+	"coop_tier": "Ржавый",
 	"survival_intro_seen": false,
 	"survival_unlock_seen": false,
 }
