@@ -761,6 +761,25 @@ func _call(method: int, path: String, body: Variant, extra: PackedStringArray = 
 	return reply
 
 
+## Проверка связи: что отвечает, а что нет. Возвращает короткий отчёт для экрана и для тестера.
+func ping() -> String:
+	var headers := PackedStringArray(["apikey: " + KEY])
+	var parts: Array[String] = []
+	var started := Time.get_ticks_msec()
+	var auth := await _raw(HTTPClient.METHOD_GET, URL + "/auth/v1/health", headers, "")
+	parts.append("вход: %s" % (("HTTP %d" % int(auth["code"])) if int(auth["code"]) > 0 else _raw_note))
+	var data := await _raw(HTTPClient.METHOD_GET, URL + "/rest/v1/", headers, "")
+	parts.append("база: %s" % (("HTTP %d" % int(data["code"])) if int(data["code"]) > 0 else _raw_note))
+	parts.append("%d мс" % (Time.get_ticks_msec() - started))
+	parts.append(Platform.build_label())
+	return " · ".join(parts)
+
+
+## Короткий код для тестера вместо скриншота.
+func error_code() -> String:
+	return ("[%s · %s]" % [_raw_note, Platform.build_label()]) if not _raw_note.is_empty() else ""
+
+
 func _raw(method: int, url: String, headers: PackedStringArray, body: String) -> Dictionary:
 	var request := HTTPRequest.new()
 	request.timeout = TIMEOUT

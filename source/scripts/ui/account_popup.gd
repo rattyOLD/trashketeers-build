@@ -101,7 +101,7 @@ func _render_guest() -> void:
 		elif result == "confirm":
 			_say("Сервер просит подтверждение почты: владельцу надо отключить Confirm email в Supabase (Authentication, Providers, Email).")
 		elif result == "offline":
-			_say("Нет связи с сервером. Попробуй позже.")
+			_say("Нет связи с сервером. Нажми «ПРОВЕРИТЬ СВЯЗЬ» и пришли код: %s" % Cloud.error_code())
 		else:
 			_say("Не получилось. Проверь логин (латиница, цифры, «_»)%s" % ((". Сервер ответил: " + Cloud.last_error.left(120)) if not Cloud.last_error.is_empty() else "")))
 	_body.add_child(create)
@@ -114,7 +114,7 @@ func _render_guest() -> void:
 			return
 		login.disabled = false
 		if result != "ok":
-			_say("Нет связи с сервером." if result == "offline" else "Логин или пароль не подошли.")
+			_say(("Нет связи с сервером. Нажми «ПРОВЕРИТЬ СВЯЗЬ». Код: %s" % Cloud.error_code()) if result == "offline" else "Логин или пароль не подошли.")
 			return
 		# Сначала читаем облако, и только потом синхронизируем профиль: иначе гостевой ник и статистика
 		# с этого устройства затёрли бы ник аккаунта на сервере.
@@ -143,6 +143,16 @@ func _render_guest() -> void:
 			Cloud.upload_save()
 			_say("Вход выполнен. На этом устройстве прогресса больше, чем в облаке, он сохранён в аккаунт."))
 	_body.add_child(login)
+	var check := UiStyle.button("ПРОВЕРИТЬ СВЯЗЬ", UiStyle.PANEL_LIGHT, 20, Vector2(0, 52))
+	check.pressed.connect(func() -> void:
+		check.disabled = true
+		_say("Проверяю...")
+		var report := await Cloud.ping()
+		if is_instance_valid(check):
+			check.disabled = false
+			DisplayServer.clipboard_set(report)
+			_say("%s\n(скопировано, вставь в чат)" % report))
+	_body.add_child(check)
 	_body.add_child(MenuPopups.small_hint("Запиши пароль: мы его не видим и вернуть не сможем. Если забудешь, поможет только DeV (сбросит на временный)."))
 
 

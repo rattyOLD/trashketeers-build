@@ -64,6 +64,15 @@ func _refresh() -> void:
 	recent.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	recent.pressed.connect(_load_errors)
 	erow.add_child(recent)
+	var copy := UiStyle.button("Копировать", UiStyle.PANEL_LIGHT, 20, Vector2(0, 54))
+	copy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	copy.pressed.connect(func() -> void:
+		DisplayServer.clipboard_set(_errors_label.text)
+		copy.text = "Скопировано"
+		get_tree().create_timer(1.5).timeout.connect(func() -> void:
+			if is_instance_valid(copy):
+				copy.text = "Копировать"))
+	erow.add_child(copy)
 	_list.add_child(erow)
 	_errors_label = _wrap("Игра сама присылает сюда ошибки, без Excel. Нужен SQL v15.")
 	_list.add_child(_errors_label)
