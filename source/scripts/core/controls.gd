@@ -57,10 +57,10 @@ static func default_config(left_handed: bool = false) -> Dictionary:
 		"layout": {
 			"dash": {"x": cx, "y": 0.74, "s": 1.0},
 			"slots": {"x": cx, "y": 0.54, "s": 1.0},
-			"interact": {"x": 0.5, "y": 0.8, "s": 1.0},
+			"interact": {"x": 0.5, "y": 0.62, "s": 1.0},
 		},
 		"hud": {},
-		"layout_v": 6,
+		"layout_v": 7,
 		"keys": {},
 		"presets": {},
 	}
@@ -102,6 +102,12 @@ static func config() -> Dictionary:
 		var low: Dictionary = layout["interact"]
 		if float(low["y"]) < 0.7 and float(low["y"]) > 0.25:
 			low["y"] = 0.8
+	if int(stored.get("layout_v", 1)) < 7:
+		stored["layout_v"] = 7
+		# Кнопка «ВЗЯТЬ» стояла слишком низко: стандартное положение переносим ближе к центру экрана.
+		var closer: Dictionary = layout["interact"]
+		if is_equal_approx(float(closer["y"]), 0.8):
+			closer["y"] = 0.62
 	return stored
 
 
