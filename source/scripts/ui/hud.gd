@@ -95,7 +95,7 @@ var _story_bar: StoryBar
 var _minimap: Minimap
 var _toast_queue: Array = []
 var _toast_busy := false
-var _toast_y := 640.0 if Orient.portrait else 440.0
+var _toast_y := 700.0 if Orient.portrait else 440.0
 var _minimal := false
 var _wanted_label: Label
 var _low_hp := false
@@ -129,13 +129,13 @@ func build(currency_icon: Texture2D, weapon: WeaponData) -> void:
 	_barks.custom_minimum_size = Vector2(400, 150)
 	_barks.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	_left_column.add_child(_barks)
-	_rail_combo = UiStyle.label("", 28, UiStyle.GOLD, 8)
+	_rail_combo = UiStyle.label("", 22, UiStyle.GOLD, 8)
 	_rail_combo.anchor_left = 0.0
 	_rail_combo.anchor_right = 0.0
 	_rail_combo.offset_left = 18.0
 	_rail_combo.offset_right = 18.0 + LEFT_W
-	_rail_combo.offset_top = 214.0
-	_rail_combo.offset_bottom = 250.0
+	_rail_combo.offset_top = 224.0
+	_rail_combo.offset_bottom = 254.0
 	_rail_combo.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_rail_combo.visible = false
 	_root.add_child(_rail_combo)
@@ -247,8 +247,8 @@ func set_story_layout(minimap: Minimap) -> void:
 	_wave_box.visible = false
 	_enemies_chip.visible = false
 	_toast_y = 700.0 if Orient.portrait else 440.0
-	_rail_combo.offset_top = 456.0
-	_rail_combo.offset_bottom = 496.0
+	_rail_combo.offset_top = 480.0
+	_rail_combo.offset_bottom = 512.0
 	_story_bar = StoryBar.new()
 	_story_bar.compact()
 	_bars_box.add_child(_story_bar)
@@ -406,7 +406,7 @@ func set_wave(number: int, enemies_left: int, chapter: int = 0, alive: int = -1)
 		_wave_box.visible = false
 	_enemies_chip.visible = enemies_left > 0 and not _minimal and _story_bar == null
 	# Сначала волна, ниже: сколько осталось убить и сколько врагов сейчас на карте.
-	_enemies_label.text = ("%s\nосталось %d · на карте %d" % [wave_text, enemies_left, alive]) if alive >= 0 else ("%s\nосталось %d" % [wave_text, enemies_left])
+	_enemies_label.text = "Волна %d\nВрагов %d" % [number, enemies_left]
 
 
 ## Сюжетный режим без ио-механик: скрываем опыт и уровень.
@@ -659,7 +659,7 @@ func set_rail_combo(count: int) -> void:
 		_rail_combo.visible = false
 		return
 	_rail_combo.visible = true
-	_rail_combo.text = "РЕЛЬС-КОМБО ×%d" % count
+	_rail_combo.text = "РЕЛЬС-КОМБО ×%d · подряд" % count
 	var heat := clampf(float(count) / 60.0, 0.0, 1.0)
 	_rail_combo.add_theme_color_override("font_color", UiStyle.GOLD.lerp(Color("#ff4fd8"), heat))
 	_rail_combo.pivot_offset = _rail_combo.size * 0.5
@@ -761,10 +761,11 @@ func show_banner(text: String, color: Color, duration: float = 2.2) -> void:
 
 ## Заставка волны: крупное «ВОЛНА N» влетает сверху, подзаголовок — снизу.
 func show_wave_intro(number: int, title: String, is_boss: bool, chapter: int = 0) -> void:
-	_wave_title.text = "ГЛАВА %d · ВОЛНА %d" % [chapter, number] if chapter > 0 else "ВОЛНА %d" % number
-	_wave_title.add_theme_font_size_override("font_size", (78 if Orient.portrait else 56) if chapter <= 0 else (50 if Orient.portrait else 40))
+	_wave_title.text = "ВОЛНА %d" % number
+	_wave_title.add_theme_font_size_override("font_size", 78 if Orient.portrait else 56)
 	_wave_title.add_theme_color_override("font_color", UiStyle.DANGER if is_boss else UiStyle.GOLD)
-	_wave_sub.text = ("БОСС: " + title) if is_boss else title
+	var sub := ("БОСС: " + title) if is_boss else title
+	_wave_sub.text = ("Глава %d · %s" % [chapter, sub]) if chapter > 0 else sub
 	_animate_titles(1.0)
 
 

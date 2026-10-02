@@ -957,12 +957,18 @@
     "picnic_table",
     "cake_cart",
     "fountain",
-    "planter"
+    "planter",
+    "m2_booth",
+    "m2_press",
+    "m2_counter"
    ],
    "cover_small": [
     "umbrella",
     "column",
-    "cash_pile"
+    "cash_pile",
+    "m2_cart",
+    "m2_register",
+    "m2_teller"
    ],
    "flat": [
     "r_railing",
@@ -976,7 +982,8 @@
     "umbrella": 3,
     "column": 2,
     "picnic_table": 2,
-    "cake_cart": 2
+    "cake_cart": 2,
+    "d_safe": 3
    },
    "boss": "mud_magnate",
    "escort": {
@@ -1215,12 +1222,18 @@
     "picnic_table",
     "cake_cart",
     "fountain",
-    "planter"
+    "planter",
+    "m2_booth",
+    "m2_press",
+    "m2_counter"
    ],
    "cover_small": [
     "umbrella",
     "column",
-    "cash_pile"
+    "cash_pile",
+    "m2_cart",
+    "m2_register",
+    "m2_teller"
    ],
    "flat": [
     "r_railing",
@@ -1234,7 +1247,8 @@
     "umbrella": 3,
     "column": 2,
     "picnic_table": 2,
-    "cake_cart": 2
+    "cake_cart": 2,
+    "d_safe": 3
    },
    "boss": "mud_magnate",
    "escort": {
@@ -1473,12 +1487,18 @@
     "picnic_table",
     "cake_cart",
     "fountain",
-    "planter"
+    "planter",
+    "m2_booth",
+    "m2_press",
+    "m2_counter"
    ],
    "cover_small": [
     "umbrella",
     "column",
-    "cash_pile"
+    "cash_pile",
+    "m2_cart",
+    "m2_register",
+    "m2_teller"
    ],
    "flat": [
     "r_railing",
@@ -1492,7 +1512,8 @@
     "umbrella": 3,
     "column": 2,
     "picnic_table": 2,
-    "cake_cart": 2
+    "cake_cart": 2,
+    "d_safe": 3
    },
    "boss": "mud_magnate",
    "escort": {

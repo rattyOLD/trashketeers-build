@@ -770,6 +770,84 @@
         "effect": "explode",
         "sound": "explosion"
       }
+    },
+    "m2_cart": {
+      "texture": "res://assets/props/m2/gold_cart.png",
+      "width": 90,
+      "footprint": [
+        72,
+        36
+      ],
+      "shadow": 32,
+      "flip": true
+    },
+    "m2_register": {
+      "texture": "res://assets/props/m2/cash_register.png",
+      "width": 64,
+      "footprint": [
+        52,
+        30
+      ],
+      "shadow": 26,
+      "flip": true
+    },
+    "m2_booth": {
+      "texture": "res://assets/props/m2/security_booth.png",
+      "width": 110,
+      "footprint": [
+        90,
+        44
+      ],
+      "shadow": 40,
+      "flip": true
+    },
+    "m2_press": {
+      "texture": "res://assets/props/m2/coin_press.png",
+      "width": 96,
+      "footprint": [
+        78,
+        40
+      ],
+      "shadow": 34,
+      "flip": true
+    },
+    "m2_counter": {
+      "texture": "res://assets/props/m2/bank_counter.png",
+      "width": 130,
+      "footprint": [
+        110,
+        36
+      ],
+      "shadow": 36,
+      "flip": true
+    },
+    "m2_teller": {
+      "texture": "res://assets/props/m2/teller_window.png",
+      "width": 110,
+      "footprint": [
+        92,
+        34
+      ],
+      "shadow": 34,
+      "flip": true
+    },
+    "d_safe": {
+      "texture": "res://assets/props/m2/safe_closed.png",
+      "width": 70,
+      "footprint": [
+        58,
+        34
+      ],
+      "shadow": 30,
+      "flip": true,
+      "destructible": {
+        "hp": 60,
+        "broken": "res://assets/props/m2/safe_broken.png",
+        "broken_width": 80.0,
+        "reward": 8,
+        "effect": "explode",
+        "sound": "explosion"
+      }
     }
   }
 }
