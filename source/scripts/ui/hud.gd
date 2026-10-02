@@ -92,7 +92,7 @@ var _story_bar: StoryBar
 var _minimap: Minimap
 var _toast_queue: Array = []
 var _toast_busy := false
-var _toast_y := 168.0 if Orient.portrait else 440.0
+var _toast_y := 640.0 if Orient.portrait else 440.0
 var _minimal := false
 var _wanted_label: Label
 var _low_hp := false
@@ -241,7 +241,7 @@ func set_story_layout(minimap: Minimap) -> void:
 	_xp_row.visible = false
 	_wave_box.visible = false
 	_enemies_chip.visible = false
-	_toast_y = 556.0 if Orient.portrait else 440.0
+	_toast_y = 700.0 if Orient.portrait else 440.0
 	_story_bar = StoryBar.new()
 	_story_bar.compact()
 	_bars_box.add_child(_story_bar)
@@ -252,7 +252,7 @@ func set_story_layout(minimap: Minimap) -> void:
 	_story_bar.chip_tapped.connect(func(chip: Control, text: String) -> void: _hint.show_for(chip, text))
 	_dock_barks()
 	if Orient.portrait:
-		UiStyle.anchor(_boss_bar, Vector2(0.5, 0.0), Rect2(-240, 440, 480, 84))
+		UiStyle.anchor(_boss_bar, Vector2(0.5, 0.0), Rect2(-240, 660, 480, 84))
 	else:
 		_boss_bar.anchor_left = 0.0
 		_boss_bar.anchor_right = 1.0
@@ -262,7 +262,7 @@ func set_story_layout(minimap: Minimap) -> void:
 		_boss_bar.offset_right = -300.0
 		_boss_bar.offset_top = 600.0
 		_boss_bar.offset_bottom = 684.0
-	UiStyle.anchor(_minimap_slot, Vector2(1.0, 0.0), Rect2(-150, 176, 132, 230) if Orient.portrait else Rect2(-150, 150, 132, 230))
+	UiStyle.anchor(_minimap_slot, Vector2(1.0, 0.0), Rect2(-190, 176, 172, 300) if Orient.portrait else Rect2(-150, 150, 132, 230))
 	_minimap = minimap
 	minimap.tapped.connect(func(overview: bool) -> void:
 		_hint.show_for(_minimap_slot, "Карта. Тап: %s." % ("крупный план" if overview else "вся карта")))
@@ -329,6 +329,12 @@ func set_xp(xp: int, needed: int, level: int) -> void:
 		_barks.say("level", true)
 	_level_last = level
 	_level_label.text = str(level)
+	# Медаль растёт влево, правый нижний угол остаётся приваренным к рамке: влезает до 999.
+	var wide := 54.0 if level >= 100 else 38.0
+	_level_label.add_theme_font_size_override("font_size", 17 if level >= 100 else 20)
+	_level_badge.custom_minimum_size = Vector2(wide, 36.0)
+	_level_badge.size = Vector2(wide, 36.0)
+	_level_badge.position = Vector2(136.0 - wide, 76.0)
 	_xp_title.text = "УР %d" % level
 	_xp_label.text = "%d/%d" % [xp, needed]
 
@@ -956,7 +962,16 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	var left := VBoxContainer.new()
 	left.add_theme_constant_override("separation", 6)
 	left.custom_minimum_size = Vector2(548 if Orient.portrait else 440, 0)
-	row.add_child(left)
+	if Orient.portrait:
+		# Контейнеры сбрасывают масштаб, поэтому колонка живёт в обёртке и увеличена вручную.
+		var wrap := Control.new()
+		wrap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		wrap.custom_minimum_size = Vector2(548.0 * 1.45, 0.0)
+		wrap.add_child(left)
+		left.scale = Vector2(1.45, 1.45)
+		row.add_child(wrap)
+	else:
+		row.add_child(left)
 	var gap := Control.new()
 	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -1021,8 +1036,8 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	medal.shadow_color = Color(0, 0, 0, 0.55)
 	medal.shadow_size = 3
 	_level_badge.add_theme_stylebox_override("panel", medal)
-	_level_badge.custom_minimum_size = Vector2(36, 36)
-	_level_badge.position = Vector2(72, 68)
+	_level_badge.custom_minimum_size = Vector2(38, 36)
+	_level_badge.position = Vector2(98, 76)
 	_level_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	head.add_child(_level_badge)
 	_level_label = UiStyle.label("1", 20, UiStyle.GOLD, 4)

@@ -16,7 +16,7 @@ func _ready() -> void:
 	if not story:
 		game.hud.set_wave(3, 12, 0, 25)
 		game.hud.set_kills(50)
-		game.hud.set_xp(280, 1000, 12)
+		game.hud.set_xp(280, 1000, int(OS.get_environment("HUD_LVL") if OS.get_environment("HUD_LVL") != "" else "12"))
 		game.hud.set_health(float(OS.get_environment("HUD_HP")) if OS.get_environment("HUD_HP") != "" else 100.0, 100.0)
 	if OS.get_environment("HUD_CHAT") == "1":
 		var barks: HudBarks = game.hud._barks

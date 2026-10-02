@@ -82,7 +82,12 @@ func say(event: String, force: bool = false) -> void:
 		pick = (pick + 1) % pool.size()
 	_last[event] = pick
 	var line: Array = pool[pick]
-	_push(str(line[0]), str(line[1]))
+	if not line.is_empty() and line[0] is Array:
+		# Диалог из двух реплик: каждая со своим именем.
+		for part: Array in line:
+			_push(str(part[0]), str(part[1]))
+	else:
+		_push(str(line[0]), str(line[1]))
 	_cool = COOLDOWN
 	_idle = _rng.randf_range(IDLE_MIN, IDLE_MAX)
 
