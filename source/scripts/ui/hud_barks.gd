@@ -27,7 +27,7 @@ func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_rng.randomize()
 	_panel = PanelContainer.new()
-	_panel.add_theme_stylebox_override("panel", UiStyle.box(Color(0.05, 0.03, 0.1, 0.72), Color(UiStyle.NEON, 0.6), 3, 12))
+	_panel.add_theme_stylebox_override("panel", UiStyle.box(Color(0.092, 0.088, 0.083, 0.72), Color(UiStyle.NEON, 0.6), 3, 12))
 	_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_panel.clip_contents = true

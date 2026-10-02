@@ -24,7 +24,7 @@ func _init() -> void:
 	_score = _score_chip.get_meta("value")
 	_lives_chip = _chip("ЖИЗНИ", Color("#ff5a7a"))
 	_lives = _lives_chip.get_meta("value")
-	_zone_chip = _chip("ЗОНА", Color("#5ff2ff"))
+	_zone_chip = _chip("ЗОНА", Color("#ffac56"))
 	_zone = _zone_chip.get_meta("value")
 	_foes_chip = _chip("ВРАГОВ", Color("#ff8a3d"))
 	_foes = _foes_chip.get_meta("value")
@@ -65,7 +65,7 @@ func hint_for(chip: Control) -> String:
 
 func _chip(caption: String, color: Color) -> PanelContainer:
 	var chip := PanelContainer.new()
-	var style := UiStyle.box(Color(0.08, 0.05, 0.16, 0.8), Color(color, 0.85), 3, 16)
+	var style := UiStyle.box(Color(0.147, 0.141, 0.132, 0.8), Color(color, 0.85), 3, 16)
 	style.set_content_margin_all(6)
 	style.content_margin_left = 12
 	style.content_margin_right = 12

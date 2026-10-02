@@ -189,7 +189,7 @@ func _make_pack(index: int, pack: Dictionary) -> Control:
 	amount_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(amount_label)
 	var price_text := str(pack["price"]) if gems else "%d неонит" % int(pack["cost"])
-	var price := UiStyle.label(price_text, 24, UiStyle.GOLD if gems else Color("#b8eaff"), 5)
+	var price := UiStyle.label(price_text, 24, UiStyle.GOLD if gems else Color("#ffd3a6"), 5)
 	price.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	price.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(price)

@@ -30,7 +30,7 @@ func _init(rewards: Array[Dictionary], chest_id: String, chest_color: Color, che
 	mouse_filter = Control.MOUSE_FILTER_STOP
 
 	var dim := ColorRect.new()
-	dim.color = Color(0.02, 0.0, 0.07, 0.94)
+	dim.color = Color(0.064, 0.062, 0.058, 0.94)
 	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
 	dim.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(dim)
@@ -143,7 +143,7 @@ func _make_card(reward: Dictionary) -> Control:
 	var color: Color = WeaponData.RARITY_COLORS.get(rarity, Color.WHITE)
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(560, 470)
-	panel.add_theme_stylebox_override("panel", UiStyle.box(Color(0.09, 0.06, 0.18, 0.98), color, 10, 30))
+	panel.add_theme_stylebox_override("panel", UiStyle.box(Color(0.166, 0.159, 0.149, 0.98), color, 10, 30))
 	var column := VBoxContainer.new()
 	column.alignment = BoxContainer.ALIGNMENT_CENTER
 	column.add_theme_constant_override("separation", 12)
@@ -151,8 +151,8 @@ func _make_card(reward: Dictionary) -> Control:
 	var header: String = str(WeaponData.RARITY_NAMES.get(rarity, rarity)).to_upper()
 	if str(reward.get("type", "")) == "xp":
 		header = "ОПЫТ АККАУНТА"
-		color = Color("#5cf3ff")
-		panel.add_theme_stylebox_override("panel", UiStyle.box(Color(0.06, 0.08, 0.2, 0.98), color, 10, 30))
+		color = Color("#ffab53")
+		panel.add_theme_stylebox_override("panel", UiStyle.box(Color(0.184, 0.177, 0.166, 0.98), color, 10, 30))
 	column.add_child(UiStyle.label(header, 30, color, 8))
 
 	var type := str(reward.get("type", ""))
@@ -259,7 +259,7 @@ func _show_summary() -> void:
 	_hint.text = ""
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(580, 0)
-	panel.add_theme_stylebox_override("panel", UiStyle.box(Color(0.09, 0.06, 0.18, 0.98), _chest_color, 8, 28))
+	panel.add_theme_stylebox_override("panel", UiStyle.box(Color(0.166, 0.159, 0.149, 0.98), _chest_color, 8, 28))
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 10)
 	panel.add_child(column)
@@ -381,9 +381,9 @@ class XpBadge:
 			var size := Vector2(150.0, 150.0 * art.get_height() / art.get_width()) * (1.0 + 0.04 * pulse)
 			draw_texture_rect(art, Rect2(c - size * 0.5 - Vector2(0, 6), size), false)
 			return
-		draw_colored_polygon(_hex(c, 70.0), Color("#0b3a4d"))
-		draw_colored_polygon(_hex(c, 62.0), Color("#1fc6df"))
-		draw_colored_polygon(_hex(c, 52.0), Color("#8ff3ff"))
+		draw_colored_polygon(_hex(c, 70.0), Color("#474440"))
+		draw_colored_polygon(_hex(c, 62.0), Color("#df7f1c"))
+		draw_colored_polygon(_hex(c, 52.0), Color("#ffc181"))
 		draw_polyline(_hex(c, 70.0) + PackedVector2Array([_hex(c, 70.0)[0]]), Color("#e8fdff"), 4.0, true)
 		var star := PackedVector2Array()
 		var center := c + Vector2(0, -12 if not _bare else 0)

@@ -52,7 +52,7 @@ func open(order: Dictionary, goals: Array) -> void:
 	scroll.add_child(list)
 	if not order.is_empty() and not str(order.get("title", "")).is_empty():
 		var reward := "Награда: %d монет и %d неонита" % [int(order.get("nuts", 0)), int(order.get("dust", 0))]
-		list.add_child(_card("ЗАКАЗ НЭЛЛ", str(order.get("title", "")), "Каждый день новый. " + reward, int(order.get("progress", 0)), int(order.get("goal", 1)), bool(order.get("done", false)), Color("#5ff2ff")))
+		list.add_child(_card("ЗАКАЗ НЭЛЛ", str(order.get("title", "")), "Каждый день новый. " + reward, int(order.get("progress", 0)), int(order.get("goal", 1)), bool(order.get("done", false)), Color("#ffac56")))
 	for goal: Dictionary in goals:
 		var title := str(goal.get("title", ""))
 		list.add_child(_card("ЦЕЛЬ МИССИИ", title, str(HINTS.get(title, "")), int(goal.get("progress", 0)), int(goal.get("goal", 1)), bool(goal.get("done", false)), Color("#ffd257")))
@@ -65,7 +65,7 @@ func open(order: Dictionary, goals: Array) -> void:
 func _card(tag: String, title: String, text: String, progress: int, goal: int, done: bool, color: Color) -> Control:
 	var accent := Color("#7cff6b") if done else color
 	var panel := PanelContainer.new()
-	var style := UiStyle.box(Color(0.1, 0.07, 0.2, 0.96), accent, 4, 20)
+	var style := UiStyle.box(Color(0.184, 0.177, 0.166, 0.96), accent, 4, 20)
 	style.set_content_margin_all(18)
 	panel.add_theme_stylebox_override("panel", style)
 	var box := VBoxContainer.new()

@@ -2,7 +2,7 @@ class_name Icons
 extends RefCounted
 ## Процедурные иконки валют (кэшируются): не тянем PNG ради 24-пиксельных значков.
 
-const OUTLINE := Color("#08151d")
+const OUTLINE := Color("#1b1a18")
 
 static var _star_dust: ImageTexture
 
@@ -22,7 +22,7 @@ static func star_dust() -> ImageTexture:
 			if star <= 1.18:
 				color = OUTLINE
 			if star <= 1.0:
-				color = Color("#fff4fe").lerp(Color("#b9eaff"), clampf(star, 0.0, 1.0))
+				color = Color("#fff4fe").lerp(Color("#ffd4a6"), clampf(star, 0.0, 1.0))
 			if p.length() < 2.5:
 				color = Color.WHITE
 			image.set_pixel(x, y, color)

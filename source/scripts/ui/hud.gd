@@ -401,7 +401,7 @@ func set_weapon(weapon: WeaponData) -> void:
 	_weapon_icon.set_weapon(weapon.icon, weapon.effect_color)
 	_weapon_name.text = weapon.get_title()
 	_weapon_name.add_theme_color_override("font_color", weapon.get_rarity_color())
-	_weapon_chip.add_theme_stylebox_override("panel", UiStyle.box(Color(0.08, 0.05, 0.15, 0.55), Color(weapon.get_rarity_color(), 0.8), 3, 16))
+	_weapon_chip.add_theme_stylebox_override("panel", UiStyle.box(Color(0.138, 0.132, 0.124, 0.55), Color(weapon.get_rarity_color(), 0.8), 3, 16))
 	UiStyle.pop_in(_weapon_chip, 0.4)
 
 
@@ -747,7 +747,7 @@ func show_wave_intro(number: int, title: String, is_boss: bool, chapter: int = 0
 
 func show_wave_cleared(bonus_nuts: int) -> void:
 	_wave_title.add_theme_font_size_override("font_size", 78 if Orient.portrait else 56)
-	_wave_title.text = "ВОЛНА ОЧИЩЕНА!"
+	_wave_title.text = "ВОЛНА ЗАЧИЩЕНА!"
 	_wave_title.add_theme_color_override("font_color", Color("#7cff6b"))
 	_wave_sub.text = "+%s · лечение +15%%" % SaveService.format_coins(bonus_nuts)
 	_animate_titles(0.9)
@@ -1008,7 +1008,7 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	_portrait.set_character(SaveService.get_character())
 	head.add_child(_portrait)
 	_level_badge = PanelContainer.new()
-	_level_badge.add_theme_stylebox_override("panel", UiStyle.box(Color("#0c1d29"), UiStyle.GOLD, 3, 10))
+	_level_badge.add_theme_stylebox_override("panel", UiStyle.box(Color("#262422"), UiStyle.GOLD, 3, 10))
 	_level_badge.custom_minimum_size = Vector2(40, 32)
 	_level_badge.position = Vector2(62, 70)
 	_level_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -1073,7 +1073,7 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 
 func _build_wave_chip() -> Control:
 	_wave_box = PanelContainer.new()
-	_wave_box.add_theme_stylebox_override("panel", UiStyle.box(Color(0.08, 0.05, 0.15, 0.6), Color(UiStyle.GOLD, 0.7), 3, 20))
+	_wave_box.add_theme_stylebox_override("panel", UiStyle.box(Color(0.138, 0.132, 0.124, 0.6), Color(UiStyle.GOLD, 0.7), 3, 20))
 	_wave_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	UiStyle.anchor(_wave_box, Vector2(1.0, 0.0), Rect2(-194, 140, 176, 34))
 	_wave_label = UiStyle.label("ВОЛНА 1", 15, UiStyle.GOLD, 4)
@@ -1085,7 +1085,7 @@ func _build_wave_chip() -> Control:
 ## Плашка шапки: иконка и подпись в рамке.
 func _chip(icon: Texture2D) -> PanelContainer:
 	var chip := PanelContainer.new()
-	chip.add_theme_stylebox_override("panel", UiStyle.box(Color(0.08, 0.05, 0.15, 0.72), Color(UiStyle.TEXT_DIM, 0.55), 3, 16))
+	chip.add_theme_stylebox_override("panel", UiStyle.box(Color(0.138, 0.132, 0.124, 0.72), Color(UiStyle.TEXT_DIM, 0.55), 3, 16))
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 6)
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -1157,7 +1157,7 @@ func _build_weapon_chip(weapon: WeaponData) -> Control:
 func _build_toast() -> Control:
 	_toast = PanelContainer.new()
 	_toast.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_toast.add_theme_stylebox_override("panel", UiStyle.box(Color(0.1, 0.06, 0.2, 0.92), UiStyle.GOLD, 4, 22))
+	_toast.add_theme_stylebox_override("panel", UiStyle.box(Color(0.184, 0.177, 0.166, 0.92), UiStyle.GOLD, 4, 22))
 	_toast.anchor_left = 0.5
 	_toast.anchor_right = 0.5
 	_toast.offset_left = -300.0
@@ -1297,7 +1297,7 @@ class DashButton:
 		if _max_charges > 1:
 			for i in _max_charges:
 				var dot := c + Vector2((i - (_max_charges - 1) * 0.5) * 22.0, r * 0.66)
-				draw_circle(dot, 7.0, Color(0.5, 1.0, 1.0, 0.95) if i < _charges else Color(0.1, 0.2, 0.3, 0.7))
+				draw_circle(dot, 7.0, Color(1.000, 0.730, 0.450, 0.95) if i < _charges else Color(0.276, 0.265, 0.248, 0.7))
 		var tip := c + Vector2(30, 0)
 		var arrow := PackedVector2Array([tip, c + Vector2(4, -22), c + Vector2(4, -9), c + Vector2(-20, -9), c + Vector2(-20, 9), c + Vector2(4, 9), c + Vector2(4, 22)])
 		draw_colored_polygon(arrow, Color(1, 1, 1, alpha))
@@ -1356,7 +1356,7 @@ class PausePanel:
 		box.add_child(_chips)
 
 		var sound := PanelContainer.new()
-		var sound_style := UiStyle.box(Color("#172e38"), Color(UiStyle.NEON, 0.35), 3, 18)
+		var sound_style := UiStyle.box(Color("#34312e"), Color(UiStyle.NEON, 0.35), 3, 18)
 		sound_style.set_content_margin_all(14)
 		sound.add_theme_stylebox_override("panel", sound_style)
 		box.add_child(sound)
@@ -1369,11 +1369,11 @@ class PausePanel:
 		var tools := HBoxContainer.new()
 		tools.add_theme_constant_override("separation", 10)
 		box.add_child(tools)
-		tools.add_child(_tool_button("ГРАФИКА", Color("#2a86c9"), func() -> void: _open_settings()))
-		tools.add_child(_tool_button("УПРАВЛЕНИЕ", Color("#6ab6d6"), func() -> void: _open_editor()))
+		tools.add_child(_tool_button("ГРАФИКА", Color("#c97926"), func() -> void: _open_settings()))
+		tools.add_child(_tool_button("УПРАВЛЕНИЕ", Color("#d69c5f"), func() -> void: _open_editor()))
 		tools.add_child(_tool_button("ТЕСТЕР", Color("#c98b1a"), func() -> void: _open_tester()))
 
-		_tips_button = UiStyle.button("", Color("#2d6a5a"), 22, Vector2(0, 60))
+		_tips_button = UiStyle.button("", Color("#625e58"), 22, Vector2(0, 60))
 		_tips_button.pressed.connect(func() -> void:
 			Tips.set_enabled(not Tips.enabled())
 			_refresh_tips_button())
@@ -1386,7 +1386,7 @@ class PausePanel:
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 12)
 		box.add_child(row)
-		var again := UiStyle.button("ЗАНОВО", UiStyle.HOT, 26, Vector2(0, 76))
+		var again := UiStyle.button("ПЕРЕЗАПУСК", UiStyle.HOT, 26, Vector2(0, 76))
 		again.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		again.pressed.connect(func() -> void:
 			visible = false
@@ -1435,7 +1435,7 @@ class PausePanel:
 			for part in parts:
 				var chip := PanelContainer.new()
 				chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-				chip.add_theme_stylebox_override("panel", UiStyle.box(Color("#172e38"), Color(UiStyle.GOLD, 0.55), 3, 14))
+				chip.add_theme_stylebox_override("panel", UiStyle.box(Color("#34312e"), Color(UiStyle.GOLD, 0.55), 3, 14))
 				chip.add_child(UiStyle.label(part, 22 if parts.size() > 1 else 24, UiStyle.TEXT, 5))
 				row.add_child(chip)
 			_chips.add_child(row)
@@ -1471,7 +1471,7 @@ class VolumeSlider:
 		slider.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		slider.custom_minimum_size = Vector2(0, 44)
 		slider.focus_mode = Control.FOCUS_NONE
-		var track := UiStyle.box(Color("#0f1e24"), UiStyle.OUTLINE, 3, 10)
+		var track := UiStyle.box(Color("#21201e"), UiStyle.OUTLINE, 3, 10)
 		track.content_margin_top = 6
 		track.content_margin_bottom = 6
 		slider.add_theme_stylebox_override("slider", track)

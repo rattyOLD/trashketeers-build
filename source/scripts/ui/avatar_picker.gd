@@ -202,8 +202,8 @@ class PortraitTile:
 	func _draw() -> void:
 		var r := minf(size.x, size.y - 30.0) * 0.5 - 4.0
 		var c := Vector2(size.x * 0.5, r + 4.0)
-		draw_circle(c, r, Color("#071b25"))
-		draw_circle(c, r - 3.0, Color("#1c4256"))
+		draw_circle(c, r, Color("#22211f"))
+		draw_circle(c, r - 3.0, Color("#4f4c47"))
 		var tex: Texture2D = null
 		if _path.is_empty() and _state == 0:
 			tex = MenuWidgets.Avatar.get_texture_for(SaveService.get_character(), SaveService.get_selected_skin())
@@ -221,8 +221,8 @@ class PortraitTile:
 		draw_string(font, Vector2(0, size.y - 8.0), _title if _state != 2 else "???", HORIZONTAL_ALIGNMENT_CENTER, size.x, 20, color)
 
 	func _draw_lock(c: Vector2) -> void:
-		draw_arc(c + Vector2(0, -6), 11.0, PI, TAU, 14, Color("#d8d0ff"), 5.0, true)
+		draw_arc(c + Vector2(0, -6), 11.0, PI, TAU, 14, Color("#ffdebb"), 5.0, true)
 		var body := Rect2(c + Vector2(-17, -6), Vector2(34, 26))
-		draw_rect(body.grow(3.0), Color("#071b25"))
-		draw_rect(body, Color("#ffd257") if _state == 1 else Color("#8eacb8"))
-		draw_circle(c + Vector2(0, 6), 4.0, Color("#071b25"))
+		draw_rect(body.grow(3.0), Color("#22211f"))
+		draw_rect(body, Color("#ffd257") if _state == 1 else Color("#b89c80"))
+		draw_circle(c + Vector2(0, 6), 4.0, Color("#22211f"))

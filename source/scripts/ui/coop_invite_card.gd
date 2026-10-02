@@ -37,7 +37,7 @@ func _init(invite: Dictionary = {}) -> void:
 
 func _ready() -> void:
 	var dim := ColorRect.new()
-	dim.color = Color(0.02, 0.0, 0.08, 0.78)
+	dim.color = Color(0.074, 0.071, 0.066, 0.78)
 	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(dim)
 	var center := CenterContainer.new()
@@ -47,7 +47,7 @@ func _ready() -> void:
 	var width := minf(GlassPopup.panel_width(), 520.0) - 60.0
 	var card := PanelContainer.new()
 	card.custom_minimum_size = Vector2(width, 0)
-	card.add_theme_stylebox_override("panel", UiStyle.box(Color("#162c36"), UiStyle.NEON, 6, 30))
+	card.add_theme_stylebox_override("panel", UiStyle.box(Color("#32302d"), UiStyle.NEON, 6, 30))
 	center.add_child(card)
 	var margin := MarginContainer.new()
 	for side in ["left", "right"]:
@@ -77,7 +77,7 @@ func _ready() -> void:
 	_bar_back = Control.new()
 	_bar_back.custom_minimum_size = Vector2(0, 10)
 	var back := ColorRect.new()
-	back.color = Color("#1b3d50")
+	back.color = Color("#4a4742")
 	back.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_bar_back.add_child(back)
 	_bar = ColorRect.new()
@@ -102,7 +102,7 @@ func _ready() -> void:
 		declined.emit()
 		queue_free())
 	column.add_child(decline)
-	var mute := UiStyle.button("ЗАГЛУШИТЬ ПРИГЛАШЕНИЯ", Color("#2b4f5e"), 16, Vector2(0, 42))
+	var mute := UiStyle.button("ЗАГЛУШИТЬ ПРИГЛАШЕНИЯ", Color("#56534e"), 16, Vector2(0, 42))
 	mute.name = "MuteInvite"
 	column.add_child(mute)
 	var options := VBoxContainer.new()

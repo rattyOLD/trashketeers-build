@@ -35,8 +35,8 @@ static func matches(query: String, haystack: String) -> bool:
 
 static func style(field: LineEdit, font_size: int) -> void:
 	field.add_theme_font_size_override("font_size", font_size)
-	field.add_theme_color_override("font_color", Color("#0c1d29"))
-	field.add_theme_color_override("font_placeholder_color", Color("#8a82a0"))
+	field.add_theme_color_override("font_color", Color("#262422"))
+	field.add_theme_color_override("font_placeholder_color", Color("#a08b75"))
 	field.add_theme_color_override("caret_color", Color("#ff8a3d"))
 	field.add_theme_stylebox_override("normal", UiStyle.box(Color("#ffffff"), UiStyle.OUTLINE, 4, 16))
 	field.add_theme_stylebox_override("focus", UiStyle.box(Color("#ffffff"), Color("#ff8a3d"), 4, 16))
@@ -54,17 +54,17 @@ static func attach_touch_input(field: LineEdit, title: String) -> void:
 static func style_dark(field: LineEdit) -> void:
 	field.set_meta("dark", true)
 	field.add_theme_color_override("font_color", Color("#f2ecff"))
-	field.add_theme_color_override("font_placeholder_color", Color("#8fa8b3"))
-	field.add_theme_stylebox_override("normal", UiStyle.box(Color("#162c36"), Color(UiStyle.NEON, 0.55), 3, 30))
-	field.add_theme_stylebox_override("focus", UiStyle.box(Color("#1a3642"), UiStyle.NEON, 3, 30))
+	field.add_theme_color_override("font_placeholder_color", Color("#b39a81"))
+	field.add_theme_stylebox_override("normal", UiStyle.box(Color("#32302d"), Color(UiStyle.NEON, 0.55), 3, 30))
+	field.add_theme_stylebox_override("focus", UiStyle.box(Color("#3d3a37"), UiStyle.NEON, 3, 30))
 
 
 static func restore_colors(field: LineEdit) -> void:
 	if field.has_meta("dark"):
 		field.add_theme_color_override("font_color", Color("#f2ecff"))
-		field.add_theme_color_override("font_placeholder_color", Color("#8fa8b3"))
+		field.add_theme_color_override("font_placeholder_color", Color("#b39a81"))
 		field.add_theme_color_override("caret_color", Color("#ff8a3d"))
 		return
-	field.add_theme_color_override("font_color", Color("#0c1d29"))
-	field.add_theme_color_override("font_placeholder_color", Color("#8a82a0"))
+	field.add_theme_color_override("font_color", Color("#262422"))
+	field.add_theme_color_override("font_placeholder_color", Color("#a08b75"))
 	field.add_theme_color_override("caret_color", Color("#ff8a3d"))

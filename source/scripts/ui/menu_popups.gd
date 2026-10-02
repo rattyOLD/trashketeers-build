@@ -292,7 +292,7 @@ class Shop:
 	var _query := ""
 
 	func _init(skins_mode: bool = false) -> void:
-		super("СКИНЫ" if skins_mode else "ГЕРОИ")
+		super("СКИНЫ" if skins_mode else "ОТРЯД")
 		_skins_mode = skins_mode
 		_balance = UiStyle.label("", 24, UiStyle.GOLD, 6)
 		content.add_child(_balance)
@@ -435,7 +435,7 @@ class Shop:
 		column.add_theme_constant_override("separation", 6)
 		panel.add_child(column)
 		var stage := PanelContainer.new()
-		stage.add_theme_stylebox_override("panel", UiStyle.box(Color(0.05, 0.03, 0.12, 0.9), Color(accent, 0.5), 2, 16))
+		stage.add_theme_stylebox_override("panel", UiStyle.box(Color(0.110, 0.106, 0.099, 0.9), Color(accent, 0.5), 2, 16))
 		stage.custom_minimum_size = Vector2(0, 230)
 		column.add_child(stage)
 		var preview := MenuWidgets.RaccoonPreview.new(skin, 1.35)
@@ -815,7 +815,7 @@ class Armory:
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 10)
 		column.add_child(row)
-		var icon := WeaponIcons.IconRect.new(weapon.icon, Color("#445860"), Vector2(130, 70))
+		var icon := WeaponIcons.IconRect.new(weapon.icon, Color("#58554f"), Vector2(130, 70))
 		row.add_child(_icon_frame(icon, weapon.get_rarity_color().darkened(0.3)))
 		var info := VBoxContainer.new()
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -854,9 +854,9 @@ class Upgrades:
 	extends GlassPopup
 	signal purchased
 	const COLORS := {
-		"power": "#ff4d6d", "stamina": "#69f0ae", "armor": "#40c4ff", "eye": "#ffe14d",
+		"power": "#ff4d6d", "stamina": "#69f0ae", "armor": "#ff9e3a", "eye": "#ffe14d",
 		"boots": "#7cffcb", "magnet": "#ff6bd6", "loot": "#ffd257",
-		"reroll": "#8ec5ff", "vest": "#ffb347", "drone": "#7cd4ff", "logistics": "#a8e5ff", "headstart": "#ff7a5c", "cash": "#a8ff5e", "radar": "#5cf3ff",
+		"reroll": "#ffc180", "vest": "#ffb347", "drone": "#ffb970", "logistics": "#ffcc97", "headstart": "#ff7a5c", "cash": "#a8ff5e", "radar": "#ffab53",
 	}
 	var _list: VBoxContainer
 	var _balance: Label
@@ -888,7 +888,7 @@ class Upgrades:
 	func _make_card(perk_id: String) -> Control:
 		var perk: Dictionary = SaveService.PERKS[perk_id]
 		var level := SaveService.get_perk_level(perk_id)
-		var color := Color(COLORS.get(perk_id, "#00e5ff"))
+		var color := Color(COLORS.get(perk_id, "#ff8200"))
 		var panel := PanelContainer.new()
 		panel.add_theme_stylebox_override("panel", UiStyle.box(UiStyle.PANEL_LIGHT, color, 4, 20))
 		var column := VBoxContainer.new()
@@ -1061,7 +1061,7 @@ class Profile:
 		grid.add_theme_constant_override("v_separation", 12)
 		grid.add_child(_tile("Убито крыс", _num(SaveService.get_stat("kills")), "skull", UiStyle.DANGER, false))
 		grid.add_child(_tile("Забегов", _num(SaveService.get_stat("runs")), "play", UiStyle.NEON, false))
-		grid.add_child(_tile("В игре", _duration(SaveService.get_stat("time_played")), "clock", Color("#89dbff"), false))
+		grid.add_child(_tile("В игре", _duration(SaveService.get_stat("time_played")), "clock", Color("#ffbe7b"), false))
 		grid.add_child(_tile("Монет собрано", _num(SaveService.get_stat("nuts_total")), "", UiStyle.GOLD, false))
 		list.add_child(grid)
 		var fav := _favorite_hero()
@@ -1219,7 +1219,7 @@ class Profile:
 	func _build_header() -> Control:
 		var level := SaveService.get_account_level()
 		var panel := PanelContainer.new()
-		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#1a3540"), Color("#c9722b"), 5, 24))
+		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#3b3935"), Color("#c9722b"), 5, 24))
 		var head := HBoxContainer.new()
 		head.add_theme_constant_override("separation", 18)
 		panel.add_child(head)
@@ -1247,7 +1247,7 @@ class Profile:
 		rank_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 		info.add_child(rank_label)
 		if int(SaveService.data.get("dragon_kills", 0)) > 0:
-			var lord := UiStyle.label("Владыка Тонкого Льда", 18, Color("#9fe8ff"), 5)
+			var lord := UiStyle.label("Владыка Тонкого Льда", 18, Color("#ffc88f"), 5)
 			lord.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 			info.add_child(lord)
 		var level_row := HBoxContainer.new()
@@ -1415,7 +1415,7 @@ class Profile:
 	func _tile(title: String, value: String, icon: String, accent: Color, big: bool) -> Control:
 		var panel := PanelContainer.new()
 		panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var box := UiStyle.box(Color("#1b3d50"), Color(accent, 0.75), 3, 16)
+		var box := UiStyle.box(Color("#4a4742"), Color(accent, 0.75), 3, 16)
 		panel.add_theme_stylebox_override("panel", box)
 		var body: BoxContainer = VBoxContainer.new() if big else HBoxContainer.new()
 		body.add_theme_constant_override("separation", 8 if not big else 2)
@@ -1454,7 +1454,7 @@ class Profile:
 			if tapped:
 				SoundManager.play(&"ui_click")
 				chronicle_requested.emit())
-		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#1b3d50"), Color(UiStyle.NEON, 0.7), 3, 16))
+		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#4a4742"), Color(UiStyle.NEON, 0.7), 3, 16))
 		var head := HBoxContainer.new()
 		head.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		var title := UiStyle.label("Летопись - читать", 24, UiStyle.TEXT, 6)
@@ -1474,7 +1474,7 @@ class Profile:
 			if tapped:
 				SoundManager.play(&"ui_click")
 				friends_requested.emit())
-		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#3e778f"), UiStyle.HOT, 4, 18))
+		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#847e76"), UiStyle.HOT, 4, 18))
 		var head := HBoxContainer.new()
 		head.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		head.add_theme_constant_override("separation", 12)
@@ -1509,7 +1509,7 @@ class Profile:
 			if tapped:
 				SoundManager.play(&"ui_click")
 				achievements_requested.emit())
-		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#1b3d50"), Color(UiStyle.GOLD, 0.7), 3, 16))
+		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#4a4742"), Color(UiStyle.GOLD, 0.7), 3, 16))
 		var column := VBoxContainer.new()
 		column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		column.add_theme_constant_override("separation", 6)

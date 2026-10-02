@@ -6,8 +6,8 @@ extends Control
 
 const BAR_HEIGHT := 34.0
 const WING_WIDTH := 70.0
-const OUTLINE := Color("#071b25")
-const WING_NEON := Color("#00ffff")
+const OUTLINE := Color("#22211f")
+const WING_NEON := Color("#ff8200")
 const WHITE_BAR := Color("#ffffff")
 const FURY_PINK := Color("#ff8a3d")
 const PLAIN_BAR := Color("#ffb020")
@@ -25,7 +25,7 @@ var _fury := false
 var _flash := 0.0
 var _time := 0.0
 var _font: Font
-var _back := UiStyle.box(Color("#0f1e24"), OUTLINE, 4, 10)
+var _back := UiStyle.box(Color("#21201e"), OUTLINE, 4, 10)
 var _fill := UiStyle.box(PLAIN_BAR, OUTLINE, 4, 10)
 
 
@@ -84,7 +84,7 @@ func _process(delta: float) -> void:
 func _draw() -> void:
 	var bar_rect := Rect2(WING_WIDTH, size.y - BAR_HEIGHT - 4.0, size.x - WING_WIDTH * 2.0, BAR_HEIGHT)
 	var title_pos := Vector2(0, bar_rect.position.y - 8.0)
-	var title_color := FURY_PINK if _fury else (Color("#bff6ff") if winged else Color("#ffd257"))
+	var title_color := FURY_PINK if _fury else (Color("#ffd6ac") if winged else Color("#ffd257"))
 	draw_string_outline(_font, title_pos, title, HORIZONTAL_ALIGNMENT_CENTER, size.x, 26, 8, OUTLINE)
 	draw_string(_font, title_pos, title, HORIZONTAL_ALIGNMENT_CENTER, size.x, 26, title_color)
 
@@ -110,8 +110,8 @@ func _draw() -> void:
 	if posture >= 0.0:
 		var pr := Rect2(bar_rect.position + Vector2(bar_rect.size.x * 0.15, bar_rect.size.y + 9.0), Vector2(bar_rect.size.x * 0.7, 9.0))
 		draw_rect(pr.grow(3.0), OUTLINE)
-		draw_rect(pr, Color("#0f1e24"))
-		var pcolor := Color("#ffe27a") if broken else Color("#5cf3ff").lerp(Color("#ffffff"), posture * 0.6)
+		draw_rect(pr, Color("#21201e"))
+		var pcolor := Color("#ffe27a") if broken else Color("#ffab53").lerp(Color("#ffffff"), posture * 0.6)
 		draw_rect(Rect2(pr.position, Vector2(pr.size.x * posture, pr.size.y)), pcolor)
 		if broken:
 			draw_string_outline(_font, Vector2(0, pr.end.y + 22.0), "ОГЛУШЁН", HORIZONTAL_ALIGNMENT_CENTER, size.x, 20, 6, OUTLINE)

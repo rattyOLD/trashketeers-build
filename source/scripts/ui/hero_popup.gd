@@ -20,7 +20,7 @@ var _reveal: UnlockReveal
 
 
 func _init() -> void:
-	super("ГЕРОИ")
+	super("ОТРЯД")
 	_balance = UiStyle.label("", 24, UiStyle.GOLD, 6)
 	content.add_child(_balance)
 	_list = MenuPopups.scroll_list(content)
@@ -95,7 +95,7 @@ func _build_stage(character: Dictionary, accent: Color, owned: bool) -> Control:
 	var skin: Dictionary = SaveService.get_skin()
 	_preview = MenuWidgets.RaccoonPreview.new(skin, 1.55, character)
 	_preview.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_preview.modulate = Color.WHITE if owned else Color(0.35, 0.35, 0.45, 1.0)
+	_preview.modulate = Color.WHITE if owned else Color(0.414, 0.397, 0.373, 1.0)
 	_stage.add_child(_preview)
 	_stage.gui_input.connect(func(event: InputEvent) -> void:
 		var tapped: bool = (event is InputEventMouseButton and event.pressed) or (event is InputEventScreenTouch and event.pressed)
@@ -231,7 +231,7 @@ func _build_stats(character: Dictionary, level: int, owned: bool) -> Control:
 		name_label.custom_minimum_size = Vector2(150, 0)
 		name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 		row.add_child(name_label)
-		var color := Color("#5be37d") if value > 0.001 else (Color("#ff6b6b") if value < -0.001 else Color("#9aa3c0"))
+		var color := Color("#5be37d") if value > 0.001 else (Color("#ff6b6b") if value < -0.001 else Color("#c0a68b"))
 		var bar := UiStyle.progress_bar(color, 16)
 		bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
@@ -294,7 +294,7 @@ func _build_actions(character: Dictionary, owned: bool) -> void:
 		button = UiStyle.button("ВЫБРАН", UiStyle.PANEL, 30, Vector2(0, 88))
 		button.disabled = true
 	else:
-		button = UiStyle.button("ВЫБРАТЬ", Color("#00a8c8"), 30, Vector2(0, 88))
+		button = UiStyle.button("ВЫБРАТЬ", Color("#c86600"), 30, Vector2(0, 88))
 		button.pressed.connect(func() -> void:
 			SaveService.select_character(id)
 			SoundManager.play(&"ui_confirm")

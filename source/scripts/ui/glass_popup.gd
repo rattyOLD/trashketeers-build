@@ -8,7 +8,7 @@ extends Control
 signal closed
 
 const CORNER := 28.0
-const BORDER := Color("#00e5ff")
+const BORDER := Color("#ff8200")
 
 static var _glass_shader: Shader
 ## Открытые окна по порядку: поле ввода браузера показывается только у верхнего (иначе оно висело бы поверх других окон).

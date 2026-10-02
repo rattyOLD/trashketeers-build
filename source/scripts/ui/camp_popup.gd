@@ -6,7 +6,7 @@ extends GlassPopup
 signal departed
 
 const TRADERS := {
-	"nell": {"name": "НЭЛЛ", "role": "Снабжение", "color": "#5ff2ff", "portrait": "res://assets/story/portraits/nell.png",
+	"nell": {"name": "НЭЛЛ", "role": "Снабжение", "color": "#ffac56", "portrait": "res://assets/story/portraits/nell.png",
 		"quote": "Всё по описи. Чай не продаётся. Он остыл."},
 	"monya": {"name": "КРОТ МОНЯ", "role": "Барыга с лопатой", "color": "#ffb347", "portrait": "",
 		"quote": "Не спрашивай, откуда. Спрашивай, сколько."},
@@ -51,7 +51,7 @@ func _init() -> void:
 ## Плашка-крючок: история продолжится в онлайне (НейроЕнот украл осколки). Пока только анонс.
 func _online_plate() -> Control:
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", UiStyle.box(Color(0.14, 0.07, 0.24, 0.95), Color("#96e0ff"), 4, 18))
+	panel.add_theme_stylebox_override("panel", UiStyle.box(Color(0.14, 0.07, 0.24, 0.95), Color("#ffc487"), 4, 18))
 	var label := UiStyle.label("Продолжи свою историю в онлайне: отомсти НейроЕноту и верни все 6 осколков.", 19, Color("#e9d6ff"), 4)
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.custom_minimum_size = Vector2(500, 0)

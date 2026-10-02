@@ -5,7 +5,7 @@ extends Control
 ## рисуются точки: Енот, враги, босс, ящики с оружием, портал.
 
 const REFRESH := 0.05
-const FRAME := Color("#00e5ff")
+const FRAME := Color("#ff8200")
 const RUST := Color("#c9722b")
 const RUST_DARK := Color("#5a2f14")
 const INSET := 9.0
@@ -18,7 +18,7 @@ signal enlarge_toggled(enlarged: bool)
 
 const RAIL_W := 10.0
 const TITLE_H := 18.0
-const ZONE_TINTS: Array[Color] = [Color("#2a86c9"), Color("#8a4fd6"), Color("#c9722b"), Color("#d63a4f")]
+const ZONE_TINTS: Array[Color] = [Color("#c97926"), Color("#8a4fd6"), Color("#c9722b"), Color("#d63a4f")]
 
 var story: StoryRun
 var overview := false
@@ -45,7 +45,7 @@ func setup(level: LevelSpawner, player: Player, enemies: EnemyManager, director:
 	_director = director
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	clip_contents = true
-	_panel = UiStyle.box(Color(0.05, 0.04, 0.1, 0.86), RUST, 4, 16)
+	_panel = UiStyle.box(Color(0.092, 0.088, 0.083, 0.86), RUST, 4, 16)
 	_panel.shadow_color = Color(0, 0, 0, 0.45)
 	_panel.shadow_size = 6
 	_inner = UiStyle.box(Color(0, 0, 0, 0), Color(FRAME, 0.55), 2, 10)
@@ -54,7 +54,7 @@ func setup(level: LevelSpawner, player: Player, enemies: EnemyManager, director:
 
 func set_story(run: StoryRun) -> void:
 	story = run
-	_panel.bg_color = Color(0.05, 0.04, 0.1, 0.5)
+	_panel.bg_color = Color(0.092, 0.088, 0.083, 0.5)
 	_panel.border_color = Color(RUST, 0.7)
 	_panel.shadow_size = 0
 	mouse_filter = Control.MOUSE_FILTER_STOP
@@ -95,16 +95,16 @@ func _zone_color(zone: int) -> Color:
 	var bank := _level.layout == "bank"
 	match zone:
 		LevelSpawner.Zone.EDGE:
-			return Color("#141226")
+			return Color("#23221f")
 		LevelSpawner.Zone.LANE:
-			return Color("#5a4a2a") if bank else Color("#2b3350")
+			return Color("#5a4a2a") if bank else Color("#4a4742")
 		LevelSpawner.Zone.LAWN:
-			return Color("#33502f") if bank else Color("#1f3a44")
+			return Color("#33502f") if bank else Color("#3f3c38")
 		LevelSpawner.Zone.BOSS:
 			return Color("#6b3a22") if bank else Color("#4a2440")
 		LevelSpawner.Zone.GATE:
-			return Color("#1d5a62")
-	return Color("#3d3424") if bank else Color("#1c1b36")
+			return Color("#5a5751")
+	return Color("#3d3424") if bank else Color("#32302d")
 
 
 func _build_image() -> Image:
@@ -143,7 +143,7 @@ func _draw() -> void:
 	var grid := Vector2(_level.grid_size)
 	var scale := minf(field.size.x / grid.x, field.size.y / grid.y)
 	var origin := field.position + (field.size - grid * scale) * 0.5
-	draw_rect(field, Color(0.02, 0.02, 0.06, 0.9))
+	draw_rect(field, Color(0.055, 0.053, 0.050, 0.9))
 	draw_texture_rect(_texture, Rect2(origin, grid * scale), false, Color(1, 1, 1, 0.95))
 	var y := origin.y
 	while y < origin.y + grid.y * scale:
@@ -159,7 +159,7 @@ func _draw() -> void:
 			if pickups.is_gold_at(i):
 				_diamond(origin, scale, at, 3.6, Color("#ff9a1f"))
 			elif pickups.is_xp_at(i):
-				_diamond(origin, scale, at, 2.2, Color("#5cf3ff"))
+				_diamond(origin, scale, at, 2.2, Color("#ffab53"))
 			else:
 				_dot(origin, scale, at, 1.7, Color("#ffd23f"), false)
 	if events != null:
@@ -235,7 +235,7 @@ func _draw_story() -> void:
 	var grid := Vector2(_level.grid_size)
 	var field := Rect2(INSET, INSET + TITLE_H, size.x - INSET * 2.0 - RAIL_W - 6.0, size.y - INSET * 2.0 - TITLE_H)
 	draw_string(font, Vector2(INSET + 2.0, INSET + 11.0), story.zone_name(), HORIZONTAL_ALIGNMENT_LEFT, size.x - INSET * 2.0, 11, Color("#ffd257"))
-	draw_rect(field, Color(0.02, 0.02, 0.06, 0.5))
+	draw_rect(field, Color(0.055, 0.053, 0.050, 0.5))
 	var scale := field.size.x / grid.x
 	_stretch = (field.size.y / grid.y) / scale if overview else 1.0
 	var top := 0.0
@@ -274,8 +274,8 @@ func _draw_story() -> void:
 	for node in get_tree().get_nodes_in_group(&"story_captive"):
 		var p := _to_map(origin, scale, (node as Node2D).global_position)
 		if inner.has_point(p):
-			draw_arc(p, 6.0 + blink, 0.0, TAU, 16, Color("#5ff2ff"), 2.0, true)
-			draw_circle(p, 2.5, Color("#5ff2ff"))
+			draw_arc(p, 6.0 + blink, 0.0, TAU, 16, Color("#ffac56"), 2.0, true)
+			draw_circle(p, 2.5, Color("#ffac56"))
 	for enemy in _enemies.get_active():
 		if enemy.is_alive() and enemy != _director.boss:
 			var e := _to_map(origin, scale, enemy.global_position)
@@ -326,7 +326,7 @@ func _draw_rail(field: Rect2) -> void:
 		draw_line(Vector2(x0 - 2.0, y), Vector2(x0 + RAIL_W + 2.0, y), Color("#7cff6b") if done else Color("#ff3b5c"), 2.0)
 	for i in range(story.captives_spawned(), story.captive_total()):
 		var y := y0 + h * (1.0 - story.captive_mark(i))
-		draw_circle(Vector2(x0 + RAIL_W * 0.5, y), 2.6, Color("#5ff2ff"))
+		draw_circle(Vector2(x0 + RAIL_W * 0.5, y), 2.6, Color("#ffac56"))
 	var boss := Vector2(x0 + RAIL_W * 0.5, y0 + 4.0)
 	draw_colored_polygon(PackedVector2Array([boss + Vector2(0, -6), boss + Vector2(6, 0), boss + Vector2(0, 6), boss + Vector2(-6, 0)]), Color("#ffd23f"))
 	var py := y0 + h * (1.0 - story.progress)

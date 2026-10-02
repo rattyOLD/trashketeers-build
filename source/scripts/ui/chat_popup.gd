@@ -29,9 +29,9 @@ const TEASES: Array[String] = [
 ]
 const REACTIONS: Array[String] = ["like", "lol", "fire"]
 const LONG_PRESS := 0.42
-const MINE_BG := Color("#45839e")
-const THEIR_BG := Color("#213c48")
-const CHECK_BLUE := Color("#5ff2ff")
+const MINE_BG := Color("#918c83")
+const THEIR_BG := Color("#42403c")
+const CHECK_BLUE := Color("#ffac56")
 
 static var _texture_cache: Dictionary = {}
 
@@ -497,7 +497,7 @@ func _open_message_menu(column: VBoxContainer, id: int, mine: bool) -> void:
 	Platform.haptic("medium")
 	var menu := PanelContainer.new()
 	menu.add_to_group("chat_menu")
-	var style := UiStyle.box(Color("#162c36"), UiStyle.NEON, 2, 26)
+	var style := UiStyle.box(Color("#32302d"), UiStyle.NEON, 2, 26)
 	style.content_margin_left = 10
 	style.content_margin_right = 10
 	style.content_margin_top = 4
@@ -628,7 +628,7 @@ func _draw_reactions(id: int) -> void:
 	for emoji: String in counts:
 		var chip := PanelContainer.new()
 		var mine_too := str(state.get("mine", "")) == emoji
-		var style := UiStyle.box(Color("#1c4256") if not mine_too else Color("#336980"), UiStyle.NEON if mine_too else Color(UiStyle.NEON, 0.3), 2, 14)
+		var style := UiStyle.box(Color("#4f4c47") if not mine_too else Color("#76716a"), UiStyle.NEON if mine_too else Color(UiStyle.NEON, 0.3), 2, 14)
 		style.content_margin_left = 6
 		style.content_margin_right = 8
 		style.content_margin_top = 2
@@ -707,7 +707,7 @@ func _track_overlay(node: Node) -> void:
 ## Все картинки и файлы переписки: сетка превью, тап открывает на весь экран.
 func _show_gallery() -> void:
 	var shade := ColorRect.new()
-	shade.color = Color(0.03, 0.02, 0.08, 0.97)
+	shade.color = Color(0.074, 0.071, 0.066, 0.97)
 	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
 	shade.mouse_filter = Control.MOUSE_FILTER_STOP
 	_track_overlay(shade)
@@ -761,7 +761,7 @@ func _show_gallery() -> void:
 		else:
 			var tile := PanelContainer.new()
 			tile.custom_minimum_size = Vector2(side, side)
-			tile.add_theme_stylebox_override("panel", UiStyle.box(Color("#213c48"), Color(UiStyle.NEON, 0.4), 2, 14))
+			tile.add_theme_stylebox_override("panel", UiStyle.box(Color("#42403c"), Color(UiStyle.NEON, 0.4), 2, 14))
 			var inner := VBoxContainer.new()
 			inner.alignment = BoxContainer.ALIGNMENT_CENTER
 			inner.add_child(FileGlyph.new())
@@ -1022,13 +1022,13 @@ class PeerAvatar:
 		var c := size * 0.5
 		var r := minf(size.x, size.y) * 0.5
 		draw_circle(c, r, UiStyle.OUTLINE)
-		draw_circle(c, r - 3.0, Color("#1c4256"))
+		draw_circle(c, r - 3.0, Color("#4f4c47"))
 		var tex := PeerAvatar.portrait_of(character)
 		if tex != null:
 			MenuWidgets.Avatar.draw_round(self, tex, c, r - 4.0)
 		if online:
 			var dot := c + Vector2(r * 0.7, r * 0.7)
-			draw_circle(dot, 9.0, Color("#0c1d29"))
+			draw_circle(dot, 9.0, Color("#262422"))
 			draw_circle(dot, 6.5, Color("#35c46a"))
 
 
@@ -1076,7 +1076,7 @@ class ChatIcon:
 			return
 		var c := size * 0.5
 		var r := minf(size.x, size.y) * 0.5 - 2.0
-		var bg := UiStyle.HOT if kind == Kind.SEND else Color("#1c4256")
+		var bg := UiStyle.HOT if kind == Kind.SEND else Color("#4f4c47")
 		if is_pressed():
 			bg = bg.lightened(0.2)
 		draw_circle(c, r, bg)
@@ -1105,7 +1105,7 @@ class FileGlyph:
 		if ResourceLoader.exists("res://assets/ui/chat/file.png"):
 			draw_texture_rect(load("res://assets/ui/chat/file.png"), Rect2(Vector2.ZERO, size), false)
 			return
-		draw_colored_polygon(PackedVector2Array([Vector2(4, 2), Vector2(26, 2), Vector2(36, 12), Vector2(36, 46), Vector2(4, 46)]), Color("#5ff2ff"))
+		draw_colored_polygon(PackedVector2Array([Vector2(4, 2), Vector2(26, 2), Vector2(36, 12), Vector2(36, 46), Vector2(4, 46)]), Color("#ffac56"))
 		draw_colored_polygon(PackedVector2Array([Vector2(26, 2), Vector2(36, 12), Vector2(26, 12)]), Color("#1d8fb0"))
 		for i in 3:
-			draw_line(Vector2(10, 22 + i * 7), Vector2(30, 22 + i * 7), Color("#0c1d29"), 2.0)
+			draw_line(Vector2(10, 22 + i * 7), Vector2(30, 22 + i * 7), Color("#262422"), 2.0)

@@ -155,7 +155,7 @@ class InteractButton:
 		var k := size.x / 250.0
 		var accent: Color = weapon.get_rarity_color() if weapon != null else UiStyle.GOLD
 		var pulse := 0.5 + 0.5 * sin(_time * 6.0)
-		draw_style_box(BattleControls.button_style(Color(0.1, 0.06, 0.2, 0.92), Color(accent, 0.7 + 0.3 * pulse), maxi(roundi(5.0 * k), 2)), Rect2(Vector2.ZERO, size))
+		draw_style_box(BattleControls.button_style(Color(0.184, 0.177, 0.166, 0.92), Color(accent, 0.7 + 0.3 * pulse), maxi(roundi(5.0 * k), 2)), Rect2(Vector2.ZERO, size))
 		var font := ThemeDB.fallback_font
 		if weapon != null:
 			WeaponIcons.draw(self, weapon.icon, Vector2(56, 48) * k, 0.7 * k, 0.0, weapon.effect_color)

@@ -40,7 +40,7 @@ func _init() -> void:
 func _build_hero(level: int) -> void:
 	MenuPopups.clear(_hero)
 	var panel := PanelContainer.new()
-	var box := UiStyle.box(Color("#0e2230"), Color("#35c8ff"), 4, 22)
+	var box := UiStyle.box(Color("#2c2a28"), Color("#35c8ff"), 4, 22)
 	box.shadow_color = Color(0.7, 0.3, 1.0, 0.35)
 	box.shadow_size = 10
 	panel.add_theme_stylebox_override("panel", box)
@@ -49,7 +49,7 @@ func _build_hero(level: int) -> void:
 	panel.add_child(column)
 	var top := HBoxContainer.new()
 	column.add_child(top)
-	var season := UiStyle.label("СЕЗОН %d" % BattlePass.season(), 22, Color("#b8eaff"), 5)
+	var season := UiStyle.label("СЕЗОН %d" % BattlePass.season(), 22, Color("#ffd3a6"), 5)
 	season.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	season.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(season)
@@ -81,7 +81,7 @@ func _build_hero(level: int) -> void:
 ## Задания сезона: три строки с полосой и кнопкой награды в очках пропуска.
 func _quests_card() -> Control:
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#0f1a24"), Color("#00e5ff"), 3, 18))
+	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#21201e"), Color("#ff8200"), 3, 18))
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 6)
 	panel.add_child(column)
@@ -100,7 +100,7 @@ func _quests_card() -> Control:
 		title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 		title.clip_text = true
 		texts.add_child(title)
-		var bar := UiStyle.progress_bar(Color("#00e5ff"), 10)
+		var bar := UiStyle.progress_bar(Color("#ff8200"), 10)
 		bar.max_value = float(goal)
 		bar.value = float(progress)
 		texts.add_child(bar)
@@ -241,7 +241,7 @@ func _milestone_card(milestone: Dictionary) -> Control:
 	var item := str(milestone["item"])
 	var color := Economy.rarity_color(Economy.item_rarity(item))
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", UiStyle.box(Color(0.1, 0.07, 0.2, 0.9), color, 4, 18))
+	panel.add_theme_stylebox_override("panel", UiStyle.box(Color(0.184, 0.177, 0.166, 0.9), color, 4, 18))
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 12)
 	panel.add_child(row)
@@ -303,7 +303,7 @@ func _buy() -> void:
 func _header_row() -> Control:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
-	var labels := [["БЕСПЛАТНО", UiStyle.NEON], ["", UiStyle.TEXT], ["ПРЕМИУМ", Color("#b8eaff")]]
+	var labels := [["БЕСПЛАТНО", UiStyle.NEON], ["", UiStyle.TEXT], ["ПРЕМИУМ", Color("#ffd3a6")]]
 	for pair in labels:
 		var label := UiStyle.label(str(pair[0]), 20, pair[1], 5)
 		if str(pair[0]).is_empty():
@@ -334,8 +334,8 @@ func _cell(track: String, tier: int) -> Control:
 	var claimed := BattlePass.is_claimed(track, tier)
 	var claimable := BattlePass.can_claim(track, tier)
 	var locked_premium := track == "prem" and not BattlePass.is_premium()
-	var accent := Color("#35c8ff") if track == "prem" else Color("#00e5ff")
-	var bg := Color("#233a33") if claimed else (Color(0.28, 0.21, 0.07, 0.98) if claimable else UiStyle.PANEL_LIGHT)
+	var accent := Color("#35c8ff") if track == "prem" else Color("#ff8200")
+	var bg := Color("#353330") if claimed else (Color(0.28, 0.21, 0.07, 0.98) if claimable else UiStyle.PANEL_LIGHT)
 	var border := Color("#2fae5f") if claimed else (UiStyle.GOLD if claimable else accent.darkened(0.5))
 	var panel := PanelContainer.new()
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -350,7 +350,7 @@ func _cell(track: String, tier: int) -> Control:
 	if int(prize["coins"]) > 0:
 		column.add_child(_amount("res://assets/ui/hub/coin.png", "+%d" % int(prize["coins"]), UiStyle.TEXT))
 	if int(prize["gems"]) > 0:
-		column.add_child(_amount("res://assets/ui/hub/neonite.png", "+%d" % int(prize["gems"]), Color("#b8eaff")))
+		column.add_child(_amount("res://assets/ui/hub/neonite.png", "+%d" % int(prize["gems"]), Color("#ffd3a6")))
 	var item := str(prize["item"])
 	if not item.is_empty():
 		var art := _item_art(item, Vector2(90, 34))
@@ -373,7 +373,7 @@ func _cell(track: String, tier: int) -> Control:
 		done.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		column.add_child(done)
 	elif locked_premium:
-		var lock := UiStyle.label("ПРЕМИУМ", 15, Color("#b8eaff"), 4)
+		var lock := UiStyle.label("ПРЕМИУМ", 15, Color("#ffd3a6"), 4)
 		lock.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		column.add_child(lock)
 	if claimable:
@@ -439,22 +439,22 @@ class Road:
 				var c2 := finish - Vector2(0.0, step * 0.5)
 				points.append(q * q * q * node + 3.0 * q * q * t * c1 + 3.0 * q * t * t * c2 + t * t * t * finish)
 			var passed := tier + 1 <= level
-			draw_polyline(points, Color("#ffb020") if passed else Color("#1c4256"), 40.0, true)
-			draw_polyline(points, Color("#253136"), 32.0, true)
+			draw_polyline(points, Color("#ffb020") if passed else Color("#4f4c47"), 40.0, true)
+			draw_polyline(points, Color("#32302d"), 32.0, true)
 			for i in range(0, 20, 2):
-				draw_line(points[i], points[i + 1], Color("#ffd23f") if passed else Color("#5d7c8a"), 3.0, true)
+				draw_line(points[i], points[i + 1], Color("#ffd23f") if passed else Color("#7f7a72"), 3.0, true)
 		if tier % 5 == 0:
 			var side := 1.0 if tier % 2 == 1 else -1.0
 			var base := node + Vector2(side * 40.0, 22.0)
 			draw_colored_polygon(PackedVector2Array([base + Vector2(0, -22), base + Vector2(-11, 0), base + Vector2(11, 0)]), Color("#ff7a3d"))
-			draw_rect(Rect2(base + Vector2(-14, 0), Vector2(28, 5)), Color("#253136"))
+			draw_rect(Rect2(base + Vector2(-14, 0), Vector2(28, 5)), Color("#32302d"))
 		var current := tier == level + 1
 		var radius := 25.0 + (2.0 * sin(_time * 5.0) if current else 0.0)
-		var fill := Color("#5a3d0a") if lit else (Color("#1f3d4a") if not current else Color("#7a5200"))
-		var ring := Color("#ffd23f") if (lit or current) else Color("#4a778a")
+		var fill := Color("#5a3d0a") if lit else (Color("#44413d") if not current else Color("#7a5200"))
+		var ring := Color("#ffd23f") if (lit or current) else Color("#7f7a72")
 		if current:
 			draw_circle(node, radius + 9.0, Color(ring, 0.25 + 0.15 * sin(_time * 5.0)))
-		draw_circle(node, radius + 3.0, Color("#0e1e24"))
+		draw_circle(node, radius + 3.0, Color("#21201e"))
 		draw_circle(node, radius, fill)
 		draw_arc(node, radius - 1.0, 0.0, TAU, 32, ring, 3.0, true)
 		if all_claimed:
@@ -464,7 +464,7 @@ class Road:
 			var text := str(tier)
 			var font_size := 24
 			var width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
-			draw_string(font, node + Vector2(-width * 0.5, 8.0), text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color.WHITE if (lit or current) else Color("#96b4c0"))
+			draw_string(font, node + Vector2(-width * 0.5, 8.0), text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color.WHITE if (lit or current) else Color("#c0a487"))
 
 
 ## Картинка косметики: рамка, цвет ника, титул-табличка, бустер-молния.
@@ -484,7 +484,7 @@ class CosmeticArt:
 		match Cosmetics.kind_of(key):
 			"frame":
 				var tint := Cosmetics.color_of(key)
-				draw_circle(c, r, Color("#1c4256"))
+				draw_circle(c, r, Color("#4f4c47"))
 				draw_arc(c, r - 2.0, 0.0, TAU, 32, Color(tint, 0.35), 9.0, true)
 				draw_arc(c, r - 2.0, 0.0, TAU, 32, tint, 5.0, true)
 			"color":
@@ -495,7 +495,7 @@ class CosmeticArt:
 				draw_line(Vector2(c.x - w * 0.5, c.y + 14.0), Vector2(c.x + w * 0.5, c.y + 14.0), Color(tint, 0.6), 3.0)
 			"title":
 				var plate := Rect2(c - Vector2(36, 12), Vector2(72, 24))
-				draw_rect(plate.grow(2.0), Color("#0e1e24"))
+				draw_rect(plate.grow(2.0), Color("#21201e"))
 				draw_rect(plate, Color(rarity, 0.25))
 				draw_rect(plate, rarity, false, 2.0)
 				for i in 3:

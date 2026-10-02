@@ -7,7 +7,7 @@ signal opened
 
 const BREAK_TIME := 1.1
 const LINK_STEP := 13.0
-const INK := Color("#071b25")
+const INK := Color("#22211f")
 const STEEL := Color("#c3bfd8")
 const GOLD := Color("#ffd257")
 

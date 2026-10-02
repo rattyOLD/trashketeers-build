@@ -20,7 +20,7 @@ const HUB_ICONS := {
 	"minimap": "res://assets/ui/hud/minimap.png",
 	"coin_cap": "res://assets/ui/hud/coin_cap.png",
 }
-const NEONITE := Color("#97e0ff")
+const NEONITE := Color("#ffc588")
 
 
 static func icon(name: String) -> Texture2D:
@@ -41,7 +41,7 @@ static func icon_rect(texture: Texture2D, side: float) -> TextureRect:
 
 static func dim() -> ColorRect:
 	var d := ColorRect.new()
-	d.color = Color(0.03, 0.01, 0.08, 0.8)
+	d.color = Color(0.074, 0.071, 0.066, 0.8)
 	d.set_anchors_preset(Control.PRESET_FULL_RECT)
 	return d
 
@@ -142,7 +142,7 @@ class TimerRing:
 		var c := size * 0.5
 		var r := minf(size.x, size.y) * 0.46
 		draw_circle(c, r + 6.0, UiStyle.OUTLINE)
-		draw_circle(c, r, Color("#142a33"))
+		draw_circle(c, r, Color("#2f2d2a"))
 		var urgent := fraction < 0.3
 		var color := UiStyle.DANGER if urgent else UiStyle.NEON
 		draw_arc(c, r - 10.0, -PI * 0.5, -PI * 0.5 + TAU * fraction, 64, color, 16.0, true)
@@ -280,7 +280,7 @@ class StatTile:
 	func _init(texture: Texture2D, caption: String, color: Color) -> void:
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
 		size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var style := UiStyle.box(Color("#172e38"), Color(color, 0.9), 4, 18)
+		var style := UiStyle.box(Color("#34312e"), Color(color, 0.9), 4, 18)
 		style.set_content_margin_all(10)
 		add_theme_stylebox_override("panel", style)
 		var column := VBoxContainer.new()
@@ -456,7 +456,7 @@ class RunResultPanel:
 		_upgrade_button.pressed.connect(func() -> void: upgrade_pressed.emit())
 		_upgrade_button.visible = false
 		right.add_child(_upgrade_button)
-		var again := BattlePanels.icon_button(BattlePanels.icon("play"), "ЕЩЁ РАЗ", "", UiStyle.HOT, 100)
+		var again := BattlePanels.icon_button(BattlePanels.icon("play"), "ПОВТОРИТЬ", "", UiStyle.HOT, 100)
 		again.pressed.connect(func() -> void: restart_pressed.emit())
 		right.add_child(again)
 		var hub := UiStyle.button("НА БАЗУ", UiStyle.PANEL_LIGHT, 28, Vector2(0, 76))
@@ -464,7 +464,7 @@ class RunResultPanel:
 		right.add_child(hub)
 
 	func _make_double_button() -> Button:
-		var button := UiStyle.button("УДВОИТЬ НАГРАДУ · реклама", Color("#2f7ae5"), 22, Vector2(0, 92))
+		var button := UiStyle.button("УДВОИТЬ НАГРАДУ · реклама", Color("#e58a2a"), 22, Vector2(0, 92))
 		button.add_theme_stylebox_override("normal", _padded(button, "normal"))
 		button.add_theme_stylebox_override("hover", _padded(button, "hover"))
 		button.add_theme_stylebox_override("pressed", _padded(button, "pressed"))

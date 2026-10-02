@@ -17,8 +17,8 @@ extends CanvasLayer
 signal transition_point
 signal finished
 
-const BG := Color("#0a1418")
-const FRAME := Color("#2e7bff")
+const BG := Color("#161514")
+const FRAME := Color("#ff9629")
 const FILL := Color("#39ff14")
 const PHRASES := [
 	"Енот перемещается",
@@ -275,7 +275,7 @@ func _init() -> void:
 			tag = prefix.trim_suffix(": ").to_upper()
 			tip_text = tip_text.trim_prefix(prefix)
 	var card := PanelContainer.new()
-	card.add_theme_stylebox_override("panel", UiStyle.box(Color(0.06, 0.04, 0.14, 0.88), Color("#ffb347", 0.55), 3, 14))
+	card.add_theme_stylebox_override("panel", UiStyle.box(Color(0.129, 0.124, 0.116, 0.88), Color("#ffb347", 0.55), 3, 14))
 	card.anchor_left = 0.08
 	card.anchor_right = 0.92
 	card.anchor_top = 0.79
@@ -291,7 +291,7 @@ func _init() -> void:
 	card_col.add_child(tip)
 	_root.add_child(card)
 
-	var build := UiStyle.label("Версия %s" % Platform.build_label(), 18, Color("#8eacb8"), 4)
+	var build := UiStyle.label("Версия %s" % Platform.build_label(), 18, Color("#b89c80"), 4)
 	build.anchor_left = 0.0
 	build.anchor_right = 1.0
 	build.anchor_top = 1.0
@@ -393,7 +393,7 @@ func _animate_runner(delta: float) -> void:
 	_dust_timer -= delta
 	if _dust_timer <= 0.0 and lift < 4.0:
 		_dust_timer = DUST_INTERVAL * (0.55 if _act == "dash" else 1.0)
-		_puff(_runner.position + Vector2(-16.0, 24.0), Color(0.75, 0.7, 0.9, 0.5), 3)
+		_puff(_runner.position + Vector2(-16.0, 24.0), Color(0.900, 0.768, 0.630, 0.5), 3)
 	if _act == "shoot":
 		_shot_timer -= delta
 		if _shot_timer <= 0.0:
@@ -439,7 +439,7 @@ func _act_offset(delta: float) -> float:
 		if _act == "flip":
 			_runner_hero.rotation = TAU * k
 		if k > 0.9 and _act_t > 0.0 and int(_time * 60.0) % 3 == 0:
-			_puff(_runner.position + Vector2(0, 26.0), Color(0.8, 0.75, 1.0, 0.6), 2)
+			_puff(_runner.position + Vector2(0, 26.0), Color(1.000, 0.841, 0.675, 0.6), 2)
 		return sin(k * PI) * _hop_height
 	if _act == "cheer":
 		return sin(k * PI * 2.0) * 10.0 * (1.0 - k)
@@ -515,7 +515,7 @@ func _draw_bar() -> void:
 	glow.shadow_size = 14
 	_bar.draw_style_box(glow, r)
 	var track := StyleBoxFlat.new()
-	track.bg_color = Color("#11222a")
+	track.bg_color = Color("#272523")
 	track.set_corner_radius_all(BAR_RADIUS)
 	track.set_border_width_all(3)
 	track.border_color = FRAME
@@ -691,8 +691,8 @@ func _run_scene(scene: String) -> void:
 class Scenery:
 	extends Control
 	const LAYERS := [
-		{"base": 0.60, "speed": 14.0, "color": Color("#12242c"), "seed": 3.0, "height": 120.0},
-		{"base": 0.66, "speed": 32.0, "color": Color("#1a3440"), "seed": 11.0, "height": 90.0},
+		{"base": 0.60, "speed": 14.0, "color": Color("#282724"), "seed": 3.0, "height": 120.0},
+		{"base": 0.66, "speed": 32.0, "color": Color("#3b3935"), "seed": 11.0, "height": 90.0},
 	]
 	var _t := 0.0
 
@@ -709,8 +709,8 @@ class Scenery:
 	func _draw() -> void:
 		var w := size.x
 		var h := size.y
-		draw_rect(Rect2(0, 0, w, h * 0.45), Color("#0f1f26"))
-		draw_rect(Rect2(0, h * 0.45, w, h * 0.2), Color("#162c36"))
+		draw_rect(Rect2(0, 0, w, h * 0.45), Color("#23221f"))
+		draw_rect(Rect2(0, h * 0.45, w, h * 0.2), Color("#32302d"))
 		for i in 26:
 			var sx := _hash(float(i) * 1.7) * w
 			var sy := _hash(float(i) * 3.1) * h * 0.4
@@ -720,7 +720,7 @@ class Scenery:
 		for k in 4:
 			draw_circle(moon, 70.0 - k * 14.0, Color("#ffb347", 0.04 + 0.03 * k))
 		draw_circle(moon, 34.0, Color("#ffe9b8", 0.9))
-		draw_circle(moon + Vector2(10, -6), 30.0, Color("#0f1f26", 0.35))
+		draw_circle(moon + Vector2(10, -6), 30.0, Color("#23221f", 0.35))
 		for layer: Dictionary in LAYERS:
 			var base: float = h * float(layer["base"])
 			var spd: float = float(layer["speed"])
@@ -740,4 +740,4 @@ class Scenery:
 				elif r < 0.25:
 					draw_rect(Rect2(x + bw * 0.2, base - bh - 26.0, 8.0, 26.0), col)
 				x += 160.0
-		draw_rect(Rect2(0, h * 0.66, w, h * 0.34), Color("#0c191f", 0.55))
+		draw_rect(Rect2(0, h * 0.66, w, h * 0.34), Color("#1d1b1a", 0.55))

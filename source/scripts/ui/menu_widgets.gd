@@ -3,7 +3,7 @@ extends RefCounted
 ## Нарисованные кодом элементы меню из паспорта интерфейса: иконки кнопок, лапки-тумблеры,
 ## круглая аватарка и размытый задник биома. Всё с тёмной мультяшной обводкой.
 
-const LINE := Color("#0b1a26")
+const LINE := Color("#23221f")
 const GEAR := Color("#e0e0e0")
 
 
@@ -48,7 +48,7 @@ class IconButton:
 		for side in [-1.0, 1.0]:
 			var lens := Rect2(glasses + Vector2(side * 16 - 12, -8), Vector2(24, 16))
 			draw_rect(lens.grow(3), LINE)
-			draw_rect(lens, Color("#71d4ff"))
+			draw_rect(lens, Color("#ffb466"))
 			draw_line(lens.position + Vector2(4, 4), lens.position + Vector2(10, 4), Color(1, 1, 1, 0.7), 2.0)
 
 	## Скрещённые патроны и гаечный ключ.
@@ -100,7 +100,7 @@ class GearButton:
 		loop.append(teeth[0])
 		draw_polyline(loop, LINE, 3.0, true)
 		draw_circle(c, 9.0, LINE)
-		draw_circle(c, 6.0, Color("#354952"))
+		draw_circle(c, 6.0, Color("#4b4844"))
 
 
 ## Кнопка «на весь экран»: четыре уголка, при включённом режиме уголки смотрят внутрь.
@@ -150,8 +150,8 @@ class FullscreenButton:
 		var inside := Platform.is_fullscreen()
 		var box := Rect2(size * 0.22, size * 0.56)
 		var arm := 11.0
-		draw_rect(Rect2(Vector2.ZERO, size).grow(-4.0), Color(0.08, 0.06, 0.16, 0.85), true)
-		draw_rect(Rect2(Vector2.ZERO, size).grow(-4.0), Color("#80bed8"), false, 3.0)
+		draw_rect(Rect2(Vector2.ZERO, size).grow(-4.0), Color(0.147, 0.141, 0.132, 0.85), true)
+		draw_rect(Rect2(Vector2.ZERO, size).grow(-4.0), Color("#d8a773"), false, 3.0)
 		for corner in 4:
 			var origin := box.position + Vector2(box.size.x * (corner % 2), box.size.y * (corner / 2))
 			var sx := 1.0 if corner % 2 == 0 else -1.0
@@ -186,8 +186,8 @@ class PawToggle:
 		draw_string_outline(font, Vector2(0, size.y * 0.5 + 12), caption, HORIZONTAL_ALIGNMENT_LEFT, size.x - 120, 32, 8, LINE)
 		draw_string(font, Vector2(0, size.y * 0.5 + 12), caption, HORIZONTAL_ALIGNMENT_LEFT, size.x - 120, 32, UiStyle.TEXT)
 		var c := Vector2(size.x - 56, size.y * 0.5 + 6)
-		var pad := Color("#ff9fc4") if on else Color("#506168")
-		var fur := Color("#eefbff") if on else Color("#354952")
+		var pad := Color("#ff9fc4") if on else Color("#605c56")
+		var fur := Color("#eefbff") if on else Color("#4b4844")
 		draw_circle(c, 26.0 + 3.0, LINE)
 		draw_circle(c, 26.0, fur)
 		draw_circle(c + Vector2(0, 4), 12.0, pad)
@@ -215,7 +215,7 @@ class Avatar:
 		var c := size * 0.5
 		var r := minf(size.x, size.y) * 0.5
 		draw_circle(c, r, LINE)
-		draw_circle(c, r - 4.0, Color("#1c4256"))
+		draw_circle(c, r - 4.0, Color("#4f4c47"))
 		var tex: Texture2D = null
 		var custom := str(SaveService.data.get("avatar", ""))
 		if not custom.is_empty():
@@ -368,7 +368,7 @@ class StageBackdrop:
 	func _draw() -> void:
 		var horizon := size.y * 0.62
 		for layer in 3:
-			var shade := Color("#1e3d4a").lerp(Color("#102128"), layer * 0.4)
+			var shade := Color("#44413d").lerp(Color("#252321"), layer * 0.4)
 			var y := horizon - 120.0 + layer * 55.0
 			var x := -40.0 + layer * 35.0
 			while x < size.x + 40.0:
@@ -385,7 +385,7 @@ class StageBackdrop:
 			var t := float(k) / 5.0
 			draw_rect(Rect2(Vector2.ZERO, Vector2(size.x * 0.12 * (1.0 - t), size.y)), Color(0, 0, 0, 0.07))
 			draw_rect(Rect2(Vector2(size.x * (1.0 - 0.12 * (1.0 - t)), 0), Vector2(size.x, size.y)), Color(0, 0, 0, 0.07))
-		draw_rect(Rect2(Vector2(0, horizon + 60.0), size), Color(0.02, 0.01, 0.05, 0.5))
+		draw_rect(Rect2(Vector2(0, horizon + 60.0), size), Color(0.046, 0.044, 0.041, 0.5))
 
 
 ## Живое превью героя в интерфейсе (гардероб, логотип): RaccoonVisual на риге внутри Control —
@@ -513,8 +513,8 @@ class NavButton:
 		custom_minimum_size = Vector2(0, 124)
 		size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		focus_mode = Control.FOCUS_NONE
-		add_theme_stylebox_override("normal", UiStyle.box(Color(0.1, 0.07, 0.2, 0.82), color.darkened(0.2), 4, 22))
-		add_theme_stylebox_override("hover", UiStyle.box(Color(0.14, 0.1, 0.26, 0.9), color, 4, 22))
+		add_theme_stylebox_override("normal", UiStyle.box(Color(0.184, 0.177, 0.166, 0.82), color.darkened(0.2), 4, 22))
+		add_theme_stylebox_override("hover", UiStyle.box(Color(0.239, 0.230, 0.215, 0.9), color, 4, 22))
 		add_theme_stylebox_override("pressed", UiStyle.box(color.darkened(0.55), Color.WHITE, 4, 22))
 		add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 		pressed.connect(func() -> void: SoundManager.play(&"ui_click"))
@@ -546,7 +546,7 @@ class NavButton:
 				draw_circle(c + Vector2(20, -18), 8.0, Color("#8e8aa6"))
 				draw_circle(c, 27.0, LINE)
 				draw_circle(c, 24.0, Color("#8e8aa6"))
-				draw_rect(Rect2(c + Vector2(-20, -8), Vector2(40, 12)), Color("#1d2c33"))
+				draw_rect(Rect2(c + Vector2(-20, -8), Vector2(40, 12)), Color("#2f2d2a"))
 				draw_circle(c + Vector2(-9, -2), 4.0, Color.WHITE)
 				draw_circle(c + Vector2(9, -2), 4.0, Color.WHITE)
 				draw_circle(c + Vector2(0, 10), 4.0, LINE)
@@ -587,7 +587,7 @@ class DiceButton:
 		focus_mode = Control.FOCUS_NONE
 		add_theme_stylebox_override("normal", UiStyle.box(Color("#ffffff"), LINE, 4, 18))
 		add_theme_stylebox_override("hover", UiStyle.box(Color("#e8f6ff"), LINE, 4, 18))
-		add_theme_stylebox_override("pressed", UiStyle.box(Color("#c8e8ff"), LINE, 4, 18))
+		add_theme_stylebox_override("pressed", UiStyle.box(Color("#ffdab4"), LINE, 4, 18))
 		add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 		pressed.connect(func() -> void:
 			SoundManager.play(&"ui_click")

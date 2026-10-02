@@ -31,7 +31,7 @@ func _ready() -> void:
 	SaveService.data[SEEN_KEY] = str(entry.get("version", ""))
 	SaveService.save_data()
 	var dim := ColorRect.new()
-	dim.color = Color(0.02, 0.0, 0.08, 0.82)
+	dim.color = Color(0.074, 0.071, 0.066, 0.82)
 	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(dim)
 	var center := CenterContainer.new()
@@ -41,7 +41,7 @@ func _ready() -> void:
 	var width := minf(GlassPopup.panel_width(), 600.0) - 40.0
 	var card := PanelContainer.new()
 	card.custom_minimum_size = Vector2(width, 0)
-	card.add_theme_stylebox_override("panel", UiStyle.box(Color("#162c36"), UiStyle.GOLD, 5, 28))
+	card.add_theme_stylebox_override("panel", UiStyle.box(Color("#32302d"), UiStyle.GOLD, 5, 28))
 	center.add_child(card)
 	var margin := MarginContainer.new()
 	for side in ["left", "right"]:

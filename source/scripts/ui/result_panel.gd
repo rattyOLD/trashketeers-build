@@ -24,7 +24,7 @@ func _init() -> void:
 	visible = false
 
 	var dim := ColorRect.new()
-	dim.color = Color(0.03, 0.01, 0.08, 0.78)
+	dim.color = Color(0.074, 0.071, 0.066, 0.78)
 	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(dim)
 
@@ -74,7 +74,7 @@ func _init() -> void:
 	_upgrade_button.pressed.connect(func() -> void: upgrade_pressed.emit())
 	_upgrade_button.visible = false
 	buttons.add_child(_upgrade_button)
-	var again := UiStyle.button("ЕЩЁ РАЗ", UiStyle.HOT, 32, Vector2(0, 96 if Orient.portrait else 76))
+	var again := UiStyle.button("ПОВТОРИТЬ", UiStyle.HOT, 32, Vector2(0, 96 if Orient.portrait else 76))
 	again.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	again.size_flags_stretch_ratio = 1.0 if Orient.portrait else 1.5
 	again.pressed.connect(func() -> void: restart_pressed.emit())

@@ -10,7 +10,7 @@ enum Mode { MENU, CONNECTING, ROOM, RUN, RESULTS }
 
 const HOST_KEY := "trk_coop_host"
 const CONNECT_TIMEOUT := 8.0
-const ME_COLOR := Color("#00e5ff")
+const ME_COLOR := Color("#ff8200")
 const FRIEND_COLOR := Color("#ff8a3d")
 
 var mode: Mode = Mode.MENU
@@ -62,7 +62,7 @@ func _init() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	var bg := ColorRect.new()
-	bg.color = Color("#11222a")
+	bg.color = Color("#272523")
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
 	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(bg)
@@ -239,7 +239,7 @@ func _slot_card(info: Dictionary, color: Color, is_me: bool) -> Control:
 	card.custom_minimum_size = Vector2(width, 0)
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var ready := bool(info.get("ready", false))
-	card.add_theme_stylebox_override("panel", UiStyle.box(Color("#1a3642"), Color("#35c46a") if ready and not bool(info.get("bot", false)) else color, 5, 26))
+	card.add_theme_stylebox_override("panel", UiStyle.box(Color("#3d3a37"), Color("#35c46a") if ready and not bool(info.get("bot", false)) else color, 5, 26))
 	card.name = "SlotMe" if is_me else "SlotFriend"
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 6)
@@ -274,7 +274,7 @@ func _empty_slot() -> Control:
 	button.custom_minimum_size = Vector2(width, 0)
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	button.focus_mode = Control.FOCUS_NONE
-	var style := UiStyle.box(Color("#162c36"), Color(FRIEND_COLOR, 0.8), 4, 26)
+	var style := UiStyle.box(Color("#32302d"), Color(FRIEND_COLOR, 0.8), 4, 26)
 	for state in ["normal", "hover", "pressed", "focus"]:
 		button.add_theme_stylebox_override(state, style)
 	button.text = "+\nПОЗВАТЬ\nДРУГА"
@@ -310,7 +310,7 @@ func _main_button(me: Dictionary, other: Dictionary) -> Control:
 func _host_field() -> Control:
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 8)
-	var toggle := UiStyle.button("СЕРВЕР (ТЕСТЕРАМ)", Color("#2b4f5e"), 15, Vector2(0, 40))
+	var toggle := UiStyle.button("СЕРВЕР (ТЕСТЕРАМ)", Color("#56534e"), 15, Vector2(0, 40))
 	toggle.name = "ServerToggle"
 	box.add_child(toggle)
 	var host_edit := LineEdit.new()
@@ -338,7 +338,7 @@ func _friends_panel() -> Control:
 	var panel := PanelContainer.new()
 	panel.name = "FriendsPanel"
 	panel.custom_minimum_size = Vector2(0, 520)
-	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#162c36"), Color(UiStyle.NEON, 0.6), 4, 22))
+	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#32302d"), Color(UiStyle.NEON, 0.6), 4, 22))
 	var margin := MarginContainer.new()
 	for side in ["left", "right", "top", "bottom"]:
 		margin.add_theme_constant_override("margin_" + side, 14)
@@ -452,7 +452,7 @@ func _render_top() -> void:
 		var mine := bool(d.get("mine", false))
 		var panel := PanelContainer.new()
 		panel.name = "Top_%d" % int(d.get("place", 0))
-		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#3a2f12") if mine else Color("#12303f"), UiStyle.GOLD if mine else UiStyle.OUTLINE, 3, 14))
+		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#3a2f12") if mine else Color("#3a3834"), UiStyle.GOLD if mine else UiStyle.OUTLINE, 3, 14))
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 10)
 		panel.add_child(row)
@@ -497,7 +497,7 @@ func _render_recent() -> void:
 		var code := str(e.get("code", ""))
 		var panel := PanelContainer.new()
 		panel.name = "Recent_" + code
-		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#12303f"), UiStyle.OUTLINE, 3, 16))
+		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#3a3834"), UiStyle.OUTLINE, 3, 16))
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 8)
 		panel.add_child(row)
@@ -544,7 +544,7 @@ func _render_requests() -> void:
 		var code := str(r.get("friend_code", ""))
 		var panel := PanelContainer.new()
 		panel.name = "Request_" + code
-		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#244350"), Color(UiStyle.HOT, 0.8), 3, 16))
+		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#4a4742"), Color(UiStyle.HOT, 0.8), 3, 16))
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 8)
 		panel.add_child(row)
@@ -598,7 +598,7 @@ func _friend_row(f: Dictionary) -> Control:
 	var panel := PanelContainer.new()
 	panel.name = "Friend_" + code
 	var tag := int(f.get("insider", -1))
-	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#12303f"), Color("#35c46a") if online else Color(UiStyle.OUTLINE, 1.0), 3, 16))
+	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#3a3834"), Color("#35c46a") if online else Color(UiStyle.OUTLINE, 1.0), 3, 16))
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	panel.gui_input.connect(func(event: InputEvent) -> void:
 		if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:

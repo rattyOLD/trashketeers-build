@@ -5,7 +5,7 @@ extends Control
 signal pressed
 
 const SIZE := Vector2(350.0, 46.0)
-const INK := Color("#5ff2ff")
+const INK := Color("#ffac56")
 const DONE := Color("#7cff6b")
 const GOAL_H := 30.0
 
@@ -30,7 +30,7 @@ func _init() -> void:
 	custom_minimum_size = SIZE
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	gui_input.connect(_on_gui_input)
-	_panel = UiStyle.box(Color(0.04, 0.06, 0.12, 0.62), Color(INK, 0.75), 3, 10)
+	_panel = UiStyle.box(Color(0.110, 0.106, 0.099, 0.62), Color(INK, 0.75), 3, 10)
 	visible = false
 
 
@@ -122,7 +122,7 @@ func _draw() -> void:
 	var font := ThemeDB.fallback_font
 	var tag := Rect2(6.0, 6.0, 56.0, 15.0)
 	draw_rect(tag, Color(accent, 0.9))
-	draw_string(font, tag.position + Vector2(0.0, 11.5), "ЗАКАЗ", HORIZONTAL_ALIGNMENT_CENTER, tag.size.x, 12, Color("#06141c"))
+	draw_string(font, tag.position + Vector2(0.0, 11.5), "ЗАКАЗ", HORIZONTAL_ALIGNMENT_CENTER, tag.size.x, 12, Color("#1a1917"))
 	var text := "ГОТОВО" if _done else "%d / %d" % [_progress, _goal]
 	draw_string(font, Vector2(SIZE.x - 64.0, 19.0), text, HORIZONTAL_ALIGNMENT_RIGHT, 58.0, 14, accent)
 	draw_string(font, Vector2(68.0, 19.0), _title, HORIZONTAL_ALIGNMENT_LEFT, SIZE.x - 140.0, 13, Color(1, 1, 1, 0.9))

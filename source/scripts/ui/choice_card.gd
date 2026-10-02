@@ -35,7 +35,7 @@ func open(card: Dictionary) -> void:
 	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(center)
 	var panel := PanelContainer.new()
-	var style := UiStyle.box(Color(0.1, 0.07, 0.2, 0.98), color, 6, 28)
+	var style := UiStyle.box(Color(0.184, 0.177, 0.166, 0.98), color, 6, 28)
 	style.set_content_margin_all(24)
 	panel.add_theme_stylebox_override("panel", style)
 	center.add_child(panel)
@@ -62,7 +62,7 @@ func open(card: Dictionary) -> void:
 		picture.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		stage.add_child(picture)
 	var text_plate := PanelContainer.new()
-	var plate_style := UiStyle.box(Color(0.03, 0.02, 0.08, 0.9), Color(color, 0.7), 3, 18)
+	var plate_style := UiStyle.box(Color(0.074, 0.071, 0.066, 0.9), Color(color, 0.7), 3, 18)
 	plate_style.set_content_margin_all(12)
 	text_plate.add_theme_stylebox_override("panel", plate_style)
 	box.add_child(text_plate)

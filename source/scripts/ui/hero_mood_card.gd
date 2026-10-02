@@ -70,7 +70,7 @@ func _init(character: Dictionary, win: bool, extra_line: String = "") -> void:
 	row.add_child(frame)
 	var back := Panel.new()
 	back.set_anchors_preset(Control.PRESET_FULL_RECT)
-	back.add_theme_stylebox_override("panel", UiStyle.box(Color("#0a0d1c"), accent, 3, 18))
+	back.add_theme_stylebox_override("panel", UiStyle.box(Color("#1a1917"), accent, 3, 18))
 	back.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	frame.add_child(back)
 	_face = TextureRect.new()
@@ -255,7 +255,7 @@ class MoodOver:
 		# пластырь
 		draw_set_transform(Vector2(s * 0.7, s * 0.6), -0.5, Vector2.ONE)
 		draw_rect(Rect2(-17, -6, 34, 12), Color("#e8c9a0"))
-		draw_rect(Rect2(-17, -6, 34, 12), Color("#08151d"), false, 2.0)
+		draw_rect(Rect2(-17, -6, 34, 12), Color("#1b1a18"), false, 2.0)
 		draw_circle(Vector2(-6, 0), 1.6, Color("#b88e60"))
 		draw_circle(Vector2(6, 0), 1.6, Color("#b88e60"))
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
@@ -282,7 +282,7 @@ class MoodOver:
 			"stoic":
 				for k in 3:
 					var x := s * (0.62 + 0.1 * float(k))
-					draw_colored_polygon(PackedVector2Array([Vector2(x, s * 0.02), Vector2(x + 7.0, s * 0.02), Vector2(x + 3.5, s * (0.12 + 0.05 * float(k)))]), Color(0.75, 0.92, 1.0, 0.8))
+					draw_colored_polygon(PackedVector2Array([Vector2(x, s * 0.02), Vector2(x + 7.0, s * 0.02), Vector2(x + 3.5, s * (0.12 + 0.05 * float(k)))]), Color(1.000, 0.841, 0.675, 0.8))
 		if mood == "sad" or mood == "angry":
 			for k in 2:
 				var phase := fmod(t * 0.7 + float(k) * 0.5, 1.0)

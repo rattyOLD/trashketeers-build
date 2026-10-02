@@ -241,7 +241,7 @@ func _joystick_center() -> Vector2:
 
 
 func _draw() -> void:
-	draw_rect(Rect2(Vector2.ZERO, size), Color(0.04, 0.02, 0.09, 0.97))
+	draw_rect(Rect2(Vector2.ZERO, size), Color(0.083, 0.079, 0.075, 0.97))
 	var step := size.x / 12.0
 	for i in 13:
 		draw_line(Vector2(i * step, 0), Vector2(i * step, size.y), Color(1, 1, 1, 0.035), 2.0)

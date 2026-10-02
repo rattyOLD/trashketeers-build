@@ -17,8 +17,8 @@ enum Mode { SURVIVAL, RAID, STORY }
 const RIGHT_WIDTH := 540.0
 const COLUMN_WIDTH := 680.0
 const PLAY_GREEN := Color("#7ed321")
-const LOGO_FONT := "res://assets/fonts/LilitaOne-Regular.ttf"
-const CAPSULE := Color("#c9c3d6")
+const LOGO_FONT := "res://assets/fonts/RussoOne-Regular.ttf"
+const CAPSULE := Color("#2b2f31")
 
 var _mode: Mode = Mode.SURVIVAL
 var _preview: MenuWidgets.RaccoonPreview
@@ -92,7 +92,7 @@ func _ready() -> void:
 
 func _build() -> void:
 	_backdrop = MenuBackdrop.new()
-	_backdrop.modulate = Color(0.78, 0.96, 1.1)
+	_backdrop.modulate = Color(0.46, 0.5, 0.46)
 	add_child(_backdrop)
 	_backdrop.build(get_viewport_rect().size)
 	var shade := ShadeOverlay.new()
@@ -237,7 +237,7 @@ func show_account_banner(text: String) -> void:
 	if is_instance_valid(_account_banner):
 		return
 	var bar := PanelContainer.new()
-	bar.add_theme_stylebox_override("panel", UiStyle.box(Color("#0f2a38"), Color("#00e5ff"), 3, 16))
+	bar.add_theme_stylebox_override("panel", UiStyle.box(Color("#34312e"), Color("#ff8200"), 3, 16))
 	bar.anchor_left = 0.5
 	bar.anchor_right = 0.5
 	bar.offset_left = -minf(COLUMN_WIDTH, get_viewport_rect().size.x - 24.0) * 0.5
@@ -344,7 +344,7 @@ func _add_capsule(row: HBoxContainer, icon_texture: Texture2D, kind: String) -> 
 			SoundManager.play(&"ui_click")
 			_currency.open_kind(kind))
 	var accent := Color("#35c8ff") if kind == "gems" else Color("#ffb020")
-	var style := UiStyle.box(Color(CAPSULE, 0.92).lerp(accent, 0.22), accent, 4, 30)
+	var style := UiStyle.box(Color(CAPSULE, 0.94), accent, 3, 14)
 	style.content_margin_left = 8
 	style.content_margin_right = 8
 	capsule.add_theme_stylebox_override("panel", style)
@@ -357,10 +357,7 @@ func _add_capsule(row: HBoxContainer, icon_texture: Texture2D, kind: String) -> 
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	box.add_child(icon)
-	var label := UiStyle.label("0", 24, Color("#1f3640"), 0)
-	label.add_theme_color_override("font_shadow_color", Color(1, 1, 1, 0.8))
-	label.add_theme_constant_override("shadow_offset_x", 1)
-	label.add_theme_constant_override("shadow_offset_y", 2)
+	var label := UiStyle.label("0", 24, UiStyle.TEXT, 4)
 	box.add_child(label)
 	var plus := MenuWidgets.PlusBadge.new()
 	plus.custom_minimum_size = Vector2(28, 28)
@@ -500,12 +497,12 @@ func _build_stage() -> Control:
 	_preview.set_anchors_preset(Control.PRESET_FULL_RECT)
 	stage.add_child(_preview)
 	_season_pill = Button.new()
-	_season_pill.text = "СЕЗОН: РЕЛЬСОТРОН В ПРОПУСКЕ"
+	_season_pill.text = "СЕЗОН · РЕЛЬСОТРОН"
 	_season_pill.focus_mode = Control.FOCUS_NONE
 	_season_pill.add_theme_font_size_override("font_size", 16)
-	_season_pill.add_theme_color_override("font_color", Color("#2a1600"))
+	_season_pill.add_theme_color_override("font_color", Color("#ffb347"))
 	for state in ["normal", "hover", "pressed"]:
-		_season_pill.add_theme_stylebox_override(state, UiStyle.box(Color("#ffc93c"), Color("#fff1b0"), 3, 18))
+		_season_pill.add_theme_stylebox_override(state, UiStyle.box(Color(0.1, 0.11, 0.1, 0.92), Color("#d9962b"), 2, 6))
 	_season_pill.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	_season_pill.offset_left = -140.0
 	_season_pill.offset_right = 140.0
@@ -549,18 +546,18 @@ func _build_stage() -> Control:
 
 func _build_play() -> Control:
 	var play := Button.new()
-	play.text = "ИГРАТЬ"
+	play.text = "В БОЙ"
 	play.custom_minimum_size = Vector2(0, 136 if Orient.portrait else 108)
 	play.focus_mode = Control.FOCUS_NONE
 	play.add_theme_font_size_override("font_size", 60 if Orient.portrait else 54)
 	for state in ["font_color", "font_hover_color", "font_pressed_color"]:
 		play.add_theme_color_override(state, Color.WHITE)
-	play.add_theme_color_override("font_outline_color", Color("#2c5a07"))
+	play.add_theme_color_override("font_outline_color", Color("#3a1d02"))
 	play.add_theme_constant_override("outline_size", 14)
 	if UiStyle.KIT_ON:
-		play.add_theme_stylebox_override("normal", UiStyle.kit_box("green", "normal", false))
-		play.add_theme_stylebox_override("hover", UiStyle.kit_box("green", "normal", false, Color(1.1, 1.1, 1.1)))
-		play.add_theme_stylebox_override("pressed", UiStyle.kit_box("green", "pressed", false))
+		play.add_theme_stylebox_override("normal", UiStyle.kit_box("gold", "normal", false))
+		play.add_theme_stylebox_override("hover", UiStyle.kit_box("gold", "normal", false, Color(1.1, 1.1, 1.1)))
+		play.add_theme_stylebox_override("pressed", UiStyle.kit_box("gold", "pressed", false))
 	else:
 		var normal := UiStyle.box(PLAY_GREEN, Color("#2c5a07"), 6, 30)
 		normal.border_width_bottom = 14
@@ -580,7 +577,7 @@ func _build_play() -> Control:
 func _build_modes() -> Control:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 12)
-	var titles := ["ВЫЖИВАНИЕ", "ЛЕДЯНОЙ НАЛЁТ", "СЮЖЕТ"]
+	var titles := ["ВЫЖИВАНИЕ", "ЛЕДЯНОЙ РЕЙД", "КАМПАНИЯ"]
 	for i in 3:
 		var button := UiStyle.button(titles[i], UiStyle.PANEL, 22 if Orient.portrait else 20, Vector2(0, 68 if Orient.portrait else 60))
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -589,7 +586,7 @@ func _build_modes() -> Control:
 		row.add_child(button)
 		_mode_buttons.append(button)
 	_select_mode(Mode.STORY if _survival_locked() else Mode.SURVIVAL)
-	_mode_buttons[2].text = "СЮЖЕТ %d/6" % SaveService.story_shards()
+	_mode_buttons[2].text = "КАМПАНИЯ %d/6" % SaveService.story_shards()
 	_lock_mark = LockMark.new()
 	_mode_buttons[0].add_child(_lock_mark)
 	_lock_mark.visible = _survival_locked()
@@ -602,7 +599,7 @@ func _build_modes() -> Control:
 
 ## Отдельное окно коопа на двоих («Выживание»): тренировка, комната, приглашения друзей.
 func _build_coop_button() -> Control:
-	var button := UiStyle.button("КООП: ВЫЖИВАНИЕ НА ДВОИХ", Color("#00a5b8"), 22 if Orient.portrait else 20, Vector2(0, 58 if Orient.portrait else 50))
+	var button := UiStyle.button("КООП · ОТРЯД НА ДВОИХ", Color("#00a5b8"), 22 if Orient.portrait else 20, Vector2(0, 58 if Orient.portrait else 50))
 	button.name = "CoopButton"
 	_coop_button = button
 	button.pressed.connect(func() -> void: open_coop())
@@ -745,12 +742,12 @@ func _select_mode(mode: int) -> void:
 	_mode = mode
 	if _mod_chip != null:
 		_mod_chip.visible = mode == Mode.SURVIVAL
-	var colors := [Color("#ffb020"), Color("#7df9ff"), Color("#7cff6b")]
+	var colors := [Color("#ff9a2e"), Color("#9fc4d8"), Color("#a6b84a")]
 	for i in _mode_buttons.size():
 		var active := i == mode
 		var b := _mode_buttons[i]
 		b.set_pressed_no_signal(active)
-		var style := UiStyle.box(Color(colors[i]).darkened(0.62) if active else Color(0.08, 0.05, 0.16, 0.75), colors[i] if active else (Color(colors[i], 0.9) if i == 2 else UiStyle.OUTLINE), 5 if active else (4 if i == 2 else 3), 20)
+		var style := UiStyle.box(Color(colors[i]).darkened(0.7) if active else Color(0.11, 0.12, 0.11, 0.8), colors[i] if active else (Color(colors[i], 0.9) if i == 2 else UiStyle.OUTLINE), 4 if active else (3 if i == 2 else 2), 8)
 		for state in ["normal", "hover", "pressed", "hover_pressed"]:
 			b.add_theme_stylebox_override(state, style)
 		b.add_theme_color_override("font_color", colors[i] if active or i == 2 else UiStyle.TEXT_DIM)
@@ -766,10 +763,10 @@ func _build_weapon_chip() -> Control:
 	var chip := Button.new()
 	chip.custom_minimum_size = Vector2(0, 84 if Orient.portrait else 78)
 	chip.focus_mode = Control.FOCUS_NONE
-	var normal := UiStyle.box(Color(0.1, 0.07, 0.2, 0.88), Color("#ffb020"), 3, 20)
+	var normal := UiStyle.box(Color(0.12, 0.13, 0.12, 0.9), Color("#d9962b"), 3, 8)
 	chip.add_theme_stylebox_override("normal", normal)
-	chip.add_theme_stylebox_override("hover", UiStyle.box(Color(0.15, 0.1, 0.28, 0.92), Color("#ffb020"), 4, 20))
-	chip.add_theme_stylebox_override("pressed", UiStyle.box(Color(0.2, 0.13, 0.34, 0.95), Color.WHITE, 4, 20))
+	chip.add_theme_stylebox_override("hover", UiStyle.box(Color(0.17, 0.18, 0.17, 0.92), Color("#ffb347"), 4, 8))
+	chip.add_theme_stylebox_override("pressed", UiStyle.box(Color(0.16, 0.17, 0.16, 0.95), Color("#ffb347"), 4, 8))
 	chip.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 	chip.pressed.connect(func() -> void:
 		SoundManager.play(&"ui_click")
@@ -795,7 +792,7 @@ func _build_weapon_chip() -> Control:
 	texts.add_child(_record_label)
 	var change := PanelContainer.new()
 	change.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var pill := UiStyle.box(Color("#ffb020").darkened(0.45), Color("#ffb020"), 3, 18)
+	var pill := UiStyle.box(Color("#d9962b").darkened(0.55), Color("#d9962b"), 2, 6)
 	pill.set_content_margin_all(8)
 	change.add_theme_stylebox_override("panel", pill)
 	var change_text := UiStyle.label("СМЕНИТЬ", 22, Color("#ffd257"), 5)
@@ -808,7 +805,7 @@ func _build_weapon_chip() -> Control:
 
 func _build_dock() -> Control:
 	var dock := PanelContainer.new()
-	var style := UiStyle.box(Color(0.05, 0.03, 0.12, 0.88), Color("#1c4256"), 3, 28)
+	var style := UiStyle.box(Color(0.110, 0.106, 0.099, 0.88), Color("#4a4d44"), 3, 10)
 	style.content_margin_left = 10
 	style.content_margin_right = 10
 	style.content_margin_top = 6
@@ -822,10 +819,10 @@ func _build_nav() -> Control:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 10)
 	var items := [
-		[MenuWidgets.NavButton.Kind.UPGRADES, "ПРОКАЧКА", Color("#ff4d6d"), func() -> void: _upgrades.open(), "upgrade"],
-		[MenuWidgets.NavButton.Kind.FRIENDS, "ДРУЗЬЯ", Color("#ffd257"), func() -> void: _friends.open(), "friends"],
-		[MenuWidgets.NavButton.Kind.SKINS, "ГЕРОИ", Color("#00e5ff"), func() -> void: _shop.open(), "hero"],
-		[MenuWidgets.NavButton.Kind.OUTFITS, "СКИНЫ", Color("#7cff6b"), func() -> void: _skins.open(), "outfit"],
+		[MenuWidgets.NavButton.Kind.UPGRADES, "ПРОКАЧКА", Color("#d9962b"), func() -> void: _upgrades.open(), "upgrade"],
+		[MenuWidgets.NavButton.Kind.FRIENDS, "ДРУЗЬЯ", Color("#d9962b"), func() -> void: _friends.open(), "friends"],
+		[MenuWidgets.NavButton.Kind.SKINS, "ОТРЯД", Color("#d9962b"), func() -> void: _shop.open(), "hero"],
+		[MenuWidgets.NavButton.Kind.OUTFITS, "СКИНЫ", Color("#d9962b"), func() -> void: _skins.open(), "outfit"],
 	]
 	for item in items:
 		var button := MenuWidgets.NavButton.new(item[0], item[1], item[2], ArenaProp.texture_of("res://assets/ui/hub/%s.png" % item[4]))
@@ -881,7 +878,7 @@ func _refresh() -> void:
 	_nick_label.text = SaveService.get_display_nickname()
 	_nick_label.add_theme_color_override("font_color", Cosmetics.nick_color(UiStyle.GOLD))
 	if _mode_buttons.size() > 2:
-		_mode_buttons[2].text = "СЮЖЕТ %d/6" % SaveService.story_shards()
+		_mode_buttons[2].text = "КАМПАНИЯ %d/6" % SaveService.story_shards()
 	if _lock_mark != null and _survival_locked():
 		_lock_mark.visible = true
 	_level_label.text = "LVL %d" % SaveService.get_account_level() + (" · VIP %d" % Premium.level() if Premium.level() > 0 else "")
@@ -925,7 +922,7 @@ class _NotifyDot:
 		custom_minimum_size = Vector2(24, 24)
 
 	func _draw() -> void:
-		draw_circle(Vector2(12, 12), 12.0, Color("#0b1a26"))
+		draw_circle(Vector2(12, 12), 12.0, Color("#23221f"))
 		draw_circle(Vector2(12, 12), 9.0, UiStyle.DANGER)
 
 
@@ -953,13 +950,13 @@ class HeroStage:
 	func _draw() -> void:
 		var floor_center := Vector2(size.x * 0.5, size.y * 0.5 + 118.0)
 		for i in 6:
-			draw_circle(Vector2(size.x * 0.5, size.y * 0.5 + 20.0), 250.0 - i * 34.0, Color(0.1, 0.85, 1.0, 0.035))
+			draw_circle(Vector2(size.x * 0.5, size.y * 0.5 + 20.0), 250.0 - i * 34.0, Color(1.000, 0.554, 0.090, 0.035))
 		draw_set_transform(floor_center, 0.0, Vector2(1.0, 0.3))
-		draw_circle(Vector2.ZERO, 200.0, Color(0.03, 0.01, 0.08, 0.75))
-		draw_arc(Vector2.ZERO, 200.0, 0.0, TAU, 64, Color("#00e5ff"), 8.0, true)
+		draw_circle(Vector2.ZERO, 200.0, Color(0.074, 0.071, 0.066, 0.75))
+		draw_arc(Vector2.ZERO, 200.0, 0.0, TAU, 64, Color("#ff8200"), 8.0, true)
 		draw_arc(Vector2.ZERO, 158.0, 0.0, TAU, 64, Color("#ffd257", 0.8), 5.0, true)
 		var pulse := fmod(_time * 0.6, 1.0)
-		draw_arc(Vector2.ZERO, 60.0 + pulse * 130.0, 0.0, TAU, 48, Color(0.0, 0.96, 1.0, (1.0 - pulse) * 0.5), 4.0, true)
+		draw_arc(Vector2.ZERO, 60.0 + pulse * 130.0, 0.0, TAU, 48, Color(1.0, 0.6, 0.18, (1.0 - pulse) * 0.5), 4.0, true)
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		for spark in _sparks:
 			var pos := Vector2(size.x * (0.2 + spark.x * 0.6), size.y * spark.y)
@@ -979,38 +976,32 @@ class ShadeOverlay:
 		for i in steps:
 			var t := float(i) / (steps - 1)
 			var alpha := lerpf(0.72, 0.35, sin(t * PI)) if t < 0.5 else lerpf(0.35, 0.85, (t - 0.5) * 2.0)
-			draw_rect(Rect2(0, h * i / steps, size.x, h / steps + 1.0), Color(0.03, 0.01, 0.08, alpha))
+			draw_rect(Rect2(0, h * i / steps, size.x, h / steps + 1.0), Color(0.02, 0.024, 0.02, alpha))
 
 
-## Логотип «Trash Squad»: толстая обводка, двухцветная заливка, наклон и тень.
+## Логотип «Trash Squad»: ровная жирная надпись, тонкая линия и подпись «Отряд зачистки».
 class LogoText:
 	extends Control
 	var font: Font
-	var _time := 0.0
 
 	func _init() -> void:
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-	func _process(delta: float) -> void:
-		_time += delta
-		queue_redraw()
-
 	func _draw() -> void:
-		var base := Vector2(0, size.y - 46.0)
-		var wobble := sin(_time * 1.6) * 0.012
-		draw_set_transform(Vector2(size.x * 0.5, base.y), -0.05 + wobble, Vector2.ONE)
-		var title := "Trash"
-		var probe := font.get_string_size(title, HORIZONTAL_ALIGNMENT_LEFT, -1, 100).x + font.get_string_size("Squad", HORIZONTAL_ALIGNMENT_LEFT, -1, 90).x
-		var font_size := int(100.0 * minf(1.0, size.x * 0.9 / maxf(probe, 1.0)))
-		var io_size := int(font_size * 0.9)
-		var width := font.get_string_size(title, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
-		var io_width := font.get_string_size("Squad", HORIZONTAL_ALIGNMENT_LEFT, -1, io_size).x
-		var start := Vector2(-(width + io_width + 14.0) * 0.5, 0)
-		draw_string_outline(font, start + Vector2(0, 10), title, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, 34, Color(0, 0, 0, 0.45))
-		draw_string_outline(font, start, title, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, 26, Color("#0b1a26"))
-		draw_string(font, start, title, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color("#ffc93c"))
-		draw_string(font, start + Vector2(0, -4), title, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color(1.0, 0.93, 0.55, 0.55))
-		var io := start + Vector2(width + 14, 0)
-		draw_string_outline(font, io, "Squad", HORIZONTAL_ALIGNMENT_LEFT, -1, io_size, 20, Color("#0b1a26"))
-		draw_string(font, io, "Squad", HORIZONTAL_ALIGNMENT_LEFT, -1, io_size, Color("#00f5ff"))
-		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		var title := "TRASH SQUAD"
+		var fs := 84
+		while fs > 30 and font.get_string_size(title, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > size.x * 0.94:
+			fs -= 4
+		var w := font.get_string_size(title, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+		var start := Vector2((size.x - w) * 0.5, size.y - 52.0)
+		draw_string_outline(font, start + Vector2(0, 5), title, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 14, Color(0, 0, 0, 0.55))
+		draw_string_outline(font, start, title, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 12, Color("#0d0f0e"))
+		var split := start.x + font.get_string_size("TRASH ", HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+		draw_string(font, start, "TRASH ", HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color("#ece7d3"))
+		draw_string(font, Vector2(split, start.y), "SQUAD", HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color("#ff9a2e"))
+		var cx := size.x * 0.5
+		var y := size.y - 34.0
+		draw_line(Vector2(cx - w * 0.5, y), Vector2(cx + w * 0.5, y), Color("#d9962b"), 3.0)
+		var sub := "ОТРЯД ЗАЧИСТКИ"
+		var sw := font.get_string_size(sub, HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
+		draw_string(font, Vector2(cx - sw * 0.5, size.y - 8.0), sub, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color("#c9bd96"))

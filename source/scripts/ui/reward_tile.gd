@@ -15,15 +15,15 @@ const GEM_COLOR := Color("#c98bff")
 func _init(title: String, coins: int, gems: int, tier: int, state: State, big: bool = false) -> void:
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	custom_minimum_size = Vector2(0, 176 if big else 168)
-	var accent := [Color("#7fa6ff"), Color("#c98bff"), UiStyle.GOLD][clampi(tier, 0, 2)] as Color
-	var bg := Color("#1c4256")
+	var accent := [Color("#ffba72"), Color("#c98bff"), UiStyle.GOLD][clampi(tier, 0, 2)] as Color
+	var bg := Color("#4f4c47")
 	var border := UiStyle.OUTLINE
 	match state:
 		State.CURRENT:
 			bg = Color(0.28, 0.21, 0.07, 0.98)
 			border = UiStyle.GOLD
 		State.DONE:
-			bg = Color("#233a33")
+			bg = Color("#353330")
 			border = Color("#2fae5f")
 		_:
 			border = accent.darkened(0.45)

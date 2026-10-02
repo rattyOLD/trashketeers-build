@@ -52,13 +52,13 @@ func _build() -> void:
 	root.gui_input.connect(_on_input)
 	add_child(root)
 	var shade := ColorRect.new()
-	shade.color = Color(0.03, 0.01, 0.08, 0.45)
+	shade.color = Color(0.074, 0.071, 0.066, 0.45)
 	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
 	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(shade)
 
 	_panel = PanelContainer.new()
-	_panel.add_theme_stylebox_override("panel", UiStyle.box(Color(0.1, 0.07, 0.2, 0.96), UiStyle.NEON, 5, 22))
+	_panel.add_theme_stylebox_override("panel", UiStyle.box(Color(0.184, 0.177, 0.166, 0.96), UiStyle.NEON, 5, 22))
 	_panel.anchor_left = 0.0
 	_panel.anchor_right = 1.0
 	_panel.anchor_top = 1.0

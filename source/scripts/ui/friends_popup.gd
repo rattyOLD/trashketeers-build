@@ -408,7 +408,7 @@ func _social_row(friend: Dictionary) -> Control:
 	var code := str(friend.get("friend_code", ""))
 	var nick := str(friend.get("nickname", "Енот"))
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#1b3d50"), Color(UiStyle.NEON, 0.6), 3, 14))
+	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#4a4742"), Color(UiStyle.NEON, 0.6), 3, 14))
 	_tappable(panel, _open_profile.bind(code))
 	var row := HBoxContainer.new()
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -431,7 +431,7 @@ func _social_row(friend: Dictionary) -> Control:
 	name_label.clip_text = true
 	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	text.add_child(name_label)
-	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#1b3d50"), Color(UiStyle.NEON, 0.6) if tag < 0 else Insider.color_of(tag, UiStyle.TEXT), 3, 16))
+	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#4a4742"), Color(UiStyle.NEON, 0.6) if tag < 0 else Insider.color_of(tag, UiStyle.TEXT), 3, 16))
 	var preview := "" if friend.get("last_body") == null else ChatPopup.preview_of(str(friend.get("last_body")))
 	var when := "" if friend.get("last_at") == null else ChatPopup._clock_label(str(friend.get("last_at")))
 	var sub_text := (preview.left(30) + ("  · " + when if not when.is_empty() else "")) if not preview.is_empty() else ("в сети" if online else "волна %d" % int(friend.get("best_wave", 0)))
@@ -460,7 +460,7 @@ func _social_row(friend: Dictionary) -> Control:
 func _request_row(request: Dictionary) -> Control:
 	var code := str(request.get("friend_code", ""))
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#244350"), Color(UiStyle.HOT, 0.8), 3, 14))
+	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#4a4742"), Color(UiStyle.HOT, 0.8), 3, 14))
 	_tappable(panel, _open_profile.bind(code))
 	var row := HBoxContainer.new()
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -490,7 +490,7 @@ func _request_row(request: Dictionary) -> Control:
 
 func _online_row(friend: Dictionary) -> Control:
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#1b3d50"), Color(UiStyle.NEON, 0.6), 3, 14))
+	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#4a4742"), Color(UiStyle.NEON, 0.6), 3, 14))
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 10)
 	panel.add_child(row)
@@ -543,7 +543,7 @@ func _fill_board() -> void:
 func _board_row(entry: Dictionary, place: int, key: String, unit: String) -> Control:
 	var me := bool(entry.get("me", false))
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#1b3d50") if not me else Color("#173a4a"), UiStyle.NEON if me else Color(UiStyle.OUTLINE, 1.0), 3, 14))
+	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#4a4742") if not me else Color("#44413d"), UiStyle.NEON if me else Color(UiStyle.OUTLINE, 1.0), 3, 14))
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 10)
 	panel.add_child(row)
@@ -581,7 +581,7 @@ func _fill_friends() -> void:
 
 func _friend_row(friend: Dictionary) -> Control:
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#1b3d50"), Color(UiStyle.NEON, 0.6), 3, 16))
+	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#4a4742"), Color(UiStyle.NEON, 0.6), 3, 16))
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 12)
 	panel.add_child(row)
@@ -629,7 +629,7 @@ func _mission_badges(done: Array, shards: int) -> Control:
 	for i in MISSION_COUNT:
 		var passed := done.has("m%d" % (i + 1))
 		var chip := PanelContainer.new()
-		var chip_box := UiStyle.box(Color("#35c46a") if passed else Color("#1c4256"), UiStyle.OUTLINE, 2, 8)
+		var chip_box := UiStyle.box(Color("#35c46a") if passed else Color("#4f4c47"), UiStyle.OUTLINE, 2, 8)
 		chip_box.content_margin_left = 5
 		chip_box.content_margin_right = 5
 		chip_box.content_margin_top = 1
@@ -704,7 +704,7 @@ class AvatarView:
 		var c := size * 0.5
 		var r := minf(size.x, size.y) * 0.5
 		draw_circle(c, r, UiStyle.OUTLINE)
-		draw_circle(c, r - 3.0, Color("#1c4256"))
+		draw_circle(c, r - 3.0, Color("#4f4c47"))
 		var tex := MenuWidgets.Avatar.get_texture_for(CharacterDB.get_character(character_id), skin_id)
 		if tex != null:
 			draw_texture_rect(tex, Rect2(c - Vector2.ONE * (r - 4.0), Vector2.ONE * (r - 4.0) * 2.0), false)
@@ -715,8 +715,8 @@ class AvatarView:
 class CardView:
 	extends Control
 
-	const BG_TOP := Color("#1a3440")
-	const BG_BOTTOM := Color("#091317")
+	const BG_TOP := Color("#3b3935")
+	const BG_BOTTOM := Color("#151413")
 
 	var info: Dictionary = {}
 	var qr_text := ""
@@ -749,7 +749,7 @@ class CardView:
 		_fit(font, str(info.get("n", "Енот")), Vector2(48, 134), 66, UiStyle.TEXT, 560.0)
 		_wordmark(font, Vector2(w - 48, 74))
 		var frame := Rect2(48, 176, 248, 248)
-		draw_style_box(UiStyle.box(Color("#1f3d4a"), UiStyle.NEON, 6, 40), frame)
+		draw_style_box(UiStyle.box(Color("#44413d"), UiStyle.NEON, 6, 40), frame)
 		var tex := MenuWidgets.Avatar.get_texture_for(CharacterDB.get_character(str(info.get("c", ""))), str(info.get("s", "classic")))
 		if tex != null:
 			draw_texture_rect(tex, frame.grow(-12.0), false)
@@ -770,7 +770,7 @@ class CardView:
 		for i in FriendsPopup.MISSION_COUNT:
 			var passed := done.has("m%d" % (i + 1))
 			var centre := Vector2(354 + i * 56, 410)
-			draw_circle(centre, 24.0, Color("#35c46a") if passed else Color("#1f3d4a"))
+			draw_circle(centre, 24.0, Color("#35c46a") if passed else Color("#44413d"))
 			draw_arc(centre, 24.0, 0.0, TAU, 40, Color("#8dffb0") if passed else Color(UiStyle.TEXT_DIM, 0.6), 3.0, true)
 			_fit(font, "%d" % (i + 1), centre + Vector2(-24, 10), 28, UiStyle.TEXT if passed else UiStyle.TEXT_DIM, 48.0, HORIZONTAL_ALIGNMENT_CENTER)
 		_draw_qr(font)
@@ -826,7 +826,7 @@ class CardView:
 			for y in _qr.size:
 				for x in _qr.size:
 					if _qr.is_dark(x, y):
-						draw_rect(Rect2(origin + Vector2(x, y) * cell, Vector2.ONE * cell), Color("#0f1f26"))
+						draw_rect(Rect2(origin + Vector2(x, y) * cell, Vector2.ONE * cell), Color("#23221f"))
 		_fit(font, "СКАНИРУЙ QR", Vector2(plate.position.x - 12, 430), 24, UiStyle.TEXT, plate.size.x + 24.0, HORIZONTAL_ALIGNMENT_CENTER)
 		_fit(font, "И ДОБАВЬ В ДРУЗЬЯ", Vector2(plate.position.x - 12, 460), 24, UiStyle.HOT, plate.size.x + 24.0, HORIZONTAL_ALIGNMENT_CENTER)
 

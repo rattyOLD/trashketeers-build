@@ -295,7 +295,7 @@ func _draw() -> void:
 
 func _draw_backdrop() -> void:
 	var accent := weapon.get_rarity_color()
-	draw_rect(Rect2(Vector2.ZERO, size), Color("#070b17"))
+	draw_rect(Rect2(Vector2.ZERO, size), Color("#151413"))
 	draw_rect(Rect2(0, size.y * 0.35, size.x, size.y * 0.65), accent.darkened(0.82))
 	var floor_y := size.y * FLOOR
 	for i in 7:
@@ -312,9 +312,9 @@ func _draw_dummy(at: Vector2, s: float, hit: float) -> void:
 	var shake := Vector2(sin(_t * 70.0) * 3.0 * hit, 0.0)
 	var c := at + shake + Vector2(hit * 5.0, 0.0)
 	draw_line(Vector2(c.x, floor_y), Vector2(c.x, c.y + 24.0 * s), Color("#5a4630"), 8.0 * s)
-	draw_rect(Rect2(c.x - 26.0 * s, floor_y - 6.0, 52.0 * s, 8.0), Color("#243238"))
+	draw_rect(Rect2(c.x - 26.0 * s, floor_y - 6.0, 52.0 * s, 8.0), Color("#34312e"))
 	var body := Color("#c9ccd8").lerp(Color.WHITE, hit)
-	draw_circle(c, 34.0 * s, Color("#08151d"))
+	draw_circle(c, 34.0 * s, Color("#1b1a18"))
 	draw_circle(c, 30.0 * s, body)
 	draw_circle(c, 22.0 * s, Color("#d9344f").lerp(Color.WHITE, hit))
 	draw_circle(c, 14.0 * s, body)
@@ -395,7 +395,7 @@ func _draw_extras() -> void:
 		for i in 9:
 			var ang := TAU * float(i) / 9.0
 			var len := 60.0 * minf(k * 2.5, 1.0)
-			draw_line(t + Vector2.from_angle(ang) * 20.0, t + Vector2.from_angle(ang) * (20.0 + len), Color("#bfeeff", 1.0 - k), 5.0)
+			draw_line(t + Vector2.from_angle(ang) * 20.0, t + Vector2.from_angle(ang) * (20.0 + len), Color("#ffd6ac", 1.0 - k), 5.0)
 		draw_arc(t, 90.0 * minf(k * 2.0, 1.0), 0.0, TAU, 32, Color("#7fdcff", 1.0 - k), 4.0)
 	if _burn > 0.0:
 		for i in 6:
@@ -434,7 +434,7 @@ func _draw_melee() -> void:
 			var a := smoothstep(0.0, 0.2, u) * (1.0 - smoothstep(0.45, 1.0, u))
 			_draw_slash(pivot, a, lerpf(-1.0, 1.0, eased) * weapon.arc_rad * 0.3 * (-1.0 if _swings % 2 == 0 else 1.0), lerpf(0.85, 1.05, eased))
 	WeaponIcons.draw(self, weapon.icon, center, scale_factor, angle, weapon.effect_color)
-	draw_circle(pivot, 5.0, Color("#08151d"))
+	draw_circle(pivot, 5.0, Color("#1b1a18"))
 	draw_circle(pivot, 3.0, Color("#f3d1a8"))
 
 

@@ -20,7 +20,7 @@ func _init() -> void:
 	visible = false
 
 	var dim := ColorRect.new()
-	dim.color = Color(0.03, 0.01, 0.08, 0.72)
+	dim.color = Color(0.074, 0.071, 0.066, 0.72)
 	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(dim)
 
@@ -39,7 +39,7 @@ func _init() -> void:
 	_cards = BoxContainer.new()
 	_cards.add_theme_constant_override("separation", 14)
 	_box.add_child(_cards)
-	_reroll = UiStyle.button("", Color("#59add1"), 21, Vector2(600, 54))
+	_reroll = UiStyle.button("", Color("#d19250"), 21, Vector2(600, 54))
 	_reroll.pressed.connect(func() -> void:
 		if visible:
 			reroll_requested.emit())

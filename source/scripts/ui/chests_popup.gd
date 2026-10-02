@@ -20,7 +20,7 @@ func _init() -> void:
 	_balance = UiStyle.label("", 24, UiStyle.GOLD, 6)
 	content.add_child(_balance)
 	var pity_card := PanelContainer.new()
-	pity_card.add_theme_stylebox_override("panel", UiStyle.box(Color("#0e2230"), Color("#35c8ff"), 3, 16))
+	pity_card.add_theme_stylebox_override("panel", UiStyle.box(Color("#2c2a28"), Color("#35c8ff"), 3, 16))
 	var pity_box := VBoxContainer.new()
 	pity_box.add_theme_constant_override("separation", 4)
 	pity_card.add_child(pity_box)
@@ -32,7 +32,7 @@ func _init() -> void:
 	_pity_bar.max_value = 1.0
 	_pity_bar.show_percentage = false
 	_pity_bar.custom_minimum_size = Vector2(0, 16)
-	_pity_bar.add_theme_stylebox_override("background", UiStyle.box(Color("#0c191e"), Color("#1c4256"), 2, 8))
+	_pity_bar.add_theme_stylebox_override("background", UiStyle.box(Color("#1c1a19"), Color("#4f4c47"), 2, 8))
 	_pity_bar.add_theme_stylebox_override("fill", UiStyle.box(Color("#35c8ff"), Color("#35c8ff"), 0, 8))
 	pity_box.add_child(_pity_bar)
 	content.add_child(pity_card)

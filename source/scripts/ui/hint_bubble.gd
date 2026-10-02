@@ -16,7 +16,7 @@ func _init() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	visible = false
 	z_index = 50
-	var style := UiStyle.box(Color(0.06, 0.04, 0.14, 0.96), Color(UiStyle.NEON, 0.8), 2, 12)
+	var style := UiStyle.box(Color(0.129, 0.124, 0.116, 0.96), Color(UiStyle.NEON, 0.8), 2, 12)
 	style.set_content_margin_all(8)
 	style.shadow_color = Color(0, 0, 0, 0.5)
 	style.shadow_size = 6

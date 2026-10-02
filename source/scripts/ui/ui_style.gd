@@ -3,15 +3,15 @@ extends RefCounted
 ## Фабрики стилизованных контролов: жирный тёмный контур, скруглённые плашки, неон.
 ## Всё строится кодом, чтобы UI не зависел от .tres-тем и легко правился в одном месте.
 
-const OUTLINE := Color("#08151d")
-const PANEL := Color("#12303f")
-const PANEL_LIGHT := Color("#1c4256")
-const NEON := Color("#00e5ff")
-const HOT := Color("#ff8a3d")
-const GOLD := Color("#ffd257")
-const DANGER := Color("#ff3b5c")
-const TEXT := Color("#eefbff")
-const TEXT_DIM := Color("#9fc9d8")
+const OUTLINE := Color("#0d0f0e")
+const PANEL := Color("#23272a")
+const PANEL_LIGHT := Color("#363b3e")
+const NEON := Color("#ff8a1f")
+const HOT := Color("#ff5a1f")
+const GOLD := Color("#f5c04a")
+const DANGER := Color("#e8412f")
+const TEXT := Color("#f1efe6")
+const TEXT_DIM := Color("#aaa898")
 
 
 static func box(bg: Color, border: Color = OUTLINE, border_width: int = 4, radius: int = 18) -> StyleBoxFlat:
@@ -108,7 +108,7 @@ static func button(text: String, color: Color, font_size: int = 30, min_size: Ve
 		b.add_theme_stylebox_override("hover", button_box(color.lightened(0.06), false))
 		b.add_theme_stylebox_override("pressed", button_box(color.lightened(0.1), true))
 		b.add_theme_stylebox_override("hover_pressed", button_box(color.lightened(0.1), true))
-		b.add_theme_stylebox_override("disabled", button_box(color.darkened(0.45).lerp(Color("#344850"), 0.5), false))
+		b.add_theme_stylebox_override("disabled", button_box(color.darkened(0.45).lerp(Color("#4a4742"), 0.5), false))
 	b.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 	b.pressed.connect(func() -> void: SoundManager.play(&"ui_click"))
 	return b
@@ -149,7 +149,7 @@ static func progress_bar(fill: Color, height: float) -> ProgressBar:
 	bar.show_percentage = false
 	bar.custom_minimum_size = Vector2(0, height)
 	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	bar.add_theme_stylebox_override("background", box(Color("#0f1e24"), OUTLINE, 4, 10))
+	bar.add_theme_stylebox_override("background", box(Color("#21201e"), OUTLINE, 4, 10))
 	var fill_box := box(fill, OUTLINE, 4, 10)
 	fill_box.set_content_margin_all(0)
 	bar.add_theme_stylebox_override("fill", fill_box)

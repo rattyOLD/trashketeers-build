@@ -44,7 +44,7 @@ class TexBar:
 		var end_w := minf(END_SRC * size.y / SRC_H, size.x * 0.33)
 		var inset := end_w * 0.5
 		var inner := Rect2(inset, size.y * 0.2, size.x - inset * 2.0, size.y * 0.6)
-		draw_rect(inner, Color(0.05, 0.03, 0.1, 0.85), true)
+		draw_rect(inner, Color(0.092, 0.088, 0.083, 0.85), true)
 		var fill: Texture2D = fills[clampi(fill_index, 0, fills.size() - 1)] if not fills.is_empty() else null
 		if fill != null and frac > 0.0:
 			var src := Rect2(0, 0, fill.get_width() * frac, fill.get_height())
@@ -52,7 +52,7 @@ class TexBar:
 		elif frac > 0.0:
 			draw_rect(Rect2(inner.position, Vector2(inner.size.x * frac, inner.size.y)), Color("#e8283f"), true)
 		if frame == null:
-			draw_rect(Rect2(Vector2.ZERO, size), Color("#80bed8"), false, 3.0)
+			draw_rect(Rect2(Vector2.ZERO, size), Color("#d8a773"), false, 3.0)
 			return
 		var fw := float(frame.get_width())
 		var fh := float(frame.get_height())
@@ -66,7 +66,7 @@ class OutlineBar:
 	extends Control
 
 	const HP_COLORS: Array[Color] = [Color("#3fdc55"), Color("#ffb020"), Color("#ff3b3b")]
-	const XP_COLORS: Array[Color] = [Color("#35e6ff")]
+	const XP_COLORS: Array[Color] = [Color("#ff9930")]
 
 	var colors: Array[Color] = HP_COLORS
 	var max_value := 1.0:
@@ -193,8 +193,8 @@ class DamagePortrait:
 	func _draw() -> void:
 		var c := size * 0.5
 		var r := minf(size.x, size.y) * 0.5
-		draw_circle(c, r - 1.0, Color("#0b171c"))
-		draw_circle(c, r - 5.0, Color("#1c4256"))
+		draw_circle(c, r - 1.0, Color("#1a1917"))
+		draw_circle(c, r - 5.0, Color("#4f4c47"))
 
 
 ## Лицо: портрет, вырезанный кругом (полигон с UV).
@@ -256,7 +256,7 @@ class Over:
 				draw_circle(Vector2(x, size.y * (0.62 + 0.3 * fall)), 2.6 * (1.0 - fall * 0.5), Color(0.8, 0.05, 0.1, 0.9 * (1.0 - fall)))
 		# Оправа.
 		var rust := Color("#c9722b").lerp(Color("#8a2a1a"), d * 0.8)
-		draw_arc(c, r - 3.5, 0.0, TAU, 48, Color("#0c1d29"), 8.0, true)
+		draw_arc(c, r - 3.5, 0.0, TAU, 48, Color("#262422"), 8.0, true)
 		draw_arc(c, r - 3.5, 0.0, TAU, 48, rust, 4.5, true)
 		for i in 4:
 			var a := TAU * i / 4.0 + PI / 4.0
