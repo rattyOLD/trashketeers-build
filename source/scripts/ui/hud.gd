@@ -919,14 +919,10 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	_nuts_row.add_child(icon)
 	_nuts_label = UiStyle.label("0", 32, UiStyle.GOLD, 8)
 	_nuts_row.add_child(_nuts_label)
-	var pause := UiStyle.button("", UiStyle.GOLD, 26, Vector2(72, 72))
+	var pause := UiStyle.flat_button(Vector2(76, 76))
 	_pause_button = pause
-	var pause_icon := BattlePanels.icon_rect(BattlePanels.icon("pause"), 40)
-	pause_icon.set_anchors_preset(Control.PRESET_CENTER)
-	pause_icon.offset_left = -20
-	pause_icon.offset_right = 20
-	pause_icon.offset_top = -24
-	pause_icon.offset_bottom = 16
+	var pause_icon := BattlePanels.icon_rect(BattlePanels.icon("pause"), 76)
+	pause_icon.set_anchors_preset(Control.PRESET_FULL_RECT)
 	pause.add_child(pause_icon)
 	pause.pressed.connect(func() -> void: pause_pressed.emit())
 	top_right.add_child(pause)

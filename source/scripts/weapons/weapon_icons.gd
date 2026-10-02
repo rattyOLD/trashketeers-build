@@ -33,7 +33,7 @@ static func _sprite(kind: StringName) -> Dictionary:
 			var path := str(raw.get("texture", ""))
 			if not ResourceLoader.exists(path):
 				continue
-			var tex: Texture2D = load(path)
+			var tex := _smooth_texture(load(path) as Texture2D)
 			var size := tex.get_size()
 			var unit := float(raw.get("length", 74.0)) / size.x
 			var center := size * 0.5
@@ -47,6 +47,19 @@ static func _sprite(kind: StringName) -> Dictionary:
 				"muzzle": (Vector2(float(muzzle_px[0]), float(muzzle_px[1])) - center) * unit,
 			}
 	return _sprites.get(kind, {})
+
+
+## Крупный рисунок ствола при сильном уменьшении без мипмапов превращается в шум («кашу»):
+## пересобираем текстуру с мипмапами и рисуем с линейной фильтрацией.
+static func _smooth_texture(tex: Texture2D) -> Texture2D:
+	var image := tex.get_image()
+	if image == null or image.is_empty():
+		return tex
+	if image.is_compressed():
+		image.decompress()
+	image.convert(Image.FORMAT_RGBA8)
+	image.generate_mipmaps()
+	return ImageTexture.create_from_image(image)
 
 
 ## Точка рукояти в единицах ствола — её держит лапа.
@@ -63,6 +76,8 @@ static func draw(canvas: CanvasItem, kind: StringName, center: Vector2, size_sca
 	var sprite := _sprite(kind)
 	if not sprite.is_empty():
 		var unit: float = sprite["unit"] * size_scale
+		if canvas.texture_filter != CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS:
+			canvas.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 		canvas.draw_set_transform_matrix(Transform2D(angle, Vector2(unit, unit * (-1.0 if flip_y else 1.0)), 0.0, center))
 		canvas.draw_texture(sprite["texture"], -(sprite["center"] as Vector2))
 		canvas.draw_set_transform_matrix(Transform2D.IDENTITY)

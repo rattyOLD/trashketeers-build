@@ -45,13 +45,9 @@ func open() -> void:
 
 
 func _build() -> void:
-	var resume := UiStyle.button("", UiStyle.GOLD, 26, Vector2(120, 120))
-	var icon := BattlePanels.icon_rect(BattlePanels.icon("pause"), 64)
-	icon.set_anchors_preset(Control.PRESET_CENTER)
-	icon.offset_left = -32
-	icon.offset_right = 32
-	icon.offset_top = -38
-	icon.offset_bottom = 26
+	var resume := UiStyle.flat_button(Vector2(120, 120))
+	var icon := BattlePanels.icon_rect(BattlePanels.icon("pause"), 120)
+	icon.set_anchors_preset(Control.PRESET_FULL_RECT)
 	resume.add_child(icon)
 	UiStyle.anchor(resume, Vector2(0.5, 0.5), Rect2(-60, -60, 120, 120))
 	resume.pressed.connect(_finish)

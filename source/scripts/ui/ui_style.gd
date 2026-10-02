@@ -64,6 +64,18 @@ static func button(text: String, color: Color, font_size: int = 30, min_size: Ve
 	return b
 
 
+## Кнопка без плашки: видна только иконка внутри (у неё уже своя рамка). Нажатие — лёгкое затемнение.
+static func flat_button(min_size: Vector2) -> Button:
+	var b := Button.new()
+	b.custom_minimum_size = min_size
+	b.focus_mode = Control.FOCUS_NONE
+	b.flat = true
+	for state in ["normal", "hover", "pressed", "hover_pressed", "disabled", "focus"]:
+		b.add_theme_stylebox_override(state, StyleBoxEmpty.new())
+	b.pressed.connect(func() -> void: SoundManager.play(&"ui_click"))
+	return b
+
+
 ## Единый стиль кнопок: плашка с тёмным ободком того же оттенка и толстой «губой» снизу;
 ## при нажатии губа уходит, текст опускается — кнопка «продавливается».
 static func button_box(color: Color, pressed: bool) -> StyleBoxFlat:

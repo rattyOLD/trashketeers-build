@@ -1092,8 +1092,8 @@
     },
     {
       "weapon_id": "heavy_barrel",
-      "display_name": "Тяжёлый Ствол",
-      "short_name": "H.B.",
+      "display_name": "Супер-ствол",
+      "short_name": "СУПЕРСТВОЛ",
       "icon": "blaster",
       "rarity": "legendary",
       "enemy_only": true,

@@ -34,7 +34,9 @@ const CLIP_CELL := Vector2(480, 320)
 const CLIP_FEET := 304.0
 const CLIP_COUNTS := {"idle": 8, "run": 8, "shoot": 4, "hit": 4, "dash": 6, "death": 8, "revive": 6}
 const HIT_CLIP_TIME := 0.2
-const CLIP_AIM_LIMIT := 0.4
+const CLIP_AIM_LIMIT := 0.26
+## Рисованный енот крупнее старого, а ствол на нём должен читаться силуэтом, а не пятном.
+const CLIP_GUN_BOOST := 1.15
 const DASH_CLIP_TIME := 0.16
 const IDLE_FPS := 7.0
 const SHOOT_ANIM_TIME := 0.24
@@ -766,6 +768,8 @@ func _gun_center(paw: Vector2, dir: Vector2, kick_amount: float) -> Vector2:
 
 
 func _weapon_scale() -> float:
+	if _clip_mode and not melee_active:
+		return GUN_SCALE * CLIP_GUN_BOOST
 	return GUN_SCALE * (melee_scale * 1.15 if melee_active else 1.0)
 
 

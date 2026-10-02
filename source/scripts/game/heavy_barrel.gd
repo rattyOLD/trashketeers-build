@@ -113,7 +113,7 @@ class Meter:
 		barrel.parts_changed.connect(_on_parts)
 		barrel.ultimate_started.connect(func() -> void: _active = true)
 		barrel.ultimate_ended.connect(func() -> void: _active = false)
-		custom_minimum_size = Vector2(_total * (CELL + GAP) + 64.0, CELL + 34.0)
+		custom_minimum_size = Vector2(_total * (CELL + GAP) + 74.0, CELL + 34.0)
 		size = custom_minimum_size
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
 		set_process(true)
@@ -139,10 +139,10 @@ class Meter:
 		draw_rect(Rect2(0, 0, size.x, size.y), Color("#1a1c2b"), true)
 		draw_rect(Rect2(0, 0, size.x, size.y), Color("#ffb020") if not _active else Color("#ff2ea6").lerp(Color.WHITE, glow * 0.4), false, 3.0)
 		var font := ThemeDB.fallback_font
-		draw_string(font, Vector2(6, 26), "H.B.", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color("#ffb020"))
+		draw_string(font, Vector2(6, 26), "СТВОЛ", HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("#ffb020"))
 		draw_string(font, Vector2(6, size.y - 6), "ДЕТАЛИ СУПЕР-СТВОЛА", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("#c9b98a"))
 		for i in _total:
-			var x := 46.0 + i * (CELL + GAP)
+			var x := 56.0 + i * (CELL + GAP)
 			var rect := Rect2(x, 6, CELL, CELL)
 			draw_rect(rect, Color("#0c0d16"), true)
 			if i < _parts or _active:
@@ -159,6 +159,9 @@ class Case:
 
 	signal picked
 
+	const PICK_RANGE := 80.0
+	const MAGNET_RANGE := 420.0
+
 	var player: Node2D
 	var _time := 0.0
 
@@ -168,7 +171,13 @@ class Case:
 	func _physics_process(delta: float) -> void:
 		_time += delta
 		queue_redraw()
-		if player != null and global_position.distance_to(player.global_position) < 60.0:
+		if player == null:
+			return
+		var gap := global_position.distance_to(player.global_position)
+		# Деталь сама летит к игроку: за стеной или в углу её иначе не достать.
+		if _time > 0.35 and gap < MAGNET_RANGE:
+			global_position = global_position.move_toward(player.global_position, (260.0 + (MAGNET_RANGE - gap) * 2.0) * delta)
+		if gap < PICK_RANGE:
 			SoundManager.play(&"level_up", -2.0, false)
 			picked.emit()
 			queue_free()
@@ -181,4 +190,4 @@ class Case:
 		draw_rect(Rect2(-28, bob - 18, 56, 36), Color("#3a3d56"), true)
 		draw_rect(Rect2(-28, bob - 18, 56, 36), Color("#ffb020"), false, 3.0)
 		draw_rect(Rect2(-28, bob - 18, 56, 8), Color("#ffb020"), true)
-		draw_string(ThemeDB.fallback_font, Vector2(-20, bob + 13), "H.B.", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color("#ffe9a8"))
+		draw_string(ThemeDB.fallback_font, Vector2(-24, bob + 12), "ДЕТАЛЬ", HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color("#ffe9a8"))
