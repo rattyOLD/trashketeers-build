@@ -28,6 +28,13 @@ const ARM_PATH := "res://assets/player/raccoon_arm.png"
 const OVERLAY_DIR := "res://assets/skins/"
 ## Текстуры хранятся ~3x к миру для чёткости на экранах телефонов: в мире енот ~100 px в высоту.
 const SPRITE_SCALE := 0.36
+## Покадровые анимации (idle/run/shoot от Astры): ячейка 480×320, ноги на y=304, масштаб подобран по росту старого енота.
+const CLIP_SCALE := 0.434
+const CLIP_CELL := Vector2(480, 320)
+const CLIP_FEET := 304.0
+const CLIP_COUNTS := {"idle": 8, "run": 8, "shoot": 4}
+const IDLE_FPS := 7.0
+const SHOOT_ANIM_TIME := 0.24
 const ARM_REST := 0.055
 const ARM_MIN := -1.05
 const ARM_MAX := 1.2
@@ -47,6 +54,7 @@ const PROPORTION_BONES := {"head": ["head"], "ears": ["ear_l", "ear_r"], "tail":
 static var _full_texture: Texture2D
 static var _arm_texture: Texture2D
 static var _hero_textures: Dictionary = {}
+static var _clip_cache: Dictionary = {}
 
 var aim_direction := Vector2.RIGHT
 ## false — цели нет: рука опущена, ствол смотрит вперёд-вниз.
@@ -68,6 +76,11 @@ var _hero_mode := false
 var _hero_cfg: Dictionary = {}
 var _hero_frames: Array[AtlasTexture] = []
 var _hero_shoulder := Vector2.ZERO
+var _clip_mode := false
+var _clip_frames: Dictionary = {}
+var _clip_grip: Dictionary = {}
+var _clip_grip_px := Vector2(300, 200)
+var _shoot_t := 0.0
 var arm: Sprite2D
 var _arm_material: ShaderMaterial
 var _gun_layer: Node2D
@@ -219,21 +232,77 @@ func _enter_hero(cfg: Dictionary) -> void:
 		atlas.atlas = texture
 		atlas.region = Rect2(i * cell_w, 0, cell_w, cell_h)
 		_hero_frames.append(atlas)
-	var feet := SHADOW_OFFSET.y / SPRITE_SCALE
-	hero.offset = Vector2(-cell_w * 0.5, -cell_h + feet)
+	_clip_mode = str(cfg.get("clips", "")) != "" and _load_clips(str(cfg["clips"]))
+	var feet := SHADOW_OFFSET.y / _sc()
+	if _clip_mode:
+		hero.offset = Vector2(-CLIP_CELL.x * 0.5, -CLIP_FEET + feet)
+	else:
+		hero.offset = Vector2(-cell_w * 0.5, -cell_h + feet)
 	var sh: Array = cfg.get("shoulder", [26, -172])
 	_hero_shoulder = Vector2(float(sh[0]), float(sh[1]) + feet)
 	_hero_mode = true
 	hero.visible = true
 	body.visible = false
 	arm.visible = false
-	hero.texture = _hero_frames[1]
+	hero.texture = _clip_frames["idle"][0] if _clip_mode else _hero_frames[1]
 	_apply_rig()
+
+
+## Листы Astры (RGBA, 8+8+4 кадра) и точки хвата. false — файлов нет, остаёмся на старом теле.
+func _load_clips(prefix: String) -> bool:
+	if not _clip_cache.is_empty():
+		_clip_frames = _clip_cache["frames"]
+		_clip_grip = _clip_cache["grip"]
+		return true
+	var frames: Dictionary = {}
+	for clip: String in CLIP_COUNTS:
+		var path := "%s%s.png" % [prefix, clip]
+		if not ResourceLoader.exists(path):
+			return false
+		var tex: Texture2D = load(path)
+		var list: Array[AtlasTexture] = []
+		for i in int(CLIP_COUNTS[clip]):
+			var atlas := AtlasTexture.new()
+			atlas.atlas = tex
+			atlas.region = Rect2((i % 4) * CLIP_CELL.x, (i / 4) * CLIP_CELL.y, CLIP_CELL.x, CLIP_CELL.y)
+			list.append(atlas)
+		frames[clip] = list
+	var grip_path := "res://data/raccoon_grip.json"
+	var grip: Dictionary = {}
+	if FileAccess.file_exists(grip_path):
+		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(grip_path))
+		grip = parsed as Dictionary if parsed is Dictionary else {}
+	_clip_cache = {"frames": frames, "grip": grip}
+	_clip_frames = frames
+	_clip_grip = grip
+	return true
+
+
+func _sc() -> float:
+	return CLIP_SCALE if _clip_mode else SPRITE_SCALE
+
+
+## Кадр по состоянию: стрельба стоя — shoot, ход — run по фазе шага, иначе idle. Заодно точка хвата кадра.
+func _clip_pick() -> void:
+	var clip := "idle"
+	var idx := int(_time * IDLE_FPS) % 8
+	if _shoot_t > 0.0 and _run < 0.3:
+		clip = "shoot"
+		idx = clampi(int((1.0 - _shoot_t / SHOOT_ANIM_TIME) * 4.0), 0, 3)
+	elif _run > 0.12:
+		clip = "run"
+		idx = int(fposmod(_gait / TAU, 1.0) * 8.0) % 8
+	hero.texture = (_clip_frames[clip] as Array)[idx]
+	var points: Array = _clip_grip.get(clip, [])
+	if idx < points.size():
+		var p: Array = points[idx]
+		_clip_grip_px = Vector2(float(p[0]), float(p[1]))
 
 
 func _leave_hero() -> void:
 	if not _hero_mode:
 		return
+	_clip_mode = false
 	_hero_mode = false
 	hero.visible = false
 	body.visible = true
@@ -249,6 +318,8 @@ func _hero_frame_index() -> int:
 
 
 func _paw_at(local_angle: float) -> Vector2:
+	if _clip_mode:
+		return _sprite_xform() * (_clip_grip_px + hero.offset)
 	if _hero_mode:
 		var reach := float(_hero_cfg.get("arm_len", 66))
 		return _sprite_xform() * (_hero_shoulder + Vector2.from_angle(clampf(local_angle, ARM_MIN, ARM_MAX)) * reach)
@@ -302,6 +373,7 @@ func update_motion(velocity: Vector2, aim: Vector2, delta: float) -> void:
 		_tail_spring.kick(-3.0)
 		_ear_spring.kick(-2.5)
 		_scarf_spring.kick(3.0)
+	_shoot_t = maxf(_shoot_t - delta, 0.0)
 	_flash = maxf(_flash - delta, 0.0)
 	_hurt = maxf(_hurt - delta, 0.0)
 	_pickup = maxf(_pickup - delta, 0.0)
@@ -348,6 +420,7 @@ func flash() -> void:
 
 ## Отдача: ствол уходит назад, тело — чуть против выстрела, голова кивает.
 func kick(direction: Vector2, strength: float) -> void:
+	_shoot_t = SHOOT_ANIM_TIME
 	_kick = minf(_kick + 8.0 * strength, 18.0)
 	_climb = minf(_climb + 0.07 * strength, 0.22)
 	_flash_t = 0.07
@@ -445,11 +518,13 @@ func get_ghost_texture() -> Texture2D:
 
 
 func get_ghost_scale() -> Vector2:
-	return Vector2(_facing * SPRITE_SCALE, SPRITE_SCALE)
+	return Vector2(_facing * _sc(), _sc())
 
 
 ## Смещение центра цельной текстуры от позиции игрока — послеобраз рисуется по центру текстуры.
 func get_ghost_offset() -> Vector2:
+	if _clip_mode:
+		return Vector2(0, (hero.offset.y + CLIP_CELL.y * 0.5) * CLIP_SCALE)
 	if _hero_mode:
 		var half_h := float(_hero_cfg.get("cell_h", 288)) * 0.5
 		return Vector2(0, (SHADOW_OFFSET.y / SPRITE_SCALE - half_h) * SPRITE_SCALE)
@@ -514,12 +589,17 @@ func _update_pose() -> void:
 		_bob = -34.0 * sin(launch * PI) - 7.0 * sin(settle * PI)
 		_squash = 1.0 - 0.22 * ease(clampf(_death_t / 0.6, 0.0, 1.0), 0.4) + 0.12 * sin(settle * PI)
 		_sway = _facing * ease(clampf(_death_t / 0.6, 0.0, 1.0), 0.6) * PI * 0.5
+	elif _clip_mode:
+		# Ход и дыхание уже нарисованы в кадрах: подпрыгивание и наклон кодом не нужны.
+		_bob = 0.0
+		_squash = 1.0 + (_squash - 1.0 - sin(_gait * 2.0) * 0.025 * _run)
+		_sway -= 0.03 * _facing * _run
 
 
 ## Трансформ «пиксели текстуры относительно точки опоры → локальные координаты узла».
 ## Отражение по x (взгляд влево) зашито в масштаб: рука, аксессуары и кости отражаются с телом.
 func _sprite_xform() -> Transform2D:
-	var scale_vec := Vector2(_facing * SPRITE_SCALE * (2.0 - _squash) * _stretch, SPRITE_SCALE * _squash)
+	var scale_vec := Vector2(_facing * _sc() * (2.0 - _squash) * _stretch, _sc() * _squash)
 	return Transform2D(_sway, scale_vec, 0.0, Vector2(0, -_bob - _hop) + _body_kick)
 
 
@@ -586,7 +666,10 @@ func _apply_rig() -> void:
 
 func _apply_hero() -> void:
 	hero.transform = _sprite_xform()
-	hero.texture = _hero_frames[_hero_frame_index()]
+	if _clip_mode:
+		_clip_pick()
+	else:
+		hero.texture = _hero_frames[_hero_frame_index()]
 	var tint := _current_tint()
 	var lit := Color(clampf(0.95 + _env.r * 0.35, 0.95, 1.3), clampf(0.95 + _env.g * 0.35, 0.95, 1.3), clampf(0.95 + _env.b * 0.35, 0.95, 1.3))
 	hero.modulate = Color(tint.r * lit.r, tint.g * lit.g, tint.b * lit.b, tint.a)

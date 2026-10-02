@@ -72,6 +72,10 @@ var _dash_range := 0.0
 var _dash_boost := 0.0
 var _boost_left := 0.0
 var _dash_dir := Vector2.RIGHT
+## Последнее направление, куда вёл джойстик: рывок после отпускания уходит туда, а не куда придётся.
+const LAST_DIR_MEMORY := 3.0
+var _last_move_dir := Vector2.ZERO
+var _last_move_age := 99.0
 var _ghost_timer := 0.0
 var _step_timer := 0.0
 var _speed_buff := 0.0
@@ -183,7 +187,9 @@ func request_dash() -> bool:
 		return false
 	var dir := move_input
 	if dir.length_squared() < 0.01:
-		if weapon_controller.has_target:
+		if _last_move_age < LAST_DIR_MEMORY and _last_move_dir.length_squared() > 0.01:
+			dir = _last_move_dir
+		elif weapon_controller.has_target:
 			dir = weapon_controller.aim_direction
 		else:
 			dir = Vector2(1.0 if visual.aim_direction.x >= 0.0 else -1.0, 0.0)
@@ -213,6 +219,11 @@ func _physics_process(delta: float) -> void:
 			dash_charges += 1
 			dash_cooldown_left = dash_cooldown_total() if dash_charges < dash_max_charges else 0.0
 	_boost_left = maxf(_boost_left - delta, 0.0)
+	if move_input.length_squared() > 0.09:
+		_last_move_dir = move_input.normalized()
+		_last_move_age = 0.0
+	else:
+		_last_move_age += delta
 	var start_position := global_position
 	var was_dashing := _dash_time > 0.0
 	_dash_iframes = maxf(_dash_iframes - delta, 0.0)
