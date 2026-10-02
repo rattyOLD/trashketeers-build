@@ -9,18 +9,21 @@ const AREA := Vector2(1408, 1792)
 const TILE_WORLD := 128.0
 const PAN_AMPLITUDE := Vector2(150, 110)
 const PAN_SPEED := 0.07
-const FLOOR := "res://assets/biome/ch1_floor.png"
-const GRAFFITI := "res://assets/props/ch1/graffiti.png"
+const FLOOR_DIR := "res://assets/biome/m1/"
+const FLOORS := ["floor_yard_dark", "floor_scrapyard_dark", "floor_yard_light", "floor_gate_dark"]
 const PROPS := [
 	["container", Vector2(250, 420), false],
 	["junk_pile", Vector2(1120, 560), true],
 	["generator", Vector2(860, 300), false],
 	["crt_terminal", Vector2(420, 980), false],
-	["oil_barrels", Vector2(1150, 1080), true],
+	["d_rust_barrel", Vector2(1150, 1080), true],
 	["tire_stack", Vector2(200, 1320), false],
 	["dumpster", Vector2(780, 1500), true],
 	["fence", Vector2(560, 640), false],
-	["toxic_bags", Vector2(1000, 1400), false],
+	["m1_garbage", Vector2(1000, 1400), false],
+	["m1_fridge", Vector2(640, 1120), false],
+	["m1_crate", Vector2(930, 800), true],
+	["m1_skull_sign", Vector2(1260, 880), false],
 ]
 const WALKERS := [
 	["res://assets/enemies/rat_gang.png", 150.0, Vector2(380, 760), Vector2(820, 820), 0.08, 0.0],
@@ -66,20 +69,21 @@ func _process(delta: float) -> void:
 
 
 func _build_floor() -> void:
-	var texture := ArenaProp.texture_of(FLOOR)
-	if texture == null:
-		return
-	var source := TileSetAtlasSource.new()
-	source.texture = texture
-	source.texture_region_size = Vector2i(256, 256)
-	var cols := int(texture.get_width() / 256)
-	var rows := int(texture.get_height() / 256)
-	for r in rows:
-		for c in cols:
-			source.create_tile(Vector2i(c, r))
+	# Бетонный двор базы: тайлы пола миссии 1 (тёмный двор и металлолом), у центральной полосы ворот.
 	var tile_set := TileSet.new()
 	tile_set.tile_size = Vector2i(256, 256)
-	tile_set.add_source(source, 0)
+	var ids := {}
+	for name in FLOORS:
+		var texture := ArenaProp.texture_of(FLOOR_DIR + name + ".png")
+		if texture == null:
+			continue
+		var source := TileSetAtlasSource.new()
+		source.texture = texture
+		source.texture_region_size = Vector2i(256, 256)
+		source.create_tile(Vector2i.ZERO)
+		ids[name] = tile_set.add_source(source)
+	if ids.is_empty():
+		return
 	var tiles := TileMapLayer.new()
 	tiles.tile_set = tile_set
 	tiles.scale = Vector2.ONE * (TILE_WORLD / 256.0)
@@ -87,14 +91,14 @@ func _build_floor() -> void:
 	for y in count.y:
 		for x in count.x:
 			var lane := x == 5 or y == 7
-			var row := 1 if lane and rows > 1 else 0
+			var pick := "floor_gate_dark" if lane else FLOORS[0]
 			var roll := randf()
-			var col := 0 if roll < 0.55 else (1 + randi() % mini(2, cols - 1) if roll < 0.7 else randi() % cols)
-			tiles.set_cell(Vector2i(x, y), 0, Vector2i(col, row))
+			if not lane:
+				pick = FLOORS[0] if roll < 0.62 else (FLOORS[1] if roll < 0.82 else FLOORS[2])
+			if not ids.has(pick):
+				pick = ids.keys()[0]
+			tiles.set_cell(Vector2i(x, y), int(ids[pick]), Vector2i.ZERO)
 	_layers.floor_layer.add_child(tiles)
-	var graffiti := ArenaDecor.floor_image(GRAFFITI, 420.0, 0.45)
-	graffiti.position = AREA * 0.5
-	_layers.decals.add_child(graffiti)
 
 
 func _build_props() -> void:
