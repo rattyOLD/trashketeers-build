@@ -24,6 +24,7 @@ const CHEER_TIME := 0.9
 const KICK_DECAY := 14.0
 const AIM_SMOOTH := 20.0
 const TEXTURE_PATH := "res://assets/player/raccoon.png"
+const GRIP_HAND_R := 30.0
 const ARM_PATH := "res://assets/player/raccoon_arm.png"
 const OVERLAY_DIR := "res://assets/skins/"
 ## Текстуры хранятся ~3x к миру для чёткости на экранах телефонов: в мире енот ~100 px в высоту.
@@ -868,6 +869,8 @@ func _draw_gun_layer() -> void:
 			_gun_layer.draw_circle(paw, 4.5, sleeve.lightened(0.15))
 	var center := _gun_center(paw, dir, _kick)
 	WeaponIcons.draw(_gun_layer, weapon_icon, center, _weapon_scale(), dir.angle(), weapon_color, dir.x < 0.0)
+	if _clip_mode and not melee_active and not _dead:
+		_draw_grip_hand()
 	if show_aim_line and aiming and not melee_active:
 		var from := center + _muzzle_offset(dir)
 		var line_dir := _gun_direction(_gun_angle)
@@ -885,6 +888,24 @@ func _draw_gun_layer() -> void:
 		var strength := sin(glint * PI)
 		_gun_layer.draw_circle(shine, 5.0 * strength, Color(1, 1, 1, 0.9 * strength))
 		_gun_layer.draw_line(shine - dir.orthogonal() * 6.0 * strength, shine + dir.orthogonal() * 6.0 * strength, Color(1, 1, 1, 0.8 * strength), 2.0)
+
+
+## Задняя лапа (хват) поверх ствола: кусок кадра героя вокруг точки хвата с мягким краем. Передняя лапа остаётся под стволом.
+func _draw_grip_hand() -> void:
+	var tex := hero.texture
+	if tex == null:
+		return
+	var size := tex.get_size()
+	var xf := _sprite_xform()
+	_gun_layer.draw_set_transform_matrix(xf)
+	for i in 3:
+		var r := GRIP_HAND_R - i * 5.0
+		var c := _clip_grip_px
+		var rect := Rect2(c - Vector2(r, r), Vector2(r, r) * 2.0).intersection(Rect2(Vector2.ZERO, size))
+		if rect.size.x < 2.0:
+			continue
+		_gun_layer.draw_texture_rect_region(tex, Rect2(rect.position + hero.offset, rect.size), rect, Color(1, 1, 1, [0.3, 0.5, 1.0][i]))
+	_gun_layer.draw_set_transform_matrix(Transform2D.IDENTITY)
 
 
 func _draw_death_marks() -> void:
