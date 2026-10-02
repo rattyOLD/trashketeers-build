@@ -8,7 +8,10 @@ const PEER_SEC := 3.0
 const TYPING_EVERY := 3.0
 const MAX_FILE := 10 * 1024 * 1024
 const IMAGE_SIDE := 1280
-const STICKERS: Array[String] = ["hi", "go", "letsgo", "ok", "gg", "lol", "yay", "angry", "srsly", "what", "hmm", "panic", "beer", "mine", "loot", "deal", "giveup", "nohit", "peace", "cold"]
+const STICKERS: Array[String] = ["hi", "go", "letsgo", "ok", "gg", "lol", "yay", "angry", "srsly", "what", "hmm", "panic", "beer", "mine", "loot", "deal", "giveup", "nohit", "peace", "cold",
+	"rico_wave", "rico_laugh", "rico_thumbsup", "rico_celebrate", "rico_angry", "rico_cry", "rico_facepalm", "rico_sleep",
+	"nell_wink", "nell_tea", "nell_roll_eyes", "nell_shock", "baron_beer", "baron_laugh", "baron_pout", "baron_surrender",
+	"king_coins", "king_yell", "toxic_panic", "toxic_scratch"]
 const SEND_ERRORS := {
 	"not_friends": "Вы больше не друзья, писать нельзя",
 	"blocked": "Переписка заблокирована",
@@ -40,6 +43,7 @@ var _list: VBoxContainer
 var _status: Label
 var _edit: LineEdit
 var _stickers: GridContainer
+var _sticker_scroll: ScrollContainer
 var _last_id := 0
 var _busy := false
 var _clock := 0.0
@@ -122,7 +126,6 @@ func _refresh() -> void:
 	_stickers.columns = 5
 	_stickers.add_theme_constant_override("h_separation", 6)
 	_stickers.add_theme_constant_override("v_separation", 6)
-	_stickers.visible = false
 	for id in STICKERS:
 		var b := TextureButton.new()
 		b.texture_normal = _sticker_texture(id)
@@ -131,7 +134,14 @@ func _refresh() -> void:
 		b.custom_minimum_size = Vector2(100, 100)
 		b.pressed.connect(_send_sticker.bind(id))
 		_stickers.add_child(b)
-	content.add_child(_stickers)
+	_sticker_scroll = DragScroll.new()
+	_sticker_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_sticker_scroll.scroll_deadzone = 16
+	_sticker_scroll.custom_minimum_size = Vector2(panel_width() - 50.0, 440.0)
+	_sticker_scroll.visible = false
+	_stickers.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_sticker_scroll.add_child(_stickers)
+	content.add_child(_sticker_scroll)
 
 	_quick = HBoxContainer.new()
 	_quick.add_theme_constant_override("separation", 6)
@@ -141,8 +151,8 @@ func _refresh() -> void:
 	bar.add_theme_constant_override("separation", 8)
 	var sticker_btn := ChatIcon.new(ChatIcon.Kind.STICKER)
 	sticker_btn.pressed.connect(func() -> void:
-		_stickers.visible = not _stickers.visible
-		_scroll.custom_minimum_size.y = _base_height - (440.0 if _stickers.visible else 0.0)
+		_sticker_scroll.visible = not _sticker_scroll.visible
+		_scroll.custom_minimum_size.y = _base_height - (440.0 if _sticker_scroll.visible else 0.0)
 		_scroll_down.call_deferred())
 	bar.add_child(sticker_btn)
 	var attach := ChatIcon.new(ChatIcon.Kind.ATTACH)
@@ -176,7 +186,7 @@ func _refresh() -> void:
 
 func _on_input_focus(focused: bool) -> void:
 	if focused:
-		_stickers.visible = false
+		_sticker_scroll.visible = false
 	_quick.visible = not focused
 	_scroll.custom_minimum_size.y = _base_height * (0.45 if focused and Orient.portrait else 1.0)
 	_scroll_down.call_deferred()
@@ -817,7 +827,7 @@ func _send_sticker(id: String) -> void:
 	recent.push_front(id)
 	SaveService.data["recent_stickers"] = recent.slice(0, 5)
 	_fill_quick()
-	_stickers.visible = false
+	_sticker_scroll.visible = false
 	_scroll.custom_minimum_size.y = _base_height
 	_deliver("sticker", id, {})
 
@@ -1057,6 +1067,13 @@ class ChatIcon:
 		focus_mode = Control.FOCUS_NONE
 
 	func _draw() -> void:
+		var art_id: String = ["stickers", "attach", "send"][kind]
+		var path := "res://assets/ui/chat/%s.png" % art_id
+		if ResourceLoader.exists(path):
+			var tex: Texture2D = load(path)
+			var pad := 4.0 if not is_pressed() else 8.0
+			draw_texture_rect(tex, Rect2(Vector2(pad, pad), size - Vector2(pad, pad) * 2.0), false)
+			return
 		var c := size * 0.5
 		var r := minf(size.x, size.y) * 0.5 - 2.0
 		var bg := UiStyle.HOT if kind == Kind.SEND else Color("#3a2d60")
@@ -1085,6 +1102,9 @@ class FileGlyph:
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	func _draw() -> void:
+		if ResourceLoader.exists("res://assets/ui/chat/file.png"):
+			draw_texture_rect(load("res://assets/ui/chat/file.png"), Rect2(Vector2.ZERO, size), false)
+			return
 		draw_colored_polygon(PackedVector2Array([Vector2(4, 2), Vector2(26, 2), Vector2(36, 12), Vector2(36, 46), Vector2(4, 46)]), Color("#5ff2ff"))
 		draw_colored_polygon(PackedVector2Array([Vector2(26, 2), Vector2(36, 12), Vector2(26, 12)]), Color("#1d8fb0"))
 		for i in 3:

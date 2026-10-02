@@ -230,6 +230,10 @@ class Avatar:
 			draw_arc(c, r - 2.0, 0.0, TAU, 40, frame, 5.0, true)
 		else:
 			draw_arc(c, r - 2.0, 0.0, TAU, 40, UiStyle.NEON, 3.0, true)
+		var ring := Insider.frame_texture(SaveService.get_insider())
+		if ring != null:
+			var big := size * 1.34
+			draw_texture_rect(ring, Rect2(c - big * 0.5, big), false)
 
 	## Картинка строго внутри круга: полигон с UV вместо квадрата, чтобы углы не вылезали за рамку.
 	static func draw_round(item: CanvasItem, tex: Texture2D, center: Vector2, radius: float) -> void:

@@ -33,6 +33,7 @@ func _init() -> void:
 	content.add_child(note)
 	content.add_child(_online_plate())
 	_list = MenuPopups.scroll_list(content)
+	(_list.get_parent() as Control).custom_minimum_size.y -= 110.0
 	_resume = UiStyle.button("ПРОДОЛЖИТЬ С ЧЕКПОИНТА", Color("#1d8fb0"), 26, Vector2(0, 70))
 	_resume.pressed.connect(func() -> void:
 		SaveService.resume_requested = true

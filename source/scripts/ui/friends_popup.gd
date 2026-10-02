@@ -302,6 +302,7 @@ func _load_online() -> void:
 		return
 	var items: Array = result["items"]
 	if items.is_empty():
+		box.add_child(_empty_art("friends"))
 		box.add_child(_wrap_label("Пока никого. Позови друга во вкладке «Добавить»."))
 		var go := UiStyle.button("ДОБАВИТЬ ДРУГА", UiStyle.HOT, 22, Vector2(0, 60))
 		go.pressed.connect(_show_tab.bind(Tab.ADD))
@@ -335,11 +336,24 @@ func _load_requests() -> void:
 	_requests_count = requests.size()
 	_build_tabs()
 	if requests.is_empty():
+		box.add_child(_empty_art("requests"))
 		box.add_child(_wrap_label("Новых заявок нет."))
 		return
 	for request in requests:
 		if request is Dictionary:
 			box.add_child(_request_row(request as Dictionary))
+
+
+## Картинка пустого списка (Астра): енот у костра, енот с проводами, голубь-почтальон.
+func _empty_art(id: String) -> Control:
+	var rect := TextureRect.new()
+	var path := "res://assets/ui/empty/%s.png" % id
+	rect.texture = load(path) as Texture2D if ResourceLoader.exists(path) else null
+	rect.custom_minimum_size = Vector2(0, 190)
+	rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return rect
 
 
 func _wrap_label(text: String) -> Label:
@@ -555,6 +569,7 @@ func _board_row(entry: Dictionary, place: int, key: String, unit: String) -> Con
 func _fill_friends() -> void:
 	var friends := SaveService.get_friends()
 	if friends.is_empty():
+		_friends_box.add_child(_empty_art("friends"))
 		var empty := UiStyle.label("Пока пусто. Вставь код визитки друга выше.", 20, UiStyle.TEXT_DIM, 4)
 		empty.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		empty.custom_minimum_size = Vector2(panel_width() - 110.0, 0)
@@ -724,9 +739,13 @@ class CardView:
 		var tag := Insider.badge_of(ins).trim_prefix("[").trim_suffix("]").to_upper()
 		if not tag.is_empty():
 			var tag_size := font.get_string_size(tag, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 22)
-			var pill := Rect2(48, 38, tag_size.x + 36, 38)
+			var badge := Insider.badge_texture(ins)
+			var icon_w := 46.0 if badge != null else 0.0
+			var pill := Rect2(48, 38, tag_size.x + 36 + icon_w, 38)
 			draw_style_box(UiStyle.box(Color(tag_color, 0.2), tag_color, 3, 19), pill)
-			_fit(font, tag, Vector2(pill.position.x + 18, pill.position.y + 28), 22, tag_color, tag_size.x + 2.0)
+			if badge != null:
+				draw_texture_rect(badge, Rect2(pill.position.x - 6, pill.position.y - 12, 62, 62), false)
+			_fit(font, tag, Vector2(pill.position.x + 18 + icon_w, pill.position.y + 28), 22, tag_color, tag_size.x + 2.0)
 		_fit(font, str(info.get("n", "Енот")), Vector2(48, 134), 66, UiStyle.TEXT, 560.0)
 		_wordmark(font, Vector2(w - 48, 74))
 		var frame := Rect2(48, 176, 248, 248)
