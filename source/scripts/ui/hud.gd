@@ -324,11 +324,12 @@ func set_loot_left(count: int) -> void:
 
 
 func set_kills(kills: int) -> void:
-	_kills_label.text = "Врагов: %d" % kills
+	_kills_label.text = "Убито: %d" % kills
 
 
-func set_wave(number: int, enemies_left: int) -> void:
-	_wave_label.text = "ВОЛНА %d · %d" % [number, enemies_left] if enemies_left > 0 and not _minimal else "ВОЛНА %d" % number
+func set_wave(number: int, enemies_left: int, chapter: int = 0) -> void:
+	var head := "ГЛАВА %d · ВОЛНА %d" % [chapter, number] if chapter > 0 else "ВОЛНА %d" % number
+	_wave_label.text = "%s · ещё %d" % [head, enemies_left] if enemies_left > 0 and not _minimal else head
 
 
 ## Сюжетный режим без ио-механик: скрываем опыт и уровень.
@@ -667,14 +668,16 @@ func show_banner(text: String, color: Color, duration: float = 2.2) -> void:
 
 
 ## Заставка волны: крупное «ВОЛНА N» влетает сверху, подзаголовок — снизу.
-func show_wave_intro(number: int, title: String, is_boss: bool) -> void:
-	_wave_title.text = "ВОЛНА %d" % number
+func show_wave_intro(number: int, title: String, is_boss: bool, chapter: int = 0) -> void:
+	_wave_title.text = "ГЛАВА %d · ВОЛНА %d" % [chapter, number] if chapter > 0 else "ВОЛНА %d" % number
+	_wave_title.add_theme_font_size_override("font_size", (78 if Orient.portrait else 56) if chapter <= 0 else (50 if Orient.portrait else 40))
 	_wave_title.add_theme_color_override("font_color", UiStyle.DANGER if is_boss else UiStyle.GOLD)
 	_wave_sub.text = ("БОСС: " + title) if is_boss else title
 	_animate_titles(1.0)
 
 
 func show_wave_cleared(bonus_nuts: int) -> void:
+	_wave_title.add_theme_font_size_override("font_size", 78 if Orient.portrait else 56)
 	_wave_title.text = "ВОЛНА ОЧИЩЕНА!"
 	_wave_title.add_theme_color_override("font_color", Color("#7cff6b"))
 	_wave_sub.text = "+%s · лечение +15%%" % SaveService.format_coins(bonus_nuts)
@@ -920,7 +923,7 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	_time_label = UiStyle.label("0:00", 26, UiStyle.TEXT, 6)
 	_time_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	right.add_child(_time_label)
-	_kills_label = UiStyle.label("Врагов: 0", 17, UiStyle.TEXT_DIM, 4)
+	_kills_label = UiStyle.label("Убито: 0", 17, UiStyle.TEXT_DIM, 4)
 	_kills_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	right.add_child(_kills_label)
 	_loot_label = UiStyle.label("", 17, UiStyle.GOLD, 4)

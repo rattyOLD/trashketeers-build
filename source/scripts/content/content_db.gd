@@ -35,6 +35,9 @@ const DIFFICULTY_DEFAULTS := {
 	"loop_interval": 0.9,
 	"loop_max_alive": 6,
 	"intermission": 1.8,
+	"late_start": 20.0,
+	"late_hp": 0.04,
+	"late_damage": 0.012,
 }
 
 var _enemies: Dictionary = {}

@@ -189,7 +189,7 @@ const SKINS := {
 }
 
 const PERKS := {
-	"power": {"title": "Сила", "description": "+6% урона любым стволом", "step": 0.06, "max": 10, "cost": 120, "icon": "🔫", "theme": "Ржавый ствол — тоже ствол"},
+	"power": {"title": "Сила", "description": "+4% урона любым стволом", "step": 0.04, "max": 10, "cost": 120, "icon": "🔫", "theme": "Ржавый ствол — тоже ствол"},
 	"stamina": {"title": "Выносливость", "description": "+12 к максимуму здоровья", "step": 12.0, "max": 10, "cost": 100, "icon": "🥫", "theme": "Консервы из мусорки"},
 	"armor": {"title": "Броня из жести", "description": "-3% получаемого урона", "step": 0.03, "max": 10, "cost": 140, "icon": "🛡", "theme": "Крышка от бака"},
 	"eye": {"title": "Меткий глаз", "description": "+1% шанса крита", "step": 0.01, "max": 10, "cost": 180, "icon": "🎯", "theme": "Очки сварщика"},
@@ -1307,6 +1307,9 @@ func record_run(summary: Dictionary) -> Dictionary:
 		Economy.grant_shards(str(key), 1)
 	var stats: Dictionary = data["stats"]
 	stats["nuts_total"] = int(stats.get("nuts_total", 0)) + nuts
+	stats["time_played"] = int(stats.get("time_played", 0)) + int(float(summary.get("time", 0.0)))
+	var hero_key := "hero_" + get_character_id()
+	stats[hero_key] = int(stats.get(hero_key, 0)) + 1
 	quest_add("raccoon_run", 1)
 	quest_add("rats", int(summary.get("kills", 0)))
 	check_achievements()

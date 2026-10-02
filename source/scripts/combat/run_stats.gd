@@ -70,8 +70,34 @@ func _init() -> void:
 		_values[key] = 0.0
 
 
+## Потолки бонусов забега. Раньше карточки копились без предела: к 70-му уровню урон и скорострельность
+## вырастали в сотни раз, и враги переставали быть угрозой. Теперь выше «колена» (70% потолка) бонус
+## растёт в три раза медленнее, а сам потолок жёсткий. Тестерские флаги потолки снимают.
+const CAPS := {
+	&"damage_mult": 3.0, &"fire_rate_mult": 1.5, &"extra_projectiles": 7.0, &"extra_ricochets": 6.0, &"range_mult": 1.0,
+	&"crit_chance_add": 0.6, &"move_speed_mult": 0.8, &"max_hp_add": 300.0, &"damage_resist": 0.5, &"regen": 4.0,
+	&"vampirism": 0.005, &"kill_heal": 3.0, &"magnet_mult": 3.0, &"dash_haste": 1.0, &"close_damage": 1.5, &"rail_rate": 1.0,
+	&"poison_power": 2.0, &"status_power": 1.5, &"blast_power": 2.0, &"double_drop": 0.5, &"drone_count": 4.0,
+}
+const KNEE := 0.7
+const OVER_KNEE_SLOPE := 0.35
+var uncapped := false
+
+
+## Сырое значение после потолка (чистая функция, её проверяет тест).
+static func capped(key: StringName, raw: float) -> float:
+	if not CAPS.has(key) or raw <= 0.0:
+		return raw
+	var cap: float = CAPS[key]
+	var knee := cap * KNEE
+	if raw <= knee:
+		return raw
+	return minf(cap, knee + (raw - knee) * OVER_KNEE_SLOPE)
+
+
 func get_stat(key: StringName) -> float:
-	return _values.get(key, 0.0)
+	var raw: float = _values.get(key, 0.0)
+	return raw if uncapped else RunStats.capped(key, raw)
 
 
 func get_stacks(upgrade_id: StringName) -> int:

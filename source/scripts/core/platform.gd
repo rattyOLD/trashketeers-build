@@ -210,6 +210,12 @@ func set_context(text: String) -> void:
 		_js("window.localStorage.setItem('__trash_ctx', %s);" % JSON.stringify(text))
 
 
+## Идёт бой: плашку «Вышла новая версия» прячем, иначе она закрывает шапку боя и случайный тап перезагрузит страницу посреди забега.
+func set_in_battle(on: bool) -> void:
+	if is_web:
+		_js("window.__trkBattle = %s; if (window.__trkUpdateUi) { window.__trkUpdateUi(); } if (!%s && window.__trkCheck) { window.__trkCheck(); }" % ["true" if on else "false", "true" if on else "false"])
+
+
 ## Хлебные крошки для отчётов об ошибках: последние 20 действий (экран, окно, запрос к серверу).
 func trail(text: String) -> void:
 	if is_web:

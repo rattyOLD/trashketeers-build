@@ -3,6 +3,10 @@ extends Node
 
 func _ready() -> void:
 	Orient.portrait = true
+	var st: Dictionary = SaveService.data["stats"]
+	st["hero_raccoon"] = 1234
+	st["time_played"] = 99999
+	st["kills"] = 123456789
 	var makers: Dictionary = {
 		"Settings": func() -> Control: return MenuPopups.Settings.new(),
 		"Shop": func() -> Control: return MenuPopups.Shop.new(false),

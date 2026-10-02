@@ -253,7 +253,7 @@ func result_lines(victory: bool) -> PackedStringArray:
 	var lines := PackedStringArray([title() if not victory else "ОСКОЛОК %d/6 ПОЛУЧЕН" % int(mission.get("shards", 1))])
 	var bonus := lives * LIFE_BONUS if victory else 0
 	lines.append("Очки: %d" % (score + bonus))
-	lines.append("Врагов: %d" % kills)
+	lines.append("Убито: %d" % kills)
 	lines.append("Спасено: %d" % rescued)
 	lines.append("Тайники: %d из %d" % [secrets_found, secrets.size()])
 	lines.append("Детали ствола: %d из %d" % [barrel.parts if not barrel.active else HeavyBarrel.TOTAL_PARTS, HeavyBarrel.TOTAL_PARTS])

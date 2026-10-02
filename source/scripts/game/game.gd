@@ -343,7 +343,7 @@ func _update_hud_timer() -> void:
 		hud.set_story_status(story.score, story.lives, story.zone_number(), story.zone_count(), story.zone_name(), -1, SaveService.nell_order(), story.goal_rows())
 		_tick_order()
 		return
-	hud.set_wave(maxi(director.wave_number, 1), director.get_enemies_left())
+	hud.set_wave(maxi(director.wave_number, 1), director.get_enemies_left(), director.chapter_index + 1)
 	hud.set_survival_order(SaveService.nell_order())
 	_tick_order()
 
@@ -412,12 +412,12 @@ func _run_summary_lines() -> PackedStringArray:
 		return PackedStringArray([
 			"%s · зона %d/%d" % [story.mission.get("title", ""), story.zone_number(), story.zone_count()],
 			"Очки: %d · Жизни: %d" % [story.score, story.lives],
-			"Врагов: %d · Спасено: %d" % [story.kills, story.rescued],
+			"Убито: %d · Спасено: %d" % [story.kills, story.rescued],
 			"Время: %s · Детали ствола: %d/%d" % [BattleBase.format_time(director.elapsed), story.barrel.parts, HeavyBarrel.TOTAL_PARTS],
 		])
 	return PackedStringArray([
 		"Волна %d · %s" % [maxi(director.wave_number, 1), director.current_chapter().get("title", "")],
-		"Врагов: %d · Уровень %d" % [kills, level],
+		"Убито: %d · Уровень %d" % [kills, level],
 		"Время: %s · Монеты: %d%s" % [BattleBase.format_time(director.elapsed), RunMods.reward(_earned()), " (×%.1f)" % RunMods.mult_of(RunMods.active) if RunMods.active != RunMods.NONE else ""],
 		"Розыск: %s" % ("★".repeat(wanted.level) if wanted != null and wanted.level > 0 else "не искали"),
 	])
@@ -444,9 +444,9 @@ func _on_wave_started(number: int, title: String, mood: String, is_boss: bool) -
 	atmosphere.letterbox(true)
 	get_tree().create_timer(1.9, false).timeout.connect(func() -> void: atmosphere.letterbox(false))
 	if director.elapsed < 4.0:
-		get_tree().create_timer(2.8, false).timeout.connect(func() -> void: hud.show_wave_intro(director.chapter_wave(), title, is_boss))
+		get_tree().create_timer(2.8, false).timeout.connect(func() -> void: hud.show_wave_intro(maxi(director.wave_number, 1), title, is_boss, director.chapter_index + 1))
 	else:
-		hud.show_wave_intro(director.chapter_wave(), title, is_boss)
+		hud.show_wave_intro(maxi(director.wave_number, 1), title, is_boss, director.chapter_index + 1)
 	SoundManager.play(&"boss_spawn" if is_boss else &"ui_confirm", -2.0, false)
 	if director.chapter_wave() >= 2 and not is_boss:
 		map.airdrop(player.global_position)
@@ -1217,7 +1217,7 @@ func _bump_rail_combo(pierced: int) -> void:
 		fx.popup(player.global_position + Vector2(0, -130), "МЕГА-КАССА!", Color("#ff4fd8"), 46.0)
 		fx.confetti(player.global_position, 30)
 		add_shake(0.6)
-		player.heal(player.max_hp * 0.06)
+		player.heal(player.max_hp * 0.03)
 		SoundManager.play(&"level_up", -3.0, false)
 
 
@@ -1233,6 +1233,8 @@ func _apply_tester_start() -> void:
 
 
 func _apply_tester_flags() -> void:
+	if Tester.flag("dmg") or Tester.flag("speed"):
+		stats.uncapped = true
 	if Tester.flag("dmg"):
 		stats.add_flat(&"damage_mult", 9.0)
 	if Tester.flag("speed"):

@@ -9,7 +9,7 @@ var mode := ""
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	mode = OS.get_environment("MODE")
-	Engine.time_scale = 2.0
+	Engine.time_scale = float(OS.get_environment("SCALE")) if not OS.get_environment("SCALE").is_empty() else 2.0
 	SaveService.data = SaveService.DEFAULTS.duplicate(true)
 	SaveService._sanitize_arsenal()
 	if mode.begins_with("mod:"):
@@ -50,9 +50,19 @@ func _physics_process(delta: float) -> void:
 			screen.debug_boss(StringName(mode.trim_prefix("boss:")))
 		if get_tree().paused and screen is Game and screen._level_up_open:
 			screen.hud._level_up._pick(0)
-	if t > 40.0 and OS.get_environment("DIE") == "1":
+	if OS.get_environment("SOAK") == "1" and screen is Game:
+		if not screen.has_meta("jumped") and t > 3.0:
+			screen.set_meta("jumped", true)
+			screen.director._start_wave(int(OS.get_environment("WAVE")))
+		if int(t) % 20 == 0 and int(t) != int(get_meta("last_print", -1)):
+			set_meta("last_print", int(t))
+			print("SOAK t=%d wave=%d mem=%.0fMB objs=%d nodes=%d orphans=%d alive=%d kills=%d" % [int(t), screen.director.wave_number,
+				Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0, int(Performance.get_monitor(Performance.OBJECT_COUNT)),
+				int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT)), int(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)),
+				screen.enemies.get_active_count(), screen.kills])
+	if t > float(OS.get_environment("DURATION") if not OS.get_environment("DURATION").is_empty() else "40") and OS.get_environment("DIE") == "1":
 		var panel: Variant = screen.get("hud") if screen != null else null
 		print("DIE_CHECK screen=", screen.get_class() if screen != null else "null")
-	if t > 40.0:
+	if t > float(OS.get_environment("DURATION") if not OS.get_environment("DURATION").is_empty() else "40"):
 		print("MODE_AUDIT_DONE ", mode, " screen=", screen.get_class() if screen != null else "null")
 		get_tree().quit()

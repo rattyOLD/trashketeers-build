@@ -400,6 +400,7 @@ func _with_loading(resources: Array, build: Callable) -> void:
 
 
 func _swap_screen(next: Node) -> void:
+	Platform.set_in_battle(next is BattleBase)
 	Platform.trail("экран " + next.get_class() + ("/" + str((next.get_script() as Script).get_global_name()) if next.get_script() != null else ""))
 	get_tree().paused = false
 	if _screen != null:

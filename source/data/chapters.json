@@ -1673,6 +1673,9 @@
   "loop_count": 1.25,
   "loop_interval": 0.9,
   "loop_max_alive": 6,
-  "intermission": 3.5
+  "intermission": 3.5,
+    "late_start": 20.0,
+    "late_hp": 0.04,
+    "late_damage": 0.012
  }
 }

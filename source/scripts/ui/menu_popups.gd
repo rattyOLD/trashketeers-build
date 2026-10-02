@@ -823,18 +823,19 @@ class Profile:
 		records.add_child(_tile("Лучшее время", BattleBase.format_time(float(SaveService.data.get("best_time", 0.0))), "clock", UiStyle.NEON, true))
 		records.add_child(_tile("Боссов убито", str(int(SaveService.data.get("boss_kills", 0))), "trophy", UiStyle.HOT, true))
 		list.add_child(records)
-		list.add_child(_section("СТАТИСТИКА"))
+		list.add_child(_section("ЗА ВСЁ ВРЕМЯ"))
 		var grid := GridContainer.new()
 		grid.columns = 2
 		grid.add_theme_constant_override("h_separation", 12)
 		grid.add_theme_constant_override("v_separation", 12)
 		grid.add_child(_tile("Убито крыс", _num(SaveService.get_stat("kills")), "skull", UiStyle.DANGER, false))
-		grid.add_child(_tile("Критов", _num(SaveService.get_stat("crits")), "swords", Color("#ff9a3d"), false))
 		grid.add_child(_tile("Забегов", _num(SaveService.get_stat("runs")), "play", UiStyle.NEON, false))
+		grid.add_child(_tile("В игре", _duration(SaveService.get_stat("time_played")), "clock", Color("#b46bff"), false))
 		grid.add_child(_tile("Монет собрано", _num(SaveService.get_stat("nuts_total")), "", UiStyle.GOLD, false))
-		grid.add_child(_tile("Глав пройдено", str(SaveService.get_biomes_cleared()), "controls", Color("#b46bff"), false))
-		grid.add_child(_tile("Налётов выиграно", str(int(SaveService.data.get("raid_wins", 0))), "trophy", Color("#5cf3ff"), false))
 		list.add_child(grid)
+		var fav := _favorite_hero()
+		if not fav.is_empty():
+			list.add_child(_tile("Любимый герой · %d забегов" % int(fav["runs"]), str(fav["name"]), "swords", Color("#ff9a3d"), false))
 		list.add_child(_achievements_bar())
 		list.add_child(_chronicle_bar())
 		list.add_child(_section("Версия игры"))
@@ -942,6 +943,27 @@ class Profile:
 			SaveService.cycle_rank()
 			_refresh())
 		return b
+
+	## «5 ч 20 мин» / «42 мин» / «меньше минуты».
+	func _duration(seconds: int) -> String:
+		if seconds >= 3600:
+			return "%d ч %d мин" % [seconds / 3600, (seconds % 3600) / 60]
+		if seconds >= 60:
+			return "%d мин" % (seconds / 60)
+		return "меньше минуты" if seconds > 0 else "0"
+
+	## Герой, за которого больше всего забегов.
+	func _favorite_hero() -> Dictionary:
+		var best := {}
+		var stats: Dictionary = SaveService.data["stats"]
+		for key: String in stats:
+			if not key.begins_with("hero_"):
+				continue
+			var runs := int(stats[key])
+			var id := key.trim_prefix("hero_")
+			if runs > 0 and CharacterDB.has_character(id) and (best.is_empty() or runs > int(best["runs"])):
+				best = {"runs": runs, "name": str(CharacterDB.get_character(id).get("title", id))}
+		return best
 
 	func _num(value: int) -> String:
 		return SaveService.format_coins(value) if value >= 10000 else str(value)

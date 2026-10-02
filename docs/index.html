@@ -415,7 +415,7 @@ html, body {
 </script>
 
 <script>
-window.__trash_build = {label: 'v35.220', time: '02.10 16:51'};
+window.__trash_build = {label: 'v35.222', time: '02.10 17:30'};
 document.getElementById('ver').textContent = 'Версия ' + window.__trash_build.label + ' · сборка от ' + window.__trash_build.time;
 </script>
 <script>
@@ -480,7 +480,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	// index.wasm / index.pck и отдаём ему уже скачанные и распакованные байты.
 	const FILES = {
 		wasm: { parts: [{url:"raccoon.core.0.wasm?h=4cbe7e5f476b",bytes:5221065},{url:"raccoon.core.1.wasm?h=a8fbc151befa",bytes:4165384}] },
-		pck: { parts: [{url:"raccoon.pack.0.wasm?h=9aaf9c9e0255",bytes:11989741},{url:"raccoon.pack.1.wasm?h=82606c4a03b5",bytes:12547538},{url:"raccoon.pack.2.wasm?h=0c9676d681bc",bytes:5154704}] },
+		pck: { parts: [{url:"raccoon.pack.0.wasm?h=e86e54d377f4",bytes:11989740},{url:"raccoon.pack.1.wasm?h=3dad21408378",bytes:12547530},{url:"raccoon.pack.2.wasm?h=ef75687e7199",bytes:5156750}] },
 	};
 	const GODOT_CONFIG = {
 		args: [],
@@ -488,7 +488,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 		ensureCrossOriginIsolationHeaders: false,
 		executable: 'index',
 		experimentalVK: false,
-		fileSizes: { 'index.pck': 30649680, 'index.wasm': 43699190 },
+		fileSizes: { 'index.pck': 30651920, 'index.wasm': 43699190 },
 		focusCanvas: true,
 		gdextensionLibs: [],
 		onPrint: function () {
@@ -513,7 +513,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 
 	// Адрес сбора отчётов о вылетах (Google Apps Script / Supabase и т.п.); пусто — отчёты не отправляются.
 	const REPORT_URL = 'https://script.google.com/macros/s/AKfycbxVyy-SnRANW0Im-1Blne2TcUbca93WqzyBulpADwWWD7YH6x3KIygBYImTe8VfP5pp/exec';
-	const BUILD_ID_REPORT = '1790934672';
+	const BUILD_ID_REPORT = '1790937014';
 	const SESSION_ID = Math.random().toString(36).slice(2, 8);
 	const SESSION_START = Date.now();
 	const REPORT_CAP = 250;
@@ -730,7 +730,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	window.trkReport('session_start', gpuInfo() + ' | ' + navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + (window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio) + ' | screen ' + screen.width + 'x' + screen.height + ' | cores ' + (navigator.hardwareConcurrency || '?'));
 
 	// Вкладка могла висеть со старой версией: при возврате в неё сверяем номер сборки и предлагаем обновиться.
-	const BUILD_ID = '1790934672';
+	const BUILD_ID = '1790937014';
 	// Важное обновление: старая сборка дальше не работает, иначе аккаунты и сохранения ломаются старым кодом.
 	function blockOldBuild(v) {
 		const wall = document.createElement('div');
@@ -750,22 +750,64 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 		document.body.appendChild(wall);
 		try { const c = document.getElementById('canvas'); if (c) { c.style.pointerEvents = 'none'; } } catch (e) {}
 	}
+	// Новая версия: в бою ничего не показываем (случайный тап перезагрузил бы забег), в меню предлагаем обновиться окном, потом тонкой плашкой.
+	var updateDismissed = false;
+	window.__trkUpdateUi = function () {
+		const v = window.__trkNewVer;
+		let bar = document.getElementById('newver');
+		let wall = document.getElementById('newverwall');
+		if (!v) { return; }
+		if (window.__trkBattle) {
+			if (bar) { bar.style.display = 'none'; }
+			if (wall) { wall.style.display = 'none'; }
+			return;
+		}
+		if (!updateDismissed) {
+			if (!wall) {
+				wall = document.createElement('div');
+				wall.id = 'newverwall';
+				wall.style.cssText = 'position:fixed;inset:0;z-index:98;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(10,6,24,.82)';
+				const card = document.createElement('div');
+				card.style.cssText = 'max-width:380px;width:100%;box-sizing:border-box;padding:26px 22px;border-radius:22px;background:#1d1536;border:3px solid #00e5ff;box-shadow:0 0 28px rgba(0,229,255,.35);text-align:center;color:#fff;font:600 16px system-ui,sans-serif';
+				card.innerHTML = '<div style="font:800 24px system-ui,sans-serif;color:#ffd257;margin-bottom:10px">Вышла новая версия</div><div style="line-height:1.4;color:#c9c3e6;margin-bottom:18px">Обнови игру: новые фичи и починенные баги уже ждут. Забег идёт только в меню, прогресс сохранён.</div>';
+				const go = document.createElement('button');
+				go.style.cssText = 'display:block;width:100%;padding:16px;border:0;border-radius:14px;background:#ff2ea6;color:#fff;font:800 20px system-ui,sans-serif;margin-bottom:10px';
+				go.textContent = 'ОБНОВИТЬ';
+				go.addEventListener('click', function () { window.location.reload(); });
+				const later = document.createElement('button');
+				later.style.cssText = 'display:block;width:100%;padding:12px;border:0;border-radius:12px;background:#2f2452;color:#c9c3e6;font:700 16px system-ui,sans-serif';
+				later.textContent = 'ПОЗЖЕ';
+				later.addEventListener('click', function () { updateDismissed = true; wall.style.display = 'none'; window.__trkUpdateUi(); });
+				card.appendChild(go); card.appendChild(later); wall.appendChild(card);
+				document.body.appendChild(wall);
+			}
+			wall.style.display = 'flex';
+			if (bar) { bar.style.display = 'none'; }
+			return;
+		}
+		if (!bar) {
+			bar = document.createElement('div');
+			bar.id = 'newver';
+			bar.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:9;padding:10px 14px;background:#ff2ea6;color:#fff;font:600 15px system-ui,sans-serif;text-align:center;cursor:pointer';
+			bar.textContent = 'Вышла новая версия игры. Нажми, чтобы обновить.';
+			bar.addEventListener('click', function () { window.location.reload(); });
+			document.body.appendChild(bar);
+		}
+		bar.style.display = 'block';
+	};
 	function checkVersion() {
 		fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (v) {
 			if (v && v.min_build && Number(BUILD_ID) < Number(v.min_build) && !document.getElementById('mustupdate')) {
-				blockOldBuild(v);
+				if (!window.__trkBattle) { blockOldBuild(v); }   // посреди забега не рубим игру: проверим снова, когда выйдет в меню
 				return;
 			}
-			if (v && v.build && v.build !== BUILD_ID && !document.getElementById('newver')) {
-				const bar = document.createElement('div');
-				bar.id = 'newver';
-				bar.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:9;padding:10px 14px;background:#ff2ea6;color:#fff;font:600 15px system-ui,sans-serif;text-align:center;cursor:pointer';
-				bar.textContent = 'Вышла новая версия игры. Нажми, чтобы обновить.';
-				bar.addEventListener('click', function () { window.location.reload(); });
-				document.body.appendChild(bar);
+			if (v && v.build && v.build !== BUILD_ID) {
+				window.__trkNewVer = v;
+				window.__trkUpdateUi();
 			}
 		}).catch(function () {});
 	}
+	window.__trkCheck = checkVersion;
 	document.addEventListener('visibilitychange', function () {
 		if (document.visibilityState === 'visible') {
 			checkVersion();
