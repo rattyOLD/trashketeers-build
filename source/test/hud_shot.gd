@@ -20,6 +20,12 @@ func _ready() -> void:
 		game.hud.set_health(float(OS.get_environment("HUD_HP")) if OS.get_environment("HUD_HP") != "" else 100.0, 100.0)
 	if OS.get_environment("HUD_CHAT") == "1":
 		var barks: HudBarks = game.hud._barks
+		if OS.get_environment("HUD_LONG") == "1":
+			barks.push_named("НЭЛЛ", "#7fe3ff", "Рико, на связи Нэлл. Впереди свалка, на свалке крысы, у крыс планы. Планы плохие.", 8.0)
+			await get_tree().process_frame
+			print("BARKS ", barks.get_global_rect())
+			for line in TextOverlap.find(game.hud):
+				print("OVERLAP radio: ", line)
 		barks.push_line("nell", "Рико, ты там цел?")
 		barks.push_line("rico", "Цел. Местами.")
 		barks.push_line("nell", "Хватит собирать царапины.")

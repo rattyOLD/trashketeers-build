@@ -467,12 +467,17 @@ class Armory:
 	var _list: VBoxContainer
 	var _balance: Label
 	var _query := ""
+	var _kind := "all"
+	var _chips: Dictionary = {}
+
+	const CLASS_NAMES := {"dagger": "Кинжал", "sword": "Меч", "katana": "Катана", "axe": "Топор", "spear": "Копьё", "hammer": "Молот", "shield": "Щит", "club": "Дубина"}
+	const RARITY_ORDER := {"common": 0, "rare": 1, "epic": 2, "legendary": 3}
 
 	func _init() -> void:
-		super("ОРУЖИЕ + MERGE")
+		super("ОРУЖЕЙНАЯ")
 		_balance = UiStyle.label("", 24, UiStyle.GOLD, 6)
 		content.add_child(_balance)
-		var hint := UiStyle.label("Купить ствол — за монеты, легендарные — только за неонит. Из ящиков забега ствол остаётся навсегда не всегда. 2 одинаковых = тир выше (у легендарных тиров нет: они сильнее всех).", 18, UiStyle.TEXT_DIM, 4)
+		var hint := UiStyle.label("Две одинаковых копии сливаются в тир выше. У легендарных тиров нет: они и так сильнее всех.", 18, UiStyle.TEXT_DIM, 4)
 		hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		content.add_child(hint)
 		var search := SearchBar.new("Найти оружие по названию")
@@ -480,24 +485,67 @@ class Armory:
 			_query = query
 			_refresh())
 		content.add_child(search)
+		var chip_row := HBoxContainer.new()
+		chip_row.add_theme_constant_override("separation", 8)
+		content.add_child(chip_row)
+		for entry in [["all", "ВСЕ"], ["gun", "СТРЕЛКОВОЕ"], ["melee", "БЛИЖНИЙ БОЙ"]]:
+			var key: String = entry[0]
+			var chip := UiStyle.button(entry[1], UiStyle.PANEL, 18, Vector2(0, 46))
+			chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			chip.pressed.connect(func() -> void:
+				_kind = key
+				_refresh())
+			chip_row.add_child(chip)
+			_chips[key] = chip
 		_list = MenuPopups.scroll_list(content)
 
+	func _group_header(text: String) -> Control:
+		var header := UiStyle.label(text, 22, UiStyle.NEON, 5)
+		header.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		return header
+
+	func _sorted(list: Array[WeaponData]) -> Array[WeaponData]:
+		var result := list.duplicate()
+		result.sort_custom(func(a: WeaponData, b: WeaponData) -> bool:
+			var ra: int = RARITY_ORDER.get(a.rarity, 0)
+			var rb: int = RARITY_ORDER.get(b.rarity, 0)
+			if ra != rb:
+				return ra < rb
+			return a.get_dps() < b.get_dps())
+		return result
+
 	func _refresh() -> void:
+		for key: String in _chips:
+			(_chips[key] as Button).modulate = Color.WHITE if key == _kind else Color(1, 1, 1, 0.55)
 		_balance.text = "%s · %s" % [SaveService.format_coins(SaveService.get_coins()), Economy.format_gems(SaveService.get_gems())]
 		MenuPopups.clear(_list)
-		var owned: Array[WeaponData] = []
-		var locked: Array[WeaponData] = []
-		for weapon in WeaponDB.get_player_weapons():
-			if not SearchBar.matches(_query, "%s %s %s" % [weapon.get_title(), weapon.short_name, WeaponData.RARITY_NAMES[weapon.rarity]]):
+		var groups := [["gun", "СТРЕЛКОВОЕ"], ["melee", "БЛИЖНИЙ БОЙ"]]
+		for group in groups:
+			if _kind != "all" and _kind != group[0]:
 				continue
-			if SaveService.owns_weapon(weapon.id):
-				owned.append(weapon)
-			else:
-				locked.append(weapon)
-		for weapon in owned:
-			_list.add_child(_make_card(weapon))
-		for weapon in locked:
-			_list.add_child(_make_locked(weapon))
+			var owned: Array[WeaponData] = []
+			var locked: Array[WeaponData] = []
+			for weapon in WeaponDB.get_player_weapons():
+				if weapon.is_melee() != (group[0] == "melee"):
+					continue
+				if not SearchBar.matches(_query, "%s %s %s" % [weapon.get_title(), weapon.short_name, WeaponData.RARITY_NAMES[weapon.rarity]]):
+					continue
+				if SaveService.owns_weapon(weapon.id):
+					owned.append(weapon)
+				else:
+					locked.append(weapon)
+			if owned.is_empty() and locked.is_empty():
+				continue
+			_list.add_child(_group_header("%s · %d из %d" % [group[1], owned.size(), owned.size() + locked.size()]))
+			for weapon in _sorted(owned):
+				_list.add_child(_make_card(weapon))
+			for weapon in _sorted(locked):
+				_list.add_child(_make_locked(weapon))
+
+	func _behavior(base: WeaponData) -> String:
+		if base.is_melee():
+			return "%s: размах %d°, дальность %d" % [CLASS_NAMES.get(base.melee_class, "Ближний бой"), roundi(rad_to_deg(base.arc_rad)), roundi(base.melee_reach)]
+		return base.behavior_text()
 
 	func _make_card(base: WeaponData) -> Control:
 		var selected := SaveService.get_selected_weapon() == base.id
@@ -523,7 +571,7 @@ class Armory:
 		var stats := UiStyle.label("Урон %d · %.1f %s · DPS %d" % [roundi(weapon.damage), 1.0 / weapon.fire_interval, "ударов/с" if weapon.is_melee() else "выстр/с", roundi(weapon.get_dps())], 18, UiStyle.TEXT_DIM, 4)
 		stats.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 		info.add_child(stats)
-		var behavior := UiStyle.label(base.behavior_text(), 17, UiStyle.NEON, 4)
+		var behavior := UiStyle.label(_behavior(base), 17, UiStyle.NEON, 4)
 		behavior.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 		behavior.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		info.add_child(behavior)
@@ -536,7 +584,7 @@ class Armory:
 			info.add_child(UiStyle.label("В РУКАХ", 18, UiStyle.NEON, 4))
 
 		if not base.has_tiers():
-			var note := UiStyle.label("ЛЕГЕНДАРНОЕ: без тиров и слияния, сильнее любого обычного, редкого и эпического ствола", 17, UiStyle.GOLD, 4)
+			var note := UiStyle.label("ЛЕГЕНДАРНОЕ · без тиров и слияния", 17, UiStyle.GOLD, 4)
 			note.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 			note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			column.add_child(note)
@@ -548,8 +596,9 @@ class Armory:
 					_refresh())
 				column.add_child(equip)
 			return panel
-		var tiers := HBoxContainer.new()
-		tiers.add_theme_constant_override("separation", 8)
+		var tiers := HFlowContainer.new()
+		tiers.add_theme_constant_override("h_separation", 8)
+		tiers.add_theme_constant_override("v_separation", 8)
 		column.add_child(tiers)
 		for t in range(1, WeaponData.MAX_TIER + 1):
 			var copies := SaveService.get_copies(base.id, t)
@@ -569,7 +618,7 @@ class Armory:
 						weapon_changed.emit(base.id)
 						_refresh())
 				tiers.add_child(merge)
-		var buy_row := _make_buy_row(base, "ЕЩЁ КОПИЮ")
+		var buy_row := _make_buy_row(base, "ЕЩЁ")
 		if buy_row != null:
 			column.add_child(buy_row)
 		return panel
@@ -607,9 +656,12 @@ class Armory:
 		var panel := PanelContainer.new()
 		panel.add_theme_stylebox_override("panel", UiStyle.box(UiStyle.PANEL.darkened(0.3), UiStyle.OUTLINE, 3, 20))
 		panel.modulate = Color(1, 1, 1, 0.6)
+		var column := VBoxContainer.new()
+		column.add_theme_constant_override("separation", 6)
+		panel.add_child(column)
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 10)
-		panel.add_child(row)
+		column.add_child(row)
 		var icon := WeaponIcons.IconRect.new(weapon.icon, Color("#4a4460"), Vector2(130, 56))
 		row.add_child(icon)
 		var info := VBoxContainer.new()
@@ -623,6 +675,10 @@ class Armory:
 		hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 		hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		info.add_child(hint_label)
+		var stat_label := UiStyle.label("Урон %d · DPS %d · %s" % [roundi(weapon.damage), roundi(weapon.get_dps()), _behavior(weapon)], 16, UiStyle.NEON, 4)
+		stat_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		stat_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		info.add_child(stat_label)
 		if WeaponData.TRAITS.has(String(weapon.trait_id)):
 			var trait_label := UiStyle.label(WeaponData.TRAITS[String(weapon.trait_id)], 16, UiStyle.GOLD, 4)
 			trait_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
@@ -630,7 +686,7 @@ class Armory:
 			info.add_child(trait_label)
 		var buy_row := _make_buy_row(weapon, "КУПИТЬ")
 		if buy_row != null:
-			info.add_child(buy_row)
+			column.add_child(buy_row)
 			panel.modulate = Color(1, 1, 1, 0.9)
 		return panel
 

@@ -556,15 +556,20 @@ func _build_play() -> Control:
 		play.add_theme_color_override(state, Color.WHITE)
 	play.add_theme_color_override("font_outline_color", Color("#2c5a07"))
 	play.add_theme_constant_override("outline_size", 14)
-	var normal := UiStyle.box(PLAY_GREEN, Color("#2c5a07"), 6, 30)
-	normal.border_width_bottom = 14
-	var hover := UiStyle.box(PLAY_GREEN.lightened(0.15), Color("#2c5a07"), 6, 30)
-	hover.border_width_bottom = 14
-	var down := UiStyle.box(PLAY_GREEN.darkened(0.08), Color("#2c5a07"), 6, 30)
-	down.border_width_bottom = 6
-	play.add_theme_stylebox_override("normal", normal)
-	play.add_theme_stylebox_override("hover", hover)
-	play.add_theme_stylebox_override("pressed", down)
+	if UiStyle.KIT_ON:
+		play.add_theme_stylebox_override("normal", UiStyle.kit_box("green", "normal", false))
+		play.add_theme_stylebox_override("hover", UiStyle.kit_box("green", "normal", false, Color(1.1, 1.1, 1.1)))
+		play.add_theme_stylebox_override("pressed", UiStyle.kit_box("green", "pressed", false))
+	else:
+		var normal := UiStyle.box(PLAY_GREEN, Color("#2c5a07"), 6, 30)
+		normal.border_width_bottom = 14
+		var hover := UiStyle.box(PLAY_GREEN.lightened(0.15), Color("#2c5a07"), 6, 30)
+		hover.border_width_bottom = 14
+		var down := UiStyle.box(PLAY_GREEN.darkened(0.08), Color("#2c5a07"), 6, 30)
+		down.border_width_bottom = 6
+		play.add_theme_stylebox_override("normal", normal)
+		play.add_theme_stylebox_override("hover", hover)
+		play.add_theme_stylebox_override("pressed", down)
 	play.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 	play.pressed.connect(_on_play)
 	UiStyle.pulse(play, 0.04, 1.1)
@@ -704,6 +709,8 @@ func _on_mode_pressed(mode: int) -> void:
 
 func _apply_lock_look() -> void:
 	var button := _mode_buttons[0]
+	# Под замком название не пишем: цепи и замок по центру иначе ложатся прямо на буквы.
+	button.text = "" if _survival_locked() else "ВЫЖИВАНИЕ"
 	if _survival_locked():
 		button.add_theme_color_override("font_color", Color(UiStyle.TEXT_DIM, 0.35))
 	elif _mode != Mode.SURVIVAL:

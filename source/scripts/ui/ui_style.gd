@@ -41,6 +41,47 @@ static func label(text: String, font_size: int, color: Color = TEXT, outline: in
 	return l
 
 
+const KIT_ON := true
+const KIT_DIR := "res://assets/ui/kit/"
+static var _kit_cache: Dictionary = {}
+
+
+## Какой из четырёх нарисованных цветов кнопки ближе к заказанному оттенку. Серые и тёмные кнопки: фиолетовая «стальная».
+static func _kit_family(color: Color) -> String:
+	if color.s < 0.3 or color.v < 0.4:
+		return "purple"
+	var h := color.h
+	if h < 0.04 or h > 0.93:
+		return "red"
+	if h < 0.2:
+		return "gold"
+	if h < 0.46:
+		return "green"
+	return "purple"
+
+
+## Кнопка из рисованной плашки: девять частей, углы с заклёпками не растягиваются.
+## Для низких кнопок берётся уменьшенная вдвое копия, чтобы рамка не съедала всю высоту.
+static func kit_box(family: String, state: String, small: bool, tint: Color = Color.WHITE) -> StyleBoxTexture:
+	var key := "%s_%s_%s_%s" % [family, state, small, tint.to_html()]
+	if _kit_cache.has(key):
+		return _kit_cache[key]
+	var sb := StyleBoxTexture.new()
+	sb.texture = load("%sbtn_%s_%s%s.png" % [KIT_DIR, family, state, "_s" if small else ""]) as Texture2D
+	var m := 15.0 if small else 30.0
+	sb.texture_margin_left = m
+	sb.texture_margin_right = m
+	sb.texture_margin_top = m
+	sb.texture_margin_bottom = m
+	sb.content_margin_left = m + 4.0
+	sb.content_margin_right = m + 4.0
+	sb.content_margin_top = m * 0.35
+	sb.content_margin_bottom = m * 0.35 + (2.0 if state == "pressed" else 0.0)
+	sb.modulate_color = tint
+	_kit_cache[key] = sb
+	return sb
+
+
 static func button(text: String, color: Color, font_size: int = 30, min_size: Vector2 = Vector2(0, 84)) -> Button:
 	var b := Button.new()
 	b.text = text
@@ -54,11 +95,20 @@ static func button(text: String, color: Color, font_size: int = 30, min_size: Ve
 	b.add_theme_color_override("font_outline_color", OUTLINE)
 	b.add_theme_constant_override("outline_size", 8)
 	b.add_theme_color_override("font_disabled_color", Color(TEXT, 0.55))
-	b.add_theme_stylebox_override("normal", button_box(color, false))
-	b.add_theme_stylebox_override("hover", button_box(color.lightened(0.06), false))
-	b.add_theme_stylebox_override("pressed", button_box(color.lightened(0.1), true))
-	b.add_theme_stylebox_override("hover_pressed", button_box(color.lightened(0.1), true))
-	b.add_theme_stylebox_override("disabled", button_box(color.darkened(0.45).lerp(Color("#3a3450"), 0.5), false))
+	var small := min_size.y < 66.0 or font_size <= 22
+	var family := _kit_family(color)
+	if KIT_ON and ResourceLoader.exists(KIT_DIR + "btn_%s_normal.png" % family):
+		b.add_theme_stylebox_override("normal", kit_box(family, "normal", small))
+		b.add_theme_stylebox_override("hover", kit_box(family, "normal", small, Color(1.12, 1.12, 1.12)))
+		b.add_theme_stylebox_override("pressed", kit_box(family, "pressed", small))
+		b.add_theme_stylebox_override("hover_pressed", kit_box(family, "pressed", small))
+		b.add_theme_stylebox_override("disabled", kit_box(family, "disabled", small))
+	else:
+		b.add_theme_stylebox_override("normal", button_box(color, false))
+		b.add_theme_stylebox_override("hover", button_box(color.lightened(0.06), false))
+		b.add_theme_stylebox_override("pressed", button_box(color.lightened(0.1), true))
+		b.add_theme_stylebox_override("hover_pressed", button_box(color.lightened(0.1), true))
+		b.add_theme_stylebox_override("disabled", button_box(color.darkened(0.45).lerp(Color("#3a3450"), 0.5), false))
 	b.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 	b.pressed.connect(func() -> void: SoundManager.play(&"ui_click"))
 	return b

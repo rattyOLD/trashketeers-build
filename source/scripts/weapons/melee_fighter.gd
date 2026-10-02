@@ -18,6 +18,7 @@ const QUERY_LIMIT := 40
 const ECHO_DELAY := 0.09
 const ECHO_SCALE := 0.6
 const ICE_WAVE_EVERY := 3
+const FROST_RADIUS := 190.0
 const GRAVITY_WINDOW := 2.5
 const ENEMY_BODY := 22.0
 const FINISHER_MULT := 1.6
@@ -53,8 +54,6 @@ var _gravity_center := Vector2.ZERO
 var _gravity_left := 0.0
 var _query: PhysicsShapeQueryParameters2D
 var _proxy: Bullet
-var _wave_weapon: WeaponData
-var _wave_source: WeaponData
 var _lunge_distance := 0.0
 
 
@@ -254,7 +253,7 @@ func _apply_trait(weapon: WeaponData, origin: Vector2, victims: Array[Node2D], s
 				BulletPool.explode(origin + direction * reach * 0.8, 130.0, weapon.damage * 0.6 * scale, Bullet.Team.PLAYER, weapon.effect_color, 1.6)
 		&"ice_wave":
 			if _swings % ICE_WAVE_EVERY == 0:
-				BulletPool.fire(_get_wave_weapon(weapon), origin + direction * 34.0, direction, Bullet.Team.PLAYER, 1.0)
+				_frost_burst(weapon, origin + direction * reach * 0.7)
 		&"gravity":
 			if _gravity_left > 0.0:
 				BulletPool.explode(_gravity_center, 150.0, weapon.damage * 0.9, Bullet.Team.PLAYER, weapon.effect_color, 1.4)
@@ -267,25 +266,13 @@ func _apply_trait(weapon: WeaponData, origin: Vector2, victims: Array[Node2D], s
 						(victim as Enemy).pull_toward(_gravity_center, PULL_FORCE)
 
 
-func _get_wave_weapon(weapon: WeaponData) -> WeaponData:
-	if _wave_weapon == null or _wave_source != weapon:
-		_wave_source = weapon
-		var base := WeaponDB.get_weapon(&"frost_shard_v1")
-		_wave_weapon = base.duplicate_data() if base != null else weapon.duplicate_data()
-		_wave_weapon.kind = "gun"
-		_wave_weapon.damage = weapon.damage * 0.55
-		_wave_weapon.piercing = true
-		_wave_weapon.bullet_speed = 760.0
-		_wave_weapon.max_distance = 620.0
-		_wave_weapon.bullet_lifetime = 1.0
-		_wave_weapon.projectiles_per_shot = 1
-		_wave_weapon.spread_rad = 0.0
-		_wave_weapon.explosion_radius = 0.0
-		_wave_weapon.explosion_damage = 0.0
-		_wave_weapon.ricochet_count = 0
-		_wave_weapon.bullet_radius = 26.0
-		_wave_weapon.sprite_scale *= 1.8
-		_wave_weapon.crit_chance = weapon.crit_chance
-		_wave_weapon.effect_color = weapon.effect_color
-		_wave_weapon.fire_sound = &""
-	return _wave_weapon
+## Ледяной разлом: каждый 3-й удар обрушивает холод по площади перед Енотом. Никаких снарядов, только удар.
+func _frost_burst(weapon: WeaponData, at: Vector2) -> void:
+	BulletPool.explode(at, FROST_RADIUS, weapon.damage * 0.55, Bullet.Team.PLAYER, weapon.effect_color, 0.8)
+	var query := _get_query()
+	(query.shape as CircleShape2D).radius = FROST_RADIUS
+	query.transform = Transform2D(0.0, at)
+	for hit in get_viewport().get_world_2d().direct_space_state.intersect_shape(query, QUERY_LIMIT):
+		var target := hit["collider"] as Node2D
+		if target is Enemy and (target as Enemy).is_alive():
+			(target as Enemy).add_slow(0.55, 2.5)

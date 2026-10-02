@@ -14,7 +14,7 @@ const TRADERS := {
 const ITEMS: Array[Dictionary] = [
 	{"id": "vest", "trader": "nell", "title": "Бронежилет", "desc": "Гасит одно попадание целиком.", "cost": 300},
 	{"id": "thermos", "trader": "nell", "title": "Термос", "desc": "+40% к здоровью на миссию.", "cost": 250},
-	{"id": "shotgun", "trader": "monya", "title": "Двустволка «Дед»", "desc": "Стартовый ствол миссии: дробовик вместо пистолета.", "cost": 500},
+	{"id": "shotgun", "trader": "monya", "title": "Бабах «Дед»", "desc": "Стартовый ствол миссии: дробовик вместо пистолета.", "cost": 500},
 	{"id": "whetstone", "trader": "monya", "title": "Точило", "desc": "+20% урона на миссию.", "cost": 400},
 ]
 

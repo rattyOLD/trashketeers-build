@@ -92,25 +92,46 @@ func push_line(who: String, text: String) -> void:
 	_push(who, text)
 
 
+## Реплика с готовым именем и цветом (сюжет). hold — сколько секунд держать на экране.
+func push_named(display_name: String, color_hex: String, text: String, hold: float = SHOW_TIME) -> void:
+	_add({"name": display_name, "color": color_hex, "text": text}, hold)
+
+
 func _push(who: String, text: String) -> void:
-	_lines.append([who, text])
+	var info: Dictionary = _speakers.get(who, {})
+	_add({"name": str(info.get("name", "")), "color": str(info.get("color", "#ffffff")), "text": text}, SHOW_TIME)
+
+
+func _add(entry: Dictionary, hold: float) -> void:
+	_lines.append(entry)
 	while _lines.size() > MAX_LINES:
 		_lines.pop_front()
-	_hide_in = SHOW_TIME
+	# В квадрат помещается ограниченное число букв: старые реплики уходят, чтобы текст не лез за край.
+	while _lines.size() > 1 and _total_chars() > 120:
+		_lines.pop_front()
+	_hide_in = hold
 	_refresh()
+
+
+func _total_chars() -> int:
+	var n := 0
+	for entry: Dictionary in _lines:
+		n += str(entry["name"]).length() + str(entry["text"]).length()
+	return n
 
 
 func _refresh() -> void:
 	for child in _list.get_children():
 		child.queue_free()
-	for entry: Array in _lines:
-		var info: Dictionary = _speakers.get(entry[0], {})
+	var chars := _total_chars()
+	var size := 17 if chars <= 60 else (15 if chars <= 90 else 13)
+	for entry: Dictionary in _lines:
 		var row := RichTextLabel.new()
 		row.bbcode_enabled = true
 		row.fit_content = true
 		row.scroll_active = false
 		row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		row.add_theme_font_size_override("normal_font_size", 17)
-		row.add_theme_font_size_override("bold_font_size", 17)
-		row.text = "[b][color=%s]%s:[/color][/b] %s" % [str(info.get("color", "#ffffff")), str(info.get("name", "")), entry[1]]
+		row.add_theme_font_size_override("normal_font_size", size)
+		row.add_theme_font_size_override("bold_font_size", size)
+		row.text = "[b][color=%s]%s:[/color][/b] %s" % [str(entry["color"]), str(entry["name"]), str(entry["text"]).replace("[", "(")]
 		_list.add_child(row)

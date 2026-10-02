@@ -73,12 +73,20 @@ func _init(title_text: String) -> void:
 	frame_style.set_border_width_all(4)
 	frame_style.set_corner_radius_all(int(CORNER))
 	frame_style.anti_aliasing = true
-	_frame.add_theme_stylebox_override("panel", frame_style)
+	if UiStyle.KIT_ON and ResourceLoader.exists(UiStyle.KIT_DIR + "window_neon_turquoise_s.png"):
+		var tex_frame := StyleBoxTexture.new()
+		tex_frame.texture = load(UiStyle.KIT_DIR + "window_neon_turquoise_s.png") as Texture2D
+		tex_frame.draw_center = false
+		for side in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]:
+			tex_frame.set_texture_margin(side, 22.0)
+		_frame.add_theme_stylebox_override("panel", tex_frame)
+	else:
+		_frame.add_theme_stylebox_override("panel", frame_style)
 	_panel.add_child(_frame)
 
 	var inner := MarginContainer.new()
 	for side in ["left", "right", "top", "bottom"]:
-		inner.add_theme_constant_override("margin_" + side, 22)
+		inner.add_theme_constant_override("margin_" + side, 28)
 	_panel.add_child(inner)
 	content = VBoxContainer.new()
 	content.add_theme_constant_override("separation", 12)

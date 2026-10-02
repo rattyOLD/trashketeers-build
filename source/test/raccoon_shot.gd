@@ -14,6 +14,9 @@ func _ready() -> void:
 		var v := RaccoonVisual.new()
 		v.position = Vector2(90 + i * 170, 250)
 		v.weapon_icon = StringName(poses[i][2])
+		if str(poses[i][2]).begins_with("melee_"):
+			v.melee_active = true
+			v.melee_offset = [0.0, -0.9, 0.9, 0.3][i]
 		add_child(v)
 		v.apply_look(CharacterDB.get_character("raccoon"), {})
 		for k in 40:

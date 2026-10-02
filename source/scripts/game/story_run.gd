@@ -213,9 +213,8 @@ func order_text() -> String:
 
 ## Реплика-тост: не появляется, пока говорит диалог или фоновая реплика, чтобы персонаж не говорил в двух окнах сразу.
 func _chatter(title: String, text: String, color: Color) -> void:
-	if _box != null or (_ambient != null and _ambient.is_busy()):
-		return
-	game.hud.toast(title, text, color)
+	if _ambient != null:
+		_ambient.push_named(title, "#" + color.to_html(false), text)
 
 
 func _count(stat: String, amount: int = 1) -> void:
@@ -1213,7 +1212,7 @@ func _place_training_target() -> void:
 	game.layers.world.add_child(target)
 	get_tree().create_timer(2.5, false).timeout.connect(func() -> void:
 		if is_instance_valid(target):
-			game.hud.toast("СТРЕЛЬБА", "Да держи ты уже палец на экране, где цель! Отпустил — Рико не стреляет, он не волшебник.", Color("#5ff2ff")))
+			game.hud.radio().push_named("НЭЛЛ", "#5ff2ff", "Держи палец на экране, где цель! Отпустил — Рико не стреляет, он не волшебник.", 7.0))
 
 
 func _on_training_broken(target: TrainingTarget) -> void:

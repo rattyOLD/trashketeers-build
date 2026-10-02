@@ -163,7 +163,7 @@ class InteractButton:
 		var big := maxi(roundi(30.0 * k), 8)
 		draw_string_outline(font, Vector2(text_x, 38.0 * k), "ВЗЯТЬ", HORIZONTAL_ALIGNMENT_LEFT, 140.0 * k, big, maxi(roundi(8.0 * k), 2), Color(0.06, 0.03, 0.1))
 		draw_string(font, Vector2(text_x, 38.0 * k), "ВЗЯТЬ", HORIZONTAL_ALIGNMENT_LEFT, 140.0 * k, big, UiStyle.GOLD)
-		var title := weapon.get_title() if weapon != null else "Пистолет T1"
+		var title := weapon.get_title() if weapon != null else "Хлопушка T1"
 		draw_string(font, Vector2(text_x, 62.0 * k), title, HORIZONTAL_ALIGNMENT_LEFT, 138.0 * k, maxi(roundi(16.0 * k), 7), Color(accent, 1.0))
 		draw_string(font, Vector2(text_x, 84.0 * k), note, HORIZONTAL_ALIGNMENT_LEFT, 138.0 * k, maxi(roundi(14.0 * k), 6), Color(1, 1, 1, 0.6))
 

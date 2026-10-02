@@ -911,13 +911,15 @@ func _on_mini_choice(index: int, name: String, at: Vector2, boss_id: String) -> 
 		player.heal(player.max_hp)
 		_rerolls_free += 1
 		_drop_weapon(_roll_weapon("rare"), at, true)
-		hud.toast("ПОЩАДА", "Нэлл: Ты его пожалел? Он тебя бы нет. Но ладно, красиво.", Color("#5ff2ff"))
+		hud.toast("ПОЩАДА", "Полное лечение и редкий ствол", Color("#5ff2ff"))
+		hud.radio().push_named("НЭЛЛ", "#5ff2ff", "Ты его пожалел? Он тебя бы нет. Но ладно, красиво.", 6.0)
 	else:
 		var extra := int(int(Economy.boss_reward(director.chapter_index, director.loop)["gems"]) * 0.25)
 		run_gems += extra
 		_drop_weapon(_roll_weapon("epic"), at, true)
 		pickups.spawn_xp_gold(at, 20)
-		hud.toast("ГРАБЁЖ", "+%s. Нэлл: Грабёж! Мне нравится. Записала." % Economy.format_gems(extra), Color("#ffb020"))
+		hud.toast("ГРАБЁЖ", "+%s" % Economy.format_gems(extra), Color("#ffb020"))
+		hud.radio().push_named("НЭЛЛ", "#5ff2ff", "Грабёж! Мне нравится. Записала.", 5.0)
 		_show_looted(boss_id)
 
 
@@ -981,7 +983,8 @@ func _on_boss_killed(boss: Enemy, at: Vector2) -> void:
 	if director.elapsed - _boss_started <= SPEED_KILL_TIME:
 		SaveService.add_stat("speed_bosses", 1)
 		_drop_weapon(_roll_weapon("legendary"), at + Vector2(70.0, 0.0), true, 0.9)
-		hud.toast("СЕКРЕТНЫЙ СТВОЛ", "Босс за минуту! Нэлл: Я это не запишу, мне не поверят.", Color("#ffd23f"))
+		hud.toast("СЕКРЕТНЫЙ СТВОЛ", "Босс за минуту!", Color("#ffd23f"))
+		hud.radio().push_named("НЭЛЛ", "#5ff2ff", "Я это не запишу, мне не поверят.", 5.0)
 	_bonus_choices += 1
 	_pending_levelups += 1
 	if not _level_up_open:

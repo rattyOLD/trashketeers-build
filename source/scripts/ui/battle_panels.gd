@@ -480,7 +480,7 @@ class RunResultPanel:
 		return button
 
 	func _padded(button: Button, state: String) -> StyleBox:
-		var box := button.get_theme_stylebox(state).duplicate() as StyleBoxFlat
+		var box := button.get_theme_stylebox(state).duplicate() as StyleBox
 		box.content_margin_left = 90.0
 		return box
 

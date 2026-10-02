@@ -75,7 +75,7 @@ const RARITY_NAMES := {
 const TRAITS := {
 	"close": "В упор: урон до ×1.9, издалека до ×0.55. Лезь в толпу",
 	"focus": "Прицел: стоя на месте 1 с — выстрел ×2, в движении ×0.75. Играй от позиции",
-	"ice_wave": "Каждый 3-й удар шлёт по прямой ледяную волну; враги замедлены",
+	"ice_wave": "Каждый 3-й удар обрушивает ледяной разлом перед тобой: урон по площади и замедление",
 	"junk_grow": "Собирает мусор: клинок растёт на 10% за каждые 10 убийств (до +100%)",
 	"gravity": "Удар стягивает врагов в точку, следующий удар взрывает их",
 	"echo": "Каждый удар повторяет второй клинок: ещё 60% урона через 0.09 с",
@@ -403,7 +403,7 @@ func behavior_text() -> String:
 		parts.append("ближний бой: удар по дуге")
 	else:
 		if projectiles_per_shot > 1:
-			parts.append("%d снарядов веером" % projectiles_per_shot)
+			parts.append("%d %s веером" % [projectiles_per_shot, "снаряда" if projectiles_per_shot < 5 else "снарядов"])
 		if piercing:
 			parts.append("пробивает врагов")
 		if ricochet_count > 0:
@@ -418,4 +418,5 @@ func behavior_text() -> String:
 			parts.append("сильно отбрасывает")
 		if parts.is_empty():
 			parts.append("точный одиночный выстрел" if fire_interval >= 0.2 else "быстрая очередь")
-	return ", ".join(parts).capitalize()
+	var joined := ", ".join(parts)
+	return joined.substr(0, 1).to_upper() + joined.substr(1)

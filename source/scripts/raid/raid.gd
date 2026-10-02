@@ -4,7 +4,7 @@ extends BattleBase
 ## Победа — обнулить ХП дракона или продержаться DURATION секунд.
 ## Угрозы: конус морозного дыхания, хвостовая волна, ледяные осколки с лужами и озноб:
 ## шкала растёт в лужах и под дыханием, на 100% Енот замерзает. Ледяные щиты закрывают от дыхания и волны.
-## Награда (неонит + чертёж Призматического Бластера) начисляется через SaveService.
+## Награда (неонит + чертёж «Радужки») начисляется через SaveService.
 
 const DURATION := 120.0
 const COMET_CAPACITY := 28
@@ -398,14 +398,14 @@ func _win(dragon_killed: bool) -> void:
 	var lines := PackedStringArray([
 		"Хладгор повержен!" if dragon_killed else "Продержался %s в ледяной бурю!" % BattleBase.format_time(DURATION),
 		"Неонит: +%d (всего %d)" % [reward["star_dust"], SaveService.get_star_dust()],
-		"Чертёж: Призматический Бластер — получен!" if reward["blueprint_new"] else "Чертёж Призматического Бластера уже в коллекции",
+		"Чертёж: «Радужка» — получен!" if reward["blueprint_new"] else "Чертёж «Радужки» уже в коллекции",
 		"Урон по дракону: %d" % roundi(damage_dealt),
 		"Замерзал: %d" % _freezes,
 	])
 	if flawless:
 		lines.append("Без единой снежинки: ни разу не замёрз!")
 	if reward["blueprint_new"]:
-		lines.append("Новая пушка «Призма» открыта в Оружейной")
+		lines.append("Новая пушка «Радужка» открыта в Оружейной")
 	get_tree().create_timer(VICTORY_DELAY, false).timeout.connect(_show_result.bind(true, lines))
 
 
