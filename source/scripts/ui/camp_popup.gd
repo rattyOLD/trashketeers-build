@@ -31,6 +31,7 @@ func _init() -> void:
 	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	note.custom_minimum_size = Vector2(520, 0)
 	content.add_child(note)
+	content.add_child(_online_plate())
 	_list = MenuPopups.scroll_list(content)
 	_resume = UiStyle.button("ПРОДОЛЖИТЬ С ЧЕКПОИНТА", Color("#1d8fb0"), 26, Vector2(0, 70))
 	_resume.pressed.connect(func() -> void:
@@ -44,6 +45,17 @@ func _init() -> void:
 		close()
 		departed.emit())
 	content.add_child(go)
+
+
+## Плашка-крючок: история продолжится в онлайне (НейроЕнот украл осколки). Пока только анонс.
+func _online_plate() -> Control:
+	var panel := PanelContainer.new()
+	panel.add_theme_stylebox_override("panel", UiStyle.box(Color(0.14, 0.07, 0.24, 0.95), Color("#b07cff"), 4, 18))
+	var label := UiStyle.label("Продолжи свою историю в онлайне: отомсти НейроЕноту и верни все 6 осколков.", 19, Color("#e9d6ff"), 4)
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.custom_minimum_size = Vector2(500, 0)
+	panel.add_child(label)
+	return panel
 
 
 func _refresh() -> void:
