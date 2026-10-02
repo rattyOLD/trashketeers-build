@@ -52,6 +52,8 @@ func open() -> void:
 
 
 func _refresh() -> void:
+	for done_id in SaveService.story_done_ids():
+		SaveService.grant_story_heroes(str(done_id))
 	var all := CharacterDB.all()
 	_index = wrapi(_index, 0, all.size())
 	var character: Dictionary = all[_index]
@@ -305,6 +307,15 @@ func _build_actions(character: Dictionary, owned: bool) -> void:
 		button = UiStyle.button("ОТКРЫТЬ · %s" % price_text, Color("#2fae5f") if affordable else UiStyle.PANEL, 30, Vector2(0, 88))
 		button.disabled = not affordable
 		button.pressed.connect(func() -> void: _buy(id))
+		var unlock := str(character.get("story_unlock", ""))
+		if not unlock.is_empty():
+			var hint := UiStyle.label("ИЛИ БЕСПЛАТНО: ПРОЙДИ СЮЖЕТ, ОПЕРАЦИЯ %s%s" % [unlock.trim_prefix("m"), "" if StoryRun.mission_exists(unlock) else " (скоро)"], 17, Color("#a6b84a"), 4)
+			hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			hint.custom_minimum_size = Vector2(520, 0)
+			_action_box.add_child(button)
+			_action_box.add_child(hint)
+			return
 	elif SaveService.get_character_id() == id:
 		button = UiStyle.button("ВЫБРАН", UiStyle.PANEL, 30, Vector2(0, 88))
 		button.disabled = true

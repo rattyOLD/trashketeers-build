@@ -1,480 +1,486 @@
 {
- "version": 1,
- "characters": [
-  {
-   "id": "raccoon",
-   "title": "Рико «Бродяга»",
-   "description": "Без слабых мест. И без тормозов.",
-   "currency": "nuts",
-   "price": 0,
-   "recolor": {},
-   "proportions": {},
-   "stats": {
-    "speed": 0.0,
-    "hp": 0.0,
-    "dash": 0.0,
-    "crit": 0.0
-   },
-   "traits": "Сбалансирован",
-   "portrait": "res://assets/ui/portraits/vagabond.png",
-   "hud_portrait": "res://assets/ui/portraits/rico.png",
-   "passive": {
-    "title": "Чутьё мусорщика",
-    "text": "Радиус подбора добычи +50%"
-   },
-   "role": "Универсал",
-   "lore": "Знает каждую щель на Неоновой Свалке. Крысы зовут его Бродягой и только шёпотом. Десять лет назад был капитаном «Особой Семёрки», отряда, которого боялись даже те, кто никого не боялся.",
-   "sprite": {
-    "path": "res://assets/heroes/raccoon_hero.png",
-    "clips": "res://assets/heroes/raccoon_",
-    "cells": 4,
-    "cell_w": 384,
-    "cell_h": 288,
-    "run": [
-     1,
-     2
-    ],
-    "shoulder": [
-     8,
-     -126
-    ],
-    "arm": "res://assets/heroes/raccoon_hero_arm.png",
-    "arm_scale": 0.26,
-    "arm_len": 100,
-    "arm_pivot_y": 51,
-    "classic_only": true
-   },
-   "quote": "Мусор для одних, сокровище для меня."
-  },
-  {
-   "id": "red_panda",
-   "title": "Тимур «Фитиль»",
-   "description": "Быстрый, злой, слегка хрупкий.",
-   "currency": "nuts",
-   "price": 3500,
-   "recolor": {
-    "fur": [
-     "#2a0d06",
-     "#b8461a",
-     "#fff1e2",
-     1.0,
-     0.07,
-     0.9
-    ],
-    "iris": [
-     "#1c0a03",
-     "#7a3a10",
-     "#f2b36a",
-     1.0,
-     0.06,
-     0.83
-    ]
-   },
-   "proportions": {
-    "head": [
-     0.05,
-     0.05
-    ],
-    "tail": [
-     0.12,
-     0.04
-    ],
-    "ears": [
-     0.12,
-     0.1
-    ]
-   },
-   "stats": {
-    "speed": 0.1,
-    "hp": -0.1,
-    "dash": 0.0,
-    "crit": 0.0
-   },
-   "traits": "+10% скорость, рывок чаще, -10% здоровья",
-   "portrait": "res://assets/ui/portraits/red_panda.png",
-   "sprite": {
-    "path": "res://assets/heroes/red_panda.png",
-    "cells": 4,
-    "cell_w": 384,
-    "cell_h": 288,
-    "run": [
-     1,
-     2
-    ],
-    "shoulder": [
-     -2,
-     -138
-    ],
-    "arm": "res://assets/heroes/red_panda_arm.png",
-    "arm_scale": 0.26,
-    "arm_len": 100,
-    "arm_pivot_y": 55,
-    "arm_color": "#4a4a58"
-   },
-   "passive": {
-    "title": "Жар",
-    "text": "25% попаданий поджигают врага"
-   },
-   "role": "Штурмовик",
-   "lore": "Бывший пиротехник свалки. Тимур по паспорту, Фитиль по жизни. Собрал экзокостюм из обломков реактора и теперь поджигает всё, что шевелится. В «Особой Семёрке» отвечал за «громкое решение»: мост на Третьем кольце до сих пор вспоминают.",
-   "quote": "Искра есть? Значит, будет пожар.",
-   "skill": {
-    "id": "fire_ring",
-    "title": "Огненное кольцо",
-    "cooldown": 18.0,
-    "text": "Вокруг Фитиля вспыхивает кольцо огня: урон по площади и поджог всех врагов рядом.",
-    "color": "#ff8a2a"
-   }
-  },
-  {
-   "id": "snow",
-   "title": "Джек «Фрост»",
-   "description": "Крепкий, упрямый, холодный.",
-   "currency": "nuts",
-   "price": 4000,
-   "recolor": {
-    "fur": [
-     "#4f5468",
-     "#c4c9d8",
-     "#ffffff",
-     1.0,
-     0.07,
-     0.9
-    ],
-    "iris": [
-     "#3a0012",
-     "#e0355a",
-     "#ffc2d0",
-     1.0,
-     0.06,
-     0.83
-    ]
-   },
-   "proportions": {
-    "torso": [
-     0.07,
-     0.02
-    ],
-    "head": [
-     0.02,
-     0.0
-    ],
-    "tail": [
-     0.0,
-     0.08
-    ]
-   },
-   "stats": {
-    "speed": -0.05,
-    "hp": 0.2,
-    "dash": 0.0,
-    "crit": 0.0
-   },
-   "traits": "+20% здоровья, -5% скорости",
-   "portrait": "res://assets/ui/portraits/snow.png",
-   "sprite": {
-    "path": "res://assets/heroes/snow.png",
-    "cells": 4,
-    "cell_w": 384,
-    "cell_h": 288,
-    "run": [
-     1,
-     2
-    ],
-    "shoulder": [
-     -6,
-     -146
-    ],
-    "arm": "res://assets/heroes/snow_arm.png",
-    "arm_scale": 0.26,
-    "arm_len": 100,
-    "arm_pivot_y": 54.5,
-    "arm_color": "#e6edf0"
-   },
-   "passive": {
-    "title": "Вечная мерзлота",
-    "text": "Враги рядом (170 px) постоянно замедлены на 28%"
-   },
-   "role": "Танк",
-   "lore": "Енот-альбинос из вечной мерзлоты под старым хладокомбинатом. Враги рядом с ним замедляются, а он доедает пломбир. В «Особой Семёрке» держал оборону: на «Холодном складе» простоял в морозильнике двое суток и вышел с мороженым.",
-   "quote": "Холодный расчёт. Горячие пули.",
-   "skill": {
-    "id": "ice_dome",
-    "title": "Ледяной купол",
-    "cooldown": 22.0,
-    "text": "Купол мерзлоты на 4 с: враги внутри замирают, а потом надолго замедлены. Фрост под куполом получает щит.",
-    "color": "#8fdcff"
-   }
-  },
-  {
-   "id": "night",
-   "title": "Эйден «Шэдоу»",
-   "description": "Бьёт точно. Живёт быстро.",
-   "currency": "nuts",
-   "price": 4500,
-   "recolor": {
-    "fur": [
-     "#060509",
-     "#393247",
-     "#bdb3d0",
-     1.0,
-     0.07,
-     0.9
-    ],
-    "iris": [
-     "#1a2a00",
-     "#a8ff2e",
-     "#f2ffc8",
-     1.0,
-     0.06,
-     0.83
-    ]
-   },
-   "proportions": {
-    "head": [
-     -0.04,
-     -0.03
-    ],
-    "legs": [
-     0.0,
-     0.1
-    ],
-    "ears": [
-     0.0,
-     0.15
-    ]
-   },
-   "stats": {
-    "speed": 0.05,
-    "hp": -0.05,
-    "dash": 0.0,
-    "crit": 0.06
-   },
-   "traits": "+6% шанс крита, +5% скорость",
-   "portrait": "res://assets/ui/portraits/night.png",
-   "sprite": {
-    "path": "res://assets/heroes/night.png",
-    "cells": 4,
-    "cell_w": 384,
-    "cell_h": 288,
-    "run": [
-     1,
-     2
-    ],
-    "shoulder": [
-     4,
-     -128
-    ],
-    "arm": "res://assets/heroes/night_arm.png",
-    "arm_scale": 0.26,
-    "arm_len": 100,
-    "arm_pivot_y": 60,
-    "arm_color": "#403048"
-   },
-   "passive": {
-    "title": "Глаз-алмаз",
-    "text": "+10% шанса крита"
-   },
-   "role": "Убийца",
-   "lore": "Чёрный как мокрый асфальт. Выныривает из тени и исчезает раньше, чем крыса успеет пискнуть. В «Особой Семёрке» ходил в разведку: на «Ночи на Третьем кольце» ушёл первым и вернулся раньше всех.",
-   "quote": "Ты меня не видел. И не увидишь.",
-   "skill": {
-    "id": "assassin_hour",
-    "title": "Час убийцы",
-    "cooldown": 20.0,
-    "text": "На 4 с все выстрелы критуют, урон растёт, а первые полсекунды Шэдоу неуязвим.",
-    "color": "#b46bff"
-   }
-  },
-  {
-   "id": "neon_hopper",
-   "title": "Нэлл «Турбо»",
-   "description": "Самая быстрая на свалке.",
-   "currency": "nuts",
-   "price": 9000,
-   "portrait": "res://assets/ui/heroes/neon_hopper.png",
-   "recolor": {},
-   "proportions": {},
-   "stats": {
-    "speed": 0.12,
-    "hp": -0.1,
-    "dash": 0.0,
-    "crit": 0.0
-   },
-   "traits": "+12% скорость, рывок чаще, -10% здоровья",
-   "passive": {
-    "title": "Разгон",
-    "text": "+12% скорострельности"
-   },
-   "sprite": {
-    "path": "res://assets/heroes/neon_hopper.png",
-    "cells": 4,
-    "cell_w": 384,
-    "cell_h": 288,
-    "run": [
-     1,
-     2
-    ],
-    "shoulder": [
-     15,
-     -126
-    ],
-    "arm_len": 100,
-    "arm_color": "#5a2a38",
-    "arm": "res://assets/heroes/neon_hopper_arm.png",
-    "arm_scale": 0.26,
-    "arm_pivot_y": 54
-   },
-   "role": "Спидстер",
-   "lore": "Позывной «Турбо». Трижды выиграла подпольные гонки на ховер-рельсе и из боя выбегает раньше, чем в неё попадут. В «Особой Семёрке» Нэлл возила отряд на дело и с дела, ни разу не опоздала и ни разу не припарковалась нормально. Теперь сидит у Рико на связи и пьёт чай, но за руль возвращается, когда совсем жарко.",
-   "quote": "Быстрее пули? Пуля просто в пробке.",
-   "skill": {
-    "id": "rail_dash",
-    "title": "Рельсовый рывок",
-    "cooldown": 16.0,
-    "text": "Длинный рывок по рельсе: режет всех на пути и даёт секунду неуязвимости.",
-    "color": "#5cf3ff"
-   }
-  },
-  {
-   "id": "fluffy_chemist",
-   "title": "Фрэнк «Фаззи»",
-   "description": "Яд, облака и наука.",
-   "currency": "nuts",
-   "price": 9000,
-   "portrait": "res://assets/ui/heroes/fluffy_chemist.png",
-   "recolor": {},
-   "proportions": {},
-   "stats": {
-    "speed": 0.0,
-    "hp": 0.05,
-    "dash": 0.0,
-    "crit": 0.0
-   },
-   "traits": "+5% здоровья, яды по умолчанию",
-   "passive": {
-    "title": "Токсичная кровь",
-    "text": "20% попаданий отравляют, яд сильнее на 30%"
-   },
-   "sprite": {
-    "path": "res://assets/heroes/fluffy_chemist.png",
-    "cells": 4,
-    "cell_w": 384,
-    "cell_h": 288,
-    "run": [
-     1,
-     2
-    ],
-    "shoulder": [
-     20,
-     -108
-    ],
-    "arm_len": 100,
-    "arm_color": "#f2ede4",
-    "arm": "res://assets/heroes/fluffy_chemist_arm.png",
-    "arm_scale": 0.26,
-    "arm_pivot_y": 48.5
-   },
-   "role": "Поддержка",
-   "lore": "Кот-учёный, выгнанный из лаборатории за слишком яркие опыты. Уверен, что яд это лекарство. В большой дозе. В «Особой Семёрке» был полевым химиком: половину операций спас, вторую половину просто взорвал красиво.",
-   "quote": "Не дыши глубоко. Или дыши, мне нужны данные.",
-   "skill": {
-    "id": "toxic_flask",
-    "title": "Токсичная колба",
-    "cooldown": 20.0,
-    "text": "Бросает колбу в гущу врагов: облако яда на 6 с травит и замедляет всех внутри.",
-    "color": "#7dff5c"
-   }
-  },
-  {
-   "id": "pigeon_mafioso",
-   "title": "Тони «Дон»",
-   "description": "Томми-ган, шляпа, бомбовый дрон.",
-   "currency": "nuts",
-   "price": 9000,
-   "portrait": "res://assets/ui/heroes/pigeon_mafioso.png",
-   "recolor": {},
-   "proportions": {},
-   "stats": {
-    "speed": -0.05,
-    "hp": 0.15,
-    "dash": 0.0,
-    "crit": 0.1
-   },
-   "traits": "+15% здоровья, +10% крит, -5% скорости",
-   "passive": {
-    "title": "Контрольный выстрел",
-    "text": "Крит мгновенно убивает врага с здоровьем ниже 25% (кроме боссов)"
-   },
-   "sprite": {
-    "path": "res://assets/heroes/pigeon_mafioso.png",
-    "cells": 4,
-    "cell_w": 384,
-    "cell_h": 288,
-    "run": [
-     1,
-     2
-    ],
-    "shoulder": [
-     20,
-     -108
-    ],
-    "arm_len": 100,
-    "arm_color": "#34385a",
-    "arm": "res://assets/heroes/pigeon_mafioso_arm.png",
-    "arm_scale": 0.26,
-    "arm_pivot_y": 46.5
-   },
-   "role": "Стрелок",
-   "lore": "Небесный босс пригородных крыш. Устал от крысиных налётов и вышел на дело лично. В «Особой Семёрке» вёл переговоры: договорился с таможней «Золотой Утки» там, где не помогали пули.",
-   "quote": "Предложение, от которого не улететь.",
-   "skill": {
-    "id": "drone_strike",
-    "title": "Бомбовый налёт",
-    "cooldown": 24.0,
-    "text": "Дрон сбрасывает серию бомб по линии прицела. Метки видны за секунду до взрыва.",
-    "color": "#ffb347"
-   }
-  },
-  {
-   "id": "sniper_f",
-   "title": "Кейт «Мираж»",
-   "description": "Снайпер, дальний бой.",
-   "currency": "gems",
-   "price": 0,
-   "recolor": {},
-   "proportions": {},
-   "stats": {},
-   "traits": "Скоро в отряде",
-   "portrait": "res://assets/ui/portraits/soon_kate.png",
-   "passive": {
-    "title": "Скоро",
-    "text": "Герой в разработке. Следи за обновлениями."
-   },
-   "role": "Снайпер",
-   "lore": "Снайпер «Особой Семёрки». Спокойная, ироничная, с оптикой и шарфом. Её никогда не видели, зато всегда слышали выстрел. Скоро в отряде.",
-   "quote": "Я уже попала. Ты просто ещё не знаешь.",
-   "coming_soon": true
-  },
-  {
-   "id": "medic_f",
-   "title": "Лиза «Док»",
-   "description": "Лечит и подкалывает.",
-   "currency": "gems",
-   "price": 0,
-   "recolor": {},
-   "proportions": {},
-   "stats": {},
-   "traits": "Скоро в отряде",
-   "portrait": "res://assets/ui/portraits/soon_liza.png",
-   "passive": {
-    "title": "Скоро",
-    "text": "Герой в разработке. Следи за обновлениями."
-   },
-   "role": "Медик",
-   "lore": "Полевой медик «Особой Семёрки». Строгая, с красным крестом на разгрузке. Штопала всех, и Рико тоже, и ругалась при этом громче, чем он. Скоро в отряде.",
-   "quote": "Не геройствуй. Я устала тебя зашивать.",
-   "coming_soon": true
-  }
- ]
+  "version": 1,
+  "characters": [
+    {
+      "id": "raccoon",
+      "title": "Рико «Бродяга»",
+      "description": "Без слабых мест. И без тормозов.",
+      "currency": "nuts",
+      "price": 0,
+      "recolor": {},
+      "proportions": {},
+      "stats": {
+        "speed": 0.0,
+        "hp": 0.0,
+        "dash": 0.0,
+        "crit": 0.0
+      },
+      "traits": "Сбалансирован",
+      "portrait": "res://assets/ui/portraits/vagabond.png",
+      "hud_portrait": "res://assets/ui/portraits/rico.png",
+      "passive": {
+        "title": "Чутьё мусорщика",
+        "text": "Радиус подбора добычи +50%"
+      },
+      "role": "Универсал",
+      "lore": "Знает каждую щель на Неоновой Свалке. Крысы зовут его Бродягой и только шёпотом. Десять лет назад был капитаном «Особой Семёрки», отряда, которого боялись даже те, кто никого не боялся.",
+      "sprite": {
+        "path": "res://assets/heroes/raccoon_hero.png",
+        "clips": "res://assets/heroes/raccoon_",
+        "cells": 4,
+        "cell_w": 384,
+        "cell_h": 288,
+        "run": [
+          1,
+          2
+        ],
+        "shoulder": [
+          8,
+          -126
+        ],
+        "arm": "res://assets/heroes/raccoon_hero_arm.png",
+        "arm_scale": 0.26,
+        "arm_len": 100,
+        "arm_pivot_y": 51,
+        "classic_only": true
+      },
+      "quote": "Мусор для одних, сокровище для меня."
+    },
+    {
+      "id": "red_panda",
+      "title": "Тимур «Фитиль»",
+      "description": "Быстрый, злой, слегка хрупкий.",
+      "currency": "nuts",
+      "price": 3500,
+      "recolor": {
+        "fur": [
+          "#2a0d06",
+          "#b8461a",
+          "#fff1e2",
+          1.0,
+          0.07,
+          0.9
+        ],
+        "iris": [
+          "#1c0a03",
+          "#7a3a10",
+          "#f2b36a",
+          1.0,
+          0.06,
+          0.83
+        ]
+      },
+      "proportions": {
+        "head": [
+          0.05,
+          0.05
+        ],
+        "tail": [
+          0.12,
+          0.04
+        ],
+        "ears": [
+          0.12,
+          0.1
+        ]
+      },
+      "stats": {
+        "speed": 0.1,
+        "hp": -0.1,
+        "dash": 0.0,
+        "crit": 0.0
+      },
+      "traits": "+10% скорость, рывок чаще, -10% здоровья",
+      "portrait": "res://assets/ui/portraits/red_panda.png",
+      "sprite": {
+        "path": "res://assets/heroes/red_panda.png",
+        "cells": 4,
+        "cell_w": 384,
+        "cell_h": 288,
+        "run": [
+          1,
+          2
+        ],
+        "shoulder": [
+          -2,
+          -138
+        ],
+        "arm": "res://assets/heroes/red_panda_arm.png",
+        "arm_scale": 0.26,
+        "arm_len": 100,
+        "arm_pivot_y": 55,
+        "arm_color": "#4a4a58"
+      },
+      "passive": {
+        "title": "Жар",
+        "text": "25% попаданий поджигают врага"
+      },
+      "role": "Штурмовик",
+      "lore": "Бывший пиротехник свалки. Тимур по паспорту, Фитиль по жизни. Собрал экзокостюм из обломков реактора и теперь поджигает всё, что шевелится. В «Особой Семёрке» отвечал за «громкое решение»: мост на Третьем кольце до сих пор вспоминают.",
+      "quote": "Искра есть? Значит, будет пожар.",
+      "skill": {
+        "id": "fire_ring",
+        "title": "Огненное кольцо",
+        "cooldown": 18.0,
+        "text": "Вокруг Фитиля вспыхивает кольцо огня: урон по площади и поджог всех врагов рядом.",
+        "color": "#ff8a2a"
+      },
+      "story_unlock": "m5"
+    },
+    {
+      "id": "snow",
+      "title": "Джек «Фрост»",
+      "description": "Крепкий, упрямый, холодный.",
+      "currency": "nuts",
+      "price": 4000,
+      "recolor": {
+        "fur": [
+          "#4f5468",
+          "#c4c9d8",
+          "#ffffff",
+          1.0,
+          0.07,
+          0.9
+        ],
+        "iris": [
+          "#3a0012",
+          "#e0355a",
+          "#ffc2d0",
+          1.0,
+          0.06,
+          0.83
+        ]
+      },
+      "proportions": {
+        "torso": [
+          0.07,
+          0.02
+        ],
+        "head": [
+          0.02,
+          0.0
+        ],
+        "tail": [
+          0.0,
+          0.08
+        ]
+      },
+      "stats": {
+        "speed": -0.05,
+        "hp": 0.2,
+        "dash": 0.0,
+        "crit": 0.0
+      },
+      "traits": "+20% здоровья, -5% скорости",
+      "portrait": "res://assets/ui/portraits/snow.png",
+      "sprite": {
+        "path": "res://assets/heroes/snow.png",
+        "cells": 4,
+        "cell_w": 384,
+        "cell_h": 288,
+        "run": [
+          1,
+          2
+        ],
+        "shoulder": [
+          -6,
+          -146
+        ],
+        "arm": "res://assets/heroes/snow_arm.png",
+        "arm_scale": 0.26,
+        "arm_len": 100,
+        "arm_pivot_y": 54.5,
+        "arm_color": "#e6edf0"
+      },
+      "passive": {
+        "title": "Вечная мерзлота",
+        "text": "Враги рядом (170 px) постоянно замедлены на 28%"
+      },
+      "role": "Танк",
+      "lore": "Енот-альбинос из вечной мерзлоты под старым хладокомбинатом. Враги рядом с ним замедляются, а он доедает пломбир. В «Особой Семёрке» держал оборону: на «Холодном складе» простоял в морозильнике двое суток и вышел с мороженым.",
+      "quote": "Холодный расчёт. Горячие пули.",
+      "skill": {
+        "id": "ice_dome",
+        "title": "Ледяной купол",
+        "cooldown": 22.0,
+        "text": "Купол мерзлоты на 4 с: враги внутри замирают, а потом надолго замедлены. Фрост под куполом получает щит.",
+        "color": "#8fdcff"
+      },
+      "story_unlock": "m4"
+    },
+    {
+      "id": "night",
+      "title": "Эйден «Шэдоу»",
+      "description": "Бьёт точно. Живёт быстро.",
+      "currency": "nuts",
+      "price": 4500,
+      "recolor": {
+        "fur": [
+          "#060509",
+          "#393247",
+          "#bdb3d0",
+          1.0,
+          0.07,
+          0.9
+        ],
+        "iris": [
+          "#1a2a00",
+          "#a8ff2e",
+          "#f2ffc8",
+          1.0,
+          0.06,
+          0.83
+        ]
+      },
+      "proportions": {
+        "head": [
+          -0.04,
+          -0.03
+        ],
+        "legs": [
+          0.0,
+          0.1
+        ],
+        "ears": [
+          0.0,
+          0.15
+        ]
+      },
+      "stats": {
+        "speed": 0.05,
+        "hp": -0.05,
+        "dash": 0.0,
+        "crit": 0.06
+      },
+      "traits": "+6% шанс крита, +5% скорость",
+      "portrait": "res://assets/ui/portraits/night.png",
+      "sprite": {
+        "path": "res://assets/heroes/night.png",
+        "cells": 4,
+        "cell_w": 384,
+        "cell_h": 288,
+        "run": [
+          1,
+          2
+        ],
+        "shoulder": [
+          4,
+          -128
+        ],
+        "arm": "res://assets/heroes/night_arm.png",
+        "arm_scale": 0.26,
+        "arm_len": 100,
+        "arm_pivot_y": 60,
+        "arm_color": "#403048"
+      },
+      "passive": {
+        "title": "Глаз-алмаз",
+        "text": "+10% шанса крита"
+      },
+      "role": "Убийца",
+      "lore": "Чёрный как мокрый асфальт. Выныривает из тени и исчезает раньше, чем крыса успеет пискнуть. В «Особой Семёрке» ходил в разведку: на «Ночи на Третьем кольце» ушёл первым и вернулся раньше всех.",
+      "quote": "Ты меня не видел. И не увидишь.",
+      "skill": {
+        "id": "assassin_hour",
+        "title": "Час убийцы",
+        "cooldown": 20.0,
+        "text": "На 4 с все выстрелы критуют, урон растёт, а первые полсекунды Шэдоу неуязвим.",
+        "color": "#b46bff"
+      },
+      "story_unlock": "m3"
+    },
+    {
+      "id": "neon_hopper",
+      "title": "Нэлл «Турбо»",
+      "description": "Самая быстрая на свалке.",
+      "currency": "nuts",
+      "price": 9000,
+      "portrait": "res://assets/ui/heroes/neon_hopper.png",
+      "recolor": {},
+      "proportions": {},
+      "stats": {
+        "speed": 0.12,
+        "hp": -0.1,
+        "dash": 0.0,
+        "crit": 0.0
+      },
+      "traits": "+12% скорость, рывок чаще, -10% здоровья",
+      "passive": {
+        "title": "Разгон",
+        "text": "+12% скорострельности"
+      },
+      "sprite": {
+        "path": "res://assets/heroes/neon_hopper.png",
+        "cells": 4,
+        "cell_w": 384,
+        "cell_h": 288,
+        "run": [
+          1,
+          2
+        ],
+        "shoulder": [
+          15,
+          -126
+        ],
+        "arm_len": 100,
+        "arm_color": "#5a2a38",
+        "arm": "res://assets/heroes/neon_hopper_arm.png",
+        "arm_scale": 0.26,
+        "arm_pivot_y": 54
+      },
+      "role": "Спидстер",
+      "lore": "Позывной «Турбо». Трижды выиграла подпольные гонки на ховер-рельсе и из боя выбегает раньше, чем в неё попадут. В «Особой Семёрке» Нэлл возила отряд на дело и с дела, ни разу не опоздала и ни разу не припарковалась нормально. Теперь сидит у Рико на связи и пьёт чай, но за руль возвращается, когда совсем жарко.",
+      "quote": "Быстрее пули? Пуля просто в пробке.",
+      "skill": {
+        "id": "rail_dash",
+        "title": "Рельсовый рывок",
+        "cooldown": 16.0,
+        "text": "Длинный рывок по рельсе: режет всех на пути и даёт секунду неуязвимости.",
+        "color": "#5cf3ff"
+      },
+      "story_unlock": "m6"
+    },
+    {
+      "id": "fluffy_chemist",
+      "title": "Фрэнк «Фаззи»",
+      "description": "Яд, облака и наука.",
+      "currency": "nuts",
+      "price": 9000,
+      "portrait": "res://assets/ui/heroes/fluffy_chemist.png",
+      "recolor": {},
+      "proportions": {},
+      "stats": {
+        "speed": 0.0,
+        "hp": 0.05,
+        "dash": 0.0,
+        "crit": 0.0
+      },
+      "traits": "+5% здоровья, яды по умолчанию",
+      "passive": {
+        "title": "Токсичная кровь",
+        "text": "20% попаданий отравляют, яд сильнее на 30%"
+      },
+      "sprite": {
+        "path": "res://assets/heroes/fluffy_chemist.png",
+        "cells": 4,
+        "cell_w": 384,
+        "cell_h": 288,
+        "run": [
+          1,
+          2
+        ],
+        "shoulder": [
+          20,
+          -108
+        ],
+        "arm_len": 100,
+        "arm_color": "#f2ede4",
+        "arm": "res://assets/heroes/fluffy_chemist_arm.png",
+        "arm_scale": 0.26,
+        "arm_pivot_y": 48.5
+      },
+      "role": "Поддержка",
+      "lore": "Кот-учёный, выгнанный из лаборатории за слишком яркие опыты. Уверен, что яд это лекарство. В большой дозе. В «Особой Семёрке» был полевым химиком: половину операций спас, вторую половину просто взорвал красиво.",
+      "quote": "Не дыши глубоко. Или дыши, мне нужны данные.",
+      "skill": {
+        "id": "toxic_flask",
+        "title": "Токсичная колба",
+        "cooldown": 20.0,
+        "text": "Бросает колбу в гущу врагов: облако яда на 6 с травит и замедляет всех внутри.",
+        "color": "#7dff5c"
+      },
+      "story_unlock": "m1"
+    },
+    {
+      "id": "pigeon_mafioso",
+      "title": "Тони «Дон»",
+      "description": "Томми-ган, шляпа, бомбовый дрон.",
+      "currency": "nuts",
+      "price": 9000,
+      "portrait": "res://assets/ui/heroes/pigeon_mafioso.png",
+      "recolor": {},
+      "proportions": {},
+      "stats": {
+        "speed": -0.05,
+        "hp": 0.15,
+        "dash": 0.0,
+        "crit": 0.1
+      },
+      "traits": "+15% здоровья, +10% крит, -5% скорости",
+      "passive": {
+        "title": "Контрольный выстрел",
+        "text": "Крит мгновенно убивает врага с здоровьем ниже 25% (кроме боссов)"
+      },
+      "sprite": {
+        "path": "res://assets/heroes/pigeon_mafioso.png",
+        "cells": 4,
+        "cell_w": 384,
+        "cell_h": 288,
+        "run": [
+          1,
+          2
+        ],
+        "shoulder": [
+          20,
+          -108
+        ],
+        "arm_len": 100,
+        "arm_color": "#34385a",
+        "arm": "res://assets/heroes/pigeon_mafioso_arm.png",
+        "arm_scale": 0.26,
+        "arm_pivot_y": 46.5
+      },
+      "role": "Стрелок",
+      "lore": "Небесный босс пригородных крыш. Устал от крысиных налётов и вышел на дело лично. В «Особой Семёрке» вёл переговоры: договорился с таможней «Золотой Утки» там, где не помогали пули.",
+      "quote": "Предложение, от которого не улететь.",
+      "skill": {
+        "id": "drone_strike",
+        "title": "Бомбовый налёт",
+        "cooldown": 24.0,
+        "text": "Дрон сбрасывает серию бомб по линии прицела. Метки видны за секунду до взрыва.",
+        "color": "#ffb347"
+      },
+      "story_unlock": "m2"
+    },
+    {
+      "id": "sniper_f",
+      "title": "Кейт «Мираж»",
+      "description": "Снайпер, дальний бой.",
+      "currency": "gems",
+      "price": 0,
+      "recolor": {},
+      "proportions": {},
+      "stats": {},
+      "traits": "Скоро в отряде",
+      "portrait": "res://assets/ui/portraits/soon_kate.png",
+      "passive": {
+        "title": "Скоро",
+        "text": "Герой в разработке. Следи за обновлениями."
+      },
+      "role": "Снайпер",
+      "lore": "Снайпер «Особой Семёрки». Спокойная, ироничная, с оптикой и шарфом. Её никогда не видели, зато всегда слышали выстрел. Скоро в отряде.",
+      "quote": "Я уже попала. Ты просто ещё не знаешь.",
+      "coming_soon": true
+    },
+    {
+      "id": "medic_f",
+      "title": "Лиза «Док»",
+      "description": "Лечит и подкалывает.",
+      "currency": "gems",
+      "price": 0,
+      "recolor": {},
+      "proportions": {},
+      "stats": {},
+      "traits": "Скоро в отряде",
+      "portrait": "res://assets/ui/portraits/soon_liza.png",
+      "passive": {
+        "title": "Скоро",
+        "text": "Герой в разработке. Следи за обновлениями."
+      },
+      "role": "Медик",
+      "lore": "Полевой медик «Особой Семёрки». Строгая, с красным крестом на разгрузке. Штопала всех, и Рико тоже, и ругалась при этом громче, чем он. Скоро в отряде.",
+      "quote": "Не геройствуй. Я устала тебя зашивать.",
+      "coming_soon": true
+    }
+  ]
 }

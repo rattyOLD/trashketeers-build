@@ -1068,6 +1068,19 @@ func select_character(character_id: String) -> void:
 		save_data()
 
 
+## Герои, которых открывает прохождение миссии. Выбранного героя не меняем. Возвращает id новых героев.
+func grant_story_heroes(mission_id: String) -> Array:
+	var gained: Array = []
+	for entry in CharacterDB.all():
+		var id := str(entry.get("id", ""))
+		if str(entry.get("story_unlock", "")) == mission_id and not owns_character(id):
+			(data["characters"] as Array).append(id)
+			gained.append(id)
+	if not gained.is_empty():
+		save_data()
+	return gained
+
+
 func buy_character(character_id: String) -> bool:
 	if not CharacterDB.has_character(character_id) or owns_character(character_id):
 		return false

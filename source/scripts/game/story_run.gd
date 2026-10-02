@@ -95,6 +95,13 @@ static func base_chapter_index(mission_id: String) -> int:
 	return 0
 
 
+static func mission_exists(mission_id: String) -> bool:
+	for entry in ConfigLoader.load_json(DATA_PATH).get("missions", []):
+		if str(entry.get("id", "")) == mission_id:
+			return true
+	return false
+
+
 ## Первая непройденная миссия (или последняя, если пройдены все).
 static func next_mission_id() -> String:
 	var last := "m1"
@@ -1007,6 +1014,9 @@ func finish() -> void:
 	SaveService.clear_story_resume()
 	var shards := int(mission.get("shards", 1))
 	SaveService.story_complete(str(mission.get("id", "")), shards, score + lives * LIFE_BONUS)
+	for hero_id in SaveService.grant_story_heroes(str(mission.get("id", ""))):
+		var hero := CharacterDB.get_character(str(hero_id))
+		game.hud.toast("НОВЫЙ ДРУГ В ОТРЯДЕ", str(hero.get("title", hero_id)), Color("#a6b84a"))
 	if not _captives.is_empty() and rescued >= _captives.size():
 		SaveService.add_stat("story_all_rescued", 1, false)
 	if flawless():
