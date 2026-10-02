@@ -15,6 +15,7 @@ var _stats_rows: VBoxContainer
 var _tip_card: PanelContainer
 var _tip_label: Label
 var _upgrade_button: Button
+var _mood_slot: VBoxContainer
 
 
 func _init() -> void:
@@ -47,6 +48,8 @@ func _init() -> void:
 	_subtitle = UiStyle.label("", 22, UiStyle.TEXT, 6)
 	_subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_box.add_child(_subtitle)
+	_mood_slot = VBoxContainer.new()
+	_box.add_child(_mood_slot)
 
 	_stats_card = PanelContainer.new()
 	_stats_card.add_theme_stylebox_override("panel", UiStyle.box(UiStyle.PANEL_LIGHT, UiStyle.OUTLINE, 3, 20))
@@ -93,6 +96,9 @@ func open(victory: bool, lines: PackedStringArray, title: String = "", can_upgra
 	_title.add_theme_color_override("font_color", UiStyle.GOLD if victory else UiStyle.DANGER)
 	_subtitle.text = lines[0] if not lines.is_empty() else ""
 	_subtitle.visible = not _subtitle.text.is_empty()
+	for old in _mood_slot.get_children():
+		old.queue_free()
+	_mood_slot.add_child(HeroMoodCard.new(SaveService.get_character(), victory))
 	for child in _stats_rows.get_children():
 		child.queue_free()
 	var notes: Array[String] = []

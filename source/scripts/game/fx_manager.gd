@@ -134,6 +134,7 @@ var _fc_tint := PackedColorArray()
 var _fc_next := 0
 ## Вспышки-спрайты (взрыв бочки, брызги шампанского): растут и тают.
 const SPRITE_FLASH_POOL := 22
+const SWEEP_POOL := 4
 const CASING_POOL := 16
 const CASING_LIFE := 0.7
 const CASING_TEX := {
@@ -147,6 +148,14 @@ var _cs_life := PackedFloat32Array()
 var _cs_spin := PackedFloat32Array()
 var _cs_next := 0
 var _sf_nodes: Array[Sprite2D] = []
+var _sw_nodes: Array[Sprite2D] = []
+var _sw_life := PackedFloat32Array()
+var _sw_total := PackedFloat32Array()
+var _sw_dir := PackedFloat32Array()
+var _sw_side := PackedFloat32Array()
+var _sw_arc := PackedFloat32Array()
+var _sw_scale := PackedFloat32Array()
+var _sw_next := 0
 var _sf_life := PackedFloat32Array()
 var _sf_total := PackedFloat32Array()
 var _sf_base := PackedFloat32Array()
@@ -204,6 +213,18 @@ func _init() -> void:
 		flash_sprite.visible = false
 		add_child(flash_sprite)
 		_sf_nodes.append(flash_sprite)
+
+	for i in SWEEP_POOL:
+		var sweep := Sprite2D.new()
+		sweep.visible = false
+		add_child(sweep)
+		_sw_nodes.append(sweep)
+	_sw_life.resize(SWEEP_POOL)
+	_sw_total.resize(SWEEP_POOL)
+	_sw_dir.resize(SWEEP_POOL)
+	_sw_side.resize(SWEEP_POOL)
+	_sw_arc.resize(SWEEP_POOL)
+	_sw_scale.resize(SWEEP_POOL)
 
 	_cs_vel.resize(CASING_POOL)
 	_cs_life.resize(CASING_POOL)
@@ -275,6 +296,28 @@ func sprite_flash(texture: Texture2D, at: Vector2, width: float, life: float, an
 	node.visible = true
 	_sf_life[k] = life
 	_sf_total[k] = life
+
+
+## След взмаха: проявляется вслед за клинком, догоняет его по дуге и тает. origin — лапа енота, size — диаметр рисунка.
+func slash_sweep(texture: Texture2D, origin: Vector2, direction: Vector2, size: float, life: float, side: float, arc: float) -> void:
+	if texture == null:
+		return
+	var k := _sw_next
+	_sw_next = (_sw_next + 1) % SWEEP_POOL
+	var node := _sw_nodes[k]
+	node.texture = texture
+	node.global_position = origin
+	node.offset = Vector2(-size * 0.275, 0.0) / maxf(size / texture.get_size().x, 0.001)
+	_sw_scale[k] = size / maxf(texture.get_size().x, 1.0)
+	_sw_dir[k] = direction.angle() + PI
+	_sw_side[k] = side
+	_sw_arc[k] = arc
+	_sw_life[k] = life
+	_sw_total[k] = life
+	node.rotation = _sw_dir[k] - side * arc * 0.3
+	node.scale = Vector2(1.0, side) * _sw_scale[k] * 0.85
+	node.modulate = Color(1, 1, 1, 0)
+	node.visible = true
 
 
 ## Гильза вылетает вправо от направления стрельбы, кувыркается и гаснет. Пул маленький: самое старое перезаписывается.
@@ -530,6 +573,20 @@ func _process(delta: float) -> void:
 		var t := 1.0 - _sf_life[i] / _sf_total[i]
 		node.scale = Vector2(1.0, _sf_flip[i]) * _sf_base[i] * (0.7 + 0.55 * (1.0 - pow(1.0 - t, 3.0)))
 		node.modulate.a = clampf((1.0 - t) * 1.6, 0.0, 1.0)
+	for i in SWEEP_POOL:
+		if _sw_life[i] <= 0.0:
+			continue
+		_sw_life[i] -= delta
+		var sn := _sw_nodes[i]
+		if _sw_life[i] <= 0.0:
+			sn.visible = false
+			continue
+		var u := 1.0 - _sw_life[i] / _sw_total[i]
+		var lead := clampf(u * 1.15, 0.0, 1.0)
+		var eased := lead * lead * (3.0 - 2.0 * lead)
+		sn.rotation = _sw_dir[i] + _sw_side[i] * _sw_arc[i] * 0.3 * lerpf(-1.0, 1.0, eased)
+		sn.scale = Vector2(1.0, _sw_side[i]) * _sw_scale[i] * lerpf(0.85, 1.05, eased)
+		sn.modulate.a = smoothstep(0.0, 0.2, u) * (1.0 - smoothstep(0.45, 1.0, u))
 	for i in CASING_POOL:
 		if _cs_life[i] <= 0.0:
 			continue

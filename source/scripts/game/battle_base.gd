@@ -464,7 +464,8 @@ func _on_melee_swing(weapon: WeaponData, origin: Vector2, direction: Vector2, _c
 	if slash == null:
 		return
 	var reach := weapon.melee_reach * (1.15 if heavy else 1.0)
-	fx.sprite_flash(slash, origin + direction * reach * 0.5, reach * 2.0, 0.16 + 0.03 * weapon.weight, direction.angle() + PI, Vector2(0.5, 0.5), side)
+	var visual := reach * WeaponVfx.slash_scale(weapon)
+	fx.slash_sweep(slash, origin, direction, visual * 2.0, 0.26 + 0.035 * weapon.weight, side, weapon.arc_rad)
 
 
 func _on_melee_hit(weapon: WeaponData, at: Vector2, count: int, finisher: bool, heavy: bool) -> void:

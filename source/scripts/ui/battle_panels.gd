@@ -366,6 +366,7 @@ class RunResultPanel:
 	var _double_button: Button
 	var _reward_coins := 0
 	var _reward_gems := 0
+	var _mood_slot: VBoxContainer
 
 	func _init(coin_icon: Texture2D) -> void:
 		_coin_icon = coin_icon
@@ -401,6 +402,8 @@ class RunResultPanel:
 		_subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		_subtitle.custom_minimum_size = Vector2(520, 0)
 		box.add_child(_subtitle)
+		_mood_slot = VBoxContainer.new()
+		box.add_child(_mood_slot)
 
 		var grid := GridContainer.new()
 		grid.columns = 3
@@ -509,6 +512,9 @@ class RunResultPanel:
 			line += " · боссов: %d" % bosses
 		var friend_line := str(summary.get("friend", ""))
 		_subtitle.text = line if friend_line.is_empty() else line + "\n" + friend_line
+		for old in _mood_slot.get_children():
+			old.queue_free()
+		_mood_slot.add_child(HeroMoodCard.new(SaveService.get_character(), bosses > 0 or record, HeroMoodCard.summary_line(summary)))
 		(_tiles["wave"] as StatTile).count_to(int(summary.get("wave", 0)), 0.15)
 		(_tiles["kills"] as StatTile).count_to(int(summary.get("kills", 0)), 0.25)
 		(_tiles["level"] as StatTile).count_to(int(summary.get("level", 1)), 0.35)
