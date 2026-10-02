@@ -906,13 +906,21 @@ static func _load_any(image: Image, bytes: PackedByteArray, mime: String) -> boo
 
 ## ---- Мелочи ----
 
+## Один тап приходит дважды: как касание и как эмулированная мышь. Раньше оба открывали просмотр, а второй тут же
+## закрывал его (картинки «не нажимались»). Считаем только мышь/эмуляцию и не пускаем повтор в течение 250 мс.
+static var _last_tap_ms := 0
+
 static func _tapped(event: InputEvent) -> bool:
-	if event is InputEventMouseButton:
-		var mouse := event as InputEventMouseButton
-		return mouse.pressed and mouse.button_index == MOUSE_BUTTON_LEFT
-	if event is InputEventScreenTouch:
-		return (event as InputEventScreenTouch).pressed
-	return false
+	if not event is InputEventMouseButton:
+		return false
+	var mouse := event as InputEventMouseButton
+	if not mouse.pressed or mouse.button_index != MOUSE_BUTTON_LEFT:
+		return false
+	var now := Time.get_ticks_msec()
+	if now - _last_tap_ms < 250:
+		return false
+	_last_tap_ms = now
+	return true
 
 
 static func _sticker_texture(id: String) -> Texture2D:
