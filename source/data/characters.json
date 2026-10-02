@@ -108,7 +108,8 @@
     "arm": "res://assets/heroes/red_panda_arm.png",
     "arm_scale": 0.26,
     "arm_len": 100,
-    "arm_pivot_y": 55
+    "arm_pivot_y": 55,
+    "arm_color": "#4a4a58"
    },
    "passive": {
     "title": "Жар",
@@ -187,7 +188,8 @@
     "arm": "res://assets/heroes/snow_arm.png",
     "arm_scale": 0.26,
     "arm_len": 100,
-    "arm_pivot_y": 54.5
+    "arm_pivot_y": 54.5,
+    "arm_color": "#e6edf0"
    },
    "passive": {
     "title": "Вечная мерзлота",
@@ -266,7 +268,8 @@
     "arm": "res://assets/heroes/night_arm.png",
     "arm_scale": 0.26,
     "arm_len": 100,
-    "arm_pivot_y": 60
+    "arm_pivot_y": 60,
+    "arm_color": "#403048"
    },
    "passive": {
     "title": "Глаз-алмаз",
@@ -317,7 +320,7 @@
      -126
     ],
     "arm_len": 100,
-    "arm_color": "#4a4a55",
+    "arm_color": "#5a2a38",
     "arm": "res://assets/heroes/neon_hopper_arm.png",
     "arm_scale": 0.26,
     "arm_pivot_y": 54
@@ -367,7 +370,7 @@
      -108
     ],
     "arm_len": 100,
-    "arm_color": "#4a4a55",
+    "arm_color": "#f2ede4",
     "arm": "res://assets/heroes/fluffy_chemist_arm.png",
     "arm_scale": 0.26,
     "arm_pivot_y": 48.5
@@ -417,7 +420,7 @@
      -108
     ],
     "arm_len": 100,
-    "arm_color": "#4a4a55",
+    "arm_color": "#34385a",
     "arm": "res://assets/heroes/pigeon_mafioso_arm.png",
     "arm_scale": 0.26,
     "arm_pivot_y": 46.5

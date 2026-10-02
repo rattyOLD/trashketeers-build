@@ -882,6 +882,18 @@ func _hero_arm_texture() -> Texture2D:
 	return _hero_textures[path]
 
 
+## Плечо: рукав и круглая «шапка» у плеча под рисунком руки, чтобы рука не висела в воздухе при качании кадров.
+func _draw_shoulder_cap(shoulder: Vector2, paw: Vector2) -> void:
+	var sleeve := Color(str(_hero_cfg.get("arm_color", "#4a4a55")))
+	var k := absf(_sprite_xform().get_scale().x)
+	var dir := (paw - shoulder)
+	var stub := shoulder + dir * 0.35
+	_gun_layer.draw_line(shoulder, stub, OUTLINE, 17.0 * k, true)
+	_gun_layer.draw_line(shoulder, stub, sleeve, 12.0 * k, true)
+	_gun_layer.draw_circle(shoulder, 9.5 * k, OUTLINE)
+	_gun_layer.draw_circle(shoulder, 7.0 * k, sleeve)
+
+
 func _draw_hero_arm(tex: Texture2D, shoulder: Vector2, paw: Vector2) -> void:
 	var dir := paw - shoulder
 	var k := float(_hero_cfg.get("arm_scale", 0.26)) * absf(_sprite_xform().get_scale().x)
@@ -917,6 +929,7 @@ func _draw_gun_layer() -> void:
 		var shoulder := _sprite_xform() * _hero_shoulder
 		var arm_tex := _hero_arm_texture()
 		if arm_tex != null:
+			_draw_shoulder_cap(shoulder, paw)
 			_draw_hero_arm(arm_tex, shoulder, paw)
 		else:
 			var sleeve := Color(str(_hero_cfg.get("arm_color", "#4a4a55")))
