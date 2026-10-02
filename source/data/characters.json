@@ -25,6 +25,7 @@
    "lore": "Знает каждую щель на Неоновой Свалке. Крысы зовут его Бродягой и только шёпотом.",
    "sprite": {
     "path": "res://assets/heroes/raccoon_hero.png",
+    "clips": "res://assets/heroes/raccoon_",
     "cells": 4,
     "cell_w": 384,
     "cell_h": 288,
