@@ -12,6 +12,13 @@ const HUB_ICONS := {
 	"trophy": "res://assets/ui/hub/achievements.png",
 	"upgrade": "res://assets/ui/hub/upgrade.png",
 	"coin": "res://assets/ui/hub/coin.png",
+	"pause": "res://assets/ui/hud/pause.png",
+	"clock": "res://assets/ui/hud/timer.png",
+	"skull": "res://assets/ui/hud/enemies.png",
+	"dash": "res://assets/ui/hud/dash.png",
+	"reload": "res://assets/ui/hud/reload.png",
+	"minimap": "res://assets/ui/hud/minimap.png",
+	"coin_cap": "res://assets/ui/hud/coin_cap.png",
 }
 const NEONITE := Color("#c77dff")
 
