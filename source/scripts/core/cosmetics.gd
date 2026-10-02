@@ -96,6 +96,15 @@ static func frame_color() -> Color:
 	return color_of(key) if owned().has(key) else Color.TRANSPARENT
 
 
+## Нарисованная рамка аватара (Астра) для надетой рамки; null — нет рамки или арта.
+static func frame_art() -> Texture2D:
+	var key := str(SaveService.data.get("frame", ""))
+	if not owned().has(key):
+		return null
+	var path := "res://assets/ui/frames/%s.png" % key.get_slice(":", 1)
+	return load(path) as Texture2D if ResourceLoader.exists(path) else null
+
+
 static func nick_color(fallback: Color) -> Color:
 	var key := str(SaveService.data.get("nick_color", ""))
 	return color_of(key) if owned().has(key) else fallback

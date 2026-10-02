@@ -225,7 +225,11 @@ class Avatar:
 		if tex != null:
 			Avatar.draw_round(self, tex, c, r - 5.0)
 		var frame := Cosmetics.frame_color()
-		if frame.a > 0.0:
+		var frame_art := Cosmetics.frame_art()
+		if frame_art != null:
+			var big := size * 1.3
+			draw_texture_rect(frame_art, Rect2(c - big * 0.5, big), false)
+		elif frame.a > 0.0:
 			draw_arc(c, r - 2.0, 0.0, TAU, 40, Color(frame, 0.35), 9.0, true)
 			draw_arc(c, r - 2.0, 0.0, TAU, 40, frame, 5.0, true)
 		else:
