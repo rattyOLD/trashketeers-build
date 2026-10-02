@@ -24,7 +24,7 @@ const CHEER_TIME := 0.9
 const KICK_DECAY := 14.0
 const AIM_SMOOTH := 20.0
 const TEXTURE_PATH := "res://assets/player/raccoon.png"
-const CLIP_GRIP_LIFT := 3.0
+const CLIP_GRIP_LIFT := -4.0
 const ARM_PATH := "res://assets/player/raccoon_arm.png"
 const OVERLAY_DIR := "res://assets/skins/"
 ## Текстуры хранятся ~3x к миру для чёткости на экранах телефонов: в мире енот ~100 px в высоту.
@@ -814,12 +814,18 @@ func _gun_center(paw: Vector2, dir: Vector2, kick_amount: float) -> Vector2:
 
 ## Размер оружия в руке: лесенка по длине рисунка (пистолет < ПП < автомат < пулемёт < снайперка < рельсотрон)
 ## и по классу в ближнем бою (нож < меч < топор < молот).
-const GUN_LADDER := [[56.0, 1.35], [70.0, 1.55], [84.0, 1.85], [94.0, 2.0], [100.0, 2.05], [130.0, 2.1]]
-const MELEE_HELD := {"melee_knife": 1.15, "melee_pigeon": 1.15, "melee_shield": 1.45, "melee_crowbar": 1.6, "melee_fireaxe": 1.75,
-	"melee_iceaxe": 1.75, "melee_katana": 1.6, "melee_junkblade": 1.7, "melee_sledge": 2.0, "melee_graviton": 2.0}
+const GUN_LADDER := [[56.0, 1.15], [70.0, 1.25], [84.0, 1.45], [88.0, 1.42], [94.0, 1.45], [100.0, 1.5], [130.0, 1.23]]
+const MELEE_HELD := {"melee_knife": 1.1, "melee_pigeon": 1.1, "melee_shield": 1.3, "melee_crowbar": 1.4, "melee_fireaxe": 1.5,
+	"melee_iceaxe": 1.5, "melee_katana": 1.4, "melee_junkblade": 1.45, "melee_sledge": 1.7, "melee_graviton": 1.7}
+
+
+## Громоздкие рисунки (толстый ствол при той же длине) подгоняем под автомат.
+const GUN_OVERRIDE := {"shotgun": 1.2, "pump": 1.25, "lmg": 1.38, "heavy_barrel": 1.3, "launcher": 1.15, "mortar": 1.15}
 
 
 func _ladder_mult() -> float:
+	if GUN_OVERRIDE.has(String(weapon_icon)):
+		return float(GUN_OVERRIDE[String(weapon_icon)])
 	var length := WeaponIcons.length_of(weapon_icon)
 	var prev: Array = GUN_LADDER[0]
 	if length <= float(prev[0]):
