@@ -22,11 +22,65 @@ const ENTRIES := [
 	["", "???", "never", 0, "Недоступно"],
 ]
 
+const CUSTOM := "custom"
+const CUSTOM_SIDE := 160
+const MAX_PHOTO := 12 * 1024 * 1024
+
 static var _cache: Dictionary = {}
+static var _custom_src := ""
+static var _custom_tex: ImageTexture = null
+
+
+## Своё фото игрока: квадрат CUSTOM_SIDE, лежит в сохранении как base64 JPEG.
+static func custom_texture() -> Texture2D:
+	var raw := str(SaveService.data.get("avatar_custom", ""))
+	if raw.is_empty():
+		return null
+	if raw == _custom_src and _custom_tex != null:
+		return _custom_tex
+	var image := Image.new()
+	if image.load_jpg_from_buffer(Marshalls.base64_to_raw(raw)) != OK:
+		return null
+	_custom_src = raw
+	_custom_tex = ImageTexture.create_from_image(image)
+	return _custom_tex
+
+
+## Файл с телефона → квадратная миниатюра. true — фото принято.
+static func store_photo(info: Dictionary) -> bool:
+	var bytes := Marshalls.base64_to_raw(str(info.get("data", "")))
+	var image := Image.new()
+	var type := str(info.get("type", "")).to_lower()
+	var err := ERR_FILE_UNRECOGNIZED
+	if type.contains("png"):
+		err = image.load_png_from_buffer(bytes)
+	elif type.contains("webp"):
+		err = image.load_webp_from_buffer(bytes)
+	else:
+		err = image.load_jpg_from_buffer(bytes)
+		if err != OK:
+			err = image.load_png_from_buffer(bytes)
+		if err != OK:
+			err = image.load_webp_from_buffer(bytes)
+	if err != OK or image.is_empty():
+		return false
+	if image.is_compressed():
+		image.decompress()
+	image.convert(Image.FORMAT_RGB8)
+	var side := mini(image.get_width(), image.get_height())
+	var square := image.get_region(Rect2i((image.get_width() - side) / 2, (image.get_height() - side) / 2, side, side))
+	square.resize(CUSTOM_SIDE, CUSTOM_SIDE, Image.INTERPOLATE_LANCZOS)
+	SaveService.data["avatar_custom"] = Marshalls.raw_to_base64(square.save_jpg_to_buffer(0.88))
+	SaveService.data["avatar"] = CUSTOM
+	SaveService.save_data()
+	return true
+
 
 
 ## Портрет как ImageTexture: сжатые текстуры в полигонах с UV на некоторых GPU рисуются белыми.
 static func portrait_texture(path: String) -> Texture2D:
+	if path == CUSTOM:
+		return custom_texture()
 	if _cache.has(path):
 		return _cache[path]
 	if not ResourceLoader.exists(path):
@@ -41,6 +95,7 @@ static func portrait_texture(path: String) -> Texture2D:
 
 var _grid: GridContainer
 var _hint: Label
+var _waiting := false
 
 
 func _init() -> void:
@@ -49,12 +104,40 @@ func _init() -> void:
 	_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_hint.custom_minimum_size = Vector2(panel_width() - 70.0, 0)
 	content.add_child(_hint)
+	var upload := UiStyle.button("СВОЁ ФОТО С ТЕЛЕФОНА", UiStyle.NEON.darkened(0.45), 28, Vector2(0, 84))
+	upload.pressed.connect(func() -> void:
+		SoundManager.play(&"ui_click")
+		_waiting = true
+		_hint.text = "Выбери фото…"
+		Platform.pick_file("image/*", MAX_PHOTO))
+	content.add_child(upload)
+	set_process(true)
 	var list := MenuPopups.scroll_list(content)
 	_grid = GridContainer.new()
 	_grid.columns = COLUMNS
 	_grid.add_theme_constant_override("h_separation", 12)
 	_grid.add_theme_constant_override("v_separation", 12)
 	list.add_child(_grid)
+
+
+func _process(_delta: float) -> void:
+	if not _waiting:
+		return
+	var picked_file: Variant = Platform.pick_file_result()
+	if picked_file == null:
+		return
+	_waiting = false
+	var info: Dictionary = picked_file
+	if info.is_empty():
+		_hint.text = "Фото не выбрано."
+	elif bool(info.get("too_big", false)):
+		_hint.text = "Фото слишком большое (до 12 МБ)."
+	elif store_photo(info):
+		SoundManager.play(&"ui_confirm", -6.0)
+		picked.emit()
+		close()
+	else:
+		_hint.text = "Не получилось прочитать фото. Пришли JPG или PNG."
 
 
 func _refresh() -> void:

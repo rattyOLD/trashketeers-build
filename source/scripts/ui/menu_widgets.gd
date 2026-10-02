@@ -226,18 +226,34 @@ class Avatar:
 			Avatar.draw_round(self, tex, c, r - 5.0)
 		var frame := Cosmetics.frame_color()
 		var frame_art := Cosmetics.frame_art()
-		if frame_art != null:
-			var big := size * 1.3
-			draw_texture_rect(frame_art, Rect2(c - big * 0.5, big), false)
-		elif frame.a > 0.0:
-			draw_arc(c, r - 2.0, 0.0, TAU, 40, Color(frame, 0.35), 9.0, true)
-			draw_arc(c, r - 2.0, 0.0, TAU, 40, frame, 5.0, true)
-		else:
-			draw_arc(c, r - 2.0, 0.0, TAU, 40, UiStyle.NEON, 3.0, true)
-		var ring := Insider.frame_texture(SaveService.get_insider())
-		if ring != null:
-			var big := size * 1.34
-			draw_texture_rect(ring, Rect2(c - big * 0.5, big), false)
+		if frame_art == null:
+			if frame.a > 0.0:
+				draw_arc(c, r - 2.0, 0.0, TAU, 40, Color(frame, 0.35), 9.0, true)
+				draw_arc(c, r - 2.0, 0.0, TAU, 40, frame, 5.0, true)
+			else:
+				draw_arc(c, r - 2.0, 0.0, TAU, 40, UiStyle.NEON, 3.0, true)
+		_overlay(0, frame_art, c, size * 1.3)
+		_overlay(1, Insider.frame_texture(SaveService.get_insider()), c, size * 1.34)
+
+	## Арт рамок живёт в дочерних TextureRect: draw_texture_rect после полигона с UV на части GPU
+	## (iOS) заливает весь прямоугольник белым.
+	var _layers: Array[TextureRect] = [null, null]
+
+	func _overlay(slot: int, tex: Texture2D, center: Vector2, big: Vector2) -> void:
+		var layer := _layers[slot]
+		if layer == null:
+			layer = TextureRect.new()
+			layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			layer.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			layer.stretch_mode = TextureRect.STRETCH_SCALE
+			add_child(layer)
+			_layers[slot] = layer
+		layer.visible = tex != null
+		if tex == null:
+			return
+		layer.texture = tex
+		layer.position = center - big * 0.5
+		layer.size = big
 
 	## Картинка строго внутри круга: полигон с UV вместо квадрата, чтобы углы не вылезали за рамку.
 	static func draw_round(item: CanvasItem, tex: Texture2D, center: Vector2, radius: float) -> void:
