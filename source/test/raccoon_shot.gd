@@ -8,7 +8,8 @@ func _ready() -> void:
 	bg.color = Color("#2a2540")
 	bg.size = Vector2(720, 400)
 	add_child(bg)
-	var poses := [[Vector2.ZERO, Vector2(1, 0), "rifle"], [Vector2.ZERO, Vector2(1, -0.9), "rifle"], [Vector2.ZERO, Vector2(1, 0.9), "rifle"], [Vector2(230, 0), Vector2(-1, -0.2), "pistol"]]
+	var ws := (OS.get_environment("SHOT_W") if OS.get_environment("SHOT_W") != "" else "rifle,rifle,rifle,pistol").split(",")
+	var poses := [[Vector2.ZERO, Vector2(1, 0), ws[0]], [Vector2.ZERO, Vector2(1, -0.9), ws[1]], [Vector2.ZERO, Vector2(1, 0.9), ws[2]], [Vector2(230, 0), Vector2(-1, -0.2), ws[3]]]
 	for i in poses.size():
 		var v := RaccoonVisual.new()
 		v.position = Vector2(90 + i * 170, 250)

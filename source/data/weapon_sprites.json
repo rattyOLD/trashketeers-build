@@ -39,18 +39,18 @@
    "icon": "smg",
    "texture": "res://assets/weapons/smg.png",
    "size": [
-    177,
-    110
+    150,
+    102
    ],
    "grip": [
-    66.1,
-    74.8
+    30.0,
+    61.2
    ],
    "muzzle": [
-    176.0,
-    38.6
+    149.0,
+    32.6
    ],
-   "length": 74
+   "length": 70
   },
   {
    "icon": "rifle",
@@ -90,33 +90,33 @@
    "icon": "sniper",
    "texture": "res://assets/weapons/sniper.png",
    "size": [
-    170,
-    110
+    190,
+    67
    ],
    "grip": [
-    68.8,
-    74.8
+    38.0,
+    48.2
    ],
    "muzzle": [
-    169.0,
-    27.9
+    189.0,
+    26.8
    ],
-   "length": 86
+   "length": 100
   },
   {
    "icon": "lmg",
    "texture": "res://assets/weapons/lmg.png",
    "size": [
-    199,
-    85
+    190,
+    106
    ],
    "grip": [
-    59.0,
-    57.8
+    41.8,
+    61.5
    ],
    "muzzle": [
-    198.0,
-    38.2
+    189.0,
+    29.7
    ],
    "length": 92
   },
@@ -612,6 +612,23 @@
     139.6
    ],
    "length": 56
+  },
+  {
+   "icon": "flamer",
+   "texture": "res://assets/weapons/flamer.png",
+   "size": [
+    190,
+    110
+   ],
+   "grip": [
+    28.5,
+    85.8
+   ],
+   "muzzle": [
+    189.0,
+    57.2
+   ],
+   "length": 84
   }
  ]
 }
