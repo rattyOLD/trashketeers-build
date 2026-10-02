@@ -57,10 +57,10 @@ static func default_config(left_handed: bool = false) -> Dictionary:
 		"layout": {
 			"dash": {"x": cx, "y": 0.74, "s": 1.0},
 			"slots": {"x": cx, "y": 0.54, "s": 1.0},
-			"interact": {"x": 0.5, "y": 0.62, "s": 1.0},
+			"interact": {"x": 0.5, "y": 0.46, "s": 1.0},
 		},
 		"hud": {},
-		"layout_v": 7,
+		"layout_v": 8,
 		"keys": {},
 		"presets": {},
 	}
@@ -108,6 +108,12 @@ static func config() -> Dictionary:
 		var closer: Dictionary = layout["interact"]
 		if is_equal_approx(float(closer["y"]), 0.8):
 			closer["y"] = 0.62
+	if int(stored.get("layout_v", 1)) < 8:
+		stored["layout_v"] = 8
+		# Ещё выше: кнопка над подписью оружия и ником енота, а не под ними.
+		var above: Dictionary = layout["interact"]
+		if is_equal_approx(float(above["y"]), 0.62) or is_equal_approx(float(above["y"]), 0.8):
+			above["y"] = 0.46
 	return stored
 
 
