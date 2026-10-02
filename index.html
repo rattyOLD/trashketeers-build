@@ -494,7 +494,7 @@ html, body {
 </script>
 
 <script>
-window.__trash_build = {label: 'v35.325', time: '03.10 01:37'};
+window.__trash_build = {label: 'v35.326', time: '03.10 01:42'};
 document.getElementById('ver').textContent = 'Версия ' + window.__trash_build.label + ' · сборка от ' + window.__trash_build.time;
 </script>
 <script>
@@ -559,7 +559,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	// index.wasm / index.pck и отдаём ему уже скачанные и распакованные байты.
 	const FILES = {
 		wasm: { parts: [{url:"raccoon.core.0.wasm?h=4cbe7e5f476b",bytes:5221065},{url:"raccoon.core.1.wasm?h=a8fbc151befa",bytes:4165384}] },
-		pck: { parts: [{url:"raccoon.pack.0.wasm?h=702618f3365f",bytes:11979902},{url:"raccoon.pack.1.wasm?h=6f74f0cc7832",bytes:12556694},{url:"raccoon.pack.2.wasm?h=39acbf5724d3",bytes:12534643},{url:"raccoon.pack.3.wasm?h=c1a0cd8c21d4",bytes:1906296}] },
+		pck: { parts: [{url:"raccoon.pack.0.wasm?h=b75e2be3bab0",bytes:11979919},{url:"raccoon.pack.1.wasm?h=572d1b1d2148",bytes:12556675},{url:"raccoon.pack.2.wasm?h=4e7f1b35535f",bytes:12534626},{url:"raccoon.pack.3.wasm?h=374e41f6af04",bytes:1906275}] },
 	};
 	const GODOT_CONFIG = {
 		args: [],
@@ -592,7 +592,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 
 	// Адрес сбора отчётов о вылетах (Google Apps Script / Supabase и т.п.); пусто — отчёты не отправляются.
 	const REPORT_URL = 'https://script.google.com/macros/s/AKfycbxVyy-SnRANW0Im-1Blne2TcUbca93WqzyBulpADwWWD7YH6x3KIygBYImTe8VfP5pp/exec';
-	const BUILD_ID_REPORT = '1790966244';
+	const BUILD_ID_REPORT = '1790966540';
 	const SESSION_ID = Math.random().toString(36).slice(2, 8);
 	const SESSION_START = Date.now();
 	const REPORT_CAP = 250;
@@ -809,7 +809,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	window.trkReport('session_start', gpuInfo() + ' | ' + navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + (window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio) + ' | screen ' + screen.width + 'x' + screen.height + ' | cores ' + (navigator.hardwareConcurrency || '?'));
 
 	// Вкладка могла висеть со старой версией: при возврате в неё сверяем номер сборки и предлагаем обновиться.
-	const BUILD_ID = '1790966244';
+	const BUILD_ID = '1790966540';
 	// Важное обновление: старая сборка дальше не работает, иначе аккаунты и сохранения ломаются старым кодом.
 	function blockOldBuild(v) {
 		const wall = document.createElement('div');
