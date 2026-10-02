@@ -61,7 +61,7 @@ func _online_plate() -> Control:
 
 func _refresh() -> void:
 	_balance.text = "Баланс: " + SaveService.format_coins(SaveService.get_nuts())
-	var resume := SaveService.story_resume("m1")
+	var resume := SaveService.story_resume(StoryRun.next_mission_id())
 	_resume.visible = not resume.is_empty()
 	if not resume.is_empty():
 		_resume.text = ("ПРОДОЛЖИТЬ: У ДВЕРИ БОССА · ЖИЗНИ %d" % int(resume.get("lives", 3))) if bool(resume.get("boss_door", false)) else ("ПРОДОЛЖИТЬ: ЗОНА %d · ЖИЗНИ %d" % [int(resume.get("zone", 0)) + 1, int(resume.get("lives", 3))])

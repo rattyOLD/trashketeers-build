@@ -122,7 +122,7 @@ func start(_weapon_id: StringName = &"") -> void:
 	layers.decals.add_child(pickups)
 	var chapter := ContentDB.get_chapter(0)
 	if not story_mission.is_empty():
-		chapter = StoryRun.map_chapter(chapter, story_mission)
+		chapter = StoryRun.map_chapter(ContentDB.get_chapter(StoryRun.base_chapter_index(story_mission)), story_mission)
 	map.build(layers, chapter)
 
 	meta_enabled = story_mission.is_empty()
@@ -707,7 +707,7 @@ func _on_enemy_fx(_enemy: Enemy, kind: String, at: Vector2, radius: float) -> vo
 func _on_boss_phase(boss: Enemy, phase: int) -> void:
 	if phase < 2:
 		return
-	if story != null and boss.data.boss_pattern == "overlord":
+	if story != null and not director.is_mini_wave():
 		story.on_boss_phase(phase)
 	hud.set_boss_fury()
 	var text := "МЕХ РАЗБИТ! МАГНАТ В ЯРОСТИ"

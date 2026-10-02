@@ -355,7 +355,7 @@ func _start_story(weapon_id: StringName) -> void:
 	Orient.refresh(get_window())
 	_with_loading(BATTLE_RESOURCES, func() -> void:
 		var game := Game.new()
-		game.story_mission = "m1"
+		game.story_mission = _debug_hash.get_slice(":", 1) if _debug_hash in ["story:m1", "story:m2"] else StoryRun.next_mission_id()
 		game.exit_requested.connect(_show_menu, CONNECT_DEFERRED)
 		game.restart_requested.connect(_start_story.bind(weapon_id), CONNECT_DEFERRED)
 		_swap_screen(game)

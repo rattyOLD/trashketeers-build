@@ -87,6 +87,44 @@ var _idle_pos := Vector2.ZERO
 var _last_idle_line := -1
 
 
+## Индекс главы-основы карты: у каждой миссии свой биом (M1 свалка, M2 банк).
+static func base_chapter_index(mission_id: String) -> int:
+	for entry in ConfigLoader.load_json(DATA_PATH).get("missions", []):
+		if str(entry.get("id", "")) == mission_id:
+			return int(entry.get("base_chapter", 0))
+	return 0
+
+
+## Первая непройденная миссия (или последняя, если пройдены все).
+static func next_mission_id() -> String:
+	var last := "m1"
+	for entry in ConfigLoader.load_json(DATA_PATH).get("missions", []):
+		last = str(entry.get("id", "m1"))
+		if not SaveService.story_done(last):
+			return last
+	return last
+
+
+func _who_name(who: String) -> String:
+	return str((speakers.get(who, {}) as Dictionary).get("name", who.to_upper()))
+
+
+func _who_color(who: String) -> Color:
+	return Color(str((speakers.get(who, {}) as Dictionary).get("color", "#ffffff")))
+
+
+func _mini_who() -> String:
+	return str(mission.get("mini_who", "baron"))
+
+
+func _boss_who() -> String:
+	return str(mission.get("boss_who", "king"))
+
+
+func _dialog_key(first: String, fallback: String) -> String:
+	return first if (mission.get("dialogs", {}) as Dictionary).has(first) else fallback
+
+
 static func map_chapter(base: Dictionary, mission_id: String) -> Dictionary:
 	var root: Dictionary = ConfigLoader.load_json(DATA_PATH)
 	var chapter := base.duplicate(true)
@@ -250,7 +288,7 @@ func rank() -> String:
 
 
 func result_lines(victory: bool) -> PackedStringArray:
-	var lines := PackedStringArray([title() if not victory else "ОСКОЛОК %d/6 ПОЛУЧЕН" % int(mission.get("shards", 1))])
+	var lines := PackedStringArray([title() if not victory else "ОСКОЛОК %d/6 ПОЛУЧЕН" % int(mission.get("shard_no", mission.get("shards", 1)))])
 	var bonus := lives * LIFE_BONUS if victory else 0
 	lines.append("Очки: %d" % (score + bonus))
 	lines.append("Убито: %d" % kills)
@@ -554,7 +592,7 @@ func _idle_line() -> void:
 	var boss: Enemy = game.director.boss
 	if boss != null and is_instance_valid(boss):
 		var boss_id := str(boss.data.id)
-		pool_key = "baron" if boss_id == "beer_baron" else "king"
+		pool_key = _mini_who() if game.director.is_mini_wave() else _boss_who()
 		who = pool_key
 	if boss == null and not locked and randf() < 0.3:
 		## Рико и пиво: редкая реплика вместо подсказки Нэлл, чтобы тема звучала, но не надоедала.
@@ -695,14 +733,21 @@ func _on_choice(index: int, card: Dictionary) -> void:
 	var option: Dictionary = (card["options"] as Array)[index]
 	var effect := str(option.get("effect", ""))
 	SaveService.set_story_choice(str(mission.get("id", "")), effect)
+	var toast: Array = option.get("toast", [])
 	if effect == "spare":
 		BossBrain.mute_bonus = 2.0
-		game.hud.toast("ШНЫРЬ СВОБОДЕН", "Оглушение Короля после колонок: +2 с", Color("#b07cff"))
+		if toast.size() >= 2:
+			game.hud.toast(str(toast[0]), str(toast[1]), Color("#b07cff"))
+		else:
+			game.hud.toast("ШНЫРЬ СВОБОДЕН", "Оглушение Короля после колонок: +2 с", Color("#b07cff"))
 	else:
 		BossBrain.mute_bonus = 0.0
 		game._drop_weapon(game._roll_weapon("epic"), game.player.global_position + Vector2(0, -90), true)
 		_drop_medkit(game.player.global_position + Vector2(70, -80))
-		game.hud.toast("НАГРАДА КОРОЛЯ", "Эпический ствол и аптечка рядом", Color("#ffd257"))
+		if toast.size() >= 2:
+			game.hud.toast(str(toast[0]), str(toast[1]), Color("#ffd257"))
+		else:
+			game.hud.toast("НАГРАДА КОРОЛЯ", "Эпический ствол и аптечка рядом", Color("#ffd257"))
 	_say(str(option.get("say", "")), 0.5)
 
 
@@ -878,19 +923,20 @@ func _give_reward(reward: String) -> void:
 
 
 func on_boss_spawned(is_mini: bool) -> void:
-	_say("baron_pre" if is_mini else "king_pre", OPEN_DELAY)
+	_say(_dialog_key("mini_pre", "baron_pre") if is_mini else _dialog_key("boss_pre", "king_pre"), OPEN_DELAY)
 	_weapon_taunt(is_mini)
 
 
 func _king_banter() -> void:
-	var key := "king_final"
+	var prefix := _boss_who()
+	var key := prefix + "_final"
 	if flawless():
-		key = "king_flawless"
+		key = prefix + "_flawless"
 	elif game.player.hp < game.player.max_hp * 0.2:
-		key = "king_lowhp"
+		key = prefix + "_lowhp"
 	var lines: Array = _banter.get(key, [])
 	if not lines.is_empty():
-		_chatter("КОРОЛЬ ХЛАМА", str(lines.pick_random()), Color("#ff5a5a"))
+		_chatter(_who_name(prefix), str(lines.pick_random()), _who_color(prefix))
 	var after: Array = _banter.get("nell_after", [])
 	if not after.is_empty():
 		get_tree().create_timer(2.6, true, false, true).timeout.connect(func() -> void:
@@ -903,13 +949,13 @@ func _weapon_taunt(is_mini: bool) -> void:
 	if wc == null or wc.weapon == null:
 		return
 	var paid: Array = _banter.get("paid_weapons", [])
-	var who := "baron" if is_mini else "king"
+	var who := _mini_who() if is_mini else _boss_who()
 	var bucket: Dictionary = _banter.get("donate", {}) if paid.has(str(wc.base_weapon.id)) else _banter.get("free", {})
 	var lines: Array = bucket.get(who, [])
 	if lines.is_empty():
 		return
-	var name := str((speakers.get(who, {}) as Dictionary).get("name", who))
-	var color := Color("#ffb020") if is_mini else Color("#ff5a5a")
+	var name := _who_name(who)
+	var color := _who_color(who)
 	get_tree().create_timer(OPEN_DELAY + 7.5, true, false, true).timeout.connect(func() -> void:
 		if _boss_alive:
 			_chatter(name, str(lines.pick_random()), color)
@@ -922,11 +968,15 @@ func _weapon_taunt(is_mini: bool) -> void:
 
 
 func on_miniboss_killed() -> void:
-	has_key = true
 	_boss_alive = false
-	tip_item("beer_key")
-	game.hud.toast("ПОЛУЧЕНО: ПИВНАЯ ПРОБКА-КЛЮЧ", "Она откроет Ящик с оружием в Зоне 3", Color("#ffb020"))
-	_say("baron_post", 1.0)
+	var custom: Array = mission.get("mini_toast", [])
+	if custom.size() >= 2:
+		game.hud.toast(str(custom[0]), str(custom[1]), _who_color(_mini_who()))
+	else:
+		has_key = true
+		tip_item("beer_key")
+		game.hud.toast("ПОЛУЧЕНО: ПИВНАЯ ПРОБКА-КЛЮЧ", "Она откроет Ящик с оружием в Зоне 3", Color("#ffb020"))
+	_say(_dialog_key("mini_post", "baron_post"), 1.0)
 
 
 func on_king_killed() -> void:
@@ -938,15 +988,15 @@ func on_king_killed() -> void:
 
 
 func on_boss_phase(phase: int) -> void:
-	var lines: Array = (mission.get("phase_lines", {}) as Dictionary).get("king", [])
+	var lines: Array = (mission.get("phase_lines", {}) as Dictionary).get(_boss_who(), [])
 	if phase >= 2 and lines.size() > 1:
-		_chatter("КОРОЛЬ ХЛАМА", str(lines[1]), Color("#ff5a5a"))
+		_chatter(_who_name(_boss_who()), str(lines[1]), _who_color(_boss_who()))
 
 
 func on_boss_break() -> void:
-	var lines: Array = (mission.get("phase_lines", {}) as Dictionary).get("king", [])
+	var lines: Array = (mission.get("phase_lines", {}) as Dictionary).get(_boss_who(), [])
 	if not lines.is_empty():
-		_chatter("КОРОЛЬ ХЛАМА", str(lines[0]), Color("#ff5a5a"))
+		_chatter(_who_name(_boss_who()), str(lines[0]), _who_color(_boss_who()))
 
 
 ## Босс главы повержен: финальная сцена, затем итог миссии.
@@ -963,9 +1013,9 @@ func finish() -> void:
 		SaveService.add_stat("story_flawless", 1, false)
 	_count("story_missions")
 	game.story_target = null
-	game.hud.show_banner("ОСКОЛОК %d/6 ПОЛУЧЕН!" % shards, UiStyle.GOLD, 2.8)
+	game.hud.show_banner("ОСКОЛОК %d/6 ПОЛУЧЕН!" % int(mission.get("shard_no", shards)), UiStyle.GOLD, 2.8)
 	_after_queue = game.story_finished
-	_say("king_dead", 1.6)
+	_say(_dialog_key("boss_dead", "king_dead"), 1.6)
 	_say("outro", 1.7)
 	var made := SaveService.story_choice(str(mission.get("id", "")))
 	if not made.is_empty():
