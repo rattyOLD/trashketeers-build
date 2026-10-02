@@ -556,6 +556,13 @@ func _idle_line() -> void:
 		var boss_id := str(boss.data.id)
 		pool_key = "baron" if boss_id == "beer_baron" else "king"
 		who = pool_key
+	if boss == null and not locked and randf() < 0.3:
+		## Рико и пиво: редкая реплика вместо подсказки Нэлл, чтобы тема звучала, но не надоедала.
+		var rico_pool: Array = _banter.get("rico_beer", [])
+		if not rico_pool.is_empty():
+			var rico: Dictionary = speakers.get("rico", {})
+			_chatter(str(rico.get("name", "РИКО")), str(rico_pool.pick_random()), Color(str(rico.get("color", "#ffb347"))))
+			return
 	var pool: Array = lines.get(pool_key, [])
 	if pool.is_empty():
 		return
