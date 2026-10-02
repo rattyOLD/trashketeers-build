@@ -24,7 +24,7 @@ const CHEER_TIME := 0.9
 const KICK_DECAY := 14.0
 const AIM_SMOOTH := 20.0
 const TEXTURE_PATH := "res://assets/player/raccoon.png"
-const GRIP_HAND_R := 30.0
+const CLIP_GRIP_LIFT := 3.0
 const ARM_PATH := "res://assets/player/raccoon_arm.png"
 const OVERLAY_DIR := "res://assets/skins/"
 ## Текстуры хранятся ~3x к миру для чёткости на экранах телефонов: в мире енот ~100 px в высоту.
@@ -95,6 +95,9 @@ var _dash_t := 0.0
 var _reviving := false
 var _clip_frames: Dictionary = {}
 var _clip_grip: Dictionary = {}
+var _clip_hands: Dictionary = {}
+var _clip_cur := "idle"
+var _clip_idx := 0
 var _clip_grip_px := Vector2(300, 200)
 var _clip_support_px := Vector2(380, 200)
 var _shoot_t := 0.0
@@ -271,6 +274,7 @@ func _load_clips(prefix: String) -> bool:
 	if not _clip_cache.is_empty():
 		_clip_frames = _clip_cache["frames"]
 		_clip_grip = _clip_cache["grip"]
+		_clip_hands = _clip_cache["hands"]
 		return true
 	var frames: Dictionary = {}
 	for clip: String in CLIP_COUNTS:
@@ -290,9 +294,23 @@ func _load_clips(prefix: String) -> bool:
 	if FileAccess.file_exists(grip_path):
 		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(grip_path))
 		grip = parsed as Dictionary if parsed is Dictionary else {}
-	_clip_cache = {"frames": frames, "grip": grip}
+	var hands: Dictionary = {}
+	for clip: String in ["idle", "run", "shoot"]:
+		var hand_path := "%shand_%s.png" % [prefix, clip]
+		if not ResourceLoader.exists(hand_path):
+			continue
+		var hand_tex: Texture2D = load(hand_path)
+		var hand_list: Array[AtlasTexture] = []
+		for i in int(CLIP_COUNTS[clip]):
+			var hand_atlas := AtlasTexture.new()
+			hand_atlas.atlas = hand_tex
+			hand_atlas.region = Rect2((i % 4) * CLIP_CELL.x, (i / 4) * CLIP_CELL.y, CLIP_CELL.x, CLIP_CELL.y)
+			hand_list.append(hand_atlas)
+		hands[clip] = hand_list
+	_clip_cache = {"frames": frames, "grip": grip, "hands": hands}
 	_clip_frames = frames
 	_clip_grip = grip
+	_clip_hands = hands
 	return true
 
 
@@ -324,6 +342,8 @@ func _clip_pick() -> void:
 		clip = "run"
 		idx = int(fposmod(_gait / TAU, 1.0) * 8.0) % 8
 	hero.texture = (_clip_frames[clip] as Array)[idx]
+	_clip_cur = clip
+	_clip_idx = idx
 	var points: Array = _clip_grip.get(clip, [])
 	if idx < points.size():
 		var p: Array = points[idx]
@@ -788,7 +808,8 @@ func _gun_direction(local_angle: float) -> Vector2:
 func _gun_center(paw: Vector2, dir: Vector2, kick_amount: float) -> Vector2:
 	var g := WeaponIcons.grip(weapon_icon)
 	var grip := Vector2(g.x, g.y * (-1.0 if dir.x < 0.0 else 1.0)).rotated(dir.angle()) * _weapon_scale()
-	return paw - grip - dir * kick_amount
+	var lift := Vector2(0.0, -CLIP_GRIP_LIFT) if _clip_mode else Vector2.ZERO
+	return paw - grip - dir * kick_amount + lift
 
 
 func _weapon_scale() -> float:
@@ -869,7 +890,7 @@ func _draw_gun_layer() -> void:
 			_gun_layer.draw_circle(paw, 4.5, sleeve.lightened(0.15))
 	var center := _gun_center(paw, dir, _kick)
 	WeaponIcons.draw(_gun_layer, weapon_icon, center, _weapon_scale(), dir.angle(), weapon_color, dir.x < 0.0)
-	if _clip_mode and not melee_active and not _dead:
+	if _clip_mode and not _dead:
 		_draw_grip_hand()
 	if show_aim_line and aiming and not melee_active:
 		var from := center + _muzzle_offset(dir)
@@ -890,22 +911,21 @@ func _draw_gun_layer() -> void:
 		_gun_layer.draw_line(shine - dir.orthogonal() * 6.0 * strength, shine + dir.orthogonal() * 6.0 * strength, Color(1, 1, 1, 0.8 * strength), 2.0)
 
 
-## Задняя лапа (хват) поверх ствола: кусок кадра героя вокруг точки хвата с мягким краем. Передняя лапа остаётся под стволом.
+## Рука-хват поверх ствола: заранее вырезанный кулак (assets/heroes/raccoon_hand_*.png) с мягким краем. Вторая рука остаётся под стволом.
 func _draw_grip_hand() -> void:
-	var tex := hero.texture
+	var tex := _hand_frame()
 	if tex == null:
 		return
-	var size := tex.get_size()
-	var xf := _sprite_xform()
-	_gun_layer.draw_set_transform_matrix(xf)
-	for i in 3:
-		var r := GRIP_HAND_R - i * 5.0
-		var c := _clip_grip_px
-		var rect := Rect2(c - Vector2(r, r), Vector2(r, r) * 2.0).intersection(Rect2(Vector2.ZERO, size))
-		if rect.size.x < 2.0:
-			continue
-		_gun_layer.draw_texture_rect_region(tex, Rect2(rect.position + hero.offset, rect.size), rect, Color(1, 1, 1, [0.3, 0.5, 1.0][i]))
+	_gun_layer.draw_set_transform_matrix(_sprite_xform())
+	_gun_layer.draw_texture(tex, hero.offset)
 	_gun_layer.draw_set_transform_matrix(Transform2D.IDENTITY)
+
+
+func _hand_frame() -> Texture2D:
+	var list: Array = _clip_hands.get(_clip_cur, [])
+	if _clip_idx < list.size():
+		return list[_clip_idx]
+	return null
 
 
 func _draw_death_marks() -> void:
