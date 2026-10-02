@@ -9,7 +9,7 @@ const WING_WIDTH := 70.0
 const OUTLINE := Color("#071b25")
 const WING_NEON := Color("#00ffff")
 const WHITE_BAR := Color("#ffffff")
-const FURY_PINK := Color("#ff2ea6")
+const FURY_PINK := Color("#ff8a3d")
 const PLAIN_BAR := Color("#ffb020")
 const FLASH_TIME := 0.5
 

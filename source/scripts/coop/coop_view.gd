@@ -7,7 +7,7 @@ extends Control
 const WORLD_SCALE := 1.0
 const STICK_RADIUS := 90.0
 const SMOOTH := 22.0
-const PLAYER_COLORS: Array[Color] = [Color("#00e5ff"), Color("#ff2ea6")]
+const PLAYER_COLORS: Array[Color] = [Color("#00e5ff"), Color("#ff8a3d")]
 const HP_MAX := 100.0
 
 var my_id := 0
@@ -145,7 +145,7 @@ func _draw_floor() -> void:
 		draw_line(_to_screen(Vector2(top_left.x, y)), _to_screen(Vector2(bottom_right.x, y)), Color(1, 1, 1, 0.05), 2.0)
 		y += step
 	var arena := Rect2(CoopArena.ARENA.position, CoopArena.ARENA.size)
-	draw_rect(Rect2(_to_screen(arena.position), arena.size * WORLD_SCALE), Color("#ff2ea6"), false, 4.0)
+	draw_rect(Rect2(_to_screen(arena.position), arena.size * WORLD_SCALE), Color("#ff8a3d"), false, 4.0)
 
 
 func _draw_player(id: int, state: Dictionary) -> void:

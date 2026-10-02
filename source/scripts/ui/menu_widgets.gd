@@ -599,7 +599,7 @@ class DiceButton:
 		var c := size * 0.5
 		var r := Rect2(c - Vector2(24, 24), Vector2(48, 48))
 		draw_rect(r.grow(3.0), LINE)
-		draw_rect(r, Color("#ff2ea6"))
+		draw_rect(r, Color("#ff8a3d"))
 		for p in [Vector2(-12, -12), Vector2(12, -12), Vector2(0, 0), Vector2(-12, 12), Vector2(12, 12)]:
 			draw_circle(c + p, 5.0, Color.WHITE)
 

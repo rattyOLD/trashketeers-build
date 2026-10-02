@@ -92,6 +92,7 @@ func _ready() -> void:
 
 func _build() -> void:
 	_backdrop = MenuBackdrop.new()
+	_backdrop.modulate = Color(0.78, 0.96, 1.1)
 	add_child(_backdrop)
 	_backdrop.build(get_viewport_rect().size)
 	var shade := ShadeOverlay.new()
@@ -513,13 +514,13 @@ func _build_stage() -> Control:
 	_season_pill.pressed.connect(func() -> void: _pass.open())
 	stage.add_child(_season_pill)
 	if Orient.portrait:
-		stage.add_child(_make_side_button("gift", "res://assets/ui/hub/daily_gift.png", "ПОДАРОК", false, 8.0, func() -> void: _daily.open()))
+		stage.add_child(_make_side_button("gift", "res://assets/ui/hub/gift_box.png", "ПОДАРОК", false, 8.0, func() -> void: _daily.open()))
 		stage.add_child(_make_side_button("chest", "res://assets/ui/hub/chest_free.png", "БЕСПЛАТНО", false, 132.0, func() -> void: _chests.open()))
 		stage.add_child(_make_side_button("news", "res://assets/ui/hub/news.png", "ОБНОВЛЕНИЯ", true, 8.0, func() -> void: _changelog.open()))
 		stage.add_child(_make_side_button("vip", "res://assets/ui/hub/vip.png", "VIP", true, 124.0, func() -> void: _vip.open()))
 	else:
 		var left := [
-			["gift", "res://assets/ui/hub/daily_gift.png", "ПОДАРОК", func() -> void: _daily.open()],
+			["gift", "res://assets/ui/hub/gift_box.png", "ПОДАРОК", func() -> void: _daily.open()],
 			["chest", "res://assets/ui/hub/chest_free.png", "БЕСПЛАТНО", func() -> void: _chests.open()],
 		]
 		var right := [
@@ -952,11 +953,11 @@ class HeroStage:
 	func _draw() -> void:
 		var floor_center := Vector2(size.x * 0.5, size.y * 0.5 + 118.0)
 		for i in 6:
-			draw_circle(Vector2(size.x * 0.5, size.y * 0.5 + 20.0), 250.0 - i * 34.0, Color(1.0, 0.18, 0.65, 0.035))
+			draw_circle(Vector2(size.x * 0.5, size.y * 0.5 + 20.0), 250.0 - i * 34.0, Color(0.1, 0.85, 1.0, 0.035))
 		draw_set_transform(floor_center, 0.0, Vector2(1.0, 0.3))
 		draw_circle(Vector2.ZERO, 200.0, Color(0.03, 0.01, 0.08, 0.75))
-		draw_arc(Vector2.ZERO, 200.0, 0.0, TAU, 64, Color("#ff2ea6"), 8.0, true)
-		draw_arc(Vector2.ZERO, 158.0, 0.0, TAU, 64, Color(0.0, 0.96, 1.0, 0.75), 5.0, true)
+		draw_arc(Vector2.ZERO, 200.0, 0.0, TAU, 64, Color("#00e5ff"), 8.0, true)
+		draw_arc(Vector2.ZERO, 158.0, 0.0, TAU, 64, Color("#ffd257", 0.8), 5.0, true)
 		var pulse := fmod(_time * 0.6, 1.0)
 		draw_arc(Vector2.ZERO, 60.0 + pulse * 130.0, 0.0, TAU, 48, Color(0.0, 0.96, 1.0, (1.0 - pulse) * 0.5), 4.0, true)
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)

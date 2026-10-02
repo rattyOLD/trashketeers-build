@@ -11,7 +11,7 @@ enum Mode { MENU, CONNECTING, ROOM, RUN, RESULTS }
 const HOST_KEY := "trk_coop_host"
 const CONNECT_TIMEOUT := 8.0
 const ME_COLOR := Color("#00e5ff")
-const FRIEND_COLOR := Color("#ff2ea6")
+const FRIEND_COLOR := Color("#ff8a3d")
 
 var mode: Mode = Mode.MENU
 var _body: VBoxContainer

@@ -1491,7 +1491,7 @@ class Profile:
 		var badge := PanelContainer.new()
 		badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		badge.custom_minimum_size = Vector2(64, 64)
-		badge.add_theme_stylebox_override("panel", UiStyle.box(Color("#ff2ea6"), UiStyle.OUTLINE, 3, 32))
+		badge.add_theme_stylebox_override("panel", UiStyle.box(Color("#ff8a3d"), UiStyle.OUTLINE, 3, 32))
 		var count := UiStyle.label(str(SaveService.get_friends().size()), 32, Color.WHITE, 8)
 		count.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		badge.add_child(count)

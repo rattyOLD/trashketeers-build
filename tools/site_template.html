@@ -7,7 +7,7 @@
 <link rel="apple-touch-icon" href="icon180.png">
 <link rel="manifest" href="manifest.webmanifest">
 <title>Trash Squad</title>
-<meta name="theme-color" content="#0d0a1c">
+<meta name="theme-color" content="#0b171c">
 <meta name="description" content="Бесплатный шутер про енота-налётчика. Открывается прямо в браузере, крысы уже заждались.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Trash Squad">
@@ -25,12 +25,12 @@
 html.sideways #rotate { display: flex; }
 :root {
 	color-scheme: dark;
-	--night: #0d0a1c;
-	--panel: #1b1433;
-	--pink: #ff2ea6;
+	--night: #0b171c;
+	--panel: #142a33;
+	--pink: #00d5ec;
 	--cyan: #00f5ff;
 	--text: #efe9ff;
-	--muted: #a79cc9;
+	--muted: #9cbbc9;
 	--danger: #ff5c7a;
 	padding: 0 !important;
 }
@@ -98,7 +98,7 @@ html, body {
 	width: min(82vw, 380px);
 	height: 22px;
 	border-radius: 12px;
-	background: #120d26;
+	background: #0f1f26;
 	border: 2px solid rgba(0, 245, 255, 0.55);
 	box-shadow: 0 0 18px rgba(0, 245, 255, 0.25), inset 0 2px 6px rgba(0, 0, 0, 0.6);
 	overflow: hidden;
@@ -137,7 +137,7 @@ html, body {
 	align-items: center;
 	gap: 4px;
 }
-#boot .made { margin: 0; font-size: 12px; letter-spacing: 2px; color: #8f84b8; }
+#boot .made { margin: 0; font-size: 12px; letter-spacing: 2px; color: #84a8b8; }
 #boot .studio {
 	display: flex;
 	align-items: center;
@@ -155,7 +155,7 @@ html, body {
 	margin: 6px 0 0;
 	font-size: 11px;
 	letter-spacing: 1px;
-	color: #8f84b8;
+	color: #84a8b8;
 	opacity: 0.8;
 }
 #tip {
@@ -235,7 +235,7 @@ html, body {
 	background: var(--pink);
 	cursor: pointer;
 }
-#crash button.alt { background: #3a2d60; }
+#crash button.alt { background: #2d5160; }
 #retry:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
 #rotate {
 	position: fixed;
@@ -485,7 +485,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 		if (baseManifest) {
 			try {
 				var m = {name: 'Trash Squad', short_name: 'Trash Squad', start_url: location.pathname + '?' + key + '=' + encodeURIComponent(value), scope: location.pathname,
-					display: 'fullscreen', orientation: 'portrait', background_color: '#0d0a1c', theme_color: '#0d0a1c',
+					display: 'fullscreen', orientation: 'portrait', background_color: '#0b171c', theme_color: '#0b171c',
 					icons: [{src: new URL('icon192.png', location.href).href, sizes: '192x192', type: 'image/png'}, {src: new URL('icon512.png', location.href).href, sizes: '512x512', type: 'image/png'}]};
 				baseManifest.href = URL.createObjectURL(new Blob([JSON.stringify(m)], {type: 'application/manifest+json'}));
 			} catch (e) {}
@@ -764,13 +764,13 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 		wall.id = 'mustupdate';
 		wall.style.cssText = 'position:fixed;inset:0;z-index:99;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;background:rgba(10,6,24,.96);color:#fff;font:600 17px system-ui,sans-serif;text-align:center';
 		const title = document.createElement('div');
-		title.style.cssText = 'font:800 26px system-ui,sans-serif;color:#ff2ea6';
+		title.style.cssText = 'font:800 26px system-ui,sans-serif;color:#00d5ec';
 		title.textContent = 'Вышло важное обновление';
 		const text = document.createElement('div');
-		text.style.cssText = 'max-width:420px;line-height:1.4;color:#c9c3e6';
+		text.style.cssText = 'max-width:420px;line-height:1.4;color:#c3dbe6';
 		text.textContent = 'Эта версия игры устарела и больше не запускается: так твой аккаунт и прогресс точно не пострадают. Обновление займёт пару секунд, енот подождёт.';
 		const btn = document.createElement('button');
-		btn.style.cssText = 'padding:16px 34px;border:0;border-radius:14px;background:#ff2ea6;color:#fff;font:800 20px system-ui,sans-serif';
+		btn.style.cssText = 'padding:16px 34px;border:0;border-radius:14px;background:#00d5ec;color:#04202a;font:800 20px system-ui,sans-serif';
 		btn.textContent = 'ОБНОВИТЬ ' + (v.label || '');
 		btn.addEventListener('click', function () { window.location.replace(window.location.pathname + '?v=' + v.build); });
 		wall.appendChild(title); wall.appendChild(text); wall.appendChild(btn);
@@ -793,16 +793,16 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 			if (!wall) {
 				wall = document.createElement('div');
 				wall.id = 'newverwall';
-				wall.style.cssText = 'position:fixed;inset:0;z-index:98;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(10,6,24,.82)';
+				wall.style.cssText = 'position:fixed;inset:0;z-index:98;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(4,14,22,.86)';
 				const card = document.createElement('div');
-				card.style.cssText = 'max-width:380px;width:100%;box-sizing:border-box;padding:26px 22px;border-radius:22px;background:#1d1536;border:3px solid #00e5ff;box-shadow:0 0 28px rgba(0,229,255,.35);text-align:center;color:#fff;font:600 16px system-ui,sans-serif';
-				card.innerHTML = '<div style="font:800 24px system-ui,sans-serif;color:#ffd257;margin-bottom:10px">Вышла новая версия</div><div style="line-height:1.4;color:#c9c3e6;margin-bottom:18px">Обнови игру: новые фичи и починенные баги уже ждут. Забег идёт только в меню, прогресс сохранён.</div>';
+				card.style.cssText = 'max-width:380px;width:100%;box-sizing:border-box;padding:26px 22px;border-radius:22px;background:#162c36;border:3px solid #00e5ff;box-shadow:0 0 28px rgba(0,229,255,.35);text-align:center;color:#fff;font:600 16px system-ui,sans-serif';
+				card.innerHTML = '<div style="font:800 24px system-ui,sans-serif;color:#ffd257;margin-bottom:10px">Вышла новая версия</div><div style="line-height:1.4;color:#c3dbe6;margin-bottom:18px">Обнови игру: новые фичи и починенные баги уже ждут. Забег идёт только в меню, прогресс сохранён.</div>';
 				const go = document.createElement('button');
-				go.style.cssText = 'display:block;width:100%;padding:16px;border:0;border-radius:14px;background:#ff2ea6;color:#fff;font:800 20px system-ui,sans-serif;margin-bottom:10px';
+				go.style.cssText = 'display:block;width:100%;padding:16px;border:0;border-radius:14px;background:#00d5ec;color:#04202a;font:800 20px system-ui,sans-serif;margin-bottom:10px';
 				go.textContent = 'ОБНОВИТЬ';
 				go.addEventListener('click', function () { window.location.reload(); });
 				const later = document.createElement('button');
-				later.style.cssText = 'display:block;width:100%;padding:12px;border:0;border-radius:12px;background:#2f2452;color:#c9c3e6;font:700 16px system-ui,sans-serif';
+				later.style.cssText = 'display:block;width:100%;padding:12px;border:0;border-radius:12px;background:#244452;color:#c3dbe6;font:700 16px system-ui,sans-serif';
 				later.textContent = 'ПОЗЖЕ';
 				later.addEventListener('click', function () { updateDismissed = true; wall.style.display = 'none'; window.__trkUpdateUi(); });
 				card.appendChild(go); card.appendChild(later); wall.appendChild(card);
@@ -815,7 +815,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 		if (!bar) {
 			bar = document.createElement('div');
 			bar.id = 'newver';
-			bar.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:9;padding:10px 14px;background:#ff2ea6;color:#fff;font:600 15px system-ui,sans-serif;text-align:center;cursor:pointer';
+			bar.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:9;padding:10px 14px;background:#00d5ec;color:#fff;font:600 15px system-ui,sans-serif;text-align:center;cursor:pointer';
 			bar.textContent = 'Вышла новая версия игры. Нажми, чтобы обновить.';
 			bar.addEventListener('click', function () { window.location.reload(); });
 			document.body.appendChild(bar);

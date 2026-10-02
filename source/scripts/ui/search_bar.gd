@@ -37,9 +37,9 @@ static func style(field: LineEdit, font_size: int) -> void:
 	field.add_theme_font_size_override("font_size", font_size)
 	field.add_theme_color_override("font_color", Color("#0c1d29"))
 	field.add_theme_color_override("font_placeholder_color", Color("#8a82a0"))
-	field.add_theme_color_override("caret_color", Color("#ff2ea6"))
+	field.add_theme_color_override("caret_color", Color("#ff8a3d"))
 	field.add_theme_stylebox_override("normal", UiStyle.box(Color("#ffffff"), UiStyle.OUTLINE, 4, 16))
-	field.add_theme_stylebox_override("focus", UiStyle.box(Color("#ffffff"), Color("#ff2ea6"), 4, 16))
+	field.add_theme_stylebox_override("focus", UiStyle.box(Color("#ffffff"), Color("#ff8a3d"), 4, 16))
 
 
 ## В веб-сборке на сенсорных экранах экранная клавиатура из Godot не открывается (iOS), поэтому по тапу
@@ -63,8 +63,8 @@ static func restore_colors(field: LineEdit) -> void:
 	if field.has_meta("dark"):
 		field.add_theme_color_override("font_color", Color("#f2ecff"))
 		field.add_theme_color_override("font_placeholder_color", Color("#8fa8b3"))
-		field.add_theme_color_override("caret_color", Color("#ff2ea6"))
+		field.add_theme_color_override("caret_color", Color("#ff8a3d"))
 		return
 	field.add_theme_color_override("font_color", Color("#0c1d29"))
 	field.add_theme_color_override("font_placeholder_color", Color("#8a82a0"))
-	field.add_theme_color_override("caret_color", Color("#ff2ea6"))
+	field.add_theme_color_override("caret_color", Color("#ff8a3d"))
