@@ -772,7 +772,10 @@ func ping() -> String:
 	parts.append("база: %s" % (("HTTP %d" % int(data["code"])) if int(data["code"]) > 0 else _raw_note))
 	parts.append("%d мс" % (Time.get_ticks_msec() - started))
 	parts.append(Platform.build_label())
-	return " · ".join(parts)
+	var text := " · ".join(parts)
+	if int(auth["code"]) == 0 or int(data["code"]) == 0:
+		Platform._js("try { var q = JSON.parse(window.localStorage.getItem('__trash_errq') || '[]'); q.push(%s); window.localStorage.setItem('__trash_errq', JSON.stringify(q.slice(-20))); } catch (e) {} return '';" % JSON.stringify("ПРОВЕРКА СВЯЗИ: " + text))
+	return text
 
 
 ## Короткий код для тестера вместо скриншота.
@@ -781,6 +784,23 @@ func error_code() -> String:
 
 
 func _raw(method: int, url: String, headers: PackedStringArray, body: String) -> Dictionary:
+	# Как в онлайн-играх: короткий сбой сети не должен ломать действие. Повторяем с паузой, но только то, что безопасно:
+	# чтение (GET) и случаи, когда запрос до сервера так и не дошёл (нет адреса, нет соединения, TLS).
+	var attempt := 0
+	while true:
+		var out := await _raw_once(method, url, headers, body)
+		if int(out["code"]) > 0 or attempt >= 2:
+			return out
+		var kind := int(out.get("result", -1))
+		var safe := method == HTTPClient.METHOD_GET or kind in [HTTPRequest.RESULT_CANT_CONNECT, HTTPRequest.RESULT_CANT_RESOLVE, HTTPRequest.RESULT_TLS_HANDSHAKE_ERROR]
+		if not safe:
+			return out
+		attempt += 1
+		await get_tree().create_timer(0.7 * attempt).timeout
+	return {"ok": false, "code": 0, "data": null}
+
+
+func _raw_once(method: int, url: String, headers: PackedStringArray, body: String) -> Dictionary:
 	var request := HTTPRequest.new()
 	request.timeout = TIMEOUT
 	# В браузере ответ уже распакован самим браузером. Если Godot распаковывает его второй раз, большие ответы
@@ -790,13 +810,13 @@ func _raw(method: int, url: String, headers: PackedStringArray, body: String) ->
 	if request.request(url, headers, method, body) != OK:
 		request.queue_free()
 		_raw_note = "запрос не ушёл"
-		return {"ok": false, "code": 0, "data": null}
+		return {"ok": false, "code": 0, "data": null, "result": -1}
 	var reply: Array = await request.request_completed
 	request.queue_free()
 	if int(reply[0]) != HTTPRequest.RESULT_SUCCESS:
 		_raw_note = "нет ответа: %s" % NET_ERRORS.get(int(reply[0]), "код %d" % int(reply[0]))
 		Platform.trail("сеть сбой %s: %s" % [url.get_slice("/", 6).get_slice("?", 0), _raw_note])
-		return {"ok": false, "code": 0, "data": null}
+		return {"ok": false, "code": 0, "data": null, "result": int(reply[0])}
 	var code := int(reply[1])
 	_raw_note = "HTTP %d" % code
 	Platform.trail("сеть %s -> %d" % [url.get_slice("/", 6).get_slice("?", 0) if url.contains("/rpc/") else url.get_slice(".co", 1).get_slice("?", 0), code])
