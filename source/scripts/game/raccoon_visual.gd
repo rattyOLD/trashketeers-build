@@ -843,6 +843,12 @@ func _weapon_scale() -> float:
 		if melee_active:
 			return GUN_SCALE * melee_scale * float(MELEE_HELD.get(String(weapon_icon), 1.6))
 		return GUN_SCALE * _ladder_mult()
+	if _hero_mode:
+		# Остальные герои: та же лесенка, пересчитанная на размер их тела относительно енота с покадровым артом.
+		var body := SPRITE_SCALE * float(_hero_cfg.get("cell_h", 288)) / (CLIP_SCALE * CLIP_CELL.y)
+		if melee_active:
+			return GUN_SCALE * melee_scale * float(MELEE_HELD.get(String(weapon_icon), 1.6)) * body
+		return GUN_SCALE * _ladder_mult() * body
 	return GUN_SCALE * (melee_scale * 1.15 if melee_active else 1.0)
 
 
@@ -904,6 +910,8 @@ func _draw_gun_layer() -> void:
 		if base.length() > 4.0:
 			var diff := clampf(angle_difference(base.angle(), dir.angle()), -CLIP_AIM_LIMIT, CLIP_AIM_LIMIT)
 			dir = base.normalized().rotated(diff)
+	var center := _gun_center(paw, dir, _kick)
+	WeaponIcons.draw(_gun_layer, weapon_icon, center, _weapon_scale(), dir.angle(), weapon_color, dir.x < 0.0)
 	if _hero_mode and not _clip_mode:
 		# В покадровом режиме руки уже нарисованы в кадрах, старую руку поверх не рисуем.
 		var shoulder := _sprite_xform() * _hero_shoulder
@@ -916,8 +924,6 @@ func _draw_gun_layer() -> void:
 			_gun_layer.draw_line(shoulder, paw, sleeve, 7.0, true)
 			_gun_layer.draw_circle(paw, 6.5, OUTLINE)
 			_gun_layer.draw_circle(paw, 4.5, sleeve.lightened(0.15))
-	var center := _gun_center(paw, dir, _kick)
-	WeaponIcons.draw(_gun_layer, weapon_icon, center, _weapon_scale(), dir.angle(), weapon_color, dir.x < 0.0)
 	if _clip_mode and not _dead:
 		_draw_grip_hand()
 	if show_aim_line and aiming and not melee_active:
