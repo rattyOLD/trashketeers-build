@@ -78,11 +78,17 @@ var _hp_mult := 1.0
 var _dmg_mult := 1.0
 var _interval := 1.0
 var _max_alive := 10
+## Доля врагов в кадре. Слабые телефоны упираются в CPU (физика и ИИ каждого врага): меньше врагов одновременно, волна та же.
+static var alive_scale := 1.0
 var _last_tick := -1
 var _leash_timer := LEASH_INTERVAL
 var _stall_timer := 0.0
 var _stall_count := -1
 var _stalled := false
+
+
+func _cap() -> int:
+	return maxi(6, int(round(float(_max_alive) * alive_scale)))
 
 
 func setup(enemies: EnemyManager, player: Player, level: LevelSpawner) -> void:
@@ -258,7 +264,7 @@ func _tick_spawns(delta: float) -> void:
 	var radius := _offscreen_radius()
 	var batch: Array[EnemyData] = []
 	for i in int(_wave["batch"]):
-		if remaining_to_spawn - batch.size() <= 0 or _enemies.get_active_count() + batch.size() >= _max_alive:
+		if remaining_to_spawn - batch.size() <= 0 or _enemies.get_active_count() + batch.size() >= _cap():
 			break
 		var data := ContentDB.get_enemy(_pick_weighted(weights))
 		if data != null:
@@ -343,7 +349,7 @@ func _tick_boss(delta: float) -> void:
 	if escort_data == null:
 		return
 	for i in int(escort.get("count", 3)):
-		if _enemies.get_active_count() >= _max_alive + 6:
+		if _enemies.get_active_count() >= _cap() + 6:
 			return
 		var at := _level.gate_spawn_point(_player.global_position, 300.0, escort_data.radius)
 		if at == Vector2.INF:
@@ -375,7 +381,7 @@ func summon_minions(count: int) -> void:
 	var weights: Dictionary = _wave.get("weights", {})
 	var escort: Dictionary = _chapter.get("escort", {})
 	for i in count:
-		if _enemies.get_active_count() >= _max_alive + 8:
+		if _enemies.get_active_count() >= _cap() + 8:
 			return
 		var id := StringName(escort.get("enemy", "rat_punk"))
 		if not weights.is_empty() and randf() < 0.6:

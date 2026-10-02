@@ -124,6 +124,7 @@ func _setup_common(camera_bounds: Rect2, currency_icon: Texture2D) -> void:
 	get_tree().create_timer(15.0, false).timeout.connect(Platform.mark_battle.bind(false))
 	SoftGlow.lite = SaveService.is_fx_lite()
 	_fx_scale = 0.5 if SoftGlow.lite else 1.0
+	WaveDirector.alive_scale = 0.7 if (Platform.is_touch() and SaveService.get_quality() == 0) else 1.0
 	camera = Camera2D.new()
 	camera.position_smoothing_enabled = true
 	camera.position_smoothing_speed = CAMERA_SMOOTHING
@@ -245,7 +246,8 @@ func _perf_context() -> String:
 ## Динамическое качество: если 5 секунд подряд средний FPS ниже порога — упрощаем эффекты, затем снижаем разрешение холста.
 ## Изменения действуют только в этом бою; настройки игрока не трогаем. На «Красиво» разрешение и FPS не снижаются: игрок выбрал максимум сам.
 func _adapt_quality(delta: float) -> void:
-	if _perf_age < ADAPT_WARMUP or _adapt_level >= ADAPT_MAX:
+	var crawling := Engine.get_frames_per_second() < 15.0
+	if _perf_age < (6.0 if crawling else ADAPT_WARMUP) or _adapt_level >= ADAPT_MAX:
 		return
 	_adapt_time += delta
 	_adapt_frames += 1
@@ -258,12 +260,15 @@ func _adapt_quality(delta: float) -> void:
 		_adapt_strikes = 0
 		return
 	_adapt_strikes += 1
-	if _adapt_strikes < ADAPT_STRIKES:
+	if _adapt_strikes < (1 if fps < 15.0 else ADAPT_STRIKES):
 		return
 	_adapt_strikes = 0
 	_adapt_level += 1
 	if SaveService.get_quality() >= 2 and _adapt_level != 1:
+		WaveDirector.alive_scale = maxf(0.4, 1.0 - 0.2 * _adapt_level)
 		return
+	# Врагов на экране урезаем при любом качестве: на слабых телефонах падение FPS идёт от CPU, а не от картинки.
+	WaveDirector.alive_scale = maxf(0.4, 1.0 - 0.2 * _adapt_level)
 	match _adapt_level:
 		1:
 			_fx_scale = 0.5
