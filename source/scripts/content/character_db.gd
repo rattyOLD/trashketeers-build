@@ -47,7 +47,7 @@ static func _load() -> void:
 		_list.append(entry)
 		_by_id[entry["id"]] = entry
 	if _list.is_empty():
-		var fallback := {"id": DEFAULT_ID, "title": "Енот Бродяга", "description": "", "currency": "nuts", "price": 0,
+		var fallback := {"id": DEFAULT_ID, "title": "Рико «Бродяга»", "description": "", "currency": "nuts", "price": 0,
 			"recolor": {}, "proportions": {}, "stats": {}, "traits": ""}
 		_list.append(fallback)
 		_by_id[DEFAULT_ID] = fallback
