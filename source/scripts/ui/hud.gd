@@ -327,9 +327,14 @@ func set_kills(kills: int) -> void:
 	_kills_label.text = "Убито: %d" % kills
 
 
-func set_wave(number: int, enemies_left: int, chapter: int = 0) -> void:
+func set_wave(number: int, enemies_left: int, chapter: int = 0, alive: int = -1) -> void:
 	var head := "ГЛАВА %d · ВОЛНА %d" % [chapter, number] if chapter > 0 else "ВОЛНА %d" % number
-	_wave_label.text = "%s · ещё %d" % [head, enemies_left] if enemies_left > 0 and not _minimal else head
+	if enemies_left <= 0 or _minimal:
+		_wave_label.text = head
+	elif alive >= 0:
+		_wave_label.text = "%s · осталось %d · на карте %d" % [head, enemies_left, alive]
+	else:
+		_wave_label.text = "%s · ещё %d" % [head, enemies_left]
 
 
 ## Сюжетный режим без ио-механик: скрываем опыт и уровень.

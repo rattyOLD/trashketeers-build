@@ -343,7 +343,7 @@ func _update_hud_timer() -> void:
 		hud.set_story_status(story.score, story.lives, story.zone_number(), story.zone_count(), story.zone_name(), -1, SaveService.nell_order(), story.goal_rows())
 		_tick_order()
 		return
-	hud.set_wave(maxi(director.wave_number, 1), director.get_enemies_left(), director.chapter_index + 1)
+	hud.set_wave(maxi(director.wave_number, 1), director.get_enemies_left(), director.chapter_index + 1, director.get_alive_count())
 	hud.set_survival_order(SaveService.nell_order())
 	_tick_order()
 
@@ -1233,8 +1233,6 @@ func _apply_tester_start() -> void:
 
 
 func _apply_tester_flags() -> void:
-	if Tester.flag("dmg") or Tester.flag("speed"):
-		stats.uncapped = true
 	if Tester.flag("dmg"):
 		stats.add_flat(&"damage_mult", 9.0)
 	if Tester.flag("speed"):

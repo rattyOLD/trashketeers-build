@@ -98,6 +98,11 @@ func get_hp_mult() -> float:
 	return _hp_mult
 
 
+## Сколько врагов сейчас живо на карте.
+func get_alive_count() -> int:
+	return _enemies.get_active_count()
+
+
 ## Сколько врагов волны ещё не побеждено (живые + не вышедшие).
 func get_enemies_left() -> int:
 	return remaining_to_spawn + _enemies.get_active_count() + (1 if _boss_pending else 0)
