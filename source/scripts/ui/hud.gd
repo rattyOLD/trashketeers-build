@@ -73,6 +73,9 @@ var _layout_revision := -1
 var _hold: LayoutHold
 var _editor: BattleLayoutEditor
 var _pause_button: Button
+const HUD_SCALE := 1.0
+## Левая колонка и правый край (монеты, пауза) должны уместиться в 720 px без вылета за экран.
+const LEFT_W := 468.0
 var _story_meter: Control
 var _bars_box: VBoxContainer
 var _chips_row: HBoxContainer
@@ -123,7 +126,7 @@ func build(currency_icon: Texture2D, weapon: WeaponData) -> void:
 	_root.add_child(_wave_box)
 	_barks = HudBarks.new()
 	# Рация живёт в левой колонке под заданиями: так её не перекрывают ни карта, ни плашка заказа.
-	_barks.custom_minimum_size = Vector2(330, 128)
+	_barks.custom_minimum_size = Vector2(400, 150)
 	_barks.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	_left_column.add_child(_barks)
 	_rail_combo = UiStyle.label("", 46, UiStyle.GOLD, 12)
@@ -960,15 +963,15 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	margin.add_child(row)
 
 	var left := VBoxContainer.new()
-	left.add_theme_constant_override("separation", 6)
-	left.custom_minimum_size = Vector2(548 if Orient.portrait else 440, 0)
+	left.add_theme_constant_override("separation", 12 if Orient.portrait else 6)
+	left.custom_minimum_size = Vector2(LEFT_W if Orient.portrait else 440, 0)
 	if Orient.portrait:
 		# Контейнеры сбрасывают масштаб, поэтому колонка живёт в обёртке и увеличена вручную.
 		var wrap := Control.new()
 		wrap.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		wrap.custom_minimum_size = Vector2(548.0 * 1.45, 0.0)
+		wrap.custom_minimum_size = Vector2(LEFT_W * HUD_SCALE, 0.0)
 		wrap.add_child(left)
-		left.scale = Vector2(1.45, 1.45)
+		left.scale = Vector2(HUD_SCALE, HUD_SCALE)
 		row.add_child(wrap)
 	else:
 		row.add_child(left)
@@ -1060,7 +1063,7 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	chips.add_child(_kills_chip)
 
 	var right := VBoxContainer.new()
-	right.custom_minimum_size = Vector2(180, 0)
+	right.custom_minimum_size = Vector2(170, 0)
 	right.add_theme_constant_override("separation", 2)
 	row.add_child(right)
 
