@@ -690,6 +690,86 @@
         ],
         "flicker": 0.15
       }
+    },
+    "m1_fridge": {
+      "texture": "res://assets/props/m1/broken_fridge.png",
+      "width": 96,
+      "footprint": [
+        80,
+        40
+      ],
+      "shadow": 36,
+      "flip": true
+    },
+    "m1_garbage": {
+      "texture": "res://assets/props/m1/garbage_bags.png",
+      "width": 96,
+      "footprint": [
+        78,
+        38
+      ],
+      "shadow": 32,
+      "flip": true
+    },
+    "m1_crate": {
+      "texture": "res://assets/props/m1/supply_crate.png",
+      "width": 74,
+      "footprint": [
+        62,
+        34
+      ],
+      "shadow": 28,
+      "flip": true
+    },
+    "m1_tire": {
+      "texture": "res://assets/props/m1/tire.png",
+      "width": 62,
+      "footprint": [
+        52,
+        30
+      ],
+      "shadow": 24,
+      "flip": true
+    },
+    "m1_skull_sign": {
+      "texture": "res://assets/props/m1/skull_sign.png",
+      "width": 78,
+      "footprint": [
+        34,
+        22
+      ],
+      "shadow": 30,
+      "flip": true
+    },
+    "m1_barrier": {
+      "texture": "res://assets/props/m1/barrier_arm.png",
+      "width": 150,
+      "flat": true,
+      "flip": true
+    },
+    "m1_toxin": {
+      "texture": "res://assets/props/m1/toxin_puddle.png",
+      "width": 110,
+      "flat": true,
+      "flip": true
+    },
+    "d_rust_barrel": {
+      "texture": "res://assets/props/m1/rust_barrel_intact.png",
+      "width": 54,
+      "footprint": [
+        44,
+        26
+      ],
+      "shadow": 30,
+      "flip": true,
+      "destructible": {
+        "hp": 28,
+        "broken": "res://assets/props/m1/rust_barrel_broken.png",
+        "broken_width": 70.0,
+        "reward": 2,
+        "effect": "explode",
+        "sound": "explosion"
+      }
     }
   }
 }

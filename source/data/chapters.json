@@ -49,13 +49,18 @@
     "generator",
     "dumpster",
     "crt_terminal",
-    "barricade"
+    "barricade",
+    "m1_fridge",
+    "m1_skull_sign"
    ],
    "cover_small": [
     "tire_stack",
     "oil_barrels",
     "toxic_bags",
-    "cable_spool"
+    "cable_spool",
+    "m1_garbage",
+    "m1_crate",
+    "m1_tire"
    ],
    "flat": [
     "scrap_ramp",
@@ -64,7 +69,9 @@
     "r_generator",
     "r_dumpster",
     "r_tires",
-    "r_barricade"
+    "r_barricade",
+    "m1_barrier",
+    "m1_toxin"
    ],
    "lamp": "floodlight",
    "destructibles": {
@@ -76,7 +83,8 @@
     "d_bags": 2,
     "d_dumpster": 2,
     "d_cans": 3,
-    "d_crates": 3
+    "d_crates": 3,
+    "d_rust_barrel": 4
    },
    "boss": "junk_overlord",
    "escort": {
@@ -337,7 +345,9 @@
     "water_tower",
     "shed",
     "van",
-    "spruce"
+    "spruce",
+    "m1_fridge",
+    "m1_skull_sign"
    ],
    "cover_small": [
     "tire_stack",
@@ -346,7 +356,10 @@
     "cable_spool",
     "bush",
     "bush_low",
-    "rocks"
+    "rocks",
+    "m1_garbage",
+    "m1_crate",
+    "m1_tire"
    ],
    "flat": [
     "scrap_ramp",
@@ -355,7 +368,9 @@
     "r_generator",
     "r_dumpster",
     "r_tires",
-    "r_barricade"
+    "r_barricade",
+    "m1_barrier",
+    "m1_toxin"
    ],
    "lamp": "floodlight",
    "destructibles": {
@@ -367,7 +382,8 @@
     "d_bags": 2,
     "d_dumpster": 2,
     "d_cans": 3,
-    "d_crates": 3
+    "d_crates": 3,
+    "d_rust_barrel": 4
    },
    "boss": "junk_overlord",
    "escort": {
@@ -641,14 +657,19 @@
     "spruce",
     "junk_pile",
     "container",
-    "generator"
+    "generator",
+    "m1_fridge",
+    "m1_skull_sign"
    ],
    "cover_small": [
     "bush",
     "bush_low",
     "rocks",
     "tire_stack",
-    "oil_barrels"
+    "oil_barrels",
+    "m1_garbage",
+    "m1_crate",
+    "m1_tire"
    ],
    "flat": [
     "scrap_ramp",
@@ -657,7 +678,9 @@
     "r_generator",
     "r_dumpster",
     "r_tires",
-    "r_barricade"
+    "r_barricade",
+    "m1_barrier",
+    "m1_toxin"
    ],
    "lamp": "floodlight",
    "destructibles": {
@@ -669,7 +692,8 @@
     "d_bags": 2,
     "d_dumpster": 2,
     "d_cans": 3,
-    "d_crates": 3
+    "d_crates": 3,
+    "d_rust_barrel": 4
    },
    "boss": "junk_overlord",
    "escort": {
@@ -1674,8 +1698,8 @@
   "loop_interval": 0.9,
   "loop_max_alive": 6,
   "intermission": 3.5,
-    "late_start": 20.0,
-    "late_hp": 0.04,
-    "late_damage": 0.012
+  "late_start": 20.0,
+  "late_hp": 0.04,
+  "late_damage": 0.012
  }
 }
