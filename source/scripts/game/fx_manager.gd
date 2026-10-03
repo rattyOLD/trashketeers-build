@@ -25,6 +25,10 @@ const CORPSE_LIFE := 0.9
 const GHOST_LIFE := 0.28
 const PUFF_LIFE := 0.45
 const FLASH_LIFE := 0.06
+## Хитмаркер (крестик попадания, как в шутерах): 0 — попадание, 1 — крит, 2 — убийство.
+const MARK_CAPACITY := 16
+const MARK_LIFE := [0.14, 0.18, 0.3]
+const MARK_COLOR: Array[Color] = [Color(1, 1, 1), Color("#ffc94a"), Color("#ff3b30")]
 const CHUNK_GRAVITY := 900.0
 const DAMAGE_COLOR := Color("#fff4c2")
 const CRIT_COLOR := Color("#ff4d2e")
@@ -102,6 +106,13 @@ var _fl_life := PackedFloat32Array()
 var _fl_size := PackedFloat32Array()
 var _fl_color := PackedColorArray()
 var _fl_next := 0
+
+var _mk_pos := PackedVector2Array()
+var _mk_life := PackedFloat32Array()
+var _mk_kind := PackedInt32Array()
+var _mk_next := 0
+var _callout := -1
+var _callout_text := ""
 
 const BOLT_CAPACITY := 16
 const BOLT_LIFE := 0.18
@@ -408,7 +419,24 @@ static func kind_scale(kind: StringName) -> float:
 	return 1.25 if kind == &"melee" else 1.0
 
 
+func hitmarker(at: Vector2, kind: int) -> void:
+	var i := _mk_next
+	_mk_next = (_mk_next + 1) % MARK_CAPACITY
+	_mk_pos[i] = at
+	_mk_life[i] = MARK_LIFE[kind]
+	_mk_kind[i] = kind
+
+
 func popup(at: Vector2, text: String, color: Color, font_size: float = 34.0) -> void:
+	_text(at, text, color, font_size)
+
+
+## Выкрик серии убийств: новый сразу гасит предыдущий, чтобы надписи не наслаивались.
+func callout(at: Vector2, text: String, color: Color, font_size: float) -> void:
+	if _callout >= 0 and _tx_text[_callout] == _callout_text:
+		_tx_life[_callout] = 0.0
+	_callout = _tx_next
+	_callout_text = text
 	_text(at, text, color, font_size)
 
 
@@ -650,6 +678,9 @@ func _process(delta: float) -> void:
 	for i in FLASH_CAPACITY:
 		if _fl_life[i] > 0.0:
 			_fl_life[i] -= delta
+	for i in MARK_CAPACITY:
+		if _mk_life[i] > 0.0:
+			_mk_life[i] -= delta
 	_sparks.queue_redraw()
 	_texts.queue_redraw()
 	_ground.queue_redraw()
@@ -711,6 +742,7 @@ func _draw_texts(canvas: CanvasItem) -> void:
 		if life <= 0.0 or _ch_z[i] <= 0.5:
 			continue
 		_draw_chunk(i, minf(life * 3.0, 1.0))
+	_draw_marks()
 	_batch.flush(canvas)
 	for i in TEXT_CAPACITY:
 		var life := _tx_life[i]
@@ -721,9 +753,32 @@ func _draw_texts(canvas: CanvasItem) -> void:
 		# «Поп»: цифра выпрыгивает крупнее и за 0.12 с садится в обычный размер.
 		var pop := 1.0 + maxf(0.0, 0.12 - t * TEXT_LIFE) / 0.12 * 0.6
 		var size := int(_tx_size[i] * pop)
-		var p := _tx_pos[i] - Vector2(80, 0)
-		canvas.draw_string_outline(_font, p, _tx_text[i], HORIZONTAL_ALIGNMENT_CENTER, 160, size, maxi(int(size * 0.42), 6), Color(OUTLINE, alpha))
-		canvas.draw_string(_font, p, _tx_text[i], HORIZONTAL_ALIGNMENT_CENTER, 160, size, Color(_tx_color[i], alpha))
+		var p := _tx_pos[i] - Vector2(200, 0)
+		canvas.draw_string_outline(_font, p, _tx_text[i], HORIZONTAL_ALIGNMENT_CENTER, 400, size, maxi(int(size * 0.42), 6), Color(OUTLINE, alpha))
+		canvas.draw_string(_font, p, _tx_text[i], HORIZONTAL_ALIGNMENT_CENTER, 400, size, Color(_tx_color[i], alpha))
+
+
+## Крестик из четырёх штрихов по диагоналям: выпрыгивает крупнее и быстро садится; у убийства — крупнее и дольше.
+func _draw_marks() -> void:
+	for i in MARK_CAPACITY:
+		var life := _mk_life[i]
+		if life <= 0.0:
+			continue
+		var kind := _mk_kind[i]
+		var total: float = MARK_LIFE[kind]
+		var t := 1.0 - life / total
+		var pop := 1.0 + 0.5 * maxf(0.0, 1.0 - t * 4.0)
+		var big := 1.35 if kind == 2 else 1.0
+		var gap := 7.0 * big * pop
+		var length := 10.0 * big * pop
+		var alpha := clampf(life / total * 2.5, 0.0, 1.0)
+		var color := Color(MARK_COLOR[kind], alpha)
+		var shade := Color(OUTLINE, 0.75 * alpha)
+		var p := _mk_pos[i]
+		for k in 4:
+			var dir := Vector2.from_angle(PI * 0.25 + PI * 0.5 * k)
+			_batch.line(p + dir * gap, p + dir * (gap + length), shade, 5.5 * big)
+			_batch.line(p + dir * gap, p + dir * (gap + length), color, 2.6 * big)
 
 
 func _draw_ground(canvas: CanvasItem) -> void:
@@ -803,6 +858,9 @@ func _draw_chunk(i: int, alpha: float) -> void:
 
 func _resize_all() -> void:
 	# Новые Packed-массивы заполняются нулями: life = 0 означает «частица мертва».
+	_mk_pos = PackedVector2Array(); _mk_pos.resize(MARK_CAPACITY)
+	_mk_life = PackedFloat32Array(); _mk_life.resize(MARK_CAPACITY)
+	_mk_kind = PackedInt32Array(); _mk_kind.resize(MARK_CAPACITY)
 	_sp_pos = PackedVector2Array(); _sp_pos.resize(SPARK_CAPACITY)
 	_sp_vel = PackedVector2Array(); _sp_vel.resize(SPARK_CAPACITY)
 	_sp_life = PackedFloat32Array(); _sp_life.resize(SPARK_CAPACITY)

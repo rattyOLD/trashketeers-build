@@ -83,6 +83,11 @@ var _last_marker: LastEnemyMarker
 var _weapon_pickups: Array[WeaponPickup] = []
 var _adrenaline_left := ADRENALINE_TIME
 var _combo := 0
+## Серия убийств подряд (окно MULTI_WINDOW): на порогах — выкрик над енотом, звук и встряска.
+const MULTI_WINDOW := 0.55
+const MULTI_CALLS := {3: "ТРОЙНОЕ!", 5: "РЕЗНЯ!", 8: "МЯСОРУБКА!", 12: "АПОКАЛИПСИС!"}
+var _multi := 0
+var _multi_left := 0.0
 var _combo_timer := 0.0
 var _recorded := false
 var _portal: Portal
@@ -349,6 +354,7 @@ func _physics_process(delta: float) -> void:
 	_combo_timer -= delta
 	if _combo_timer <= 0.0:
 		_combo = 0
+	_multi_left -= delta
 	if _adrenaline_left > 0.0:
 		_adrenaline_left -= delta
 		if _adrenaline_left <= 0.0:
@@ -763,6 +769,17 @@ func _split_enemy(enemy: Enemy, at: Vector2) -> void:
 var _torch_depth := 0
 
 
+func _count_multikill() -> void:
+	_multi = _multi + 1 if _multi_left > 0.0 else 1
+	_multi_left = MULTI_WINDOW
+	if not MULTI_CALLS.has(_multi):
+		return
+	var heat := minf(_multi / 12.0, 1.0)
+	fx.callout(player.global_position + Vector2(0, -120), MULTI_CALLS[_multi], Color("#ffd257").lerp(Color("#ff3b30"), heat), 30.0 + 8.0 * heat)
+	SoundManager.play(&"k_perfect")
+	add_shake(0.12)
+
+
 func _on_enemy_died(enemy: Enemy) -> void:
 	var data := enemy.data
 	if data.is_boss():
@@ -787,6 +804,12 @@ func _on_enemy_died(enemy: Enemy) -> void:
 		BulletPool.explode(at, RunMods.BLAST_RADIUS, RunMods.BLAST_DAMAGE_BASE + RunMods.BLAST_DAMAGE_PER_WAVE * wave, Bullet.Team.ENEMY, Color("#ff7a3d"), 1.0)
 	kills += 1
 	hero_skills.on_kill()
+	fx.hitmarker(body, 2)
+	SoundManager.play(&"k_combo")
+	if not data.is_boss() and data.max_hp >= 120.0:
+		hitstop(0.04)
+		add_shake(0.15)
+	_count_multikill()
 	if SaveService.get_character_id() == "red_panda" and enemy.bleed_left > 0.0 and _torch_depth < 2:
 		_torch_depth += 1
 		BulletPool.explode(at, 95.0, 38.0 * (1.0 + stats.get_stat(&"damage_mult")), Bullet.Team.PLAYER, Color("#ff8a2a"), 1.0, &"fire")

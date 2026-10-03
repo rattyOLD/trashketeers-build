@@ -35,9 +35,12 @@ const CAMERA_KICK_DECAY := 16.0
 const HIT_FX_PER_SEC := 45.0
 const HIT_FX_BURST := 10.0
 const MUZZLE_FLASH_GAP := 0.06
+## Не чаще одного крестика попадания за MARK_GAP: дробь и пулемёт не рисуют их пачками.
+const MARK_GAP := 0.06
 var _hit_fx_budget := HIT_FX_BURST
 var _fx_scale := 1.0
 var _flash_cd := 0.0
+var _mark_cd := 0.0
 var stats := RunStats.new()
 var finished := false
 
@@ -349,6 +352,7 @@ func _physics_process(delta: float) -> void:
 		return
 	_hit_fx_budget = minf(_hit_fx_budget + delta * HIT_FX_PER_SEC * _fx_scale, HIT_FX_BURST)
 	_flash_cd = maxf(_flash_cd - delta, 0.0)
+	_mark_cd = maxf(_mark_cd - delta, 0.0)
 	var input := hud.joystick.output
 	if not hud.joystick.is_active():
 		input = Input.get_vector(&"move_left", &"move_right", &"move_up", &"move_down")
@@ -459,6 +463,9 @@ func _on_bullet_hit(bullet: Bullet, target: Node2D) -> void:
 	var crit := bullet.last_hit_crit
 	if bullet.team == Bullet.Team.PLAYER:
 		SoundManager.play(&"hit")
+		if target is Enemy and _mark_cd <= 0.0:
+			_mark_cd = MARK_GAP
+			fx.hitmarker((target as Enemy).get_aim_point(), 1 if crit else 0)
 		if crit:
 			fx.ring(bullet.global_position, Color("#ffb347"), 26.0)
 			hitstop(0.035)
