@@ -3,7 +3,6 @@
 # Секреты репозитория (Settings → Secrets and variables → Actions):
 #   ANDROID_KEYSTORE_BASE64 — base64 файла trashketeers-beta.keystore
 #   ANDROID_KEYSTORE_PASSWORD — пароль хранилища и ключа (алиас trashketeers)
-#   FIREBASE_APP_ID — App ID Android-приложения в Firebase (1:…:android:…)
 #   FIREBASE_SERVICE_ACCOUNT — JSON ключа сервисного аккаунта с ролью Firebase App Distribution Admin
 name: Android beta
 
@@ -97,7 +96,7 @@ jobs:
       - name: Отправить тестерам (Firebase App Distribution)
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
-          appId: ${{ secrets.FIREBASE_APP_ID }}
+          appId: 1:80820379449:android:83df21951e3a0f0fc7d2e8
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           groups: testers
           file: source/build/android/TrashSquad.apk
