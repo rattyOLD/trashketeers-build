@@ -16,6 +16,15 @@ const LIGHT_GAIN := 0.9
 static var _texture: ImageTexture
 
 var ambient := Color(0.7, 0.68, 0.78)
+## Тон по типу главы: Свалка (М1–М3) — темнее, Банк (М4–М6) — светлее. Не хоррор: свет только мягче/ярче.
+const LAYOUT_AMBIENT := {
+	"junkyard": Color(0.62, 0.6, 0.71),
+	"bank": Color(0.84, 0.81, 0.86),
+}
+
+
+func set_layout(layout: String) -> void:
+	ambient = LAYOUT_AMBIENT.get(layout, ambient)
 var player: Node2D
 
 var _viewport: SubViewport

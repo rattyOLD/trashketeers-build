@@ -193,6 +193,7 @@ func start(_weapon_id: StringName = &"") -> void:
 	layers.fx.add_child(_last_marker)
 
 	_setup_common(map.bounds, pickups.nut_texture)
+	light_map.set_layout(map.layout)
 	_last_marker.setup(director, enemies, camera)
 	minimap = Minimap.new()
 	minimap.setup(map, player, enemies, director)
@@ -555,6 +556,7 @@ func _switch_chapter(index: int = -1) -> void:
 	map.clear()
 	map.build(layers, chapter)
 	hazards.attach_level(map)
+	light_map.set_layout(map.layout)
 	_portal = null
 	player.global_position = map.player_start
 	player.reset_physics_interpolation()

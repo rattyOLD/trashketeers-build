@@ -20,6 +20,8 @@ var hp_now := 0.0
 var hp_max := 0.0
 var posture := -1.0
 var broken := false
+## Телефонная шапка: всё (шкала оглушения, «ОГЛУШЁН») — внутри своего прямоугольника, ниже ничего не торчит.
+var compact := false
 
 var _fury := false
 var _flash := 0.0
@@ -83,10 +85,15 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	var bar_rect := Rect2(WING_WIDTH, size.y - BAR_HEIGHT - 4.0, size.x - WING_WIDTH * 2.0, BAR_HEIGHT)
+	if compact:
+		var side := WING_WIDTH if winged else 8.0
+		var bar_h := 28.0
+		bar_rect = Rect2(side, size.y - bar_h - 6.0 - (14.0 if posture >= 0.0 else 0.0), size.x - side * 2.0, bar_h)
 	var title_pos := Vector2(0, bar_rect.position.y - 8.0)
 	var title_color := FURY_PINK if _fury else (Color("#ffd6ac") if winged else Color("#ffd257"))
-	draw_string_outline(_font, title_pos, title, HORIZONTAL_ALIGNMENT_CENTER, size.x, 26, 8, OUTLINE)
-	draw_string(_font, title_pos, title, HORIZONTAL_ALIGNMENT_CENTER, size.x, 26, title_color)
+	var shown_title := (title + " · ОГЛУШЁН") if compact and broken and posture >= 0.0 else title
+	draw_string_outline(_font, title_pos, shown_title, HORIZONTAL_ALIGNMENT_CENTER, size.x, 26, 8, OUTLINE)
+	draw_string(_font, title_pos, shown_title, HORIZONTAL_ALIGNMENT_CENTER, size.x, 26, title_color)
 
 	if winged:
 		_draw_wing(bar_rect, -1.0)
@@ -109,11 +116,13 @@ func _draw() -> void:
 	draw_string(_font, Vector2(bar_rect.position.x, text_y), label, HORIZONTAL_ALIGNMENT_CENTER, bar_rect.size.x, 22, Color.WHITE)
 	if posture >= 0.0:
 		var pr := Rect2(bar_rect.position + Vector2(bar_rect.size.x * 0.15, bar_rect.size.y + 9.0), Vector2(bar_rect.size.x * 0.7, 9.0))
+		if compact:
+			pr = Rect2(bar_rect.position + Vector2(bar_rect.size.x * 0.15, bar_rect.size.y + 7.0), Vector2(bar_rect.size.x * 0.7, 6.0))
 		draw_rect(pr.grow(3.0), OUTLINE)
 		draw_rect(pr, Color("#21201e"))
 		var pcolor := Color("#ffe27a") if broken else Color("#ffab53").lerp(Color("#ffffff"), posture * 0.6)
 		draw_rect(Rect2(pr.position, Vector2(pr.size.x * posture, pr.size.y)), pcolor)
-		if broken:
+		if broken and not compact:
 			draw_string_outline(_font, Vector2(0, pr.end.y + 22.0), "ОГЛУШЁН", HORIZONTAL_ALIGNMENT_CENTER, size.x, 20, 6, OUTLINE)
 			draw_string(_font, Vector2(0, pr.end.y + 22.0), "ОГЛУШЁН", HORIZONTAL_ALIGNMENT_CENTER, size.x, 20, Color("#ffe27a"))
 	if _flash > 0.0:

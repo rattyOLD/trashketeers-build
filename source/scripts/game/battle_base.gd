@@ -10,7 +10,9 @@ signal exit_requested
 signal restart_requested
 
 const CAMERA_SMOOTHING := 9.0
-const PORTRAIT_CAMERA_DROP := 150.0
+const PORTRAIT_CAMERA_DROP := 70.0
+## Телефон (портрет): камера чуть отдалена — шапка занимает верх экрана, а поля боя видно больше.
+const PORTRAIT_ZOOM := 0.9
 const HIST_STEP := 5.0
 const HIST_MAX := 24
 const SHOT_STEP := 30.0
@@ -182,8 +184,12 @@ func _setup_common(camera_bounds: Rect2, currency_icon: Texture2D) -> void:
 
 
 func _apply_camera_zoom() -> void:
-	var z := 1.0 if Orient.portrait else LANDSCAPE_ZOOM
+	var z := camera_zoom()
 	camera.zoom = Vector2(z, z)
+
+
+static func camera_zoom() -> float:
+	return PORTRAIT_ZOOM if Orient.portrait else LANDSCAPE_ZOOM
 
 
 func set_camera_bounds(bounds: Rect2) -> void:
@@ -416,7 +422,7 @@ func _show_result(victory: bool, lines: PackedStringArray, title: String = "", c
 
 func _update_shake(delta: float) -> void:
 	_kick = _kick.lerp(Vector2.ZERO, clampf(CAMERA_KICK_DECAY * delta, 0.0, 1.0))
-	## В вертикали чат и карта сверху закрывают бой: енот стоит ниже центра экрана.
+	## В вертикали шапка закрывает верх, а пальцы на кнопках — низ: енот чуть ниже центра, посередине свободной зоны.
 	var base := Vector2(0.0, -PORTRAIT_CAMERA_DROP) if Orient.portrait else Vector2.ZERO
 	if _shake <= 0.0:
 		camera.offset = base + _kick

@@ -486,5 +486,5 @@ func _pick_weighted(weights: Dictionary) -> StringName:
 
 
 func _offscreen_radius() -> float:
-	var zoom := 1.0 if Orient.portrait else BattleBase.LANDSCAPE_ZOOM
+	var zoom := BattleBase.camera_zoom()
 	return get_viewport().get_visible_rect().size.length() * 0.5 / zoom + SPAWN_MARGIN

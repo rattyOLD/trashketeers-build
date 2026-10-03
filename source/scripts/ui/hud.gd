@@ -55,6 +55,8 @@ var _boss_bar: BossBar
 var _banner: Label
 var _wave_title: Label
 var _title_tween: Tween
+var _toast_item: Array = []
+var _toast_tween: Tween
 var _wave_sub: Label
 var _countdown: Label
 var _toast: PanelContainer
@@ -671,6 +673,8 @@ func _dock_boss_bar() -> void:
 		return
 	var inverse := _band.get_global_transform().affine_inverse()
 	var top_left := inverse * _barks.get_global_rect().position
+	_boss_bar.compact = true
+	_boss_bar.custom_minimum_size = Vector2.ZERO
 	UiStyle.anchor(_boss_bar, Vector2(0.0, 0.0), Rect2(top_left, Vector2(RADIO_RECT.size.x, _barks.size.y)))
 
 
@@ -816,6 +820,12 @@ func hide_boss() -> void:
 
 
 func show_banner(text: String, color: Color, duration: float = 2.2) -> void:
+	if _band != null:
+		# Строка событий одна: баннер ждёт, пока уйдут заставка главы, заголовок волны и прошлый баннер.
+		if (_chapter_card != null and _chapter_card.visible) or _titles_showing() or _banner.visible:
+			get_tree().create_timer(0.3, false).timeout.connect(show_banner.bind(text, color, duration))
+			return
+		_hide_toast_now()
 	duration = minf(duration, 1.8)
 	var half := 350.0 if _band != null else minf(350.0, (_root.size.x - 28.0) * 0.5)
 	_banner.offset_left = -half
@@ -851,7 +861,9 @@ func show_wave_cleared(bonus_nuts: int) -> void:
 
 func show_countdown(seconds: int) -> void:
 	if _band != null:
-		_clear_wave_titles()
+		# Пока видна другая надпись, этот тик отсчёта пропускаем: следующий покажется через секунду.
+		if (_chapter_card != null and _chapter_card.visible) or _banner.visible or (_wave_title.visible and _wave_title.modulate.a > 0.05):
+			return
 		_hide_toast_now()
 	_countdown.text = "Следующая волна через %d" % seconds
 	_countdown.visible = true
@@ -908,10 +920,18 @@ func show_chapter(subtitle: String, title: String, accent: Color = UiStyle.NEON)
 	_chapter_card.play(subtitle, title, accent)
 
 
-## Лента событий в шапке одна: важное (отсчёт, волна, глава) сразу гасит текущий тост.
+## Лента событий в шапке одна: важное (отсчёт, волна, глава, баннер) убирает текущий тост, а тост
+## возвращается в начало очереди и покажется целиком, когда строка освободится.
 func _hide_toast_now() -> void:
-	if _band != null and _toast != null and _toast.visible:
-		_toast.modulate.a = 0.0
+	if _band == null or _toast == null or not _toast.visible:
+		return
+	if _toast_tween != null and _toast_tween.is_valid():
+		_toast_tween.kill()
+	_toast.visible = false
+	if not _toast_item.is_empty():
+		_toast_queue.push_front(_toast_item)
+		_toast_item = []
+	get_tree().create_timer(0.4, false).timeout.connect(_next_toast)
 
 
 func show_revive(cost: int, gems: int, ad_available: bool, summary: Dictionary) -> void:
@@ -948,7 +968,7 @@ func is_pause_open() -> bool:
 
 func _process(delta: float) -> void:
 	if _band != null and _rail_combo.visible:
-		_rail_combo.modulate.a = 0.0 if (_chapter_card.visible or _toast.visible or (_wave_sub.visible and _wave_sub.modulate.a > 0.05)) else 1.0
+		_rail_combo.modulate.a = 0.0 if (_chapter_card.visible or _toast.visible or _banner.visible or (_wave_sub.visible and _wave_sub.modulate.a > 0.05)) else 1.0
 	_items_clock += delta
 	if _layout_revision != Controls.revision or _items_clock >= 0.25:
 		_items_clock = 0.0
@@ -974,6 +994,12 @@ func _event_busy() -> bool:
 		return false
 	if _chapter_card != null and _chapter_card.visible:
 		return true
+	if _banner != null and _banner.visible:
+		return true
+	return _titles_showing()
+
+
+func _titles_showing() -> bool:
 	for label: Label in [_wave_title, _countdown]:
 		if label != null and label.visible and label.modulate.a > 0.05:
 			return true
@@ -989,7 +1015,7 @@ func _clear_wave_titles() -> void:
 
 
 func _animate_titles(hold: float) -> void:
-	if _band != null and _chapter_card != null and _chapter_card.visible:
+	if _band != null and ((_chapter_card != null and _chapter_card.visible) or _banner.visible):
 		get_tree().create_timer(0.3, false).timeout.connect(_animate_titles.bind(hold))
 		return
 	_hide_toast_now()
@@ -1020,6 +1046,8 @@ func _fit_font(label: Label, base: int, max_width: float) -> void:
 
 
 func _next_toast() -> void:
+	if _toast.visible:
+		return
 	if _toast_queue.is_empty():
 		_toast_busy = false
 		return
@@ -1032,6 +1060,7 @@ func _next_toast() -> void:
 		get_tree().create_timer(0.4, false).timeout.connect(_next_toast)
 		return
 	var item: Array = _toast_queue.pop_front()
+	_toast_item = item
 	var half := minf(300.0, (_root.size.x - 36.0) * 0.5)
 	var shift := 0.0
 	if _band != null:
@@ -1046,8 +1075,14 @@ func _next_toast() -> void:
 	_toast.custom_minimum_size = Vector2(half * 2.0, 0.0)
 	_toast_title.text = item[0]
 	_toast_text.text = item[1]
-	_fit_font(_toast_title, _band_font(20) if _band != null else 28, half * 2.0 - 48.0)
-	_fit_font(_toast_text, _band_font(14) if _band != null else 20, half * 2.0 - 48.0)
+	_fit_font(_toast_title, _band_font(18) if _band != null else 28, half * 2.0 - 48.0)
+	_fit_font(_toast_text, _band_font(13) if _band != null else 20, half * 2.0 - 48.0)
+	if _band != null:
+		# Тост целиком помещается в строку событий (EVENT_H) и не заходит за нижнюю границу шапки.
+		var panel := _toast.get_theme_stylebox("panel") as StyleBoxFlat
+		panel.content_margin_top = 5
+		panel.content_margin_bottom = 5
+		_toast.get_child(0).add_theme_constant_override("separation", 0)
 	_toast.size = Vector2(half * 2.0, 0.0)
 	_toast.reset_size.call_deferred()
 	_toast_title.add_theme_color_override("font_color", item[2])
@@ -1055,12 +1090,13 @@ func _next_toast() -> void:
 	var hidden_y := -140.0
 	var shown_y := _toast_y
 	if _band != null:
-		hidden_y = _event_top - 24.0
-		shown_y = _event_top - 4.0
+		shown_y = _event_top + 2.0
+		hidden_y = shown_y + 14.0
 		_toast.modulate.a = 0.0
 		_toast.create_tween().tween_property(_toast, "modulate:a", 1.0, 0.25)
 	_toast.position.y = hidden_y
 	var tween := _toast.create_tween()
+	_toast_tween = tween
 	tween.tween_property(_toast, "position:y", shown_y, 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	tween.tween_interval(1.8)
 	if _band != null:
@@ -1069,6 +1105,7 @@ func _next_toast() -> void:
 		tween.tween_property(_toast, "position:y", hidden_y, 0.3).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	tween.tween_callback(func() -> void:
 		_toast.visible = false
+		_toast_item = []
 		_next_toast())
 
 
