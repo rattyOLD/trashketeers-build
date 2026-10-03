@@ -109,6 +109,7 @@ func setup_art(prop: String, decals_layer: Node2D) -> void:
 	hp = max_hp
 	nut_reward = int(_destruct.get("reward", 2))
 	_common_setup()
+	ArenaProp.texture_of(str(_destruct.get("broken", "")))
 	_sprite = ArenaProp.make_sprite(str(_def.get("texture", "")), float(_def.get("width", 0.0)))
 	if _def.get("flip", false):
 		_sprite.flip_h = randf() < 0.5
@@ -230,6 +231,7 @@ func _break_art() -> void:
 		_sprite.scale = fresh.scale
 		_sprite.offset = fresh.offset
 		_sprite.flip_h = flip
+		fresh.free()
 		fresh.free()
 		_sprite.z_index = -1
 	if _destruct.get("effect", "") == "explode":

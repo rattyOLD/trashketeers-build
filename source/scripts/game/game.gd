@@ -100,6 +100,34 @@ var _switching := false
 var _boss_started := 0.0
 
 
+## Текстуры врагов главы грузятся под загрузочным экраном (или затемнением смены главы), а не при
+## первом появлении крысы: синхронная загрузка листа посреди боя на телефоне — фриз до секунды.
+## Только враги этой главы: все листы разом — лишние ~50 МБ видеопамяти на слабых телефонах.
+static func warm_chapter(chapter: Dictionary) -> void:
+	var ids := {}
+	for wave: Dictionary in chapter.get("waves", []):
+		for id in (wave.get("weights", {}) as Dictionary):
+			ids[str(id)] = true
+		for key in ["boss", "miniboss"]:
+			if not str(wave.get(key, "")).is_empty():
+				ids[str(wave[key])] = true
+	if not str(chapter.get("boss", "")).is_empty():
+		ids[str(chapter["boss"])] = true
+	var escort: Dictionary = chapter.get("escort", {})
+	if escort.has("enemy"):
+		ids[str(escort["enemy"])] = true
+	for id: String in ids:
+		var data := ContentDB.get_enemy(StringName(id))
+		if data == null:
+			continue
+		var _texture := data.texture
+		var _attack := data.attack_texture
+		if not data.frames_id.is_empty():
+			var sheet := FrameDB.get_sheet(data.frames_id)
+			for path in sheet.get("regions", PackedStringArray()):
+				RigDB.data_texture(path)
+
+
 func start(_weapon_id: StringName = &"") -> void:
 	randomize()
 	RunMods.clear()
@@ -113,6 +141,8 @@ func start(_weapon_id: StringName = &"") -> void:
 		RigSprite.prewarm(enemy_data.rig_id, Enemy.RIG_MARGIN)
 		for variant in enemy_data.rig_variants:
 			RigSprite.prewarm(variant, Enemy.RIG_MARGIN)
+	if story_mission.is_empty():
+		warm_chapter(ContentDB.get_chapter(0))
 	_build_layers()
 	liquids = LiquidFx.new()
 	layers.decals.add_child(liquids)
@@ -514,6 +544,7 @@ func _enter_portal() -> void:
 
 func _switch_chapter(index: int = -1) -> void:
 	var chapter := ContentDB.get_chapter(director.chapter_index + 1 if index < 0 else index)
+	warm_chapter(chapter)
 	enemies.release_all()
 	BulletPool.release_all()
 	lobs.clear()
