@@ -1030,9 +1030,19 @@ func owns_character(character_id: String) -> bool:
 	return (data["characters"] as Array).has(character_id)
 
 
+## Герой погиб по сюжету: миссия гибели пройдена, а финал (m6) ещё нет. После финала он доступен как «архив».
+func hero_fallen(character_id: String) -> bool:
+	var mission_id := str(CharacterDB.get_character(character_id).get("story_fallen", ""))
+	return not mission_id.is_empty() and story_done(mission_id) and not story_done("m6")
+
+
+func hero_fallen_mission(character_id: String) -> String:
+	return str(CharacterDB.get_character(character_id).get("story_fallen", ""))
+
+
 func get_character_id() -> String:
 	var id := str(data["character"])
-	return id if CharacterDB.has_character(id) and owns_character(id) else CharacterDB.DEFAULT_ID
+	return id if CharacterDB.has_character(id) and owns_character(id) and not hero_fallen(id) else CharacterDB.DEFAULT_ID
 
 
 func get_character() -> Dictionary:
@@ -1063,7 +1073,7 @@ func upgrade_hero(character_id: String) -> bool:
 
 
 func select_character(character_id: String) -> void:
-	if owns_character(character_id):
+	if owns_character(character_id) and not hero_fallen(character_id):
 		data["character"] = character_id
 		save_data()
 
@@ -1082,7 +1092,7 @@ func grant_story_heroes(mission_id: String) -> Array:
 
 
 func buy_character(character_id: String) -> bool:
-	if not CharacterDB.has_character(character_id) or owns_character(character_id):
+	if not CharacterDB.has_character(character_id) or owns_character(character_id) or hero_fallen(character_id):
 		return false
 	var entry := CharacterDB.get_character(character_id)
 	var currency: String = entry["currency"]

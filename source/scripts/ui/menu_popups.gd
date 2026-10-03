@@ -404,6 +404,9 @@ class Shop:
 		elif selected:
 			action = UiStyle.button("Выбран", UiStyle.PANEL, 22, Vector2(124, 64))
 			action.disabled = true
+		elif SaveService.hero_fallen(id):
+			action = UiStyle.button("Погиб (оп. %s)" % SaveService.hero_fallen_mission(id).trim_prefix("m"), UiStyle.PANEL, 18, Vector2(124, 64))
+			action.disabled = true
 		elif SaveService.owns_character(id):
 			action = UiStyle.button("Выбрать", UiStyle.NEON.darkened(0.3), 22, Vector2(124, 64))
 			action.pressed.connect(func() -> void:

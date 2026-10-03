@@ -287,7 +287,8 @@
         "text": "На 4 с все выстрелы критуют, урон растёт, а первые полсекунды Шэдоу неуязвим.",
         "color": "#b46bff"
       },
-      "story_unlock": "m3"
+      "story_unlock": "m3",
+      "story_fallen": "m4"
     },
     {
       "id": "neon_hopper",
@@ -389,7 +390,8 @@
         "text": "Бросает колбу в гущу врагов: облако яда на 6 с травит и замедляет всех внутри.",
         "color": "#7dff5c"
       },
-      "story_unlock": "m1"
+      "story_unlock": "m1",
+      "story_fallen": "m2"
     },
     {
       "id": "pigeon_mafioso",
@@ -440,7 +442,8 @@
         "text": "Дрон сбрасывает серию бомб по линии прицела. Метки видны за секунду до взрыва.",
         "color": "#ffb347"
       },
-      "story_unlock": "m2"
+      "story_unlock": "m2",
+      "story_fallen": "m4"
     },
     {
       "id": "sniper_f",

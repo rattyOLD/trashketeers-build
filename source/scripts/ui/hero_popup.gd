@@ -316,6 +316,9 @@ func _build_actions(character: Dictionary, owned: bool) -> void:
 			_action_box.add_child(button)
 			_action_box.add_child(hint)
 			return
+	elif SaveService.hero_fallen(id):
+		button = UiStyle.button("ПОГИБ В ОПЕРАЦИИ %s" % SaveService.hero_fallen_mission(id).trim_prefix("m"), UiStyle.PANEL, 26, Vector2(0, 88))
+		button.disabled = true
 	elif SaveService.get_character_id() == id:
 		button = UiStyle.button("ВЫБРАН", UiStyle.PANEL, 30, Vector2(0, 88))
 		button.disabled = true
