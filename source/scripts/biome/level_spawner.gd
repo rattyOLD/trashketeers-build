@@ -46,7 +46,7 @@ const DOOR_GAP := 6
 const DOOR_LEAD := 0.03
 const WALL_THICK := 2
 ## Выживание: арена крупнее сюжетной (по каждой стороне), а на Свалке — сетка дорог на районы.
-const SURVIVAL_SCALE := 1.3
+const SURVIVAL_SCALE := 1.5
 const DISTRICTS := 3
 
 var chapter: Dictionary = {}
@@ -377,7 +377,7 @@ func _junk_lane(x: int, y: int, cx: int, mid_y: int) -> bool:
 
 
 ## Выживание на Свалке: сетка дорог делит арену на районы 3×3; вариант главы добавляет свою черту
-## (1 — кольцо вокруг центральной площади, 2 — диагональный проезд, 3 — средняя поперечная улица).
+## (1 — кольцо вокруг центральной площади, 3 — средняя поперечная улица).
 func _district_lane(x: int, y: int, cx: int, mid_y: int, width: float) -> bool:
 	if y < RING_TOP + _boss_cells.y + 1:
 		return false
@@ -392,10 +392,6 @@ func _district_lane(x: int, y: int, cx: int, mid_y: int, width: float) -> bool:
 			var rx := absi(x - cx)
 			var ry := absi(y - mid_y)
 			return (absi(rx - 6) < 2 and ry <= 7) or (absi(ry - 6) < 2 and rx <= 7)
-		2:
-			var dx := float(x - _road_x[0]) / float(maxi(_road_x[1] - _road_x[0], 1))
-			var dy := float(y - _road_y[0]) / float(maxi(_road_y[1] - _road_y[0], 1))
-			return dx >= 0.0 and dx <= 1.0 and absf(dx - dy) * float(_road_x[1] - _road_x[0]) < 1.6
 		3:
 			return absi(y - mid_y) < 2 and x > RING_SIDE + 2 and x < grid_size.x - RING_SIDE - 2
 	return false
@@ -422,6 +418,17 @@ func _district_of(p: Vector2) -> int:
 func _bank_zone(x: int, y: int, cx: int, mid_y: int) -> Zone:
 	if x < RING_SIDE + 3 or x >= grid_size.x - RING_SIDE - 3:
 		return Zone.LANE
+	if not _road_x.is_empty():
+		# Выживание: мощёные аллеи делят парк на районы, центральный район — площадь с медальоном.
+		if y < RING_TOP + 8 or _district_of(cell_to_world(Vector2i(x, y))) == DISTRICTS * DISTRICTS / 2:
+			return Zone.FLOOR
+		for rx in _road_x:
+			if absi(x - rx) < 2:
+				return Zone.FLOOR
+		for ry in _road_y:
+			if absi(y - ry) < 2:
+				return Zone.FLOOR
+		return Zone.LAWN
 	var variant := int(chapter.get("variant", 0))
 	var medal := Vector2(x - cx + 0.5, (y - (mid_y + 8)) * 1.25).length() < 6.5
 	if variant == 1:
@@ -830,6 +837,8 @@ func _build_center() -> void:
 	if layout == "bank":
 		var medal := ArenaDecor.floor_image("res://assets/props/ch2/medallion.png", 360.0)
 		medal.position = cell_to_world(Vector2i(grid_size.x / 2, grid_size.y / 2 + 8)) + Vector2(-CELL * 0.5, 0)
+		if not _road_x.is_empty():
+			medal.position = cell_to_world(Vector2i((_road_x[0] + _road_x[1]) / 2, (_road_y[0] + _road_y[1]) / 2))
 		_own(medal, _layers.decals)
 		var curbs := ArenaDecor.Curbs.new()
 		curbs.segments = _zone_edges([Zone.LAWN])
@@ -984,7 +993,7 @@ func _build_cover() -> void:
 func _build_scenes() -> void:
 	var library: Dictionary = ConfigLoader.load_json("res://data/scenes.json").get("scenes", {})
 	var area := _interior_rect()
-	if not _road_x.is_empty() and layout != "bank":
+	if not _road_x.is_empty():
 		_build_districts(library, area)
 		return
 	var entries: Array = chapter.get("scenes", []).duplicate()
@@ -1038,12 +1047,28 @@ func _build_districts(library: Dictionary, area: Rect2) -> void:
 		for attempt in 160:
 			if done >= per:
 				break
-			var p := _scene_point("lane", area)
-			if p == Vector2.INF or _district_of(p) != d or not _scene_spacing_ok(p):
+			var p := _district_point(d, area)
+			if p == Vector2.INF or not _scene_spacing_ok(p):
 				continue
 			if _place_scene(scene, p):
 				_cover_spots.append(p)
 				done += 1
+
+
+## Точка в районе d у его дороги (2–5 клеток от линии дороги), по сетке 32 px.
+func _district_point(d: int, area: Rect2) -> Vector2:
+	var p := Vector2(randf_range(area.position.x, area.end.x), randf_range(area.position.y, area.end.y))
+	if _district_of(p) != d or not _cover_allowed(p, 0.0):
+		return Vector2.INF
+	var c := world_to_cell(p)
+	var near := 99
+	for rx in _road_x:
+		near = mini(near, absi(c.x - rx))
+	for ry in _road_y:
+		near = mini(near, absi(c.y - ry))
+	if near < 3 or near > 6:
+		return Vector2.INF
+	return p.snapped(Vector2(32.0, 32.0))
 
 
 func _scene_point(anchor: String, area: Rect2) -> Vector2:
