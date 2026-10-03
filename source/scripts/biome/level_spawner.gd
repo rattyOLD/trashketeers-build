@@ -938,6 +938,9 @@ func _build_scenes() -> void:
 
 func _scene_point(anchor: String, area: Rect2) -> Vector2:
 	var p := Vector2(randf_range(area.position.x, area.end.x), randf_range(area.position.y, area.end.y))
+	# Посреди квартала сцены не висят: «открытые» тоже встают у дороги (как у обочины).
+	if anchor == "open":
+		anchor = "lane"
 	match anchor:
 		"back":
 			p.y = randf_range(area.position.y, area.position.y + 240.0)
@@ -955,7 +958,8 @@ func _scene_point(anchor: String, area: Rect2) -> Vector2:
 				return Vector2.INF
 	if not _cover_allowed(p, 0.0):
 		return Vector2.INF
-	return p
+	# Шаг сетки 32 px: соседние сцены и их предметы встают рядами, а не вразброс.
+	return p.snapped(Vector2(32.0, 32.0))
 
 
 func _scene_spacing_ok(p: Vector2) -> bool:
@@ -1046,7 +1050,7 @@ func _build_decor() -> void:
 	for id in chapter.get("flat", []):
 		for n in 1:
 			for attempt in 30:
-				var p := Vector2(randf_range(area.position.x, area.end.x), randf_range(area.position.y, area.end.y))
+				var p := _near_scene_point(area, 160.0, 320.0)
 				if _cover_allowed(p, 40.0) and is_area_clear(p, CELL * 1.6):
 					var prop := ArenaProp.new()
 					prop.position = p
@@ -1056,26 +1060,45 @@ func _build_decor() -> void:
 	if layout == "bank":
 		return
 	var stains := ArenaDecor.Stains.new()
+	# Масло и грязь — там, где стоит хлам и техника, а не равномерно по полу.
 	for i in int(16 * _area_scale):
-		stains.spots.append([Vector2(randf_range(area.position.x, area.end.x), randf_range(area.position.y, area.end.y)), randf_range(26.0, 64.0), randf_range(-0.6, 0.6)])
+		stains.spots.append([_near_scene_point(area, 40.0, 190.0), randf_range(26.0, 64.0), randf_range(-0.6, 0.6)])
 	_own(stains, _layers.decals)
 	var puddles := ArenaDecor.Puddles.new()
 	for attempt in int(PUDDLE_COUNT * 8 * _area_scale):
 		if _puddles.size() >= int(PUDDLE_COUNT * _area_scale):
 			break
 		var p := Vector2(randf_range(area.position.x, area.end.x), randf_range(area.position.y, area.end.y))
-		if is_walkable(p) and zone_at(p) != Zone.BOSS:
+		# Вода собирается на дороге у обочины.
+		if is_walkable(p) and zone_at(p) == Zone.LANE and _near_curb(p):
 			_puddles.append([p, Vector2(randf_range(70, 130), randf_range(28, 48)), randf_range(-0.4, 0.4), randf() * TAU])
 	puddles.puddles = _puddles
 	_own(puddles, _layers.decals)
 	for i in 3:
 		for attempt in 30:
 			var p := Vector2(randf_range(area.position.x, area.end.x), randf_range(area.position.y, area.end.y))
-			if _cover_allowed(p, 20.0) and is_area_clear(p, CELL):
+			# Пар идёт из люков посреди дороги.
+			if zone_at(p) == Zone.LANE and not _near_curb(p) and is_area_clear(p, CELL):
 				var vent := ArenaDecor.SteamVent.new()
 				vent.position = p
 				_own(vent, _layers.decals)
 				break
+
+
+## Точка в кольце min..max вокруг случайной уже поставленной сцены (без сцен — случайная по арене).
+func _near_scene_point(area: Rect2, min_r: float, max_r: float) -> Vector2:
+	if _cover_spots.is_empty():
+		return Vector2(randf_range(area.position.x, area.end.x), randf_range(area.position.y, area.end.y))
+	var anchor: Vector2 = _cover_spots.pick_random()
+	return (anchor + Vector2.from_angle(randf() * TAU) * randf_range(min_r, max_r)).clamp(area.position, area.end)
+
+
+## Дорога, у которой рядом (в пределах полутора клеток) начинается не-дорога — обочина.
+func _near_curb(p: Vector2) -> bool:
+	for offset in [Vector2(CELL * 1.5, 0), Vector2(-CELL * 1.5, 0), Vector2(0, CELL * 1.5), Vector2(0, -CELL * 1.5)]:
+		if zone_at(p + offset) != Zone.LANE:
+			return true
+	return false
 
 
 # --- Размещение с проверкой наложений ------------------------------------------------------------
