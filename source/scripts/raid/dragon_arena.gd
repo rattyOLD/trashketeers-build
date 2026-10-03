@@ -75,6 +75,7 @@ var _crack_time := 0.0
 var _crack_from := RADIUS
 var _crack_to := RADIUS
 var _thin_ice: ThinIce
+static var _batch := PolyBatch.new()
 
 
 func build(layers: BiomeLayers, player: Player) -> void:
@@ -294,18 +295,20 @@ func _build_ambient(fx_layer: Node2D) -> void:
 
 
 func _draw() -> void:
-	draw_circle(Vector2.ZERO, RADIUS + 60.0, Color(EDGE, 0.05))
-	draw_circle(Vector2.ZERO, RADIUS + 26.0, Color(1, 1, 1, 0.9))
-	draw_circle(Vector2.ZERO, RADIUS + 8.0, Color("#cfeeff"))
-	draw_circle(Vector2.ZERO, RADIUS, OBSIDIAN)
+	_batch.circle(Vector2.ZERO, RADIUS + 60.0, Color(EDGE, 0.05))
+	_batch.circle(Vector2.ZERO, RADIUS + 26.0, Color(1, 1, 1, 0.9))
+	_batch.circle(Vector2.ZERO, RADIUS + 8.0, Color("#cfeeff"))
+	_batch.circle(Vector2.ZERO, RADIUS, OBSIDIAN)
 	for ring in 5:
-		draw_circle(Vector2.ZERO, RADIUS * (0.9 - ring * 0.17), OBSIDIAN.lerp(Color("#4f93c4"), 0.12 * (ring + 1)))
+		_batch.circle(Vector2.ZERO, RADIUS * (0.9 - ring * 0.17), OBSIDIAN.lerp(Color("#4f93c4"), 0.12 * (ring + 1)))
+	_batch.flush(self)
 	_draw_decals()
 	_draw_cracks()
 	_draw_mirror_sheen()
-	draw_arc(Vector2.ZERO, RING_OUTER, 0.0, TAU, 96, Color(RUNE_PURPLE, 0.14), 2.0, true)
+	_batch.arc(Vector2.ZERO, RING_OUTER, 0.0, TAU, 96, Color(RUNE_PURPLE, 0.14), 2.0, true)
 	_draw_core_sigil()
-	draw_arc(Vector2.ZERO, RADIUS, 0.0, TAU, 128, Color(EDGE, 0.3), 16.0, true)
+	_batch.arc(Vector2.ZERO, RADIUS, 0.0, TAU, 128, Color(EDGE, 0.3), 16.0, true)
+	_batch.flush(self)
 
 
 ## Блики и наледь на зеркальном льду: ячейки листа Astra (лужи, зигзаги, завитки, искры, осколки).
@@ -334,7 +337,7 @@ func _draw_cracks() -> void:
 			a += rng.randf_range(-0.7, 0.7)
 			p += Vector2.from_angle(a) * rng.randf_range(30.0, 80.0)
 			pts.append(p)
-		draw_polyline(pts, Color(0.85, 0.96, 1.0, 0.22), 2.0, true)
+		_batch.polyline(pts, Color(0.85, 0.96, 1.0, 0.22), 2.0, true)
 
 
 func _draw_mirror_sheen() -> void:
@@ -348,17 +351,17 @@ func _draw_mirror_sheen() -> void:
 			Vector2(x + 90.0 - RADIUS * 0.55, RADIUS), Vector2(x - RADIUS * 0.55, RADIUS),
 		])
 		for poly in Geometry2D.intersect_polygons(band, clip):
-			draw_colored_polygon(poly, Color(1, 1, 1, 0.03))
+			_batch.polygon(poly, Color(1, 1, 1, 0.03))
 
 
 ## Ядро приземления: опасная зона отмечена красноватым кругом с рунами.
 func _draw_core_sigil() -> void:
-	draw_circle(Vector2.ZERO, CORE_RADIUS, Color("#ff4466", 0.06))
-	draw_arc(Vector2.ZERO, CORE_RADIUS, 0.0, TAU, 64, Color("#ff6f8a", 0.55), 3.0, true)
-	draw_arc(Vector2.ZERO, CORE_RADIUS - 50.0, 0.0, TAU, 64, Color(RUNE_PURPLE, 0.5), 2.0, true)
+	_batch.circle(Vector2.ZERO, CORE_RADIUS, Color("#ff4466", 0.06))
+	_batch.arc(Vector2.ZERO, CORE_RADIUS, 0.0, TAU, 64, Color("#ff6f8a", 0.55), 3.0, true)
+	_batch.arc(Vector2.ZERO, CORE_RADIUS - 50.0, 0.0, TAU, 64, Color(RUNE_PURPLE, 0.5), 2.0, true)
 	for i in 12:
 		var dir := Vector2.from_angle(TAU * i / 12.0)
-		draw_line(dir * (CORE_RADIUS - 50.0), dir * CORE_RADIUS, Color(RUNE_TEAL, 0.4), 2.0, true)
+		_batch.line(dir * (CORE_RADIUS - 50.0), dir * CORE_RADIUS, Color(RUNE_TEAL, 0.4), 2.0, true)
 
 
 ## Вода на месте провалившегося льда и мигающая трещина на той полосе, что вот-вот уйдёт вниз.
@@ -367,18 +370,19 @@ class ThinIce:
 	var arena: DragonArena
 
 	func _draw() -> void:
+		var batch := DragonArena._batch
 		var safe := arena.safe_radius
 		if safe < DragonArena.RADIUS - 0.5:
 			var outer := DragonArena.RADIUS + 34.0
-			draw_arc(Vector2.ZERO, (safe + outer) * 0.5, 0.0, TAU, 128, Color(DragonArena.WATER, 0.97), outer - safe + 2.0, true)
-			draw_arc(Vector2.ZERO, safe, 0.0, TAU, 128, Color(1, 1, 1, 0.85), 5.0, true)
-			draw_arc(Vector2.ZERO, safe - 8.0, 0.0, TAU, 128, Color(DragonArena.EDGE, 0.35), 10.0, true)
+			batch.arc(Vector2.ZERO, (safe + outer) * 0.5, 0.0, TAU, 128, Color(DragonArena.WATER, 0.97), outer - safe + 2.0, true)
+			batch.arc(Vector2.ZERO, safe, 0.0, TAU, 128, Color(1, 1, 1, 0.85), 5.0, true)
+			batch.arc(Vector2.ZERO, safe - 8.0, 0.0, TAU, 128, Color(DragonArena.EDGE, 0.35), 10.0, true)
 		if arena._crack_state == 1:
 			var target := arena._crack_to
 			var from := arena._crack_from
 			var blink := 0.5 + 0.5 * sin(arena._crack_time * 14.0)
-			draw_arc(Vector2.ZERO, (target + from) * 0.5, 0.0, TAU, 128, Color(1.0, 0.55, 0.45, 0.10 + 0.14 * blink), from - target, true)
-			draw_arc(Vector2.ZERO, target, 0.0, TAU, 128, Color(1.0, 0.85, 0.8, 0.5 + 0.4 * blink), 6.0, true)
+			batch.arc(Vector2.ZERO, (target + from) * 0.5, 0.0, TAU, 128, Color(1.0, 0.55, 0.45, 0.10 + 0.14 * blink), from - target, true)
+			batch.arc(Vector2.ZERO, target, 0.0, TAU, 128, Color(1.0, 0.85, 0.8, 0.5 + 0.4 * blink), 6.0, true)
 			var rng := RandomNumberGenerator.new()
 			rng.seed = 4242
 			for i in 46:
@@ -389,7 +393,9 @@ class ThinIce:
 					a += rng.randf_range(-0.12, 0.12)
 					p += Vector2.from_angle(a) * (from - target) / 3.0
 					pts.append(p)
-				draw_polyline(pts, Color(1.0, 0.95, 0.9, 0.35 + 0.4 * blink), 2.5, true)
+				batch.polyline(pts, Color(1.0, 0.95, 0.9, 0.35 + 0.4 * blink), 2.5, true)
+		batch.flush(self)
+
 
 
 ## Подсветка геометрической тени кристаллов, пока горит луч.
@@ -399,6 +405,7 @@ class ShadowHints:
 	var source := Vector2.INF
 
 	func _draw() -> void:
+		var batch := DragonArena._batch
 		if source == Vector2.INF:
 			return
 		for crystal in arena.crystals:
@@ -406,7 +413,8 @@ class ShadowHints:
 			if poly.size() >= 3:
 				var clipped := Geometry2D.intersect_polygons(poly, _disc())
 				for part in clipped:
-					draw_colored_polygon(part, Color(EDGE, 0.1))
+					batch.polygon(part, Color(EDGE, 0.1))
+		batch.flush(self)
 
 	func _disc() -> PackedVector2Array:
 		var disc := PackedVector2Array()
@@ -446,6 +454,7 @@ class RuneRing:
 		modulate.a = 0.75 + 0.25 * sin(_time * RUNE_BREATH_SPEED)
 
 	func _draw() -> void:
+		var batch := DragonArena._batch
 		var rng := RandomNumberGenerator.new()
 		rng.seed = 555
 		for i in 70:
@@ -453,5 +462,7 @@ class RuneRing:
 			var base := Vector2.from_angle(angle) * (radius + 30.0)
 			var tip := Vector2.from_angle(angle) * (radius - rng.randf_range(10.0, 60.0))
 			var side := Vector2.from_angle(angle + PI * 0.5) * rng.randf_range(9.0, 18.0)
-			draw_colored_polygon(PackedVector2Array([base - side, tip, base + side]), Color(0.85, 0.96, 1.0, 0.9))
-			draw_line(base, tip, Color(1, 1, 1, 0.9), 1.5, true)
+			batch.polygon(PackedVector2Array([base - side, tip, base + side]), Color(0.85, 0.96, 1.0, 0.9))
+			batch.line(base, tip, Color(1, 1, 1, 0.9), 1.5, true)
+		batch.flush(self)
+

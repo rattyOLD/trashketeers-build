@@ -16,6 +16,7 @@ const FEATHER := 1.25
 
 static var _unit_circle := PackedVector2Array()
 static var _shapes := {}
+static var _f32_cell := PackedFloat32Array([0.0])
 
 var points := PackedVector2Array()
 var colors := PackedColorArray()
@@ -92,20 +93,57 @@ func rect(area: Rect2, color: Color) -> void:
 	_append(xform * quad, color)
 
 
-## draw_line(from, to, color, width) при width >= 0 без сглаживания (квад из двух треугольников).
-func line(from: Vector2, to: Vector2, color: Color, width: float) -> void:
-	var t := (from - to).orthogonal().normalized() * width * 0.5
-	var quad := PackedVector2Array([from + t, from - t, to - t, from + t, to - t, to + t])
-	_append(xform * quad, color)
+## draw_line(from, to, color, width, antialiased) при width >= 0: квад из двух треугольников,
+## со сглаживанием — ещё четыре пера по краям (как canvas_item_add_line).
+func line(from: Vector2, to: Vector2, color: Color, width: float, antialiased: bool = false) -> void:
+	var diff := from - to
+	var dir := diff.orthogonal().normalized()
+	var t := dir * width * 0.5
+	var bl := from + t
+	var br := from - t
+	var er := to - t
+	var el := to + t
+	_append(xform * PackedVector2Array([bl, br, er, bl, er, el]), color)
+	if not antialiased:
+		return
+	var border_size := FEATHER * (width if width < 1.0 else 1.0)
+	var border := dir * border_size
+	var border2 := diff.normalized() * border_size
+	_feather(bl, bl + border, el + border, el, color)
+	_feather(br, br - border, er - border, er, color)
+	_feather(bl, bl + border2, br + border2, br, color)
+	_feather(el, el - border2, er - border2, er, color)
+	_feather(bl, bl + border2, bl + border + border2, bl + border, color, true)
+	_feather(br, br + border2, br - border + border2, br - border, color, true)
+	_feather(el, el - border2, el + border - border2, el + border, color, true)
+	_feather(er, er - border2, er - border - border2, er - border, color, true)
 
 
-## draw_arc — точки дуги считаются как в CanvasItem::draw_arc, дальше polyline.
+## Перо сглаживания: квад p0..p3, цвет на p0 и p3 (у углового пера — только на p0), остальное прозрачно.
+func _feather(p0: Vector2, p1: Vector2, p2: Vector2, p3: Vector2, color: Color, corner: bool = false) -> void:
+	var clear := Color(color, 0.0)
+	var start := points.size()
+	points.append_array(xform * PackedVector2Array([p0, p1, p2, p0, p2, p3]))
+	colors.resize(start + 6)
+	colors[start] = color
+	colors[start + 1] = clear
+	colors[start + 2] = clear
+	colors[start + 3] = color
+	colors[start + 4] = clear
+	colors[start + 5] = clear if corner else color
+
+
+## draw_arc — точки дуги как в CanvasItem::draw_arc, в float32 движка: от этого зависит, замкнёт ли
+## polyline полный круг (у больших радиусов последняя точка не совпадает с первой — шов с перьями).
 func arc(center: Vector2, radius: float, start_angle: float, end_angle: float, point_count: int, color: Color, width: float, antialiased: bool = false) -> void:
 	var arc_points := PackedVector2Array()
 	arc_points.resize(point_count)
-	var delta_angle := clampf(end_angle - start_angle, -TAU, TAU)
+	var start := _f32(start_angle)
+	var tau := _f32(TAU)
+	var delta_angle := clampf(_f32(_f32(end_angle) - start), -tau, tau)
+	var denominator := _f32(point_count - 1.0)
 	for i in point_count:
-		var theta := (i / (point_count - 1.0)) * delta_angle + start_angle
+		var theta := _f32(_f32(_f32(i / denominator) * delta_angle) + start)
 		arc_points[i] = center + Vector2(cos(theta), sin(theta)) * radius
 	polyline(arc_points, color, width, antialiased)
 
@@ -263,11 +301,22 @@ func _append_color(color: Color, count: int) -> void:
 	colors.append_array(_fill)
 
 
-## Как canvas_item_add_circle: веер (центр, i, i + 1), точки i·TAU/64.
+## Как canvas_item_add_circle: веер (центр, i, i + 1), углы i·TAU/64 в float32.
 static func _build_unit_circle() -> void:
-	var step := TAU / CIRCLE_SEGMENTS
+	var step := _f32(_f32(TAU) / CIRCLE_SEGMENTS)
+	var rim := PackedVector2Array()
+	rim.resize(CIRCLE_SEGMENTS + 1)
+	for i in CIRCLE_SEGMENTS + 1:
+		var angle := _f32(i * step)
+		rim[i] = Vector2(cos(angle), sin(angle))
 	_unit_circle.resize(CIRCLE_SEGMENTS * 3)
 	for i in CIRCLE_SEGMENTS:
 		_unit_circle[i * 3] = Vector2.ZERO
-		_unit_circle[i * 3 + 1] = Vector2(cos(i * step), sin(i * step))
-		_unit_circle[i * 3 + 2] = Vector2(cos((i + 1) * step), sin((i + 1) * step))
+		_unit_circle[i * 3 + 1] = rim[i]
+		_unit_circle[i * 3 + 2] = rim[i + 1]
+
+
+## Округление до float32 (real_t движка): скаляры GDScript — double.
+static func _f32(value: float) -> float:
+	_f32_cell[0] = value
+	return _f32_cell[0]
