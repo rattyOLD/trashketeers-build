@@ -1,8 +1,10 @@
-# Тестовая сборка Android: при пуше в ветку собирает подписанный APK и выкладывает его в Releases.
-# Тестеры ставят приложение Obtainium, добавляют ссылку на репозиторий — обновления приходят сами.
-# Нужны секреты репозитория (Settings → Secrets and variables → Actions):
+# Тестовая сборка Android: при пуше собирает подписанный APK и отправляет его тестерам через
+# Firebase App Distribution (группа testers); копия APK — в артефактах запуска.
+# Секреты репозитория (Settings → Secrets and variables → Actions):
 #   ANDROID_KEYSTORE_BASE64 — base64 файла trashketeers-beta.keystore
 #   ANDROID_KEYSTORE_PASSWORD — пароль хранилища и ключа (алиас trashketeers)
+#   FIREBASE_APP_ID — App ID Android-приложения в Firebase (1:…:android:…)
+#   FIREBASE_SERVICE_ACCOUNT — JSON ключа сервисного аккаунта с ролью Firebase App Distribution Admin
 name: Android beta
 
 on:
@@ -12,7 +14,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 env:
   GODOT_VERSION: 4.4.1
@@ -86,13 +88,16 @@ jobs:
           $GODOT --headless --path source --export-release "Android" build/android/trashketeers.apk 2>&1 | tee export.log
           test -f source/build/android/trashketeers.apk
 
-      - name: Выложить в Releases
-        uses: softprops/action-gh-release@v2
+      - uses: actions/upload-artifact@v4
         with:
-          tag_name: beta-${{ github.run_number }}
-          name: Тестовая сборка ${{ github.run_number }} (${{ github.ref_name }})
-          prerelease: true
-          body: |
-            Ветка ${{ github.ref_name }}, коммит ${{ github.sha }}.
-            Ставится поверх предыдущей тестовой сборки, сохранения остаются.
-          files: source/build/android/trashketeers.apk
+          name: trashketeers-beta-${{ github.run_number }}
+          path: source/build/android/trashketeers.apk
+
+      - name: Отправить тестерам (Firebase App Distribution)
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: ${{ secrets.FIREBASE_APP_ID }}
+          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          groups: testers
+          file: source/build/android/trashketeers.apk
+          releaseNotes: "beta.${{ github.run_number }} · ${{ github.ref_name }} · ${{ github.event.head_commit.message }}"
