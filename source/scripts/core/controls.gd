@@ -40,11 +40,19 @@ const DEFAULT_KEYS := {
 	&"weapon_3": [KEY_3],
 }
 
+const SKILL_X := 0.885
+const SKILL_Y := 0.82
+const SLOTS_X := 0.695
+const SLOTS_Y := 0.8
+
 static var revision := 0
 
 
 static func default_config(left_handed: bool = false) -> Dictionary:
-	var cx := 0.87 if not left_handed else 0.13
+	# Хват двумя большими пальцами снизу: навык — в правом нижнем углу под большим пальцем,
+	# стволы — колонкой левее, по дуге движения пальца (правее зоны джойстика, ZONE_WIDTH_FRACTION).
+	var cx := SKILL_X if not left_handed else 1.0 - SKILL_X
+	var sx := SLOTS_X if not left_handed else 1.0 - SLOTS_X
 	return {
 		"left_handed": left_handed,
 		"joystick_scale": 1.0,
@@ -55,12 +63,12 @@ static func default_config(left_handed: bool = false) -> Dictionary:
 		"auto_fire": true,
 		"weapon_slots": 2,
 		"layout": {
-			"dash": {"x": cx, "y": 0.74, "s": 1.0},
-			"slots": {"x": cx, "y": 0.54, "s": 1.0},
+			"dash": {"x": cx, "y": SKILL_Y, "s": 1.0},
+			"slots": {"x": sx, "y": SLOTS_Y, "s": 1.0},
 			"interact": {"x": 0.5, "y": 0.46, "s": 1.0},
 		},
 		"hud": {},
-		"layout_v": 8,
+		"layout_v": 9,
 		"keys": {},
 		"presets": {},
 	}
@@ -114,6 +122,18 @@ static func config() -> Dictionary:
 		var above: Dictionary = layout["interact"]
 		if is_equal_approx(float(above["y"]), 0.62) or is_equal_approx(float(above["y"]), 0.8):
 			above["y"] = 0.46
+	if int(stored.get("layout_v", 1)) < 9:
+		stored["layout_v"] = 9
+		# Навык и стволы опустились под большой палец; свои раскладки игрока не трогаем.
+		var left := bool(stored.get("left_handed", false))
+		var skill: Dictionary = layout["dash"]
+		if absf(float(skill["y"]) - 0.74) < 0.005 and absf(float(skill["x"]) - (0.13 if left else 0.87)) < 0.005:
+			skill["x"] = 1.0 - SKILL_X if left else SKILL_X
+			skill["y"] = SKILL_Y
+		var column: Dictionary = layout["slots"]
+		if absf(float(column["y"]) - 0.54) < 0.005 and absf(float(column["x"]) - (0.13 if left else 0.87)) < 0.005:
+			column["x"] = 1.0 - SLOTS_X if left else SLOTS_X
+			column["y"] = SLOTS_Y
 	return stored
 
 
@@ -232,7 +252,7 @@ static func weapon_slot_count() -> int:
 static func apply_big(left_handed: bool) -> void:
 	apply_preset(left_handed)
 	var cx := 0.13 if left_handed else 0.87
-	set_element("dash", cx, 0.72, 1.4)
+	set_element("dash", cx, 0.8, 1.4)
 	set_element("slots", cx, 0.46, 1.25)
 	set_element("interact", 0.5, 0.8, 1.35)
 	set_value("joystick_scale", 1.3)

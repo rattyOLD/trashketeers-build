@@ -687,7 +687,8 @@ func _on_enemy_fx(_enemy: Enemy, kind: String, at: Vector2, radius: float) -> vo
 		"muzzle":
 			fx.muzzle_flash(at, (player.global_position - at).angle(), Color("#ffb347"), 1.4)
 		"summon":
-			director.summon_minions(int(radius))
+			# Мини-босс середины главы зовёт на одного меньше: бой не превращается в бесконечную толпу.
+			director.summon_minions(int(radius) - (1 if director.is_mini_wave() else 0))
 			fx.ring(at, Color("#ffd257"), 200.0)
 			fx.dust(at, 14, 160.0)
 			hud.show_banner("ПОДМОГА!", Color("#ffd257"), 1.4)

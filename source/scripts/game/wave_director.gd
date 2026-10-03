@@ -229,6 +229,9 @@ func _start_wave(number: int) -> void:
 	_hp_mult = (1.0 + float(d["hp_per_wave"]) * step) * pow(float(d["loop_hp"]), loop) * power
 	_dmg_mult = (1.0 + float(d["damage_per_wave"]) * step) * pow(float(d["loop_damage"]), loop) * pow(power, 0.6)
 	# Дальше 20-й волны герои «выходят на плато» (потолки бонусов), поэтому враги продолжают расти сами, а не только по кругам.
+	# Начало главы (первый круг) плотнее: без этого первые волны проходились без единой царапины.
+	if loop == 0 and chapter_wave() <= int(d.get("early_waves", 0)):
+		_dmg_mult *= float(d.get("early_damage", 1.0))
 	var late := maxf(float(number) - float(d["late_start"]), 0.0)
 	_hp_mult *= 1.0 + late * float(d["late_hp"])
 	_dmg_mult *= 1.0 + late * float(d["late_damage"])
@@ -238,7 +241,8 @@ func _start_wave(number: int) -> void:
 		print("ADAPT wave %d power %.1f x%.2f" % [number, run_stats.power() if run_stats != null else 0.0, adapt])
 	_dmg_mult *= 1.0 + (adapt - 1.0) * 0.5
 	var count_adapt := 1.0 + (adapt - 1.0) * 0.35
-	remaining_to_spawn = int(ceil(float(_wave["count"]) * pow(float(d["loop_count"]), loop) * float(_chapter.get("count_mult", 1.0)) * count_adapt))
+	var early_count := float(d.get("early_count", 1.0)) if loop == 0 and chapter_wave() <= int(d.get("early_waves", 0)) else 1.0
+	remaining_to_spawn = int(ceil(float(_wave["count"]) * pow(float(d["loop_count"]), loop) * float(_chapter.get("count_mult", 1.0)) * count_adapt * early_count))
 	_interval = maxf(float(_wave["spawn_interval"]) * pow(float(d["loop_interval"]), loop), 0.25)
 	_max_alive = int(_wave["max_alive"]) + int(d["loop_max_alive"]) * loop
 	_boss_pending = false
@@ -324,7 +328,7 @@ func _tick_boss(delta: float) -> void:
 			Platform.send_report("softlock", "boss data missing wave=%d key='%s'" % [wave_number, _boss_key()])
 			_boss_pending = false
 			return
-		var boss_hp := pow(float(_difficulty["loop_hp"]), loop) * float(_chapter.get("power", 1.0)) * _adaptive_boss_mult(boss_data) * BOSS_HP_TRIM * (1.0 + maxf(float(wave_number) - float(_difficulty["late_start"]), 0.0) * float(_difficulty["late_hp"]))
+		var boss_hp := pow(float(_difficulty["loop_hp"]), loop) * float(_chapter.get("power", 1.0)) * _adaptive_boss_mult(boss_data) * BOSS_HP_TRIM * (float(_difficulty.get("mini_hp", 1.0)) if is_mini_wave() else 1.0) * (1.0 + maxf(float(wave_number) - float(_difficulty["late_start"]), 0.0) * float(_difficulty["late_hp"]))
 		boss = _enemies.spawn(boss_data, _level.boss_point, boss_hp, _dmg_mult)
 		if boss == null:
 			_boss_retry = BOSS_RETRY_DELAY
