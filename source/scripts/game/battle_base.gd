@@ -466,7 +466,7 @@ func _on_bullet_hit(bullet: Bullet, target: Node2D) -> void:
 		SoundManager.play(&"hit")
 		if target is Enemy and _mark_cd <= 0.0:
 			_mark_cd = MARK_GAP
-			fx.hitmarker((target as Enemy).get_aim_point(), 1 if crit else 0)
+			fx.hitmarker((target as Enemy).get_aim_point(), 1 if crit else 0, target)
 		if crit:
 			fx.ring(bullet.global_position, Color("#ffb347"), 26.0)
 			hitstop(0.035)
@@ -479,10 +479,16 @@ func _on_bullet_hit(bullet: Bullet, target: Node2D) -> void:
 		var impact_tex := WeaponVfx.impact_for(bullet.weapon)
 		if impact_tex != null:
 			fx.sprite_flash(impact_tex, bullet.global_position, WeaponVfx.impact_width(bullet.weapon) * (1.25 if crit else 1.0), 0.14)
-	if bullet.weapon.id == &"beer_jet_v1" or bullet.weapon.id == &"puke_v1":
-		# Жидкость при ударе: брызги назад и в стороны плюс белая пена — без твёрдых «комков».
+	if bullet.weapon.id == &"beer_jet_v1":
+		# Пиво при ударе: брызги назад и в стороны плюс белая пена — без твёрдых «комков».
 		fx.burst_dir(bullet.global_position, -bullet.velocity.normalized(), color.lightened(0.3), 7, 1.3, 300.0, 3.0)
 		fx.burst(bullet.global_position, Color("#fff6dc"), 3, 110.0, 2.4)
+		return
+	if bullet.weapon.id == &"puke_v1":
+		# Рвота: мутные брызги и жёлто-бурые комки — мерзко и не похоже на пиво.
+		fx.burst_dir(bullet.global_position, -bullet.velocity.normalized(), Color("#8a9a1a"), 6, 1.2, 240.0, 3.4)
+		fx.chunks(bullet.global_position, Color("#c9a83a"), 3, 170.0, 3.2)
+		fx.chunks(bullet.global_position, Color("#6b4f1d"), 2, 140.0, 2.6)
 		return
 	fx.burst_dir(bullet.global_position, -bullet.velocity.normalized(), color, 6 if crit else (2 if dense else 4), 0.8, 260.0, 3.0)
 	if target is Enemy and not dense:

@@ -39,7 +39,8 @@ var damage_scale := 1.0
 var _age := 0.0
 ## Уровень упрощения при большой плотности снарядов: 1 — без шлейфа, 2 — ещё и без луча-свипа.
 var _lod := 0
-var _liquid := false
+## Капля жидкой струи (пиво/рвота): FxManager соединяет соседние капли очереди в сплошную струю.
+var is_liquid := false
 ## Сколько врагов эта пуля уже пробила (рельсотрон растит урон с каждым).
 var pierced := 0
 
@@ -114,8 +115,11 @@ func activate(data: WeaponData, origin: Vector2, direction: Vector2, owner_team:
 
 	_apply_team_masks(owner_team)
 	_reset_trail(origin)
-	_liquid = LIQUID_IDS.has(data.id)
-	if _liquid:
+	is_liquid = LIQUID_IDS.has(data.id)
+	if is_liquid:
+		# В струе капли — лишь пузыри внутри потока: сам поток рисует FxManager лентой.
+		_sprite.scale = data.sprite_scale * 0.55
+		_sprite.modulate = Color(data.bullet_modulate, 0.8)
 		_trail_count = 0
 		_trail.visible = false
 	if lod > 0 and owner_team == Team.PLAYER:
@@ -166,7 +170,7 @@ func tick(delta: float) -> bool:
 		step = _sweep(step)
 	global_position += step
 	_advance_trail()
-	if _liquid and (Engine.get_physics_frames() + spawn_frame) % 3 == 0 and liquid_sink.is_valid():
+	if is_liquid and (Engine.get_physics_frames() + spawn_frame) % 3 == 0 and liquid_sink.is_valid():
 		liquid_sink.call(global_position, velocity, weapon.effect_color)
 	_distance_left -= step.length()
 	_time_left -= delta

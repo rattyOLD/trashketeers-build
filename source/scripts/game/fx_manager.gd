@@ -111,7 +111,12 @@ var _mk_pos := PackedVector2Array()
 var _mk_life := PackedFloat32Array()
 var _mk_kind := PackedInt32Array()
 var _mk_next := 0
+var _mk_target: Array[Node2D] = []
 var _callout := -1
+var _stream: Array[Bullet] = []
+const STREAM_FRAME_GAP := 6
+const STREAM_MAX_GAP := 150.0
+const STREAM_MAX_ANGLE := 0.12
 var _callout_text := ""
 
 const BOLT_CAPACITY := 16
@@ -419,10 +424,14 @@ static func kind_scale(kind: StringName) -> float:
 	return 1.25 if kind == &"melee" else 1.0
 
 
-func hitmarker(at: Vector2, kind: int) -> void:
+## target — моб, за которым крестик едет, пока виден (null — стоит на месте, как у убийства).
+func hitmarker(at: Vector2, kind: int, target: Node2D = null) -> void:
 	var i := _mk_next
 	_mk_next = (_mk_next + 1) % MARK_CAPACITY
-	_mk_pos[i] = at
+	if _mk_target.size() < MARK_CAPACITY:
+		_mk_target.resize(MARK_CAPACITY)
+	_mk_target[i] = target
+	_mk_pos[i] = at if target == null else at - target.global_position
 	_mk_life[i] = MARK_LIFE[kind]
 	_mk_kind[i] = kind
 
@@ -430,7 +439,8 @@ func hitmarker(at: Vector2, kind: int) -> void:
 ## Брызги за летящей каплей жидкости: светлая капелька, отстающая от струи и опадающая.
 func droplet(at: Vector2, velocity: Vector2, color: Color) -> void:
 	var drift := -velocity * 0.12 + Vector2(randf_range(-40.0, 40.0), randf_range(-20.0, 50.0))
-	_spark(at + Vector2(randf_range(-5.0, 5.0), randf_range(-5.0, 5.0)), drift, color.lightened(0.35), 2.2)
+	var tone := color.lightened(0.35) if color.g < 0.8 or color.r > 0.8 else Color("#8a9a1a")
+	_spark(at + Vector2(randf_range(-5.0, 5.0), randf_range(-5.0, 5.0)), drift, tone, 2.2)
 
 
 func popup(at: Vector2, text: String, color: Color, font_size: float = 34.0) -> void:
@@ -694,6 +704,7 @@ func _process(delta: float) -> void:
 
 func _draw_sparks(canvas: CanvasItem) -> void:
 	var batch := _batch
+	_draw_liquid_streams(batch)
 	for i in SPARK_CAPACITY:
 		var life := _sp_life[i]
 		if life <= 0.0:
@@ -764,6 +775,46 @@ func _draw_texts(canvas: CanvasItem) -> void:
 		canvas.draw_string(_font, p, _tx_text[i], HORIZONTAL_ALIGNMENT_CENTER, 400, size, Color(_tx_color[i], alpha))
 
 
+## Струя жидкости: соседние по времени капли одной очереди соединяются лентой — получается
+## сплошной поток, а не россыпь капель. Пиво — светлое, прозрачное, с бликом; рвота — мутная,
+## густая, с комками. Всё в общем батче искр.
+func _draw_liquid_streams(batch: PolyBatch) -> void:
+	_stream.clear()
+	for bullet in BulletPool._active:
+		if bullet.is_liquid:
+			_stream.append(bullet)
+	if _stream.size() < 2:
+		return
+	_stream.sort_custom(func(a: Bullet, b: Bullet) -> bool: return a.spawn_frame < b.spawn_frame)
+	var last := {}
+	for b in _stream:
+		var a: Bullet = last.get(b.weapon)
+		last[b.weapon] = b
+		if a == null or b.spawn_frame - a.spawn_frame > STREAM_FRAME_GAP:
+			continue
+		var pa := a.global_position
+		var pb := b.global_position
+		if pa.distance_squared_to(pb) > STREAM_MAX_GAP * STREAM_MAX_GAP:
+			continue
+		# Только капли, летящие почти в одну сторону: веер с разбросом не должен давать «молнию».
+		if absf(a.velocity.angle_to(b.velocity)) > STREAM_MAX_ANGLE:
+			continue
+		var w := b.weapon.bullet_radius * 2.0
+		if b.weapon.id == &"puke_v1":
+			batch.line(pa, pb, Color("#4f5a10", 0.9), w * 1.9)
+			batch.line(pa, pb, Color("#8fa31c", 0.95), w * 1.25)
+			if b.spawn_frame % 3 == 0:
+				var mid := pa.lerp(pb, 0.5) + Vector2(sin(float(b.spawn_frame) * 1.7), cos(float(a.spawn_frame) * 2.3)) * w * 0.4
+				batch.circle(mid, w * 0.3, Color("#d1b53e", 0.95))
+				batch.circle(mid + Vector2(w * 0.35, w * 0.15), w * 0.16, Color("#6b4a18", 0.95))
+		else:
+			var c := b.weapon.effect_color
+			batch.line(pa, pb, Color(c.darkened(0.1), 0.45), w * 2.1)
+			batch.line(pa, pb, Color(c.lightened(0.1), 0.92), w * 1.4)
+			var lift := Vector2(0, -w * 0.25)
+			batch.line(pa + lift, pb + lift, Color(1.0, 0.96, 0.82, 0.55), w * 0.3)
+
+
 ## Крестик из четырёх штрихов по диагоналям: выпрыгивает крупнее и быстро садится; у убийства — крупнее и дольше.
 func _draw_marks() -> void:
 	for i in MARK_CAPACITY:
@@ -781,6 +832,12 @@ func _draw_marks() -> void:
 		var color := Color(MARK_COLOR[kind], alpha)
 		var shade := Color(OUTLINE, 0.75 * alpha)
 		var p := _mk_pos[i]
+		var target := _mk_target[i] if i < _mk_target.size() else null
+		if target != null:
+			if not is_instance_valid(target) or not target.visible:
+				_mk_life[i] = 0.0
+				continue
+			p += target.global_position
 		for k in 4:
 			var dir := Vector2.from_angle(PI * 0.25 + PI * 0.5 * k)
 			_batch.line(p + dir * gap, p + dir * (gap + length), shade, 3.6 * big)
