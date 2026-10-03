@@ -39,6 +39,7 @@ func _ready() -> void:
 	if is_native_app:
 		telemetry = NativeTelemetry.new()
 		add_child.call_deferred(telemetry)
+		add_child.call_deferred(AppUpdater.new())
 	if not is_web:
 		return
 	_js("if (navigator.storage && navigator.storage.persist) { navigator.storage.persist(); } return true;")

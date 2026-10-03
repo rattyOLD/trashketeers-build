@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 env:
   GODOT_VERSION: 4.4.1
@@ -93,6 +93,25 @@ jobs:
         with:
           name: TrashSquad-beta-${{ github.run_number }}
           path: source/build/android/TrashSquad.apk
+
+      # Постоянная ссылка на свежий APK + номер версии: по ним игра сама предлагает «ОБНОВИТЬ» (core/app_updater.gd).
+      - name: Файл версии для автообновления
+        env:
+          MSG: ${{ github.event.head_commit.message }}
+        run: |
+          python3 -c 'import json,os; print(json.dumps({"code": int(os.environ["GITHUB_RUN_NUMBER"]), "name": "beta." + os.environ["GITHUB_RUN_NUMBER"], "notes": os.environ.get("MSG", "").splitlines()[0][:180] if os.environ.get("MSG") else ""}, ensure_ascii=False))' > source/build/android/android-version.json
+          cat source/build/android/android-version.json
+
+      - name: Релиз android-beta на GitHub (для автообновления)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-beta
+          name: TrashSquad beta (Beer Party Studio)
+          prerelease: true
+          make_latest: false
+          files: |
+            source/build/android/TrashSquad.apk
+            source/build/android/android-version.json
 
       - name: Отправить тестерам (Firebase App Distribution)
         uses: wzieba/Firebase-Distribution-Github-Action@v1
