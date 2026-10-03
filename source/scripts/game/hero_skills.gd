@@ -16,6 +16,7 @@ var _shake: Callable
 var _left := 0.0
 var _query: PhysicsShapeQueryParameters2D
 var _hero := ""
+var _tea_kills := 0
 
 
 func setup(hero_id: String, player: Player, fx: FxManager, stats: RunStats, shake: Callable) -> void:
@@ -26,6 +27,16 @@ func setup(hero_id: String, player: Player, fx: FxManager, stats: RunStats, shak
 	_shake = shake
 	skill = CharacterDB.get_character(hero_id).get("skill", {})
 	_left = 3.0 if not skill.is_empty() else 0.0
+
+
+## Нэлл «Чай»: каждые 10 убийств перезарядка навыка быстрее на секунду.
+func on_kill() -> void:
+	if _hero != "neon_hopper" or skill.is_empty():
+		return
+	_tea_kills += 1
+	if _tea_kills >= 10:
+		_tea_kills = 0
+		_left = maxf(_left - 1.0, 0.0)
 
 
 func has_skill() -> bool:
@@ -56,8 +67,8 @@ func try_use() -> bool:
 		return false
 	_left = _cooldown()
 	match str(skill["id"]):
-		"fire_ring":
-			_fire_ring()
+		"mines":
+			_mines()
 		"ice_dome":
 			_ice_dome()
 		"assassin_hour":
@@ -116,6 +127,25 @@ func _later(delay: float, action: Callable) -> void:
 	get_tree().create_timer(delay, false).timeout.connect(action)
 
 
+func _mines() -> void:
+	var at := _player.global_position
+	var color := Color("#ff8a2a")
+	var base := randf() * TAU
+	for k in 3:
+		var spot := at + Vector2.from_angle(base + TAU * k / 3.0) * 150.0
+		_fx.ring(spot, Color("#ffd257"), 60.0)
+		_later(1.5, func() -> void:
+			if not is_instance_valid(_player):
+				return
+			BulletPool.explode(spot, 150.0, 105.0 * _power(), Bullet.Team.PLAYER, color, 1.4, &"fire")
+			_fx.burst(spot, Color("#ffb347"), 22, 400.0, 5.0)
+			for enemy in _enemies_in(spot, 160.0):
+				enemy.add_bleed(14.0 * _power(), 4.0, true)
+			if _shake.is_valid():
+				_shake.call(0.15))
+	_fx.popup(at + Vector2(0, -90), "МИНЫ!", Color("#ffd257"), 28.0)
+
+
 func _fire_ring() -> void:
 	var at := _player.global_position
 	var color := Color("#ff8a2a")
@@ -151,7 +181,7 @@ func _assassin_hour() -> void:
 	_player.grant_invuln(0.5)
 	_fx.ring(_player.global_position, Color("#b46bff"), 190.0)
 	_fx.burst(_player.global_position, Color("#7a3bd1"), 26, 320.0, 4.0)
-	_fx.popup(_player.global_position + Vector2(0, -90), "ЧАС УБИЙЦЫ", Color("#d9a8ff"), 28.0)
+	_fx.popup(_player.global_position + Vector2(0, -90), "ТИХИЙ ЧАС", Color("#d9a8ff"), 28.0)
 	_later(4.0, func() -> void:
 		if not is_instance_valid(_player):
 			return
@@ -194,6 +224,7 @@ func _toxic_flask() -> void:
 	zone.global_position = target
 	_fx.ring(target, Color("#7dff5c"), 210.0)
 	_fx.burst(target, Color("#9dff7a"), 26, 300.0, 4.5)
+	_player.heal(_player.max_hp * 0.12)
 
 
 func _drone_strike() -> void:

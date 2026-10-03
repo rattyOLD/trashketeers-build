@@ -737,6 +737,9 @@ func _split_enemy(enemy: Enemy, at: Vector2) -> void:
 			spawned.push(Vector2.from_angle(angle) * 260.0)
 
 
+var _torch_depth := 0
+
+
 func _on_enemy_died(enemy: Enemy) -> void:
 	var data := enemy.data
 	if data.is_boss():
@@ -760,6 +763,11 @@ func _on_enemy_died(enemy: Enemy) -> void:
 		var wave := maxi(director.wave_number, 1)
 		BulletPool.explode(at, RunMods.BLAST_RADIUS, RunMods.BLAST_DAMAGE_BASE + RunMods.BLAST_DAMAGE_PER_WAVE * wave, Bullet.Team.ENEMY, Color("#ff7a3d"), 1.0)
 	kills += 1
+	hero_skills.on_kill()
+	if SaveService.get_character_id() == "red_panda" and enemy.bleed_left > 0.0 and _torch_depth < 2:
+		_torch_depth += 1
+		BulletPool.explode(at, 95.0, 38.0 * (1.0 + stats.get_stat(&"damage_mult")), Bullet.Team.PLAYER, Color("#ff8a2a"), 1.0, &"fire")
+		_torch_depth -= 1
 	if story != null:
 		story.on_kill(data)
 	hud.set_kills(kills)
@@ -1347,6 +1355,8 @@ func _apply_run_start_perks() -> void:
 
 
 func _on_nuts_collected(amount: int) -> void:
+	if SaveService.get_character_id() == "pigeon_mafioso":
+		amount = int(amount * 1.2 + randf())
 	nuts += int(amount * events.coin_mult + randf()) if events.coin_mult > 1.0 else amount
 	hud.set_nuts(nuts)
 	hud.punch_nuts()

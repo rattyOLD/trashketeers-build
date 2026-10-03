@@ -111,6 +111,7 @@ func _spawn_player(at: Vector2, weapon: WeaponData, target_finder: Callable) -> 
 		"fluffy_chemist":
 			stats.add_flat(&"poison_chance", 0.2)
 			stats.add_flat(&"poison_power", 0.3)
+			stats.add_flat(&"regen", 0.5)
 	entities.add_child(player)
 	player.setup(target_finder, weapon, stats)
 	player.visual.apply_look(SaveService.get_character(), SaveService.get_skin())

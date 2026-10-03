@@ -20,6 +20,10 @@ const EXECUTE_HP := 0.25
 var _frost_aura := false
 var _execute_shot := false
 var _frost_tick := 0.0
+var _hero := ""
+var _still := 0.0
+var _still_bonus := false
+var _shield_cd := 0.0
 const SLOW_DURATION := 2.0
 const SHOCK_RANGE := 210.0
 const SHOCK_DAMAGE_RATIO := 0.7
@@ -61,6 +65,7 @@ func setup(run_stats: RunStats, target_player: Player, enemy_manager: EnemyManag
 	stats = run_stats
 	_frost_aura = SaveService.get_character_id() == "snow"
 	_execute_shot = SaveService.get_character_id() == "pigeon_mafioso"
+	_hero = SaveService.get_character_id()
 	player = target_player
 	enemies = enemy_manager
 	fx = effects
@@ -77,6 +82,14 @@ func _physics_process(delta: float) -> void:
 			for enemy in enemies.get_active():
 				if enemy.is_alive() and enemy.global_position.distance_squared_to(player.global_position) < r2:
 					enemy.add_slow(FROST_SLOW, FROST_INTERVAL * 2.0)
+	if _hero == "raccoon":
+		_stand_still(delta)
+	elif _hero == "snow":
+		_shield_cd -= delta
+		if _shield_cd <= 0.0 and player.hp < player.max_hp * 0.3:
+			_shield_cd = 25.0
+			player.grant_invuln(2.0)
+			fx.ring(player.global_position, Color("#e8fbff"), 150.0)
 	_blast_cd -= delta
 	_heal_popup_cd -= delta
 	_shock_cd -= delta
@@ -88,6 +101,22 @@ func _physics_process(delta: float) -> void:
 		if _regen_acc >= 0.5:
 			player.heal(_regen_acc)
 			_regen_acc = 0.0
+
+
+## Рико «Ни шагу назад»: стоит на месте 1.5 с, урон +15%.
+func _stand_still(delta: float) -> void:
+	if player.move_input.length() < 0.1:
+		_still += delta
+		if _still >= 1.5 and not _still_bonus:
+			_still_bonus = true
+			stats.add_flat(&"damage_mult", 0.15)
+			player.apply_run_stats(stats)
+	else:
+		_still = 0.0
+		if _still_bonus:
+			_still_bonus = false
+			stats.add_flat(&"damage_mult", -0.15)
+			player.apply_run_stats(stats)
 
 
 func has_effects() -> bool:
@@ -109,6 +138,8 @@ func on_player_hit(bullet: Bullet, enemy: Enemy) -> void:
 	if _execute_shot and crit and enemy.data.boss_pattern.is_empty() and enemy.hp < enemy.max_hp * EXECUTE_HP:
 		enemy.take_damage(enemy.hp + 1.0, Vector2.ZERO, true)
 		return
+	if _hero == "night" and enemy.hp >= enemy.max_hp - damage * 1.05:
+		enemy.take_damage(damage * 0.25, Vector2.ZERO, false)
 	var p := power()
 	var at := enemy.get_aim_point()
 
