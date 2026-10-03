@@ -21,6 +21,14 @@ const ITEMS: Array[Dictionary] = [
 var _balance: Label
 var _list: VBoxContainer
 var _resume: Button
+var _cat_face: TextureRect
+var _cat_line: Label
+var _cat_sticker: TextureRect
+var _pet_times: Array[float] = []
+var _pet_token := 0
+
+const MOSYA_FRAMES := "res://assets/ui/mosya/mosya_frames.png"
+const MOSYA_LINES: Array[String] = ["мур", "мррр", "мур-мур", "мрр, ещё", "мяу", "мррр-мяу"]
 
 
 func _init() -> void:
@@ -32,8 +40,9 @@ func _init() -> void:
 	note.custom_minimum_size = Vector2(520, 0)
 	content.add_child(note)
 	content.add_child(_online_plate())
+	content.add_child(_mosya_card())
 	_list = MenuPopups.scroll_list(content)
-	(_list.get_parent() as Control).custom_minimum_size.y -= 110.0
+	(_list.get_parent() as Control).custom_minimum_size.y -= 270.0
 	_resume = UiStyle.button("ПРОДОЛЖИТЬ С ЧЕКПОИНТА", Color("#1d8fb0"), 26, Vector2(0, 70))
 	_resume.pressed.connect(func() -> void:
 		SaveService.resume_requested = true
@@ -138,3 +147,74 @@ func _item_row(item: Dictionary, color: Color) -> Control:
 				_refresh())
 	row.add_child(buy)
 	return row
+
+
+## Мося, кот Рико: гладится в лагере. Закрывает глаза, мурчит. Если тыкать слишком быстро, сердится.
+func _cat_frame(index: int) -> Texture2D:
+	var atlas := AtlasTexture.new()
+	atlas.atlas = load(MOSYA_FRAMES) as Texture2D
+	atlas.region = Rect2(index * 192, 0, 192, 256)
+	return atlas
+
+
+func _mosya_card() -> Control:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 14)
+	_cat_face = TextureRect.new()
+	_cat_face.custom_minimum_size = Vector2(120, 160)
+	_cat_face.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_cat_face.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_cat_face.texture = _cat_frame(0)
+	row.add_child(_cat_face)
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 4)
+	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(column)
+	column.add_child(UiStyle.label("МОСЯ · кот Рико", 24, Color("#ffd257"), 5))
+	_cat_line = UiStyle.label("Не спрашивай, откуда в лагере кот.", 18, UiStyle.TEXT_DIM, 4)
+	_cat_line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_cat_line.custom_minimum_size = Vector2(300, 0)
+	column.add_child(_cat_line)
+	var pet := UiStyle.button("ПОГЛАДИТЬ", Color("#c86600"), 24, Vector2(0, 60))
+	pet.pressed.connect(_pet_mosya)
+	column.add_child(pet)
+	_cat_sticker = TextureRect.new()
+	_cat_sticker.custom_minimum_size = Vector2(110, 110)
+	_cat_sticker.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_cat_sticker.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_cat_sticker.modulate.a = 0.0
+	row.add_child(_cat_sticker)
+	return row
+
+
+func _pet_mosya() -> void:
+	var now := Time.get_ticks_msec() / 1000.0
+	_pet_times.append(now)
+	while not _pet_times.is_empty() and now - _pet_times[0] > 3.0:
+		_pet_times.pop_front()
+	SaveService.add_stat("mosya_pets", 1, false)
+	_pet_token += 1
+	var token := _pet_token
+	SoundManager.play(&"ui_confirm")
+	if _pet_times.size() >= 7:
+		_cat_face.texture = load("res://assets/ui/stickers/mosya_angry.png") as Texture2D
+		_cat_line.text = "Мося: ФШШ. Хватит. Дай подышать."
+		_show_cat_sticker("mosya_angry")
+		_pet_times.clear()
+	else:
+		_cat_face.texture = _cat_frame(3)
+		var total := SaveService.get_stat("mosya_pets")
+		_cat_line.text = "%s  (погладил %d)" % [MOSYA_LINES[total % MOSYA_LINES.size()], total]
+		if total % 10 == 0:
+			_show_cat_sticker("mosya_meow")
+	await get_tree().create_timer(0.8).timeout
+	if token == _pet_token and is_instance_valid(_cat_face):
+		_cat_face.texture = _cat_frame(0)
+
+
+func _show_cat_sticker(id: String) -> void:
+	_cat_sticker.texture = load("res://assets/ui/stickers/%s.png" % id) as Texture2D
+	_cat_sticker.modulate.a = 1.0
+	var tween := create_tween()
+	tween.tween_interval(0.9)
+	tween.tween_property(_cat_sticker, "modulate:a", 0.0, 0.5)

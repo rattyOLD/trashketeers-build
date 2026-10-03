@@ -11,7 +11,7 @@ const IMAGE_SIDE := 1280
 const STICKERS: Array[String] = ["hi", "go", "letsgo", "ok", "gg", "lol", "yay", "angry", "srsly", "what", "hmm", "panic", "beer", "mine", "loot", "deal", "giveup", "nohit", "peace", "cold",
 	"rico_wave", "rico_laugh", "rico_thumbsup", "rico_celebrate", "rico_angry", "rico_cry", "rico_facepalm", "rico_sleep",
 	"nell_wink", "nell_tea", "nell_roll_eyes", "nell_shock", "baron_beer", "baron_laugh", "baron_pout", "baron_surrender",
-	"king_coins", "king_yell", "toxic_panic", "toxic_scratch"]
+	"king_coins", "king_yell", "toxic_panic", "toxic_scratch", "mosya_meow", "mosya_purr", "mosya_angry"]
 const SEND_ERRORS := {
 	"not_friends": "Вы больше не друзья, писать нельзя",
 	"blocked": "Переписка заблокирована",
