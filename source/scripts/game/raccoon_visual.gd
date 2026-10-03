@@ -135,6 +135,13 @@ var _bob := 0.0
 var _squash := 1.0
 var _stretch := 1.0
 var _sway := 0.0
+## Наклон корпуса по скорости и ускорению, сжатие от выстрела, «прищепка» разворота, счётчик шагов
+## (Player поднимает пыль): живость поверх нарисованных кадров.
+var _lean := 0.0
+var _shot_squash := 0.0
+var _turn := 0.0
+var _step_phase := 0
+var footsteps := 0
 var _carry_lag := 0.0
 var _hop := 0.0
 var _aim_local := 0.0
@@ -424,6 +431,7 @@ func update_motion(velocity: Vector2, aim: Vector2, delta: float) -> void:
 	var look_x := aim.x if absf(aim.x) > 0.05 else velocity.x
 	if absf(look_x) > 0.05 and signf(look_x) != _facing:
 		_facing = signf(look_x)
+		_turn = 1.0
 		_tail_spring.kick(-3.0)
 		_ear_spring.kick(-2.5)
 		_scarf_spring.kick(3.0)
@@ -437,6 +445,15 @@ func update_motion(velocity: Vector2, aim: Vector2, delta: float) -> void:
 	_flash_t = maxf(_flash_t - delta, 0.0)
 	_body_kick = _body_kick.lerp(Vector2.ZERO, clampf(KICK_DECAY * delta, 0.0, 1.0))
 	var local_accel := accel.x * _facing
+	var lean_target := clampf(velocity.x / 260.0, -1.0, 1.0) * 0.07 + clampf(accel.x * 0.00004, -0.05, 0.05)
+	_lean = lerpf(_lean, lean_target * (1.0 - _dash_blend), clampf(10.0 * delta, 0.0, 1.0))
+	_shot_squash = move_toward(_shot_squash, 0.0, delta * 0.9)
+	_turn = move_toward(_turn, 0.0, delta * 9.0)
+	var phase := floori(_gait / PI)
+	if phase != _step_phase:
+		_step_phase = phase
+		if _run > 0.55 and not dashing and not _dead:
+			footsteps += 1
 	_tail_spring.update(clampf(-local_accel * 0.0006, -0.35, 0.35), delta)
 	_scarf_spring.update(clampf(-local_accel * 0.0005, -0.3, 0.3), delta)
 	_ear_spring.update(0.0, delta)
@@ -481,6 +498,7 @@ func kick(direction: Vector2, strength: float) -> void:
 	_climb = minf(_climb + 0.07 * strength, 0.22)
 	_flash_t = 0.07
 	_body_kick -= direction.normalized() * 2.5 * strength
+	_shot_squash = minf(_shot_squash + 0.035 * strength, 0.07)
 	_head_spring.kick(-0.8 * strength)
 	_ear_spring.kick(-0.6 * strength)
 
@@ -661,8 +679,9 @@ func _update_pose() -> void:
 ## Трансформ «пиксели текстуры относительно точки опоры → локальные координаты узла».
 ## Отражение по x (взгляд влево) зашито в масштаб: рука, аксессуары и кости отражаются с телом.
 func _sprite_xform() -> Transform2D:
-	var scale_vec := Vector2(_facing * _sc() * (2.0 - _squash) * _stretch, _sc() * _squash)
-	return Transform2D(_sway, scale_vec, 0.0, Vector2(0, -_bob - _hop) + _body_kick)
+	var squash := _squash - _shot_squash
+	var scale_vec := Vector2(_facing * _sc() * (2.0 - squash) * _stretch * (1.0 - 0.2 * _turn), _sc() * squash)
+	return Transform2D(_sway + (0.0 if _dead else _lean), scale_vec, 0.0, Vector2(0, -_bob - _hop) + _body_kick)
 
 
 func _apply_rig() -> void:

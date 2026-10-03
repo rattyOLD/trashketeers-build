@@ -259,7 +259,10 @@ func _physics_process(delta: float) -> void:
 	if melee_weapon:
 		visual.melee_offset = weapon_controller.melee.offset
 		visual.melee_scale = weapon_controller.melee.size_scale
+	var steps := visual.footsteps
 	visual.update_motion(velocity, aim, delta)
+	if visual.footsteps != steps and fx != null:
+		fx.dust(global_position + Vector2(-8.0 * signf(velocity.x), 6.0), 1, 6.0)
 	visual.set_env_light(EnvLights.sample(global_position), delta)
 	visual.modulate.a = 0.55 if _invuln > 0.0 and int(_invuln * 20.0) % 2 == 0 else 1.0
 
