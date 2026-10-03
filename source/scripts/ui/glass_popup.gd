@@ -118,14 +118,14 @@ static func owner_of(node: Node) -> GlassPopup:
 
 ## Открыто хоть одно окно: экран под ним в этот момент не перестраиваем (иначе окно пропадёт).
 static func any_open() -> bool:
-	_open_stack = _open_stack.filter(func(p: GlassPopup) -> bool: return is_instance_valid(p) and p.visible)
+	_open_stack = _open_stack.filter(func(p: Variant) -> bool: return is_instance_valid(p) and (p as GlassPopup).visible)
 	return not _open_stack.is_empty()
 
 
 ## Поле в верхнем открытом окне, и окно уже доиграло анимацию появления.
 static func is_on_top(node: Node) -> bool:
 	var popup := owner_of(node)
-	_open_stack = _open_stack.filter(func(p: GlassPopup) -> bool: return is_instance_valid(p) and p.visible)
+	_open_stack = _open_stack.filter(func(p: Variant) -> bool: return is_instance_valid(p) and (p as GlassPopup).visible)
 	if popup == null:
 		return _open_stack.is_empty()
 	return not _open_stack.is_empty() and _open_stack.back() == popup and popup._panel.scale.is_equal_approx(Vector2.ONE) and not popup._closing and popup.overlays == 0
