@@ -1,4 +1,4 @@
-# Тестовая сборка Android: при пуше собирает подписанный APK и отправляет его тестерам через
+# TrashSquad (Beer Party Studio) — тестовая сборка Android: при пуше собирает подписанный APK и отправляет его тестерам через
 # Firebase App Distribution (группа testers); копия APK — в артефактах запуска.
 # Секреты репозитория (Settings → Secrets and variables → Actions):
 #   ANDROID_KEYSTORE_BASE64 — base64 файла trashketeers-beta.keystore
@@ -75,6 +75,7 @@ jobs:
         run: |
           sed -i "s/^version\/code=.*/version\/code=${GITHUB_RUN_NUMBER}/" source/export_presets.cfg
           sed -i "s/^version\/name=.*/version\/name=\"beta.${GITHUB_RUN_NUMBER}\"/" source/export_presets.cfg
+          sed -i "s/^config\/version=.*/config\/version=\"beta.${GITHUB_RUN_NUMBER}\"/" source/project.godot
 
       - name: Импорт и экспорт APK
         env:
@@ -85,13 +86,13 @@ jobs:
           GODOT=~/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64
           $GODOT --headless --path source --import > import.log 2>&1 || true
           mkdir -p source/build/android
-          $GODOT --headless --path source --export-release "Android" build/android/trashketeers.apk 2>&1 | tee export.log
-          test -f source/build/android/trashketeers.apk
+          $GODOT --headless --path source --export-release "Android" build/android/TrashSquad.apk 2>&1 | tee export.log
+          test -f source/build/android/TrashSquad.apk
 
       - uses: actions/upload-artifact@v4
         with:
-          name: trashketeers-beta-${{ github.run_number }}
-          path: source/build/android/trashketeers.apk
+          name: TrashSquad-beta-${{ github.run_number }}
+          path: source/build/android/TrashSquad.apk
 
       - name: Отправить тестерам (Firebase App Distribution)
         uses: wzieba/Firebase-Distribution-Github-Action@v1
@@ -99,5 +100,5 @@ jobs:
           appId: ${{ secrets.FIREBASE_APP_ID }}
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           groups: testers
-          file: source/build/android/trashketeers.apk
-          releaseNotes: "beta.${{ github.run_number }} · ${{ github.ref_name }} · ${{ github.event.head_commit.message }}"
+          file: source/build/android/TrashSquad.apk
+          releaseNotes: "TrashSquad beta.${{ github.run_number }} · Beer Party Studio · ${{ github.ref_name }} · ${{ github.event.head_commit.message }}"

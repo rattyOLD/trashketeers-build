@@ -18,6 +18,9 @@ const AD_TIMEOUT := 45.0
 const AD_SIMULATED_TIME := 1.2
 
 var is_web := false
+## Приложение на телефоне (не редактор): отчёты шлёт NativeTelemetry.
+var is_native_app := false
+var telemetry: NativeTelemetry
 var is_telegram := false
 
 var _cloud_wait := -1.0
@@ -32,6 +35,10 @@ var _ad_simulated := false
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	is_web = OS.has_feature("web")
+	is_native_app = OS.has_feature("mobile") and not OS.has_feature("editor")
+	if is_native_app:
+		telemetry = NativeTelemetry.new()
+		add_child.call_deferred(telemetry)
 	if not is_web:
 		return
 	_js("if (navigator.storage && navigator.storage.persist) { navigator.storage.persist(); } return true;")
@@ -147,6 +154,9 @@ const BATTLE_FLAG := "__trash_battle"
 ## Флаг «бой идёт»: ставится на старте боя и снимается через несколько секунд стабильной работы
 ## или при выходе. Если при следующем запуске он остался — вкладку убила система (нехватка памяти).
 func mark_battle(active: bool, info: String = "") -> void:
+	if is_native_app:
+		storage_set(BATTLE_FLAG, info if active else "")
+		return
 	if not is_web:
 		return
 	if active:
@@ -156,6 +166,10 @@ func mark_battle(active: bool, info: String = "") -> void:
 
 
 func consume_unclean_exit() -> String:
+	if is_native_app:
+		var flag := storage_get(BATTLE_FLAG)
+		storage_set(BATTLE_FLAG, "")
+		return flag
 	if not is_web:
 		return ""
 	var value: Variant = _js("var v = window.localStorage.getItem('%s'); window.localStorage.removeItem('%s'); return v;" % [BATTLE_FLAG, BATTLE_FLAG])
@@ -163,6 +177,8 @@ func consume_unclean_exit() -> String:
 
 
 func build_label() -> String:
+	if is_native_app and telemetry != null:
+		return telemetry.build_label()
 	if not is_web:
 		return "редактор"
 	var value: Variant = _js("return window.__trash_build ? window.__trash_build.label + ' · ' + window.__trash_build.time : '';")
@@ -206,6 +222,8 @@ func is_fullscreen() -> bool:
 
 
 func set_context(text: String) -> void:
+	if telemetry != null:
+		telemetry.set_context(text)
 	if is_web:
 		_js("window.localStorage.setItem('__trash_ctx', %s);" % JSON.stringify(text))
 
@@ -218,11 +236,15 @@ func set_in_battle(on: bool) -> void:
 
 ## Хлебные крошки для отчётов об ошибках: последние 20 действий (экран, окно, запрос к серверу).
 func trail(text: String) -> void:
+	if telemetry != null:
+		telemetry.trail(text)
 	if is_web:
 		_js("var t = window.__trash_trail = window.__trash_trail || []; t.push(%s); if (t.length > 20) { t.shift(); }" % JSON.stringify("%ds %s" % [Time.get_ticks_msec() / 1000, text.left(80)]))
 
 
 func last_context() -> String:
+	if telemetry != null:
+		return telemetry.last_context()
 	if not is_web:
 		return ""
 	var value: Variant = _js("return window.localStorage.getItem('__trash_ctx');")
@@ -230,28 +252,40 @@ func last_context() -> String:
 
 
 func device_info() -> String:
+	if telemetry != null:
+		return telemetry.device_info()
 	if not is_web:
 		return OS.get_name()
 	return str(_js("return navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + (window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio);"))
 
 
 func note_event(text: String) -> void:
+	if telemetry != null:
+		telemetry.note(text)
 	if is_web:
 		_js("if (window.trkNote) { window.trkNote(%s); }" % JSON.stringify(text))
 
 
 func send_report(kind: String, text: String, extra: String = "") -> void:
+	if telemetry != null:
+		telemetry.report(kind, text, extra)
 	if is_web:
 		_js("if (window.trkReport) { window.trkReport(%s, %s, %s); }" % [JSON.stringify(kind), JSON.stringify(text), JSON.stringify(extra)])
 
 
 func store_snapshot(base64_jpeg: String) -> void:
+	if is_native_app:
+		storage_set("__trash_shot", base64_jpeg)
 	if is_web:
 		_js("window.localStorage.setItem('__trash_shot', %s);" % JSON.stringify(base64_jpeg))
 
 
 ## Последний снимок экрана перед вылетом; забирается один раз.
 func take_snapshot() -> String:
+	if is_native_app:
+		var shot := storage_get("__trash_shot")
+		storage_set("__trash_shot", "")
+		return shot
 	if not is_web:
 		return ""
 	var value: Variant = _js("var v = window.localStorage.getItem('__trash_shot'); window.localStorage.removeItem('__trash_shot'); return v;")
