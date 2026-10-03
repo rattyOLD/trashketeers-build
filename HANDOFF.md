@@ -24,3 +24,5 @@
 4. Арт от Астры (задание у владельца): Мася (кот, сейчас фото), струи боссов, фон районов со зрителями-крысами/свиньями (по главе), — встроить, зрители реагируют на бой.
 5. Ошибка «Lambda capture freed» — отложенные таймеры старого боя после выхода (безвредно, но шумит).
 6. iOS TestFlight — когда владелец даст данные Apple.
+7. Обновление APK целиком внутри игры (без браузера): перевести экспорт Android на Gradle-сборку (`gradle_build/use_gradle_build=true`, шаблон android_source), написать Android-плагин v2 (Kotlin): скачать APK в cacheDir с прогрессом → FileProvider → Intent ACTION_VIEW (application/vnd.android.package-archive) + разрешение REQUEST_INSTALL_PACKAGES; в `core/app_updater.gd` вместо `OS.shell_open` — загрузка HTTPRequest в user:// с полоской и вызов плагина. Проверить на Android 8–14.
+8. Тестер-меню теперь открыто и Insider (`MainMenuUI._sync_tester_button`): проверить, что из него нельзя добыть монеты/прокачку, иначе закрыть такие пункты для Insider.
