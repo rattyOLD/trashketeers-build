@@ -204,6 +204,9 @@ func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_APPLICATION_FOCUS_IN:
 		_perf_last_usec = 0
 		_perf_resume_guard = 2
+	# Приложение (Android/iOS): «Назад» и уход в фон ставят бой на паузу, а не закрывают игру.
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST or what == NOTIFICATION_APPLICATION_PAUSED:
+		_open_pause()
 
 
 func _process(delta: float) -> void:

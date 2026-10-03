@@ -10,6 +10,7 @@ config/features=PackedStringArray("4.4", "GL Compatibility")
 boot_splash/show_image=false
 boot_splash/bg_color=Color(0.05, 0.04, 0.11, 1)
 config/icon="res://assets/icon.png"
+config/quit_on_go_back=false
 
 [autoload]
 
@@ -56,6 +57,8 @@ pointing/emulate_touch_from_mouse=true
 common/physics_interpolation=true
 
 [rendering]
+
+textures/vram_compression/import_etc2_astc=true
 
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
