@@ -147,6 +147,10 @@ func is_touch() -> bool:
 func set_render_cap(cap: float) -> void:
 	if is_web:
 		_js("window.__trash_dpr_cap = %s;" % str(cap))
+	elif is_native_app and is_inside_tree():
+		# В приложении экран телефона в 2–4 раза плотнее, чем веб рисует на «качестве 0–1»: там рендер в
+		# логическом размере 720×1280 с растяжкой на экран (меньше нагрев), на «качестве 2» — полное разрешение.
+		get_tree().root.content_scale_mode = Window.CONTENT_SCALE_MODE_CANVAS_ITEMS if cap >= 2.5 else Window.CONTENT_SCALE_MODE_VIEWPORT
 
 
 const BATTLE_FLAG := "__trash_battle"
