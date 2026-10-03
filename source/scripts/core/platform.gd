@@ -150,7 +150,8 @@ func set_render_cap(cap: float) -> void:
 	elif is_native_app and is_inside_tree():
 		# В приложении экран телефона в 2–4 раза плотнее, чем веб рисует на «качестве 0–1»: там рендер в
 		# логическом размере 720×1280 с растяжкой на экран (меньше нагрев), на «качестве 2» — полное разрешение.
-		get_tree().root.content_scale_mode = Window.CONTENT_SCALE_MODE_CANVAS_ITEMS if cap >= 2.5 else Window.CONTENT_SCALE_MODE_VIEWPORT
+		# Даже «качество 2» в полном разрешении (1080×2175 на moto g32 / Adreno 610) давало 11 FPS — в приложении всегда 720×1280.
+		get_tree().root.content_scale_mode = Window.CONTENT_SCALE_MODE_VIEWPORT
 
 
 const BATTLE_FLAG := "__trash_battle"
