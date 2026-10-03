@@ -795,7 +795,7 @@ func _on_enemy_died(enemy: Enemy) -> void:
 
 func _on_wanted_level(level: int) -> void:
 	hud.set_wanted(level)
-	hud.toast("РОЗЫСК %s" % "★".repeat(level), "Бюро Расчистки выслало агентов. За каждого платят награду.", Color("#ff5a5a"))
+	hud.toast("РОЗЫСК %s" % "★".repeat(level), "Бюро ликвидации выслало агентов. За каждого платят награду.", Color("#ff5a5a"))
 	if level >= 5:
 		SaveService.add_stat("wanted_max", 1)
 	if radio != null:

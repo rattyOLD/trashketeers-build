@@ -908,7 +908,7 @@
     },
     {
       "enemy_id": "fed_chief",
-      "display_name": "Шеф Бюро",
+      "display_name": "Директор",
       "behavior": "chaser",
       "max_hp": 720,
       "move_speed": 100,
