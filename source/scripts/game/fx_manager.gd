@@ -166,6 +166,7 @@ var _light_life := PackedFloat32Array()
 var _light_total := PackedFloat32Array()
 var _light_energy := PackedFloat32Array()
 var _light_next := 0
+var _batch := PolyBatch.new()
 
 
 func _init() -> void:
@@ -655,6 +656,7 @@ func _process(delta: float) -> void:
 
 
 func _draw_sparks(canvas: CanvasItem) -> void:
+	var batch := _batch
 	for i in SPARK_CAPACITY:
 		var life := _sp_life[i]
 		if life <= 0.0:
@@ -662,9 +664,9 @@ func _draw_sparks(canvas: CanvasItem) -> void:
 		var t := life / _sp_max[i]
 		var c := _sp_color[i]
 		var tail := _sp_vel[i] * 0.03
-		canvas.draw_line(_sp_pos[i] - tail, _sp_pos[i], Color(c, 0.5 * t), _sp_size[i] * 1.4 * t)
-		canvas.draw_circle(_sp_pos[i], _sp_size[i] * 2.0 * t, Color(c, 0.22 * t))
-		canvas.draw_circle(_sp_pos[i], _sp_size[i] * t, Color(c.lightened(0.45), t))
+		batch.line(_sp_pos[i] - tail, _sp_pos[i], Color(c, 0.5 * t), _sp_size[i] * 1.4 * t)
+		batch.circle(_sp_pos[i], _sp_size[i] * 2.0 * t, Color(c, 0.22 * t))
+		batch.circle(_sp_pos[i], _sp_size[i] * t, Color(c.lightened(0.45), t))
 	for i in FLASH_CAPACITY:
 		var life := _fl_life[i]
 		if life <= 0.0:
@@ -675,8 +677,8 @@ func _draw_sparks(canvas: CanvasItem) -> void:
 		var side := fwd.orthogonal()
 		var p := _fl_pos[i]
 		var star := PackedVector2Array([p + fwd * 30.0 * s, p + side * 7.0 * s, p - fwd * 6.0 * s, p - side * 7.0 * s])
-		canvas.draw_colored_polygon(star, Color(_fl_color[i], 0.85 * t))
-		canvas.draw_circle(p + fwd * 6.0 * s, 9.0 * s, Color(1, 1, 1, 0.8 * t))
+		batch.polygon(star, Color(_fl_color[i], 0.85 * t))
+		batch.circle(p + fwd * 6.0 * s, 9.0 * s, Color(1, 1, 1, 0.8 * t))
 	for i in BOLT_CAPACITY:
 		var life := _bo_life[i]
 		if life <= 0.0:
@@ -692,14 +694,15 @@ func _draw_sparks(canvas: CanvasItem) -> void:
 			points.append(a.lerp(b, f) + normal * sin(_bo_seed[i] + j * 7.3 + life * 60.0) * 14.0)
 		points.append(b)
 		var fade := life / BOLT_LIFE
-		canvas.draw_polyline(points, Color(_bo_color[i], 0.55 * fade), 9.0 * fade + 2.0)
-		canvas.draw_polyline(points, Color(1, 1, 1, fade), 3.0)
+		batch.polyline(points, Color(_bo_color[i], 0.55 * fade), 9.0 * fade + 2.0)
+		batch.polyline(points, Color(1, 1, 1, fade), 3.0)
 	for i in RING_CAPACITY:
 		var life := _ring_life[i]
 		if life <= 0.0:
 			continue
 		var t := 1.0 - life / 0.35
-		canvas.draw_arc(_ring_pos[i], _ring_radius[i] * (0.4 + t), 0.0, TAU, 40, Color(_ring_color[i], 1.0 - t), 6.0 * (1.0 - t) + 1.0)
+		batch.arc(_ring_pos[i], _ring_radius[i] * (0.4 + t), 0.0, TAU, 40, Color(_ring_color[i], 1.0 - t), 6.0 * (1.0 - t) + 1.0)
+	batch.flush(canvas)
 
 
 func _draw_texts(canvas: CanvasItem) -> void:
@@ -707,7 +710,8 @@ func _draw_texts(canvas: CanvasItem) -> void:
 		var life := _ch_life[i]
 		if life <= 0.0 or _ch_z[i] <= 0.5:
 			continue
-		_draw_chunk(canvas, i, minf(life * 3.0, 1.0))
+		_draw_chunk(i, minf(life * 3.0, 1.0))
+	_batch.flush(canvas)
 	for i in TEXT_CAPACITY:
 		var life := _tx_life[i]
 		if life <= 0.0:
@@ -723,6 +727,7 @@ func _draw_texts(canvas: CanvasItem) -> void:
 
 
 func _draw_ground(canvas: CanvasItem) -> void:
+	var b := _batch
 	for i in SPLAT_CAPACITY:
 		var life := _spl_life[i]
 		if life <= 0.0:
@@ -732,26 +737,27 @@ func _draw_ground(canvas: CanvasItem) -> void:
 		var r := _spl_radius[i]
 		var p := _spl_pos[i]
 		var seed := _spl_seed[i]
-		canvas.draw_set_transform(p, 0.0, Vector2(1.0, 0.55))
-		canvas.draw_circle(Vector2.ZERO, r, Color(c.darkened(0.35), 0.45 * fade))
+		b.set_transform(p, 0.0, Vector2(1.0, 0.55))
+		b.circle(Vector2.ZERO, r, Color(c.darkened(0.35), 0.45 * fade))
 		for k in 5:
 			var a := seed + k * 1.37
-			canvas.draw_circle(Vector2.from_angle(a) * r * 0.95, r * (0.22 + 0.08 * sin(seed + k)), Color(c.darkened(0.35), 0.45 * fade))
-		canvas.draw_circle(Vector2(-r * 0.25, -r * 0.2), r * 0.28, Color(c.lightened(0.3), 0.25 * fade))
-	canvas.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			b.circle(Vector2.from_angle(a) * r * 0.95, r * (0.22 + 0.08 * sin(seed + k)), Color(c.darkened(0.35), 0.45 * fade))
+		b.circle(Vector2(-r * 0.25, -r * 0.2), r * 0.28, Color(c.lightened(0.3), 0.25 * fade))
+	b.reset_transform()
 
 	for i in PUFF_CAPACITY:
 		var life := _pf_life[i]
 		if life <= 0.0:
 			continue
 		var t := life / PUFF_LIFE
-		canvas.draw_circle(_pf_pos[i], _pf_size[i] * (1.6 - t * 0.6), Color(0.78, 0.74, 0.86, 0.32 * t))
+		b.circle(_pf_pos[i], _pf_size[i] * (1.6 - t * 0.6), Color(0.78, 0.74, 0.86, 0.32 * t))
 
 	for i in CHUNK_CAPACITY:
 		var life := _ch_life[i]
 		if life <= 0.0 or _ch_z[i] > 0.5:
 			continue
-		_draw_chunk(canvas, i, minf(life * 3.0, 1.0))
+		_draw_chunk(i, minf(life * 3.0, 1.0))
+	b.flush(canvas)
 
 	for i in CORPSE_CAPACITY:
 		var life := _co_life[i]
@@ -782,17 +788,17 @@ func _draw_ground(canvas: CanvasItem) -> void:
 	canvas.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
-func _draw_chunk(canvas: CanvasItem, i: int, alpha: float) -> void:
+func _draw_chunk(i: int, alpha: float) -> void:
 	var p := _ch_pos[i]
 	var s := _ch_size[i]
 	var z := _ch_z[i]
 	if z > 0.5:
-		canvas.draw_circle(p + Vector2(0, 3), s * 0.6, Color(0, 0, 0, 0.25 * alpha))
+		_batch.circle(p + Vector2(0, 3), s * 0.6, Color(0, 0, 0, 0.25 * alpha))
 	var top := p - Vector2(0, z)
 	var dir := Vector2.from_angle(_ch_spin[i]) * s * 0.6
 	var side := dir.orthogonal() * 0.6
 	var quad := PackedVector2Array([top - dir - side, top + dir - side, top + dir + side, top - dir + side])
-	canvas.draw_colored_polygon(quad, Color(_ch_color[i], alpha))
+	_batch.polygon(quad, Color(_ch_color[i], alpha))
 
 
 func _resize_all() -> void:

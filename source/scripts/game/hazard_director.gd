@@ -44,6 +44,7 @@ var _history: Array[Vector2] = []
 var _tick := 0.0
 var _rocket: Texture2D
 var _blast: Texture2D
+var _batch := PolyBatch.new()
 
 
 func setup(target: Player, wave_director: WaveDirector, level: LevelSpawner, effects: FxManager) -> void:
@@ -302,13 +303,15 @@ func _draw_laser(k: int, warming: bool, t: float, clock: float) -> void:
 	var a := (at - direction * reach).clamp(map.bounds.position, map.bounds.end)
 	var b := (at + direction * reach).clamp(map.bounds.position, map.bounds.end)
 	var normal := direction.orthogonal() * LASER_WIDTH * 0.5
+	var batch := _batch
 	if warming:
 		var blink := 0.35 + 0.65 * absf(sin(clock * (8.0 + 16.0 * t)))
-		draw_colored_polygon(PackedVector2Array([a + normal, b + normal, b - normal, a - normal]), Color(TELEGRAPH, 0.12 + 0.1 * t))
-		draw_line(a + normal, b + normal, Color(TELEGRAPH, 0.8 * blink), 3.0)
-		draw_line(a - normal, b - normal, Color(TELEGRAPH, 0.8 * blink), 3.0)
-		draw_line(a, b, Color(1.0, 0.5, 0.5, 0.5 * blink), 2.0)
+		batch.polygon(PackedVector2Array([a + normal, b + normal, b - normal, a - normal]), Color(TELEGRAPH, 0.12 + 0.1 * t))
+		batch.line(a + normal, b + normal, Color(TELEGRAPH, 0.8 * blink), 3.0)
+		batch.line(a - normal, b - normal, Color(TELEGRAPH, 0.8 * blink), 3.0)
+		batch.line(a, b, Color(1.0, 0.5, 0.5, 0.5 * blink), 2.0)
 	else:
 		var fade := clampf(_life[k] / 0.45, 0.0, 1.0)
-		draw_colored_polygon(PackedVector2Array([a + normal, b + normal, b - normal, a - normal]), Color(1.0, 0.35, 0.45, 0.6 * fade))
-		draw_line(a, b, Color(1, 1, 1, fade), LASER_WIDTH * 0.35 * fade + 2.0)
+		batch.polygon(PackedVector2Array([a + normal, b + normal, b - normal, a - normal]), Color(1.0, 0.35, 0.45, 0.6 * fade))
+		batch.line(a, b, Color(1, 1, 1, fade), LASER_WIDTH * 0.35 * fade + 2.0)
+	batch.flush(self)
