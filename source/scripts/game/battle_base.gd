@@ -156,6 +156,7 @@ func _setup_common(camera_bounds: Rect2, currency_icon: Texture2D) -> void:
 	add_child(light_map)
 	light_map.build(self, 1)
 
+	Bullet.liquid_sink = fx.droplet
 	hud = Hud.new()
 	add_child(hud)
 	hud.build(currency_icon, player.weapon_controller.base_weapon)
@@ -479,8 +480,9 @@ func _on_bullet_hit(bullet: Bullet, target: Node2D) -> void:
 		if impact_tex != null:
 			fx.sprite_flash(impact_tex, bullet.global_position, WeaponVfx.impact_width(bullet.weapon) * (1.25 if crit else 1.0), 0.14)
 	if bullet.weapon.id == &"beer_jet_v1" or bullet.weapon.id == &"puke_v1":
-		fx.burst_dir(bullet.global_position, -bullet.velocity.normalized(), color, 7, 1.1, 300.0, 3.5)
-		fx.chunks(bullet.global_position, color.lightened(0.25), 3, 200.0, 3.0)
+		# Жидкость при ударе: брызги назад и в стороны плюс белая пена — без твёрдых «комков».
+		fx.burst_dir(bullet.global_position, -bullet.velocity.normalized(), color.lightened(0.3), 7, 1.3, 300.0, 3.0)
+		fx.burst(bullet.global_position, Color("#fff6dc"), 3, 110.0, 2.4)
 		return
 	fx.burst_dir(bullet.global_position, -bullet.velocity.normalized(), color, 6 if crit else (2 if dense else 4), 0.8, 260.0, 3.0)
 	if target is Enemy and not dense:

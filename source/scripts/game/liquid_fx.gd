@@ -6,7 +6,11 @@ extends Node2D
 const CAPACITY := 24
 const SPLASH_FRAMES := 6
 const SPLASH_TIME := 0.36
-const DRY_FRACTION := 0.55
+const DRY_FRACTION := 0.72
+## Пиво и рвота слегка светятся в карте освещения (как неон/огонь): в тёмной главе жидкость
+## остаётся сочной и блестящей, а не бурой. Брызги — короткая вспышка, лужа — источник на время жизни.
+const GLOW := [Color(1.0, 0.72, 0.25), Color(0.6, 1.0, 0.25)]
+const GLOW_STRENGTH := 0.5
 const BASE := "res://assets/vfx/liquid/"
 
 var _sprites: Array[Sprite2D] = []
@@ -14,6 +18,7 @@ var _age: PackedFloat32Array = PackedFloat32Array()
 var _life: PackedFloat32Array = PackedFloat32Array()
 var _kind: PackedInt32Array = PackedInt32Array()
 var _next := 0
+var _glow: PackedInt32Array = PackedInt32Array()
 var _beer_puddles: Array[Texture2D] = []
 var _vomit_puddles: Array[Texture2D] = []
 var _drying: Array[Texture2D] = []
@@ -43,6 +48,7 @@ func _ready() -> void:
 		_age.append(0.0)
 		_life.append(0.0)
 		_kind.append(0)
+		_glow.append(-1)
 	set_process(false)
 
 
@@ -74,6 +80,13 @@ func _start(at: Vector2, kind: int, radius: float, life: float, is_splash: bool)
 	if is_splash and kind == 2 and life > SPLASH_TIME:
 		_kind[k] = 4
 	sprite.texture = _frame_for(k)
+	EnvLights.remove(_glow[k])
+	_glow[k] = -1
+	var tint: Color = GLOW[1 if kind == 1 else 0]
+	if is_splash:
+		EnvLights.flash(at, tint, radius * 2.2, GLOW_STRENGTH, life)
+	else:
+		_glow[k] = EnvLights.add(at, tint, radius * 1.8, GLOW_STRENGTH * 0.8, sprite)
 	set_process(true)
 
 
@@ -101,6 +114,8 @@ func _process(delta: float) -> void:
 		_age[k] += delta
 		if _age[k] >= _life[k]:
 			sprite.visible = false
+			EnvLights.remove(_glow[k])
+			_glow[k] = -1
 			continue
 		active = true
 		var t := _age[k] / _life[k]

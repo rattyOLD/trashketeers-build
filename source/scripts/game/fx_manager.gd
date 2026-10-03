@@ -427,6 +427,12 @@ func hitmarker(at: Vector2, kind: int) -> void:
 	_mk_kind[i] = kind
 
 
+## Брызги за летящей каплей жидкости: светлая капелька, отстающая от струи и опадающая.
+func droplet(at: Vector2, velocity: Vector2, color: Color) -> void:
+	var drift := -velocity * 0.12 + Vector2(randf_range(-40.0, 40.0), randf_range(-20.0, 50.0))
+	_spark(at + Vector2(randf_range(-5.0, 5.0), randf_range(-5.0, 5.0)), drift, color.lightened(0.35), 2.2)
+
+
 func popup(at: Vector2, text: String, color: Color, font_size: float = 34.0) -> void:
 	_text(at, text, color, font_size)
 

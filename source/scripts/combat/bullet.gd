@@ -22,6 +22,10 @@ const TRAIL_WIDTH_SCALE := 1.5
 
 static var _trail_gradient: Gradient
 static var _trail_curve: Curve
+## Жидкие снаряды (пиво, рвота): вместо линии-хвоста за каплей летят брызги — их рисует FxManager
+## в общем батче (см. BattleBase). Задаётся боем: func(at, velocity, color).
+const LIQUID_IDS: Array[StringName] = [&"beer_jet_v1", &"puke_v1"]
+static var liquid_sink: Callable
 
 var weapon: WeaponData
 var team: Team = Team.PLAYER
@@ -35,6 +39,7 @@ var damage_scale := 1.0
 var _age := 0.0
 ## Уровень упрощения при большой плотности снарядов: 1 — без шлейфа, 2 — ещё и без луча-свипа.
 var _lod := 0
+var _liquid := false
 ## Сколько врагов эта пуля уже пробила (рельсотрон растит урон с каждым).
 var pierced := 0
 
@@ -109,6 +114,10 @@ func activate(data: WeaponData, origin: Vector2, direction: Vector2, owner_team:
 
 	_apply_team_masks(owner_team)
 	_reset_trail(origin)
+	_liquid = LIQUID_IDS.has(data.id)
+	if _liquid:
+		_trail_count = 0
+		_trail.visible = false
 	if lod > 0 and owner_team == Team.PLAYER:
 		_trail_count = 0
 		_trail.visible = false
@@ -157,6 +166,8 @@ func tick(delta: float) -> bool:
 		step = _sweep(step)
 	global_position += step
 	_advance_trail()
+	if _liquid and (Engine.get_physics_frames() + spawn_frame) % 3 == 0 and liquid_sink.is_valid():
+		liquid_sink.call(global_position, velocity, weapon.effect_color)
 	_distance_left -= step.length()
 	_time_left -= delta
 	var alive := _distance_left > 0.0 and _time_left > 0.0
