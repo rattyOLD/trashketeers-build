@@ -451,11 +451,11 @@ func _set_side_alert(key: String, alert: bool, caption_text: String = "") -> voi
 		caption.text = caption_text
 
 
-## Кнопка тестера появляется и пропадает вместе с тегом DeV: тег приходит с сервера уже после того, как меню построено.
+## Кнопка тестера появляется и пропадает вместе с тегом DeV или Insider: тег приходит с сервера уже после того, как меню построено.
 func _sync_tester_button() -> void:
 	if _stage == null:
 		return
-	var need := SaveService.is_dev()
+	var need := SaveService.get_insider() in [0, 1]
 	if need and not is_instance_valid(_tester_button):
 		_tester_button = _build_tester_button()
 		_stage.add_child(_tester_button)
