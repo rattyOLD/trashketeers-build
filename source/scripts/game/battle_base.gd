@@ -63,6 +63,7 @@ var _adapt_level := 0
 var camera: Camera2D
 var hud: Hud
 var atmosphere: AtmosphereFX
+var light_map: LightMap
 
 var _shake := 0.0
 var _hud_timer := 0.0
@@ -145,6 +146,10 @@ func _setup_common(camera_bounds: Rect2, currency_icon: Texture2D) -> void:
 	atmosphere = AtmosphereFX.new()
 	add_child(atmosphere)
 	atmosphere.build(self)
+	light_map = LightMap.new()
+	light_map.player = player
+	add_child(light_map)
+	light_map.build(self, 1)
 
 	hud = Hud.new()
 	add_child(hud)

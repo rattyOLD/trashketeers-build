@@ -139,5 +139,31 @@ static func sample(at: Vector2) -> Color:
 	return Color(minf(sum.r, 1.2), minf(sum.g, 1.2), minf(sum.b, 1.2), 1.0)
 
 
+## Источники в прямоугольнике view (с мерцанием и вспышками) — для карты освещения (LightMap).
+static func collect(view: Rect2, out_pos: PackedVector2Array, out_color: PackedColorArray, out_radius: PackedFloat32Array) -> void:
+	out_pos.clear()
+	out_color.clear()
+	out_radius.clear()
+	for id in _pos.size():
+		var r := _radius[id]
+		if r <= 0.0 or not view.grow(r).has_point(_pos[id]):
+			continue
+		var f := 1.0
+		var node: CanvasItem = _nodes[id]
+		if node != null and is_instance_valid(node):
+			if not node.is_visible_in_tree():
+				continue
+			f = (node as Light2D).energy if node is Light2D else node.modulate.a
+		out_pos.append(_pos[id])
+		out_color.append(_color[id] * f)
+		out_radius.append(r)
+	for k in _flash_life.size():
+		if _flash_life[k] <= 0.0 or not view.grow(_flash_radius[k]).has_point(_flash_pos[k]):
+			continue
+		out_pos.append(_flash_pos[k])
+		out_color.append(_flash_color[k] * (_flash_life[k] / _flash_total[k]))
+		out_radius.append(_flash_radius[k])
+
+
 static func _key(at: Vector2) -> Vector2i:
 	return Vector2i(floori(at.x / CELL), floori(at.y / CELL))

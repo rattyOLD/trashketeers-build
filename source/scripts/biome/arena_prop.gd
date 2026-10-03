@@ -86,6 +86,8 @@ func setup(prop_id: String, solid: bool = true, flip: int = 0) -> void:
 		add_child(collision)
 	if def.has("light") and SaveService.are_prop_lights_enabled():
 		_build_light(def["light"])
+	elif def.has("light"):
+		_register_plain_light.call_deferred(def["light"])
 	if def.has("smoke"):
 		var s: Array = def["smoke"]
 		_smoke_at = Vector2(float(s[0]) * (-1.0 if sprite.flip_h else 1.0), float(s[1]))
@@ -136,6 +138,15 @@ func _build_light(cfg: Dictionary) -> void:
 func _register_light(color: Color, radius: float, _glow_at: Vector2) -> void:
 	if is_inside_tree():
 		_light_id = EnvLights.add(_light.global_position, color, radius * 0.9, 0.6, _light)
+
+
+## Без PointLight2D (качество «Эконом»): источник только в EnvLights — для карты освещения и подсветки персонажей.
+func _register_plain_light(cfg: Dictionary) -> void:
+	if not is_inside_tree():
+		return
+	var cast: Array = cfg.get("cast", [0, 0])
+	var at := global_position + Vector2(float(cast[0]), float(cast[1]) * 0.5 + 10.0)
+	_light_id = EnvLights.add(at, Color(str(cfg.get("color", "#ffffff"))), float(cfg.get("radius", 200.0)) * 0.9, 0.6)
 
 
 func _exit_tree() -> void:
