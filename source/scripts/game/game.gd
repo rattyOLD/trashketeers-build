@@ -557,10 +557,12 @@ func _switch_chapter(index: int = -1) -> void:
 	hazards.attach_level(map)
 	_portal = null
 	player.global_position = map.player_start
+	player.reset_physics_interpolation()
 	player.velocity = Vector2.ZERO
 	set_camera_bounds(map.bounds)
 	camera.global_position = player.global_position
 	camera.reset_smoothing()
+	camera.reset_physics_interpolation()
 	minimap.rebuild()
 	events.reset()
 	_apply_chapter_look(chapter)
@@ -1114,6 +1116,7 @@ func story_respawn(at: Vector2) -> void:
 	if finished or player == null:
 		return
 	player.global_position = at
+	player.reset_physics_interpolation()
 	player.velocity = Vector2.ZERO
 	player.revive(0.7, REVIVE_INVULN)
 	BulletPool.release_all()
@@ -1121,6 +1124,7 @@ func story_respawn(at: Vector2) -> void:
 	traps.clear()
 	camera.global_position = player.global_position
 	camera.reset_smoothing()
+	camera.reset_physics_interpolation()
 	BulletPool.explode(at, REVIVE_BLAST, 0.0, Bullet.Team.PLAYER, Color("#7df9ff"), 2.4)
 	fx.ring(at, Color("#7df9ff"), REVIVE_BLAST)
 	SoundManager.play(&"shield_up", 0.0, false)

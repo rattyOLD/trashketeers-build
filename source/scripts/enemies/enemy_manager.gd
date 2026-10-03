@@ -25,6 +25,7 @@ func setup(player: Player, container: Node2D, capacity: int, nav: Callable = Cal
 	_nav = nav
 	for i in capacity:
 		var enemy := Enemy.new()
+		enemy.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_ON
 		enemy.died.connect(_on_enemy_died)
 		enemy.damaged.connect(_on_enemy_damaged)
 		enemy.exploded.connect(_on_enemy_exploded)

@@ -465,6 +465,7 @@ func _tick_leash(delta: float) -> void:
 		var at := _level.find_spawn_point(_player.global_position, radius, radius + SPAWN_DEPTH, enemy.data.radius)
 		if at != Vector2.INF:
 			enemy.global_position = at
+			enemy.reset_physics_interpolation()
 			enemy.velocity = Vector2.ZERO
 			enemy.stuck_time = 0.0
 	_stalled = false

@@ -113,6 +113,9 @@ func _spawn_player(at: Vector2, weapon: WeaponData, target_finder: Callable) -> 
 			stats.add_flat(&"poison_chance", 0.2)
 			stats.add_flat(&"poison_power", 0.3)
 			stats.add_flat(&"regen", 0.5)
+	# Интерполяция физики: герой, враги и камера движутся в физическом шаге (60 Гц), а кадр рисуется
+	# между шагами — плавно при любом лимите кадров (30/60/120) и без подёргиваний от рассинхрона.
+	player.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_ON
 	entities.add_child(player)
 	player.setup(target_finder, weapon, stats)
 	player.visual.apply_look(SaveService.get_character(), SaveService.get_skin())
@@ -131,6 +134,7 @@ func _setup_common(camera_bounds: Rect2, currency_icon: Texture2D) -> void:
 	camera.position_smoothing_enabled = true
 	camera.position_smoothing_speed = CAMERA_SMOOTHING
 	camera.position = player.position
+	camera.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_ON
 	add_child(camera)
 	_apply_camera_zoom()
 	get_window().size_changed.connect(_apply_camera_zoom)

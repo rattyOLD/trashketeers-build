@@ -397,8 +397,10 @@ func resume_from(d: Dictionary) -> void:
 	game.director.elapsed = float(d.get("elapsed", 0.0))
 	checkpoint = Vector2(float(d.get("x", checkpoint.x)), float(d.get("y", checkpoint.y)))
 	game.player.global_position = checkpoint
+	game.player.reset_physics_interpolation()
 	game.camera.global_position = checkpoint
 	game.camera.reset_smoothing()
+	game.camera.reset_physics_interpolation()
 	var zones: Array = mission.get("zones", [])
 	zone_index = clampi(int(d.get("zone", 0)), 0, maxi(zones.size() - 1, 0))
 	_zone_hit = true
@@ -522,6 +524,8 @@ func debug_jump(target: float) -> void:
 		_next_captive += 1
 	game.camera.global_position = game.player.global_position
 	game.camera.reset_smoothing()
+	game.player.reset_physics_interpolation()
+	game.camera.reset_physics_interpolation()
 
 
 func _y_of(p: float) -> float:

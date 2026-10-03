@@ -251,6 +251,7 @@ func activate(enemy_data: EnemyData, at: Vector2, hp_mult: float = 1.0, dmg_mult
 	fleeing = false
 	loot = 0
 	global_position = at
+	reset_physics_interpolation()
 	velocity = Vector2.ZERO
 	_knockback = Vector2.ZERO
 	_flash = -1.0
@@ -1007,6 +1008,7 @@ func _try_blink(dir: Vector2) -> void:
 		if not test_move(global_transform, offset):
 			var from := global_position
 			global_position += offset
+			reset_physics_interpolation()
 			_knockback = Vector2.ZERO
 			blinked.emit(self, from, global_position)
 			return
