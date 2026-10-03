@@ -33,6 +33,10 @@ func _ready() -> void:
 	var dim := ColorRect.new()
 	dim.color = Color(0.074, 0.071, 0.066, 0.82)
 	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
+	# Тап мимо окна — закрыть.
+	dim.gui_input.connect(func(event: InputEvent) -> void:
+		if (event is InputEventMouseButton and (event as InputEventMouseButton).pressed) or (event is InputEventScreenTouch and (event as InputEventScreenTouch).pressed):
+			_close())
 	add_child(dim)
 	var center := CenterContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -65,12 +69,20 @@ func _ready() -> void:
 	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	title.custom_minimum_size = Vector2(width - 50.0, 0)
 	column.add_child(title)
+	# Список изменений прокручивается: кнопки всегда видны, даже если текст длиннее экрана.
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.custom_minimum_size = Vector2(width - 40.0, maxf(get_viewport_rect().size.y - 620.0, 240.0))
+	column.add_child(scroll)
+	var rows := VBoxContainer.new()
+	rows.add_theme_constant_override("separation", 12)
+	scroll.add_child(rows)
 	for line in entry.get("short", []):
 		var row := UiStyle.label("• " + str(line), 20, UiStyle.TEXT, 4)
 		row.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 		row.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		row.custom_minimum_size = Vector2(width - 50.0, 0)
-		column.add_child(row)
+		row.custom_minimum_size = Vector2(width - 60.0, 0)
+		rows.add_child(row)
 	var more := UiStyle.button("ВСЁ ОБ ОБНОВЛЕНИИ", UiStyle.HOT, 24, Vector2(0, 68))
 	more.name = "MoreButton"
 	more.pressed.connect(func() -> void:
@@ -85,5 +97,13 @@ func _ready() -> void:
 
 
 func _close() -> void:
+	if is_queued_for_deletion():
+		return
 	closed.emit()
 	queue_free()
+
+
+func _notification(what: int) -> void:
+	# Кнопка «Назад» на Android закрывает окно.
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		_close()
