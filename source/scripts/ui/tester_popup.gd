@@ -41,15 +41,17 @@ func _refresh() -> void:
 	_scroll = _list.get_parent().get_parent() as ScrollContainer
 	_restore_scroll.call_deferred(scroll_pos)
 
-	_section("СЕРВЕР")
-	var panel := UiStyle.button("ПАНЕЛЬ DeV: жалобы, стата, стоп-слова", UiStyle.HOT, 22, Vector2(0, 64))
-	_fit(panel)
-	panel.pressed.connect(func() -> void:
-		var dev := DevPopup.new()
-		add_child(dev)
-		dev.closed.connect(dev.queue_free)
-		dev.open())
-	_list.add_child(panel)
+	# Панель DeV (жалобы, сброс паролей, теги) — только DeV; Insider видит лишь тестерские настройки.
+	if SaveService.is_dev():
+		_section("СЕРВЕР")
+		var panel := UiStyle.button("ПАНЕЛЬ DeV: жалобы, стата, стоп-слова", UiStyle.HOT, 22, Vector2(0, 64))
+		_fit(panel)
+		panel.pressed.connect(func() -> void:
+			var dev := DevPopup.new()
+			add_child(dev)
+			dev.closed.connect(dev.queue_free)
+			dev.open())
+		_list.add_child(panel)
 	var coop := UiStyle.button("КООП НА ДВОИХ (тест): тренировка с ботом", UiStyle.PANEL_LIGHT, 22, Vector2(0, 64))
 	_fit(coop)
 	coop.pressed.connect(func() -> void:
