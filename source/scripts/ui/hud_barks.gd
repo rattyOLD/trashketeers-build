@@ -47,6 +47,11 @@ func _init() -> void:
 	set_process(true)
 
 
+## На время боя с боссом его полоса встаёт на место рации: панель прячется, место в шапке остаётся.
+func set_muted(muted: bool) -> void:
+	_panel.visible = not muted
+
+
 func _load() -> void:
 	var file := FileAccess.open(PATH, FileAccess.READ)
 	if file == null:

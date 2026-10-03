@@ -96,6 +96,19 @@ var _minimap: Minimap
 var _toast_queue: Array = []
 var _toast_busy := false
 var _toast_y := 700.0 if Orient.portrait else 440.0
+## Телефон (портрет): вся шапка — один блок BAND_W×BAND_H в своих координатах, который масштабируется,
+## чтобы занимать сверху не больше BAND_SHARE высоты экрана; ниже — только игра и кнопки управления.
+## Нижняя строка блока — лента событий (заставки волн, отсчёт, глава, баннеры, тосты, комбо).
+const BAND_W := 720.0
+const BAND_SHARE := 0.225
+const EVENT_TOP := 306.0
+const EVENT_H := 66.0
+const MAP_BOTTOM := 282.0
+const RADIO_RECT := Rect2(18, 212, 468, 86)
+const PORTRAIT_SCALE := 0.78
+var _band: Control
+var _top_bar: Control
+var _event_top := EVENT_TOP
 var _minimal := false
 var _wanted_label: Label
 var _low_hp := false
@@ -117,16 +130,28 @@ func build(currency_icon: Texture2D, weapon: WeaponData) -> void:
 	joystick = VirtualJoystick.new()
 	_root.add_child(joystick)
 
-	_root.add_child(_build_top_bar(currency_icon))
-	_root.add_child(_build_boss_bar())
-	_root.add_child(_build_banner())
-	_root.add_child(_build_wave_titles())
-	_root.add_child(_build_minimap_slot())
-	_root.move_child(_minimap_slot, 0)
-	_root.add_child(_wave_box)
+	var top: Control = _root
+	if Orient.portrait:
+		_band = Control.new()
+		_band.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_band.size = Vector2(BAND_W, EVENT_TOP + EVENT_H)
+		_root.add_child(_band)
+		top = _band
+	_top_bar = _build_top_bar(currency_icon)
+	top.add_child(_top_bar)
+	if _band != null:
+		_top_bar.minimum_size_changed.connect(_fit_band, CONNECT_DEFERRED)
+		_left_column.minimum_size_changed.connect(_fit_band, CONNECT_DEFERRED)
+	top.add_child(_build_boss_bar())
+	top.add_child(_build_banner())
+	top.add_child(_build_wave_titles())
+	top.add_child(_build_minimap_slot())
+	top.move_child(_minimap_slot, 0)
+	top.add_child(_wave_box)
 	_barks = HudBarks.new()
 	# Рация живёт в левой колонке под заданиями: так её не перекрывают ни карта, ни плашка заказа.
-	_barks.custom_minimum_size = Vector2(400, 150)
+	_barks.custom_minimum_size = RADIO_RECT.size if Orient.portrait else Vector2(400, 150)
+	_barks.clip_contents = Orient.portrait
 	_barks.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	_left_column.add_child(_barks)
 	_rail_combo = UiStyle.label("", 22, UiStyle.GOLD, 8)
@@ -136,9 +161,11 @@ func build(currency_icon: Texture2D, weapon: WeaponData) -> void:
 	_rail_combo.offset_right = 18.0 + LEFT_W
 	_rail_combo.offset_top = 224.0
 	_rail_combo.offset_bottom = 254.0
+	if Orient.portrait:
+		UiStyle.anchor(_rail_combo, Vector2(0.5, 0.0), Rect2(-350, EVENT_TOP + 38.0, 700, 26))
 	_rail_combo.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_rail_combo.visible = false
-	_root.add_child(_rail_combo)
+	top.add_child(_rail_combo)
 	_root.add_child(_build_weapon_chip(weapon))
 	_weapon_chip.visible = false
 	var swipe := BattleControls.SwipeSwitch.new()
@@ -158,9 +185,11 @@ func build(currency_icon: Texture2D, weapon: WeaponData) -> void:
 	_interact.pressed.connect(func() -> void: interact_pressed.emit())
 	_root.add_child(_interact)
 	_root.resized.connect(apply_layout)
-	_root.add_child(_build_toast())
+	top.add_child(_build_toast())
 	_chapter_card = BattlePanels.ChapterCard.new()
-	_root.add_child(_chapter_card)
+	if Orient.portrait:
+		_chapter_card.dock(EVENT_TOP, _band_font(18), _band_font(30))
+	top.add_child(_chapter_card)
 
 	_level_up = LevelUpPanel.new()
 	_level_up.chosen.connect(func(u: UpgradeData) -> void: upgrade_chosen.emit(u))
@@ -247,8 +276,9 @@ func set_story_layout(minimap: Minimap) -> void:
 	_wave_box.visible = false
 	_enemies_chip.visible = false
 	_toast_y = 700.0 if Orient.portrait else 440.0
-	_rail_combo.offset_top = 480.0
-	_rail_combo.offset_bottom = 512.0
+	if _band == null:
+		_rail_combo.offset_top = 480.0
+		_rail_combo.offset_bottom = 512.0
 	_story_bar = StoryBar.new()
 	_story_bar.compact()
 	_bars_box.add_child(_story_bar)
@@ -259,7 +289,7 @@ func set_story_layout(minimap: Minimap) -> void:
 	_story_bar.chip_tapped.connect(func(chip: Control, text: String) -> void: _hint.show_for(chip, text))
 	_dock_barks()
 	if Orient.portrait:
-		UiStyle.anchor(_boss_bar, Vector2(0.5, 0.0), Rect2(-240, 660, 480, 84))
+		UiStyle.anchor(_boss_bar, Vector2(0.0, 0.0), RADIO_RECT)
 	else:
 		_boss_bar.anchor_left = 0.0
 		_boss_bar.anchor_right = 1.0
@@ -269,7 +299,7 @@ func set_story_layout(minimap: Minimap) -> void:
 		_boss_bar.offset_right = -300.0
 		_boss_bar.offset_top = 600.0
 		_boss_bar.offset_bottom = 684.0
-	UiStyle.anchor(_minimap_slot, Vector2(1.0, 0.0), Rect2(-190, 176, 172, 300) if Orient.portrait else Rect2(-150, 150, 132, 230))
+	UiStyle.anchor(_minimap_slot, Vector2(1.0, 0.0), Rect2(-142, 172, 124, 110) if Orient.portrait else Rect2(-150, 150, 132, 230))
 	_minimap = minimap
 	minimap.tapped.connect(func(overview: bool) -> void:
 		_hint.show_for(_minimap_slot, "Карта. Тап: %s." % ("крупный план" if overview else "вся карта")))
@@ -283,10 +313,11 @@ func order_completed(info: Dictionary) -> void:
 
 func set_survival_order(order: Dictionary) -> void:
 	if _order_card == null:
-		var spacer := Control.new()
-		spacer.custom_minimum_size = Vector2(0.0, 44.0)
-		spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		_left_column.add_child(spacer)
+		if not Orient.portrait:
+			var spacer := Control.new()
+			spacer.custom_minimum_size = Vector2(0.0, 44.0)
+			spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			_left_column.add_child(spacer)
 		_order_card = OrderCard.new()
 		_order_card.minimal = _minimal
 		_order_card.pressed.connect(func() -> void: orders_requested.emit())
@@ -406,7 +437,7 @@ func set_wave(number: int, enemies_left: int, chapter: int = 0, alive: int = -1)
 		_wave_box.visible = false
 	_enemies_chip.visible = enemies_left > 0 and not _minimal and _story_bar == null
 	# Сначала волна, ниже: сколько осталось убить и сколько врагов сейчас на карте.
-	_enemies_label.text = "Волна %d\nВрагов %d" % [number, enemies_left]
+	_enemies_label.text = ("Волна %d · Врагов %d" if _band != null else "Волна %d\nВрагов %d") % [number, enemies_left]
 
 
 ## Сюжетный режим без ио-механик: скрываем опыт и уровень.
@@ -606,9 +637,47 @@ func _open_layout_editor(id: String) -> void:
 	_editor.open()
 
 
+## Кегль надписей ленты событий: на сенсорных экранах подписи шапки увеличены (HUD_TEXT_BOOST),
+## а эти задаются после увеличения — учитываем его здесь.
+func _band_font(base: int) -> int:
+	return int(round(base * (HUD_TEXT_BOOST if Platform.is_touch() else 1.0)))
+
+
+## Лента событий встаёт сразу под фактический низ шапки (кегли на телефоне увеличены, высота колонки
+## заранее не известна), а весь блок масштабируется по своей реальной высоте до BAND_SHARE экрана.
+func _fit_band() -> void:
+	if _band == null:
+		return
+	var column := 18.0 + _left_column.get_combined_minimum_size().y * _left_column.scale.y
+	_event_top = maxf(maxf(_top_bar.get_combined_minimum_size().y, column), MAP_BOTTOM) + 6.0
+	var band_h := _event_top + EVENT_H
+	var k := minf(minf(1.0, _root.size.y * BAND_SHARE / band_h), _root.size.x / BAND_W)
+	_band.scale = Vector2(k, k)
+	_band.position = Vector2.ZERO
+	_band.size = Vector2(_root.size.x / k, band_h)
+	for label: Control in [_wave_title, _countdown, _banner]:
+		label.offset_top = _event_top
+		label.offset_bottom = _event_top + 40.0
+	for label: Control in [_wave_sub, _rail_combo]:
+		label.offset_top = _event_top + 38.0
+		label.offset_bottom = _event_top + 64.0
+	_chapter_card.dock(_event_top, _band_font(18), _band_font(30))
+	_dock_boss_bar.call_deferred()
+
+
+## Полоса босса — на месте рации (рация на время боя с боссом скрыта).
+func _dock_boss_bar() -> void:
+	if _band == null or _barks == null or not _barks.is_inside_tree():
+		return
+	var inverse := _band.get_global_transform().affine_inverse()
+	var top_left := inverse * _barks.get_global_rect().position
+	UiStyle.anchor(_boss_bar, Vector2(0.0, 0.0), Rect2(top_left, Vector2(RADIO_RECT.size.x, _barks.size.y)))
+
+
 func apply_layout() -> void:
 	if _root == null or _slot_bar == null:
 		return
+	_fit_band()
 	var area := _root.size
 	Controls.place(_dash, "dash", area)
 	Controls.place(_skill, "dash", area)
@@ -682,8 +751,7 @@ func set_minimap(minimap: Control) -> void:
 
 ## Тап по миникарте выживания: увеличить (в два раза) или вернуть как было.
 func _on_minimap_enlarge(big: bool) -> void:
-	var rect := Rect2(-314, 176, 296, 296) if big else Rect2(-194, 176, 176, 176)
-	UiStyle.anchor(_minimap_slot, Vector2(1.0, 0.0), rect)
+	UiStyle.anchor(_minimap_slot, Vector2(1.0, 0.0), _minimap_rect(big))
 	if _barks != null:
 		_barks.visible = not big
 	_hint.show_for(_minimap_slot, "Карта крупно. Тап по ней: уменьшить." if big else "Карта обычная. Тап: увеличить.")
@@ -697,6 +765,8 @@ func show_boss(boss_name: String, hp: float, max_hp: float, winged: bool = false
 		_barks.say("boss", true)
 	update_boss(hp, max_hp)
 	_boss_bar.visible = true
+	if _band != null and _barks != null:
+		_barks.set_muted(true)
 	UiStyle.pop_in(_boss_bar, 0.5)
 
 
@@ -741,11 +811,13 @@ func set_boss_fury() -> void:
 
 func hide_boss() -> void:
 	_boss_bar.visible = false
+	if _barks != null:
+		_barks.set_muted(false)
 
 
 func show_banner(text: String, color: Color, duration: float = 2.2) -> void:
 	duration = minf(duration, 1.8)
-	var half := minf(350.0, (_root.size.x - 28.0) * 0.5)
+	var half := 350.0 if _band != null else minf(350.0, (_root.size.x - 28.0) * 0.5)
 	_banner.offset_left = -half
 	_banner.offset_right = half
 	_banner.text = text
@@ -762,7 +834,7 @@ func show_banner(text: String, color: Color, duration: float = 2.2) -> void:
 ## Заставка волны: крупное «ВОЛНА N» влетает сверху, подзаголовок — снизу.
 func show_wave_intro(number: int, title: String, is_boss: bool, chapter: int = 0) -> void:
 	_wave_title.text = "ВОЛНА %d" % number
-	_wave_title.add_theme_font_size_override("font_size", 78 if Orient.portrait else 56)
+	_wave_title.add_theme_font_size_override("font_size", _title_font() if Orient.portrait else 56)
 	_wave_title.add_theme_color_override("font_color", UiStyle.DANGER if is_boss else UiStyle.GOLD)
 	var sub := ("БОСС: " + title) if is_boss else title
 	_wave_sub.text = ("Глава %d · %s" % [chapter, sub]) if chapter > 0 else sub
@@ -770,7 +842,7 @@ func show_wave_intro(number: int, title: String, is_boss: bool, chapter: int = 0
 
 
 func show_wave_cleared(bonus_nuts: int) -> void:
-	_wave_title.add_theme_font_size_override("font_size", 78 if Orient.portrait else 56)
+	_wave_title.add_theme_font_size_override("font_size", _title_font() if Orient.portrait else 56)
 	_wave_title.text = "ВОЛНА ЗАЧИЩЕНА!"
 	_wave_title.add_theme_color_override("font_color", Color("#7cff6b"))
 	_wave_sub.text = "+%s · лечение +15%%" % SaveService.format_coins(bonus_nuts)
@@ -778,6 +850,9 @@ func show_wave_cleared(bonus_nuts: int) -> void:
 
 
 func show_countdown(seconds: int) -> void:
+	if _band != null:
+		_clear_wave_titles()
+		_hide_toast_now()
 	_countdown.text = "Следующая волна через %d" % seconds
 	_countdown.visible = true
 	_countdown.modulate.a = 1.0
@@ -829,7 +904,14 @@ func show_result(victory: bool, lines: PackedStringArray, title: String = "", ca
 
 
 func show_chapter(subtitle: String, title: String, accent: Color = UiStyle.NEON) -> void:
+	_hide_toast_now()
 	_chapter_card.play(subtitle, title, accent)
+
+
+## Лента событий в шапке одна: важное (отсчёт, волна, глава) сразу гасит текущий тост.
+func _hide_toast_now() -> void:
+	if _band != null and _toast != null and _toast.visible:
+		_toast.modulate.a = 0.0
 
 
 func show_revive(cost: int, gems: int, ad_available: bool, summary: Dictionary) -> void:
@@ -865,6 +947,8 @@ func is_pause_open() -> bool:
 
 
 func _process(delta: float) -> void:
+	if _band != null and _rail_combo.visible:
+		_rail_combo.modulate.a = 0.0 if (_chapter_card.visible or _toast.visible or (_wave_sub.visible and _wave_sub.modulate.a > 0.05)) else 1.0
 	_items_clock += delta
 	if _layout_revision != Controls.revision or _items_clock >= 0.25:
 		_items_clock = 0.0
@@ -880,6 +964,22 @@ func _process(delta: float) -> void:
 
 
 ## Любое окно поверх боя (пауза, прокачка, итог) сразу убирает крупную надпись волны, иначе она торчит из-под окна.
+func _title_font() -> int:
+	return _band_font(30)
+
+
+## Лента событий одна: заставка главы, заголовки волн и тосты не наезжают друг на друга.
+func _event_busy() -> bool:
+	if _band == null:
+		return false
+	if _chapter_card != null and _chapter_card.visible:
+		return true
+	for label: Label in [_wave_title, _countdown]:
+		if label != null and label.visible and label.modulate.a > 0.05:
+			return true
+	return false
+
+
 func _clear_wave_titles() -> void:
 	if _title_tween != null and _title_tween.is_valid():
 		_title_tween.kill()
@@ -889,11 +989,15 @@ func _clear_wave_titles() -> void:
 
 
 func _animate_titles(hold: float) -> void:
+	if _band != null and _chapter_card != null and _chapter_card.visible:
+		get_tree().create_timer(0.3, false).timeout.connect(_animate_titles.bind(hold))
+		return
+	_hide_toast_now()
 	for label in [_wave_title, _wave_sub]:
 		label.visible = true
 		label.modulate.a = 0.0
 	UiStyle.keep_pivot_centered(_wave_title)
-	_wave_title.scale = Vector2.ONE * 2.2
+	_wave_title.scale = Vector2.ONE * (1.4 if _band != null else 2.2)
 	if _title_tween != null and _title_tween.is_valid():
 		_title_tween.kill()
 	var tween := _wave_title.create_tween().set_parallel(true)
@@ -924,10 +1028,15 @@ func _next_toast() -> void:
 		# Не лезем поверх заставки главы: ждём, пока она уйдёт.
 		get_tree().create_timer(0.4, false).timeout.connect(_next_toast)
 		return
+	if _event_busy():
+		get_tree().create_timer(0.4, false).timeout.connect(_next_toast)
+		return
 	var item: Array = _toast_queue.pop_front()
 	var half := minf(300.0, (_root.size.x - 36.0) * 0.5)
 	var shift := 0.0
-	if Orient.portrait and _story_bar == null:
+	if _band != null:
+		half = 350.0
+	elif Orient.portrait and _story_bar == null:
 		half = 250.0
 		shift = -50.0  # правый край левее колонки слотов оружия
 	_toast.offset_left = -half + shift
@@ -937,17 +1046,27 @@ func _next_toast() -> void:
 	_toast.custom_minimum_size = Vector2(half * 2.0, 0.0)
 	_toast_title.text = item[0]
 	_toast_text.text = item[1]
-	_fit_font(_toast_title, 28, half * 2.0 - 48.0)
-	_fit_font(_toast_text, 20, half * 2.0 - 48.0)
+	_fit_font(_toast_title, _band_font(20) if _band != null else 28, half * 2.0 - 48.0)
+	_fit_font(_toast_text, _band_font(14) if _band != null else 20, half * 2.0 - 48.0)
 	_toast.size = Vector2(half * 2.0, 0.0)
 	_toast.reset_size.call_deferred()
 	_toast_title.add_theme_color_override("font_color", item[2])
 	_toast.visible = true
-	_toast.position.y = -140.0
+	var hidden_y := -140.0
+	var shown_y := _toast_y
+	if _band != null:
+		hidden_y = _event_top - 24.0
+		shown_y = _event_top - 4.0
+		_toast.modulate.a = 0.0
+		_toast.create_tween().tween_property(_toast, "modulate:a", 1.0, 0.25)
+	_toast.position.y = hidden_y
 	var tween := _toast.create_tween()
-	tween.tween_property(_toast, "position:y", _toast_y, 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_property(_toast, "position:y", shown_y, 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	tween.tween_interval(1.8)
-	tween.tween_property(_toast, "position:y", -140.0, 0.3).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	if _band != null:
+		tween.tween_property(_toast, "modulate:a", 0.0, 0.3)
+	else:
+		tween.tween_property(_toast, "position:y", hidden_y, 0.3).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	tween.tween_callback(func() -> void:
 		_toast.visible = false
 		_next_toast())
@@ -980,7 +1099,7 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	margin.add_child(row)
 
 	var left := VBoxContainer.new()
-	left.add_theme_constant_override("separation", 12 if Orient.portrait else 6)
+	left.add_theme_constant_override("separation", 6)
 	left.custom_minimum_size = Vector2(LEFT_W if Orient.portrait else 440, 0)
 	if Orient.portrait:
 		# Контейнеры сбрасывают масштаб, поэтому колонка живёт в обёртке и увеличена вручную.
@@ -1049,6 +1168,12 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	_portrait.position = Vector2(0, 0)
 	_portrait.set_character(SaveService.get_character())
 	head.add_child(_portrait)
+	if Orient.portrait:
+		# Шапка телефона компактнее: портрет меньше, полосы и медаль уровня сдвинуты за ним.
+		_portrait.scale = Vector2.ONE * PORTRAIT_SCALE
+		head.custom_minimum_size.y = 108.0 * PORTRAIT_SCALE + 2.0
+		bars.offset_left = 92.0 * PORTRAIT_SCALE
+		bars.offset_top = 4.0
 	# Значок уровня: круглая «медаль», приваренная к рамке портрета снизу справа, как её продолжение.
 	_level_badge = PanelContainer.new()
 	var medal := UiStyle.box(Color("#1d1f1e"), UiStyle.NEON, 4, 20)
@@ -1057,7 +1182,9 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	medal.shadow_size = 3
 	_level_badge.add_theme_stylebox_override("panel", medal)
 	_level_badge.custom_minimum_size = Vector2(38, 36)
-	_level_badge.position = Vector2(98, 76)
+	_level_badge.position = Vector2(98, 76) * (PORTRAIT_SCALE if Orient.portrait else 1.0)
+	if Orient.portrait:
+		_level_badge.scale = Vector2.ONE * PORTRAIT_SCALE
 	_level_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	head.add_child(_level_badge)
 	_level_label = UiStyle.label("1", 20, UiStyle.GOLD, 4)
@@ -1150,14 +1277,21 @@ func _chip(icon: Texture2D) -> PanelContainer:
 
 func _build_boss_bar() -> Control:
 	_boss_bar = BossBar.new()
-	UiStyle.anchor(_boss_bar, Vector2(0.5, 0.0), Rect2(-240, 384, 480, 84))
+	if Orient.portrait:
+		UiStyle.anchor(_boss_bar, Vector2(0.0, 0.0), RADIO_RECT)
+	else:
+		UiStyle.anchor(_boss_bar, Vector2(0.5, 0.0), Rect2(-240, 384, 480, 84))
 	_boss_bar.visible = false
 	return _boss_bar
 
 
 func _build_banner() -> Control:
 	_banner = UiStyle.label("", 34, UiStyle.DANGER, 10)
-	UiStyle.anchor(_banner, Vector2(0.5, 0.5), Rect2(-350, -380, 700, 110) if Orient.portrait else Rect2(-350, -280, 700, 80))
+	if Orient.portrait:
+		UiStyle.anchor(_banner, Vector2(0.5, 0.0), Rect2(-350, EVENT_TOP, 700, 40))
+		_banner.add_theme_font_size_override("font_size", _band_font(24))
+	else:
+		UiStyle.anchor(_banner, Vector2(0.5, 0.5), Rect2(-350, -280, 700, 80))
 	_banner.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_banner.visible = false
 	return _banner
@@ -1167,16 +1301,25 @@ func _build_wave_titles() -> Control:
 	var box := Control.new()
 	box.set_anchors_preset(Control.PRESET_FULL_RECT)
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_wave_title = UiStyle.label("", 78 if Orient.portrait else 56, UiStyle.GOLD, 16)
-	UiStyle.anchor(_wave_title, Vector2(0.5, 0.5), Rect2(-360, -250, 720, 110) if Orient.portrait else Rect2(-360, -60, 720, 80))
+	_wave_title = UiStyle.label("", _title_font() if Orient.portrait else 56, UiStyle.GOLD, 10 if Orient.portrait else 16)
+	if Orient.portrait:
+		UiStyle.anchor(_wave_title, Vector2(0.5, 0.0), Rect2(-350, EVENT_TOP, 700, 40))
+	else:
+		UiStyle.anchor(_wave_title, Vector2(0.5, 0.5), Rect2(-360, -60, 720, 80))
 	_wave_title.visible = false
 	box.add_child(_wave_title)
-	_wave_sub = UiStyle.label("", 30, UiStyle.TEXT, 8)
-	UiStyle.anchor(_wave_sub, Vector2(0.5, 0.5), Rect2(-360, -150, 720, 50) if Orient.portrait else Rect2(-360, 20, 720, 40))
+	_wave_sub = UiStyle.label("", _band_font(16) if Orient.portrait else 30, UiStyle.TEXT, 5 if Orient.portrait else 8)
+	if Orient.portrait:
+		UiStyle.anchor(_wave_sub, Vector2(0.5, 0.0), Rect2(-350, EVENT_TOP + 38.0, 700, 26))
+	else:
+		UiStyle.anchor(_wave_sub, Vector2(0.5, 0.5), Rect2(-360, 20, 720, 40))
 	_wave_sub.visible = false
 	box.add_child(_wave_sub)
-	_countdown = UiStyle.label("", 30, UiStyle.NEON, 8)
-	UiStyle.anchor(_countdown, Vector2(0.5, 0.5), Rect2(-360, -60, 720, 50) if Orient.portrait else Rect2(-360, 70, 720, 40))
+	_countdown = UiStyle.label("", _band_font(22) if Orient.portrait else 30, UiStyle.NEON, 6 if Orient.portrait else 8)
+	if Orient.portrait:
+		UiStyle.anchor(_countdown, Vector2(0.5, 0.0), Rect2(-350, EVENT_TOP, 700, 40))
+	else:
+		UiStyle.anchor(_countdown, Vector2(0.5, 0.5), Rect2(-360, 70, 720, 40))
 	_countdown.visible = false
 	box.add_child(_countdown)
 	return box
@@ -1185,8 +1328,14 @@ func _build_wave_titles() -> Control:
 func _build_minimap_slot() -> Control:
 	_minimap_slot = Control.new()
 	_minimap_slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	UiStyle.anchor(_minimap_slot, Vector2(1.0, 0.0), Rect2(-194, 176, 176, 176))
+	UiStyle.anchor(_minimap_slot, Vector2(1.0, 0.0), _minimap_rect(false))
 	return _minimap_slot
+
+
+func _minimap_rect(big: bool) -> Rect2:
+	if Orient.portrait:
+		return Rect2(-314, 172, 296, 296) if big else Rect2(-128, 172, 110, 110)
+	return Rect2(-314, 176, 296, 296) if big else Rect2(-194, 176, 176, 176)
 
 
 func _build_weapon_chip(weapon: WeaponData) -> Control:

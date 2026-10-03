@@ -101,6 +101,21 @@ class ChapterCard:
 		UiStyle.anchor(_line, Vector2(0.5, 0.0), Rect2(-180, 128, 360, 5))
 		add_child(_line)
 
+	var _top := 530.0
+	var _height := 150.0
+
+	## В шапке телефона: заставка — строка ленты событий (подпись главы сверху мелко, название крупно).
+	func dock(top: float, chapter_font: int, title_font: int) -> void:
+		_top = top
+		_height = 66.0
+		UiStyle.anchor(self, Vector2(0.5, 0.0), Rect2(-350, top, 700, _height))
+		_chapter.add_theme_font_size_override("font_size", chapter_font)
+		_chapter.offset_bottom = 20
+		_title.add_theme_font_size_override("font_size", title_font)
+		_title.offset_top = 22
+		_title.offset_bottom = 60
+		UiStyle.anchor(_line, Vector2(0.5, 0.0), Rect2(-120, 62, 240, 3))
+
 	func play(chapter_text: String, title: String, accent: Color) -> void:
 		_chapter.text = chapter_text.to_upper()
 		_title.text = title.to_upper()
@@ -111,12 +126,13 @@ class ChapterCard:
 		if _tween != null:
 			_tween.kill()
 		_line.scale.x = 0.0
-		_line.pivot_offset = Vector2(180, 2)
+		_line.pivot_offset = Vector2(_line.size.x * 0.5, 2)
 		_tween = create_tween().set_parallel(true)
 		_tween.tween_property(self, "modulate:a", 1.0, 0.35)
-		var top := 530.0 if Orient.portrait else 250.0
-		_tween.tween_property(self, "offset_top", top, 0.5).from(top - 50.0).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-		_tween.tween_property(self, "offset_bottom", top + 150.0, 0.5).from(top + 100.0).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		var top := _top if Orient.portrait else 250.0
+		var drop := 50.0 if _height > 100.0 else 16.0
+		_tween.tween_property(self, "offset_top", top, 0.5).from(top - drop).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		_tween.tween_property(self, "offset_bottom", top + _height, 0.5).from(top + _height - drop).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		_tween.tween_property(_line, "scale:x", 1.0, 0.5).set_delay(0.25)
 		_tween.chain().tween_interval(2.3)
 		_tween.chain().tween_property(self, "modulate:a", 0.0, 0.5)
