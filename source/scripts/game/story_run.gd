@@ -414,6 +414,11 @@ func on_start() -> void:
 	game.add_child(_ambient)
 	_ambient.setup(speakers)
 	_place_training_target()
+	if str(mission.get("id", "")) == "m1":
+		var cat := MosyaCat.new()
+		cat.position = game.player.global_position + Vector2(-150.0, -90.0)
+		game.layers.world.add_child(cat)
+		cat.setup(game.player, game.fx)
 	game.hud.show_banner(title(), UiStyle.GOLD, 2.2)
 	_update_progress()
 	_check_zone()

@@ -1,0 +1,101 @@
+class_name MosyaCat
+extends Node2D
+## Мося, кот Рико, сидит на уровне первой главы. Подойди и тапни по нему: жмурится, мурчит, над ним всплывает «мур».
+## Если тыкать слишком быстро, сердится. Кот всегда на месте, просто меняет позу.
+
+const FRAMES := "res://assets/ui/mosya/mosya_frames.png"
+const LINES: Array[String] = ["мур", "мррр", "мур-мур", "мрр, ещё", "мяу", "мррр-мяу"]
+const NEAR := 190.0
+const TAP_RADIUS := 100.0
+
+var player: Player
+var fx: FxManager
+var _sprite := Sprite2D.new()
+var _time := 0.0
+var _happy := 0.0
+var _angry := 0.0
+var _taps: Array[float] = []
+var _frames: Array[Texture2D] = []
+
+
+func _init() -> void:
+	z_index = 3
+
+
+func setup(target: Player, effects: FxManager) -> void:
+	player = target
+	fx = effects
+	var sheet := load(FRAMES) as Texture2D
+	for i in 4:
+		var atlas := AtlasTexture.new()
+		atlas.atlas = sheet
+		atlas.region = Rect2(i * 192, 0, 192, 256)
+		_frames.append(atlas)
+	_sprite.texture = _frames[0]
+	_sprite.scale = Vector2(0.5, 0.5)
+	_sprite.offset = Vector2(0, -110)
+	add_child(_sprite)
+
+
+func _process(delta: float) -> void:
+	_time += delta
+	_happy = maxf(_happy - delta, 0.0)
+	_angry = maxf(_angry - delta, 0.0)
+	var breathe := 1.0 + 0.018 * sin(_time * 2.2)
+	_sprite.scale = Vector2(0.5, 0.5 * breathe)
+	if _angry > 0.0:
+		_sprite.texture = load("res://assets/ui/stickers/mosya_angry.png") as Texture2D
+		_sprite.scale = Vector2(0.28, 0.28)
+		_sprite.offset = Vector2(0, -190)
+	else:
+		_sprite.offset = Vector2(0, -110)
+		_sprite.texture = _frames[3 if _happy > 0.0 else 0]
+	queue_redraw()
+
+
+func is_near() -> bool:
+	return is_instance_valid(player) and not player.is_dead and player.global_position.distance_to(global_position) < NEAR
+
+
+func _draw() -> void:
+	draw_circle(Vector2(0, 2), 38.0, Color(0, 0, 0, 0.25))
+	if not is_near():
+		return
+	var font := ThemeDB.fallback_font
+	var pulse := 0.5 + 0.5 * sin(_time * 5.0)
+	var rect := Rect2(-92, -262, 184, 46)
+	draw_style_box(UiStyle.box(Color("#17120e"), Color(Color("#ff8a3d"), 0.6 + 0.4 * pulse), 3, 14), rect)
+	draw_string(font, Vector2(-92, -230), "ПОГЛАДИТЬ", HORIZONTAL_ALIGNMENT_CENTER, 184.0, 24, Color("#ffe9cf"))
+
+
+func _input(event: InputEvent) -> void:
+	if not is_near() or get_tree().paused:
+		return
+	var screen := Vector2.ZERO
+	if event is InputEventScreenTouch and (event as InputEventScreenTouch).pressed:
+		screen = (event as InputEventScreenTouch).position
+	elif event is InputEventMouseButton and (event as InputEventMouseButton).pressed and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT and not Platform.is_touch():
+		screen = (event as InputEventMouseButton).position
+	else:
+		return
+	var world := get_viewport().get_canvas_transform().affine_inverse() * screen
+	if world.distance_to(global_position + Vector2(0, -90)) > TAP_RADIUS + 20.0:
+		return
+	get_viewport().set_input_as_handled()
+	_pet()
+
+
+func _pet() -> void:
+	var now := Time.get_ticks_msec() / 1000.0
+	_taps.append(now)
+	while not _taps.is_empty() and now - _taps[0] > 3.0:
+		_taps.pop_front()
+	SaveService.add_stat("mosya_pets", 1, false)
+	if _taps.size() >= 7:
+		_angry = 1.6
+		_taps.clear()
+		fx.popup(global_position + Vector2(0, -250), "ФШШ!", Color("#ff6b6b"), 40.0)
+		return
+	_happy = 1.0
+	var total := SaveService.get_stat("mosya_pets")
+	fx.popup(global_position + Vector2(0, -250), LINES[total % LINES.size()], Color("#ffd27a"), 38.0)

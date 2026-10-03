@@ -35,11 +35,14 @@ static func matches(query: String, haystack: String) -> bool:
 
 static func style(field: LineEdit, font_size: int) -> void:
 	field.add_theme_font_size_override("font_size", font_size)
-	field.add_theme_color_override("font_color", Color("#262422"))
-	field.add_theme_color_override("font_placeholder_color", Color("#a08b75"))
+	var font := load("res://assets/fonts/RussoOne-Regular.ttf") as Font
+	if font != null:
+		field.add_theme_font_override("font", font)
+	field.add_theme_color_override("font_color", Color("#ffe9cf"))
+	field.add_theme_color_override("font_placeholder_color", Color("#9a8266"))
 	field.add_theme_color_override("caret_color", Color("#ff8a3d"))
-	field.add_theme_stylebox_override("normal", UiStyle.box(Color("#ffffff"), UiStyle.OUTLINE, 4, 16))
-	field.add_theme_stylebox_override("focus", UiStyle.box(Color("#ffffff"), Color("#ff8a3d"), 4, 16))
+	field.add_theme_stylebox_override("normal", UiStyle.box(Color("#17120e"), Color("#6b4a2c"), 3, 16))
+	field.add_theme_stylebox_override("focus", UiStyle.box(Color("#1f1812"), Color("#ff8a3d"), 4, 16))
 
 
 ## В веб-сборке на сенсорных экранах экранная клавиатура из Godot не открывается (iOS), поэтому по тапу
@@ -53,6 +56,9 @@ static func attach_touch_input(field: LineEdit, title: String) -> void:
 ## Тёмное поле в неоновой рамке (строка чата): светлый текст, розовый курсор.
 static func style_dark(field: LineEdit) -> void:
 	field.set_meta("dark", true)
+	var f2 := load("res://assets/fonts/RussoOne-Regular.ttf") as Font
+	if f2 != null:
+		field.add_theme_font_override("font", f2)
 	field.add_theme_color_override("font_color", Color("#f2ecff"))
 	field.add_theme_color_override("font_placeholder_color", Color("#b39a81"))
 	field.add_theme_stylebox_override("normal", UiStyle.box(Color("#32302d"), Color(UiStyle.NEON, 0.55), 3, 30))
@@ -65,6 +71,6 @@ static func restore_colors(field: LineEdit) -> void:
 		field.add_theme_color_override("font_placeholder_color", Color("#b39a81"))
 		field.add_theme_color_override("caret_color", Color("#ff8a3d"))
 		return
-	field.add_theme_color_override("font_color", Color("#262422"))
-	field.add_theme_color_override("font_placeholder_color", Color("#a08b75"))
+	field.add_theme_color_override("font_color", Color("#ffe9cf"))
+	field.add_theme_color_override("font_placeholder_color", Color("#9a8266"))
 	field.add_theme_color_override("caret_color", Color("#ff8a3d"))

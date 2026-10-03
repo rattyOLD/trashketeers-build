@@ -494,7 +494,7 @@ html, body {
 </script>
 
 <script>
-window.__trash_build = {label: 'v35.483', time: '03.10 17:25'};
+window.__trash_build = {label: 'v35.484', time: '03.10 17:54'};
 document.getElementById('ver').textContent = 'Версия ' + window.__trash_build.label + ' · сборка от ' + window.__trash_build.time;
 </script>
 <script>
@@ -559,7 +559,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	// index.wasm / index.pck и отдаём ему уже скачанные и распакованные байты.
 	const FILES = {
 		wasm: { parts: [{url:"raccoon.core.0.wasm?h=4cbe7e5f476b",bytes:5221065},{url:"raccoon.core.1.wasm?h=a8fbc151befa",bytes:4165384}] },
-		pck: { parts: [{url:"raccoon.pack.0.wasm?h=2a715c4c4c12",bytes:11976796},{url:"raccoon.pack.1.wasm?h=0ca4687b3733",bytes:12559786},{url:"raccoon.pack.2.wasm?h=29e305d4371a",bytes:12541891},{url:"raccoon.pack.3.wasm?h=a6e526a33799",bytes:4239988}] },
+		pck: { parts: [{url:"raccoon.pack.0.wasm?h=53c32a680c83",bytes:11976721},{url:"raccoon.pack.1.wasm?h=4faf80882048",bytes:12559687},{url:"raccoon.pack.2.wasm?h=5cec392448ff",bytes:12541876},{url:"raccoon.pack.3.wasm?h=86fbb2b9b6a4",bytes:4244756}] },
 	};
 	const GODOT_CONFIG = {
 		args: [],
@@ -567,7 +567,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 		ensureCrossOriginIsolationHeaders: false,
 		executable: 'index',
 		experimentalVK: false,
-		fileSizes: { 'index.pck': 42374976, 'index.wasm': 43699190 },
+		fileSizes: { 'index.pck': 42380048, 'index.wasm': 43699190 },
 		focusCanvas: true,
 		gdextensionLibs: [],
 		onPrint: function () {
@@ -592,7 +592,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 
 	// Адрес сбора отчётов о вылетах (Google Apps Script / Supabase и т.п.); пусто — отчёты не отправляются.
 	const REPORT_URL = 'https://script.google.com/macros/s/AKfycbxVyy-SnRANW0Im-1Blne2TcUbca93WqzyBulpADwWWD7YH6x3KIygBYImTe8VfP5pp/exec';
-	const BUILD_ID_REPORT = '1791023149';
+	const BUILD_ID_REPORT = '1791024870';
 	const SESSION_ID = Math.random().toString(36).slice(2, 8);
 	const SESSION_START = Date.now();
 	const REPORT_CAP = 250;
@@ -809,7 +809,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	window.trkReport('session_start', gpuInfo() + ' | ' + navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + (window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio) + ' | screen ' + screen.width + 'x' + screen.height + ' | cores ' + (navigator.hardwareConcurrency || '?'));
 
 	// Вкладка могла висеть со старой версией: при возврате в неё сверяем номер сборки и предлагаем обновиться.
-	const BUILD_ID = '1791023149';
+	const BUILD_ID = '1791024870';
 	// Важное обновление: старая сборка дальше не работает, иначе аккаунты и сохранения ломаются старым кодом.
 	function blockOldBuild(v) {
 		const wall = document.createElement('div');

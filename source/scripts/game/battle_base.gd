@@ -10,6 +10,7 @@ signal exit_requested
 signal restart_requested
 
 const CAMERA_SMOOTHING := 9.0
+const PORTRAIT_CAMERA_DROP := 150.0
 const HIST_STEP := 5.0
 const HIST_MAX := 24
 const SHOT_STEP := 30.0
@@ -403,12 +404,14 @@ func _show_result(victory: bool, lines: PackedStringArray, title: String = "", c
 
 func _update_shake(delta: float) -> void:
 	_kick = _kick.lerp(Vector2.ZERO, clampf(CAMERA_KICK_DECAY * delta, 0.0, 1.0))
+	## В вертикали чат и карта сверху закрывают бой: енот стоит ниже центра экрана.
+	var base := Vector2(0.0, -PORTRAIT_CAMERA_DROP) if Orient.portrait else Vector2.ZERO
 	if _shake <= 0.0:
-		camera.offset = _kick
+		camera.offset = base + _kick
 		return
 	_shake = maxf(_shake - delta * 2.5, 0.0)
 	var power := _shake * _shake * 18.0
-	camera.offset = _kick + Vector2(randf_range(-power, power), randf_range(-power, power))
+	camera.offset = base + _kick + Vector2(randf_range(-power, power), randf_range(-power, power))
 
 
 func _request_dash() -> void:

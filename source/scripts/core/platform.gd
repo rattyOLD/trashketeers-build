@@ -487,6 +487,9 @@ if (!el) {
   el.style.cssText = 'position:fixed;z-index:20;box-sizing:border-box;border:0;outline:0;background:transparent;color:#0c1d29;padding:0 14px;font-family:system-ui,-apple-system,sans-serif;-webkit-appearance:none;border-radius:16px';
   el.addEventListener('keydown', function (e) { if (e.key === 'Enter') { el.dataset.enter = '1'; e.preventDefault(); } });
   el.addEventListener('input', function () { el.dataset.changed = '1'; });
+  var dock = function () { var v = window.visualViewport; document.documentElement.style.setProperty('--trk-vt', (v ? v.offsetTop : 0) + 'px'); };
+  el.addEventListener('focus', function () { dock(); el.classList.add('trk_docked'); if (window.visualViewport) { window.visualViewport.addEventListener('scroll', dock); window.visualViewport.addEventListener('resize', dock); } });
+  el.addEventListener('blur', function () { el.classList.remove('trk_docked'); if (window.visualViewport) { window.visualViewport.removeEventListener('scroll', dock); window.visualViewport.removeEventListener('resize', dock); } });
   document.body.appendChild(el);
 }
 el.type = %s; el.placeholder = %s; el.maxLength = %d; el.style.color = %s; el.style.caretColor = '#ff2ea6'; el.classList.toggle('trk_dark', %s);
@@ -494,9 +497,9 @@ el.dataset.vw = %f; el.dataset.gx = %f; el.dataset.gy = %f; el.dataset.gw = %f; 
 el.style.left = (r.left + %f * k) + 'px'; el.style.top = (r.top + %f * k) + 'px';
 el.style.width = (%f * k) + 'px'; el.style.height = (%f * k) + 'px';
 el.style.fontSize = Math.max(16, %f * k) + 'px'; el.style.display = 'block';
-if (!document.getElementById('trk_in_css')) { var st = document.createElement('style'); st.id = 'trk_in_css'; st.textContent = 'input[id^=trk_in_]::placeholder{font-size:0.72em;color:#8a82a0;opacity:1} input.trk_dark::placeholder{color:#8f86b3}'; document.head.appendChild(st); }
+if (!document.getElementById('trk_in_css')) { var st = document.createElement('style'); st.id = 'trk_in_css'; st.textContent = 'input[id^=trk_in_]{font-family:"Russo One",system-ui,sans-serif !important;letter-spacing:.5px} input[id^=trk_in_]::placeholder{font-size:0.72em;color:#9a8266;opacity:1} input.trk_docked{left:12px !important;right:12px !important;width:auto !important;top:calc(var(--trk-vt,0px) + 14px) !important;height:62px !important;font-size:22px !important;background:#17120e !important;color:#ffe9cf !important;border:3px solid #ff8a3d !important;border-radius:16px !important;box-shadow:0 6px 24px rgba(0,0,0,.65),0 0 18px rgba(255,138,61,.35);z-index:40 !important}'; document.head.appendChild(st); }
 """ % [view.x, JSON.stringify(id), JSON.stringify("password" if secret else "text"), JSON.stringify(placeholder), max_length if max_length > 0 else 500,
-		JSON.stringify("#f2ecff" if dark else "#0c1d29"), "true" if dark else "false",
+		JSON.stringify("#ffe9cf"), "true" if dark else "false",
 		view.x, rect.position.x, rect.position.y, rect.size.x, rect.size.y,
 		rect.position.x, rect.position.y, rect.size.x, rect.size.y, font_px])
 
