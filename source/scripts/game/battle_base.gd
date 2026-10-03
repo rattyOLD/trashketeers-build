@@ -586,5 +586,6 @@ class NameTag:
 
 	func _draw() -> void:
 		var font := ThemeDB.fallback_font
-		draw_string_outline(font, Vector2(-120, 0), text, HORIZONTAL_ALIGNMENT_CENTER, 240, 20, 7, Color(0.06, 0.03, 0.1, 0.9))
-		draw_string(font, Vector2(-120, 0), text, HORIZONTAL_ALIGNMENT_CENTER, 240, 20, Cosmetics.nick_color(Color(1, 1, 1, 0.95)))
+		# Ник мелкий и полупрозрачный: в гуще боя он не должен перекрывать врагов и пули.
+		draw_string_outline(font, Vector2(-120, 0), text, HORIZONTAL_ALIGNMENT_CENTER, 240, 16, 5, Color(0.06, 0.03, 0.1, 0.55))
+		draw_string(font, Vector2(-120, 0), text, HORIZONTAL_ALIGNMENT_CENTER, 240, 16, Color(Cosmetics.nick_color(Color(1, 1, 1, 0.95)), 0.6))

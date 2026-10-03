@@ -783,7 +783,7 @@ func _count_multikill() -> void:
 	if not MULTI_CALLS.has(_multi):
 		return
 	var heat := minf(_multi / 12.0, 1.0)
-	fx.callout(player.global_position + Vector2(0, -120), MULTI_CALLS[_multi], Color("#ffd257").lerp(Color("#ff3b30"), heat), 30.0 + 8.0 * heat)
+	fx.callout(player.global_position + Vector2(0, -175), MULTI_CALLS[_multi], Color("#ffd257").lerp(Color("#ff3b30"), heat), 30.0 + 8.0 * heat)
 	SoundManager.play(&"k_perfect")
 	add_shake(0.12)
 

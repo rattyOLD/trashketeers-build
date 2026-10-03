@@ -96,6 +96,8 @@ func _draw() -> void:
 	WeaponIcons.draw(self, weapon.icon, Vector2(0, -34 + bob), 0.85, tilt, weapon.effect_color)
 	var font := ThemeDB.fallback_font
 	var label := weapon.get_title()
-	var alpha := 0.55 if _cooldown > 0.0 else 1.0
-	draw_string_outline(font, Vector2(-110, -66 + bob), label, HORIZONTAL_ALIGNMENT_CENTER, 220, 20, 7, Color(0.08, 0.04, 0.12, alpha))
-	draw_string(font, Vector2(-110, -66 + bob), label, HORIZONTAL_ALIGNMENT_CENTER, 220, 20, Color(color, alpha))
+	# Подпись крупно — только у ствола, к которому енот подошёл; остальные мелко и полупрозрачно, чтобы не засорять бой.
+	var alpha := 0.55 if _cooldown > 0.0 else (1.0 if focused else 0.6)
+	var size := 20 if focused else 15
+	draw_string_outline(font, Vector2(-110, -66 + bob), label, HORIZONTAL_ALIGNMENT_CENTER, 220, size, 6, Color(0.08, 0.04, 0.12, alpha))
+	draw_string(font, Vector2(-110, -66 + bob), label, HORIZONTAL_ALIGNMENT_CENTER, 220, size, Color(color, alpha))
