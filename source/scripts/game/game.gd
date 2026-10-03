@@ -87,6 +87,9 @@ var _combo := 0
 const MULTI_WINDOW := 0.55
 const MULTI_CALLS := {3: "ТРОЙНОЕ!", 5: "РЕЗНЯ!", 8: "МЯСОРУБКА!", 12: "АПОКАЛИПСИС!"}
 var _multi := 0
+## Для отчёта о забеге (баланс): здоровье в % на старте каждой волны и полученный урон по источникам.
+var _wave_hp := PackedStringArray()
+var _damage_by := {}
 var _multi_left := 0.0
 var _combo_timer := 0.0
 var _recorded := false
@@ -241,6 +244,8 @@ func start(_weapon_id: StringName = &"") -> void:
 	for pickup in _weapon_pickups:
 		pickup.expired.connect(_on_pickup_expired)
 	player.weapon_controller.slots_changed.connect(_refresh_slots)
+	player.damaged.connect(func(amount: float) -> void:
+		_damage_by[Player.last_source] = float(_damage_by.get(Player.last_source, 0.0)) + amount)
 	hero_skills.used.connect(func(_id: String) -> void: player.weapon_controller.charge_overdrive())
 	player.weapon_controller.overdrive_changed.connect(_on_overdrive_changed)
 	player.weapon_controller.overdrive_fired.connect(_on_overdrive_fired)
@@ -462,6 +467,8 @@ func _apply_chapter_look(chapter: Dictionary) -> void:
 
 func _on_wave_started(number: int, title: String, mood: String, is_boss: bool) -> void:
 	Platform.note_event("wave %d %s boss=%s" % [number, title, is_boss])
+	if story_mission.is_empty() and player != null:
+		_wave_hp.append("%d:%d" % [number, int(100.0 * player.hp / maxf(player.max_hp, 1.0))])
 	_last_marker.reset_hunt()
 	atmosphere.set_mood(mood)
 	_check_clean_sweep()
@@ -1610,8 +1617,18 @@ func _revive() -> void:
 
 
 func _on_menu_pressed() -> void:
+	if story_mission.is_empty() and not finished:
+		_send_run_report("quit", director.wave_number, str(director.chapter_index + 1), false)
 	_record()
 	super._on_menu_pressed()
+
+
+## Итог забега выживания в общий журнал: и при смерти/финише, и при выходе в меню посреди забега.
+func _send_run_report(outcome: String, wave: Variant, chapter: Variant, record: bool) -> void:
+	var damage := PackedStringArray()
+	for source: Variant in _damage_by:
+		damage.append("%s:%d" % [source, int(_damage_by[source])])
+	Platform.send_report("run", "mode=survival outcome=%s hero=%s weapon=%s wave=%s chapter=%s level=%d kills=%d time=%ds coins=%d bosses=%d revives=%d killed_by=%s record=%s mod=%s power=%.2f adapt=%.2f | hp %s | dmg %s" % [outcome, SaveService.get_character_id(), player.weapon_controller.base_weapon.id, str(wave), str(chapter), level, kills, int(director.elapsed), nuts, bosses_killed, revives_used, Player.last_source, record, RunMods.active, stats.power(), director.adapt, " ".join(_wave_hp), " ".join(damage)])
 
 
 func _waves_cleared() -> int:
@@ -1644,7 +1661,7 @@ func _finish() -> void:
 	var previous_best := SaveService.get_stat("best_wave")
 	var result := _record()
 	summary["friend"] = SaveService.friend_wave_line(int(summary["wave"]), previous_best)
-	Platform.send_report("run", "mode=survival hero=%s weapon=%s wave=%d chapter=%s level=%d kills=%d time=%ds coins=%d bosses=%d revives=%d killed_by=%s died=%s record=%s mod=%s" % [SaveService.get_character_id(), player.weapon_controller.base_weapon.id, summary["wave"], summary["chapter"], level, kills, int(director.elapsed), nuts, bosses_killed, revives_used, Player.last_source, player.is_dead, result.get("record", false), RunMods.active])
+	_send_run_report("died" if player.is_dead else "finished", summary["wave"], summary["chapter"], result.get("record", false))
 	summary["record"] = result.get("record", false)
 	summary["total_coins"] = SaveService.get_coins()
 	finished = true
