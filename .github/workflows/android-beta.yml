@@ -9,7 +9,7 @@ name: Android beta
 
 on:
   push:
-    branches: [main, perf/draw-batching]
+    branches: [main]
     paths: ["source/**", ".github/workflows/android-beta.yml"]
   workflow_dispatch:
 
