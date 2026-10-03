@@ -45,6 +45,9 @@ const BASE_AREA := 2000.0
 const DOOR_GAP := 6
 const DOOR_LEAD := 0.03
 const WALL_THICK := 2
+## Выживание: арена крупнее сюжетной (по каждой стороне), а на Свалке — сетка дорог на районы.
+const SURVIVAL_SCALE := 1.3
+const DISTRICTS := 3
 
 var chapter: Dictionary = {}
 var layout := "junkyard"
@@ -91,6 +94,9 @@ func build(layers: BiomeLayers, chapter_def: Dictionary) -> void:
 	layout = str(chapter.get("layout", "junkyard"))
 	var size: Array = chapter.get("size", [40, 50])
 	grid_size = Vector2i(int(size[0]), int(size[1]))
+	_story = chapter.get("story", {})
+	if _story.is_empty():
+		grid_size = Vector2i((Vector2(grid_size) * SURVIVAL_SCALE).round())
 	_origin = -Vector2(grid_size) * CELL * 0.5
 	bounds = Rect2(_origin, Vector2(grid_size) * CELL)
 	_area_scale = float(grid_size.x * grid_size.y) / BASE_AREA
@@ -298,12 +304,25 @@ func _physics_process(delta: float) -> void:
 
 var _lane_shift := 0
 var _lane_wide := 0.0
+## Дороги-границы районов (номера клеток) и тема каждого района (id сцены, "" — площадь).
+var _road_x: Array[int] = []
+var _road_y: Array[int] = []
+var _district_theme: Array[String] = []
 
 
 ## Каждый забег двигает и утолщает дорожки, поэтому даже одна и та же глава каждый раз выглядит иначе.
 func _roll_run_twist() -> void:
 	_lane_shift = randi_range(-2, 2)
 	_lane_wide = randf_range(-0.4, 1.0)
+	_road_x.clear()
+	_road_y.clear()
+	if _story.is_empty():
+		var inner_w := grid_size.x - RING_SIDE * 2
+		var top := RING_TOP + _boss_cells.y + 2
+		var inner_h := grid_size.y - RING_BOTTOM - top
+		for k in range(1, DISTRICTS):
+			_road_x.append(RING_SIDE + inner_w * k / DISTRICTS + randi_range(-2, 2))
+			_road_y.append(top + inner_h * k / DISTRICTS + randi_range(-2, 2))
 
 
 func _assign_zones() -> void:
@@ -335,6 +354,8 @@ func _assign_zones() -> void:
 ## Рисунок дорожек свалки по варианту локации: крест, кольцо, диагонали, три полосы.
 func _junk_lane(x: int, y: int, cx: int, mid_y: int) -> bool:
 	var width := 2.0 + _lane_wide
+	if not _road_x.is_empty():
+		return _district_lane(x, y, cx, mid_y, width)
 	match int(chapter.get("variant", 0)):
 		1:
 			var radius_x := 11 + _lane_shift
@@ -353,6 +374,47 @@ func _junk_lane(x: int, y: int, cx: int, mid_y: int) -> bool:
 			var mid := absi(y - mid_y - _lane_shift) < width
 			return mid or absi(y - mid_y - gap) < width or absi(y - mid_y + gap) < width
 	return absi(y - mid_y - _lane_shift) < width or (absi(x - cx + 0.5 + _lane_shift) < width and y >= RING_TOP + 6)
+
+
+## Выживание на Свалке: сетка дорог делит арену на районы 3×3; вариант главы добавляет свою черту
+## (1 — кольцо вокруг центральной площади, 2 — диагональный проезд, 3 — средняя поперечная улица).
+func _district_lane(x: int, y: int, cx: int, mid_y: int, width: float) -> bool:
+	if y < RING_TOP + _boss_cells.y + 1:
+		return false
+	for rx in _road_x:
+		if absf(x - rx + 0.5) < width:
+			return true
+	for ry in _road_y:
+		if absf(y - ry + 0.5) < width:
+			return true
+	match int(chapter.get("variant", 0)):
+		1:
+			var rx := absi(x - cx)
+			var ry := absi(y - mid_y)
+			return (absi(rx - 6) < 2 and ry <= 7) or (absi(ry - 6) < 2 and rx <= 7)
+		2:
+			var dx := float(x - _road_x[0]) / float(maxi(_road_x[1] - _road_x[0], 1))
+			var dy := float(y - _road_y[0]) / float(maxi(_road_y[1] - _road_y[0], 1))
+			return dx >= 0.0 and dx <= 1.0 and absf(dx - dy) * float(_road_x[1] - _road_x[0]) < 1.6
+		3:
+			return absi(y - mid_y) < 2 and x > RING_SIDE + 2 and x < grid_size.x - RING_SIDE - 2
+	return false
+
+
+## Номер района 0..8 по клетке (столбец + 3 × ряд); -1 — вне сетки районов.
+func _district_of(p: Vector2) -> int:
+	if _road_x.is_empty():
+		return -1
+	var c := world_to_cell(p)
+	var col := 0
+	for rx in _road_x:
+		if c.x >= rx:
+			col += 1
+	var row := 0
+	for ry in _road_y:
+		if c.y >= ry:
+			row += 1
+	return col + DISTRICTS * row
 
 
 ## Банк: крест площади по центру, газоны по четвертям, розовые дорожки у боковых стен,
@@ -781,6 +843,13 @@ func _build_center() -> void:
 		var graffiti := ArenaDecor.floor_image("res://assets/props/ch1/graffiti.png", 400.0, 0.4)
 		graffiti.position = center
 		_own(graffiti, _layers.decals)
+		if not _road_x.is_empty():
+			# Бордюры вдоль дорог: районы читаются как кварталы.
+			var curbs := ArenaDecor.Curbs.new()
+			curbs.segments = _zone_edges([Zone.LANE])
+			curbs.color = Color("#6d6a86")
+			curbs.shade = Color("#2a2740")
+			_own(curbs, _layers.decals)
 
 
 ## Отрезки границ между клетками выбранных зон и остальными (бордюры газонов/дорожек).
@@ -915,6 +984,9 @@ func _build_cover() -> void:
 func _build_scenes() -> void:
 	var library: Dictionary = ConfigLoader.load_json("res://data/scenes.json").get("scenes", {})
 	var area := _interior_rect()
+	if not _road_x.is_empty() and layout != "bank":
+		_build_districts(library, area)
+		return
 	var entries: Array = chapter.get("scenes", []).duplicate()
 	entries.shuffle()
 	for index in entries.size():
@@ -930,6 +1002,44 @@ func _build_scenes() -> void:
 				break
 			var p := _scene_point(str(scene.get("anchor", "open")), area)
 			if p == Vector2.INF or not _scene_spacing_ok(p):
+				continue
+			if _place_scene(scene, p):
+				_cover_spots.append(p)
+				done += 1
+
+
+## Районы: у каждого своя тема (сцена из списка главы), её группы стоят у дорог своего района.
+## Центральный район — площадь с граффити, нижний средний — старт: там пусто.
+func _build_districts(library: Dictionary, area: Rect2) -> void:
+	var themes: Array = []
+	for entry: Array in chapter.get("scenes", []):
+		if library.has(str(entry[0])):
+			themes.append(str(entry[0]))
+	if themes.is_empty():
+		return
+	themes.shuffle()
+	_district_theme.clear()
+	var center := DISTRICTS * DISTRICTS / 2
+	var start := _district_of(player_start)
+	var next := 0
+	for d in DISTRICTS * DISTRICTS:
+		if d == center or d == start:
+			_district_theme.append("")
+		else:
+			_district_theme.append(str(themes[next % themes.size()]))
+			next += 1
+	var per := maxi(int(round(3.0 * _area_scale / 1.6)), 3)
+	for d in _district_theme.size():
+		var theme := _district_theme[d]
+		if theme.is_empty():
+			continue
+		var scene: Dictionary = library[theme]
+		var done := 0
+		for attempt in 160:
+			if done >= per:
+				break
+			var p := _scene_point("lane", area)
+			if p == Vector2.INF or _district_of(p) != d or not _scene_spacing_ok(p):
 				continue
 			if _place_scene(scene, p):
 				_cover_spots.append(p)

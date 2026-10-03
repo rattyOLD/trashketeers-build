@@ -3,6 +3,7 @@
 # Секреты репозитория (Settings → Secrets and variables → Actions):
 #   ANDROID_KEYSTORE_BASE64 — base64 файла trashketeers-beta.keystore
 #   ANDROID_KEYSTORE_PASSWORD — пароль хранилища и ключа (алиас trashketeers)
+#   FIREBASE_TESTERS — (необязательно) почты тестеров через запятую: им сборка уйдёт вдобавок к группе testers
 #   FIREBASE_SERVICE_ACCOUNT — JSON ключа сервисного аккаунта с ролью Firebase App Distribution Admin
 name: Android beta
 
@@ -99,5 +100,6 @@ jobs:
           appId: 1:80820379449:android:83df21951e3a0f0fc7d2e8
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           groups: testers
+          testers: ${{ secrets.FIREBASE_TESTERS }}
           file: source/build/android/TrashSquad.apk
           releaseNotes: "TrashSquad beta.${{ github.run_number }} · Beer Party Studio · ${{ github.ref_name }} · ${{ github.event.head_commit.message }}"
