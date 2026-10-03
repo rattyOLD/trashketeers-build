@@ -19,6 +19,11 @@ const MAX_SPEED := 1200.0
 const ATTRACT_START := 260.0
 ## Притянутый лут дольше этого времени зачисляется сразу (страховка от любых орбит).
 const ATTRACT_TIMEOUT := 1.6
+const ATLAS_PAD := 2
+const ATLAS_WHITE := 0
+const ATLAS_XP := 1
+const ATLAS_XP_GOLD := 2
+const ATLAS_NUT := 3
 
 var nut_texture: Texture2D
 var xp_texture: Texture2D
@@ -32,6 +37,9 @@ var _attract_time := PackedFloat32Array()
 var _kind := PackedByteArray()
 var _value := PackedInt32Array()
 var _count := 0
+var _atlas: ImageTexture
+var _atlas_uv: Array[Rect2] = []
+var _batch := PolyBatch.new()
 var _time := 0.0
 
 
@@ -45,6 +53,33 @@ func _init() -> void:
 	nut_texture = make_coin_texture(26)
 	xp_texture = make_xp_texture()
 	xp_gold_texture = make_xp_texture(true)
+	var white := Image.create(4, 4, false, Image.FORMAT_RGBA8)
+	white.fill(Color.WHITE)
+	_build_atlas([white, make_xp_image(false), make_xp_image(true), make_coin_image(26)])
+
+
+## Тени, свечение и спрайты лута — один вызов отрисовки: спрайты лежат в атласе с белым текселем
+## для кругов. Края каждого спрайта продублированы на ATLAS_PAD пикселей: линейная фильтрация
+## у края берёт те же цвета, что и clamp отдельной текстуры.
+func _build_atlas(images: Array[Image]) -> void:
+	var width := 0
+	var height := 0
+	for img in images:
+		width += img.get_width() + ATLAS_PAD * 2
+		height = maxi(height, img.get_height() + ATLAS_PAD * 2)
+	var atlas := Image.create(width, height, false, Image.FORMAT_RGBA8)
+	var size := Vector2(width, height)
+	var x := 0
+	for img in images:
+		var w := img.get_width()
+		var h := img.get_height()
+		for py in range(-ATLAS_PAD, h + ATLAS_PAD):
+			for px in range(-ATLAS_PAD, w + ATLAS_PAD):
+				atlas.set_pixel(x + ATLAS_PAD + px, ATLAS_PAD + py, img.get_pixel(clampi(px, 0, w - 1), clampi(py, 0, h - 1)))
+		_atlas_uv.append(Rect2(Vector2(x + ATLAS_PAD, ATLAS_PAD) / size, Vector2(w, h) / size))
+		x += w + ATLAS_PAD * 2
+	_atlas = ImageTexture.create_from_image(atlas)
+	_batch.use_atlas(_atlas, _atlas_uv[ATLAS_WHITE].get_center())
 
 
 func setup(player: Player) -> void:
@@ -185,32 +220,40 @@ func _view_rect() -> Rect2:
 
 
 func _draw() -> void:
-	var nut_half := nut_texture.get_size() * 0.5
-	var xp_half := xp_texture.get_size() * 0.5
+	var nut_size := nut_texture.get_size()
+	var xp_size := xp_texture.get_size()
+	var nut_half := nut_size * 0.5
+	var xp_half := xp_size * 0.5
 	var view := _view_rect()
+	var b := _batch
 	for i in _count:
 		if not view.has_point(_pos[i]):
 			continue
 		if _kind[i] == Kind.XP_GOLD:
 			var glow := 1.35 + 0.12 * sin(_time * 6.0 + i)
-			draw_circle(_pos[i] + Vector2(0, 8), 9.0, Color(0, 0, 0, 0.25))
-			draw_circle(_pos[i] + Vector2(0, -4), 15.0 * glow, Color(1.0, 0.82, 0.25, 0.18))
-			draw_set_transform(_pos[i] + Vector2(0, sin(_time * 5.0 + i) * 3.0 - 5), 0.0, Vector2.ONE * 1.35)
-			draw_texture(xp_gold_texture, -xp_half)
-			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			b.circle(_pos[i] + Vector2(0, 8), 9.0, Color(0, 0, 0, 0.25))
+			b.circle(_pos[i] + Vector2(0, -4), 15.0 * glow, Color(1.0, 0.82, 0.25, 0.18))
+			b.set_transform(_pos[i] + Vector2(0, sin(_time * 5.0 + i) * 3.0 - 5), 0.0, Vector2.ONE * 1.35)
+			b.texture_rect(Rect2(-xp_half, xp_size), _atlas_uv[ATLAS_XP_GOLD])
+			b.reset_transform()
 		elif _kind[i] == Kind.XP:
 			var bob := sin(_time * 5.0 + i) * 3.0
 			var big := 1.0 + 0.25 * (_value[i] - 1)
-			draw_circle(_pos[i] + Vector2(0, 8), 7.0 * big, Color(0, 0, 0, 0.25))
-			draw_set_transform(_pos[i] + Vector2(0, bob - 4), 0.0, Vector2.ONE * big)
-			draw_texture(xp_texture, -xp_half)
-			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			b.circle(_pos[i] + Vector2(0, 8), 7.0 * big, Color(0, 0, 0, 0.25))
+			b.set_transform(_pos[i] + Vector2(0, bob - 4), 0.0, Vector2.ONE * big)
+			b.texture_rect(Rect2(-xp_half, xp_size), _atlas_uv[ATLAS_XP])
+			b.reset_transform()
 		else:
-			draw_texture(nut_texture, _pos[i] - nut_half)
+			b.texture_rect(Rect2(_pos[i] - nut_half, nut_size), _atlas_uv[ATLAS_NUT])
+	b.flush(self)
 
 
 ## Кристалл опыта 20×26: бирюзовый ромб с контуром и бликом.
 static func make_xp_texture(gold: bool = false) -> ImageTexture:
+	return ImageTexture.create_from_image(make_xp_image(gold))
+
+
+static func make_xp_image(gold: bool = false) -> Image:
 	var w := 20
 	var h := 26
 	var image := Image.create(w, h, false, Image.FORMAT_RGBA8)
@@ -228,17 +271,26 @@ static func make_xp_texture(gold: bool = false) -> ImageTexture:
 			if d <= 0.78 and p.x < -1.0 and p.y < -2.0 and d > 0.3:
 				color = Color("#fffbe0") if gold else Color("#c8ffff")
 			image.set_pixel(x, y, color)
-	return ImageTexture.create_from_image(image)
+	return image
 
 
 ## Золотая монета Сетки (общая валюта всех игр): ободок, выпуклый центр со звездой и блик.
 ## Рисуется с 3× суперсэмплингом, результат кэшируется по размеру.
 static var _coin_cache: Dictionary = {}
+static var _coin_images: Dictionary = {}
 
 
 static func make_coin_texture(size: int = 24) -> ImageTexture:
 	if _coin_cache.has(size):
 		return _coin_cache[size]
+	var texture := ImageTexture.create_from_image(make_coin_image(size))
+	_coin_cache[size] = texture
+	return texture
+
+
+static func make_coin_image(size: int = 24) -> Image:
+	if _coin_images.has(size):
+		return _coin_images[size]
 	var ss := 3
 	var big := size * ss
 	var image := Image.create(big, big, false, Image.FORMAT_RGBA8)
@@ -268,9 +320,8 @@ static func make_coin_texture(size: int = 24) -> ImageTexture:
 				color = color.lerp(Color.WHITE, 0.75)
 			image.set_pixel(x, y, color)
 	image.resize(size, size, Image.INTERPOLATE_LANCZOS)
-	var texture := ImageTexture.create_from_image(image)
-	_coin_cache[size] = texture
-	return texture
+	_coin_images[size] = image
+	return image
 
 
 ## Пятиконечная звезда в единичных координатах: <= 0 внутри.

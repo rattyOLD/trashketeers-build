@@ -10,6 +10,8 @@ extends RefCounted
 ## Пока батч не сброшен (flush), между фигурами нельзя рисовать другое (текстуры, текст) —
 ## перед ними flush. Трансформ задаётся set_transform батча, а у самого CanvasItem на момент
 ## flush должен стоять единичный.
+## С атласом (use_atlas) в тот же вызов идут и картинки (texture_rect): фигуры берут белый тексель
+## атласа, поэтому чередование «тень-круг → спрайт» не рвёт батч.
 
 const CIRCLE_SEGMENTS := 64
 const FEATHER := 1.25
@@ -22,8 +24,9 @@ var points := PackedVector2Array()
 var colors := PackedColorArray()
 var xform := Transform2D.IDENTITY
 var _fill := PackedColorArray()
-var _strip := PackedVector2Array()
-var _strip_colors := PackedColorArray()
+var _atlas: Texture2D
+var _white_uv := Vector2.ZERO
+var _uvs := PackedVector2Array()
 
 
 ## Как CanvasItem.draw_set_transform: поворот, затем масштаб по осям экрана (scale_basis).
@@ -42,11 +45,43 @@ func is_empty() -> bool:
 	return points.is_empty()
 
 
+## Атлас для texture_rect; white_uv — UV непрозрачного белого текселя в нём (для фигур).
+func use_atlas(atlas: Texture2D, white_uv: Vector2) -> void:
+	_atlas = atlas
+	_white_uv = white_uv
+
+
 func flush(canvas: CanvasItem) -> void:
 	if not points.is_empty():
-		RenderingServer.canvas_item_add_triangle_array(canvas.get_canvas_item(), PackedInt32Array(), points, colors)
+		if _atlas == null:
+			RenderingServer.canvas_item_add_triangle_array(canvas.get_canvas_item(), PackedInt32Array(), points, colors)
+		else:
+			_pad_uvs()
+			RenderingServer.canvas_item_add_triangle_array(canvas.get_canvas_item(), PackedInt32Array(), points, colors, _uvs, PackedInt32Array(), PackedFloat32Array(), _atlas.get_rid())
 	points.clear()
 	colors.clear()
+	_uvs.clear()
+
+
+## draw_texture_rect_region(atlas, area, uv_area · размер атласа, modulate): квад как у rect-команды
+## движка — вершины по углам area, UV по углам uv_area (в долях атласа).
+func texture_rect(area: Rect2, uv_area: Rect2, modulate: Color = Color.WHITE) -> void:
+	_pad_uvs()
+	var p := area.position
+	var e := area.end
+	var u := uv_area.position
+	var v := uv_area.end
+	_append(xform * PackedVector2Array([p, Vector2(e.x, p.y), e, p, e, Vector2(p.x, e.y)]), modulate)
+	_uvs.append_array(PackedVector2Array([u, Vector2(v.x, u.y), v, u, v, Vector2(u.x, v.y)]))
+
+
+func _pad_uvs() -> void:
+	var missing := points.size() - _uvs.size()
+	if missing > 0:
+		var white := PackedVector2Array()
+		white.resize(missing)
+		white.fill(_white_uv)
+		_uvs.append_array(white)
 
 
 ## draw_circle(pos, radius, color) без сглаживания.
