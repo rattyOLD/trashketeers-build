@@ -1,7 +1,7 @@
 class_name BattleBase
 extends Node2D
 ## Общая основа боевых режимов (Свалка и Налёт): игрок, камера, HUD, атмосфера, пауза,
-## «сочность» (тряска, hitstop, отдача камеры, вспышки дула), взрывы, рывок, очистка.
+## «сочность» (тряска, hitstop, отдача камеры, вспышки дула), взрывы, навык героя, очистка.
 ## Режим-наследник строит арену и сценарий, затем вызывает _setup_common() и переопределяет
 ## хуки _on_player_died / _update_hud_timer / _run_summary_lines.
 ## BulletPool и SoundManager — автолоады и переживают бой, поэтому в _exit_tree их чистим.
@@ -95,7 +95,7 @@ func _spawn_player(at: Vector2, weapon: WeaponData, target_finder: Callable) -> 
 	player.bonus_max_hp = SaveService.get_perk_bonus("stamina") * meta + Player.BASE_MAX_HP * (CharacterDB.get_stat(hero, "hp") + SaveService.HERO_HP_PER_LEVEL * hero_level)
 	player.armor = SaveService.get_perk_bonus("armor") * meta
 	player.vest = int(SaveService.get_perk_bonus("vest") * meta)
-	player.dash_cooldown_mult = 1.0 + CharacterDB.get_stat(hero, "dash")
+	player.skill_cooldown_mult = 1.0 + CharacterDB.get_stat(hero, "dash")
 	stats.add_flat(&"damage_mult", SaveService.get_perk_bonus("power") * meta + SaveService.HERO_DAMAGE_PER_LEVEL * hero_level)
 	stats.add_flat(&"crit_chance_add", SaveService.get_perk_bonus("eye") * meta)
 	stats.add_flat(&"move_speed_mult", SaveService.get_perk_bonus("boots") * meta)
@@ -160,15 +160,13 @@ func _setup_common(camera_bounds: Rect2, currency_icon: Texture2D) -> void:
 	player.health_changed.connect(hud.set_health)
 	player.damaged.connect(_on_player_damaged)
 	player.died.connect(_on_player_died)
-	player.dashed.connect(_on_player_dashed)
 	player.weapon_controller.fired.connect(_on_player_fired)
 	player.weapon_controller.melee.swing_started.connect(_on_melee_swing)
 	player.weapon_controller.melee.hit_resolved.connect(_on_melee_hit)
 	player.weapon_controller.weapon_changed.connect(hud.set_weapon)
 	BulletPool.bullet_hit.connect(_on_bullet_hit)
 	BulletPool.exploded.connect(_on_explosion)
-	hud.dash_pressed.connect(_request_dash)
-	hud.skill_pressed.connect(_request_dash)
+	hud.skill_pressed.connect(_request_skill)
 	hero_skills = HeroSkills.new()
 	add_child(hero_skills)
 	hero_skills.setup(SaveService.get_character_id(), player, fx, stats, add_shake)
@@ -356,9 +354,7 @@ func _physics_process(delta: float) -> void:
 		input = Input.get_vector(&"move_left", &"move_right", &"move_up", &"move_down")
 	player.move_input = input
 	camera.global_position = player.global_position
-	hud.set_dash_cooldown(player.dash_fraction())
 	hud.set_skill_cooldown(hero_skills.fraction())
-	hud.set_dash_charges(player.dash_charges, player.dash_max_charges)
 
 	_hud_timer -= delta
 	if _hud_timer <= 0.0:
@@ -369,7 +365,7 @@ func _physics_process(delta: float) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"dash"):
-		_request_dash()
+		_request_skill()
 	elif event.is_action_pressed(&"ui_cancel") and not finished:
 		_open_pause()
 
@@ -432,13 +428,11 @@ func _update_shake(delta: float) -> void:
 	camera.offset = base + _kick + Vector2(randf_range(-power, power), randf_range(-power, power))
 
 
-func _request_dash() -> void:
-	if player == null or finished or get_tree().paused or RunMods.has(&"no_dash"):
+func _request_skill() -> void:
+	if player == null or finished or get_tree().paused:
 		return
 	if hero_skills != null and hero_skills.has_skill():
 		hero_skills.try_use()
-	else:
-		player.request_dash()
 
 
 
@@ -558,10 +552,6 @@ func _on_player_damaged(_amount: float) -> void:
 	atmosphere.hit_pulse(1.0)
 	SoundManager.play(&"player_hurt")
 	hitstop(0.05)
-
-
-func _on_player_dashed() -> void:
-	add_shake(0.06)
 
 
 ## round_up — для обратного отсчёта, чтобы «0:00» появлялось ровно в момент окончания.

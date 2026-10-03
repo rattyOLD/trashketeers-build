@@ -1,6 +1,6 @@
 class_name HeroSkills
 extends Node
-## Активный навык героя (кнопка рывка; у героев с навыком она вызывает навык, а не рывок). У Бродяги навыка нет.
+## Активный навык героя (кнопка навыка справа внизу).
 ## Урон идёт через BulletPool.explode: он бьёт и обычных врагов, и Хладгора (когда тот на земле),
 ## поэтому навыки работают в любом режиме. Статусы (заморозка, яд, поджог) — только по Enemy.
 
@@ -54,7 +54,7 @@ func fraction() -> float:
 
 
 func _cooldown() -> float:
-	return float(skill["cooldown"]) * _player.dash_cooldown_mult
+	return float(skill["cooldown"]) * _player.skill_cooldown_mult
 
 
 func _physics_process(delta: float) -> void:
@@ -79,6 +79,8 @@ func try_use() -> bool:
 			_toxic_flask()
 		"drone_strike":
 			_drone_strike()
+		"squall":
+			_squall()
 	if _shake.is_valid():
 		_shake.call(0.35)
 	SoundManager.play(&"shield_up")
@@ -158,6 +160,22 @@ func _fire_ring() -> void:
 	for enemy in _enemies_in(at, 320.0):
 		enemy.add_bleed(16.0 * _power(), 4.0, true)
 	_player.grant_invuln(0.25)
+
+
+## Рико «Шквал»: 5 с скорострельность +50%, пули прошивают врагов насквозь.
+func _squall() -> void:
+	_stats.add_flat(&"fire_rate_mult", 0.5)
+	_stats.add_flat(&"piercing", 1.0)
+	_player.apply_run_stats(_stats)
+	_fx.ring(_player.global_position, Color("#ffd257"), 200.0)
+	_fx.burst(_player.global_position, Color("#ffb020"), 24, 320.0, 4.0)
+	_fx.popup(_player.global_position + Vector2(0, -90), "ШКВАЛ!", Color("#ffd257"), 28.0)
+	_later(5.0, func() -> void:
+		if not is_instance_valid(_player):
+			return
+		_stats.add_flat(&"fire_rate_mult", -0.5)
+		_stats.add_flat(&"piercing", -1.0)
+		_player.apply_run_stats(_stats))
 
 
 func _ice_dome() -> void:

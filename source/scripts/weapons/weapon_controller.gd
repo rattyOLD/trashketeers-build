@@ -98,7 +98,7 @@ func cycle_slot() -> bool:
 	return false
 
 
-## Рывок заряжает следующий выстрел рельсотрона: он бьёт в разы сильнее и вылетает без ожидания.
+## Навык героя заряжает следующий выстрел рельсотрона: он бьёт в разы сильнее и вылетает без ожидания.
 func charge_overdrive() -> void:
 	if weapon == null or not weapon.dash_charge:
 		return

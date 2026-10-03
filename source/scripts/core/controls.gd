@@ -11,7 +11,7 @@ const HUD_TITLES := {
 	"loot": "ЛУТ НА КАРТЕ", "fps": "СЧЁТЧИК FPS", "wave": "ВОЛНА", "boss": "ПОЛОСА БОССА", "minimap": "МИНИКАРТА",
 	"order": "ЗАДАНИЕ", "story_bar": "ОЧКИ, ЖИЗНИ, ЗОНА", "story_meter": "ДЕТАЛИ СУПЕР-СТВОЛА", "wanted": "РОЗЫСК", "barks": "РЕПЛИКИ",
 }
-const ELEMENT_TITLES := {"dash": "РЫВОК", "slots": "СЛОТЫ ОРУЖИЯ", "interact": "ВЗЯТЬ"}
+const ELEMENT_TITLES := {"dash": "НАВЫК", "slots": "СЛОТЫ ОРУЖИЯ", "interact": "ВЗЯТЬ"}
 const ELEMENT_SIZE := {"dash": Vector2(160, 160), "slots": Vector2(96, 96), "interact": Vector2(250, 96)}
 const PRESET_SLOTS := 3
 
@@ -20,7 +20,7 @@ const KEY_ACTIONS := [
 	[&"move_down", "Вниз"],
 	[&"move_left", "Влево"],
 	[&"move_right", "Вправо"],
-	[&"dash", "Рывок"],
+	[&"dash", "Навык"],
 	[&"interact", "Подобрать ствол"],
 	[&"weapon_next", "Следующий ствол"],
 	[&"weapon_1", "Слот 1"],

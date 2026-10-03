@@ -11,7 +11,6 @@ const BLAST_DAMAGE_PER_WAVE := 0.6
 const ENEMY_SPEED := 2.0
 const SHOTGUN_IDS: Array[StringName] = [&"trash_shotgun_v1", &"double_v1"]
 const MODS: Array[Dictionary] = [
-	{"id": &"no_dash", "title": "Без рывка", "desc": "Рывок отключён", "mult": 1.3},
 	{"id": &"fast_enemies", "title": "Двойная скорость врагов", "desc": "Враги бегут вдвое быстрее", "mult": 1.3},
 	{"id": &"blast", "title": "Враги взрываются", "desc": "Каждая смерть бьёт по площади", "mult": 1.3},
 	{"id": &"shotguns", "title": "Только дробовики", "desc": "Другие стволы не выпадают", "mult": 1.3},

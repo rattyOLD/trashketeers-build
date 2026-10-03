@@ -33,15 +33,6 @@ const STAT_KEYS: Array[StringName] = [
 	&"evo_toxic_burst",
 	&"evo_vamp_poison",
 	&"evo_static_freeze",
-	&"dash_haste",
-	&"dash_charges",
-	&"dash_range",
-	&"dash_damage",
-	&"dash_poison",
-	&"dash_fire",
-	&"dash_blast",
-	&"dash_refund",
-	&"dash_boost",
 	&"close_damage",
 	&"close_reach",
 	&"close_width",
@@ -76,7 +67,7 @@ func _init() -> void:
 const CAPS := {
 	&"damage_mult": 3.0, &"fire_rate_mult": 1.5, &"extra_projectiles": 7.0, &"extra_ricochets": 6.0, &"range_mult": 1.0,
 	&"crit_chance_add": 0.6, &"move_speed_mult": 0.8, &"max_hp_add": 300.0, &"damage_resist": 0.5, &"regen": 4.0,
-	&"vampirism": 0.005, &"kill_heal": 3.0, &"magnet_mult": 3.0, &"dash_haste": 1.0, &"close_damage": 1.5, &"rail_rate": 1.0,
+	&"vampirism": 0.005, &"kill_heal": 3.0, &"magnet_mult": 3.0, &"close_damage": 1.5, &"rail_rate": 1.0,
 	&"poison_power": 2.0, &"status_power": 1.5, &"blast_power": 2.0, &"double_drop": 0.5, &"drone_count": 4.0,
 }
 const KNEE := 0.7
@@ -160,9 +151,7 @@ const ARCHETYPE_BY_STAT := {
 	&"shock_chance": &"debuff", &"shock_jumps": &"debuff", &"explosive_chance": &"debuff", &"blast_power": &"debuff",
 	&"burn_chance": &"debuff", &"burn_vamp": &"debuff", &"bleed_chance": &"debuff", &"vampirism": &"debuff", &"kill_heal": &"debuff",
 	&"close_finisher": &"debuff", &"evo_vamp_poison": &"debuff", &"evo_toxic_burst": &"debuff", &"evo_static_freeze": &"debuff",
-	&"dash_poison": &"debuff", &"dash_fire": &"debuff", &"dash_blast": &"debuff",
-	&"move_speed_mult": &"mobility", &"dash_haste": &"mobility", &"dash_charges": &"mobility", &"dash_refund": &"mobility",
-	&"dash_range": &"mobility", &"dash_damage": &"mobility", &"dash_boost": &"mobility",
+	&"move_speed_mult": &"mobility",
 }
 ## Насколько сильно выдача тянется к уже выбранному направлению (доля 1.0 = ×(1 + BIAS)).
 const ARCHETYPE_BIAS := 1.8

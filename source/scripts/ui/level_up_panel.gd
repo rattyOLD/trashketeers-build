@@ -11,7 +11,7 @@ var _title: Label
 var _cards: BoxContainer
 var _choices: Array[UpgradeData] = []
 var _reroll: Button
-const ARCHETYPE_NAMES := {&"dps": "БИЛД: УРОН", &"debuff": "БИЛД: ЭФФЕКТЫ", &"mobility": "БИЛД: РЫВОК"}
+const ARCHETYPE_NAMES := {&"dps": "БИЛД: УРОН", &"debuff": "БИЛД: ЭФФЕКТЫ", &"mobility": "БИЛД: СКОРОСТЬ"}
 
 
 func _init() -> void:

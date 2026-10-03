@@ -354,125 +354,6 @@
       ]
     },
     {
-      "upgrade_id": "dash_haste",
-      "title": "Реактивный хвост",
-      "description": "Рывок восстанавливается на 30% быстрее",
-      "stat": "dash_haste",
-      "value": 0.3,
-      "max_stacks": 5,
-      "color": "#35E6FF",
-      "category": "dash",
-      "rarity": "common"
-    },
-    {
-      "upgrade_id": "dash_range",
-      "title": "Длинный прыжок",
-      "description": "+25% дальности рывка",
-      "stat": "dash_range",
-      "value": 0.25,
-      "max_stacks": 5,
-      "color": "#35E6FF",
-      "category": "dash",
-      "rarity": "common"
-    },
-    {
-      "upgrade_id": "dash_double",
-      "title": "Двойной рывок",
-      "description": "+1 заряд рывка: два прыжка подряд",
-      "stat": "dash_charges",
-      "value": 1,
-      "max_stacks": 1,
-      "color": "#5CFFF0",
-      "category": "dash",
-      "rarity": "rare"
-    },
-    {
-      "upgrade_id": "dash_triple",
-      "title": "Тройной, блин!",
-      "description": "+1 заряд рывка (до 4 подряд)",
-      "stat": "dash_charges",
-      "value": 1,
-      "max_stacks": 2,
-      "color": "#5CFFF0",
-      "category": "dash",
-      "rarity": "epic",
-      "requires": [
-        "dash_double"
-      ]
-    },
-    {
-      "upgrade_id": "dash_hit",
-      "title": "Таран",
-      "description": "Рывок бьёт крыс на пути: +45 урона",
-      "stat": "dash_damage",
-      "value": 45,
-      "max_stacks": 6,
-      "color": "#FF6A3D",
-      "category": "dash",
-      "rarity": "common"
-    },
-    {
-      "upgrade_id": "dash_poison",
-      "title": "Токсичный след",
-      "description": "Рывок оставляет ядовитую лужу",
-      "stat": "dash_poison",
-      "value": 1,
-      "max_stacks": 3,
-      "color": "#7CFF3D",
-      "category": "dash",
-      "rarity": "rare"
-    },
-    {
-      "upgrade_id": "dash_fire",
-      "title": "Горелый хвост",
-      "description": "Рывок оставляет огненный след",
-      "stat": "dash_fire",
-      "value": 1,
-      "max_stacks": 3,
-      "color": "#FF8A1F",
-      "category": "dash",
-      "rarity": "rare"
-    },
-    {
-      "upgrade_id": "dash_blast",
-      "title": "Бум-рывок",
-      "description": "Взрыв в начале и в конце рывка",
-      "stat": "dash_blast",
-      "value": 1,
-      "max_stacks": 3,
-      "color": "#FFB62E",
-      "category": "dash",
-      "rarity": "epic",
-      "requires": [
-        "dash_hit"
-      ]
-    },
-    {
-      "upgrade_id": "dash_refund",
-      "title": "Кровь ускоряет",
-      "description": "Каждое убийство в рывке возвращает 0,5 с перезарядки",
-      "stat": "dash_refund",
-      "value": 0.5,
-      "max_stacks": 3,
-      "color": "#FF3B5C",
-      "category": "dash",
-      "rarity": "rare",
-      "requires": [
-        "dash_hit"
-      ]
-    },
-    {
-      "upgrade_id": "dash_boost",
-      "title": "Афтербёрнер",
-      "description": "После рывка +25% скорости на 2 с",
-      "stat": "dash_boost",
-      "value": 0.25,
-      "max_stacks": 4,
-      "color": "#00E5FF",
-      "category": "dash",
-      "rarity": "rare"
-    },
-    {
       "upgrade_id": "speed_tires",
       "title": "Кроссовки из шин",
       "description": "+12% скорости бега",
@@ -668,18 +549,6 @@
       "weight": 0.5
     },
     {
-      "upgrade_id": "scrap_tail",
-      "title": "Бодрый хвост",
-      "description": "Рывок быстрее на 6%",
-      "stat": "dash_haste",
-      "value": 0.06,
-      "max_stacks": 0,
-      "color": "#35E6FF",
-      "category": "endless",
-      "rarity": "common",
-      "weight": 0.5
-    },
-    {
       "upgrade_id": "scrap_fat",
       "title": "Ещё жирок",
       "description": "+15 к максимальному здоровью",
@@ -773,18 +642,6 @@
       "color": "#FFC93C",
       "category": "rail",
       "rarity": "epic",
-      "rail_only": true
-    },
-    {
-      "upgrade_id": "rail_overdrive",
-      "title": "Овердрайв рывка",
-      "description": "Заряженный рывком выстрел бьёт сильнее (+0,75×)",
-      "stat": "rail_overdrive",
-      "value": 1,
-      "max_stacks": 3,
-      "color": "#FFE27A",
-      "category": "rail",
-      "rarity": "rare",
       "rail_only": true
     },
     {

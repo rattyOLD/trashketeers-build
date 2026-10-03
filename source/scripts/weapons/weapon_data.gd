@@ -215,7 +215,7 @@ var burn: float
 ## Взрыв в конце полёта (огнемёт): радиус и шанс на каждую пулю.
 var finisher_radius: float
 var finisher_chance: float
-## Рельсотрон: +доля урона за каждого уже пробитого врага; рывок заряжает следующий выстрел.
+## Рельсотрон: +доля урона за каждого уже пробитого врага; навык героя заряжает следующий выстрел.
 var pierce_ramp: float
 var dash_charge: bool
 var trait_id: StringName

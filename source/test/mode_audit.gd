@@ -43,8 +43,8 @@ func _physics_process(delta: float) -> void:
 			else:
 				p.hp = p.max_hp
 			p.move_input = Vector2(cos(t * 0.7), sin(t * 0.7))
-			if screen.has_method("_request_dash"):
-				screen._request_dash()
+			if screen.has_method("_request_skill"):
+				screen._request_skill()
 		if screen is Game and mode.begins_with("boss:") and not screen.get_meta("boss_done", false):
 			screen.set_meta("boss_done", true)
 			screen.debug_boss(StringName(mode.trim_prefix("boss:")))

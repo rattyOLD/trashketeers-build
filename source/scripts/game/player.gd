@@ -2,7 +2,6 @@ class_name Player
 extends CharacterBody2D
 ## Енот. Проходит сквозь врагов (иначе толпа запирает его на телефоне),
 ## упирается только в стены и препятствия. Контактный урон считают сами враги.
-## Рывок (dash): короткий бросок с неуязвимостью — ответ на телеграфы крыс.
 ## Постоянная прокачка (Сила / Выносливость / Броня) приходит из SaveService при старте боя.
 
 signal health_changed(hp: float, max_hp: float)
@@ -12,9 +11,6 @@ signal damaged(amount: float)
 static var last_source: StringName = &"?"
 signal died
 signal fell_into_void
-signal dashed
-signal dash_moved(from: Vector2, to: Vector2)
-signal dash_ended(at: Vector2)
 
 const RADIUS := 20.0
 const BASE_SPEED := 240.0
@@ -23,19 +19,11 @@ const BASE_MAGNET := 110.0
 const INVULN_TIME := 0.7
 const KNOCKBACK_DECAY := 5.0
 const FALL_TIME := 0.9
-const DASH_SPEED := 980.0
-const DASH_TIME := 0.16
-const DASH_COOLDOWN := 1.4
-const DASH_IFRAMES := 0.3
-const GHOST_INTERVAL := 0.03
 const STEP_INTERVAL := 0.3
-const DASH_GHOST_COLOR := Color(0.45, 0.95, 1.0)
 const SHIELD_RECHARGE := 12.0
 const SHIELD_COLOR := Color(0.3, 0.9, 1.0)
 const MAX_RESIST := 0.6
 const MAX_SPEED_BONUS := 1.8
-const MAX_DASH_HASTE := 3.0
-const DASH_BOOST_TIME := 2.0
 
 var max_hp := BASE_MAX_HP
 var hp := BASE_MAX_HP
@@ -48,12 +36,8 @@ var is_falling := false
 var armor := 0.0
 ## Бонус к максимуму HP из постоянной прокачки («Выносливость»).
 var bonus_max_hp := 0.0
-## Время до следующего заряда рывка (0, когда все заряды полны).
-var dash_cooldown_left := 0.0
-var dash_charges := 1
-var dash_max_charges := 1
-## Множитель перезарядки рывка от героя (CharacterDB, stats.dash).
-var dash_cooldown_mult := 1.0
+## Множитель перезарядки навыка от героя (CharacterDB, stats.dash).
+var skill_cooldown_mult := 1.0
 var fx: FxManager
 ## Внешняя тяга (магнитные мины) — выставляется каждый кадр, сама не затухает.
 var external_pull := Vector2.ZERO
@@ -64,19 +48,7 @@ var visual: RaccoonVisual
 var weapon_controller: WeaponController
 
 var _invuln := 0.0
-var _dash_iframes := 0.0
 var _knockback := Vector2.ZERO
-var _dash_time := 0.0
-var _dash_haste := 0.0
-var _dash_range := 0.0
-var _dash_boost := 0.0
-var _boost_left := 0.0
-var _dash_dir := Vector2.RIGHT
-## Последнее направление, куда вёл джойстик: рывок после отпускания уходит туда, а не куда придётся.
-const LAST_DIR_MEMORY := 3.0
-var _last_move_dir := Vector2.ZERO
-var _last_move_age := 99.0
-var _ghost_timer := 0.0
 var _step_timer := 0.0
 var _speed_buff := 0.0
 var _snare := 0.0
@@ -86,8 +58,6 @@ var vest := 0
 var shield_max := 0
 var _shield_timer := 0.0
 var _resist := 0.0
-var _dash_cooling := false
-var _ready_flash := 0.0
 
 
 func _init() -> void:
@@ -137,14 +107,6 @@ func apply_run_stats(stats: RunStats) -> void:
 	max_hp = new_max
 	hp = minf(hp, max_hp)
 	move_speed = BASE_SPEED * (1.0 + minf(stats.get_stat(&"move_speed_mult"), MAX_SPEED_BONUS))
-	_dash_haste = minf(stats.get_stat(&"dash_haste"), MAX_DASH_HASTE)
-	_dash_range = minf(stats.get_stat(&"dash_range"), 2.5)
-	_dash_boost = stats.get_stat(&"dash_boost")
-	var charges := 1 + int(stats.get_stat(&"dash_charges"))
-	if charges > dash_max_charges:
-		dash_charges += charges - dash_max_charges
-	dash_max_charges = charges
-	dash_charges = mini(dash_charges, dash_max_charges)
 	magnet_radius = BASE_MAGNET * (1.0 + stats.get_stat(&"magnet_mult"))
 	weapon_controller.apply_run_stats(stats)
 	_resist = clampf(stats.get_stat(&"damage_resist"), 0.0, MAX_RESIST)
@@ -162,96 +124,18 @@ func set_speed_buff(amount: float) -> void:
 	_speed_buff = amount
 
 
-func is_dashing() -> bool:
-	return _dash_time > 0.0
-
-
-func dash_cooldown_total() -> float:
-	return DASH_COOLDOWN * dash_cooldown_mult / (1.0 + _dash_haste)
-
-
-## 0 — рывок готов, 1 — только что потрачен последний заряд.
-func dash_fraction() -> float:
-	if dash_charges > 0:
-		return 0.0
-	return clampf(dash_cooldown_left / maxf(dash_cooldown_total(), 0.01), 0.0, 1.0)
-
-
-func refund_dash(seconds: float) -> void:
-	if dash_charges < dash_max_charges:
-		dash_cooldown_left -= seconds
-
-
-func request_dash() -> bool:
-	if is_dead or _stun > 0.0 or dash_charges <= 0 or _dash_time > 0.0:
-		return false
-	var dir := move_input
-	if dir.length_squared() < 0.01:
-		if _last_move_age < LAST_DIR_MEMORY and _last_move_dir.length_squared() > 0.01:
-			dir = _last_move_dir
-		elif weapon_controller.has_target:
-			dir = weapon_controller.aim_direction
-		else:
-			dir = Vector2(1.0 if visual.aim_direction.x >= 0.0 else -1.0, 0.0)
-	_dash_dir = dir.normalized()
-	_dash_time = DASH_TIME * (1.0 + _dash_range)
-	_dash_iframes = maxf(DASH_IFRAMES, _dash_time + 0.1)
-	_snare = 0.0
-	_stun = 0.0
-	dash_charges -= 1
-	if dash_cooldown_left <= 0.0:
-		dash_cooldown_left = dash_cooldown_total()
-	_ghost_timer = 0.0
-	visual.dashing = true
-	SoundManager.play(&"dash")
-	if fx != null:
-		fx.dust(global_position + Vector2(0, 18), 6, 40.0)
-	dashed.emit()
-	return true
-
-
 func _physics_process(delta: float) -> void:
 	if is_dead:
 		return
-	if dash_charges < dash_max_charges:
-		dash_cooldown_left -= delta
-		if dash_cooldown_left <= 0.0:
-			dash_charges += 1
-			dash_cooldown_left = dash_cooldown_total() if dash_charges < dash_max_charges else 0.0
-	_boost_left = maxf(_boost_left - delta, 0.0)
-	if move_input.length_squared() > 0.09:
-		_last_move_dir = move_input.normalized()
-		_last_move_age = 0.0
-	else:
-		_last_move_age += delta
-	var start_position := global_position
-	var was_dashing := _dash_time > 0.0
-	_dash_iframes = maxf(_dash_iframes - delta, 0.0)
-	if _dash_time > 0.0:
-		_dash_time -= delta
-		velocity = _dash_dir * DASH_SPEED
-		_ghost_timer -= delta
-		if _ghost_timer <= 0.0 and fx != null:
-			_ghost_timer = GHOST_INTERVAL
-			fx.ghost(visual.get_ghost_texture(), global_position + visual.get_ghost_offset(), visual.get_ghost_scale(), DASH_GHOST_COLOR)
-		if _dash_time <= 0.0:
-			visual.dashing = false
-	else:
-		_snare = maxf(_snare - delta, 0.0)
-		_stun = maxf(_stun - delta, 0.0)
-		var speed := move_speed * (1.0 + _speed_buff + (_dash_boost if _boost_left > 0.0 else 0.0)) * move_slow * (0.15 if _snare > 0.0 else 1.0)
-		velocity = (Vector2.ZERO if _stun > 0.0 else move_input.limit_length(1.0) * speed) + _knockback + external_pull
+	_snare = maxf(_snare - delta, 0.0)
+	_stun = maxf(_stun - delta, 0.0)
+	var speed := move_speed * (1.0 + _speed_buff) * move_slow * (0.15 if _snare > 0.0 else 1.0)
+	velocity = (Vector2.ZERO if _stun > 0.0 else move_input.limit_length(1.0) * speed) + _knockback + external_pull
 	_knockback = _knockback.lerp(Vector2.ZERO, clampf(KNOCKBACK_DECAY * delta, 0.0, 1.0))
 	move_and_slide()
-	if was_dashing:
-		dash_moved.emit(start_position, global_position)
-		if _dash_time <= 0.0:
-			_boost_left = DASH_BOOST_TIME if _dash_boost > 0.0 else 0.0
-			dash_ended.emit(global_position)
 	_invuln = maxf(_invuln - delta, 0.0)
 	_tick_steps(delta)
 	_tick_shield(delta)
-	_tick_dash_feedback(delta)
 	var aim := weapon_controller.aim_direction if weapon_controller.has_target else velocity
 	visual.aiming = weapon_controller.has_target
 	var melee_weapon := weapon_controller.weapon != null and weapon_controller.weapon.is_melee()
@@ -280,43 +164,9 @@ func _tick_shield(delta: float) -> void:
 	queue_redraw()
 
 
-func _tick_dash_feedback(delta: float) -> void:
-	var cooling := dash_charges <= 0
-	if _dash_cooling and not cooling:
-		_ready_flash = 1.0
-		SoundManager.play(&"dash_ready", -6.0, false)
-		if fx != null:
-			fx.ring(global_position + Vector2(0, 16), Color(0.45, 0.95, 1.0), 44.0)
-			fx.burst(global_position + Vector2(0, 16), Color(0.6, 1.0, 1.0), 8, 180.0, 2.8)
-	_dash_cooling = cooling
-	if _ready_flash > 0.0:
-		_ready_flash = maxf(_ready_flash - delta * 2.5, 0.0)
-	if cooling or _ready_flash > 0.0 or dash_charges < dash_max_charges:
-		queue_redraw()
-
-
 func _draw() -> void:
 	if is_dead:
 		return
-	if _dash_cooling:
-		var progress := 1.0 - dash_fraction()
-		SoftGlow.pool(self, Vector2(0, 20), 34.0, 0.42, Color(0, 0, 0, 0.22))
-		draw_set_transform(Vector2(0, 20), 0.0, Vector2(1.0, 0.42))
-		draw_arc(Vector2.ZERO, 30.0, -PI * 0.5, -PI * 0.5 + TAU * progress, 32, Color(0.35, 0.9, 1.0, 0.25 + 0.3 * progress), 3.0, true)
-		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-	elif _ready_flash > 0.0:
-		var r := 30.0 + 26.0 * (1.0 - _ready_flash)
-		SoftGlow.rim(self, Vector2(0, 20), r * 1.15, 0.42, Color(0.7, 1.0, 1.0, _ready_flash * 0.7))
-	if dash_max_charges > 1:
-		var recharge := 1.0 - clampf(dash_cooldown_left / maxf(dash_cooldown_total(), 0.01), 0.0, 1.0)
-		for i in dash_max_charges:
-			var at := Vector2((i - (dash_max_charges - 1) * 0.5) * 16.0, 36.0)
-			if i < dash_charges:
-				draw_circle(at, 5.0, Color(0.5, 1.0, 1.0, 0.95))
-			else:
-				draw_circle(at, 5.0, Color(0.1, 0.2, 0.3, 0.6))
-				if i == dash_charges:
-					draw_arc(at, 5.0, -PI * 0.5, -PI * 0.5 + TAU * recharge, 12, Color(0.5, 1.0, 1.0, 0.9), 2.5, true)
 	if shield > 0:
 		var pulse := 0.5 + 0.5 * sin(Time.get_ticks_msec() * 0.008)
 		for i in shield:
@@ -328,7 +178,7 @@ func _draw() -> void:
 
 
 func _tick_steps(delta: float) -> void:
-	if velocity.length_squared() < 3600.0 or _dash_time > 0.0:
+	if velocity.length_squared() < 3600.0:
 		_step_timer = minf(_step_timer, 0.08)
 		return
 	_step_timer -= delta
@@ -341,7 +191,7 @@ func _tick_steps(delta: float) -> void:
 
 
 func take_damage(amount: float, _direction: Vector2 = Vector2.ZERO, _is_crit: bool = false) -> void:
-	if is_dead or _invuln > 0.0 or _dash_iframes > 0.0 or amount <= 0.0 or Tester.flag("god"):
+	if is_dead or _invuln > 0.0 or amount <= 0.0 or Tester.flag("god"):
 		return
 	if shield > 0:
 		shield -= 1
@@ -374,7 +224,7 @@ func take_damage(amount: float, _direction: Vector2 = Vector2.ZERO, _is_crit: bo
 		died.emit()
 
 
-## Захват магнитной миной: почти стоп на time секунд (рывок снимает).
+## Захват магнитной миной: почти стоп на time секунд.
 func stun(time: float) -> void:
 	_stun = maxf(_stun, time)
 
@@ -396,7 +246,7 @@ func snare(time: float) -> void:
 ## Радиальный толчок (например, удар приземления дракона): затухает сам.
 ## Шаг к цели при ударе ближнего боя: дистанция в пикселях (затухание отброса ≈ 5/с).
 func lunge(direction: Vector2, distance: float) -> void:
-	if not is_dead and _dash_time <= 0.0:
+	if not is_dead:
 		_knockback += direction.normalized() * distance * (KNOCKBACK_DECAY + 0.2)
 
 
@@ -428,8 +278,6 @@ func revive(hp_fraction: float, invulnerability: float) -> void:
 	hp = max_hp * clampf(hp_fraction, 0.05, 1.0)
 	_invuln = invulnerability
 	_knockback = Vector2.ZERO
-	_dash_time = 0.0
-	visual.dashing = false
 	visual.revive()
 	health_changed.emit(hp, max_hp)
 

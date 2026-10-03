@@ -3,14 +3,13 @@ extends CanvasLayer
 ## Боевой интерфейс. PROCESS_MODE_ALWAYS — чтобы окна прокачки, паузы и результата
 ## работали, пока дерево на паузе. Джойстик внутри явно PAUSABLE.
 ## Раскладка под портрет: сверху HP/XP, волна по центру, монеты и пауза справа (+ мини-карта);
-## снизу слева — джойстик, справа — полупрозрачные кнопки РЫВОК и карточка ствола.
+## снизу слева — джойстик, справа — полупрозрачная кнопка навыка и карточка ствола.
 
 signal upgrade_chosen(upgrade: UpgradeData)
 signal reroll_requested
 signal upgrade_pressed
 signal restart_pressed
 signal menu_pressed
-signal dash_pressed
 signal skill_pressed
 signal slot_pressed(index: int)
 signal interact_pressed
@@ -65,7 +64,6 @@ var _toast_text: Label
 var _weapon_chip: PanelContainer
 var _weapon_icon: WeaponIcons.IconRect
 var _weapon_name: Label
-var _dash: DashButton
 const HUD_TEXT_BOOST := 1.3
 var _skill: SkillButton
 var _rail_combo: Label
@@ -173,9 +171,6 @@ func build(currency_icon: Texture2D, weapon: WeaponData) -> void:
 	var swipe := BattleControls.SwipeSwitch.new()
 	swipe.swiped.connect(func() -> void: weapon_swiped.emit())
 	_root.add_child(swipe)
-	_dash = DashButton.new()
-	_dash.pressed.connect(func() -> void: dash_pressed.emit())
-	_root.add_child(_dash)
 	_skill = SkillButton.new()
 	_skill.visible = false
 	_skill.pressed.connect(func() -> void: skill_pressed.emit())
@@ -242,7 +237,6 @@ func build(currency_icon: Texture2D, weapon: WeaponData) -> void:
 			_hold.targets[id] = hud_node.bind(id)
 	_hold.requested.connect(_open_layout_editor)
 	_root.add_child(_hold)
-	_dash.held.connect(func() -> void: _hint.show_for(_dash, "Рывок: быстрый бросок от удара."))
 	_slot_bar.slot_held.connect(_on_slot_held)
 
 
@@ -471,9 +465,7 @@ func set_interact(weapon: WeaponData, note: String = "") -> void:
 
 
 func _hold_dash() -> Control:
-	if _skill.visible:
-		return _skill
-	return _dash
+	return _skill
 
 
 func _hold_slots() -> Control:
@@ -683,13 +675,11 @@ func apply_layout() -> void:
 		return
 	_fit_band()
 	var area := _root.size
-	Controls.place(_dash, "dash", area)
 	Controls.place(_skill, "dash", area)
 	Controls.place(_slot_bar, "slots", area, BattleControls.slots_base_size(_slot_bar.count))
 	Controls.place(_interact, "interact", area)
 	_resolve_button_overlap(area)
 	var opacity := clampf(float(Controls.get_value("opacity")), 0.3, 1.0)
-	_dash.modulate.a = opacity * Controls.element_opacity("dash")
 	_skill.modulate.a = opacity * Controls.element_opacity("dash")
 	_slot_bar.modulate.a = opacity * Controls.element_opacity("slots")
 	_interact.modulate.a = Controls.element_opacity("interact")
@@ -699,7 +689,7 @@ func apply_layout() -> void:
 
 
 func _resolve_button_overlap(area: Vector2) -> void:
-	var main_btn: Control = _skill if _skill.visible else _dash
+	var main_btn: Control = _skill
 	var slot_rect := Rect2(_slot_bar.position, _slot_bar.size).grow(6.0)
 	if not slot_rect.intersects(Rect2(main_btn.position, main_btn.size)):
 		return
@@ -712,7 +702,6 @@ func _resolve_button_overlap(area: Vector2) -> void:
 
 func set_skill(title: String, color: Color) -> void:
 	_skill.visible = not title.is_empty()
-	_dash.visible = title.is_empty()
 	_skill.title = title
 	_skill.accent = color
 	_skill.queue_redraw()
@@ -720,10 +709,6 @@ func set_skill(title: String, color: Color) -> void:
 
 func set_skill_cooldown(fraction: float) -> void:
 	_skill.cooldown = clampf(fraction, 0.0, 1.0)
-
-
-func set_dash_cooldown(fraction: float) -> void:
-	_dash.cooldown = clampf(fraction, 0.0, 1.0)
 
 
 ## Рельс-комбо для рельсотрона: 0 — скрыть. Цвет от золотого к розовому по мере роста.
@@ -738,10 +723,6 @@ func set_rail_combo(count: int) -> void:
 	_rail_combo.pivot_offset = _rail_combo.size * 0.5
 	_rail_combo.scale = Vector2.ONE * (1.1 + 0.08 * heat)
 	create_tween().tween_property(_rail_combo, "scale", Vector2.ONE, 0.18)
-
-
-func set_dash_charges(charges: int, max_charges: int) -> void:
-	_dash.set_charges(charges, max_charges)
 
 
 func set_minimap(minimap: Control) -> void:
@@ -893,8 +874,6 @@ func show_mod_badge(title: String) -> void:
 	badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_left_column.add_child(badge)
 	_dock_barks()
-	if RunMods.has(&"no_dash"):
-		_dash.modulate.a = 0.25
 
 
 func toast(title: String, text: String, color: Color = UiStyle.GOLD) -> void:
@@ -1410,7 +1389,7 @@ func _build_toast() -> Control:
 	return _toast
 
 
-## Полупрозрачная круглая кнопка рывка с сектором перезарядки. Слушает сырые касания
+## Полупрозрачная круглая кнопка навыка с сектором перезарядки. Слушает сырые касания
 ## (ScreenTouch), а не GUI: второй палец при зажатом джойстике GUI не получает.
 class SkillButton:
 	extends Control
@@ -1472,87 +1451,6 @@ class SkillButton:
 		draw_string(font, Vector2(6, c.y + size.x * 0.2), title, HORIZONTAL_ALIGNMENT_CENTER, size.x - 12.0, int(size.x * 0.15), Color(1, 1, 1, alpha * 0.85))
 
 
-class DashButton:
-	extends Control
-
-	var _batch := PolyBatch.new()
-	signal pressed
-	signal held
-
-	const HOLD_MS := 550
-
-	var _hold_start := -1
-
-	var cooldown := 0.0:
-		set(value):
-			if not is_equal_approx(value, cooldown):
-				cooldown = value
-				queue_redraw()
-	var _press := 0.0
-	var _charges := 1
-	var _max_charges := 1
-
-	func _init() -> void:
-		mouse_filter = Control.MOUSE_FILTER_IGNORE
-
-	func set_charges(charges: int, max_charges: int) -> void:
-		if charges != _charges or max_charges != _max_charges:
-			_charges = charges
-			_max_charges = max_charges
-			queue_redraw()
-
-	func _input(event: InputEvent) -> void:
-		if event is InputEventScreenTouch and not event.pressed:
-			_hold_start = -1
-		if not is_visible_in_tree() or get_tree().paused:
-			return
-		if event is InputEventScreenTouch and event.pressed:
-			var center := get_global_rect().get_center()
-			if (event as InputEventScreenTouch).position.distance_to(center) < size.x * 0.55:
-				_hold_start = Time.get_ticks_msec()
-				_press = 1.0
-				queue_redraw()
-				pressed.emit()
-				get_viewport().set_input_as_handled()
-
-	func _process(delta: float) -> void:
-		if _press > 0.0:
-			_press = maxf(_press - delta * 5.0, 0.0)
-			queue_redraw()
-		if _hold_start >= 0 and Time.get_ticks_msec() - _hold_start >= HOLD_MS:
-			_hold_start = -1
-			held.emit()
-
-	func _draw() -> void:
-		var c := size * 0.5
-		var r := size.x * 0.46 * (1.0 - 0.08 * _press)
-		var ready := cooldown <= 0.001
-		_batch.circle(c, r, Color(0.06, 0.03, 0.12, 0.42))
-		_batch.arc(c, r, 0.0, TAU, 48, Color(UiStyle.NEON, 0.75 if ready else 0.3), 5.0, true)
-		if not ready:
-			var sweep := PackedVector2Array([c])
-			var steps := 32
-			for i in steps + 1:
-				sweep.append(c + Vector2.from_angle(-PI * 0.5 + TAU * cooldown * i / steps) * r)
-			_batch.polygon(sweep, Color(0, 0, 0, 0.45))
-		var alpha := 0.95 if ready else 0.45
-		if _max_charges > 1:
-			for i in _max_charges:
-				var dot := c + Vector2((i - (_max_charges - 1) * 0.5) * 22.0, r * 0.66)
-				_batch.circle(dot, 7.0, Color(1.000, 0.730, 0.450, 0.95) if i < _charges else Color(0.276, 0.265, 0.248, 0.7))
-		var tip := c + Vector2(30, 0)
-		var arrow := PackedVector2Array([tip, c + Vector2(4, -22), c + Vector2(4, -9), c + Vector2(-20, -9), c + Vector2(-20, 9), c + Vector2(4, 9), c + Vector2(4, 22)])
-		_batch.polygon(arrow, Color(1, 1, 1, alpha))
-		for k in 3:
-			var y := -14.0 + k * 14.0
-			_batch.line(c + Vector2(-44, y), c + Vector2(-28, y), Color(UiStyle.NEON, alpha), 4.0)
-		_batch.flush(self)
-		var font := ThemeDB.fallback_font
-		draw_string_outline(font, Vector2(0, size.y + 4), "РЫВОК", HORIZONTAL_ALIGNMENT_CENTER, size.x, 18, 6, Color(0.05, 0.02, 0.1, 0.8))
-		draw_string(font, Vector2(0, size.y + 4), "РЫВОК", HORIZONTAL_ALIGNMENT_CENTER, size.x, 18, Color(1, 1, 1, alpha))
-
-
-## Пауза: плашки статистики, громкость, вибрация, крупное «Продолжить», ниже «Заново» / «В хаб».
 class PausePanel:
 	extends Control
 	signal resumed

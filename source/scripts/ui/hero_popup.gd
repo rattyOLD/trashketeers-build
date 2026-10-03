@@ -6,7 +6,7 @@ extends GlassPopup
 signal skin_changed
 
 const RARITY_TITLES := {"common": "ОБЫЧНЫЙ", "rare": "РЕДКИЙ", "epic": "ЭПИЧЕСКИЙ", "legendary": "ЛЕГЕНДАРНЫЙ"}
-const STAT_ROWS := [["hp", "ЗДОРОВЬЕ"], ["speed", "СКОРОСТЬ"], ["dash", "РЫВОК"], ["crit", "КРИТ"], ["damage", "УРОН"]]
+const STAT_ROWS := [["hp", "ЗДОРОВЬЕ"], ["speed", "СКОРОСТЬ"], ["crit", "КРИТ"], ["damage", "УРОН"]]
 
 var _index := 0
 var _list: VBoxContainer
@@ -213,7 +213,7 @@ func _build_passive(character: Dictionary, accent: Color) -> Control:
 		skill_text.custom_minimum_size = Vector2(500, 0)
 		column.add_child(skill_text)
 	else:
-		var none := UiStyle.label("НАВЫК: РЫВОК", 21, UiStyle.TEXT_DIM, 5)
+		var none := UiStyle.label("НАВЫК: НЕТ", 21, UiStyle.TEXT_DIM, 5)
 		none.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 		column.add_child(none)
 	return panel

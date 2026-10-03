@@ -53,8 +53,6 @@ const REROLL_BASE_COST := 220.0
 const DEATH_TIP_NEWBIE := 6
 const DEATH_TIP_EVERY := 3
 const DEATH_FAST_TIME := 100.0
-const SHADOW_BONUS := 0.35
-const SHADOW_TIME := 3.0
 const REROLL_GROWTH := 1.55
 const QUICK_CLEAR_TIME := 10.0
 const GOLD_CLEAR_TIME := 5.0
@@ -64,7 +62,6 @@ const CLEAN_SWEEP_XP := 3
 const QUICK_CLEAR_RATIO := 0.6
 var _number_budget := 10.0
 var status: StatusSystem
-var dash_trail: DashTrail
 var _rail_combo := 0
 var _rail_timer := 0.0
 const RAIL_COMBO_WINDOW := 4.0
@@ -74,7 +71,6 @@ var hazards: HazardDirector
 var _pending_levelups := 0
 var _level_up_open := false
 var _rerolls_free := 0
-var _shadow_left := 0.0
 var _current_bonus := false
 var _rerolls_paid := 0
 var _reroll_deal := false
@@ -207,9 +203,6 @@ func start(_weapon_id: StringName = &"") -> void:
 	layers.decals.add_child(hazards)
 	status = StatusSystem.new()
 	status.setup(stats, player, enemies, fx)
-	dash_trail = DashTrail.new()
-	layers.decals.add_child(dash_trail)
-	dash_trail.setup(player, enemies, stats, fx)
 	add_child(status)
 	Enemy.status_sink = _on_enemy_status
 	events = MapEvents.new()
@@ -243,7 +236,7 @@ func start(_weapon_id: StringName = &"") -> void:
 	for pickup in _weapon_pickups:
 		pickup.expired.connect(_on_pickup_expired)
 	player.weapon_controller.slots_changed.connect(_refresh_slots)
-	player.dashed.connect(player.weapon_controller.charge_overdrive)
+	hero_skills.used.connect(func(_id: String) -> void: player.weapon_controller.charge_overdrive())
 	player.weapon_controller.overdrive_changed.connect(_on_overdrive_changed)
 	player.weapon_controller.overdrive_fired.connect(_on_overdrive_fired)
 	hud.slot_pressed.connect(_switch_slot)
@@ -356,11 +349,6 @@ func _physics_process(delta: float) -> void:
 	_combo_timer -= delta
 	if _combo_timer <= 0.0:
 		_combo = 0
-	if _shadow_left > 0.0:
-		_shadow_left -= delta
-		if _shadow_left <= 0.0:
-			stats.add_flat(&"damage_mult", -SHADOW_BONUS)
-			player.apply_run_stats(stats)
 	if _adrenaline_left > 0.0:
 		_adrenaline_left -= delta
 		if _adrenaline_left <= 0.0:
@@ -722,7 +710,7 @@ func _on_enemy_fx(_enemy: Enemy, kind: String, at: Vector2, radius: float) -> vo
 			if healed > 0:
 				fx.ring(at, Color("#5ff2ff"), radius * 0.6)
 		"crane":
-			hud.show_banner("МАГНИТ! УБЕГАЙ ИЛИ РЫВОК", Color("#b46bff"), 1.4)
+			hud.show_banner("МАГНИТ! УБЕГАЙ ИЗ КРУГА", Color("#b46bff"), 1.4)
 			atmosphere.flash(Color("#b46bff"), 0.25, 0.3)
 			add_shake(0.4)
 		"collapse":
@@ -818,7 +806,6 @@ func _on_enemy_died(enemy: Enemy) -> void:
 			pickups.spawn(at + Vector2(0, -8), bounty)
 			fx.popup(at + Vector2(0, -60), "РОЗЫСК +%d" % bounty, Color("#ff7a7a"), 26.0)
 	status.on_enemy_died(enemy, at)
-	dash_trail.on_enemy_died()
 	pickups.spawn_xp(at, data.xp)
 	if enemy.loot > 0:
 		pickups.spawn(at, enemy.loot)
@@ -1258,7 +1245,7 @@ func _on_pickup_expired(pickup: WeaponPickup) -> void:
 	pickup.clear()
 
 
-## Каждый враг, пробитый лучом рельсотрона, растит комбо; рывок-овердрайв даёт самые длинные цепочки.
+## Каждый враг, пробитый лучом рельсотрона, растит комбо; навык-овердрайв даёт самые длинные цепочки.
 func _bump_rail_combo(pierced: int) -> void:
 	_rail_combo += 1
 	_rail_timer = RAIL_COMBO_WINDOW
@@ -1287,7 +1274,6 @@ func _apply_tester_flags() -> void:
 		stats.add_flat(&"damage_mult", 9.0)
 	if Tester.flag("speed"):
 		stats.add_flat(&"move_speed_mult", 0.6)
-		stats.add_flat(&"dash_haste", 0.6)
 	player.apply_run_stats(stats)
 	if Tester.flag("levels"):
 		_pending_levelups += 10
@@ -1538,16 +1524,6 @@ func _sync_drones() -> void:
 		drone.global_position = player.global_position
 		layers.fx.add_child(drone)
 		_drones.append(drone)
-
-
-func _on_player_dashed() -> void:
-	super._on_player_dashed()
-	if SaveService.get_character_id() == "night":
-		if _shadow_left <= 0.0:
-			stats.add_flat(&"damage_mult", SHADOW_BONUS)
-			player.apply_run_stats(stats)
-		_shadow_left = SHADOW_TIME
-	SaveService.add_stat("dashes", 1, false)
 
 
 func _on_achievement(achievement: Dictionary) -> void:

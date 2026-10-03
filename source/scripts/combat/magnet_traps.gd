@@ -2,8 +2,7 @@ class_name MagnetTraps
 extends Node2D
 ## Магнитные мины Магнитчика. Мина летит по дуге к точке у Енота, втыкается и взводится
 ## (ARM_TIME); взведённая тянет Енота к себе в радиусе PULL_RADIUS и тормозит его, у самого
-## центра — защёлкивается: урон и короткий «захват» (скорость почти ноль). Рывок рвёт захват
-## и не тянется. Через LIFETIME мина разряжается. Пул фиксирован, рисуется одним _draw.
+## центра — защёлкивается: урон и короткий «захват» (скорость почти ноль). Через LIFETIME мина разряжается. Пул фиксирован, рисуется одним _draw.
 
 const CAPACITY := 8
 const FLIGHT := 0.55
@@ -84,7 +83,7 @@ func _physics_process(delta: float) -> void:
 		if _age[k] > FLIGHT + LIFETIME:
 			_age[k] = -1.0
 			continue
-		if _age[k] < armed_at or player == null or player.is_dead or player.is_dashing():
+		if _age[k] < armed_at or player == null or player.is_dead:
 			continue
 		var to := _to[k] - player.global_position
 		var d := to.length()

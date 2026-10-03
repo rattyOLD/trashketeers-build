@@ -219,7 +219,7 @@ const NELL_ORDERS_PER_DAY := 8
 const NELL_ORDERS := [
 	{"id": "kills", "title": "Убей 120 врагов", "stats": ["kills"], "goal": 120, "nuts": 350, "dust": 2},
 	{"id": "kills_big", "title": "Убей 300 врагов", "stats": ["kills"], "goal": 300, "nuts": 700, "dust": 4},
-	{"id": "dash", "title": "Сделай 60 рывков", "stats": ["dashes"], "goal": 60, "nuts": 300, "dust": 2},
+	{"id": "kills_mid", "title": "Убей 200 врагов", "stats": ["kills"], "goal": 200, "nuts": 500, "dust": 3},
 	{"id": "crit", "title": "Нанеси 80 критов", "stats": ["crits"], "goal": 80, "nuts": 350, "dust": 2},
 	{"id": "boss", "title": "Победи босса", "stats": ["boss_kills", "story_missions"], "goal": 1, "nuts": 800, "dust": 5},
 	{"id": "crates", "title": "Разбей 5 ящиков с оружием", "stats": ["crates"], "goal": 5, "nuts": 400, "dust": 2},
@@ -231,7 +231,6 @@ const ACHIEVEMENTS := [
 	{"id": "wave_5", "title": "Пять волн", "description": "Дойти до 5-й волны и не расплакаться", "stat": "best_wave", "goal": 5, "nuts": 80, "dust": 0},
 	{"id": "wave_10", "title": "Ветеран свалки", "description": "Дойти до 10-й волны. Свалка тебя уважает, но не любит", "stat": "best_wave", "goal": 10, "nuts": 250, "dust": 5},
 	{"id": "king_slayer", "title": "Цареубийца", "description": "Победить Короля Хлама. Корона теперь дешевле", "stat": "boss_kills", "goal": 1, "nuts": 200, "dust": 0},
-	{"id": "dasher", "title": "Шустрый", "description": "Сделать 100 рывков. Ноги жалуются, енот нет", "stat": "dashes", "goal": 100, "nuts": 60, "dust": 0},
 	{"id": "crate_hunter", "title": "Охотник за ящиками", "description": "Разбить 15 ящиков с оружием. Подарки есть подарки", "stat": "crates", "goal": 15, "nuts": 120, "dust": 0},
 	{"id": "merger", "title": "Кузнец", "description": "Сделать первый Merge оружия. Два плохих ствола лучше одного", "stat": "merges", "goal": 1, "nuts": 100, "dust": 0},
 	{"id": "rich", "title": "Мешок монет", "description": "Собрать 1000 монет. Карманы довольны", "stat": "nuts_total", "goal": 1000, "nuts": 0, "dust": 5},
@@ -250,7 +249,6 @@ const ACHIEVEMENTS := [
 	{"id": "perk_junkie", "title": "Билд на ходу", "description": "Выбрать 100 улучшений. Ты любишь выбирать", "stat": "picks", "goal": 100, "nuts": 200, "dust": 0},
 	{"id": "chest_lord", "title": "Владыка сундуков", "description": "Открыть 20 сундуков. Азарт, как он есть", "stat": "chests", "goal": 20, "nuts": 250, "dust": 3},
 	{"id": "blacksmith_pro", "title": "Мастер горна", "description": "Сделать 10 Merge. Кузнец гордится", "stat": "merges", "goal": 10, "nuts": 300, "dust": 3},
-	{"id": "dash_king", "title": "Молния помоек", "description": "Сделать 1000 рывков. Енот уже не бегает, он телепортируется", "stat": "dashes", "goal": 1000, "nuts": 350, "dust": 3},
 	{"id": "rescuer", "title": "Спасатель", "description": "Освободить 10 пленников. Они сказали «спасибо». Некоторые", "stat": "story_rescued", "goal": 10, "nuts": 200, "dust": 2},
 	{"id": "liberator", "title": "Освободитель", "description": "Освободить 40 пленников. Клетки в панике", "stat": "story_rescued", "goal": 40, "nuts": 700, "dust": 6},
 	{"id": "all_free", "title": "Никто не забыт", "description": "Освободить всех пленников миссии. Никто не забыт, даже крысы", "stat": "story_all_rescued", "goal": 1, "nuts": 250, "dust": 3},
@@ -1344,7 +1342,7 @@ func get_achievement_progress(achievement: Dictionary) -> float:
 
 # --- Итоги забегов ---------------------------------------------------------------------------------
 
-## Итоги забега Свалки. Счётчики боя (kills, crits, dashes, crates, boss_kills) уже
+## Итоги забега Свалки. Счётчики боя (kills, crits, crates, boss_kills) уже
 ## накоплены вживую через add_stat() — ачивки открываются прямо в бою; здесь только монеты,
 ## рекорд волны, опыт аккаунта и трофейные стволы (сразу попадают в арсенал).
 ## summary: nuts, time, wave, kills, loot (Array [[id, tier], ...]). Возвращает {"record", "loot"}.
