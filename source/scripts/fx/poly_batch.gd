@@ -19,11 +19,14 @@ const FEATHER := 1.25
 static var _unit_circle := PackedVector2Array()
 static var _shapes := {}
 static var _f32_cell := PackedFloat32Array([0.0])
+## Дуги по (start, end, point_count): единичные точки и смещения кромки — от радиуса и центра не зависят.
+static var _arcs := {}
 
 var points := PackedVector2Array()
 var colors := PackedColorArray()
 var xform := Transform2D.IDENTITY
 var _fill := PackedColorArray()
+var _circle_fill := PackedColorArray()
 var _atlas: Texture2D
 var _white_uv := Vector2.ZERO
 var _uvs := PackedVector2Array()
@@ -88,7 +91,11 @@ func _pad_uvs() -> void:
 func circle(pos: Vector2, radius: float, color: Color) -> void:
 	if _unit_circle.is_empty():
 		_build_unit_circle()
-	_append(xform * Transform2D(Vector2(radius, 0.0), Vector2(0.0, radius), pos) * _unit_circle, color)
+	if _circle_fill.size() != _unit_circle.size():
+		_circle_fill.resize(_unit_circle.size())
+	points.append_array(xform * Transform2D(Vector2(radius, 0.0), Vector2(0.0, radius), pos) * _unit_circle)
+	_circle_fill.fill(color)
+	colors.append_array(_circle_fill)
 
 
 ## draw_colored_polygon(polygon, color).
@@ -171,16 +178,16 @@ func _feather(p0: Vector2, p1: Vector2, p2: Vector2, p3: Vector2, color: Color, 
 ## draw_arc — точки дуги как в CanvasItem::draw_arc, в float32 движка: от этого зависит, замкнёт ли
 ## polyline полный круг (у больших радиусов последняя точка не совпадает с первой — шов с перьями).
 func arc(center: Vector2, radius: float, start_angle: float, end_angle: float, point_count: int, color: Color, width: float, antialiased: bool = false) -> void:
-	var arc_points := PackedVector2Array()
-	arc_points.resize(point_count)
-	var start := _f32(start_angle)
-	var tau := _f32(TAU)
-	var delta_angle := clampf(_f32(_f32(end_angle) - start), -tau, tau)
-	var denominator := _f32(point_count - 1.0)
-	for i in point_count:
-		var theta := _f32(_f32(_f32(i / denominator) * delta_angle) + start)
-		arc_points[i] = center + Vector2(cos(theta), sin(theta)) * radius
-	polyline(arc_points, color, width, antialiased)
+	if point_count < 2:
+		return
+	var key := Vector3(start_angle, end_angle, point_count)
+	var shape: Array = _arcs.get(key, [])
+	if shape.is_empty():
+		shape = _build_arc(start_angle, end_angle, point_count)
+		_arcs[key] = shape
+	var arc_points: PackedVector2Array = Transform2D(Vector2(radius, 0.0), Vector2(0.0, radius), center) * (shape[0] as PackedVector2Array)
+	var loop := arc_points[0].is_equal_approx(arc_points[point_count - 1])
+	_emit_polyline(arc_points, shape[1] if loop else shape[2], loop, shape[3], shape[4], color, width, antialiased)
 
 
 ## draw_polyline(points, color, width, antialiased) при width >= 0.
@@ -189,58 +196,155 @@ func polyline(line_points: PackedVector2Array, color: Color, width: float, antia
 	if count < 2:
 		return
 	var loop := line_points[0].is_equal_approx(line_points[count - 1])
-	var first_dir := Vector2.ZERO
+	var first_dir := _first_dir(line_points)
+	var last_dir := _last_dir(line_points)
+	_emit_polyline(line_points, _bases(line_points, loop, first_dir, last_dir), loop, first_dir, last_dir, color, width, antialiased)
+
+
+static func _build_arc(start_angle: float, end_angle: float, point_count: int) -> Array:
+	var unit := PackedVector2Array()
+	unit.resize(point_count)
+	var start := _f32(start_angle)
+	var tau := _f32(TAU)
+	var delta_angle := clampf(_f32(_f32(end_angle) - start), -tau, tau)
+	var denominator := _f32(point_count - 1.0)
+	for i in point_count:
+		var theta := _f32(_f32(_f32(i / denominator) * delta_angle) + start)
+		unit[i] = Vector2(cos(theta), sin(theta))
+	var first_dir := _first_dir(unit)
+	var last_dir := _last_dir(unit)
+	return [unit, _bases(unit, true, first_dir, last_dir), _bases(unit, false, first_dir, last_dir), first_dir, last_dir]
+
+
+static func _first_dir(line_points: PackedVector2Array) -> Vector2:
+	var dir := Vector2.ZERO
+	for i in range(1, line_points.size()):
+		dir = (line_points[i] - line_points[i - 1]).normalized()
+		if not dir.is_zero_approx():
+			break
+	return dir
+
+
+static func _last_dir(line_points: PackedVector2Array) -> Vector2:
+	var dir := Vector2.ZERO
+	for i in range(line_points.size() - 1, 0, -1):
+		dir = (line_points[i] - line_points[i - 1]).normalized()
+		if not dir.is_zero_approx():
+			break
+	return dir
+
+
+## Смещение кромки в каждой точке (бисектриса с ограничением длины), как в canvas_item_add_polyline.
+static func _bases(line_points: PackedVector2Array, loop: bool, first_dir: Vector2, last_dir: Vector2) -> PackedVector2Array:
+	var count := line_points.size()
+	var bases := PackedVector2Array()
+	bases.resize(count)
+	var prev_dir := Vector2.ZERO
+	for i in count:
+		var dir := _segment_dir(line_points, i, prev_dir)
+		if i == 0 and loop:
+			prev_dir = last_dir
+		elif i == count - 1 and loop:
+			prev_dir = first_dir
+		if i == 0 and not loop:
+			bases[i] = first_dir.orthogonal()
+		elif i == count - 1 and not loop:
+			bases[i] = last_dir.orthogonal()
+		else:
+			bases[i] = _edge_offset(dir, prev_dir)
+		prev_dir = dir
+	return bases
+
+
+## Ленты полилинии сразу списком треугольников: середина, затем левое и правое перо (порядок движка).
+## Середина однотонная, у перьев цвета чередуются «цвет / прозрачный» — заливаются без цикла.
+func _emit_polyline(line_points: PackedVector2Array, bases: PackedVector2Array, loop: bool, first_dir: Vector2, last_dir: Vector2, color: Color, width: float, antialiased: bool) -> void:
+	if antialiased and not loop:
+		_emit_open_antialiased(line_points, bases, first_dir, last_dir, color, width)
+		return
+	var count := line_points.size()
+	var half := width * 0.5
+	var border_size := FEATHER * (width if width < 1.0 else 1.0)
+	var size := (count - 1) * 6
+	var middle := PackedVector2Array()
+	middle.resize(size)
+	var left := PackedVector2Array()
+	var right := PackedVector2Array()
+	if antialiased:
+		left.resize(size)
+		right.resize(size)
+	var edge := bases[0] * half
+	var a_prev := line_points[0] + edge
+	var b_prev := line_points[0] - edge
+	var la_prev := a_prev + bases[0] * border_size
+	var rb_prev := b_prev - bases[0] * border_size
 	for i in range(1, count):
-		first_dir = (line_points[i] - line_points[i - 1]).normalized()
-		if not first_dir.is_zero_approx():
-			break
-	var last_dir := Vector2.ZERO
-	for i in range(count - 1, 0, -1):
-		last_dir = (line_points[i] - line_points[i - 1]).normalized()
-		if not last_dir.is_zero_approx():
-			break
+		edge = bases[i] * half
+		var a := line_points[i] + edge
+		var b := line_points[i] - edge
+		var o := (i - 1) * 6
+		middle[o] = a_prev
+		middle[o + 1] = b_prev
+		middle[o + 2] = a
+		middle[o + 3] = b_prev
+		middle[o + 4] = a
+		middle[o + 5] = b
+		if antialiased:
+			var feather := bases[i] * border_size
+			var la := a + feather
+			var rb := b - feather
+			left[o] = a_prev
+			left[o + 1] = la_prev
+			left[o + 2] = a
+			left[o + 3] = la_prev
+			left[o + 4] = a
+			left[o + 5] = la
+			right[o] = b_prev
+			right[o + 1] = rb_prev
+			right[o + 2] = b
+			right[o + 3] = rb_prev
+			right[o + 4] = b
+			right[o + 5] = rb
+			la_prev = la
+			rb_prev = rb
+		a_prev = a
+		b_prev = b
+	points.append_array(xform * middle)
+	_append_color(color, size)
+	if antialiased:
+		var alternating := PackedColorArray([color, Color(color, 0.0)])
+		while alternating.size() < size:
+			alternating.append_array(alternating)
+		alternating.resize(size)
+		points.append_array(xform * left)
+		colors.append_array(alternating)
+		points.append_array(xform * right)
+		colors.append_array(alternating)
+
+
+## Незамкнутая сглаженная полилиния: ленты с перьями на концах (как в движке), через strip → список.
+func _emit_open_antialiased(line_points: PackedVector2Array, bases: PackedVector2Array, first_dir: Vector2, last_dir: Vector2, color: Color, width: float) -> void:
+	var count := line_points.size()
 	var clear := Color(color, 0.0)
 	var pair_count := count * 2
-	var extra := 4 if antialiased and not loop else 0
+	var border_size := FEATHER * (width if width < 1.0 else 1.0)
 	var middle := PackedVector2Array()
-	middle.resize(pair_count + extra)
+	middle.resize(pair_count + 4)
 	var middle_colors := PackedColorArray()
-	middle_colors.resize(pair_count + extra)
+	middle_colors.resize(pair_count + 4)
 	middle_colors.fill(color)
 	var left := PackedVector2Array()
 	var right := PackedVector2Array()
 	var side_colors := PackedColorArray()
-	var border_size := FEATHER * (width if width < 1.0 else 1.0)
-	if antialiased:
-		var side_count := pair_count + (0 if loop else 5)
-		left.resize(side_count)
-		right.resize(side_count)
-		side_colors.resize(side_count)
-	var prev_dir := Vector2.ZERO
+	left.resize(pair_count + 5)
+	right.resize(pair_count + 5)
+	side_colors.resize(pair_count + 5)
 	for i in count:
-		var is_first := i == 0
-		var is_last := i == count - 1
-		var dir := _segment_dir(line_points, i, prev_dir)
-		if is_first and loop:
-			prev_dir = last_dir
-		elif is_last and loop:
-			prev_dir = first_dir
-		var base_offset: Vector2
-		if is_first and not loop:
-			base_offset = first_dir.orthogonal()
-		elif is_last and not loop:
-			base_offset = last_dir.orthogonal()
-		else:
-			base_offset = _edge_offset(dir, prev_dir)
-		var edge := base_offset * (width * 0.5)
+		var base := bases[i]
+		var edge := base * (width * 0.5)
+		var border := base * border_size
 		var pos := line_points[i]
-		if not antialiased:
-			middle[i * 2] = pos + edge
-			middle[i * 2 + 1] = pos - edge
-			prev_dir = dir
-			continue
-		var border := base_offset * border_size
-		var j := i * 2 + (0 if loop else 2)
+		var j := i * 2 + 2
 		middle[j] = pos + edge
 		middle[j + 1] = pos - edge
 		left[j] = pos + edge
@@ -249,8 +353,8 @@ func polyline(line_points: PackedVector2Array, color: Color, width: float, antia
 		right[j + 1] = pos - edge - border
 		side_colors[j] = color
 		side_colors[j + 1] = clear
-		if is_first and not loop:
-			var begin := -dir * border_size
+		if i == 0:
+			var begin := -_segment_dir(line_points, 0, Vector2.ZERO) * border_size
 			middle[0] = pos + edge + begin
 			middle[1] = pos - edge + begin
 			middle_colors[0] = clear
@@ -261,8 +365,8 @@ func polyline(line_points: PackedVector2Array, color: Color, width: float, antia
 			right[1] = pos - edge + begin - border
 			side_colors[0] = clear
 			side_colors[1] = clear
-		if is_last and not loop:
-			var end := prev_dir * border_size
+		if i == count - 1:
+			var end := last_dir * border_size
 			var e := pair_count + 2
 			middle[e] = pos + edge + end
 			middle[e + 1] = pos - edge + end
@@ -277,11 +381,9 @@ func polyline(line_points: PackedVector2Array, color: Color, width: float, antia
 			side_colors[e] = color
 			side_colors[e + 1] = clear
 			side_colors[e + 2] = clear
-		prev_dir = dir
 	_append_strip(middle, middle_colors)
-	if antialiased:
-		_append_strip(left, side_colors)
-		_append_strip(right, side_colors)
+	_append_strip(left, side_colors)
+	_append_strip(right, side_colors)
 
 
 static func _segment_dir(line_points: PackedVector2Array, index: int, prev_dir: Vector2) -> Vector2:
