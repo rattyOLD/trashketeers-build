@@ -232,7 +232,6 @@ func _break_art() -> void:
 		_sprite.offset = fresh.offset
 		_sprite.flip_h = flip
 		fresh.free()
-		fresh.free()
 		_sprite.z_index = -1
 	if _destruct.get("effect", "") == "explode":
 		var cfg: Array = _destruct.get("explode", [120, 50])
