@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://lsgc2ufmnetk"
+path="res://.godot/imported/blueprint.png-0c9f20440606eb235026af56df9a1764.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/icons/blueprint.png"
+dest_files=["res://.godot/imported/blueprint.png-0c9f20440606eb235026af56df9a1764.ctex"]
 
 [params]
 

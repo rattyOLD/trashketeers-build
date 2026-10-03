@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://dhbp5p7yp306y"
+path="res://.godot/imported/muzzle_rare.png-8b3f1317b35e1dead158b7914e973e3d.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/vfx/muzzle_rare.png"
+dest_files=["res://.godot/imported/muzzle_rare.png-8b3f1317b35e1dead158b7914e973e3d.ctex"]
 
 [params]
 

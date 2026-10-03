@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://dop0dc02wuj3j"
+path="res://.godot/imported/fx_flamer.png-24909cea34326bf72b3d012bb918d3a7.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/vfx/fx_flamer.png"
+dest_files=["res://.godot/imported/fx_flamer.png-24909cea34326bf72b3d012bb918d3a7.ctex"]
 
 [params]
 

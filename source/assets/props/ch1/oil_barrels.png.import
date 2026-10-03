@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://6dno6hu52tsg"
+path="res://.godot/imported/oil_barrels.png-5737c66b3373dc9607d1c9bdbe97990d.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/props/ch1/oil_barrels.png"
+dest_files=["res://.godot/imported/oil_barrels.png-5737c66b3373dc9607d1c9bdbe97990d.ctex"]
 
 [params]
 

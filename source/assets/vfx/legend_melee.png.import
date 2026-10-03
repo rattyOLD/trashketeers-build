@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://bsbdhkbc3p8dm"
+path="res://.godot/imported/legend_melee.png-cec7fc6a677a0b27a6e2911924daa71e.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/vfx/legend_melee.png"
+dest_files=["res://.godot/imported/legend_melee.png-cec7fc6a677a0b27a6e2911924daa71e.ctex"]
 
 [params]
 

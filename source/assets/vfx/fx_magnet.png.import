@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://dxfirmxfkxcjw"
+path="res://.godot/imported/fx_magnet.png-fd09d278d8805661cb5e6958c09763a0.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/vfx/fx_magnet.png"
+dest_files=["res://.godot/imported/fx_magnet.png-fd09d278d8805661cb5e6958c09763a0.ctex"]
 
 [params]
 

@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://dhg444rrimely"
+path="res://.godot/imported/junk_pile.png-01f7a86088f2360e7c663923e1cf3ade.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/props/ch1/junk_pile.png"
+dest_files=["res://.godot/imported/junk_pile.png-01f7a86088f2360e7c663923e1cf3ade.ctex"]
 
 [params]
 

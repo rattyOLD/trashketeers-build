@@ -2,9 +2,18 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://dfukq153ah5js"
+path="res://.godot/imported/capgun.png-54307aa6c778cb88c107f6e5cea84f38.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/weapons/capgun.png"
+dest_files=["res://.godot/imported/capgun.png-54307aa6c778cb88c107f6e5cea84f38.ctex"]
 
 [params]
-
 
 compress/mode=0
 compress/high_quality=false

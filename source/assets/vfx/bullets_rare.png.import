@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://3s0srqbrk7xo"
+path="res://.godot/imported/bullets_rare.png-d7b2e7627241357d43017a9e1c171507.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/vfx/bullets_rare.png"
+dest_files=["res://.godot/imported/bullets_rare.png-d7b2e7627241357d43017a9e1c171507.ctex"]
 
 [params]
 

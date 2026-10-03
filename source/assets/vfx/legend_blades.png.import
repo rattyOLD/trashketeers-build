@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://kix4rljdk17t"
+path="res://.godot/imported/legend_blades.png-f4763547358af67b6377df39f858434f.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/vfx/legend_blades.png"
+dest_files=["res://.godot/imported/legend_blades.png-f4763547358af67b6377df39f858434f.ctex"]
 
 [params]
 

@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://vpy0mbe85m5j"
+path="res://.godot/imported/gift_box.png-f78ac59c0cdf62ecf55e991cab95c104.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/hub/gift_box.png"
+dest_files=["res://.godot/imported/gift_box.png-f78ac59c0cdf62ecf55e991cab95c104.ctex"]
 
 [params]
 

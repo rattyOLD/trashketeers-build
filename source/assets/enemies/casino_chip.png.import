@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://y41ldc6ojdfc"
+path="res://.godot/imported/casino_chip.png-8f5fad43efd75d77f3d314b747057ba9.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/enemies/casino_chip.png"
+dest_files=["res://.godot/imported/casino_chip.png-8f5fad43efd75d77f3d314b747057ba9.ctex"]
 
 [params]
 

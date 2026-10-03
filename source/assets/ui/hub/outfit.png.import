@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://b72qqkb0yo6dx"
+path="res://.godot/imported/outfit.png-d8cd0ab8594e86417186d1aa372cfe49.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/hub/outfit.png"
+dest_files=["res://.godot/imported/outfit.png-d8cd0ab8594e86417186d1aa372cfe49.ctex"]
 
 [params]
 

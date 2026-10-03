@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://qyd45suram8l"
+path="res://.godot/imported/rat_toxic_sheet.png-3dfa33e92335daac17deb062cdcc3f68.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/enemies/rat_toxic_sheet.png"
+dest_files=["res://.godot/imported/rat_toxic_sheet.png-3dfa33e92335daac17deb062cdcc3f68.ctex"]
 
 [params]
 

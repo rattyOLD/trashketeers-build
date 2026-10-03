@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://8wvbseinuojp"
+path="res://.godot/imported/crt_terminal.png-a32a11e65b5bb0cb5f17453c46801c06.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/props/ch1/crt_terminal.png"
+dest_files=["res://.godot/imported/crt_terminal.png-a32a11e65b5bb0cb5f17453c46801c06.ctex"]
 
 [params]
 

@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://b6ue0dp8ropix"
+path="res://.godot/imported/ice_glints.png-635f4af96ccaa4c21b576bac4a9ed796.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/vfx/ice_glints.png"
+dest_files=["res://.godot/imported/ice_glints.png-635f4af96ccaa4c21b576bac4a9ed796.ctex"]
 
 [params]
 

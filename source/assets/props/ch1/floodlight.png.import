@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://f8b3u6wdvhjj"
+path="res://.godot/imported/floodlight.png-329e1d1e337c04e451861cc0d44620cc.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/props/ch1/floodlight.png"
+dest_files=["res://.godot/imported/floodlight.png-329e1d1e337c04e451861cc0d44620cc.ctex"]
 
 [params]
 

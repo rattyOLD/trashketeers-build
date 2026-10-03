@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://dlqc0n7b4r82n"
+path="res://.godot/imported/pigeon_mafioso.png-26316c10648078daee01d1fa6c0a32ac.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/heroes/pigeon_mafioso.png"
+dest_files=["res://.godot/imported/pigeon_mafioso.png-26316c10648078daee01d1fa6c0a32ac.ctex"]
 
 [params]
 

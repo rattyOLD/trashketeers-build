@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://ipy3pmh6kt41"
+path="res://.godot/imported/cake_cart.png-ad6fbb3e8a343b0ab3914d383a5c69ba.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/props/ch2/cake_cart.png"
+dest_files=["res://.godot/imported/cake_cart.png-ad6fbb3e8a343b0ab3914d383a5c69ba.ctex"]
 
 [params]
 

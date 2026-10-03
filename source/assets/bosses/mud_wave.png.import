@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://cio74yofwp2hr"
+path="res://.godot/imported/mud_wave.png-b995a32802cb83f1ac6f90c2eab2664a.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/bosses/mud_wave.png"
+dest_files=["res://.godot/imported/mud_wave.png-b995a32802cb83f1ac6f90c2eab2664a.ctex"]
 
 [params]
 

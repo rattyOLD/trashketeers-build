@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://b7k0yoxrl6hxk"
+path="res://.godot/imported/rare_open.png-8c80c8bda71df288ccd2427101523bbd.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/chests/rare_open.png"
+dest_files=["res://.godot/imported/rare_open.png-8c80c8bda71df288ccd2427101523bbd.ctex"]
 
 [params]
 

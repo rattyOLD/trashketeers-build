@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://ctctt5b0jv4cm"
+path="res://.godot/imported/razor_card.png-a499e0b2818660cb865d03ebdad509d6.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/enemies/razor_card.png"
+dest_files=["res://.godot/imported/razor_card.png-a499e0b2818660cb865d03ebdad509d6.ctex"]
 
 [params]
 

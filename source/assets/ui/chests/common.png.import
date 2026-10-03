@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://dm0cuuq0xt262"
+path="res://.godot/imported/common.png-39f8ae3a9cbb08d792c9254eaab6d5b9.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/chests/common.png"
+dest_files=["res://.godot/imported/common.png-39f8ae3a9cbb08d792c9254eaab6d5b9.ctex"]
 
 [params]
 

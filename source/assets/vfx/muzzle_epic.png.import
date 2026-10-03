@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://cb0cd2683v0kx"
+path="res://.godot/imported/muzzle_epic.png-3bca8c7dfa61af80816154852a9ba1e5.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/vfx/muzzle_epic.png"
+dest_files=["res://.godot/imported/muzzle_epic.png-3bca8c7dfa61af80816154852a9ba1e5.ctex"]
 
 [params]
 

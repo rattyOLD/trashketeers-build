@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://b2rtu25o82t22"
+path="res://.godot/imported/melee_katana.png-950a79b5f56c113262bc0ef26df6c300.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/weapons/melee_katana.png"
+dest_files=["res://.godot/imported/melee_katana.png-950a79b5f56c113262bc0ef26df6c300.ctex"]
 
 [params]
 

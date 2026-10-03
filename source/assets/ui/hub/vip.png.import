@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://d4ftuhimvxkua"
+path="res://.godot/imported/vip.png-376c571a02bb7b0bba840d7bea01e01c.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/hub/vip.png"
+dest_files=["res://.godot/imported/vip.png-376c571a02bb7b0bba840d7bea01e01c.ctex"]
 
 [params]
 

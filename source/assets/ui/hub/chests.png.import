@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://dnldfo3irkalx"
+path="res://.godot/imported/chests.png-e8f5edf68bb9792e31ace4e41956c67d.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/hub/chests.png"
+dest_files=["res://.godot/imported/chests.png-e8f5edf68bb9792e31ace4e41956c67d.ctex"]
 
 [params]
 

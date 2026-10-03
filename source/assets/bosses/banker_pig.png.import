@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://dpxwypckwjrw6"
+path="res://.godot/imported/banker_pig.png-e8a4d560a4f23676bb2fd0d8ea112a39.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/bosses/banker_pig.png"
+dest_files=["res://.godot/imported/banker_pig.png-e8a4d560a4f23676bb2fd0d8ea112a39.ctex"]
 
 [params]
 

@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://b3sfxwe043par"
+path="res://.godot/imported/pig_sniper.png-3f84a35491bdbab06d320d0373fa1eae.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/enemies/pig_sniper.png"
+dest_files=["res://.godot/imported/pig_sniper.png-3f84a35491bdbab06d320d0373fa1eae.ctex"]
 
 [params]
 

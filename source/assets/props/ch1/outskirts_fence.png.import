@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://duekm5e2ql3cv"
+path="res://.godot/imported/outskirts_fence.png-28935b8768a813320ff6eeaf13b6e160.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/props/ch1/outskirts_fence.png"
+dest_files=["res://.godot/imported/outskirts_fence.png-28935b8768a813320ff6eeaf13b6e160.ctex"]
 
 [params]
 

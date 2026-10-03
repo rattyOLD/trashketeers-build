@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://b7ry0arjma0cp"
+path="res://.godot/imported/umbrella.png-a4279f4e7ef7cb352c213d5802a3dbca.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/props/ch2/umbrella.png"
+dest_files=["res://.godot/imported/umbrella.png-a4279f4e7ef7cb352c213d5802a3dbca.ctex"]
 
 [params]
 

@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://dtk1xydo13tap"
+path="res://.godot/imported/fountain.png-e4bc2ba40906b3bad0c4336293fdec6d.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/props/ch2/fountain.png"
+dest_files=["res://.godot/imported/fountain.png-e4bc2ba40906b3bad0c4336293fdec6d.ctex"]
 
 [params]
 

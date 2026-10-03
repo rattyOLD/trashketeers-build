@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://bfaltjdkt2ou7"
+path="res://.godot/imported/bruiser.png-5a8e637a5e1aedf7779f5f7df59a0111.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/enemies/bruiser.png"
+dest_files=["res://.godot/imported/bruiser.png-5a8e637a5e1aedf7779f5f7df59a0111.ctex"]
 
 [params]
 

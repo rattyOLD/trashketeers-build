@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://bvl8lsuale0ms"
+path="res://.godot/imported/toxic_bags.png-1afd9a93b71fbeb971e2641d135986a9.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/props/ch1/toxic_bags.png"
+dest_files=["res://.godot/imported/toxic_bags.png-1afd9a93b71fbeb971e2641d135986a9.ctex"]
 
 [params]
 

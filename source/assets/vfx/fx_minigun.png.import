@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://dcge8vaqq7w1v"
+path="res://.godot/imported/fx_minigun.png-73b62cb4c0e40d7ce53246dd7be8bd50.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/vfx/fx_minigun.png"
+dest_files=["res://.godot/imported/fx_minigun.png-73b62cb4c0e40d7ce53246dd7be8bd50.ctex"]
 
 [params]
 

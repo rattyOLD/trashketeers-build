@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://boi021dp26mh8"
+path="res://.godot/imported/trapper_fire.png-3a4105b43b34c69c8067c5807525a1ae.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/enemies/trapper_fire.png"
+dest_files=["res://.godot/imported/trapper_fire.png-3a4105b43b34c69c8067c5807525a1ae.ctex"]
 
 [params]
 

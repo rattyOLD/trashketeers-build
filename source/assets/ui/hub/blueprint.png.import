@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://d37gbclryces"
+path="res://.godot/imported/blueprint.png-48c1964ab6d83d22e1df0800fec4afdf.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/hub/blueprint.png"
+dest_files=["res://.godot/imported/blueprint.png-48c1964ab6d83d22e1df0800fec4afdf.ctex"]
 
 [params]
 

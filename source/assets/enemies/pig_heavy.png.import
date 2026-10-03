@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://b13opu8ngcrx2"
+path="res://.godot/imported/pig_heavy.png-241d376f593dcfa60503f59449230175.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/enemies/pig_heavy.png"
+dest_files=["res://.godot/imported/pig_heavy.png-241d376f593dcfa60503f59449230175.ctex"]
 
 [params]
 

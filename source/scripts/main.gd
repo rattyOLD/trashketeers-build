@@ -403,11 +403,14 @@ func _swap_screen(next: Node) -> void:
 	Platform.set_in_battle(next is BattleBase)
 	Platform.trail("экран " + next.get_class() + ("/" + str((next.get_script() as Script).get_global_name()) if next.get_script() != null else ""))
 	get_tree().paused = false
+	var leaving_battle := _screen is BattleBase and not next is BattleBase
 	if _screen != null:
 		# remove_child сразу вызывает _exit_tree старого экрана (бой чистит BulletPool)
 		# до того, как новый экран сделает первый кадр.
 		remove_child(_screen)
 		_screen.queue_free()
+	if leaving_battle:
+		BattleMemory.release()
 	_screen = next
 	add_child(next)
 	if _loading != null:

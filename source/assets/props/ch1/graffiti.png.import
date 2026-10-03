@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://b7li3k82o8hrk"
+path="res://.godot/imported/graffiti.png-89e2d423d6e57b2459718a7b7c4b3af9.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/props/ch1/graffiti.png"
+dest_files=["res://.godot/imported/graffiti.png-89e2d423d6e57b2459718a7b7c4b3af9.ctex"]
 
 [params]
 

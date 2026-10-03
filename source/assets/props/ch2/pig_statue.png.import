@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://bw1qp8fs77pw0"
+path="res://.godot/imported/pig_statue.png-bb495509e69d95b7296de82cfabed9d7.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/props/ch2/pig_statue.png"
+dest_files=["res://.godot/imported/pig_statue.png-bb495509e69d95b7296de82cfabed9d7.ctex"]
 
 [params]
 

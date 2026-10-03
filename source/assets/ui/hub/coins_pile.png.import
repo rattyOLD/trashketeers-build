@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://qg748fd7os2u"
+path="res://.godot/imported/coins_pile.png-bfb8c11443ebbc6ae973ddfd79c38a08.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/hub/coins_pile.png"
+dest_files=["res://.godot/imported/coins_pile.png-bfb8c11443ebbc6ae973ddfd79c38a08.ctex"]
 
 [params]
 

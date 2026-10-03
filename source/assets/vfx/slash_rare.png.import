@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://civ0k3amr6huy"
+path="res://.godot/imported/slash_rare.png-e39de8c31a48346c691f451cb2100f29.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/vfx/slash_rare.png"
+dest_files=["res://.godot/imported/slash_rare.png-e39de8c31a48346c691f451cb2100f29.ctex"]
 
 [params]
 

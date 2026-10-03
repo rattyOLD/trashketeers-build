@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://b5nxy6i5gq6f"
+path="res://.godot/imported/swords.png-51ce37119cb362dc17d42edfcf7af6ec.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/icons/swords.png"
+dest_files=["res://.godot/imported/swords.png-51ce37119cb362dc17d42edfcf7af6ec.ctex"]
 
 [params]
 

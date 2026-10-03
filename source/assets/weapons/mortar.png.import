@@ -2,9 +2,18 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://dumvyra2xr2wd"
+path="res://.godot/imported/mortar.png-29a6ceca5cc244c5d022c439674436ab.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/weapons/mortar.png"
+dest_files=["res://.godot/imported/mortar.png-29a6ceca5cc244c5d022c439674436ab.ctex"]
 
 [params]
-
 
 compress/mode=0
 compress/high_quality=false

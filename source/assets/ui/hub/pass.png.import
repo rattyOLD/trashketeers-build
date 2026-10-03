@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://brim61vw8stqq"
+path="res://.godot/imported/pass.png-c212bbc35a7732d82fe930c3658f1cf3.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/hub/pass.png"
+dest_files=["res://.godot/imported/pass.png-c212bbc35a7732d82fe930c3658f1cf3.ctex"]
 
 [params]
 

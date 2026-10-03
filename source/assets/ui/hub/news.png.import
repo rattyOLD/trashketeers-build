@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://56l3nwj7xku7"
+path="res://.godot/imported/news.png-fef6c9d699ce626971b2905c19611cf6.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/hub/news.png"
+dest_files=["res://.godot/imported/news.png-fef6c9d699ce626971b2905c19611cf6.ctex"]
 
 [params]
 

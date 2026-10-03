@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://ditxhr4txuu6l"
+path="res://.godot/imported/pig_royal.png-3384f64bdc978a036f5ac05457ee4132.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/enemies/pig_royal.png"
+dest_files=["res://.godot/imported/pig_royal.png-3384f64bdc978a036f5ac05457ee4132.ctex"]
 
 [params]
 

@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://dv3hcpd4i8c64"
+path="res://.godot/imported/melee_junkblade.png-52904b752fe20aab3734045b2ecbf98d.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/weapons/melee_junkblade.png"
+dest_files=["res://.godot/imported/melee_junkblade.png-52904b752fe20aab3734045b2ecbf98d.ctex"]
 
 [params]
 

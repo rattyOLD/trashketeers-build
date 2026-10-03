@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://me0aceyn78vu"
+path="res://.godot/imported/melee_shield.png-f0406bf436848b8204ce86783c90ad98.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/weapons/melee_shield.png"
+dest_files=["res://.godot/imported/melee_shield.png-f0406bf436848b8204ce86783c90ad98.ctex"]
 
 [params]
 

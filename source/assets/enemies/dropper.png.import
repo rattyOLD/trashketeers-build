@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://ouqr765qid0u"
+path="res://.godot/imported/dropper.png-ab8de616cc8fa499e87ae43b47431a16.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/enemies/dropper.png"
+dest_files=["res://.godot/imported/dropper.png-ab8de616cc8fa499e87ae43b47431a16.ctex"]
 
 [params]
 

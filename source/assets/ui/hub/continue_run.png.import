@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://bbeqq4wtb5mm0"
+path="res://.godot/imported/continue_run.png-4ec6d12edb163f213e027a86ec44d568.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/hub/continue_run.png"
+dest_files=["res://.godot/imported/continue_run.png-4ec6d12edb163f213e027a86ec44d568.ctex"]
 
 [params]
 

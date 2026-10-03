@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://b5i1q2iho3nmx"
+path="res://.godot/imported/fence.png-73a4b7bfe1b3e4fcf4eb2e0d591a4159.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/props/ch1/fence.png"
+dest_files=["res://.godot/imported/fence.png-73a4b7bfe1b3e4fcf4eb2e0d591a4159.ctex"]
 
 [params]
 

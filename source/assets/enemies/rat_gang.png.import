@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://cnf8i7b7kxuyt"
+path="res://.godot/imported/rat_gang.png-7eb961af2fca396b4f20dc22b877d8d9.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/enemies/rat_gang.png"
+dest_files=["res://.godot/imported/rat_gang.png-7eb961af2fca396b4f20dc22b877d8d9.ctex"]
 
 [params]
 

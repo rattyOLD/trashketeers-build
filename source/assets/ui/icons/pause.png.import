@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://certlplad7bgc"
+path="res://.godot/imported/pause.png-c9683d27010e8906901570fdb199319a.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/icons/pause.png"
+dest_files=["res://.godot/imported/pause.png-c9683d27010e8906901570fdb199319a.ctex"]
 
 [params]
 

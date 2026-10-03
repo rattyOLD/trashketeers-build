@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://4exquvy6r660"
+path="res://.godot/imported/bruiser_bash.png-b51495b58ae506adfd1b3795b6202043.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/enemies/bruiser_bash.png"
+dest_files=["res://.godot/imported/bruiser_bash.png-b51495b58ae506adfd1b3795b6202043.ctex"]
 
 [params]
 

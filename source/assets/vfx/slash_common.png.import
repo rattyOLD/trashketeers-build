@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://1fr3vd2geeqi"
+path="res://.godot/imported/slash_common.png-2ac0c5107da82059aecad83cee0ecac4.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/vfx/slash_common.png"
+dest_files=["res://.godot/imported/slash_common.png-2ac0c5107da82059aecad83cee0ecac4.ctex"]
 
 [params]
 

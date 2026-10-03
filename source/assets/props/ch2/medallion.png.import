@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://cl3w3cklwkkmc"
+path="res://.godot/imported/medallion.png-decc6e0d0b37df01cb0c02ea569afda0.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/props/ch2/medallion.png"
+dest_files=["res://.godot/imported/medallion.png-decc6e0d0b37df01cb0c02ea569afda0.ctex"]
 
 [params]
 

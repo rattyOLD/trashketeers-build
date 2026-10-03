@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://breee8jn7scng"
+path="res://.godot/imported/magnate_frames.png-8f8f42db79c8a78577e38d666422967e.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/bosses/magnate_frames.png"
+dest_files=["res://.godot/imported/magnate_frames.png-8f8f42db79c8a78577e38d666422967e.ctex"]
 
 [params]
 

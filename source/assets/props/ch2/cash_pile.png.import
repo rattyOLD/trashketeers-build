@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://bf8hujyaoh5uv"
+path="res://.godot/imported/cash_pile.png-fc4496e59ce41ea2d28d62a7d47c5539.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/props/ch2/cash_pile.png"
+dest_files=["res://.godot/imported/cash_pile.png-fc4496e59ce41ea2d28d62a7d47c5539.ctex"]
 
 [params]
 

@@ -2,9 +2,18 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://7l4533gyvih6"
+path="res://.godot/imported/coil.png-ca5c9975b108160afcafed63f328d077.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/weapons/coil.png"
+dest_files=["res://.godot/imported/coil.png-ca5c9975b108160afcafed63f328d077.ctex"]
 
 [params]
-
 
 compress/mode=0
 compress/high_quality=false

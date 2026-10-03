@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://cduv4da4k0mej"
+path="res://.godot/imported/fx_explosion.png-8437014b8da28433b06f7e8e62f3c83c.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/props/ch1/fx_explosion.png"
+dest_files=["res://.godot/imported/fx_explosion.png-8437014b8da28433b06f7e8e62f3c83c.ctex"]
 
 [params]
 

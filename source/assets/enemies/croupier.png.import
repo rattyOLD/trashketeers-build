@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://xytryfok4yt8"
+path="res://.godot/imported/croupier.png-55c0429bbe7fc018a213d853830b2ade.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/enemies/croupier.png"
+dest_files=["res://.godot/imported/croupier.png-55c0429bbe7fc018a213d853830b2ade.ctex"]
 
 [params]
 

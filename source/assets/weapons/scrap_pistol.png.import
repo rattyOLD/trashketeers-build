@@ -2,9 +2,18 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://dwid7wx71shph"
+path="res://.godot/imported/scrap_pistol.png-f79ec54eeba1ebfcafe1326c46cfc28b.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/weapons/scrap_pistol.png"
+dest_files=["res://.godot/imported/scrap_pistol.png-f79ec54eeba1ebfcafe1326c46cfc28b.ctex"]
 
 [params]
-
 
 compress/mode=0
 compress/high_quality=false

@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://cgfpnoyuqwgx5"
+path="res://.godot/imported/spark_rat.png-d877164b25cc34ca5207eb478a18c0c7.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/enemies/spark_rat.png"
+dest_files=["res://.godot/imported/spark_rat.png-d877164b25cc34ca5207eb478a18c0c7.ctex"]
 
 [params]
 

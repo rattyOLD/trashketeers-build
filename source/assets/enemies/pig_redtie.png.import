@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://4q3h1cuhrrqq"
+path="res://.godot/imported/pig_redtie.png-637378af1260eb7934a3fa734b5471c0.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/enemies/pig_redtie.png"
+dest_files=["res://.godot/imported/pig_redtie.png-637378af1260eb7934a3fa734b5471c0.ctex"]
 
 [params]
 

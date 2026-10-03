@@ -2,9 +2,18 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://bo3glg8b8vene"
+path="res://.godot/imported/carbine.png-12958aa79df84c11056ade0f3714d5ae.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/weapons/carbine.png"
+dest_files=["res://.godot/imported/carbine.png-12958aa79df84c11056ade0f3714d5ae.ctex"]
 
 [params]
-
 
 compress/mode=0
 compress/high_quality=false

@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://cc05aofj5ns4n"
+path="res://.godot/imported/toxic_pipe.png-2986ac037357cb8b8ae9b8b8993caa17.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/props/ch1/toxic_pipe.png"
+dest_files=["res://.godot/imported/toxic_pipe.png-2986ac037357cb8b8ae9b8b8993caa17.ctex"]
 
 [params]
 

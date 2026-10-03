@@ -160,6 +160,7 @@ func _setup_common(camera_bounds: Rect2, currency_icon: Texture2D) -> void:
 	hud = Hud.new()
 	add_child(hud)
 	hud.build(currency_icon, player.weapon_controller.base_weapon)
+	_warm_glyphs()
 
 	player.health_changed.connect(hud.set_health)
 	player.damaged.connect(_on_player_damaged)
@@ -183,6 +184,22 @@ func _setup_common(camera_bounds: Rect2, currency_icon: Texture2D) -> void:
 		MainMenuUI.open_upgrades_next = true
 		_on_menu_pressed())
 	hud.set_health(player.hp, player.max_hp)
+
+
+## Буквы шрифта растеризуются при первом показе каждого размера (в вебе ~1 с на окне прокачки).
+## Под заставкой загрузки один раз рисуем алфавит в размерах окна прокачки, тостов и баннеров.
+const GLYPH_TEXT := "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюяABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%+-×.,:;!?«»()/•·№"
+const GLYPH_SIZES := [[36, 9], [25, 6], [20, 5], [18, 5], [14, 4], [28, 8], [22, 6], [30, 8], [34, 10]]
+
+
+func _warm_glyphs() -> void:
+	var holder := Control.new()
+	holder.modulate.a = 0.02
+	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for pair: Array in GLYPH_SIZES:
+		holder.add_child(UiStyle.label(GLYPH_TEXT, int(pair[0]), UiStyle.TEXT, int(pair[1])))
+	hud.add_child(holder)
+	get_tree().create_timer(0.3, true).timeout.connect(holder.queue_free)
 
 
 func _apply_camera_zoom() -> void:

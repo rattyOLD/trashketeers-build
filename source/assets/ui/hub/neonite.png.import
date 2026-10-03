@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://drkdc030kvvjb"
+path="res://.godot/imported/neonite.png-3ceb47b9939a6e0e0dd458b310a11659.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/hub/neonite.png"
+dest_files=["res://.godot/imported/neonite.png-3ceb47b9939a6e0e0dd458b310a11659.ctex"]
 
 [params]
 

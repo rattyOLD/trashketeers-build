@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://cvvmmxxxa5xg"
+path="res://.godot/imported/pig_security.png-eab2039dda49e29c99d59aa05401d2bc.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/enemies/pig_security.png"
+dest_files=["res://.godot/imported/pig_security.png-eab2039dda49e29c99d59aa05401d2bc.ctex"]
 
 [params]
 

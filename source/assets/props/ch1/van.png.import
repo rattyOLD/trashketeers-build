@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://bs8wisy5qnjg8"
+path="res://.godot/imported/van.png-f5232617ed9bd2ba205397d8f25afadc.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/props/ch1/van.png"
+dest_files=["res://.godot/imported/van.png-f5232617ed9bd2ba205397d8f25afadc.ctex"]
 
 [params]
 

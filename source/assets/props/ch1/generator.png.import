@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://bfxixgkdg4hat"
+path="res://.godot/imported/generator.png-d4c5904fa053f59c395c9eb9edeb1169.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/props/ch1/generator.png"
+dest_files=["res://.godot/imported/generator.png-d4c5904fa053f59c395c9eb9edeb1169.ctex"]
 
 [params]
 

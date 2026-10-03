@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://cljqcdqcyjq5c"
+path="res://.godot/imported/rare.png-4e34e2064d9b7e6bd71022c7cd84d230.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/chests/rare.png"
+dest_files=["res://.godot/imported/rare.png-4e34e2064d9b7e6bd71022c7cd84d230.ctex"]
 
 [params]
 

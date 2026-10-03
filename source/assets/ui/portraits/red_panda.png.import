@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://ccl707m560qrl"
+path="res://.godot/imported/red_panda.png-ded42cda8ae6ca6d9b0ca5160eee5d76.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/portraits/red_panda.png"
+dest_files=["res://.godot/imported/red_panda.png-ded42cda8ae6ca6d9b0ca5160eee5d76.ctex"]
 
 [params]
 

@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://pbnakfq0how3"
+path="res://.godot/imported/hero.png-2764f18323278c9d4e4c12cfbe884ebe.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/hub/hero.png"
+dest_files=["res://.godot/imported/hero.png-2764f18323278c9d4e4c12cfbe884ebe.ctex"]
 
 [params]
 

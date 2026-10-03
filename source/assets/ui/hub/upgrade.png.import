@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://b4ah82gbaen11"
+path="res://.godot/imported/upgrade.png-5e14812648373a8ef81c9144fea1d235.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/hub/upgrade.png"
+dest_files=["res://.godot/imported/upgrade.png-5e14812648373a8ef81c9144fea1d235.ctex"]
 
 [params]
 

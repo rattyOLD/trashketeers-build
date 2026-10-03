@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://byrgt3c03jby5"
+path="res://.godot/imported/spruce.png-f4aae49f3cbfd952f16425d937bd2c4f.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/props/ch1/spruce.png"
+dest_files=["res://.godot/imported/spruce.png-f4aae49f3cbfd952f16425d937bd2c4f.ctex"]
 
 [params]
 

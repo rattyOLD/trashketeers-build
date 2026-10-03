@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://desymyy4y3wfl"
+path="res://.godot/imported/props_b_ruin.png-45a837dd9231e6e28bf8fd3564a9838c.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/raid/props_b_ruin.png"
+dest_files=["res://.godot/imported/props_b_ruin.png-45a837dd9231e6e28bf8fd3564a9838c.ctex"]
 
 [params]
 

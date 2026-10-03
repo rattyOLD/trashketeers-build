@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://b2jfkbyythlrj"
+path="res://.godot/imported/tire_stack.png-ebce9c0ca6c9fe921c2dc29d3d430a61.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/props/ch1/tire_stack.png"
+dest_files=["res://.godot/imported/tire_stack.png-ebce9c0ca6c9fe921c2dc29d3d430a61.ctex"]
 
 [params]
 

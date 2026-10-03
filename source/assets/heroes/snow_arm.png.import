@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://d1gol2ijpgtkq"
+path="res://.godot/imported/snow_arm.png-7c0f99694486beb53a41a7452ef93a00.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/heroes/snow_arm.png"
+dest_files=["res://.godot/imported/snow_arm.png-7c0f99694486beb53a41a7452ef93a00.ctex"]
 
 [params]
 

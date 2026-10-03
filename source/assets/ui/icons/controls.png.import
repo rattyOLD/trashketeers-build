@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://ba15c85po2ltp"
+path="res://.godot/imported/controls.png-86df0ff64b3b77852d7cc968eb3512e9.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/icons/controls.png"
+dest_files=["res://.godot/imported/controls.png-86df0ff64b3b77852d7cc968eb3512e9.ctex"]
 
 [params]
 

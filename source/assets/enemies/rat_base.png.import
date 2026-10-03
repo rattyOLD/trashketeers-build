@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://bsud66k6v7o8n"
+path="res://.godot/imported/rat_base.png-007d9e52978915147039e04010a8d4b5.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/enemies/rat_base.png"
+dest_files=["res://.godot/imported/rat_base.png-007d9e52978915147039e04010a8d4b5.ctex"]
 
 [params]
 

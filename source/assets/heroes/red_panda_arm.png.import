@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://c7fuwfg773rps"
+path="res://.godot/imported/red_panda_arm.png-ad66f0bf5e68b7c9a28f1afe6d7a8e68.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/heroes/red_panda_arm.png"
+dest_files=["res://.godot/imported/red_panda_arm.png-ad66f0bf5e68b7c9a28f1afe6d7a8e68.ctex"]
 
 [params]
 

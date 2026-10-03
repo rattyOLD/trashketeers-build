@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://b0cbg08kgkou"
+path="res://.godot/imported/shank_stab.png-8fdecee02aab60f9f7d8efe59e704790.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/enemies/shank_stab.png"
+dest_files=["res://.godot/imported/shank_stab.png-8fdecee02aab60f9f7d8efe59e704790.ctex"]
 
 [params]
 

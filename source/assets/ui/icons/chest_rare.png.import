@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://djmyt1kkj0wct"
+path="res://.godot/imported/chest_rare.png-7515378a104a4f3bd8d82963efaa9734.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/icons/chest_rare.png"
+dest_files=["res://.godot/imported/chest_rare.png-7515378a104a4f3bd8d82963efaa9734.ctex"]
 
 [params]
 

@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://botrfmn0wsqcl"
+path="res://.godot/imported/dumpster.png-5fcf333230e3777be489c88924d64249.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/props/ch1/dumpster.png"
+dest_files=["res://.godot/imported/dumpster.png-5fcf333230e3777be489c88924d64249.ctex"]
 
 [params]
 

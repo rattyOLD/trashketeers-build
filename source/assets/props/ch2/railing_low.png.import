@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://oyv0et4078en"
+path="res://.godot/imported/railing_low.png-130cd240823c6ab0884b3a36d3b6a5cc.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/props/ch2/railing_low.png"
+dest_files=["res://.godot/imported/railing_low.png-130cd240823c6ab0884b3a36d3b6a5cc.ctex"]
 
 [params]
 

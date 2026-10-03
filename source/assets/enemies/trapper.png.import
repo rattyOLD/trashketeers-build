@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://tp3vkwwpvj1"
+path="res://.godot/imported/trapper.png-6c5bb8422e26acc6aa2467764315c57e.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/enemies/trapper.png"
+dest_files=["res://.godot/imported/trapper.png-6c5bb8422e26acc6aa2467764315c57e.ctex"]
 
 [params]
 

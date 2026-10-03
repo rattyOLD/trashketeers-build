@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://cc0lgcydxrn5f"
+path="res://.godot/imported/night.png-9edce4960805d679455396aaf4823063.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/portraits/night.png"
+dest_files=["res://.godot/imported/night.png-9edce4960805d679455396aaf4823063.ctex"]
 
 [params]
 

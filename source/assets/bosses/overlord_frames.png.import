@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://dgxlbj2y6igir"
+path="res://.godot/imported/overlord_frames.png-a0fa106dad74de8eccd82f32ff9fdada.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/bosses/overlord_frames.png"
+dest_files=["res://.godot/imported/overlord_frames.png-a0fa106dad74de8eccd82f32ff9fdada.ctex"]
 
 [params]
 

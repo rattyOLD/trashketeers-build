@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://dwbjinrrv2var"
+path="res://.godot/imported/ice_dragon_death.png-920e0d5b083c2b10538f96456057e698.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/bosses/ice_dragon_death.png"
+dest_files=["res://.godot/imported/ice_dragon_death.png-920e0d5b083c2b10538f96456057e698.ctex"]
 
 [params]
 

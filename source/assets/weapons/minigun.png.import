@@ -2,9 +2,18 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://cmytrmiacq277"
+path="res://.godot/imported/minigun.png-661ff1e5214044fbd571cbd6837e3f76.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/weapons/minigun.png"
+dest_files=["res://.godot/imported/minigun.png-661ff1e5214044fbd571cbd6837e3f76.ctex"]
 
 [params]
-
 
 compress/mode=0
 compress/high_quality=false

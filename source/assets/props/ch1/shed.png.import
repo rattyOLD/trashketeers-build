@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://gyy4e2orilqp"
+path="res://.godot/imported/shed.png-c1ac2558ddce7131ed42700bc1f59a8d.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/props/ch1/shed.png"
+dest_files=["res://.godot/imported/shed.png-c1ac2558ddce7131ed42700bc1f59a8d.ctex"]
 
 [params]
 

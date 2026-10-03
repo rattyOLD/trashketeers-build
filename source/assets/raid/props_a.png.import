@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://c5edinqa8k485"
+path="res://.godot/imported/props_a.png-65ac686ed925cff68f71e5f1f0a3bd0a.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/raid/props_a.png"
+dest_files=["res://.godot/imported/props_a.png-65ac686ed925cff68f71e5f1f0a3bd0a.ctex"]
 
 [params]
 

@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://b68f0jnq1s30v"
+path="res://.godot/imported/vagabond.png-60f526b1f46dfb6fc5567c3e1191f0ef.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/portraits/vagabond.png"
+dest_files=["res://.godot/imported/vagabond.png-60f526b1f46dfb6fc5567c3e1191f0ef.ctex"]
 
 [params]
 

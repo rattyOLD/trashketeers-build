@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://cimm1guahuoyx"
+path="res://.godot/imported/achievements.png-3f088cc16b82a7f8252b0f2f137adaf9.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/hub/achievements.png"
+dest_files=["res://.godot/imported/achievements.png-3f088cc16b82a7f8252b0f2f137adaf9.ctex"]
 
 [params]
 

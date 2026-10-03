@@ -103,6 +103,12 @@ var texture: Texture2D:
 				_texture = ConfigLoader.get_fallback_texture()
 		return _texture
 var _texture: Texture2D
+
+
+## Выход из боя: отдать текстуры (видеопамять), при следующем обращении загрузятся заново.
+func release_textures() -> void:
+	_texture = null
+	_attack_texture = null
 var _texture_path := ""
 var _attack_path := ""
 var _resolver: Callable

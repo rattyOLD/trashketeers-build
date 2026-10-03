@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://c5l2cnntgl8yb"
+path="res://.godot/imported/crystals.png-af25d9da7ebb2e51f4c02f47c898bc3d.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/props/ch2/crystals.png"
+dest_files=["res://.godot/imported/crystals.png-af25d9da7ebb2e51f4c02f47c898bc3d.ctex"]
 
 [params]
 

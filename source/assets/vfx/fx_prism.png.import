@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://yy16nnovntol"
+path="res://.godot/imported/fx_prism.png-794aa029154a4b2f836977eed5f38534.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/vfx/fx_prism.png"
+dest_files=["res://.godot/imported/fx_prism.png-794aa029154a4b2f836977eed5f38534.ctex"]
 
 [params]
 

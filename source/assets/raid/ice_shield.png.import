@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bu158ga8c0mwe"
-path="res://.godot/imported/white_dragon_sheet.png-e0e8709cf628c016135a782e389e907a.ctex"
+path="res://.godot/imported/ice_shield.png-e667a39f5d6034e488b2bebb246949c0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/bosses/white_dragon_sheet.png"
-dest_files=["res://.godot/imported/white_dragon_sheet.png-e0e8709cf628c016135a782e389e907a.ctex"]
+source_file="res://assets/raid/ice_shield.png"
+dest_files=["res://.godot/imported/ice_shield.png-e667a39f5d6034e488b2bebb246949c0.ctex"]
 
 [params]
 

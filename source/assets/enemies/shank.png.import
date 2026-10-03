@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://66b1125uh51b"
+path="res://.godot/imported/shank.png-1c93cda1a505f4e267ff34d72138408c.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/enemies/shank.png"
+dest_files=["res://.godot/imported/shank.png-1c93cda1a505f4e267ff34d72138408c.ctex"]
 
 [params]
 

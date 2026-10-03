@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://bj63y0drmpfdn"
+path="res://.godot/imported/shaman_frames.png-3a49d8427aa703bca5819cb8244f631c.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/bosses/shaman_frames.png"
+dest_files=["res://.godot/imported/shaman_frames.png-3a49d8427aa703bca5819cb8244f631c.ctex"]
 
 [params]
 

@@ -16,6 +16,11 @@ static func has_sheet(sheet_id: String) -> bool:
 	return _sheets.has(sheet_id)
 
 
+static func release_textures() -> void:
+	for sheet: Dictionary in _sheets.values():
+		sheet["texture"] = null
+
+
 static func get_sheet(sheet_id: String) -> Dictionary:
 	_load()
 	var sheet: Dictionary = _sheets.get(sheet_id, {})

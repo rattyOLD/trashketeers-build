@@ -2,9 +2,18 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://c31027me80qjy"
+path="res://.godot/imported/magnet.png-f24bdfec50318241fcdaaae88cad07b0.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/weapons/magnet.png"
+dest_files=["res://.godot/imported/magnet.png-f24bdfec50318241fcdaaae88cad07b0.ctex"]
 
 [params]
-
 
 compress/mode=0
 compress/high_quality=false

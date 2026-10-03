@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://bp5c6ixnyreew"
+path="res://.godot/imported/epic.png-ad30b4feec92cef3165ab28eaff023e2.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/chests/epic.png"
+dest_files=["res://.godot/imported/epic.png-ad30b4feec92cef3165ab28eaff023e2.ctex"]
 
 [params]
 

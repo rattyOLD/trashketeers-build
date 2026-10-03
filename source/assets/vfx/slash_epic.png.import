@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://ds54h8jsji06s"
+path="res://.godot/imported/slash_epic.png-7d455bb19e6a5e49b135489603271337.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/vfx/slash_epic.png"
+dest_files=["res://.godot/imported/slash_epic.png-7d455bb19e6a5e49b135489603271337.ctex"]
 
 [params]
 

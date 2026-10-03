@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://bfd6v4f5dydgh"
+path="res://.godot/imported/lamp_banner.png-20d7d87c047564b23dcff7506db75f53.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/props/ch2/lamp_banner.png"
+dest_files=["res://.godot/imported/lamp_banner.png-20d7d87c047564b23dcff7506db75f53.ctex"]
 
 [params]
 

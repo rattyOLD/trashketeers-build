@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://dtvor00psvfs2"
+path="res://.godot/imported/bullets_common.png-3e9b204ad5e9261f05c7feda7234851e.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/vfx/bullets_common.png"
+dest_files=["res://.godot/imported/bullets_common.png-3e9b204ad5e9261f05c7feda7234851e.ctex"]
 
 [params]
 

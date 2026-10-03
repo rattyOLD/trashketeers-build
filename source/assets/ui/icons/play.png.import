@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://q7pr16ngbd3v"
+path="res://.godot/imported/play.png-78491ae8c948a86ad25f5385b612aa5f.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/icons/play.png"
+dest_files=["res://.godot/imported/play.png-78491ae8c948a86ad25f5385b612aa5f.ctex"]
 
 [params]
 

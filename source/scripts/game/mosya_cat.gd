@@ -7,6 +7,8 @@ const FRAMES := "res://assets/ui/mosya/mosya_frames.png"
 const LINES: Array[String] = ["мур", "мррр", "мур-мур", "мрр, ещё", "мяу", "мррр-мяу"]
 const NEAR := 190.0
 const TAP_RADIUS := 100.0
+## Плашка «ПОГЛАДИТЬ» над головой (в координатах кота): тап по ней — тоже погладить.
+const BUTTON := Rect2(-92, -262, 184, 46)
 
 var player: Player
 var fx: FxManager
@@ -63,8 +65,7 @@ func _draw() -> void:
 		return
 	var font := ThemeDB.fallback_font
 	var pulse := 0.5 + 0.5 * sin(_time * 5.0)
-	var rect := Rect2(-92, -262, 184, 46)
-	draw_style_box(UiStyle.box(Color("#17120e"), Color(Color("#ff8a3d"), 0.6 + 0.4 * pulse), 3, 14), rect)
+	draw_style_box(UiStyle.box(Color("#17120e"), Color(Color("#ff8a3d"), 0.6 + 0.4 * pulse), 3, 14), BUTTON)
 	draw_string(font, Vector2(-92, -230), "ПОГЛАДИТЬ", HORIZONTAL_ALIGNMENT_CENTER, 184.0, 24, Color("#ffe9cf"))
 
 
@@ -79,7 +80,8 @@ func _input(event: InputEvent) -> void:
 	else:
 		return
 	var world := get_viewport().get_canvas_transform().affine_inverse() * screen
-	if world.distance_to(global_position + Vector2(0, -90)) > TAP_RADIUS + 20.0:
+	var local := world - global_position
+	if local.distance_to(Vector2(0, -90)) > TAP_RADIUS + 20.0 and not BUTTON.grow(24.0).has_point(local):
 		return
 	get_viewport().set_input_as_handled()
 	_pet()

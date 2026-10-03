@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://tprxkbbfgf7f"
+path="res://.godot/imported/container.png-7622bfbad8e4840b0e19ab9991f83508.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/props/ch1/container.png"
+dest_files=["res://.godot/imported/container.png-7622bfbad8e4840b0e19ab9991f83508.ctex"]
 
 [params]
 

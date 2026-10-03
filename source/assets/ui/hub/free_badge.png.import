@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://v8pfrhi8qi3x"
+path="res://.godot/imported/free_badge.png-162df28c43cdcdddf0da6d0bb61736b9.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/hub/free_badge.png"
+dest_files=["res://.godot/imported/free_badge.png-162df28c43cdcdddf0da6d0bb61736b9.ctex"]
 
 [params]
 

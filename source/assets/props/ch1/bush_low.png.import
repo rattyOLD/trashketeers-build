@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://dmq266sjwd2ul"
+path="res://.godot/imported/bush_low.png-7a3a9ff741ad49c4ed0e385f1ddd5ed2.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/props/ch1/bush_low.png"
+dest_files=["res://.godot/imported/bush_low.png-7a3a9ff741ad49c4ed0e385f1ddd5ed2.ctex"]
 
 [params]
 

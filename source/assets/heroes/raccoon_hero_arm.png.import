@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://d3megbb28a23g"
+path="res://.godot/imported/raccoon_hero_arm.png-5ddfaf7ffeeaf690f55b8391c2ed2dda.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/heroes/raccoon_hero_arm.png"
+dest_files=["res://.godot/imported/raccoon_hero_arm.png-5ddfaf7ffeeaf690f55b8391c2ed2dda.ctex"]
 
 [params]
 

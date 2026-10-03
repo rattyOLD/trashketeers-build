@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://c7to28vg3oyny"
+path="res://.godot/imported/icons_status.png-bfcaf23329e03f13f20243cdeafdff59.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/vfx/icons_status.png"
+dest_files=["res://.godot/imported/icons_status.png-bfcaf23329e03f13f20243cdeafdff59.ctex"]
 
 [params]
 

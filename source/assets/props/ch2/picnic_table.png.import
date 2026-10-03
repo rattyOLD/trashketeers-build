@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://dvpbjets8icin"
+path="res://.godot/imported/picnic_table.png-4ec5efae752a4fef7cf7fc45c15fd086.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/props/ch2/picnic_table.png"
+dest_files=["res://.godot/imported/picnic_table.png-4ec5efae752a4fef7cf7fc45c15fd086.ctex"]
 
 [params]
 

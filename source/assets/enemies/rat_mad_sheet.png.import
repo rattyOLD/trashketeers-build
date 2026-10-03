@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://lbg7lmsuv2x2"
+path="res://.godot/imported/rat_mad_sheet.png-1f207eec7ead0014093f574ddcba958d.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/enemies/rat_mad_sheet.png"
+dest_files=["res://.godot/imported/rat_mad_sheet.png-1f207eec7ead0014093f574ddcba958d.ctex"]
 
 [params]
 

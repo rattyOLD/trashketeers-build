@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://ngymtgmre0ff"
+path="res://.godot/imported/water_tower.png-88a84014a5e746ce0f7f34734469051b.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/props/ch1/water_tower.png"
+dest_files=["res://.godot/imported/water_tower.png-88a84014a5e746ce0f7f34734469051b.ctex"]
 
 [params]
 

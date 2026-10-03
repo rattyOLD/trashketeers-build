@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://catx76lpt5xuw"
+path="res://.godot/imported/gear.png-4aa4718099f076f2f0926e870f29c2f2.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/icons/gear.png"
+dest_files=["res://.godot/imported/gear.png-4aa4718099f076f2f0926e870f29c2f2.ctex"]
 
 [params]
 

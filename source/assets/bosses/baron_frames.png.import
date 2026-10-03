@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://buencydeusdq0"
+path="res://.godot/imported/baron_frames.png-27d42f4159e83cb79e843703bfbfe935.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/bosses/baron_frames.png"
+dest_files=["res://.godot/imported/baron_frames.png-27d42f4159e83cb79e843703bfbfe935.ctex"]
 
 [params]
 

@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://coetcqh7u5ebv"
+path="res://.godot/imported/pig_magnate.png-b4b2a0db1951511636ffb901065574e7.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/bosses/pig_magnate.png"
+dest_files=["res://.godot/imported/pig_magnate.png-b4b2a0db1951511636ffb901065574e7.ctex"]
 
 [params]
 

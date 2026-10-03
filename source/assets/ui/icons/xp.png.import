@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://bmlquns7c24yt"
+path="res://.godot/imported/xp.png-b03eb13b1230cd79acafe6e2a17f0c6f.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/icons/xp.png"
+dest_files=["res://.godot/imported/xp.png-b03eb13b1230cd79acafe6e2a17f0c6f.ctex"]
 
 [params]
 

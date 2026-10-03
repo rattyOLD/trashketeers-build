@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://ma6g3ned2vkg"
+path="res://.godot/imported/bush.png-b92acf1942ef86f96a679a5889899943.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/props/ch1/bush.png"
+dest_files=["res://.godot/imported/bush.png-b92acf1942ef86f96a679a5889899943.ctex"]
 
 [params]
 

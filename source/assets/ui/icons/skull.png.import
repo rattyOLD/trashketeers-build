@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://dox53upjrwvh1"
+path="res://.godot/imported/skull.png-06f45d578eff70abe316ad14d48a9a2a.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/icons/skull.png"
+dest_files=["res://.godot/imported/skull.png-06f45d578eff70abe316ad14d48a9a2a.ctex"]
 
 [params]
 

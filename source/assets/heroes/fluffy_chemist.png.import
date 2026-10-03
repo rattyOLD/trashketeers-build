@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://djb0kfo6qy338"
+path="res://.godot/imported/fluffy_chemist.png-eb000aa9f4ec08511f05dbb9b4153f36.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/heroes/fluffy_chemist.png"
+dest_files=["res://.godot/imported/fluffy_chemist.png-eb000aa9f4ec08511f05dbb9b4153f36.ctex"]
 
 [params]
 

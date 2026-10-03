@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://crhp807s21g4d"
+path="res://.godot/imported/ch2_floor.png-5943df793782a30e8b31901d57750b8a.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/biome/ch2_floor.png"
+dest_files=["res://.godot/imported/ch2_floor.png-5943df793782a30e8b31901d57750b8a.ctex"]
 
 [params]
 

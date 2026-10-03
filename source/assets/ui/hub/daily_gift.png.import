@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://oq774m5aykd0"
+path="res://.godot/imported/daily_gift.png-98b2936dac3bd6a29f1db3363486b04e.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/hub/daily_gift.png"
+dest_files=["res://.godot/imported/daily_gift.png-98b2936dac3bd6a29f1db3363486b04e.ctex"]
 
 [params]
 

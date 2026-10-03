@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://4uo32jue22fg"
+path="res://.godot/imported/planter.png-6de1ab06bffedc08353483624acb8a94.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/props/ch2/planter.png"
+dest_files=["res://.godot/imported/planter.png-6de1ab06bffedc08353483624acb8a94.ctex"]
 
 [params]
 

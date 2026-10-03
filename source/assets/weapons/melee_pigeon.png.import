@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://cker7lcp42hxt"
+path="res://.godot/imported/melee_pigeon.png-2df26d0f826c199ddd80cca089df5920.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/weapons/melee_pigeon.png"
+dest_files=["res://.godot/imported/melee_pigeon.png-2df26d0f826c199ddd80cca089df5920.ctex"]
 
 [params]
 

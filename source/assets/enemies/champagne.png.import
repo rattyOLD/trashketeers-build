@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://ctldmj1xbdwmj"
+path="res://.godot/imported/champagne.png-7d8b06ea0c026c5c41f0eccc13a66d32.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/enemies/champagne.png"
+dest_files=["res://.godot/imported/champagne.png-7d8b06ea0c026c5c41f0eccc13a66d32.ctex"]
 
 [params]
 

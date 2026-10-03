@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://devptsudjkd53"
+path="res://.godot/imported/pig_angry.png-72a2bb1576b280c8c25dc8b7fb32d194.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/enemies/pig_angry.png"
+dest_files=["res://.godot/imported/pig_angry.png-72a2bb1576b280c8c25dc8b7fb32d194.ctex"]
 
 [params]
 

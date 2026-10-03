@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://4a4kyp1oimik"
+path="res://.godot/imported/ad_ticket.png-d028f7bf567057fdd15c3667a501eb77.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/ui/hub/ad_ticket.png"
+dest_files=["res://.godot/imported/ad_ticket.png-d028f7bf567057fdd15c3667a501eb77.ctex"]
 
 [params]
 

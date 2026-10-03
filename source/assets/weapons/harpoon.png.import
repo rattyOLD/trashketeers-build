@@ -2,9 +2,18 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://bgycqojc56cti"
+path="res://.godot/imported/harpoon.png-e3fb82731f002ec8c9eda55ccf6e6b1d.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/weapons/harpoon.png"
+dest_files=["res://.godot/imported/harpoon.png-e3fb82731f002ec8c9eda55ccf6e6b1d.ctex"]
 
 [params]
-
 
 compress/mode=0
 compress/high_quality=false

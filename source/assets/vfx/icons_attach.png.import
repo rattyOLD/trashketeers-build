@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://dxchbjek0gt8y"
+path="res://.godot/imported/icons_attach.png-87ade655cc76aed866cbf753efbadd97.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/vfx/icons_attach.png"
+dest_files=["res://.godot/imported/icons_attach.png-87ade655cc76aed866cbf753efbadd97.ctex"]
 
 [params]
 

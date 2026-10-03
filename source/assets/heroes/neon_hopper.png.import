@@ -2,6 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
+uid="uid://do4l4x380m2j2"
+path="res://.godot/imported/neon_hopper.png-183c924b6f4d7b47bde1b2b3edfcb63a.ctex"
+metadata={
+"vram_texture": false
+}
+
+[deps]
+
+source_file="res://assets/heroes/neon_hopper.png"
+dest_files=["res://.godot/imported/neon_hopper.png-183c924b6f4d7b47bde1b2b3edfcb63a.ctex"]
 
 [params]
 
