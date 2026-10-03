@@ -24,6 +24,20 @@
 2. `tools/build_main.sh` (нужны Godot 4.4.1 и шаблоны экспорта), проверить `checked N scripts, failed 0` и отсутствие `SCRIPT ERROR`.
 3. Скопировать содержимое `site/` в корень и `docs/`, коммит, `git push origin main`.
 
+## Проверка перед выкладкой (обязательно)
+- `GODOT=... tools/verify.sh` — импорт, компиляция всех скриптов (`CHECK checked N, failed 0`), бот играет выживание, сюжет, рейд и мод «враги взрываются». Выкладывать только при `VERIFY OK`.
+- Веб: экспорт `Web` в `source/build/web`, затем `python3 tools/make_site.py source/build/web` → `tools/site/` → скопировать в корень и `docs/`, коммит в `main`. Номер версии берётся как следующий за `version.json`.
+- Проверить загрузку сайта в Chromium (Playwright): игра должна дойти до главного меню.
+- APK собирает GitHub Actions (`.github/workflows/android-beta.yml`) на каждый пуш в `source/`: подпись, Firebase App Distribution (группа `testers` + секрет `FIREBASE_TESTERS`), релиз `android-beta` с `android-version.json` для окна «ОБНОВИТЬ» в игре (`core/app_updater.gd`).
+
+## Инструменты проверки (source/test, в сборку не попадают)
+- `shot_battle` (скриншот боя: PROBE_CH, PROBE_WAVE, PROBE_Q, SHOT_AT, OUT), `boss_shot` (+BOSS=id), `map_overview` (вся карта сверху, SEED), `hud_band` (шапка телефона), `stream_test` (струи пива/рвоты), `update_popup`.
+- `balance_bot` + `tools/run_balance_bots.sh` — новичок проходит выживание; ориентир баланса: смерть на волнах 5–10, босс главы — стена.
+- `draw_probe`, `prof_battle`, `tools/gdprof.py` — вызовы отрисовки и профайлер GDScript.
+
+## Телеметрия
+Веб и APK шлют отчёты (perf, spike, error, run, prev_session_died с хвостом лога) в Google Apps Script → таблица. Чтение для разработки — отдельное развёртывание Apps Script с `doGet` и ключом (ключ у владельца, в репозиторий не кладётся).
+
 ## Для Астры
 Арт кладётся в `source/assets/<папка>/`. Нарезку и прозрачность делает `tools/slice_vfx.py`.
 Промпты и требования — в проектных документах Claude Project «AppRaccoon» (`astra_brief.md`).
