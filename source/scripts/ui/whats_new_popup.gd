@@ -63,7 +63,7 @@ func _ready() -> void:
 		picture.texture = load(image_path) as Texture2D
 		picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		picture.custom_minimum_size = Vector2(0, 150)
+		picture.custom_minimum_size = Vector2(0, 110)
 		column.add_child(picture)
 	var title := UiStyle.label(str(entry.get("title", "")), 30, UiStyle.NEON, 7)
 	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -72,7 +72,7 @@ func _ready() -> void:
 	# Список изменений прокручивается: кнопки всегда видны, даже если текст длиннее экрана.
 	var scroll := ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	scroll.custom_minimum_size = Vector2(width - 40.0, maxf(get_viewport_rect().size.y - 620.0, 240.0))
+	scroll.custom_minimum_size = Vector2(width - 40.0, clampf(get_viewport_rect().size.y - 620.0, 220.0, 380.0))
 	column.add_child(scroll)
 	var rows := VBoxContainer.new()
 	rows.add_theme_constant_override("separation", 12)
