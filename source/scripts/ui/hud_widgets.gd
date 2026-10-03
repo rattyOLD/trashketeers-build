@@ -113,6 +113,8 @@ class OutlineBar:
 class DamagePortrait:
 	extends Control
 
+	var _batch := PolyBatch.new()
+
 	const HUD_DIR := "res://assets/ui/portraits/hud/"
 	const SIDE := 120.0
 
@@ -193,8 +195,9 @@ class DamagePortrait:
 	func _draw() -> void:
 		var c := size * 0.5
 		var r := minf(size.x, size.y) * 0.5
-		draw_circle(c, r - 1.0, Color("#1a1917"))
-		draw_circle(c, r - 5.0, Color("#4f4c47"))
+		_batch.circle(c, r - 1.0, Color("#1a1917"))
+		_batch.circle(c, r - 5.0, Color("#4f4c47"))
+		_batch.flush(self)
 
 
 ## Лицо: портрет, вырезанный кругом (полигон с UV).
@@ -217,6 +220,7 @@ class Over:
 	extends Control
 
 	var owner_portrait: DamagePortrait
+	var _batch := PolyBatch.new()
 
 	func _init(p: DamagePortrait) -> void:
 		owner_portrait = p
@@ -234,7 +238,7 @@ class Over:
 		var r := minf(size.x, size.y) * 0.5
 		var clock := Time.get_ticks_msec() / 1000.0
 		if d > 0.0:
-			draw_circle(c, r - 8.0, Color(0.85, 0.05, 0.12, 0.34 * d))
+			_batch.circle(c, r - 8.0, Color(0.85, 0.05, 0.12, 0.34 * d))
 		# Трещины на «стекле» оправы: появляются по ступеням.
 		var cracks := [
 			[0.25, [Vector2(0.62, 0.10), Vector2(0.52, 0.30), Vector2(0.58, 0.45), Vector2(0.46, 0.64)]],
@@ -247,19 +251,20 @@ class Over:
 			var pts := PackedVector2Array()
 			for u: Vector2 in crack[1]:
 				pts.append(u * size)
-			draw_polyline(pts, Color(0.05, 0.02, 0.08, 0.9), 3.4, true)
-			draw_polyline(pts, Color(1, 0.85, 0.8, 0.5), 1.1, true)
+			_batch.polyline(pts, Color(0.05, 0.02, 0.08, 0.9), 3.4, true)
+			_batch.polyline(pts, Color(1, 0.85, 0.8, 0.5), 1.1, true)
 		if d > 0.6:
 			for i in 3:
 				var x := size.x * (0.3 + 0.22 * i)
 				var fall := fmod(clock * (0.5 + 0.15 * i) + i * 0.37, 1.0)
-				draw_circle(Vector2(x, size.y * (0.62 + 0.3 * fall)), 2.6 * (1.0 - fall * 0.5), Color(0.8, 0.05, 0.1, 0.9 * (1.0 - fall)))
+				_batch.circle(Vector2(x, size.y * (0.62 + 0.3 * fall)), 2.6 * (1.0 - fall * 0.5), Color(0.8, 0.05, 0.1, 0.9 * (1.0 - fall)))
 		# Оправа.
 		var rust := Color("#c9722b").lerp(Color("#8a2a1a"), d * 0.8)
-		draw_arc(c, r - 3.5, 0.0, TAU, 48, Color("#262422"), 8.0, true)
-		draw_arc(c, r - 3.5, 0.0, TAU, 48, rust, 4.5, true)
+		_batch.arc(c, r - 3.5, 0.0, TAU, 48, Color("#262422"), 8.0, true)
+		_batch.arc(c, r - 3.5, 0.0, TAU, 48, rust, 4.5, true)
 		for i in 4:
 			var a := TAU * i / 4.0 + PI / 4.0
-			draw_circle(c + Vector2.from_angle(a) * (r - 3.5), 3.0, Color("#ffe27a").lerp(Color("#5a3a30"), d))
+			_batch.circle(c + Vector2.from_angle(a) * (r - 3.5), 3.0, Color("#ffe27a").lerp(Color("#5a3a30"), d))
 		if health < 0.25 and health > 0.0:
-			draw_arc(c, r - 2.0, 0.0, TAU, 48, Color(1, 0.15, 0.2, 0.35 + 0.35 * sin(clock * 8.0)), 6.0, true)
+			_batch.arc(c, r - 2.0, 0.0, TAU, 48, Color(1, 0.15, 0.2, 0.35 + 0.35 * sin(clock * 8.0)), 6.0, true)
+		_batch.flush(self)

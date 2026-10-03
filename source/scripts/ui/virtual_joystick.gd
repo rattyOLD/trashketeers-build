@@ -17,6 +17,7 @@ var KNOB_RADIUS := KNOB_RADIUS_DEFAULT
 var _touch_index := -1
 var _base := Vector2.ZERO
 var _knob := Vector2.ZERO
+var _batch := PolyBatch.new()
 
 
 func _init() -> void:
@@ -97,11 +98,13 @@ func _reset() -> void:
 func _draw() -> void:
 	if not is_active():
 		var hint := _hint_position()
-		draw_arc(hint, BASE_RADIUS, 0.0, TAU, 48, Color(1, 1, 1, 0.1), 4.0)
-		draw_circle(hint, KNOB_RADIUS, Color(1, 1, 1, 0.06))
+		_batch.arc(hint, BASE_RADIUS, 0.0, TAU, 48, Color(1, 1, 1, 0.1), 4.0)
+		_batch.circle(hint, KNOB_RADIUS, Color(1, 1, 1, 0.06))
+		_batch.flush(self)
 		return
-	draw_circle(_base, BASE_RADIUS, Color(0.05, 0.02, 0.1, 0.35))
-	draw_arc(_base, BASE_RADIUS, 0.0, TAU, 48, Color(UiStyle.NEON, 0.55), 5.0)
-	draw_circle(_knob, KNOB_RADIUS + 4.0, UiStyle.OUTLINE)
-	draw_circle(_knob, KNOB_RADIUS, Color(UiStyle.NEON, 0.75))
-	draw_circle(_knob + Vector2(-12, -12), KNOB_RADIUS * 0.3, Color(1, 1, 1, 0.35))
+	_batch.circle(_base, BASE_RADIUS, Color(0.05, 0.02, 0.1, 0.35))
+	_batch.arc(_base, BASE_RADIUS, 0.0, TAU, 48, Color(UiStyle.NEON, 0.55), 5.0)
+	_batch.circle(_knob, KNOB_RADIUS + 4.0, UiStyle.OUTLINE)
+	_batch.circle(_knob, KNOB_RADIUS, Color(UiStyle.NEON, 0.75))
+	_batch.circle(_knob + Vector2(-12, -12), KNOB_RADIUS * 0.3, Color(1, 1, 1, 0.35))
+	_batch.flush(self)

@@ -36,6 +36,7 @@ var _timer := 0.0
 var _time := 0.0
 var _panel: StyleBoxFlat
 var _inner: StyleBoxFlat
+var _batch := PolyBatch.new()
 
 
 func setup(level: LevelSpawner, player: Player, enemies: EnemyManager, director: WaveDirector) -> void:
@@ -147,12 +148,12 @@ func _draw() -> void:
 	draw_texture_rect(_texture, Rect2(origin, grid * scale), false, Color(1, 1, 1, 0.95))
 	var y := origin.y
 	while y < origin.y + grid.y * scale:
-		draw_line(Vector2(origin.x, y), Vector2(origin.x + grid.x * scale, y), Color(0, 0, 0, 0.16), 1.0)
+		_batch.line(Vector2(origin.x, y), Vector2(origin.x + grid.x * scale, y), Color(0, 0, 0, 0.16), 1.0)
 		y += 3.0
 	var sweep := fposmod(_time * 0.35, 1.0)
 	var sx := origin.x + grid.x * scale * sweep
-	draw_rect(Rect2(sx - 5.0, origin.y, 10.0, grid.y * scale), Color(FRAME, 0.05))
-	draw_line(Vector2(sx, origin.y), Vector2(sx, origin.y + grid.y * scale), Color(FRAME, 0.28), 1.5)
+	_batch.rect(Rect2(sx - 5.0, origin.y, 10.0, grid.y * scale), Color(FRAME, 0.05))
+	_batch.line(Vector2(sx, origin.y), Vector2(sx, origin.y + grid.y * scale), Color(FRAME, 0.28), 1.5)
 	if pickups != null:
 		for i in pickups.get_count():
 			var at := pickups.position_at(i)
@@ -167,45 +168,47 @@ func _draw() -> void:
 			if pool.visible:
 				var c := _to_map(origin, scale, pool.global_position)
 				var r := maxf(6.0 * pool.scale.x / 2.0, 4.0)
-				draw_circle(c, r, Color(0.48, 1.0, 0.24, 0.28))
-				draw_arc(c, r, 0.0, TAU, 20, Color(0.48, 1.0, 0.24, 0.8), 1.5, true)
+				_batch.circle(c, r, Color(0.48, 1.0, 0.24, 0.28))
+				_batch.arc(c, r, 0.0, TAU, 20, Color(0.48, 1.0, 0.24, 0.8), 1.5, true)
 	var radar := SaveService.get_perk_level("radar")
 	for object in _level.destructibles:
 		if object.kind == DestructibleObject.Kind.WEAPON_CRATE and object.is_intact() and (object.visible or radar > 0):
 			var p := _to_map(origin, scale, object.global_position).clamp(field.position + Vector2.ONE * 4.0, field.end - Vector2.ONE * 4.0)
-			draw_rect(Rect2(p - Vector2.ONE * 4.5, Vector2.ONE * 9.0), Color(0, 0, 0, 0.7))
-			draw_rect(Rect2(p - Vector2.ONE * 3.0, Vector2.ONE * 6.0), object.get_rarity_color())
+			_batch.rect(Rect2(p - Vector2.ONE * 4.5, Vector2.ONE * 9.0), Color(0, 0, 0, 0.7))
+			_batch.rect(Rect2(p - Vector2.ONE * 3.0, Vector2.ONE * 6.0), object.get_rarity_color())
 	if events != null and events.marauder != null and events.marauder.is_alive():
 		var m := _to_map(origin, scale, events.marauder.global_position)
 		var pulse := 6.0 + 2.5 * sin(_time * 9.0)
-		draw_arc(m, pulse, 0.0, TAU, 20, Color("#ffd23f"), 2.0, true)
-		draw_circle(m, 3.5, Color("#ffd23f"))
+		_batch.arc(m, pulse, 0.0, TAU, 20, Color("#ffd23f"), 2.0, true)
+		_batch.circle(m, 3.5, Color("#ffd23f"))
 	for enemy in _enemies.get_active():
 		if enemy.is_alive() and enemy != _director.boss and enemy != (events.marauder if events != null else null):
 			_dot(origin, scale, enemy.global_position, 2.0, Color("#ff4d6d"), true)
 			if radar > 0 and enemy.data.max_hp >= 120.0:
 				var ep := _to_map(origin, scale, enemy.global_position)
-				draw_arc(ep, 5.5 + sin(_time * 7.0), 0.0, TAU, 14, Color("#ffd23f"), 1.5, true)
+				_batch.arc(ep, 5.5 + sin(_time * 7.0), 0.0, TAU, 14, Color("#ffd23f"), 1.5, true)
 	if _director.boss != null and _director.boss.is_alive():
 		_diamond(origin, scale, _director.boss.global_position, 7.0 + sin(_time * 6.0), Color("#ffd23f"))
 	var portal := _level.get_portal()
 	if portal != null and portal.visible:
 		var pp := _to_map(origin, scale, portal.global_position)
 		var pr := 6.0 + sin(_time * 8.0) * 1.5
-		draw_arc(pp, pr + 3.0, 0.0, TAU, 24, Color(PORTAL, 0.6), 2.0, true)
-		draw_circle(pp, pr, PORTAL)
+		_batch.arc(pp, pr + 3.0, 0.0, TAU, 24, Color(PORTAL, 0.6), 2.0, true)
+		_batch.circle(pp, pr, PORTAL)
 	var me := _to_map(origin, scale, _player.global_position)
 	var aim := _player.visual.aim_direction.normalized() if _player.visual.aim_direction.length_squared() > 0.0 else Vector2.UP
-	draw_arc(me, 9.0 + sin(_time * 5.0) * 1.2, 0.0, TAU, 20, Color(FRAME, 0.55), 1.5, true)
+	_batch.arc(me, 9.0 + sin(_time * 5.0) * 1.2, 0.0, TAU, 20, Color(FRAME, 0.55), 1.5, true)
 	var tip := me + aim * 8.0
 	var left := me + aim.rotated(2.5) * 6.0
 	var right := me + aim.rotated(-2.5) * 6.0
-	draw_colored_polygon(PackedVector2Array([tip, left, right]), Color(0, 0, 0, 0.75))
-	draw_colored_polygon(PackedVector2Array([me + aim * 6.5, me + aim.rotated(2.5) * 4.2, me + aim.rotated(-2.5) * 4.2]), FRAME)
+	_batch.polygon(PackedVector2Array([tip, left, right]), Color(0, 0, 0, 0.75))
+	_batch.polygon(PackedVector2Array([me + aim * 6.5, me + aim.rotated(2.5) * 4.2, me + aim.rotated(-2.5) * 4.2]), FRAME)
+	_batch.flush(self)
 	draw_style_box(_inner, Rect2(Vector2.ONE * (INSET - 3.0), size - Vector2.ONE * (INSET - 3.0) * 2.0))
 	for corner in [Vector2(9, 9), Vector2(size.x - 9, 9), Vector2(9, size.y - 9), Vector2(size.x - 9, size.y - 9)]:
-		draw_circle(corner, 3.5, RUST_DARK)
-		draw_circle(corner, 2.2, Color("#f0b060"))
+		_batch.circle(corner, 3.5, RUST_DARK)
+		_batch.circle(corner, 2.2, Color("#f0b060"))
+	_batch.flush(self)
 
 
 func _to_map(origin: Vector2, scale: float, world: Vector2) -> Vector2:
@@ -216,15 +219,15 @@ func _to_map(origin: Vector2, scale: float, world: Vector2) -> Vector2:
 func _dot(origin: Vector2, scale: float, world: Vector2, radius: float, color: Color, outline: bool) -> void:
 	var p := _to_map(origin, scale, world).clamp(Vector2.ONE * (INSET + radius), size - Vector2.ONE * (INSET + radius))
 	if outline:
-		draw_circle(p, radius + 1.0, Color(0, 0, 0, 0.6))
-	draw_circle(p, radius, color)
+		_batch.circle(p, radius + 1.0, Color(0, 0, 0, 0.6))
+	_batch.circle(p, radius, color)
 
 
 func _diamond(origin: Vector2, scale: float, world: Vector2, radius: float, color: Color) -> void:
 	var p := _to_map(origin, scale, world).clamp(Vector2.ONE * (INSET + radius), size - Vector2.ONE * (INSET + radius))
 	var pts := PackedVector2Array([p + Vector2(0, -radius - 1.0), p + Vector2(radius + 1.0, 0), p + Vector2(0, radius + 1.0), p + Vector2(-radius - 1.0, 0)])
-	draw_colored_polygon(pts, Color(0, 0, 0, 0.65))
-	draw_colored_polygon(PackedVector2Array([p + Vector2(0, -radius), p + Vector2(radius, 0), p + Vector2(0, radius), p + Vector2(-radius, 0)]), color)
+	_batch.polygon(pts, Color(0, 0, 0, 0.65))
+	_batch.polygon(PackedVector2Array([p + Vector2(0, -radius), p + Vector2(radius, 0), p + Vector2(0, radius), p + Vector2(-radius, 0)]), color)
 
 
 # --- Сюжетная карта: крупный план вокруг игрока и рельса всей миссии справа ---------------------
@@ -255,13 +258,13 @@ func _draw_story() -> void:
 			if pickups.is_gold_at(i):
 				var g := _to_map(origin, scale, pickups.position_at(i))
 				if inner.has_point(g):
-					draw_circle(g, 2.4, Color("#ff9a1f"))
+					_batch.circle(g, 2.4, Color("#ff9a1f"))
 	for object in _level.destructibles:
 		if object.kind == DestructibleObject.Kind.WEAPON_CRATE and object.is_intact() and object.visible:
 			var c := _to_map(origin, scale, object.global_position)
 			if inner.has_point(c):
-				draw_rect(Rect2(c - Vector2.ONE * 4.5, Vector2.ONE * 9.0), Color(0, 0, 0, 0.75))
-				draw_rect(Rect2(c - Vector2.ONE * 3.0, Vector2.ONE * 6.0), object.get_rarity_color())
+				_batch.rect(Rect2(c - Vector2.ONE * 4.5, Vector2.ONE * 9.0), Color(0, 0, 0, 0.75))
+				_batch.rect(Rect2(c - Vector2.ONE * 3.0, Vector2.ONE * 6.0), object.get_rarity_color())
 	var blink := 0.6 + 0.4 * sin(_time * 6.0)
 	for key: Variant in _level.story_gates:
 		var gate := _level.story_gates[key] as StoryGate
@@ -270,31 +273,32 @@ func _draw_story() -> void:
 		var bar := Rect2(a, Vector2(maxf(b.x - a.x, 6.0), maxf(b.y - a.y, 4.0)))
 		if inner.intersects(bar):
 			var color := Color("#7cff6b") if gate.is_open else Color("#ff3b5c").lerp(Color.WHITE, (1.0 - blink) * 0.5)
-			draw_rect(bar, Color(color, 0.85 if not gate.is_open else 0.5))
+			_batch.rect(bar, Color(color, 0.85 if not gate.is_open else 0.5))
 	for node in get_tree().get_nodes_in_group(&"story_captive"):
 		var p := _to_map(origin, scale, (node as Node2D).global_position)
 		if inner.has_point(p):
-			draw_arc(p, 6.0 + blink, 0.0, TAU, 16, Color("#ffac56"), 2.0, true)
-			draw_circle(p, 2.5, Color("#ffac56"))
+			_batch.arc(p, 6.0 + blink, 0.0, TAU, 16, Color("#ffac56"), 2.0, true)
+			_batch.circle(p, 2.5, Color("#ffac56"))
 	for enemy in _enemies.get_active():
 		if enemy.is_alive() and enemy != _director.boss:
 			var e := _to_map(origin, scale, enemy.global_position)
 			if inner.has_point(e):
-				draw_circle(e, 3.0, Color(0, 0, 0, 0.6))
-				draw_circle(e, 2.2, Color("#ff4d6d"))
+				_batch.circle(e, 3.0, Color(0, 0, 0, 0.6))
+				_batch.circle(e, 2.2, Color("#ff4d6d"))
 	if _director.boss != null and _director.boss.is_alive():
 		var bp := _to_map(origin, scale, _director.boss.global_position)
 		if inner.has_point(bp):
 			_diamond(origin, scale, _director.boss.global_position, 7.0 + sin(_time * 6.0), Color("#ffd23f"))
 	var me := _to_map(origin, scale, _player.global_position)
 	var aim := _player.visual.aim_direction.normalized() if _player.visual.aim_direction.length_squared() > 0.0 else Vector2.UP
-	draw_arc(me, 8.0 + sin(_time * 5.0) * 1.2, 0.0, TAU, 20, Color(FRAME, 0.6), 1.5, true)
-	draw_colored_polygon(PackedVector2Array([me + aim * 8.0, me + aim.rotated(2.5) * 6.0, me + aim.rotated(-2.5) * 6.0]), Color(0, 0, 0, 0.75))
-	draw_colored_polygon(PackedVector2Array([me + aim * 6.5, me + aim.rotated(2.5) * 4.2, me + aim.rotated(-2.5) * 4.2]), FRAME)
+	_batch.arc(me, 8.0 + sin(_time * 5.0) * 1.2, 0.0, TAU, 20, Color(FRAME, 0.6), 1.5, true)
+	_batch.polygon(PackedVector2Array([me + aim * 8.0, me + aim.rotated(2.5) * 6.0, me + aim.rotated(-2.5) * 6.0]), Color(0, 0, 0, 0.75))
+	_batch.polygon(PackedVector2Array([me + aim * 6.5, me + aim.rotated(2.5) * 4.2, me + aim.rotated(-2.5) * 4.2]), FRAME)
 	if not overview and top > 0.5:
 		_edge_arrow(field, true)
 	if not overview and top + rows < grid.y - 0.5:
 		_edge_arrow(field, false)
+	_batch.flush(self)
 	draw_style_box(_inner, field.grow(3.0))
 	_draw_rail(field)
 
@@ -303,7 +307,7 @@ func _edge_arrow(field: Rect2, up: bool) -> void:
 	var x := field.get_center().x
 	var y := field.position.y + 7.0 if up else field.end.y - 7.0
 	var dir := -1.0 if up else 1.0
-	draw_colored_polygon(PackedVector2Array([Vector2(x, y + 5.0 * dir), Vector2(x - 7.0, y - 3.0 * dir), Vector2(x + 7.0, y - 3.0 * dir)]), Color(FRAME, 0.7))
+	_batch.polygon(PackedVector2Array([Vector2(x, y + 5.0 * dir), Vector2(x - 7.0, y - 3.0 * dir), Vector2(x + 7.0, y - 3.0 * dir)]), Color(FRAME, 0.7))
 
 
 ## Рельса всей миссии: зоны цветными полосами, засады и пленники засечками, босс наверху, Енот — стрелкой.

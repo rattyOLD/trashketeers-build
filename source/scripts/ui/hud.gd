@@ -1228,6 +1228,8 @@ func _build_toast() -> Control:
 ## (ScreenTouch), а не GUI: второй палец при зажатом джойстике GUI не получает.
 class SkillButton:
 	extends Control
+
+	var _batch := PolyBatch.new()
 	signal pressed
 
 	var title := ""
@@ -1268,13 +1270,14 @@ class SkillButton:
 		var r := size.x * 0.46 * (1.0 - 0.08 * _press)
 		var ready := cooldown <= 0.001
 		var pulse := 0.5 + 0.5 * sin(_time * 5.0)
-		draw_circle(c, r, Color(0.06, 0.03, 0.12, 0.5))
-		draw_arc(c, r, 0.0, TAU, 48, Color(accent, (0.65 + 0.3 * pulse) if ready else 0.3), 5.0, true)
+		_batch.circle(c, r, Color(0.06, 0.03, 0.12, 0.5))
+		_batch.arc(c, r, 0.0, TAU, 48, Color(accent, (0.65 + 0.3 * pulse) if ready else 0.3), 5.0, true)
 		if not ready:
 			var sweep := PackedVector2Array([c])
 			for i in 33:
 				sweep.append(c + Vector2.from_angle(-PI * 0.5 + TAU * cooldown * i / 32.0) * r)
-			draw_colored_polygon(sweep, Color(0, 0, 0, 0.5))
+			_batch.polygon(sweep, Color(0, 0, 0, 0.5))
+		_batch.flush(self)
 		var font := ThemeDB.fallback_font
 		var alpha := 1.0 if ready else 0.5
 		draw_string_outline(font, Vector2(0, c.y - 4.0), "НАВЫК", HORIZONTAL_ALIGNMENT_CENTER, size.x, int(size.x * 0.2), 6, Color(0.06, 0.03, 0.1))
@@ -1285,6 +1288,8 @@ class SkillButton:
 
 class DashButton:
 	extends Control
+
+	var _batch := PolyBatch.new()
 	signal pressed
 	signal held
 
@@ -1336,25 +1341,26 @@ class DashButton:
 		var c := size * 0.5
 		var r := size.x * 0.46 * (1.0 - 0.08 * _press)
 		var ready := cooldown <= 0.001
-		draw_circle(c, r, Color(0.06, 0.03, 0.12, 0.42))
-		draw_arc(c, r, 0.0, TAU, 48, Color(UiStyle.NEON, 0.75 if ready else 0.3), 5.0, true)
+		_batch.circle(c, r, Color(0.06, 0.03, 0.12, 0.42))
+		_batch.arc(c, r, 0.0, TAU, 48, Color(UiStyle.NEON, 0.75 if ready else 0.3), 5.0, true)
 		if not ready:
 			var sweep := PackedVector2Array([c])
 			var steps := 32
 			for i in steps + 1:
 				sweep.append(c + Vector2.from_angle(-PI * 0.5 + TAU * cooldown * i / steps) * r)
-			draw_colored_polygon(sweep, Color(0, 0, 0, 0.45))
+			_batch.polygon(sweep, Color(0, 0, 0, 0.45))
 		var alpha := 0.95 if ready else 0.45
 		if _max_charges > 1:
 			for i in _max_charges:
 				var dot := c + Vector2((i - (_max_charges - 1) * 0.5) * 22.0, r * 0.66)
-				draw_circle(dot, 7.0, Color(1.000, 0.730, 0.450, 0.95) if i < _charges else Color(0.276, 0.265, 0.248, 0.7))
+				_batch.circle(dot, 7.0, Color(1.000, 0.730, 0.450, 0.95) if i < _charges else Color(0.276, 0.265, 0.248, 0.7))
 		var tip := c + Vector2(30, 0)
 		var arrow := PackedVector2Array([tip, c + Vector2(4, -22), c + Vector2(4, -9), c + Vector2(-20, -9), c + Vector2(-20, 9), c + Vector2(4, 9), c + Vector2(4, 22)])
-		draw_colored_polygon(arrow, Color(1, 1, 1, alpha))
+		_batch.polygon(arrow, Color(1, 1, 1, alpha))
 		for k in 3:
 			var y := -14.0 + k * 14.0
-			draw_line(c + Vector2(-44, y), c + Vector2(-28, y), Color(UiStyle.NEON, alpha), 4.0)
+			_batch.line(c + Vector2(-44, y), c + Vector2(-28, y), Color(UiStyle.NEON, alpha), 4.0)
+		_batch.flush(self)
 		var font := ThemeDB.fallback_font
 		draw_string_outline(font, Vector2(0, size.y + 4), "РЫВОК", HORIZONTAL_ALIGNMENT_CENTER, size.x, 18, 6, Color(0.05, 0.02, 0.1, 0.8))
 		draw_string(font, Vector2(0, size.y + 4), "РЫВОК", HORIZONTAL_ALIGNMENT_CENTER, size.x, 18, Color(1, 1, 1, alpha))
