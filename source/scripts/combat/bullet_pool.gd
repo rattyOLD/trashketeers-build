@@ -14,6 +14,9 @@ signal bullet_hit(bullet: Bullet, target: Node2D)
 signal exploded(at: Vector2, radius: float, color: Color, team: Bullet.Team)
 
 const EXPLOSION_QUERY_LIMIT := 48
+const MAX_BLAST_NESTING := 2
+const MAX_BLASTS_PER_FRAME := 12
+const MAX_BLAST_QUEUE := 96
 ## Порог активных снарядов, после которых новые пули упрощаются (шлейф, свип-луч).
 const LOD_TRAILS_OFF := 70
 const LOD_SWEEP_OFF := 150
@@ -26,6 +29,9 @@ const EXPLOSION_KNOCKBACK := 1.8
 
 var _free: Array[Bullet] = []
 var _active: Array[Bullet] = []
+var _blast_nesting := 0
+var _blasts_this_frame := 0
+var _blast_queue: Array = []
 var _exhausted_warned := false
 ## Окраска всех вражеских снарядов (фаза ярости Сириуса). Альфа 0 — окраски нет.
 var _enemy_tint := Color(0, 0, 0, 0)
@@ -92,6 +98,7 @@ func release(bullet: Bullet) -> void:
 
 ## Вызывать при выходе из боя/смене уровня: пул — автолоад и переживает смену сцен.
 func release_all() -> void:
+	_blast_queue.clear()
 	while not _active.is_empty():
 		release(_active.back())
 
@@ -111,6 +118,12 @@ func get_capacity() -> int:
 
 func _physics_process(delta: float) -> void:
 	_finisher_cd = maxf(_finisher_cd - delta, 0.0)
+	_blasts_this_frame = 0
+	if not _blast_queue.is_empty():
+		var pending := _blast_queue
+		_blast_queue = []
+		for blast: Array in pending:
+			explode(blast[0], blast[1], blast[2], blast[3], blast[4], blast[5], blast[6])
 	var live := _active.size()
 	_lod = 2 if live > LOD_SWEEP_OFF else (1 if live > LOD_TRAILS_OFF else 0)
 	# Обход с конца: swap-remove переносит в i уже обработанный последний элемент,
@@ -196,6 +209,20 @@ func _on_bullet_detonated(bullet: Bullet) -> void:
 func explode(at: Vector2, radius: float, damage: float, team: Bullet.Team, color: Color, knockback: float = 1.0, kind: StringName = &"blast") -> void:
 	if radius <= 0.0 or not is_inside_tree():
 		return
+	# Цепные реакции (взрыв убил врага → тот взорвался → …) не растят стек вызовов: глубже
+	# MAX_BLAST_NESTING и сверх MAX_BLASTS_PER_FRAME взрывы уходят в очередь на следующие кадры.
+	# Раньше плотная толпа с «взрывными» бонусами роняла веб-версию (Maximum call stack size exceeded).
+	if _blast_nesting >= MAX_BLAST_NESTING or _blasts_this_frame >= MAX_BLASTS_PER_FRAME:
+		if _blast_queue.size() < MAX_BLAST_QUEUE:
+			_blast_queue.append([at, radius, damage, team, color, knockback, kind])
+		return
+	_blasts_this_frame += 1
+	_blast_nesting += 1
+	_explode_now(at, radius, damage, team, color, knockback, kind)
+	_blast_nesting -= 1
+
+
+func _explode_now(at: Vector2, radius: float, damage: float, team: Bullet.Team, color: Color, knockback: float, kind: StringName) -> void:
 	var query := _get_blast_query()
 	(query.shape as CircleShape2D).radius = radius
 	query.transform = Transform2D(0.0, at)
