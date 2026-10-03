@@ -1,0 +1,98 @@
+# Тестовая сборка Android: при пуше в ветку собирает подписанный APK и выкладывает его в Releases.
+# Тестеры ставят приложение Obtainium, добавляют ссылку на репозиторий — обновления приходят сами.
+# Нужны секреты репозитория (Settings → Secrets and variables → Actions):
+#   ANDROID_KEYSTORE_BASE64 — base64 файла trashketeers-beta.keystore
+#   ANDROID_KEYSTORE_PASSWORD — пароль хранилища и ключа (алиас trashketeers)
+name: Android beta
+
+on:
+  push:
+    branches: [main, perf/draw-batching]
+    paths: ["source/**", ".github/workflows/android-beta.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  GODOT_VERSION: 4.4.1
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Godot и шаблоны экспорта (кэш)
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/godot
+            ~/.local/share/godot/export_templates
+          key: godot-${{ env.GODOT_VERSION }}-android
+
+      - name: Скачать Godot
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/godot ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+          cd ~/godot
+          curl -sSL -o g.zip https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip
+          unzip -q g.zip && rm g.zip
+          curl -sSL -o t.tpz https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_export_templates.tpz
+          unzip -q t.tpz 'templates/android*' && rm t.tpz
+          mv templates/* ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable/
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Ключи и настройки редактора
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          test -n "$KEYSTORE_BASE64" || { echo "Нет секрета ANDROID_KEYSTORE_BASE64"; exit 1; }
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/beta.keystore"
+          keytool -genkeypair -keystore "$RUNNER_TEMP/debug.keystore" -storepass android -alias androiddebugkey \
+            -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          mkdir -p ~/.config/godot
+          cat > ~/.config/godot/editor_settings-4.4.tres <<EOF
+          [gd_resource type="EditorSettings" format=3]
+
+          [resource]
+          export/android/android_sdk_path = "$ANDROID_HOME"
+          export/android/java_sdk_path = "$JAVA_HOME"
+          export/android/debug_keystore = "$RUNNER_TEMP/debug.keystore"
+          export/android/debug_keystore_user = "androiddebugkey"
+          export/android/debug_keystore_pass = "android"
+          EOF
+
+      - name: Номер версии
+        run: |
+          sed -i "s/^version\/code=.*/version\/code=${GITHUB_RUN_NUMBER}/" source/export_presets.cfg
+          sed -i "s/^version\/name=.*/version\/name=\"beta.${GITHUB_RUN_NUMBER}\"/" source/export_presets.cfg
+
+      - name: Импорт и экспорт APK
+        env:
+          GODOT_ANDROID_KEYSTORE_RELEASE_PATH: ${{ runner.temp }}/beta.keystore
+          GODOT_ANDROID_KEYSTORE_RELEASE_USER: trashketeers
+          GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          GODOT=~/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64
+          $GODOT --headless --path source --import > import.log 2>&1 || true
+          mkdir -p source/build/android
+          $GODOT --headless --path source --export-release "Android" build/android/trashketeers.apk 2>&1 | tee export.log
+          test -f source/build/android/trashketeers.apk
+
+      - name: Выложить в Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: beta-${{ github.run_number }}
+          name: Тестовая сборка ${{ github.run_number }} (${{ github.ref_name }})
+          prerelease: true
+          body: |
+            Ветка ${{ github.ref_name }}, коммит ${{ github.sha }}.
+            Ставится поверх предыдущей тестовой сборки, сохранения остаются.
+          files: source/build/android/trashketeers.apk
