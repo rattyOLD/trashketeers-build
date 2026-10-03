@@ -437,7 +437,10 @@ html, body {
 	var phone = false;
 	try { phone = window.matchMedia('(pointer: coarse)').matches && Math.min(screen.width, screen.height) < 700; } catch (e) {}
 	var judge = function () {
+		var ae = document.activeElement;
+		if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) { return; }
 		var sideways = phone && window.innerWidth > window.innerHeight * 1.05;
+		try { if (phone && screen.orientation && screen.orientation.type) { sideways = sideways && screen.orientation.type.indexOf('landscape') === 0; } } catch (e) {}
 		document.documentElement.classList.toggle('sideways', sideways);
 	};
 	judge();
