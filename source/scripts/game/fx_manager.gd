@@ -773,18 +773,18 @@ func _draw_marks() -> void:
 		var kind := _mk_kind[i]
 		var total: float = MARK_LIFE[kind]
 		var t := 1.0 - life / total
-		var pop := 1.0 + 0.5 * maxf(0.0, 1.0 - t * 4.0)
-		var big := 1.35 if kind == 2 else 1.0
-		var gap := 7.0 * big * pop
-		var length := 10.0 * big * pop
+		var pop := 1.0 + 0.3 * maxf(0.0, 1.0 - t * 4.0)
+		var big := 1.2 if kind == 2 else 1.0
+		var gap := 5.0 * big * pop
+		var length := 6.0 * big * pop
 		var alpha := clampf(life / total * 2.5, 0.0, 1.0)
 		var color := Color(MARK_COLOR[kind], alpha)
 		var shade := Color(OUTLINE, 0.75 * alpha)
 		var p := _mk_pos[i]
 		for k in 4:
 			var dir := Vector2.from_angle(PI * 0.25 + PI * 0.5 * k)
-			_batch.line(p + dir * gap, p + dir * (gap + length), shade, 5.5 * big)
-			_batch.line(p + dir * gap, p + dir * (gap + length), color, 2.6 * big)
+			_batch.line(p + dir * gap, p + dir * (gap + length), shade, 3.6 * big)
+			_batch.line(p + dir * gap, p + dir * (gap + length), color, 1.8 * big)
 
 
 func _draw_ground(canvas: CanvasItem) -> void:

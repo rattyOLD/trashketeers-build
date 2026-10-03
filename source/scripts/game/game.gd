@@ -1460,7 +1460,7 @@ func _celebrate_level_up() -> void:
 	fx.burst(at + Vector2(0, -30), Color("#00f5ff"), 30, 380.0, 4.5)
 	fx.confetti(at + Vector2(0, -30), 30)
 	fx.popup(at + Vector2(0, -110), "УРОВЕНЬ %d!" % level, Color("#7df9ff"), 42.0)
-	SoundManager.play(&"level_up", 0.0, false)
+	SoundManager.play(&"level_up", -9.0, false)
 
 
 func _extra_context() -> String:
