@@ -147,7 +147,7 @@ func _item_row(item: Dictionary, color: Color) -> Control:
 	return row
 
 
-## Мося, кот Рико: гладится в лагере. Закрывает глаза, мурчит. Если тыкать слишком быстро, сердится.
+## Мася, кот Рико: гладится в лагере. Закрывает глаза, мурчит. Если тыкать слишком быстро, сердится.
 func _cat_frame(index: int) -> Texture2D:
 	var atlas := AtlasTexture.new()
 	atlas.atlas = load(MOSYA_FRAMES) as Texture2D
@@ -196,7 +196,7 @@ func _pet_mosya() -> void:
 	SoundManager.play(&"ui_confirm")
 	if _pet_times.size() >= 7:
 		_cat_face.texture = load("res://assets/ui/stickers/mosya_angry.png") as Texture2D
-		_cat_line.text = "Мося: ФШШ. Хватит. Дай подышать."
+		_cat_line.text = "Мася: ФШШ. Хватит. Дай подышать."
 		_show_cat_sticker("mosya_angry")
 		_pet_times.clear()
 	else:
