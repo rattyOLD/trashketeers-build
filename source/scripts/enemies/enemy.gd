@@ -124,6 +124,9 @@ var _flash := 0.0
 var poison_stacks := 0
 var poison_left := 0.0
 var poison_dps := 0.0
+## Яд рывка — один отдельный эффект, не усиливает стаки яда оружия.
+var dash_poison_left := 0.0
+var dash_poison_dps := 0.0
 var bleed_left := 0.0
 var bleed_dps := 0.0
 var bleed_is_burn := false
@@ -234,6 +237,8 @@ func activate(enemy_data: EnemyData, at: Vector2, hp_mult: float = 1.0, dmg_mult
 	_detour_time = 0.0
 	poison_stacks = 0
 	poison_left = 0.0
+	dash_poison_left = 0.0
+	dash_poison_dps = 0.0
 	bleed_left = 0.0
 	slow_left = 0.0
 	stagger = 0.0
@@ -518,7 +523,7 @@ func tick(delta: float, player: Player, nav: Callable = Callable()) -> void:
 	_block_cooldown -= delta
 	_charge_cd -= delta
 	_blink_cd -= delta
-	if _status_key != 0 or poison_left > 0.0 or bleed_left > 0.0 or slow_left > 0.0 or stagger > 0.0 or stun_left > 0.0 or posture_stun > 0.0 or posture > 0.0 or _posture_cd > 0.0 or _stun_cd > 0.0:
+	if _status_key != 0 or poison_left > 0.0 or dash_poison_left > 0.0 or bleed_left > 0.0 or slow_left > 0.0 or stagger > 0.0 or stun_left > 0.0 or posture_stun > 0.0 or posture > 0.0 or _posture_cd > 0.0 or _stun_cd > 0.0:
 		_tick_status(delta)
 		if data == null:
 			return
@@ -712,7 +717,15 @@ func add_slow(amount: float, duration: float) -> void:
 	slow_left = maxf(slow_left, duration)
 
 
+func add_dash_poison(dps: float) -> void:
+	dash_poison_dps = maxf(dash_poison_dps, clampf(dps, 0.0, 7.0))
+	dash_poison_left = 3.0
+
+
 func _tick_status(delta: float) -> void:
+	dash_poison_left = maxf(dash_poison_left - delta, 0.0)
+	if dash_poison_left <= 0.0:
+		dash_poison_dps = 0.0
 	if poison_left > 0.0:
 		poison_left -= delta
 		if poison_left <= 0.0:
@@ -741,11 +754,13 @@ func _tick_status(delta: float) -> void:
 		_status_tick = STATUS_TICK
 		if poison_stacks > 0:
 			_take_dot(poison_stacks * poison_dps * STATUS_TICK, "poison")
+		if is_alive() and dash_poison_left > 0.0:
+			_take_dot(dash_poison_dps * STATUS_TICK, "poison")
 		if is_alive() and bleed_left > 0.0:
 			_take_dot(bleed_dps * STATUS_TICK, "burn" if bleed_is_burn else "bleed")
 		if data == null:
 			return
-	var key := (1 if poison_stacks > 0 else 0) | (2 if bleed_left > 0.0 else 0) | (4 if slow_left > 0.0 else 0) | (8 if stun_left > 0.0 or posture_stun > 0.0 else 0)
+	var key := (1 if poison_stacks > 0 or dash_poison_left > 0.0 else 0) | (2 if bleed_left > 0.0 else 0) | (4 if slow_left > 0.0 else 0) | (8 if stun_left > 0.0 or posture_stun > 0.0 else 0)
 	if key != _status_key:
 		_status_key = key
 		var tint := data.sprite_modulate

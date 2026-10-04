@@ -667,6 +667,90 @@
       "category": "rail",
       "rarity": "common",
       "rail_only": true
+    },
+    {
+      "upgrade_id": "dodge_impact",
+      "title": "Таран",
+      "description": "18 урона сквозь врага, +6 за уровень. До 8 целей за рывок; 3 уровня.",
+      "stat": "dodge_damage",
+      "value": 1,
+      "max_stacks": 3,
+      "category": "dash",
+      "rarity": "common",
+      "requires": [],
+      "color": "#64d8f5",
+      "weight": 0.8
+    },
+    {
+      "upgrade_id": "dodge_blast",
+      "title": "Взрывной рывок",
+      "description": "Первый контакт: взрыв 14/20 урона в радиусе 72. Одна стихия, до 2 уровней.",
+      "stat": "dodge_blast",
+      "value": 1,
+      "max_stacks": 2,
+      "category": "dash_element",
+      "rarity": "rare",
+      "requires": [
+        "dodge_impact"
+      ],
+      "color": "#ff9b32",
+      "weight": 0.8
+    },
+    {
+      "upgrade_id": "dodge_poison",
+      "title": "Ядовитый рывок",
+      "description": "Яд на 3 с: 4/7 урона в секунду, без стаков. Одна стихия, до 2 уровней.",
+      "stat": "dodge_poison",
+      "value": 1,
+      "max_stacks": 2,
+      "category": "dash_element",
+      "rarity": "rare",
+      "requires": [
+        "dodge_impact"
+      ],
+      "color": "#6ee067",
+      "weight": 0.8
+    },
+    {
+      "upgrade_id": "dodge_shock",
+      "title": "Искровой рывок",
+      "description": "Первый контакт: молния в 2 соседние цели на 18/24 урона. Одна стихия, до 2 уровней.",
+      "stat": "dodge_shock",
+      "value": 1,
+      "max_stacks": 2,
+      "category": "dash_element",
+      "rarity": "rare",
+      "requires": [
+        "dodge_impact"
+      ],
+      "color": "#6adcff",
+      "weight": 0.8
+    },
+    {
+      "upgrade_id": "dodge_recovery",
+      "title": "Быстрые лапы",
+      "description": "Перезарядка −0,5 с. До 3 уровней; минимум 3,5 с.",
+      "stat": "dodge_cooldown",
+      "value": 0.5,
+      "max_stacks": 3,
+      "category": "dash",
+      "rarity": "common",
+      "requires": [],
+      "color": "#64d8f5",
+      "weight": 0.8
+    },
+    {
+      "upgrade_id": "dodge_distance",
+      "title": "Широкий шаг",
+      "description": "Дальность +10%, до 2 уровней (+20%). Стены останавливают рывок.",
+      "stat": "dodge_distance",
+      "value": 0.1,
+      "max_stacks": 2,
+      "category": "dash",
+      "rarity": "common",
+      "requires": [],
+      "color": "#64d8f5",
+      "weight": 0.8
     }
   ]
 }

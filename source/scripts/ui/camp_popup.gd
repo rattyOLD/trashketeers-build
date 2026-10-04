@@ -40,7 +40,11 @@ func _init() -> void:
 	note.custom_minimum_size = Vector2(520, 0)
 	content.add_child(note)
 	content.add_child(_online_plate())
-	_list = MenuPopups.scroll_list(content)
+	if Orient.portrait:
+		_list = MenuPopups.scroll_list(content)
+	else:
+		_list = VBoxContainer.new()
+		content.add_child(_list)
 	_resume = UiStyle.button("ПРОДОЛЖИТЬ С ЧЕКПОИНТА", Color("#1d8fb0"), 26, Vector2(0, 70))
 	_resume.pressed.connect(func() -> void:
 		SaveService.resume_requested = true
@@ -73,8 +77,16 @@ func _refresh() -> void:
 	if not resume.is_empty():
 		_resume.text = ("ПРОДОЛЖИТЬ: У ДВЕРИ БОССА · ЖИЗНИ %d" % int(resume.get("lives", 3))) if bool(resume.get("boss_door", false)) else ("ПРОДОЛЖИТЬ: ЗОНА %d · ЖИЗНИ %d" % [int(resume.get("zone", 0)) + 1, int(resume.get("lives", 3))])
 	MenuPopups.clear(_list)
+	var traders := BoxContainer.new()
+	traders.vertical = Orient.portrait
+	traders.add_theme_constant_override("separation", 12)
+	_list.add_child(traders)
 	for trader_id in TRADERS:
-		_list.add_child(_trader_card(trader_id))
+		var card := _trader_card(trader_id)
+		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		if not Orient.portrait:
+			card.custom_minimum_size.x = (panel_width() - 84.0) * 0.5
+		traders.add_child(card)
 
 
 func _trader_card(trader_id: String) -> Control:

@@ -10,6 +10,7 @@ signal reroll_requested
 signal upgrade_pressed
 signal restart_pressed
 signal menu_pressed
+signal dash_pressed
 signal skill_pressed
 signal slot_pressed(index: int)
 signal interact_pressed
@@ -64,8 +65,9 @@ var _toast_text: Label
 var _weapon_chip: PanelContainer
 var _weapon_icon: WeaponIcons.IconRect
 var _weapon_name: Label
-const HUD_TEXT_BOOST := 1.3
+const HUD_TEXT_BOOST := 1.1
 var _skill: SkillButton
+var _dash: SkillButton
 var _rail_combo: Label
 var _slot_bar: BattleControls.SlotBar
 var _interact: BattleControls.InteractButton
@@ -95,7 +97,7 @@ var _story_bar: StoryBar
 var _minimap: Minimap
 var _toast_queue: Array = []
 var _toast_busy := false
-var _toast_y := 700.0 if Orient.portrait else 440.0
+var _toast_y := 700.0 if Orient.portrait else 116.0
 ## Телефон (портрет): вся шапка — один блок BAND_W×BAND_H в своих координатах, который масштабируется,
 ## чтобы занимать сверху не больше BAND_SHARE высоты экрана; ниже — только игра и кнопки управления.
 ## Нижняя строка блока — лента событий (заставки волн, отсчёт, глава, баннеры, тосты, комбо).
@@ -150,8 +152,8 @@ func build(currency_icon: Texture2D, weapon: WeaponData) -> void:
 	top.add_child(_wave_box)
 	_barks = HudBarks.new()
 	# Рация живёт в левой колонке под заданиями: так её не перекрывают ни карта, ни плашка заказа.
-	_barks.custom_minimum_size = RADIO_RECT.size if Orient.portrait else Vector2(400, 150)
-	_barks.clip_contents = Orient.portrait
+	_barks.custom_minimum_size = RADIO_RECT.size if Orient.portrait else Vector2(360, 94)
+	_barks.clip_contents = true
 	_barks.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	_left_column.add_child(_barks)
 	_rail_combo = UiStyle.label("", 22, UiStyle.GOLD, 8)
@@ -175,6 +177,13 @@ func build(currency_icon: Texture2D, weapon: WeaponData) -> void:
 	_skill.visible = false
 	_skill.pressed.connect(func() -> void: skill_pressed.emit())
 	_root.add_child(_skill)
+	_dash = SkillButton.new()
+	_dash.caption = "РЫВОК"
+	_dash.title = "Уклонение"
+	_dash.action = &"dodge"
+	_dash.accent = Color("#6adcff")
+	_dash.pressed.connect(func() -> void: dash_pressed.emit())
+	_root.add_child(_dash)
 	_slot_bar = BattleControls.SlotBar.new()
 	_slot_bar.slot_pressed.connect(func(i: int) -> void: slot_pressed.emit(i))
 	_root.add_child(_slot_bar)
@@ -229,6 +238,7 @@ func build(currency_icon: Texture2D, weapon: WeaponData) -> void:
 	_hold = LayoutHold.new()
 	_hold.targets = {
 		"dash": _hold_dash,
+		"dodge": element_node.bind("dodge"),
 		"slots": _hold_slots,
 		"interact": _hold_interact,
 	}
@@ -271,7 +281,7 @@ func set_story_layout(minimap: Minimap) -> void:
 	_xp_row.visible = false
 	_wave_box.visible = false
 	_enemies_chip.visible = false
-	_toast_y = 700.0 if Orient.portrait else 440.0
+	_toast_y = 700.0 if Orient.portrait else 116.0
 	if _band == null:
 		_rail_combo.offset_top = 480.0
 		_rail_combo.offset_bottom = 512.0
@@ -293,9 +303,9 @@ func set_story_layout(minimap: Minimap) -> void:
 		_boss_bar.anchor_bottom = 0.0
 		_boss_bar.offset_left = 300.0
 		_boss_bar.offset_right = -300.0
-		_boss_bar.offset_top = 600.0
-		_boss_bar.offset_bottom = 684.0
-	UiStyle.anchor(_minimap_slot, Vector2(1.0, 0.0), Rect2(-142, 172, 124, 110) if Orient.portrait else Rect2(-150, 150, 132, 230))
+		_boss_bar.offset_top = 30.0
+		_boss_bar.offset_bottom = 96.0
+	UiStyle.anchor(_minimap_slot, Vector2(1.0, 0.0), Rect2(-142, 172, 124, 110) if Orient.portrait else Rect2(-162, 186, 144, 144))
 	_minimap = minimap
 	minimap.tapped.connect(func(overview: bool) -> void:
 		_hint.show_for(_minimap_slot, "Карта. Тап: %s." % ("крупный план" if overview else "вся карта")))
@@ -524,6 +534,8 @@ func element_node(id: String) -> Control:
 	match id:
 		"dash":
 			return _hold_dash()
+		"dodge":
+			return _dash
 		"slots":
 			return _slot_bar
 		"interact":
@@ -533,7 +545,7 @@ func element_node(id: String) -> Control:
 
 func editable_ids() -> Array[String]:
 	var ids: Array[String] = []
-	for id in ["dash", "slots", "interact"]:
+	for id in Controls.ELEMENTS:
 		if _visible_node(element_node(id)):
 			ids.append(id)
 	for id in Controls.HUD_ELEMENTS:
@@ -680,14 +692,17 @@ func _dock_boss_bar() -> void:
 func apply_layout() -> void:
 	if _root == null or _slot_bar == null:
 		return
+	ScreenSafeArea.fit(_root, get_viewport().get_visible_rect().size)
 	_fit_band()
 	var area := _root.size
 	Controls.place(_skill, "dash", area)
+	Controls.place(_dash, "dodge", area)
 	Controls.place(_slot_bar, "slots", area, BattleControls.slots_base_size(_slot_bar.count))
 	Controls.place(_interact, "interact", area)
 	_resolve_button_overlap(area)
 	var opacity := clampf(float(Controls.get_value("opacity")), 0.3, 1.0)
 	_skill.modulate.a = opacity * Controls.element_opacity("dash")
+	_dash.modulate.a = opacity * Controls.element_opacity("dodge")
 	_slot_bar.modulate.a = opacity * Controls.element_opacity("slots")
 	_interact.modulate.a = Controls.element_opacity("interact")
 	joystick.modulate.a = opacity
@@ -696,7 +711,12 @@ func apply_layout() -> void:
 
 
 func _resolve_button_overlap(area: Vector2) -> void:
-	var main_btn: Control = _skill
+	for button in [_dash, _skill]:
+		button.position.x = clampf(button.position.x, 4.0, area.x - button.size.x - 4.0)
+	var skill_rect := Rect2(_skill.position, _skill.size).grow(10.0)
+	if skill_rect.intersects(Rect2(_dash.position, _dash.size)):
+		_dash.position.x = _skill.position.x - 14.0 - _dash.size.x if _skill.position.x > area.x * 0.5 else _skill.position.x + _skill.size.x + 14.0
+	var main_btn: Control = _dash
 	var slot_rect := Rect2(_slot_bar.position, _slot_bar.size).grow(6.0)
 	if not slot_rect.intersects(Rect2(main_btn.position, main_btn.size)):
 		return
@@ -712,6 +732,11 @@ func set_skill(title: String, color: Color) -> void:
 	_skill.title = title
 	_skill.accent = color
 	_skill.queue_redraw()
+
+
+func set_dash_cooldown(remaining: float, total: float) -> void:
+	_dash.cooldown = clampf(remaining / maxf(total, 0.001), 0.0, 1.0)
+	_dash.seconds = remaining
 
 
 func set_skill_cooldown(fraction: float) -> void:
@@ -1047,7 +1072,7 @@ func _next_toast() -> void:
 		return
 	var item: Array = _toast_queue.pop_front()
 	_toast_item = item
-	var half := minf(300.0, (_root.size.x - 36.0) * 0.5)
+	var half := minf(240.0, (_root.size.x - 36.0) * 0.5)
 	var shift := 0.0
 	if _band != null:
 		half = 350.0
@@ -1061,8 +1086,8 @@ func _next_toast() -> void:
 	_toast.custom_minimum_size = Vector2(half * 2.0, 0.0)
 	_toast_title.text = item[0]
 	_toast_text.text = item[1]
-	_fit_font(_toast_title, _band_font(18) if _band != null else 28, half * 2.0 - 48.0)
-	_fit_font(_toast_text, _band_font(13) if _band != null else 20, half * 2.0 - 48.0)
+	_fit_font(_toast_title, _band_font(18) if _band != null else 20, half * 2.0 - 48.0)
+	_fit_font(_toast_text, _band_font(13) if _band != null else 16, half * 2.0 - 48.0)
 	if _band != null:
 		# Тост целиком помещается в строку событий (EVENT_H) и не заходит за нижнюю границу шапки.
 		var panel := _toast.get_theme_stylebox("panel") as StyleBoxFlat
@@ -1123,7 +1148,7 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 
 	var left := VBoxContainer.new()
 	left.add_theme_constant_override("separation", 6)
-	left.custom_minimum_size = Vector2(LEFT_W if Orient.portrait else 440, 0)
+	left.custom_minimum_size = Vector2(LEFT_W if Orient.portrait else 360, 0)
 	if Orient.portrait:
 		# Контейнеры сбрасывают масштаб, поэтому колонка живёт в обёртке и увеличена вручную.
 		var wrap := Control.new()
@@ -1143,7 +1168,7 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	# Шапка как в современных мобильных экшенах: портрет с уровнем, широкие полосы HP и опыта, ниже ряд плашек.
 	# Оправа портрета и полоса здоровья стыкуются в одну деталь: полоса «выходит» из-под кольца.
 	var head := Control.new()
-	head.custom_minimum_size = Vector2(0, 108)
+	head.custom_minimum_size = Vector2(0, 86)
 	head.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	left.add_child(head)
 	var bars := VBoxContainer.new()
@@ -1151,11 +1176,11 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	_bars_box = bars
 	bars.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	bars.anchor_right = 1.0
-	bars.offset_left = 92.0
+	bars.offset_left = 72.0
 	bars.offset_top = 10.0
 	head.add_child(bars)
 	var hp_stack := Control.new()
-	hp_stack.custom_minimum_size = Vector2(0, 40)
+	hp_stack.custom_minimum_size = Vector2(0, 34)
 	bars.add_child(hp_stack)
 	_hp_bar = HudWidgets.OutlineBar.new(HudWidgets.OutlineBar.HP_COLORS)
 	_hp_bar.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -1178,7 +1203,7 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	_xp_row.add_child(_xp_title)
 	var xp_stack := Control.new()
 	xp_stack.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	xp_stack.custom_minimum_size = Vector2(0, 24)
+	xp_stack.custom_minimum_size = Vector2(0, 20)
 	_xp_row.add_child(xp_stack)
 	_xp_bar = HudWidgets.OutlineBar.new(HudWidgets.OutlineBar.XP_COLORS)
 	_xp_bar.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -1189,6 +1214,7 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 
 	_portrait = HudWidgets.DamagePortrait.new()
 	_portrait.position = Vector2(0, 0)
+	_portrait.scale = Vector2.ONE * 0.74
 	_portrait.set_character(SaveService.get_character())
 	head.add_child(_portrait)
 	if Orient.portrait:
@@ -1205,7 +1231,7 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	medal.shadow_size = 3
 	_level_badge.add_theme_stylebox_override("panel", medal)
 	_level_badge.custom_minimum_size = Vector2(38, 36)
-	_level_badge.position = Vector2(98, 76) * (PORTRAIT_SCALE if Orient.portrait else 1.0)
+	_level_badge.position = Vector2(98, 76) * (PORTRAIT_SCALE if Orient.portrait else 0.74)
 	if Orient.portrait:
 		_level_badge.scale = Vector2.ONE * PORTRAIT_SCALE
 	_level_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -1276,7 +1302,7 @@ func _build_wave_chip() -> Control:
 	_wave_box = PanelContainer.new()
 	_wave_box.add_theme_stylebox_override("panel", UiStyle.box(Color(0.138, 0.132, 0.124, 0.6), Color(UiStyle.GOLD, 0.7), 3, 20))
 	_wave_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	UiStyle.anchor(_wave_box, Vector2(1.0, 0.0), Rect2(-194, 164, 176, 34))
+	UiStyle.anchor(_wave_box, Vector2(1.0, 0.0), Rect2(-162, 154, 144, 30))
 	_wave_label = UiStyle.label("ВОЛНА 1", 15, UiStyle.GOLD, 4)
 	_wave_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_wave_box.add_child(_wave_label)
@@ -1303,7 +1329,7 @@ func _build_boss_bar() -> Control:
 	if Orient.portrait:
 		UiStyle.anchor(_boss_bar, Vector2(0.0, 0.0), RADIO_RECT)
 	else:
-		UiStyle.anchor(_boss_bar, Vector2(0.5, 0.0), Rect2(-240, 384, 480, 84))
+		UiStyle.anchor(_boss_bar, Vector2(0.5, 0.0), Rect2(-220, 30, 440, 66))
 	_boss_bar.visible = false
 	return _boss_bar
 
@@ -1358,7 +1384,7 @@ func _build_minimap_slot() -> Control:
 func _minimap_rect(big: bool) -> Rect2:
 	if Orient.portrait:
 		return Rect2(-314, 172, 296, 296) if big else Rect2(-128, 172, 110, 110)
-	return Rect2(-314, 176, 296, 296) if big else Rect2(-194, 176, 176, 176)
+	return Rect2(-314, 186, 296, 296) if big else Rect2(-162, 186, 144, 144)
 
 
 func _build_weapon_chip(weapon: WeaponData) -> Control:
@@ -1383,8 +1409,8 @@ func _build_toast() -> Control:
 	_toast.add_theme_stylebox_override("panel", UiStyle.box(Color(0.184, 0.177, 0.166, 0.92), UiStyle.GOLD, 4, 22))
 	_toast.anchor_left = 0.5
 	_toast.anchor_right = 0.5
-	_toast.offset_left = -300.0
-	_toast.offset_right = 300.0
+	_toast.offset_left = -240.0
+	_toast.offset_right = 240.0
 	_toast.visible = false
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 2)
@@ -1405,6 +1431,9 @@ class SkillButton:
 	signal pressed
 
 	var title := ""
+	var caption := "НАВЫК"
+	var action: StringName = &"dash"
+	var seconds := 0.0
 	var accent := UiStyle.GOLD
 	var cooldown := 0.0:
 		set(value):
@@ -1438,6 +1467,8 @@ class SkillButton:
 			queue_redraw()
 
 	func _draw() -> void:
+		if size.x < 2.0:
+			return
 		var c := size * 0.5
 		var r := size.x * 0.46 * (1.0 - 0.08 * _press)
 		var ready := cooldown <= 0.001
@@ -1452,10 +1483,28 @@ class SkillButton:
 		_batch.flush(self)
 		var font := ThemeDB.fallback_font
 		var alpha := 1.0 if ready else 0.5
-		draw_string_outline(font, Vector2(0, c.y - 4.0), "НАВЫК", HORIZONTAL_ALIGNMENT_CENTER, size.x, int(size.x * 0.2), 6, Color(0.06, 0.03, 0.1))
-		draw_string(font, Vector2(0, c.y - 4.0), "НАВЫК", HORIZONTAL_ALIGNMENT_CENTER, size.x, int(size.x * 0.2), Color(accent, alpha))
-		draw_string_outline(font, Vector2(6, c.y + size.x * 0.2), title, HORIZONTAL_ALIGNMENT_CENTER, size.x - 12.0, int(size.x * 0.15), 5, Color(0.06, 0.03, 0.1))
-		draw_string(font, Vector2(6, c.y + size.x * 0.2), title, HORIZONTAL_ALIGNMENT_CENTER, size.x - 12.0, int(size.x * 0.15), Color(1, 1, 1, alpha * 0.85))
+		draw_string_outline(font, Vector2(0, c.y - 4.0), caption, HORIZONTAL_ALIGNMENT_CENTER, size.x, int(size.x * 0.2), 6, Color(0.06, 0.03, 0.1))
+		draw_string(font, Vector2(0, c.y - 4.0), caption, HORIZONTAL_ALIGNMENT_CENTER, size.x, int(size.x * 0.2), Color(accent, alpha))
+		var words := title.split(" ")
+		var lines: Array[String] = [""]
+		var small := int(size.x * 0.115)
+		for word in words:
+			var combined: String = (lines.back() + " " + word).strip_edges()
+			if font.get_string_size(combined, HORIZONTAL_ALIGNMENT_LEFT, -1, small).x > size.x * 0.82 and not lines.back().is_empty():
+				lines.append(word)
+			else:
+				lines[lines.size() - 1] = combined
+		for i in mini(lines.size(), 2):
+			var text: String = lines[i]
+			while font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, small).x > size.x * 0.82 and text.length() > 2:
+				text = text.substr(0, text.length() - 2) + "…"
+			draw_string(font, Vector2(size.x * 0.09, c.y + size.x * (0.11 + i * 0.13)), text, HORIZONTAL_ALIGNMENT_CENTER, size.x * 0.82, small, Color(1, 1, 1, alpha * 0.9))
+		var status := ("%.1f с" % seconds if seconds > 0.01 else "ЗАРЯДКА") if not ready else "ГОТОВО"
+		if not Platform.is_touch() and ready:
+			var keys := Controls.keys_for(action)
+			if not keys.is_empty():
+				status = Controls.key_title(int(keys[0]))
+		draw_string(font, Vector2(0, size.y * 0.86), status, HORIZONTAL_ALIGNMENT_CENTER, size.x, int(size.x * 0.1), Color(accent, alpha))
 
 
 class PausePanel:

@@ -31,7 +31,7 @@ func owns(touch_index: int) -> bool:
 
 
 func in_zone(point: Vector2) -> bool:
-	return _in_zone(point)
+	return _in_zone(get_global_transform().affine_inverse() * point)
 
 
 func is_active() -> bool:
@@ -46,25 +46,26 @@ func _notification(what: int) -> void:
 func _input(event: InputEvent) -> void:
 	if event is InputEventScreenTouch:
 		var touch := event as InputEventScreenTouch
+		var point := get_global_transform().affine_inverse() * touch.position
 		if touch.canceled and touch.index == _touch_index:
 			_reset()
 			return
-		if touch.pressed and _in_zone(touch.position) and _touch_index != -1 and touch.index != _touch_index:
+		if touch.pressed and _in_zone(point) and _touch_index != -1 and touch.index != _touch_index:
 			_reset()
-		if touch.pressed and _touch_index == -1 and _in_zone(touch.position):
+		if touch.pressed and _touch_index == -1 and _in_zone(point):
 			var scale := float(Controls.get_value("joystick_scale"))
 			BASE_RADIUS = BASE_RADIUS_DEFAULT * scale
 			KNOB_RADIUS = KNOB_RADIUS_DEFAULT * scale
 			_touch_index = touch.index
-			_base = _hint_position() if bool(Controls.get_value("joystick_fixed")) else touch.position
-			_knob = touch.position
+			_base = _hint_position() if bool(Controls.get_value("joystick_fixed")) else point
+			_knob = point
 			_update_output()
 		elif not touch.pressed and touch.index == _touch_index:
 			_reset()
 	elif event is InputEventScreenDrag:
 		var drag := event as InputEventScreenDrag
 		if drag.index == _touch_index:
-			_knob = drag.position
+			_knob = get_global_transform().affine_inverse() * drag.position
 			_update_output()
 
 

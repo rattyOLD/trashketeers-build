@@ -14,7 +14,7 @@ signal story_requested(weapon_id: StringName)
 
 enum Mode { SURVIVAL, RAID, STORY }
 
-const RIGHT_WIDTH := 540.0
+const RIGHT_WIDTH := 580.0
 const COLUMN_WIDTH := 680.0
 const PLAY_GREEN := Color("#7ed321")
 const LOGO_FONT := "res://assets/fonts/RussoOne-Regular.ttf"
@@ -202,8 +202,11 @@ func _build_landscape_layout() -> Control:
 	margin.add_theme_constant_override("margin_left", 30)
 	margin.add_theme_constant_override("margin_right", 30)
 	margin.add_theme_constant_override("margin_top", 14)
-	margin.add_theme_constant_override("margin_bottom", 12)
+	margin.add_theme_constant_override("margin_bottom", 24)
 	add_child(margin)
+	var fit_safe := func() -> void: ScreenSafeArea.fit(margin, get_viewport_rect().size)
+	resized.connect(fit_safe)
+	fit_safe.call_deferred()
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 8)
 	margin.add_child(column)

@@ -66,7 +66,7 @@ func open(choices: Array[UpgradeData], level: int, stats: RunStats, bonus: bool 
 func _make_card(upgrade: UpgradeData, index: int, stats: RunStats) -> Button:
 	var accent := upgrade.rarity_color() if upgrade.category != "evolution" else Color("#ff5cf0")
 	var text_width := 540.0 if Orient.portrait else 300.0
-	var card := UiStyle.button("", UiStyle.PANEL_LIGHT, 28, Vector2(600, 122) if Orient.portrait else Vector2(340, 210))
+	var card := UiStyle.button("", UiStyle.PANEL_LIGHT, 28, Vector2(600, 122) if Orient.portrait else Vector2(340, 280))
 	var border := 6 if upgrade.rarity_rank > 0 else 4
 	card.add_theme_stylebox_override("normal", UiStyle.box(UiStyle.PANEL_LIGHT.darkened(0.15), accent, border, 22))
 	card.add_theme_stylebox_override("hover", UiStyle.box(UiStyle.PANEL_LIGHT.lightened(0.08), accent.lightened(0.25), border, 22))
@@ -104,6 +104,9 @@ func _make_card(upgrade: UpgradeData, index: int, stats: RunStats) -> Button:
 	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	desc.custom_minimum_size = Vector2(text_width, 0)
 	column.add_child(desc)
+	if not Orient.portrait:
+		column.minimum_size_changed.connect(func() -> void:
+			card.custom_minimum_size.y = maxf(280.0, column.get_combined_minimum_size().y + 16.0))
 	return card
 
 

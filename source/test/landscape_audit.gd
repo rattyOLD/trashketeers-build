@@ -51,7 +51,7 @@ func _run() -> void:
 	previous["auto_pick"] = true
 	SaveService.data["controls"] = previous
 	var migrated := Controls.config()
-	_check(int(migrated["layout_v"]) == 10 and migrated.has("portrait_layout_backup"), "old layout backed up and migrated")
+	_check(int(migrated["layout_v"]) == 11 and migrated.has("portrait_layout_backup"), "old layout backed up and migrated")
 	_check(bool(migrated["left_handed"]) and bool(migrated["auto_pick"]) and int(migrated["keys"]["dash"][0]) == KEY_X, "preferences and bindings preserved")
 	_check(float(migrated["portrait_layout_backup"]["layout"]["dash"]["s"]) == 1.2, "custom portrait layout remains in backup")
 	Controls.apply_preset(false)
@@ -108,6 +108,14 @@ func _run() -> void:
 		await _shot(id.trim_prefix("_"))
 		popup.visible = false
 		GlassPopup._open_stack.erase(popup)
+	var loading := LoadingScreen.new()
+	main.add_child(loading)
+	loading.set_progress(78.0)
+	await _settle()
+	_inside(loading._title, "native loading title")
+	_inside(loading._bar, "native loading progress")
+	await _shot("loading")
+	loading.queue_free()
 	var editor := ControlEditor.new()
 	menu.add_child(editor)
 	editor.open()
@@ -123,9 +131,23 @@ func _run() -> void:
 		battle.start()
 		await _settle()
 		_inside(battle.hud._skill, mode + " skill")
+		_inside(battle.hud._dash, mode + " dash")
 		_inside(battle.hud._slot_bar, mode + " weapon slots")
 		_inside(battle.hud._interact, mode + " pickup")
+		_check(is_equal_approx(battle.camera.zoom.x, 1.05), mode + " camera shows more arena")
 		await _shot(mode)
+		await get_tree().create_timer(3.0).timeout
+		battle.hud._barks.say("heal", true)
+		battle.hud.toast("АДРЕНАЛИН!", "+35% скорострельности и +15% скорости на 20 с")
+		await _settle()
+		await _shot(mode + "-combat")
+		var dash_touch := InputEventScreenTouch.new()
+		dash_touch.pressed = true
+		dash_touch.index = 1
+		dash_touch.position = battle.hud._dash.get_global_rect().get_center()
+		battle.player.dash_remaining = 0.0
+		battle.hud._dash._input(dash_touch)
+		_check(battle.player.dash_remaining > 0.0, mode + " dash touch activates")
 		battle._open_pause()
 		await _settle()
 		_inside(battle.hud._pause._panel, mode + " pause")
@@ -140,6 +162,19 @@ func _run() -> void:
 			_inside(game.hud._level_up._box, "upgrade choices")
 			await _shot("level-up")
 			game.hud._level_up._pick(0)
+			var dash_choices: Array[UpgradeData] = []
+			for upgrade in ContentDB.get_upgrades():
+				if upgrade.category in ["dash", "dash_element"]:
+					dash_choices.append(upgrade)
+			for group in [dash_choices.slice(0, 3), dash_choices.slice(3, 6)]:
+				game.hud._level_up.open(group, 8, game.stats)
+				await _settle()
+				for card in game.hud._level_up._cards.get_children():
+					_inside(card, "dash upgrade card")
+					for label in card.get_child(0).get_children():
+						_check(card.get_global_rect().grow(1.0).encloses(label.get_global_rect()), "dash card text fits " + label.text + " " + str(label.get_global_rect()) + " inside " + str(card.get_global_rect()))
+				await _shot("dash-perks-" + str(group[0].id))
+			game.hud._level_up.visible = false
 		battle._show_result(false, PackedStringArray(["Тест результата", "Врагов: 123", "Монет: 42", "Уровень: 8", "Время: 10:30", "Совет: продолжай играть"]))
 		await _settle()
 		_inside(battle.hud._result._panel, mode + " result")

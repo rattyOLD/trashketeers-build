@@ -30,7 +30,7 @@ var _floating_close: Button
 
 
 static func panel_width() -> float:
-	return 620.0 if Orient.portrait else 900.0
+	return 620.0 if Orient.portrait else 1120.0
 
 
 func _init(title_text: String) -> void:
@@ -186,7 +186,10 @@ func _refresh() -> void:
 func _fit_popup_height() -> void:
 	if _content_scroll_view == null or not is_inside_tree():
 		return
-	var available := maxf(180.0, get_viewport_rect().size.y - 112.0)
+	var safe := ScreenSafeArea.rect(get_viewport_rect().size)
+	ScreenSafeArea.fit(_center, get_viewport_rect().size, 12.0)
+	_panel.custom_minimum_size.x = minf(panel_width(), safe.size.x - 48.0)
+	var available := maxf(180.0, safe.size.y - 112.0)
 	_content_scroll_view.custom_minimum_size.y = minf(content.get_combined_minimum_size().y, available)
 
 
