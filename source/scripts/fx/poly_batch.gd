@@ -30,6 +30,7 @@ var _circle_fill := PackedColorArray()
 var _atlas: Texture2D
 var _white_uv := Vector2.ZERO
 var _uvs := PackedVector2Array()
+var _white_uv_fill := PackedVector2Array()
 
 
 ## Как CanvasItem.draw_set_transform: поворот, затем масштаб по осям экрана (scale_basis).
@@ -52,6 +53,7 @@ func is_empty() -> bool:
 func use_atlas(atlas: Texture2D, white_uv: Vector2) -> void:
 	_atlas = atlas
 	_white_uv = white_uv
+	_white_uv_fill.fill(_white_uv)
 
 
 func flush(canvas: CanvasItem) -> void:
@@ -81,10 +83,10 @@ func texture_rect(area: Rect2, uv_area: Rect2, modulate: Color = Color.WHITE) ->
 func _pad_uvs() -> void:
 	var missing := points.size() - _uvs.size()
 	if missing > 0:
-		var white := PackedVector2Array()
-		white.resize(missing)
-		white.fill(_white_uv)
-		_uvs.append_array(white)
+		if _white_uv_fill.size() != missing:
+			_white_uv_fill.resize(missing)
+			_white_uv_fill.fill(_white_uv)
+		_uvs.append_array(_white_uv_fill)
 
 
 ## draw_circle(pos, radius, color) без сглаживания.

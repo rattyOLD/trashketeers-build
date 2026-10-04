@@ -8,7 +8,7 @@ extends RefCounted
 
 static func release() -> void:
 	FrameDB.release_textures()
-	RigDB._data_textures.clear()
+	RigDB.release_textures()
 	ArenaProp._textures.clear()
 	AmbientLife._frames.clear()
 	AmbientLife._textures.clear()

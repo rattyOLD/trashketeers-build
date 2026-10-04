@@ -5,13 +5,14 @@ var _frames := 0
 
 
 func _ready() -> void:
+	Controls.apply_keys()
+	seed(17032)
 	Engine.max_fps = 60
 	if OS.get_environment("PROBE_UNCAP") == "1":
 		Engine.max_fps = 0
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 	Orient.portrait = true
 	get_window().content_scale_size = Orient.PORTRAIT_SIZE
-	SaveService.data["quality"] = 0
 	SaveService.data["quality"] = 0
 	var state: Dictionary = SaveService.data["tester"]
 	state["god"] = true
