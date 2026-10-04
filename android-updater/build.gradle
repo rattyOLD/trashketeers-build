@@ -1,0 +1,14 @@
+plugins { id 'com.android.library' version '8.2.0' }
+android {
+    namespace 'io.trashketeers.updater'
+    compileSdk 34
+    defaultConfig { minSdk 21 }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+dependencies {
+    compileOnly 'org.godotengine:godot:4.4.1.stable'
+    implementation 'androidx.core:core:1.13.1'
+}

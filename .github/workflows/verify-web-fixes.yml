@@ -2,7 +2,7 @@ name: Verify and build gameplay fixes
 
 on:
   push:
-    branches: [fix/story-boss-respawn-armory-selection]
+    branches: [fix/story-boss-respawn-armory-selection, fix/ios-story-tester-start, fix/in-game-android-updates]
     paths: ["source/**", ".github/workflows/verify-web-fixes.yml"]
   workflow_dispatch:
 
