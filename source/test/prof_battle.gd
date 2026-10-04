@@ -11,8 +11,8 @@ func _ready() -> void:
 	if OS.get_environment("PROBE_UNCAP") == "1":
 		Engine.max_fps = 0
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
-	Orient.portrait = true
-	get_window().content_scale_size = Orient.PORTRAIT_SIZE
+	Orient.portrait = false
+	get_window().content_scale_size = Orient.LANDSCAPE_SIZE
 	SaveService.data["quality"] = 0
 	var state: Dictionary = SaveService.data["tester"]
 	state["god"] = true

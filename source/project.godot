@@ -37,7 +37,7 @@ window/size/window_width_override=1000
 window/size/window_height_override=562
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
-window/handheld/orientation=1
+window/handheld/orientation=4
 
 [gui]
 

@@ -7,7 +7,7 @@ extends Control
 const BASE_RADIUS_DEFAULT := 110.0
 const KNOB_RADIUS_DEFAULT := 46.0
 const DEADZONE := 0.12
-const ZONE_WIDTH_FRACTION := 0.62
+const ZONE_WIDTH_FRACTION := 0.48
 const ZONE_TOP := 170.0
 
 var output := Vector2.ZERO
@@ -77,8 +77,8 @@ func _in_zone(point: Vector2) -> bool:
 
 
 func _hint_position() -> Vector2:
-	var x := size.x * (0.76 if bool(Controls.get_value("left_handed")) else 0.24)
-	return Vector2(x, size.y - 260.0)
+	var x := size.x * (0.84 if bool(Controls.get_value("left_handed")) else 0.16)
+	return Vector2(x, size.y * 0.8)
 
 
 func _update_output() -> void:

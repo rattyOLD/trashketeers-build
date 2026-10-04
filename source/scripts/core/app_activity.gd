@@ -34,6 +34,7 @@ func _ready() -> void:
 	_hide_callback = JavaScriptBridge.create_callback(_on_pagehide)
 	_show_callback = JavaScriptBridge.create_callback(_on_pageshow)
 	_document.addEventListener("visibilitychange", _visibility_callback)
+	_window.addEventListener("trashorientationchange", _visibility_callback)
 	_window.addEventListener("pagehide", _hide_callback)
 	_window.addEventListener("pageshow", _show_callback)
 	_sync_web.call_deferred()
@@ -71,7 +72,7 @@ func _on_pageshow(_args: Array) -> void:
 
 
 func _sync_web() -> void:
-	_set_backgrounded(_page_hidden or bool(_document.hidden))
+	_set_backgrounded(_page_hidden or bool(_document.hidden) or bool(_window.__trash_landscape_blocked))
 
 
 func _set_backgrounded(value: bool) -> void:

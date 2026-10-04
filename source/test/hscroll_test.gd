@@ -1,7 +1,7 @@
 extends Node
 ## Ищет места, где содержимое прокрутки шире окна (из-за этого появляется горизонтальный скролл/обрезка).
 func _ready() -> void:
-	Orient.portrait = true
+	Orient.portrait = false
 	var makers := {
 		"BattlePass": func() -> Control: return BattlePassPopup.new(),
 		"Camp": func() -> Control: return CampPopup.new(),

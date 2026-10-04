@@ -1488,7 +1488,7 @@ class PausePanel:
 		_panel.add_theme_stylebox_override("panel", style)
 		center.add_child(_panel)
 		var box := VBoxContainer.new()
-		box.custom_minimum_size = Vector2(600, 0)
+		box.custom_minimum_size = Vector2(1000, 0)
 		box.add_theme_constant_override("separation", 14)
 		_panel.add_child(box)
 
@@ -1498,16 +1498,27 @@ class PausePanel:
 		head.add_child(BattlePanels.icon_rect(BattlePanels.icon("pause"), 46))
 		head.add_child(UiStyle.label("ПАУЗА", 56, UiStyle.TEXT, 14))
 		box.add_child(head)
+		var body := HBoxContainer.new()
+		body.add_theme_constant_override("separation", 24)
+		box.add_child(body)
+		var summary := VBoxContainer.new()
+		summary.custom_minimum_size = Vector2(440, 0)
+		summary.add_theme_constant_override("separation", 14)
+		body.add_child(summary)
+		var actions := VBoxContainer.new()
+		actions.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		actions.add_theme_constant_override("separation", 14)
+		body.add_child(actions)
 
 		_chips = VBoxContainer.new()
 		_chips.add_theme_constant_override("separation", 6)
-		box.add_child(_chips)
+		summary.add_child(_chips)
 
 		var sound := PanelContainer.new()
 		var sound_style := UiStyle.box(Color("#34312e"), Color(UiStyle.NEON, 0.35), 3, 18)
 		sound_style.set_content_margin_all(14)
 		sound.add_theme_stylebox_override("panel", sound_style)
-		box.add_child(sound)
+		summary.add_child(sound)
 		var sound_box := VBoxContainer.new()
 		sound_box.add_theme_constant_override("separation", 8)
 		sound.add_child(sound_box)
@@ -1516,7 +1527,7 @@ class PausePanel:
 
 		var tools := HBoxContainer.new()
 		tools.add_theme_constant_override("separation", 10)
-		box.add_child(tools)
+		actions.add_child(tools)
 		tools.add_child(_tool_button("ГРАФИКА", Color("#c97926"), func() -> void: _open_settings()))
 		tools.add_child(_tool_button("УПРАВЛЕНИЕ", Color("#d69c5f"), func() -> void: _open_editor()))
 		tools.add_child(_tool_button("ТЕСТЕР", Color("#c98b1a"), func() -> void: _open_tester()))
@@ -1525,15 +1536,15 @@ class PausePanel:
 		_tips_button.pressed.connect(func() -> void:
 			Tips.set_enabled(not Tips.enabled())
 			_refresh_tips_button())
-		box.add_child(_tips_button)
+		actions.add_child(_tips_button)
 		_refresh_tips_button()
 
 		var resume := BattlePanels.icon_button(BattlePanels.icon("play"), "ПРОДОЛЖИТЬ", "", Color("#35c46a"), 100)
 		resume.pressed.connect(_resume)
-		box.add_child(resume)
+		actions.add_child(resume)
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 12)
-		box.add_child(row)
+		actions.add_child(row)
 		var again := UiStyle.button("ПЕРЕЗАПУСК", UiStyle.HOT, 26, Vector2(0, 76))
 		again.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		again.pressed.connect(func() -> void:

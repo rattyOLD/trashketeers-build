@@ -25,6 +25,8 @@ var _lifted := false
 var _closing := false
 ## Поверх окна открыт полноэкранный слой (просмотр фото, галерея): браузерное поле ввода прячется.
 var overlays := 0
+var _content_scroll_view: ScrollContainer
+var _floating_close: Button
 
 
 static func panel_width() -> float:
@@ -89,8 +91,16 @@ func _init(title_text: String) -> void:
 		inner.add_theme_constant_override("margin_" + side, 28)
 	_panel.add_child(inner)
 	content = VBoxContainer.new()
+	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	content.add_theme_constant_override("separation", 12)
-	inner.add_child(content)
+	_content_scroll_view = DragScroll.new()
+	_content_scroll_view.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_content_scroll_view.follow_focus = true
+	_content_scroll_view.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	inner.add_child(_content_scroll_view)
+	_content_scroll_view.add_child(content)
+	content.minimum_size_changed.connect(_fit_popup_height.call_deferred)
+	resized.connect(_fit_popup_height.call_deferred)
 
 	var header := HBoxContainer.new()
 	content.add_child(header)
@@ -101,6 +111,16 @@ func _init(title_text: String) -> void:
 	var close_button := UiStyle.button("X", UiStyle.PANEL_LIGHT, 28, Vector2(56, 56))
 	close_button.pressed.connect(close)
 	header.add_child(close_button)
+	_floating_close = UiStyle.button("X", UiStyle.PANEL_LIGHT, 28, Vector2(56, 56))
+	_floating_close.set_anchors_preset(Control.PRESET_TOP_RIGHT)
+	_floating_close.offset_left = -84
+	_floating_close.offset_right = -28
+	_floating_close.offset_top = 28
+	_floating_close.offset_bottom = 84
+	_floating_close.visible = false
+	_floating_close.pressed.connect(close)
+	_frame.add_child(_floating_close)
+	_content_scroll_view.get_v_scroll_bar().value_changed.connect(func(value: float) -> void: _floating_close.visible = value > 1.0)
 
 	_panel.resized.connect(_sync_glass)
 	# Телефонная клавиатура закрывает низ экрана: пока вводят текст, окно поднимается в верхнюю половину.
@@ -137,6 +157,7 @@ func open() -> void:
 	_open_stack.append(self)
 	Platform.trail("окно " + _title.text)
 	_refresh()
+	_fit_popup_height.call_deferred()
 	visible = true
 	_panel.pivot_offset = _panel.size * 0.5
 	_panel.scale = Vector2(0.4, 0.4)
@@ -160,6 +181,13 @@ func close() -> void:
 ## Хук наследника: перерисовать содержимое перед показом.
 func _refresh() -> void:
 	pass
+
+
+func _fit_popup_height() -> void:
+	if _content_scroll_view == null or not is_inside_tree():
+		return
+	var available := maxf(180.0, get_viewport_rect().size.y - 112.0)
+	_content_scroll_view.custom_minimum_size.y = minf(content.get_combined_minimum_size().y, available)
 
 
 func _watch_inputs(node: Node) -> void:

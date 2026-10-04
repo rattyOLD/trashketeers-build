@@ -11,7 +11,7 @@ const path = require('node:path');
     // A newly installed service worker deliberately reloads its clients. Keep
     // this isolated startup check on one document, so aborted old-page requests
     // cannot be mistaken for a runtime crash in WebKit.
-    const page = await browser.newPage({viewport: {width: 390, height: 844}, deviceScaleFactor: 1.5, isMobile: true, hasTouch: true, serviceWorkers: 'block'});
+    const page = await browser.newPage({viewport: {width: 844, height: 390}, deviceScaleFactor: 1.5, isMobile: true, hasTouch: true, serviceWorkers: 'block'});
     const lines = [];
     const errors = [];
     page.on('console', msg => {
