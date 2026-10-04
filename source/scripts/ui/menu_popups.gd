@@ -730,6 +730,21 @@ class Armory:
 
 		_add_actions(column, base, selected, tier)
 		return panel
+
+	func _add_actions(column: VBoxContainer, base: WeaponData, selected: bool, tier: int) -> void:
+		if not base.has_tiers():
+			var note := UiStyle.label("ЛЕГЕНДАРНОЕ · без тиров и слияния", 17, UiStyle.GOLD, 4)
+			note.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+			note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			column.add_child(note)
+			if not selected:
+				var equip := UiStyle.button("ВЗЯТЬ В РУКИ", base.get_rarity_color().darkened(0.35), 20, Vector2(0, 54))
+				equip.pressed.connect(func() -> void:
+					SaveService.set_selected_weapon(base.id, 1)
+					weapon_changed.emit(base.id)
+					_refresh())
+				column.add_child(equip)
+			return
 		var tiers := HFlowContainer.new()
 		tiers.add_theme_constant_override("h_separation", 8)
 		tiers.add_theme_constant_override("v_separation", 8)
@@ -755,21 +770,6 @@ class Armory:
 		var buy_row := _make_buy_row(base, "ЕЩЁ")
 		if buy_row != null:
 			column.add_child(buy_row)
-		return panel
-
-	func _add_actions(column: VBoxContainer, base: WeaponData, selected: bool, tier: int) -> void:
-		if not base.has_tiers():
-			var note := UiStyle.label("ЛЕГЕНДАРНОЕ · без тиров и слияния", 17, UiStyle.GOLD, 4)
-			note.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-			note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			column.add_child(note)
-			if not selected:
-				var equip := UiStyle.button("ВЗЯТЬ В РУКИ", base.get_rarity_color().darkened(0.35), 20, Vector2(0, 54))
-				equip.pressed.connect(func() -> void:
-					SaveService.set_selected_weapon(base.id, 1)
-					weapon_changed.emit(base.id)
-					_refresh())
-				column.add_child(equip)
 	
 	func _icon_frame(art: Control, accent: Color) -> Control:
 		var frame := PanelContainer.new()

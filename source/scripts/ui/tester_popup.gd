@@ -14,6 +14,7 @@ const BOSS_NAMES := {
 
 var _status: Label
 var _reset_armed := false
+var _story_reset_armed := false
 var _list: VBoxContainer
 var _scroll: ScrollContainer
 
@@ -32,6 +33,7 @@ func _refresh() -> void:
 			content.remove_child(child)
 			child.queue_free()
 	_reset_armed = false
+	_story_reset_armed = false
 	_status = UiStyle.label("", 22, UiStyle.NEON, 5)
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_status.custom_minimum_size = Vector2(540, 0)
@@ -102,6 +104,23 @@ func _refresh() -> void:
 		SaveService.save_data()
 		return "Журнал диалогов очищен")
 	_list.add_child(story)
+	if SaveService.is_dev():
+		var reset_story := UiStyle.button("Сбросить сюжетный прогресс", Color("#a3283e"), 22, Vector2(0, 58))
+		_fit(reset_story)
+		reset_story.pressed.connect(func() -> void:
+			if not _story_reset_armed:
+				_story_reset_armed = true
+				reset_story.text = "Начать сюжет заново? Нажми ещё раз"
+				_status.text = "Сбросятся миссии, печати, рекорды сюжета, диалоги, выборы и чекпоинт. Оружие, герои, валюта и прокачка сохранятся."
+				return
+			if Tester.reset_story():
+				changed.emit()
+				_refresh()
+				_status.text = "Сюжет сброшен. Начни с первой миссии."
+			else:
+				_refresh()
+				_status.text = "Сброс сюжета доступен только DeV.")
+		_list.add_child(reset_story)
 
 	_section("В БОЮ")
 	for name in Tester.FLAGS:
