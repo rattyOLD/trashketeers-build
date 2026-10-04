@@ -1291,6 +1291,8 @@ func _bump_rail_combo(pierced: int) -> void:
 
 ## Тестер: старт с выбранной главы и волны (в том числе сразу на босса).
 func _apply_tester_start() -> void:
+	if not story_mission.is_empty():
+		return
 	var chapter_number := Tester.start_chapter()
 	var wave := Tester.start_wave()
 	if chapter_number == 0 and wave == 1:
@@ -1466,7 +1468,7 @@ func _celebrate_level_up() -> void:
 func _extra_context() -> String:
 	if director == null or player == null:
 		return ""
-	return "wave=%d enemies=%d lvl=%d hp=%d/%d pos=(%d,%d)" % [director.wave_number, enemies.get_active_count(), level, int(player.hp), int(player.max_hp), int(player.global_position.x), int(player.global_position.y)]
+	return "wave=%d enemies=%d lvl=%d hp=%d/%d pos=(%d,%d) mission=%s tester_start=%d:%d" % [director.wave_number, enemies.get_active_count(), level, int(player.hp), int(player.max_hp), int(player.global_position.x), int(player.global_position.y), story_mission if not story_mission.is_empty() else "survival", Tester.start_chapter(), Tester.start_wave()]
 
 
 func _xp_needed(for_level: int) -> int:

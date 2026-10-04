@@ -5,7 +5,9 @@ func _ready() -> void:
 	var u := AppUpdater.new()
 	add_child(u)
 	await get_tree().process_frame
-	u._show("beta.25", "Карты выживания: карта +50%, районы во всех главах")
+	u._native = RefCounted.new()
+	u._remote = {"code": 46, "bytes": 55 * 1024 * 1024, "sha256": "0".repeat(64)}
+	u._show("beta.46", "")
 	await get_tree().create_timer(1.2).timeout
 	get_viewport().get_texture().get_image().save_png(OS.get_environment("OUT"))
 	print("LOCAL ", AppUpdater.local_code())

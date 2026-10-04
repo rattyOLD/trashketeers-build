@@ -145,6 +145,9 @@ func clear() -> void:
 	_destr_done.clear()
 	_puddles.clear()
 	gate_rects.clear()
+	story_gates.clear()
+	story_cells.clear()
+	_story_clear.clear()
 	_portal = null
 
 

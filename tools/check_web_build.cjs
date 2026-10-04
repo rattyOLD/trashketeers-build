@@ -8,7 +8,10 @@ const path = require('node:path');
   const browser = await type.launch(name === 'chromium' ? {args: ['--no-sandbox', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader']} : {headless: false});
   try {
     for (const scenario of ['', '#story:m1', '#story:m2']) {
-    const page = await browser.newPage({viewport: {width: 390, height: 844}, deviceScaleFactor: 1.5, isMobile: true, hasTouch: true});
+    // A newly installed service worker deliberately reloads its clients. Keep
+    // this isolated startup check on one document, so aborted old-page requests
+    // cannot be mistaken for a runtime crash in WebKit.
+    const page = await browser.newPage({viewport: {width: 390, height: 844}, deviceScaleFactor: 1.5, isMobile: true, hasTouch: true, serviceWorkers: 'block'});
     const lines = [];
     const errors = [];
     page.on('console', msg => {
@@ -23,15 +26,24 @@ const path = require('node:path');
       // avoids WebKit's unhandled AbortError from deliberately aborted SDK scripts.
       return route.fulfill({status: 200, contentType: route.request().resourceType() === 'script' ? 'application/javascript' : 'application/json', headers: {'Access-Control-Allow-Origin': '*'}, body: '{}'});
     });
+    if (scenario) await page.addInitScript(() => {
+      localStorage.setItem('battle_raccoon_save_v1', JSON.stringify({
+        character: 'pigeon_mafioso', characters: ['raccoon', 'pigeon_mafioso'],
+        selected_weapon: 'golden_smg_v1', selected_tier: 1,
+        arsenal: {golden_smg_v1: [1, 0, 0, 0, 0]}, quality: 0, fx_lite: true,
+        tester: {start_chapter: 1, start_wave: 2}, tips_off: true,
+      }));
+    });
     await page.goto('http://127.0.0.1:8765/' + scenario, {waitUntil: 'domcontentloaded'});
     await page.waitForFunction(() => !document.getElementById('boot'), {timeout: 120000});
     await page.waitForTimeout(scenario ? 30000 : 8000);
     const label = name + (scenario ? '-' + scenario.slice(1).replace(':', '-') : '-menu');
-    const state = await page.evaluate(() => ({trail: window.__trash_trail, crash: document.getElementById('crashlog').textContent}));
+    const state = await page.evaluate(() => ({trail: window.__trash_trail, crash: document.getElementById('crashlog').textContent, context: localStorage.getItem('__trash_ctx')}));
     await page.screenshot({path: path.join(output, label + '.png')});
     fs.writeFileSync(path.join(output, label + '.log'), lines.join('\n') + '\n' + JSON.stringify(state));
     if (state.crash) errors.push(state.crash);
     if (scenario && !(state.trail || []).some(line => line.includes('/Game'))) errors.push('Story did not reach Game: ' + JSON.stringify(state));
+    if (scenario && !(state.context || '').includes('mission=' + scenario.split(':')[1] + ' tester_start=1:2')) errors.push('Missing story regression context: ' + JSON.stringify(state));
     if (errors.length) throw new Error(errors.join('\n'));
     console.log('WEB_STARTUP_OK', label);
     await page.close();

@@ -10,7 +10,7 @@ name: Android beta
 on:
   push:
     branches: [main]
-    paths: ["source/**", ".github/workflows/android-beta.yml"]
+    paths: ["source/**", "android-updater/**", "tools/android_version.py", ".github/workflows/android-beta.yml"]
   workflow_dispatch:
 
 permissions:
@@ -33,7 +33,7 @@ jobs:
           path: |
             ~/godot
             ~/.local/share/godot/export_templates
-          key: godot-${{ env.GODOT_VERSION }}-android
+          key: godot-${{ env.GODOT_VERSION }}-android-gradle-v2
 
       - name: Скачать Godot
         if: steps.cache.outputs.cache-hit != 'true'
@@ -50,6 +50,22 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.10.2"
+
+      - name: Собрать обновлятор и подключить Android-плагин
+        run: |
+          gradle -p android-updater --no-daemon assembleRelease
+          mkdir -p source/android/build
+          unzip -q ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable/android_source.zip -d source/android/build
+          printf '%s\n' "${GODOT_VERSION}.stable" > source/android/.build_version
+          touch source/android/build/.gdignore
+          chmod +x source/android/build/gradlew
+          mkdir -p source/android/build/libs/release source/android/build/libs/debug
+          cp android-updater/build/outputs/aar/TrashSquadUpdater-release.aar source/android/build/libs/release/
+          cp android-updater/build/outputs/aar/TrashSquadUpdater-release.aar source/android/build/libs/debug/
 
       - name: Ключи и настройки редактора
         env:
@@ -85,6 +101,9 @@ jobs:
         run: |
           GODOT=~/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64
           $GODOT --headless --path source --import > import.log 2>&1 || true
+          XDG_DATA_HOME="$RUNNER_TEMP/updater-test-user" $GODOT --headless --path source res://test/app_updater_test.tscn > updater-test.log 2>&1
+          grep -q 'APP_UPDATER_TEST failures=0' updater-test.log
+          if grep -q 'SCRIPT ERROR' updater-test.log; then exit 1; fi
           mkdir -p source/build/android
           $GODOT --headless --path source --export-release "Android" build/android/TrashSquad.apk 2>&1 | tee export.log
           test -f source/build/android/TrashSquad.apk
@@ -96,10 +115,8 @@ jobs:
 
       # Постоянная ссылка на свежий APK + номер версии: по ним игра сама предлагает «ОБНОВИТЬ» (core/app_updater.gd).
       - name: Файл версии для автообновления
-        env:
-          MSG: ${{ github.event.head_commit.message }}
         run: |
-          python3 -c 'import json,os; print(json.dumps({"code": int(os.environ["GITHUB_RUN_NUMBER"]), "name": "beta." + os.environ["GITHUB_RUN_NUMBER"], "notes": os.environ.get("MSG", "").splitlines()[0][:180] if os.environ.get("MSG") else ""}, ensure_ascii=False))' > source/build/android/android-version.json
+          python3 tools/android_version.py source/build/android/TrashSquad.apk "$GITHUB_RUN_NUMBER" > source/build/android/android-version.json
           cat source/build/android/android-version.json
 
       - name: Релиз android-beta на GitHub (для автообновления)
