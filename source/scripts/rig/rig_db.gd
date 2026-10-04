@@ -13,6 +13,12 @@ static var _loaded := false
 static var _data_textures: Dictionary = {}
 
 
+static func release_textures() -> void:
+	for rig: Dictionary in _rigs.values():
+		rig["texture"] = null
+	_data_textures.clear()
+
+
 static func get_rig(rig_id: String) -> Dictionary:
 	_load()
 	var rig: Dictionary = _rigs.get(rig_id, {})

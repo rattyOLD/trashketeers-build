@@ -8,6 +8,10 @@ mkdir -p "$LOG"
 "$GODOT" --headless --path $P --import > "$LOG/import.log" 2>&1
 "$GODOT" --headless --path $P res://test/check_scripts.tscn 2>&1 | grep "CHECK checked"
 fail=0
+XDG_DATA_HOME="$LOG/android-perf-user" "$GODOT" --headless --path $P res://test/android_perf_regression.tscn > "$LOG/android-perf.log" 2>&1
+if ! grep -q 'ANDROID_PERF_REGRESSION failures=0' "$LOG/android-perf.log" || grep -q 'SCRIPT ERROR' "$LOG/android-perf.log"; then
+  fail=1
+fi
 XDG_DATA_HOME="$LOG/app-updater-user" "$GODOT" --headless --path $P res://test/app_updater_test.tscn > "$LOG/app-updater.log" 2>&1
 if ! grep -q 'APP_UPDATER_TEST failures=0' "$LOG/app-updater.log" || grep -q 'SCRIPT ERROR' "$LOG/app-updater.log"; then
   fail=1

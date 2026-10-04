@@ -17,6 +17,8 @@ var size := Vector2i.ZERO
 var _blocked := PackedByteArray()
 var _dist := PackedInt32Array()
 var _queue := PackedInt32Array()
+var _directions := PackedVector2Array()
+var _direction_valid := PackedByteArray()
 
 
 func setup(grid_size: Vector2i, blocked: PackedByteArray) -> void:
@@ -25,16 +27,24 @@ func setup(grid_size: Vector2i, blocked: PackedByteArray) -> void:
 	_dist.resize(size.x * size.y)
 	_dist.fill(-1)
 	_queue.resize(size.x * size.y)
+	_directions.resize(size.x * size.y)
+	_direction_valid.resize(size.x * size.y)
+	_direction_valid.fill(0)
 
 
 func set_blocked(cell: Vector2i, is_blocked: bool) -> void:
 	if _inside(cell):
-		_blocked[_index(cell)] = 1 if is_blocked else 0
+		var index := _index(cell)
+		var value := 1 if is_blocked else 0
+		if _blocked[index] != value:
+			_blocked[index] = value
+			_direction_valid.fill(0)
 
 
 ## Горячий цикл (до ~2800 ячеек × 8 соседей раз в 0.3 с в WebAssembly): индексы считаются
 ## вручную, без вызовов _inside/_index и без Vector2i-аллокаций на соседа.
 func rebuild(target: Vector2i, radius: int) -> void:
+	_direction_valid.fill(0)
 	_dist.fill(-1)
 	if not _inside(target) or _blocked[_index(target)] == 1:
 		return
@@ -75,6 +85,15 @@ func rebuild(target: Vector2i, radius: int) -> void:
 func direction_at(cell: Vector2i) -> Vector2:
 	if not _inside(cell):
 		return Vector2.ZERO
+	var index := _index(cell)
+	if _direction_valid[index] == 0:
+		_directions[index] = _direction_uncached(cell)
+		_direction_valid[index] = 1
+	return _directions[index]
+
+
+## Между перестроениями поля ответ одинаков для всех врагов в этой клетке.
+func _direction_uncached(cell: Vector2i) -> Vector2:
 	var here := _dist[_index(cell)]
 	if here == -1 and _blocked[_index(cell)] == 1:
 		return _escape_direction(cell)
