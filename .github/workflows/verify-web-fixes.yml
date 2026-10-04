@@ -1,0 +1,98 @@
+name: Verify and build gameplay fixes
+
+on:
+  push:
+    branches: [fix/story-boss-respawn-armory-selection]
+    paths: ["source/**", ".github/workflows/verify-web-fixes.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: web-fixes-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 1
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /source/
+            /tools/
+            /docs/development/
+            /.github/
+            /audio_unlock.js
+            /render_scale.js
+            /version.json
+            /HANDOFF.md
+            /CLAUDE.md
+            /DEV.md
+      - name: Install Godot and graphics support
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y xvfb libgl1-mesa-dri
+          mkdir -p "$RUNNER_TEMP/godot" "$HOME/.local/share/godot/export_templates/4.4.1.stable"
+          curl -fLsS --retry 3 https://github.com/godotengine/godot/releases/download/4.4.1-stable/Godot_v4.4.1-stable_linux.x86_64.zip -o "$RUNNER_TEMP/godot.zip"
+          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
+          curl -fLsS --retry 3 https://github.com/godotengine/godot/releases/download/4.4.1-stable/Godot_v4.4.1-stable_export_templates.tpz -o "$RUNNER_TEMP/templates.tpz"
+          unzip -jo "$RUNNER_TEMP/templates.tpz" 'templates/web_*' -d "$HOME/.local/share/godot/export_templates/4.4.1.stable"
+          echo "GODOT=$RUNNER_TEMP/godot/Godot_v4.4.1-stable_linux.x86_64" >> "$GITHUB_ENV"
+          echo "LOG=$RUNNER_TEMP/verify" >> "$GITHUB_ENV"
+      - name: Verify scripts and all four game modes
+        env:
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: |
+          mkdir -p "$LOG"
+          bash tools/verify.sh | tee "$LOG/summary.log"
+          grep -q 'CHECK checked 171 scripts, failed 0' "$LOG/summary.log"
+          grep -q 'VERIFY OK' "$LOG/summary.log"
+          if grep -q 'SCRIPT ERROR' "$LOG/import.log"; then exit 1; fi
+          XDG_DATA_HOME="$RUNNER_TEMP/regression-user" "$GODOT" --headless --path source res://test/boss_armory_regression.tscn > "$LOG/regression.log" 2>&1
+          XDG_DATA_HOME="$RUNNER_TEMP/reset-user" "$GODOT" --headless --path source res://test/story_reset_test.tscn > "$LOG/reset.log" 2>&1
+          grep -q 'BOSS_ARMORY_REGRESSION failures=0' "$LOG/regression.log"
+          grep -q 'STORY_RESET_TEST failures=0' "$LOG/reset.log"
+          if grep -q 'SCRIPT ERROR' "$LOG/regression.log" "$LOG/reset.log"; then exit 1; fi
+      - name: Export Web
+        run: |
+          mkdir -p source/build/web
+          "$GODOT" --headless --path source --export-release Web build/web/index.html > "$LOG/export.log" 2>&1
+          if grep -q 'SCRIPT ERROR\|Export failed' "$LOG/export.log"; then exit 1; fi
+          python3 tools/make_site.py source/build/web
+      - name: Check Web startup in Chromium
+        run: |
+          npm install --prefix "$RUNNER_TEMP/browser" playwright
+          "$RUNNER_TEMP/browser/node_modules/.bin/playwright" install --with-deps chromium
+          python3 -m http.server 8765 --directory tools/site > "$LOG/http.log" 2>&1 &
+          node tools/check_web_build.cjs "$RUNNER_TEMP/browser/node_modules/playwright" "$LOG"
+      - name: Save verified build to branch
+        run: |
+          python3 - <<'PY'
+          import pathlib, shutil, subprocess
+          files = list(pathlib.Path('tools/site').iterdir())
+          for file in files:
+              if not file.is_file():
+                  continue
+              for target in [pathlib.Path(file.name), pathlib.Path('docs') / file.name]:
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  shutil.copy2(file, target)
+                  subprocess.run(['git', 'add', '--sparse', str(target)], check=True)
+          PY
+          git diff --exit-code HEAD -- HANDOFF.md CLAUDE.md DEV.md
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if ! git diff --cached --quiet; then
+            git commit -m "build: publish verified gameplay fixes"
+            git push origin "HEAD:${{ github.ref_name }}"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gameplay-fixes-verification
+          path: ${{ runner.temp }}/verify
