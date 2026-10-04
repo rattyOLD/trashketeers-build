@@ -46,6 +46,7 @@ func _run() -> void:
 		var equip := _button(card, prefix)
 		_check(equip != null, "card equip " + String(weapon.id))
 		if equip != null:
+			_check(not equip.disabled, "owned card equip enabled " + String(weapon.id))
 			equip.pressed.emit()
 			_check(SaveService.get_loadout().id == weapon.id, "loadout " + String(weapon.id))
 		card.free()
