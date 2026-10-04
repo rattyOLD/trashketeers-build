@@ -942,13 +942,17 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 
 	// Вылет уже запущенной игры: показываем текст ошибки и последние строки лога движка,
 	// чтобы тестер мог скопировать их и прислать. Сохранённый прогресс не затрагивается.
-	function crash(message) {
+	function crash(message, stack) {
 		if (crashed || !started) {
 			return;
 		}
 		crashed = true;
 		const ua = navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + window.devicePixelRatio;
-		const report = 'CRASH: ' + message + '\n' + ua + '\n--- лог ---\n' + logTail.slice(-15).join('\n');
+		let context = '';
+		try { context = window.localStorage.getItem('__trash_ctx') || ''; } catch (e) {}
+		const report = 'CRASH: ' + message + '\nBUILD ' + window.__trash_build.label + '\n' + ua +
+			'\nWHERE ' + context + '\nTRAIL ' + (window.__trash_trail || []).join(' ; ') +
+			'\nSTACK ' + String(stack || 'unavailable').slice(0, 6000) + '\n--- лог ---\n' + logTail.slice(-15).join('\n');
 		try {
 			window.localStorage.setItem('trk_last_crash', report);
 		} catch (e) {}
@@ -1278,13 +1282,13 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 		const reason = event.reason;
 		const text = reason && reason.message ? reason.message : String(reason);
 		if (CRASH_PATTERN.test(text)) {
-			crash(text);
+			crash(text, reason && reason.stack);
 		}
 	});
 	window.addEventListener('error', function (event) {
 		const text = event.message || (event.error && event.error.message) || '';
 		if (CRASH_PATTERN.test(text)) {
-			crash(text);
+			crash(text, event.error && event.error.stack);
 		}
 	});
 

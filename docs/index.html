@@ -497,7 +497,7 @@ html, body {
 </script>
 
 <script>
-window.__trash_build = {label: 'v35.489', time: '04.10 17:20'};
+window.__trash_build = {label: 'v35.490', time: '04.10 17:51'};
 document.getElementById('ver').textContent = 'Версия ' + window.__trash_build.label + ' · сборка от ' + window.__trash_build.time;
 </script>
 <script>
@@ -562,7 +562,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	// index.wasm / index.pck и отдаём ему уже скачанные и распакованные байты.
 	const FILES = {
 		wasm: { parts: [{url:"raccoon.core.0.wasm?h=4cbe7e5f476b",bytes:5221065},{url:"raccoon.core.1.wasm?h=a8fbc151befa",bytes:4165384}] },
-		pck: { parts: [{url:"raccoon.pack.0.wasm?h=63b88d88849b",bytes:11983909},{url:"raccoon.pack.1.wasm?h=c3d712c53101",bytes:12559663},{url:"raccoon.pack.2.wasm?h=a79f6284d813",bytes:12541890},{url:"raccoon.pack.3.wasm?h=672504351949",bytes:4347485}] },
+		pck: { parts: [{url:"raccoon.pack.0.wasm?h=3ed9881547a5",bytes:11983902},{url:"raccoon.pack.1.wasm?h=c3d712c53101",bytes:12559663},{url:"raccoon.pack.2.wasm?h=a79f6284d813",bytes:12541890},{url:"raccoon.pack.3.wasm?h=0c87073065e8",bytes:4347693}] },
 	};
 	const GODOT_CONFIG = {
 		args: [],
@@ -570,7 +570,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 		ensureCrossOriginIsolationHeaders: false,
 		executable: 'index',
 		experimentalVK: false,
-		fileSizes: { 'index.pck': 42481856, 'index.wasm': 43699190 },
+		fileSizes: { 'index.pck': 42482048, 'index.wasm': 43699190 },
 		focusCanvas: true,
 		gdextensionLibs: [],
 		onPrint: function () {
@@ -595,7 +595,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 
 	// Адрес сбора отчётов о вылетах (Google Apps Script / Supabase и т.п.); пусто — отчёты не отправляются.
 	const REPORT_URL = 'https://script.google.com/macros/s/AKfycbxVyy-SnRANW0Im-1Blne2TcUbca93WqzyBulpADwWWD7YH6x3KIygBYImTe8VfP5pp/exec';
-	const BUILD_ID_REPORT = '1791109222';
+	const BUILD_ID_REPORT = '1791111109';
 	const SESSION_ID = Math.random().toString(36).slice(2, 8);
 	const SESSION_START = Date.now();
 	const REPORT_CAP = 250;
@@ -812,7 +812,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	window.trkReport('session_start', gpuInfo() + ' | ' + navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + (window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio) + ' | screen ' + screen.width + 'x' + screen.height + ' | cores ' + (navigator.hardwareConcurrency || '?'));
 
 	// Вкладка могла висеть со старой версией: при возврате в неё сверяем номер сборки и предлагаем обновиться.
-	const BUILD_ID = '1791109222';
+	const BUILD_ID = '1791111109';
 	// Важное обновление: старая сборка дальше не работает, иначе аккаунты и сохранения ломаются старым кодом.
 	function blockOldBuild(v) {
 		const wall = document.createElement('div');
@@ -942,13 +942,17 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 
 	// Вылет уже запущенной игры: показываем текст ошибки и последние строки лога движка,
 	// чтобы тестер мог скопировать их и прислать. Сохранённый прогресс не затрагивается.
-	function crash(message) {
+	function crash(message, stack) {
 		if (crashed || !started) {
 			return;
 		}
 		crashed = true;
 		const ua = navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + window.devicePixelRatio;
-		const report = 'CRASH: ' + message + '\n' + ua + '\n--- лог ---\n' + logTail.slice(-15).join('\n');
+		let context = '';
+		try { context = window.localStorage.getItem('__trash_ctx') || ''; } catch (e) {}
+		const report = 'CRASH: ' + message + '\nBUILD ' + window.__trash_build.label + '\n' + ua +
+			'\nWHERE ' + context + '\nTRAIL ' + (window.__trash_trail || []).join(' ; ') +
+			'\nSTACK ' + String(stack || 'unavailable').slice(0, 6000) + '\n--- лог ---\n' + logTail.slice(-15).join('\n');
 		try {
 			window.localStorage.setItem('trk_last_crash', report);
 		} catch (e) {}
@@ -1278,13 +1282,13 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 		const reason = event.reason;
 		const text = reason && reason.message ? reason.message : String(reason);
 		if (CRASH_PATTERN.test(text)) {
-			crash(text);
+			crash(text, reason && reason.stack);
 		}
 	});
 	window.addEventListener('error', function (event) {
 		const text = event.message || (event.error && event.error.message) || '';
 		if (CRASH_PATTERN.test(text)) {
-			crash(text);
+			crash(text, event.error && event.error.stack);
 		}
 	});
 
