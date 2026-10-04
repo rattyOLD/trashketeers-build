@@ -22,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap">
 <style>
-html.upright #rotate { display: flex; }
+html.orientation-ready:not(.upright) #rotate { opacity: 0; visibility: hidden; pointer-events: none; }
 :root {
 	color-scheme: dark;
 	--night: #0b171c;
@@ -292,17 +292,17 @@ html, body {
 	inset: 0;
 	z-index: 1000;
 	pointer-events: auto;
-	display: none;
+	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
 	gap: 26px;
 	padding: 24px;
 	text-align: center;
+	transition: opacity 0.25s ease, visibility 0.25s;
 	background:
-		radial-gradient(90% 50% at 50% 40%, rgba(0, 245, 255, 0.16), transparent 65%),
-		radial-gradient(120% 60% at 50% 110%, rgba(255, 46, 166, 0.28), transparent 60%),
-		rgba(13, 10, 28, 0.97);
+		radial-gradient(90% 70% at 50% 45%, rgba(245, 192, 74, 0.12), transparent 65%),
+		#0d1116;
 	font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 #rotate .phone {
@@ -310,9 +310,9 @@ html, body {
 	width: 74px;
 	height: 128px;
 	border-radius: 16px;
-	border: 4px solid var(--cyan);
-	box-shadow: 0 0 22px rgba(0, 245, 255, 0.55), inset 0 0 14px rgba(0, 245, 255, 0.25);
-	background: rgba(0, 245, 255, 0.06);
+	border: 4px solid #f5c04a;
+	box-shadow: 0 0 22px rgba(245, 192, 74, 0.2);
+	background: #23272a;
 	animation: turn 1.8s ease-in-out infinite;
 }
 #rotate .phone::before {
@@ -324,7 +324,7 @@ html, body {
 	height: 5px;
 	margin-left: -11px;
 	border-radius: 3px;
-	background: var(--cyan);
+	background: #f5c04a;
 	opacity: 0.8;
 }
 #rotate .phone::after {
@@ -336,12 +336,12 @@ html, body {
 	height: 26px;
 	margin-left: -13px;
 	border-radius: 50%;
-	background: radial-gradient(circle, var(--pink) 30%, transparent 70%);
+	background: radial-gradient(circle, #f5c04a 30%, transparent 70%);
 	animation: pulse 1.3s ease-in-out infinite;
 }
 @keyframes turn {
-	0%, 100% { transform: translateY(0); }
-	50% { transform: rotate(90deg); }
+	0%, 15%, 100% { transform: rotate(0); }
+	55%, 90% { transform: rotate(90deg); }
 }
 @keyframes pulse { 0%, 100% { opacity: 0.45; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.15); } }
 #rotate h2 {
@@ -349,23 +349,33 @@ html, body {
 	font-family: "Russo One", "Arial Black", Impact, sans-serif;
 	font-weight: 400;
 	font-size: clamp(26px, 8vw, 40px);
-	color: #fff;
-	text-shadow: 0 0 6px var(--pink), 0 0 22px rgba(255, 46, 166, 0.7);
+	color: #f1efe6;
+	text-shadow: 0 2px 4px #0d0f0e;
 }
 #rotate p { margin: 0; max-width: 300px; font-size: 15px; line-height: 1.4; color: var(--muted); }
 #rotate p b { color: var(--cyan); font-weight: 600; }
+html.orientation-hidden #rotate .phone, html.orientation-hidden #rotate .phone::after,
+html.orientation-ready:not(.upright) #rotate .phone, html.orientation-ready:not(.upright) #rotate .phone::after { animation-play-state: paused; }
+@media (max-height: 480px) {
+	#rotate { gap: 16px; padding: 16px; }
+	#rotate .phone { width: 56px; height: 96px; border-width: 3px; border-radius: 12px; }
+	#rotate h2 { font-size: clamp(22px, 4vw, 32px); }
+	#rotate p { max-width: 460px; }
+}
 @media (prefers-reduced-motion: reduce) {
 	#rotate .phone, #rotate .phone::after { animation: none; }
+	#rotate .phone { transform: rotate(90deg); }
+	#rotate { transition: none; }
 	#boot, .bar i { transition: none; }
 }
 </style>
 
 <canvas id="canvas" tabindex="0">Браузер не поддерживает canvas.</canvas>
 
-<div id="rotate">
+<div id="rotate" role="dialog" aria-modal="true" aria-labelledby="rotate-title">
 	<div class="phone"></div>
-	<h2>Поверни телефон горизонтально</h2>
-	<p>Для игры нужен горизонтальный экран.</p>
+	<h2 id="rotate-title">Играем горизонтально</h2>
+	<p id="rotate-hint">Для игры нужен горизонтальный экран.</p>
 </div>
 
 <div id="boot">
@@ -435,17 +445,40 @@ html, body {
 	};
 	try { if (screen.orientation && screen.orientation.lock && window.matchMedia('(pointer: coarse)').matches) { screen.orientation.lock('landscape').catch(function () {}); } } catch (e) {}
 	var touch = window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
+	var rotateTitle = document.getElementById('rotate-title');
+	var rotateHint = document.getElementById('rotate-hint');
 	var judge = function () {
 		var ae = document.activeElement;
 		if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) { return; }
 		var blocked = touch && window.innerHeight > window.innerWidth;
 		document.documentElement.classList.toggle('upright', blocked);
+		rotateTitle.textContent = blocked ? 'Поверни телефон горизонтально' : 'Играем горизонтально';
+		rotateHint.textContent = blocked ? 'Для игры нужен горизонтальный экран.' : (touch ? 'Держи телефон горизонтально для удобного управления.' : 'Игра рассчитана на горизонтальный экран.');
 		if (window.__trash_landscape_blocked !== blocked) {
 			window.__trash_landscape_blocked = blocked;
 			window.dispatchEvent(new Event('trashorientationchange'));
 		}
 	};
 	judge();
+	var introRemaining = 1800;
+	var introTimer = null;
+	var introStarted = 0;
+	var syncIntro = function () {
+		if (introTimer !== null) {
+			clearTimeout(introTimer);
+			introRemaining -= performance.now() - introStarted;
+			introTimer = null;
+		}
+		document.documentElement.classList.toggle('orientation-hidden', document.hidden);
+		if (document.hidden || document.documentElement.classList.contains('orientation-ready')) { return; }
+		introStarted = performance.now();
+		introTimer = setTimeout(function () {
+			introTimer = null;
+			document.documentElement.classList.add('orientation-ready');
+		}, Math.max(0, introRemaining));
+	};
+	syncIntro();
+	document.addEventListener('visibilitychange', syncIntro);
 	window.addEventListener('orientationchange', function () { judge(); setTimeout(judge, 400); });
 	window.addEventListener('orientationchange', kick);
 	window.addEventListener('resize', judge);
@@ -499,7 +532,7 @@ html, body {
 </script>
 
 <script>
-window.__trash_build = {label: 'v35.493', time: '05.10 04:15'};
+window.__trash_build = {label: 'v35.494', time: '05.10 04:44'};
 document.getElementById('ver').textContent = 'Версия ' + window.__trash_build.label + ' · сборка от ' + window.__trash_build.time;
 </script>
 <script>
@@ -564,7 +597,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	// index.wasm / index.pck и отдаём ему уже скачанные и распакованные байты.
 	const FILES = {
 		wasm: { parts: [{url:"raccoon.core.0.wasm?h=4cbe7e5f476b",bytes:5221065},{url:"raccoon.core.1.wasm?h=a8fbc151befa",bytes:4165384}] },
-		pck: { parts: [{url:"raccoon.pack.0.wasm?h=2dde66252340",bytes:11983790},{url:"raccoon.pack.1.wasm?h=768f2b2903ef",bytes:12559672},{url:"raccoon.pack.2.wasm?h=68d7a1795cd4",bytes:12541828},{url:"raccoon.pack.3.wasm?h=4e9ac5770fd2",bytes:4360008}] },
+		pck: { parts: [{url:"raccoon.pack.0.wasm?h=e1933e138b84",bytes:11983710},{url:"raccoon.pack.1.wasm?h=85d14f61a7e2",bytes:12559677},{url:"raccoon.pack.2.wasm?h=8b8f5fdf6101",bytes:12541777},{url:"raccoon.pack.3.wasm?h=c2a59e7fc93f",bytes:4363207}] },
 	};
 	const GODOT_CONFIG = {
 		args: [],
@@ -572,7 +605,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 		ensureCrossOriginIsolationHeaders: false,
 		executable: 'index',
 		experimentalVK: false,
-		fileSizes: { 'index.pck': 42494624, 'index.wasm': 43699190 },
+		fileSizes: { 'index.pck': 42497904, 'index.wasm': 43699190 },
 		focusCanvas: true,
 		gdextensionLibs: [],
 		onPrint: function () {
@@ -597,7 +630,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 
 	// Адрес сбора отчётов о вылетах (Google Apps Script / Supabase и т.п.); пусто — отчёты не отправляются.
 	const REPORT_URL = 'https://script.google.com/macros/s/AKfycbxVyy-SnRANW0Im-1Blne2TcUbca93WqzyBulpADwWWD7YH6x3KIygBYImTe8VfP5pp/exec';
-	const BUILD_ID_REPORT = '1791148511';
+	const BUILD_ID_REPORT = '1791150274';
 	const SESSION_ID = Math.random().toString(36).slice(2, 8);
 	const SESSION_START = Date.now();
 	const REPORT_CAP = 250;
@@ -814,7 +847,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	window.trkReport('session_start', gpuInfo() + ' | ' + navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + (window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio) + ' | screen ' + screen.width + 'x' + screen.height + ' | cores ' + (navigator.hardwareConcurrency || '?'));
 
 	// Вкладка могла висеть со старой версией: при возврате в неё сверяем номер сборки и предлагаем обновиться.
-	const BUILD_ID = '1791148511';
+	const BUILD_ID = '1791150274';
 	// Важное обновление: старая сборка дальше не работает, иначе аккаунты и сохранения ломаются старым кодом.
 	function blockOldBuild(v) {
 		const wall = document.createElement('div');
