@@ -348,7 +348,7 @@ func upload_save() -> String:
 	var cloud_text := str(cloud["text"])
 	if not cloud_text.is_empty():
 		var theirs := SaveService.parse_backup(cloud_text)
-		if not theirs.is_empty() and SaveService.score_of(theirs) > SaveService.progress_score():
+		if not theirs.is_empty() and SaveService.should_restore_cloud(theirs):
 			SaveService.import_code(cloud_text)
 	var result := await _call(HTTPClient.METHOD_POST, "/rest/v1/rpc/upload_save", {"p_data": SaveService.export_code()})
 	if bool(result["ok"]) and result["data"] is String and not str(result["data"]).is_empty():

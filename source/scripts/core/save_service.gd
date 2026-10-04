@@ -39,6 +39,7 @@ const DEFAULTS := {
 	"story_best": {},
 	"story_choice": {},
 	"story_resume": {},
+	"story_reset_at": 0,
 	"recent_stickers": [],
 	"friends": {},
 	"invite_used": "",
@@ -708,6 +709,15 @@ static func score_of(d: Dictionary) -> int:
 
 func progress_score() -> int:
 	return score_of(data)
+
+
+## An intentional campaign restart takes precedence over an older, more complete campaign.
+func should_restore_cloud(remote: Dictionary) -> bool:
+	var local_reset := int(data.get("story_reset_at", 0))
+	var remote_reset := int(remote.get("story_reset_at", 0))
+	if remote_reset != local_reset:
+		return remote_reset > local_reset
+	return score_of(remote) > progress_score()
 
 
 func restore_backup(code: String) -> bool:

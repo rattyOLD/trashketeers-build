@@ -88,6 +88,19 @@ static func reset_save() -> void:
 	SaveService.save_data()
 
 
+## Restart the campaign without removing earned account rewards or lifetime statistics.
+static func reset_story() -> bool:
+	if not SaveService.is_dev():
+		return false
+	for key in ["story", "story_log", "story_best", "story_choice", "story_resume"]:
+		SaveService.data[key] = {}
+	SaveService.resume_requested = false
+	SaveService.data["train_again"] = true
+	SaveService.data["story_reset_at"] = maxi(int(Time.get_unix_time_from_system()), int(SaveService.data.get("story_reset_at", 0)) + 1)
+	SaveService.save_data()
+	return true
+
+
 static func reset_ads() -> void:
 	SaveService.data["ads_coins"] = 0
 	SaveService.data["ads_gems"] = 0
