@@ -96,6 +96,7 @@ static func reset_story() -> bool:
 		SaveService.data[key] = {}
 	SaveService.resume_requested = false
 	SaveService.data["train_again"] = true
+	SaveService.data["story_reset_at"] = maxi(int(Time.get_unix_time_from_system()), int(SaveService.data.get("story_reset_at", 0)) + 1)
 	SaveService.save_data()
 	return true
 

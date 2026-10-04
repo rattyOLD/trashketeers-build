@@ -62,13 +62,23 @@ func _run() -> void:
 		for key in ["story", "story_best", "story_log", "story_choice", "story_resume"]:
 			_check((SaveService.data[key] as Dictionary).is_empty(), "cleared " + key)
 		for key in before:
-			if key not in ["story", "story_best", "story_log", "story_choice", "story_resume", "train_again", "saved_at"]:
+			if key not in ["story", "story_best", "story_log", "story_choice", "story_resume", "story_reset_at", "train_again", "saved_at"]:
 				_check(SaveService.data[key] == before[key], "preserved " + str(key))
 		_check(StoryRun.next_mission_id() == "m1", "restart at mission one")
 		_check(not SaveService.resume_requested, "resume request cleared")
 		_check(bool(SaveService.data["train_again"]), "training enabled")
 		var stored: Dictionary = JSON.parse_string(Platform.storage_get(SaveService.STORAGE_KEY))
 		_check((stored["story"] as Dictionary).is_empty(), "reset persisted")
+		_check(not SaveService.should_restore_cloud(before), "old cloud campaign cannot undo reset")
+		var reset_save := SaveService.data.duplicate(true)
+		SaveService._apply_text(JSON.stringify(reset_save))
+		_check(int(SaveService.data["story_reset_at"]) == int(reset_save["story_reset_at"]), "reset marker survives reload")
+		SaveService.data = before.duplicate(true)
+		_check(SaveService.should_restore_cloud(reset_save), "another device accepts intentional reset")
+		_check(not SaveService.should_restore_cloud(before), "equal progress is not replaced")
+		var richer := before.duplicate(true)
+		richer["account_xp"] = int(richer["account_xp"]) + 1000
+		_check(SaveService.should_restore_cloud(richer), "normal progress protection still works")
 	popup.queue_free()
 	SaveService.data = original
 	SaveService.resume_requested = resume
