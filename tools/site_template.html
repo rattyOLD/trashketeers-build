@@ -354,7 +354,8 @@ html, body {
 }
 #rotate p { margin: 0; max-width: 300px; font-size: 15px; line-height: 1.4; color: var(--muted); }
 #rotate p b { color: var(--cyan); font-weight: 600; }
-html.orientation-hidden #rotate .phone, html.orientation-hidden #rotate .phone::after { animation-play-state: paused; }
+html.orientation-hidden #rotate .phone, html.orientation-hidden #rotate .phone::after,
+html.orientation-ready:not(.upright) #rotate .phone, html.orientation-ready:not(.upright) #rotate .phone::after { animation-play-state: paused; }
 @media (max-height: 480px) {
 	#rotate { gap: 16px; padding: 16px; }
 	#rotate .phone { width: 56px; height: 96px; border-width: 3px; border-radius: 12px; }
