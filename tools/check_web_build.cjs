@@ -8,7 +8,10 @@ const path = require('node:path');
   const browser = await type.launch(name === 'chromium' ? {args: ['--no-sandbox', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader']} : {headless: false});
   try {
     for (const scenario of ['', '#story:m1', '#story:m2']) {
-    const page = await browser.newPage({viewport: {width: 390, height: 844}, deviceScaleFactor: 1.5, isMobile: true, hasTouch: true});
+    // A newly installed service worker deliberately reloads its clients. Keep
+    // this isolated startup check on one document, so aborted old-page requests
+    // cannot be mistaken for a runtime crash in WebKit.
+    const page = await browser.newPage({viewport: {width: 390, height: 844}, deviceScaleFactor: 1.5, isMobile: true, hasTouch: true, serviceWorkers: 'block'});
     const lines = [];
     const errors = [];
     page.on('console', msg => {
