@@ -23,6 +23,7 @@ Net="*res://scripts/core/net.gd"
 SoundManager="*res://scripts/core/sound_manager.gd"
 ContentDB="*res://scripts/content/content_db.gd"
 BulletPool="*res://scripts/combat/bullet_pool.gd"
+AppActivity="*res://scripts/core/app_activity.gd"
 
 [debug]
 

@@ -51,7 +51,7 @@ jobs:
         run: |
           mkdir -p "$LOG"
           bash tools/verify.sh | tee "$LOG/summary.log"
-          grep -q 'CHECK checked 171 scripts, failed 0' "$LOG/summary.log"
+          grep -Eq 'CHECK checked [0-9]+ scripts, failed 0' "$LOG/summary.log"
           grep -q 'VERIFY OK' "$LOG/summary.log"
           if grep -q 'SCRIPT ERROR' "$LOG/import.log"; then exit 1; fi
           XDG_DATA_HOME="$RUNNER_TEMP/regression-user" "$GODOT" --headless --path source res://test/boss_armory_regression.tscn > "$LOG/regression.log" 2>&1

@@ -184,6 +184,9 @@ func _setup_common(camera_bounds: Rect2, currency_icon: Texture2D) -> void:
 		MainMenuUI.open_upgrades_next = true
 		_on_menu_pressed())
 	hud.set_health(player.hp, player.max_hp)
+	AppActivity.backgrounding.connect(_on_backgrounding)
+	if AppActivity.backgrounded:
+		_on_backgrounding.call_deferred()
 
 
 ## Буквы шрифта растеризуются при первом показе каждого размера (в вебе ~1 с на окне прокачки).
@@ -219,6 +222,8 @@ func set_camera_bounds(bounds: Rect2) -> void:
 
 
 func _exit_tree() -> void:
+	if AppActivity.backgrounding.is_connected(_on_backgrounding):
+		AppActivity.backgrounding.disconnect(_on_backgrounding)
 	Platform.mark_battle(false)
 	if BulletPool.bullet_hit.is_connected(_on_bullet_hit):
 		BulletPool.bullet_hit.disconnect(_on_bullet_hit)
@@ -238,8 +243,17 @@ func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_APPLICATION_FOCUS_IN:
 		_perf_last_usec = 0
 		_perf_resume_guard = 2
-	# Приложение (Android/iOS): «Назад» и уход в фон ставят бой на паузу, а не закрывают игру.
-	if what == NOTIFICATION_WM_GO_BACK_REQUEST or what == NOTIFICATION_APPLICATION_PAUSED:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		_open_pause()
+
+
+func _on_backgrounding() -> void:
+	if not is_inside_tree():
+		return
+	_perf_last_usec = 0
+	_perf_resume_guard = 2
+	if hud != null:
+		hud.reset_background_input()
 		_open_pause()
 
 

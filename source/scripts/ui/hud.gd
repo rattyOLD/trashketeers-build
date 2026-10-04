@@ -455,6 +455,13 @@ func set_weapon(weapon: WeaponData) -> void:
 	UiStyle.pop_in(_weapon_chip, 0.4)
 
 
+func reset_background_input() -> void:
+	joystick._reset()
+	_slot_bar._hold_index = -1
+	_interact._touch = -1
+	_hold._cancel()
+
+
 func set_slots(weapons: Array, active: int, count: int) -> void:
 	_slot_bar.set_slots(weapons, active, count)
 	apply_layout()

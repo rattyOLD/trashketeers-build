@@ -111,7 +111,6 @@ var _page_hidden := false
 var _ambient: Array[AudioStreamPlayer] = []
 var _ambient_timers: Dictionary = {}
 var _ambient_on := false
-var _visibility_callback: JavaScriptObject
 
 
 func _ready() -> void:
@@ -119,7 +118,6 @@ func _ready() -> void:
 	_ensure_buses()
 	_preload_streams()
 	_create_players()
-	_watch_visibility()
 	apply_enabled()
 
 
@@ -289,34 +287,9 @@ func _input(event: InputEvent) -> void:
 		play_music(id)
 
 
-## В вебе тишина по потере фокуса окна недопустима: игра живёт в iframe (Telegram, просмотрщик),
-## и blur приходит, даже когда игрок смотрит на экран. Глушим только по document.hidden
-## (свернули Telegram, ушли на другую вкладку). Колбэк через get_interface — без eval,
-## который строгий CSP хостинга может запрещать.
-func _watch_visibility() -> void:
-	if not OS.has_feature("web"):
-		return
-	var document := JavaScriptBridge.get_interface("document")
-	if document == null:
-		return
-	_visibility_callback = JavaScriptBridge.create_callback(_on_visibility_changed)
-	document.addEventListener("visibilitychange", _visibility_callback)
-
-
-func _on_visibility_changed(_args: Array) -> void:
-	_page_hidden = bool(JavaScriptBridge.get_interface("document").hidden)
+func set_backgrounded(value: bool) -> void:
+	_page_hidden = value
 	apply_enabled()
-
-
-func _notification(what: int) -> void:
-	if OS.has_feature("web"):
-		return
-	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_APPLICATION_PAUSED:
-		_page_hidden = true
-		apply_enabled()
-	elif what == NOTIFICATION_APPLICATION_FOCUS_IN or what == NOTIFICATION_APPLICATION_RESUMED:
-		_page_hidden = false
-		apply_enabled()
 
 
 func _pick_player() -> int:
