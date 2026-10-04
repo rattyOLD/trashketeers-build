@@ -16,7 +16,13 @@ const path = require('node:path');
       if (/SCRIPT ERROR|Parse Error|WebAssembly.*Error|memory access out of bounds/.test(msg.text())) errors.push(msg.text());
     });
     page.on('pageerror', error => errors.push(String(error)));
-    await page.route('**/*', route => new URL(route.request().url()).hostname === '127.0.0.1' ? route.continue() : route.abort());
+    await page.route('**/*', route => {
+      const url = new URL(route.request().url());
+      if (url.hostname === '127.0.0.1' || url.protocol === 'blob:' || url.protocol === 'data:') return route.continue();
+      // No telemetry/account requests leave this isolated check. A CORS-safe stub
+      // avoids WebKit's unhandled AbortError from deliberately aborted SDK scripts.
+      return route.fulfill({status: 200, contentType: route.request().resourceType() === 'script' ? 'application/javascript' : 'application/json', headers: {'Access-Control-Allow-Origin': '*'}, body: '{}'});
+    });
     await page.goto('http://127.0.0.1:8765/' + scenario, {waitUntil: 'domcontentloaded'});
     await page.waitForFunction(() => !document.getElementById('boot'), {timeout: 120000});
     await page.waitForTimeout(scenario ? 30000 : 8000);
