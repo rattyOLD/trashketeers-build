@@ -20,6 +20,12 @@ func _button(root: Node, prefix: String) -> Button:
 			return found
 	return null
 
+func _select_other(weapon_id: StringName) -> void:
+	var other := &"revolver_v1" if weapon_id == StringName(SaveService.START_WEAPON) else StringName(SaveService.START_WEAPON)
+	if not SaveService.owns_weapon(other):
+		SaveService.add_weapon(other, 1)
+	SaveService.set_selected_weapon(other)
+
 func _run() -> void:
 	var original_save := SaveService.data.duplicate(true)
 	SaveService.data = SaveService.DEFAULTS.duplicate(true)
@@ -34,9 +40,9 @@ func _run() -> void:
 			continue
 		armory._buy(weapon, Economy.shop_price(weapon) <= 0)
 		_check(SaveService.owns_weapon(weapon.id), "purchase " + String(weapon.id))
-		SaveService.set_selected_weapon(StringName(SaveService.START_WEAPON))
+		_select_other(weapon.id)
 		var card := armory._make_card(weapon)
-		var prefix := "T1 ×" if weapon.has_tiers() else "ВЗЯТЬ В РУКИ"
+		var prefix := "ВЗЯТЬ В РУКИ"
 		var equip := _button(card, prefix)
 		_check(equip != null, "card equip " + String(weapon.id))
 		if equip != null:
@@ -55,8 +61,18 @@ func _run() -> void:
 			if tier2 != null:
 				tier2.pressed.emit()
 				_check(SaveService.get_selected_tier() == 2, "selected tier2 " + String(weapon.id))
+			_select_other(weapon.id)
+			armory._open_detail(weapon.id, 2)
+			var detail_equip := _button(armory._list, "ВЗЯТЬ В РУКИ · T2")
+			_check(detail_equip != null and not detail_equip.disabled, "explicit detail equip " + String(weapon.id))
+			if detail_equip != null:
+				detail_equip.pressed.emit()
+				_check(SaveService.get_loadout().id == weapon.id and SaveService.get_selected_tier() == 2, "detail equips displayed tier")
+			SaveService.add_weapon(weapon.id, WeaponData.MAX_TIER)
+			SaveService.add_weapon(weapon.id, WeaponData.MAX_TIER)
+			_check(not SaveService.can_merge(weapon.id, WeaponData.MAX_TIER) and not SaveService.merge(weapon.id, WeaponData.MAX_TIER), "no tier above T5")
 		else:
-			SaveService.set_selected_weapon(StringName(SaveService.START_WEAPON))
+			_select_other(weapon.id)
 			armory._open_detail(weapon.id, 1)
 			var legendary := _button(armory._list, prefix)
 			_check(legendary != null, "legendary detail equip " + String(weapon.id))

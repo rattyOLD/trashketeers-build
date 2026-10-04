@@ -673,7 +673,7 @@ class Armory:
 		_list.add_child(actions)
 		if SaveService.owns_weapon(base.id):
 			var selected := SaveService.get_selected_weapon() == base.id
-			_add_actions(actions, base, selected, SaveService.get_selected_tier() if selected else SaveService.best_tier(base.id))
+			_add_actions(actions, base, selected, tier)
 		else:
 			var buy_row := _make_buy_row(base, "КУПИТЬ")
 			if buy_row != null:
@@ -745,6 +745,14 @@ class Armory:
 					_refresh())
 				column.add_child(equip)
 			return
+		var equipped := selected and SaveService.get_selected_tier() == tier
+		var equip := UiStyle.button("В РУКАХ · T%d" % tier if equipped else "ВЗЯТЬ В РУКИ · T%d" % tier, base.get_rarity_color().darkened(0.35), 20, Vector2(0, 54))
+		equip.disabled = equipped or SaveService.get_copies(base.id, tier) <= 0
+		equip.pressed.connect(func() -> void:
+			SaveService.set_selected_weapon(base.id, tier)
+			weapon_changed.emit(base.id)
+			_refresh())
+		column.add_child(equip)
 		var tiers := HFlowContainer.new()
 		tiers.add_theme_constant_override("h_separation", 8)
 		tiers.add_theme_constant_override("v_separation", 8)
@@ -767,7 +775,9 @@ class Armory:
 						weapon_changed.emit(base.id)
 						_refresh())
 				tiers.add_child(merge)
-		var buy_row := _make_buy_row(base, "ЕЩЁ")
+		if tier == WeaponData.MAX_TIER:
+			column.add_child(_note("T5 — максимальный тир", 17, UiStyle.GOLD))
+		var buy_row := _make_buy_row(base, "КОПИЯ T1")
 		if buy_row != null:
 			column.add_child(buy_row)
 	
