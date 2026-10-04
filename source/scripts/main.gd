@@ -70,6 +70,8 @@ func _ready() -> void:
 	SaveService.apply_quality()
 	_register_input()
 	_show_menu()
+	if not Platform.is_web:
+		add_child(OrientationIntro.new())
 	_accept_card_link.call_deferred()
 	if OS.has_feature("web"):
 		var url_hash := str(JavaScriptBridge.eval("window.location.hash"))

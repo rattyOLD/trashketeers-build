@@ -81,6 +81,21 @@ func _run() -> void:
 	main.set_script(load("res://scripts/main.gd"))
 	add_child(main)
 	await _settle()
+	var intro := main.get_node_or_null("OrientationIntro") as OrientationIntro
+	if intro == null:
+		for child in main.get_children():
+			if child is OrientationIntro:
+				intro = child as OrientationIntro
+	_check(is_instance_valid(intro), "native startup guidance is visible")
+	if is_instance_valid(intro):
+		_inside(intro._cover, "startup guidance")
+		await _shot("orientation-intro")
+		AppActivity._set_backgrounded(true)
+		await get_tree().create_timer(2.3, true).timeout
+		_check(is_instance_valid(intro), "startup animation waits while backgrounded")
+		AppActivity._set_backgrounded(false)
+	await get_tree().create_timer(1.5, true).timeout
+	_check(not is_instance_valid(intro), "startup guidance removes itself")
 	_check(not Orient.portrait and get_window().content_scale_size == Orient.LANDSCAPE_SIZE, "main uses horizontal viewport")
 	var menu := main._screen as MainMenuUI
 	await _shot("menu")
