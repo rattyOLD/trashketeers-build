@@ -799,6 +799,8 @@ func _begin(enc: Dictionary) -> void:
 	if locked:
 		gate_key = "boss" if enc.has("boss") and not bool(enc.get("mini", false)) else LevelSpawner.door_key(float(enc["at"]))
 		if gate_key == "boss":
+			# Entry has already crossed the doorway; respawn on this side of the closed gate.
+			checkpoint = game.player.global_position
 			game.map.close_story_gate(gate_key)
 
 
