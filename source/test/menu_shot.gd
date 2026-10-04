@@ -2,7 +2,7 @@ extends Node
 ## Снимок главного меню (нужен виртуальный экран, не headless).
 
 func _ready() -> void:
-	Orient.portrait = true
+	Orient.portrait = false
 	var scene: PackedScene = load(ProjectSettings.get_setting("application/run/main_scene"))
 	var main := scene.instantiate()
 	add_child(main)

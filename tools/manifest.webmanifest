@@ -3,7 +3,7 @@
  "short_name": "Trash Squad",
  "start_url": "./",
  "display": "fullscreen",
- "orientation": "portrait",
+ "orientation": "landscape",
  "background_color": "#0d0a1c",
  "theme_color": "#0d0a1c",
  "icons": [

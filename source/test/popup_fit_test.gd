@@ -1,8 +1,8 @@
 extends Node
-## Ни одно окно не шире и не выше экрана (портрет 720×1280, как на телефоне): рамки не должны «слезать».
+## Ни одно окно не шире и не выше горизонтального экрана 1280×720: рамки не должны «слезать».
 
 func _ready() -> void:
-	Orient.portrait = true
+	Orient.portrait = false
 	var st: Dictionary = SaveService.data["stats"]
 	st["hero_raccoon"] = 1234
 	st["time_played"] = 99999
@@ -40,7 +40,7 @@ func _ready() -> void:
 	var overlaps := 0
 	for key: String in makers:
 		var sub := SubViewport.new()
-		sub.size = Vector2i(720, 1280)
+		sub.size = Vector2i(1280, 720)
 		add_child(sub)
 		var maker := makers[key] as Callable
 		var popup := maker.call() as Control
@@ -55,7 +55,7 @@ func _ready() -> void:
 			print("SKIP ", key, " (нет _panel)")
 		else:
 			var r := panel.get_global_rect()
-			var ok := r.position.x >= -0.5 and r.end.x <= 720.5 and r.size.y <= 1280.5
+			var ok := r.position.x >= -0.5 and r.end.x <= 1280.5 and r.size.y <= 720.5
 			if not ok:
 				bad += 1
 				print("FAIL %s rect=%s" % [key, str(r)])

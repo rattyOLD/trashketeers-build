@@ -1,7 +1,7 @@
 extends Node
 ## Снимок одного окна: POPUP=BattlePass → /tmp/anim/popup_<имя>.png (720×1280).
 func _ready() -> void:
-	Orient.portrait = true
+	Orient.portrait = false
 	var key := OS.get_environment("POPUP")
 	var maker: Variant = {
 		"BattlePass": func() -> Control: return BattlePassPopup.new(),

@@ -5,8 +5,8 @@ func _init() -> void:
 
 
 func _ready() -> void:
-	Orient.portrait = true
-	get_window().content_scale_size = Orient.PORTRAIT_SIZE
+	Orient.portrait = false
+	get_window().content_scale_size = Orient.LANDSCAPE_SIZE
 	if OS.get_environment("VPMODE") == "1":
 		get_tree().root.content_scale_mode = Window.CONTENT_SCALE_MODE_VIEWPORT
 	SaveService.data["quality"] = int(OS.get_environment("PROBE_Q")) if OS.get_environment("PROBE_Q") != "" else 0

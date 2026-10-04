@@ -40,10 +40,10 @@ const DEFAULT_KEYS := {
 	&"weapon_3": [KEY_3],
 }
 
-const SKILL_X := 0.885
-const SKILL_Y := 0.82
-const SLOTS_X := 0.695
-const SLOTS_Y := 0.8
+const SKILL_X := 0.87
+const SKILL_Y := 0.8
+const SLOTS_X := 0.74
+const SLOTS_Y := 0.76
 
 static var revision := 0
 
@@ -65,10 +65,10 @@ static func default_config(left_handed: bool = false) -> Dictionary:
 		"layout": {
 			"dash": {"x": cx, "y": SKILL_Y, "s": 1.0},
 			"slots": {"x": sx, "y": SLOTS_Y, "s": 1.0},
-			"interact": {"x": 0.5, "y": 0.46, "s": 1.0},
+			"interact": {"x": 0.74 if not left_handed else 0.26, "y": 0.46, "s": 1.0},
 		},
 		"hud": {},
-		"layout_v": 9,
+		"layout_v": 10,
 		"keys": {},
 		"presets": {},
 	}
@@ -134,6 +134,11 @@ static func config() -> Dictionary:
 		if absf(float(column["y"]) - 0.54) < 0.005 and absf(float(column["x"]) - (0.13 if left else 0.87)) < 0.005:
 			column["x"] = 1.0 - SLOTS_X if left else SLOTS_X
 			column["y"] = SLOTS_Y
+	if int(stored.get("layout_v", 1)) < 10:
+		stored["portrait_layout_backup"] = {"layout": layout.duplicate(true), "hud": (stored["hud"] as Dictionary).duplicate(true)}
+		stored["layout"] = (base["layout"] as Dictionary).duplicate(true)
+		stored["hud"] = {}
+		stored["layout_v"] = 10
 	return stored
 
 
@@ -252,9 +257,10 @@ static func weapon_slot_count() -> int:
 static func apply_big(left_handed: bool) -> void:
 	apply_preset(left_handed)
 	var cx := 0.13 if left_handed else 0.87
+	var sx := 0.29 if left_handed else 0.71
 	set_element("dash", cx, 0.8, 1.4)
-	set_element("slots", cx, 0.46, 1.25)
-	set_element("interact", 0.5, 0.8, 1.35)
+	set_element("slots", sx, 0.7, 1.25)
+	set_element("interact", sx, 0.32, 1.35)
 	set_value("joystick_scale", 1.3)
 	save()
 
@@ -268,6 +274,8 @@ static func apply_preset(left_handed: bool) -> void:
 	fresh["presets"] = keep_presets
 	fresh["keys"] = keep_keys
 	fresh["hud"] = config().get("hud", {})
+	if config().has("portrait_layout_backup"):
+		fresh["portrait_layout_backup"] = config()["portrait_layout_backup"]
 	SaveService.data["controls"] = fresh
 	save()
 
@@ -291,6 +299,8 @@ static func load_preset(slot: int) -> bool:
 		return false
 	var snapshot: Dictionary = (presets[str(slot)] as Dictionary).duplicate(true)
 	snapshot["presets"] = presets
+	if not snapshot.has("portrait_layout_backup") and cfg.has("portrait_layout_backup"):
+		snapshot["portrait_layout_backup"] = cfg["portrait_layout_backup"]
 	SaveService.data["controls"] = snapshot
 	apply_keys()
 	save()

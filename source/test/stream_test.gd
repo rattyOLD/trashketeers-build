@@ -2,8 +2,8 @@ extends Node
 ## Струи пива и рвоты: очередь капель из фиксированной точки в сторону енота, затем снимок.
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	Orient.portrait = true
-	get_window().content_scale_size = Orient.PORTRAIT_SIZE
+	Orient.portrait = false
+	get_window().content_scale_size = Orient.LANDSCAPE_SIZE
 	SaveService.data["quality"] = 2
 	var state: Dictionary = SaveService.data["tester"]
 	state["god"] = true

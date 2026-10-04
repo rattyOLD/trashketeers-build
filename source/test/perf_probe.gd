@@ -1,8 +1,8 @@
 extends Node
 ## Замер CPU: сколько мс на кадр даёт каждая ветка сцены (скрипты и физика). PROBE_STORY=1 для сюжета.
 func _ready() -> void:
-	Orient.portrait = true
-	get_window().content_scale_size = Orient.PORTRAIT_SIZE
+	Orient.portrait = false
+	get_window().content_scale_size = Orient.LANDSCAPE_SIZE
 	var game := Game.new()
 	if OS.get_environment("PROBE_STORY") == "1":
 		game.story_mission = "m1"

@@ -2,8 +2,8 @@ extends Node
 ## Вся карта выживания сверху (глава PROBE_CH, зерно SEED): камера вписывает границы арены.
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	Orient.portrait = true
-	get_window().content_scale_size = Orient.PORTRAIT_SIZE
+	Orient.portrait = false
+	get_window().content_scale_size = Orient.LANDSCAPE_SIZE
 	SaveService.data["quality"] = 2
 	var state: Dictionary = SaveService.data["tester"]
 	state["god"] = true

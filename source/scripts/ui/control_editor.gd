@@ -22,6 +22,7 @@ var _swipe_toggle: Button
 var _preset_buttons: Array[Button] = []
 var _collapsed := false
 var _summary: Control
+var _options_scroll: ScrollContainer
 
 
 func _init() -> void:
@@ -90,8 +91,13 @@ func _build() -> void:
 	_body.add_child(head)
 
 	_summary = VBoxContainer.new()
+	_summary.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_summary.add_theme_constant_override("separation", 8)
-	_body.add_child(_summary)
+	_options_scroll = DragScroll.new()
+	_options_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_options_scroll.custom_minimum_size = Vector2(0, 300)
+	_body.add_child(_options_scroll)
+	_options_scroll.add_child(_summary)
 	var hint := UiStyle.label("Тащи кнопки пальцем. Тап по кнопке выбирает её: ниже её размер и прозрачность.", 18, UiStyle.TEXT_DIM, 4)
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_summary.add_child(hint)
@@ -202,6 +208,7 @@ func _slider(parent: Control, caption: String, low: float, high: float, on_chang
 func _toggle_fold() -> void:
 	_collapsed = not _collapsed
 	_summary.visible = not _collapsed
+	_options_scroll.visible = not _collapsed
 	((_body.get_child(0) as HBoxContainer).get_child(1) as Button).text = "РАЗВЕРНУТЬ" if _collapsed else "СВЕРНУТЬ"
 	_panel.reset_size()
 
@@ -237,7 +244,7 @@ func _place_all() -> void:
 
 
 func _joystick_center() -> Vector2:
-	return Vector2(size.x * (0.76 if bool(Controls.get_value("left_handed")) else 0.24), size.y - 230.0)
+	return Vector2(size.x * (0.84 if bool(Controls.get_value("left_handed")) else 0.16), size.y * 0.8)
 
 
 func _draw() -> void:

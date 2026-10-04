@@ -5,8 +5,8 @@ func _init() -> void:
 
 
 func _ready() -> void:
-	Orient.portrait = true
-	get_window().content_scale_size = Orient.PORTRAIT_SIZE
+	Orient.portrait = false
+	get_window().content_scale_size = Orient.LANDSCAPE_SIZE
 	SaveService.data["quality"] = int(OS.get_environment("PROBE_Q")) if OS.get_environment("PROBE_Q") != "" else 0
 	var state: Dictionary = SaveService.data["tester"]
 	state["god"] = true

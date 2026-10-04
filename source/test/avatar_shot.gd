@@ -1,6 +1,6 @@
 extends Node
 func _ready() -> void:
-	Orient.portrait = true
+	Orient.portrait = false
 	Platform.storage_set(SaveService.BADGE_KEY, "0")
 	SaveService.data["frame"] = "frame:tin"
 	var own: Array = SaveService.data.get("cosmetics", [])

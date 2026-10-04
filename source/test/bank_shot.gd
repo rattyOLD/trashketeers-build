@@ -1,7 +1,7 @@
 extends Node
 func _ready() -> void:
-	Orient.portrait = true
-	get_window().content_scale_size = Orient.PORTRAIT_SIZE
+	Orient.portrait = false
+	get_window().content_scale_size = Orient.LANDSCAPE_SIZE
 	var game := Game.new()
 	add_child(game)
 	game.start(&"")

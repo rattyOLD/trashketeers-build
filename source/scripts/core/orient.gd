@@ -1,7 +1,6 @@
 class_name Orient
 extends RefCounted
-## Ориентация экрана. На телефонах игра только вертикальная (720×1280), горизонтальная раскладка 1280×720
-## доступна только на ПК. Окна и панели выбирают раскладку по Orient.portrait.
+## Единая горизонтальная компоновка для телефона, браузера и ПК.
 
 const LANDSCAPE_SIZE := Vector2i(1280, 720)
 const PORTRAIT_SIZE := Vector2i(720, 1280)
@@ -22,9 +21,9 @@ static func _probe() -> void:
 
 
 ## Нужна ли вертикальная раскладка для окна такого размера.
-static func wants_portrait(width: float, height: float) -> bool:
+static func wants_portrait(_width: float, _height: float) -> bool:
 	_probe()
-	return height > width or not desktop
+	return false
 
 
 ## Возвращает true, если ориентация сменилась.

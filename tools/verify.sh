@@ -8,6 +8,10 @@ mkdir -p "$LOG"
 "$GODOT" --headless --path $P --import > "$LOG/import.log" 2>&1
 "$GODOT" --headless --path $P res://test/check_scripts.tscn 2>&1 | grep "CHECK checked"
 fail=0
+XDG_DATA_HOME="$LOG/landscape-user" "$GODOT" --headless --path $P res://test/landscape_audit.tscn > "$LOG/landscape.log" 2>&1
+if ! grep -q 'LANDSCAPE_AUDIT failures=0' "$LOG/landscape.log" || grep -q 'SCRIPT ERROR' "$LOG/landscape.log"; then
+  fail=1
+fi
 XDG_DATA_HOME="$LOG/app-activity-user" "$GODOT" --headless --path $P res://test/app_activity_test.tscn > "$LOG/app-activity.log" 2>&1
 if ! grep -q 'APP_ACTIVITY_TEST failures=0' "$LOG/app-activity.log" || grep -q 'SCRIPT ERROR' "$LOG/app-activity.log"; then
   fail=1
@@ -26,7 +30,7 @@ if ! grep -q 'STORY_TESTER_START failures=0' "$LOG/story-tester-start.log" || gr
 fi
 for m in survival story raid mod:blast; do
   MODE=$m DURATION=45 timeout 300 xvfb-run -a -s "-screen 0 1280x1400x24" "$GODOT" --rendering-driver opengl3 \
-    --resolution 720x1280 --path $P res://test/mode_audit.tscn > "$LOG/$m.log" 2>&1
+    --resolution 1280x720 --path $P res://test/mode_audit.tscn > "$LOG/$m.log" 2>&1
   n=$(grep -c "SCRIPT ERROR" "$LOG/$m.log"); done_ok=$(grep -c MODE_AUDIT_DONE "$LOG/$m.log")
   echo "$m: errors=$n finished=$done_ok"
   [ "$n" != "0" ] || [ "$done_ok" != "1" ] && fail=1

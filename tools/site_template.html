@@ -22,7 +22,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap">
 <style>
-html.sideways #rotate { display: flex; }
+html.upright #rotate { display: flex; }
 :root {
 	color-scheme: dark;
 	--night: #0b171c;
@@ -290,8 +290,8 @@ html, body {
 #rotate {
 	position: fixed;
 	inset: 0;
-	z-index: 8;
-	pointer-events: none;
+	z-index: 1000;
+	pointer-events: auto;
 	display: none;
 	flex-direction: column;
 	align-items: center;
@@ -341,7 +341,7 @@ html, body {
 }
 @keyframes turn {
 	0%, 100% { transform: translateY(0); }
-	50% { transform: translateY(-10px); }
+	50% { transform: rotate(90deg); }
 }
 @keyframes pulse { 0%, 100% { opacity: 0.45; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.15); } }
 #rotate h2 {
@@ -364,8 +364,8 @@ html, body {
 
 <div id="rotate">
 	<div class="phone"></div>
-	<h2>Держи телефон вертикально</h2>
-	<p>Переверни телефон вертикально, и всё продолжится.</p>
+	<h2>Поверни телефон горизонтально</h2>
+	<p>Для игры нужен горизонтальный экран.</p>
 </div>
 
 <div id="boot">
@@ -433,21 +433,23 @@ html, body {
 			return setTimeout(function () { window.dispatchEvent(new Event('resize')); }, ms);
 		});
 	};
-	try { if (screen.orientation && screen.orientation.lock && window.matchMedia('(pointer: coarse)').matches) { screen.orientation.lock('portrait').catch(function () {}); } } catch (e) {}
-	var phone = false;
-	try { phone = window.matchMedia('(pointer: coarse)').matches && Math.min(screen.width, screen.height) < 700; } catch (e) {}
+	try { if (screen.orientation && screen.orientation.lock && window.matchMedia('(pointer: coarse)').matches) { screen.orientation.lock('landscape').catch(function () {}); } } catch (e) {}
+	var touch = window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
 	var judge = function () {
 		var ae = document.activeElement;
 		if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) { return; }
-		var sideways = phone && window.innerWidth > window.innerHeight * 1.05;
-		try { if (phone && screen.orientation && screen.orientation.type) { sideways = sideways && screen.orientation.type.indexOf('landscape') === 0; } } catch (e) {}
-		document.documentElement.classList.toggle('sideways', sideways);
+		var blocked = touch && window.innerHeight > window.innerWidth;
+		document.documentElement.classList.toggle('upright', blocked);
+		if (window.__trash_landscape_blocked !== blocked) {
+			window.__trash_landscape_blocked = blocked;
+			window.dispatchEvent(new Event('trashorientationchange'));
+		}
 	};
 	judge();
-	setInterval(judge, 300);
 	window.addEventListener('orientationchange', function () { judge(); setTimeout(judge, 400); });
 	window.addEventListener('orientationchange', kick);
 	window.addEventListener('resize', judge);
+	document.addEventListener('focusout', judge);
 	window.addEventListener('resize', kick);
 	if (window.visualViewport) { window.visualViewport.addEventListener('resize', kick); }
 
@@ -540,7 +542,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 		if (baseManifest) {
 			try {
 				var m = {name: 'Trash Squad', short_name: 'Trash Squad', start_url: location.pathname + '?' + key + '=' + encodeURIComponent(value), scope: location.pathname,
-					display: 'fullscreen', orientation: 'portrait', background_color: '#0b171c', theme_color: '#0b171c',
+					display: 'fullscreen', orientation: 'landscape', background_color: '#0b171c', theme_color: '#0b171c',
 					icons: [{src: new URL('icon192.png', location.href).href, sizes: '192x192', type: 'image/png'}, {src: new URL('icon512.png', location.href).href, sizes: '512x512', type: 'image/png'}]};
 				baseManifest.href = URL.createObjectURL(new Blob([JSON.stringify(m)], {type: 'application/manifest+json'}));
 			} catch (e) {}
