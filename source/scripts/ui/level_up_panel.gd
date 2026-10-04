@@ -105,8 +105,13 @@ func _make_card(upgrade: UpgradeData, index: int, stats: RunStats) -> Button:
 	desc.custom_minimum_size = Vector2(text_width, 0)
 	column.add_child(desc)
 	if not Orient.portrait:
+		var card_ref := weakref(card)
+		var column_ref := weakref(column)
 		column.minimum_size_changed.connect(func() -> void:
-			card.custom_minimum_size.y = maxf(280.0, column.get_combined_minimum_size().y + 16.0))
+			var target := card_ref.get_ref() as Button
+			var contents := column_ref.get_ref() as VBoxContainer
+			if is_instance_valid(target) and is_instance_valid(contents):
+				target.custom_minimum_size.y = maxf(280.0, contents.get_combined_minimum_size().y + 16.0))
 	return card
 
 
