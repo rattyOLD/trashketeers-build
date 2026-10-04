@@ -38,6 +38,7 @@ func select(id: String) -> void:
 
 
 func open() -> void:
+	ScreenSafeArea.fit(self, get_viewport_rect().size)
 	for child in get_children():
 		child.queue_free()
 	_items.clear()
@@ -56,7 +57,10 @@ func _build() -> void:
 	interact.show_for(demo[1], "в пустой слот 2")
 	interact.visible = true
 	var dash := DashPreview.new()
-	_items = {"dash": dash, "slots": slot_bar, "interact": interact}
+	dash.caption = "НАВЫК"
+	var dodge := DashPreview.new()
+	dodge.caption = "РЫВОК"
+	_items = {"dash": dash, "dodge": dodge, "slots": slot_bar, "interact": interact}
 	for id in _items:
 		_items[id].mouse_filter = Control.MOUSE_FILTER_IGNORE
 		add_child(_items[id])
@@ -269,7 +273,7 @@ func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
 			_dragging = ""
-			for id in ["interact", "slots", "dash"]:
+			for id in ["interact", "slots", "dodge", "dash"]:
 				var item: Control = _items[id]
 				if Rect2(item.position, item.size).grow(12.0).has_point(event.position):
 					_dragging = id
@@ -291,6 +295,7 @@ func _gui_input(event: InputEvent) -> void:
 
 class DashPreview:
 	extends Control
+	var caption := "НАВЫК"
 
 	func _draw() -> void:
 		var c := size * 0.5
@@ -301,3 +306,4 @@ class DashPreview:
 		var k := size.x / 160.0
 		var arrow := PackedVector2Array([tip, c + Vector2(4, -22) * k, c + Vector2(4, -9) * k, c + Vector2(-20, -9) * k, c + Vector2(-20, 9) * k, c + Vector2(4, 9) * k, c + Vector2(4, 22) * k])
 		draw_colored_polygon(arrow, Color(1, 1, 1, 0.95))
+		draw_string(ThemeDB.fallback_font, Vector2(0, size.y * 0.78), caption, HORIZONTAL_ALIGNMENT_CENTER, size.x, maxi(12, roundi(size.x * 0.14)), Color.WHITE)

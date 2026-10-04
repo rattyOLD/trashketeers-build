@@ -3,7 +3,7 @@ extends RefCounted
 ## Настройки управления: раскладка кнопок на экране (положение и размер), сторона джойстика,
 ## жесты, переназначение клавиш и пять пресетов. Хранится в SaveService.data["controls"].
 
-const ELEMENTS := ["dash", "slots", "interact"]
+const ELEMENTS := ["dash", "dodge", "slots", "interact"]
 ## Остальные элементы боевого интерфейса, которые игрок может двигать, масштабировать и делать прозрачными.
 const HUD_ELEMENTS := ["hp", "xp", "coins", "pause", "time", "kills", "loot", "fps", "wave", "boss", "minimap", "order", "story_bar", "story_meter", "wanted", "barks"]
 const HUD_TITLES := {
@@ -11,8 +11,8 @@ const HUD_TITLES := {
 	"loot": "ЛУТ НА КАРТЕ", "fps": "СЧЁТЧИК FPS", "wave": "ВОЛНА", "boss": "ПОЛОСА БОССА", "minimap": "МИНИКАРТА",
 	"order": "ЗАДАНИЕ", "story_bar": "ОЧКИ, ЖИЗНИ, ЗОНА", "story_meter": "ДЕТАЛИ СУПЕР-СТВОЛА", "wanted": "РОЗЫСК", "barks": "РЕПЛИКИ",
 }
-const ELEMENT_TITLES := {"dash": "НАВЫК", "slots": "СЛОТЫ ОРУЖИЯ", "interact": "ВЗЯТЬ"}
-const ELEMENT_SIZE := {"dash": Vector2(160, 160), "slots": Vector2(96, 96), "interact": Vector2(250, 96)}
+const ELEMENT_TITLES := {"dash": "НАВЫК", "dodge": "РЫВОК", "slots": "СЛОТЫ ОРУЖИЯ", "interact": "ВЗЯТЬ"}
+const ELEMENT_SIZE := {"dash": Vector2(160, 160), "dodge": Vector2(144, 144), "slots": Vector2(200, 96), "interact": Vector2(250, 96)}
 const PRESET_SLOTS := 3
 
 const KEY_ACTIONS := [
@@ -21,6 +21,7 @@ const KEY_ACTIONS := [
 	[&"move_left", "Влево"],
 	[&"move_right", "Вправо"],
 	[&"dash", "Навык"],
+	[&"dodge", "Рывок"],
 	[&"interact", "Подобрать ствол"],
 	[&"weapon_next", "Следующий ствол"],
 	[&"weapon_1", "Слот 1"],
@@ -32,7 +33,8 @@ const DEFAULT_KEYS := {
 	&"move_right": [KEY_D, KEY_RIGHT],
 	&"move_up": [KEY_W, KEY_UP],
 	&"move_down": [KEY_S, KEY_DOWN],
-	&"dash": [KEY_SPACE, KEY_SHIFT],
+	&"dash": [KEY_R],
+	&"dodge": [KEY_SPACE, KEY_SHIFT],
 	&"interact": [KEY_E, KEY_F],
 	&"weapon_next": [KEY_Q, KEY_TAB],
 	&"weapon_1": [KEY_1],
@@ -40,17 +42,17 @@ const DEFAULT_KEYS := {
 	&"weapon_3": [KEY_3],
 }
 
-const SKILL_X := 0.87
+const SKILL_X := 0.92
 const SKILL_Y := 0.8
-const SLOTS_X := 0.74
-const SLOTS_Y := 0.76
+const SLOTS_X := 0.60
+const SLOTS_Y := 0.84
 
 static var revision := 0
 
 
 static func default_config(left_handed: bool = false) -> Dictionary:
 	# Хват двумя большими пальцами снизу: навык — в правом нижнем углу под большим пальцем,
-	# стволы — колонкой левее, по дуге движения пальца (правее зоны джойстика, ZONE_WIDTH_FRACTION).
+	# рядом — отдельный рывок; оружие лежит горизонтально ниже центра экрана.
 	var cx := SKILL_X if not left_handed else 1.0 - SKILL_X
 	var sx := SLOTS_X if not left_handed else 1.0 - SLOTS_X
 	return {
@@ -64,11 +66,12 @@ static func default_config(left_handed: bool = false) -> Dictionary:
 		"weapon_slots": 2,
 		"layout": {
 			"dash": {"x": cx, "y": SKILL_Y, "s": 1.0},
+			"dodge": {"x": 0.79 if not left_handed else 0.21, "y": 0.8, "s": 1.0},
 			"slots": {"x": sx, "y": SLOTS_Y, "s": 1.0},
-			"interact": {"x": 0.74 if not left_handed else 0.26, "y": 0.46, "s": 1.0},
+			"interact": {"x": 0.79 if not left_handed else 0.21, "y": 0.51, "s": 1.0},
 		},
 		"hud": {},
-		"layout_v": 10,
+		"layout_v": 11,
 		"keys": {},
 		"presets": {},
 	}
@@ -139,6 +142,11 @@ static func config() -> Dictionary:
 		stored["layout"] = (base["layout"] as Dictionary).duplicate(true)
 		stored["hud"] = {}
 		stored["layout_v"] = 10
+	if int(stored.get("layout_v", 1)) < 11:
+		stored["landscape_layout_backup"] = {"layout": (stored["layout"] as Dictionary).duplicate(true), "hud": (stored["hud"] as Dictionary).duplicate(true)}
+		stored["layout"] = (base["layout"] as Dictionary).duplicate(true)
+		stored["hud"] = {}
+		stored["layout_v"] = 11
 	return stored
 
 
@@ -256,11 +264,12 @@ static func weapon_slot_count() -> int:
 ## Готовая раскладка «Большие пальцы»: крупные кнопки с запасом между ними.
 static func apply_big(left_handed: bool) -> void:
 	apply_preset(left_handed)
-	var cx := 0.13 if left_handed else 0.87
-	var sx := 0.29 if left_handed else 0.71
-	set_element("dash", cx, 0.8, 1.4)
-	set_element("slots", sx, 0.7, 1.25)
-	set_element("interact", sx, 0.32, 1.35)
+	var cx := 0.09 if left_handed else 0.91
+	var sx := 0.24 if left_handed else 0.76
+	set_element("dash", cx, 0.78, 1.15)
+	set_element("dodge", sx, 0.78, 1.15)
+	set_element("slots", 0.46 if left_handed else 0.54, 0.84, 1.1)
+	set_element("interact", sx, 0.48, 1.15)
 	set_value("joystick_scale", 1.3)
 	save()
 
@@ -273,6 +282,8 @@ static func apply_preset(left_handed: bool) -> void:
 		fresh[key] = config()[key]
 	fresh["presets"] = keep_presets
 	fresh["keys"] = keep_keys
+	if config().has("landscape_layout_backup"):
+		fresh["landscape_layout_backup"] = config()["landscape_layout_backup"]
 	fresh["hud"] = config().get("hud", {})
 	if config().has("portrait_layout_backup"):
 		fresh["portrait_layout_backup"] = config()["portrait_layout_backup"]
@@ -299,6 +310,8 @@ static func load_preset(slot: int) -> bool:
 		return false
 	var snapshot: Dictionary = (presets[str(slot)] as Dictionary).duplicate(true)
 	snapshot["presets"] = presets
+	if not snapshot.has("landscape_layout_backup") and cfg.has("landscape_layout_backup"):
+		snapshot["landscape_layout_backup"] = cfg["landscape_layout_backup"]
 	if not snapshot.has("portrait_layout_backup") and cfg.has("portrait_layout_backup"):
 		snapshot["portrait_layout_backup"] = cfg["portrait_layout_backup"]
 	SaveService.data["controls"] = snapshot
@@ -311,6 +324,13 @@ static func keys_for(action: StringName) -> Array:
 	var custom: Dictionary = config()["keys"]
 	if custom.has(str(action)):
 		return custom[str(action)]
+	if action == &"dodge":
+		var skill_keys: Array = custom.get("dash", DEFAULT_KEYS[&"dash"])
+		var free_keys: Array = []
+		for key in DEFAULT_KEYS[&"dodge"]:
+			if not skill_keys.has(key):
+				free_keys.append(key)
+		return [KEY_C] if free_keys.is_empty() else free_keys
 	return DEFAULT_KEYS.get(action, [])
 
 

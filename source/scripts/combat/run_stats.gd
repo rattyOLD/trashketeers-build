@@ -3,6 +3,7 @@ extends RefCounted
 ## Бонусы текущего забега. Живут только до конца боя; базовые конфиги не трогают.
 
 const STAT_KEYS: Array[StringName] = [
+	&"dodge_damage", &"dodge_blast", &"dodge_poison", &"dodge_shock", &"dodge_cooldown", &"dodge_distance",
 	&"damage_mult",
 	&"fire_rate_mult",
 	&"extra_projectiles",
@@ -70,6 +71,7 @@ const CAPS := {
 	&"vampirism": 0.005, &"kill_heal": 3.0, &"magnet_mult": 3.0, &"close_damage": 1.5, &"rail_rate": 1.0,
 	&"poison_power": 2.0, &"status_power": 1.5, &"blast_power": 2.0, &"double_drop": 0.5, &"drone_count": 4.0,
 }
+const DASH_CAPS := {&"dodge_damage": 3.0, &"dodge_blast": 2.0, &"dodge_poison": 2.0, &"dodge_shock": 2.0, &"dodge_cooldown": 1.5, &"dodge_distance": 0.2}
 const KNEE := 0.7
 const OVER_KNEE_SLOPE := 0.35
 var uncapped := false
@@ -99,6 +101,8 @@ func power() -> float:
 
 func get_stat(key: StringName) -> float:
 	var raw: float = _values.get(key, 0.0)
+	if DASH_CAPS.has(key):
+		return clampf(raw, 0.0, float(DASH_CAPS[key]))
 	return raw if uncapped else RunStats.capped(key, raw)
 
 
@@ -111,6 +115,8 @@ func can_take(upgrade: UpgradeData) -> bool:
 
 
 func apply(upgrade: UpgradeData) -> void:
+	if upgrade.category in ["dash", "dash_element"] and not is_available(upgrade):
+		return
 	_stacks[upgrade.id] = get_stacks(upgrade.id) + 1
 	if not INSTANT_STATS.has(upgrade.stat):
 		_values[upgrade.stat] = get_stat(upgrade.stat) + upgrade.value
@@ -128,6 +134,10 @@ func has_upgrade(upgrade_id: StringName) -> bool:
 func is_available(upgrade: UpgradeData) -> bool:
 	if not can_take(upgrade):
 		return false
+	if upgrade.category == "dash_element":
+		for key in [&"dodge_blast", &"dodge_poison", &"dodge_shock"]:
+			if key != upgrade.stat and get_stat(key) > 0.0:
+				return false
 	if upgrade.close_only and not close_context:
 		return false
 	if upgrade.rail_only and not rail_context:
@@ -152,6 +162,7 @@ const ARCHETYPE_BY_STAT := {
 	&"burn_chance": &"debuff", &"burn_vamp": &"debuff", &"bleed_chance": &"debuff", &"vampirism": &"debuff", &"kill_heal": &"debuff",
 	&"close_finisher": &"debuff", &"evo_vamp_poison": &"debuff", &"evo_toxic_burst": &"debuff", &"evo_static_freeze": &"debuff",
 	&"move_speed_mult": &"mobility",
+	&"dodge_damage": &"mobility", &"dodge_blast": &"mobility", &"dodge_poison": &"mobility", &"dodge_shock": &"mobility", &"dodge_cooldown": &"mobility", &"dodge_distance": &"mobility",
 }
 ## Насколько сильно выдача тянется к уже выбранному направлению (доля 1.0 = ×(1 + BIAS)).
 const ARCHETYPE_BIAS := 1.8

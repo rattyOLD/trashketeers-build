@@ -10,7 +10,7 @@ const RARITY_FALLBACK := Color("#b9c2d9")
 
 
 static func slots_base_size(count: int) -> Vector2:
-	return Vector2(SLOT_W, SLOT_H * count + SLOT_GAP * (count - 1))
+	return Vector2(SLOT_W * count + SLOT_GAP * (count - 1), SLOT_H)
 
 
 static func button_style(fill: Color, border: Color, width: int = 4) -> StyleBoxFlat:
@@ -50,7 +50,7 @@ class SlotBar:
 		queue_redraw()
 
 	func _scale() -> float:
-		return size.x / SLOT_W
+		return size.y / SLOT_H
 
 	func _process(delta: float) -> void:
 		if _flash > 0.0:
@@ -68,11 +68,11 @@ class SlotBar:
 			return
 		if event is InputEventScreenTouch and event.pressed:
 			var local := ((event as InputEventScreenTouch).position - get_global_rect().position) / _scale()
-			if local.x < 0.0 or local.x > SLOT_W:
+			if local.y < 0.0 or local.y > SLOT_H:
 				return
 			for i in count:
-				var top := i * (SLOT_H + SLOT_GAP)
-				if local.y >= top and local.y <= top + SLOT_H:
+				var top := i * (SLOT_W + SLOT_GAP)
+				if local.x >= top and local.x <= top + SLOT_W:
 					_hold_index = i
 					_hold_start = Time.get_ticks_msec()
 					slot_pressed.emit(i)
@@ -84,7 +84,7 @@ class SlotBar:
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2(k, k))
 		var font := ThemeDB.fallback_font
 		for i in count:
-			var rect := Rect2(0, i * (SLOT_H + SLOT_GAP), SLOT_W, SLOT_H)
+			var rect := Rect2(i * (SLOT_W + SLOT_GAP), 0, SLOT_W, SLOT_H)
 			var weapon: WeaponData = weapons[i] if i < weapons.size() else null
 			var is_active := i == active
 			var accent: Color = weapon.get_rarity_color() if weapon != null else RARITY_FALLBACK

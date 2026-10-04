@@ -20,6 +20,7 @@ var _cool := 3.0
 var _idle := 12.0
 var _hide_in := 0.0
 var _last: Dictionary = {}
+var _muted := false
 var _rng := RandomNumberGenerator.new()
 
 
@@ -44,12 +45,14 @@ func _init() -> void:
 	_list.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	column.add_child(_list)
 	_load()
+	_panel.visible = false
 	set_process(true)
 
 
 ## На время боя с боссом его полоса встаёт на место рации: панель прячется, место в шапке остаётся.
 func set_muted(muted: bool) -> void:
-	_panel.visible = not muted
+	_muted = muted
+	_panel.visible = not muted and not _lines.is_empty()
 
 
 func _load() -> void:
@@ -131,10 +134,11 @@ func _total_chars() -> int:
 
 
 func _refresh() -> void:
+	_panel.visible = not _muted and not _lines.is_empty()
 	for child in _list.get_children():
 		child.queue_free()
 	var chars := _total_chars()
-	var size := 17 if chars <= 60 else (15 if chars <= 90 else 13)
+	var size := 15 if chars <= 60 else 13
 	for entry: Dictionary in _lines:
 		var row := RichTextLabel.new()
 		row.bbcode_enabled = true

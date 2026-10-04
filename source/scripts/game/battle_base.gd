@@ -57,7 +57,8 @@ var _perf_resume_guard := 0
 var _context_timer := 0.0
 var _spikes_sent := 0
 static var _perfs_sent := 0
-const LANDSCAPE_ZOOM := 1.3
+const LANDSCAPE_ZOOM := 1.05
+var _camera_lead := Vector2.ZERO
 var _hist_timer := 0.0
 var _shot_timer := 20.0
 var _fps_hist: Array[int] = []
@@ -172,6 +173,10 @@ func _setup_common(camera_bounds: Rect2, currency_icon: Texture2D) -> void:
 	BulletPool.bullet_hit.connect(_on_bullet_hit)
 	BulletPool.exploded.connect(_on_explosion)
 	hud.skill_pressed.connect(_request_skill)
+	hud.dash_pressed.connect(_request_dash)
+	var dash_effects := DashEffects.new()
+	add_child(dash_effects)
+	dash_effects.setup(player, stats, fx)
 	hero_skills = HeroSkills.new()
 	add_child(hero_skills)
 	hero_skills.setup(SaveService.get_character_id(), player, fx, stats, add_shake)
@@ -391,6 +396,7 @@ func _physics_process(delta: float) -> void:
 	player.move_input = input
 	camera.global_position = player.global_position
 	hud.set_skill_cooldown(hero_skills.fraction())
+	hud.set_dash_cooldown(player.dash_remaining, player.dash_cooldown)
 
 	_hud_timer -= delta
 	if _hud_timer <= 0.0:
@@ -402,6 +408,8 @@ func _physics_process(delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"dash"):
 		_request_skill()
+	elif event.is_action_pressed(&"dodge"):
+		_request_dash()
 	elif event.is_action_pressed(&"ui_cancel") and not finished:
 		_open_pause()
 
@@ -455,7 +463,8 @@ func _show_result(victory: bool, lines: PackedStringArray, title: String = "", c
 func _update_shake(delta: float) -> void:
 	_kick = _kick.lerp(Vector2.ZERO, clampf(CAMERA_KICK_DECAY * delta, 0.0, 1.0))
 	## В вертикали шапка закрывает верх, а пальцы на кнопках — низ: енот чуть ниже центра, посередине свободной зоны.
-	var base := Vector2(0.0, -PORTRAIT_CAMERA_DROP) if Orient.portrait else Vector2.ZERO
+	_camera_lead = _camera_lead.lerp(player.move_input.limit_length(1.0) * 36.0, minf(delta * 5.0, 1.0))
+	var base := Vector2(0.0, -PORTRAIT_CAMERA_DROP) if Orient.portrait else Vector2(0.0, 18.0 / LANDSCAPE_ZOOM) + _camera_lead
 	if _shake <= 0.0:
 		camera.offset = base + _kick
 		return
@@ -469,6 +478,11 @@ func _request_skill() -> void:
 		return
 	if hero_skills != null and hero_skills.has_skill():
 		hero_skills.try_use()
+
+
+func _request_dash() -> void:
+	if player != null and not finished and not get_tree().paused:
+		player.try_dash()
 
 
 

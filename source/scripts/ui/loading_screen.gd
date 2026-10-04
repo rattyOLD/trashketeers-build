@@ -221,15 +221,15 @@ func _init() -> void:
 	text_col.alignment = BoxContainer.ALIGNMENT_CENTER
 	text_col.anchor_left = 0.05
 	text_col.anchor_right = 0.95
-	text_col.anchor_top = 0.36
-	text_col.anchor_bottom = 0.36
+	text_col.anchor_top = 0.32
+	text_col.anchor_bottom = 0.32
 	text_col.offset_top = -80.0
 	text_col.offset_bottom = 80.0
 	_root.add_child(text_col)
 	_phrase_index = randi() % PHRASES.size()
-	_title = UiStyle.label(PHRASES[_phrase_index], 46, UiStyle.TEXT, 14)
+	_title = UiStyle.label(PHRASES[_phrase_index], 38, UiStyle.TEXT, 14)
 	_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_title.custom_minimum_size = Vector2(0, 124)
+	_title.custom_minimum_size = Vector2(0, 96)
 	text_col.add_child(_title)
 	var dot_row := HBoxContainer.new()
 	dot_row.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -243,8 +243,8 @@ func _init() -> void:
 	_bar = Control.new()
 	_bar.anchor_left = (1.0 - BAR_WIDTH_FRACTION) * 0.5
 	_bar.anchor_right = 1.0 - (1.0 - BAR_WIDTH_FRACTION) * 0.5
-	_bar.anchor_top = 0.7
-	_bar.anchor_bottom = 0.7
+	_bar.anchor_top = 0.62
+	_bar.anchor_bottom = 0.62
 	_bar.offset_bottom = BAR_HEIGHT
 	_bar.draw.connect(_draw_bar)
 	_root.add_child(_bar)
@@ -278,15 +278,15 @@ func _init() -> void:
 	card.add_theme_stylebox_override("panel", UiStyle.box(Color(0.129, 0.124, 0.116, 0.88), Color("#ffb347", 0.55), 3, 14))
 	card.anchor_left = 0.08
 	card.anchor_right = 0.92
-	card.anchor_top = 0.79
-	card.anchor_bottom = 0.79
+	card.anchor_top = 0.77
+	card.anchor_bottom = 0.77
 	card.grow_vertical = Control.GROW_DIRECTION_END
 	var card_col := VBoxContainer.new()
 	card_col.add_theme_constant_override("separation", 4)
 	card.add_child(card_col)
 	if not tag.is_empty():
 		card_col.add_child(UiStyle.label(tag, 17, Color("#ffb347"), 4))
-	var tip := UiStyle.label(tip_text, 23, Color("#d4cbef"), 6)
+	var tip := UiStyle.label(tip_text, 20, Color("#d4cbef"), 6)
 	tip.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	card_col.add_child(tip)
 	_root.add_child(card)
@@ -305,6 +305,11 @@ func _init() -> void:
 	_flash.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(_flash)
+
+
+func _ready() -> void:
+	ScreenSafeArea.fit(_root, get_viewport().get_visible_rect().size)
+	get_viewport().size_changed.connect(func() -> void: ScreenSafeArea.fit(_root, get_viewport().get_visible_rect().size))
 
 
 ## Прогресс 0..100 от внешнего источника.
@@ -380,7 +385,7 @@ func _animate_phrase(delta: float) -> void:
 
 
 func _animate_runner(delta: float) -> void:
-	var rect := _bar.get_global_rect()
+	var rect := Rect2(_bar.position, _bar.size)
 	var lift := _act_offset(delta)
 	_runner.position = Vector2(rect.position.x + rect.size.x * shown_progress / 100.0, rect.position.y - 26.0 * RUNNER_SCALE - lift)
 	if _finishing:
@@ -645,7 +650,7 @@ func _spawn_extra(sheet_id: String, size: float, face: float, at: Vector2, clip:
 
 
 func _run_scene(scene: String) -> void:
-	var rect := _bar.get_global_rect()
+	var rect := Rect2(_bar.position, _bar.size)
 	var line := rect.position.y - 6.0
 	var lane := rect.position.y - 120.0
 	var left := rect.position.x - 80.0

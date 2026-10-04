@@ -6,6 +6,8 @@ extends CharacterBody2D
 
 signal health_changed(hp: float, max_hp: float)
 signal damaged(amount: float)
+signal dash_started
+signal dash_moved(from: Vector2, to: Vector2)
 
 ## Кто нанёс последний урон Еноту: уходит в отчёт о забеге.
 static var last_source: StringName = &"?"
@@ -24,6 +26,10 @@ const SHIELD_RECHARGE := 12.0
 const SHIELD_COLOR := Color(0.3, 0.9, 1.0)
 const MAX_RESIST := 0.6
 const MAX_SPEED_BONUS := 1.8
+const DASH_DURATION := 0.22
+const DASH_SPEED := 780.0
+const DASH_COOLDOWN := 5.0
+const DASH_MIN_COOLDOWN := 3.5
 
 var max_hp := BASE_MAX_HP
 var hp := BASE_MAX_HP
@@ -58,6 +64,12 @@ var vest := 0
 var shield_max := 0
 var _shield_timer := 0.0
 var _resist := 0.0
+var dash_remaining := 0.0
+var dash_cooldown := DASH_COOLDOWN
+var _dash_left := 0.0
+var _dash_direction := Vector2.RIGHT
+var _dash_distance_mult := 1.0
+var _last_move_direction := Vector2.RIGHT
 
 
 func _init() -> void:
@@ -101,6 +113,8 @@ func setup(target_finder: Callable, start_weapon: WeaponData, stats: RunStats) -
 
 
 func apply_run_stats(stats: RunStats) -> void:
+	dash_cooldown = maxf(DASH_MIN_COOLDOWN, DASH_COOLDOWN - clampf(stats.get_stat(&"dodge_cooldown"), 0.0, 1.5))
+	_dash_distance_mult = 1.0 + clampf(stats.get_stat(&"dodge_distance"), 0.0, 0.2)
 	var new_max := BASE_MAX_HP + bonus_max_hp + stats.get_stat(&"max_hp_add")
 	if new_max > max_hp:
 		hp += new_max - max_hp
@@ -129,10 +143,20 @@ func _physics_process(delta: float) -> void:
 		return
 	_snare = maxf(_snare - delta, 0.0)
 	_stun = maxf(_stun - delta, 0.0)
+	dash_remaining = maxf(dash_remaining - delta, 0.0)
+	if move_input.length_squared() > 0.04:
+		_last_move_direction = move_input.normalized()
 	var speed := move_speed * (1.0 + _speed_buff) * move_slow * (0.15 if _snare > 0.0 else 1.0)
 	velocity = (Vector2.ZERO if _stun > 0.0 else move_input.limit_length(1.0) * speed) + _knockback + external_pull
+	var dashing := _dash_left > 0.0 and _stun <= 0.0
+	if dashing:
+		velocity = _dash_direction * DASH_SPEED * _dash_distance_mult * minf(_dash_left / maxf(delta, 0.001), 1.0)
+	_dash_left = maxf(_dash_left - delta, 0.0)
 	_knockback = _knockback.lerp(Vector2.ZERO, clampf(KNOCKBACK_DECAY * delta, 0.0, 1.0))
+	var before := global_position
 	move_and_slide()
+	if dashing:
+		dash_moved.emit(before, global_position)
 	_invuln = maxf(_invuln - delta, 0.0)
 	_tick_steps(delta)
 	_tick_shield(delta)
@@ -149,6 +173,25 @@ func _physics_process(delta: float) -> void:
 		fx.dust(global_position + Vector2(-8.0 * signf(velocity.x), 6.0), 1, 6.0)
 	visual.set_env_light(EnvLights.sample(global_position), delta)
 	visual.modulate.a = 0.55 if _invuln > 0.0 and int(_invuln * 20.0) % 2 == 0 else 1.0
+
+
+func try_dash() -> bool:
+	if not is_inside_tree() or get_tree().paused or is_dead or is_falling or is_stunned() or dash_remaining > 0.0 or _dash_left > 0.0:
+		return false
+	_dash_direction = move_input.normalized() if move_input.length_squared() > 0.04 else _last_move_direction
+	_dash_left = DASH_DURATION
+	dash_remaining = dash_cooldown
+	_knockback = Vector2.ZERO
+	grant_invuln(0.12)
+	dash_started.emit()
+	if fx != null:
+		fx.ring(global_position, Color("#64d8f5"), 36.0)
+	SoundManager.play(&"step", -4.0, false)
+	return true
+
+
+func is_dashing() -> bool:
+	return _dash_left > 0.0
 
 
 func _tick_shield(delta: float) -> void:
