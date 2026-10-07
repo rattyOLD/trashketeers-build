@@ -25,13 +25,13 @@ func _init() -> void:
 	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(dim)
 
-	var center := CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	add_child(center)
-
+	# Окно ставим по центру видимой области сами: на части Android (вырез, смена размера окна при
+	# переходе во весь экран) контейнер-центровщик оставлял панель съехавшей вправо за край экрана.
 	_box = VBoxContainer.new()
 	_box.add_theme_constant_override("separation", 12)
-	center.add_child(_box)
+	add_child(_box)
+	_box.minimum_size_changed.connect(_center_box.call_deferred)
+	resized.connect(_center_box.call_deferred)
 
 	_title = UiStyle.label("", 36, UiStyle.GOLD, 9)
 	_box.add_child(_title)
@@ -55,7 +55,7 @@ func open(choices: Array[UpgradeData], level: int, stats: RunStats, bonus: bool 
 	_title.text = "НАГРАДА БОССА!" if bonus else "УРОВЕНЬ %d!" % level
 	_title.add_theme_color_override("font_color", Color("#ff7ae0") if bonus else UiStyle.GOLD)
 	_cards.vertical = Orient.portrait
-	_reroll.custom_minimum_size = Vector2(600, 64 if Orient.portrait else 54)
+	_reroll.custom_minimum_size = Vector2(minf(600.0, _card_width() * 3.0), 64 if Orient.portrait else 54)
 	for child in _cards.get_children():
 		child.queue_free()
 	for i in choices.size():
@@ -64,15 +64,34 @@ func open(choices: Array[UpgradeData], level: int, stats: RunStats, bonus: bool 
 	_reroll.text = reroll_text
 	_reroll.modulate = Color.WHITE if reroll_ok else Color(1, 1, 1, 0.5)
 	visible = true
+	_center_box()
 	# Короткая пауза, чтобы палец, которым только что стреляли, не выбрал карточку случайно.
 	_armed_at = Time.get_ticks_msec() + 350
 	UiStyle.pop_in(_box)
 
 
+func _center_box() -> void:
+	if not is_inside_tree():
+		return
+	var area := get_viewport_rect().size
+	_box.size = _box.get_combined_minimum_size()
+	# position, а не global_position: во время пружинящего появления масштаб ≠ 1, и глобальная установка
+	# сдвигала окно на долю его размера (влево-вверх или вправо на других экранах).
+	_box.position = ((area - _box.size) * 0.5).max(Vector2.ZERO) - global_position
+	_box.pivot_offset = _box.size * 0.5
+
+
+## Ширина карточки в горизонтали: три карточки и отступы должны влезть в видимую ширину.
+func _card_width() -> float:
+	var area := get_viewport_rect().size.x if is_inside_tree() else 1280.0
+	return clampf((area - 60.0 - 28.0) / 3.0, 240.0, 340.0)
+
+
 func _make_card(upgrade: UpgradeData, index: int, stats: RunStats) -> Button:
 	var accent := upgrade.rarity_color() if upgrade.category != "evolution" else Color("#ff5cf0")
-	var text_width := 540.0 if Orient.portrait else 300.0
-	var card := UiStyle.button("", UiStyle.PANEL_LIGHT, 28, Vector2(600, 122) if Orient.portrait else Vector2(340, 280))
+	var card_w := _card_width()
+	var text_width := 540.0 if Orient.portrait else card_w - 40.0
+	var card := UiStyle.button("", UiStyle.PANEL_LIGHT, 28, Vector2(600, 122) if Orient.portrait else Vector2(card_w, 280))
 	var border := 6 if upgrade.rarity_rank > 0 else 4
 	card.add_theme_stylebox_override("normal", UiStyle.box(UiStyle.PANEL_LIGHT.darkened(0.15), accent, border, 22))
 	card.add_theme_stylebox_override("hover", UiStyle.box(UiStyle.PANEL_LIGHT.lightened(0.08), accent.lightened(0.25), border, 22))
