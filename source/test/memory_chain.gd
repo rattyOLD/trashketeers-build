@@ -25,6 +25,7 @@ func _physics_process(delta: float) -> void:
 	if screen != null and screen.get("player") != null and is_instance_valid(screen.get("player")):
 		screen.get("player").hp = screen.get("player").max_hp
 		if get_tree().paused and screen is Game and screen._level_up_open:
+			screen.hud._level_up._armed_at = 0
 			screen.hud._level_up._pick(0)
 	match step:
 		0:

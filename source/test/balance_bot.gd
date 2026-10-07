@@ -119,6 +119,7 @@ func _physics_process(delta: float) -> void:
 	game.hud.joystick.output = move.limit_length(1.0)
 	game._request_skill()
 	if get_tree().paused and game._level_up_open:
+		game.hud._level_up._armed_at = 0
 		game.hud._level_up._pick(rng.randi() % 3)
 	if t > float(OS.get_environment("DURATION") if OS.get_environment("DURATION") != "" else "900"):
 		print("TIMEOUT wave=%d t=%ds" % [game.director.wave_number, int(t)])

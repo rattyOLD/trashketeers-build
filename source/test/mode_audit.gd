@@ -49,6 +49,7 @@ func _physics_process(delta: float) -> void:
 			screen.set_meta("boss_done", true)
 			screen.debug_boss(StringName(mode.trim_prefix("boss:")))
 		if get_tree().paused and screen is Game and screen._level_up_open:
+			screen.hud._level_up._armed_at = 0
 			screen.hud._level_up._pick(0)
 	if OS.get_environment("SOAK") == "1" and screen is Game:
 		if not screen.has_meta("jumped") and t > 3.0:

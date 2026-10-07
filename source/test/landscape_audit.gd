@@ -161,6 +161,7 @@ func _run() -> void:
 			await _settle()
 			_inside(game.hud._level_up._box, "upgrade choices")
 			await _shot("level-up")
+			game.hud._level_up._armed_at = 0
 			game.hud._level_up._pick(0)
 			var dash_choices: Array[UpgradeData] = []
 			for upgrade in ContentDB.get_upgrades():

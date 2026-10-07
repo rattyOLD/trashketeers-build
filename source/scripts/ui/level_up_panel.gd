@@ -11,6 +11,7 @@ var _title: Label
 var _cards: BoxContainer
 var _choices: Array[UpgradeData] = []
 var _reroll: Button
+var _armed_at := 0
 const ARCHETYPE_NAMES := {&"dps": "БИЛД: УРОН", &"debuff": "БИЛД: ЭФФЕКТЫ", &"mobility": "БИЛД: СКОРОСТЬ"}
 
 
@@ -40,8 +41,11 @@ func _init() -> void:
 	_cards.add_theme_constant_override("separation", 14)
 	_box.add_child(_cards)
 	_reroll = UiStyle.button("", Color("#d19250"), 21, Vector2(600, 54))
+	# Срабатывает на касании, а не на отпускании: на Android экран может сдвинуться под пальцем
+	# (появилась системная панель), и отпускание мимо кнопки терялось — карточку было не выбрать.
+	_reroll.action_mode = BaseButton.ACTION_MODE_BUTTON_PRESS
 	_reroll.pressed.connect(func() -> void:
-		if visible:
+		if visible and Time.get_ticks_msec() >= _armed_at:
 			reroll_requested.emit())
 	_box.add_child(_reroll)
 
@@ -60,6 +64,8 @@ func open(choices: Array[UpgradeData], level: int, stats: RunStats, bonus: bool 
 	_reroll.text = reroll_text
 	_reroll.modulate = Color.WHITE if reroll_ok else Color(1, 1, 1, 0.5)
 	visible = true
+	# Короткая пауза, чтобы палец, которым только что стреляли, не выбрал карточку случайно.
+	_armed_at = Time.get_ticks_msec() + 350
 	UiStyle.pop_in(_box)
 
 
@@ -71,6 +77,7 @@ func _make_card(upgrade: UpgradeData, index: int, stats: RunStats) -> Button:
 	card.add_theme_stylebox_override("normal", UiStyle.box(UiStyle.PANEL_LIGHT.darkened(0.15), accent, border, 22))
 	card.add_theme_stylebox_override("hover", UiStyle.box(UiStyle.PANEL_LIGHT.lightened(0.08), accent.lightened(0.25), border, 22))
 	card.add_theme_stylebox_override("pressed", UiStyle.box(UiStyle.PANEL_LIGHT.lightened(0.15), Color.WHITE, border, 22))
+	card.action_mode = BaseButton.ACTION_MODE_BUTTON_PRESS
 	card.pressed.connect(_pick.bind(index))
 
 	var column := VBoxContainer.new()
@@ -116,7 +123,7 @@ func _make_card(upgrade: UpgradeData, index: int, stats: RunStats) -> Button:
 
 
 func _pick(index: int) -> void:
-	if not visible or index >= _choices.size():
+	if not visible or index >= _choices.size() or Time.get_ticks_msec() < _armed_at:
 		return
 	visible = false
 	chosen.emit(_choices[index])

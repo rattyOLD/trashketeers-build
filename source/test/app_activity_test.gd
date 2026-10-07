@@ -121,6 +121,7 @@ func _run() -> void:
 			AppActivity._set_backgrounded(true)
 			AppActivity._set_backgrounded(false)
 			_check(game._level_up_open and get_tree().paused and not game.hud.is_pause_open(), "level-up preserved without extra pause window")
+			game.hud._level_up._armed_at = 0
 			game.hud._level_up._pick(0)
 			_check(not get_tree().paused, "upgrade choice still resumes battle")
 		battle.queue_free()
