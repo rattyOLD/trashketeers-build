@@ -121,7 +121,27 @@ static func button(text: String, color: Color, font_size: int = 30, min_size: Ve
 		b.add_theme_stylebox_override("disabled", button_box(color.darkened(0.45).lerp(Color("#4a4742"), 0.5), false))
 	b.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 	b.pressed.connect(func() -> void: SoundManager.play(&"ui_click"))
+	press_feedback(b)
 	return b
+
+
+## Кнопка «прожимается»: под пальцем чуть утапливается, отпустил — пружинит обратно, плюс короткий отклик вибрацией.
+static func press_feedback(b: BaseButton) -> void:
+	b.button_down.connect(func() -> void:
+		if b.disabled:
+			return
+		b.pivot_offset = b.size * 0.5
+		var tween := b.create_tween()
+		tween.tween_property(b, "scale", Vector2(0.94, 0.94), 0.06)
+		b.set_meta(&"press_tween", tween)
+		Platform.haptic("light"))
+	b.button_up.connect(func() -> void:
+		var old: Variant = b.get_meta(&"press_tween", null)
+		if old is Tween and (old as Tween).is_valid():
+			(old as Tween).kill()
+		b.pivot_offset = b.size * 0.5
+		var tween := b.create_tween()
+		tween.tween_property(b, "scale", Vector2.ONE, 0.28).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT))
 
 
 ## Кнопка без плашки: видна только иконка внутри (у неё уже своя рамка). Нажатие — лёгкое затемнение.
@@ -133,6 +153,7 @@ static func flat_button(min_size: Vector2) -> Button:
 	for state in ["normal", "hover", "pressed", "hover_pressed", "disabled", "focus"]:
 		b.add_theme_stylebox_override(state, StyleBoxEmpty.new())
 	b.pressed.connect(func() -> void: SoundManager.play(&"ui_click"))
+	press_feedback(b)
 	return b
 
 

@@ -8,6 +8,7 @@ func _init() -> void:
 
 
 func _ready() -> void:
+	WeaponController.force_auto = true
 	Engine.max_fps = 60
 	Orient.portrait = false
 	get_window().content_scale_size = Orient.LANDSCAPE_SIZE

@@ -7,6 +7,7 @@ var mode := ""
 
 
 func _ready() -> void:
+	WeaponController.force_auto = true
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	mode = OS.get_environment("MODE")
 	Engine.time_scale = float(OS.get_environment("SCALE")) if not OS.get_environment("SCALE").is_empty() else 2.0

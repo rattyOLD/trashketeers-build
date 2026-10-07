@@ -5,6 +5,7 @@ func _init() -> void:
 
 
 func _ready() -> void:
+	WeaponController.force_auto = true
 	Orient.portrait = false
 	get_window().content_scale_size = Orient.LANDSCAPE_SIZE
 	SaveService.data["quality"] = int(OS.get_environment("PROBE_Q")) if OS.get_environment("PROBE_Q") != "" else 0

@@ -1,6 +1,7 @@
 extends Node
 ## Струи пива и рвоты: очередь капель из фиксированной точки в сторону енота, затем снимок.
 func _ready() -> void:
+	WeaponController.force_auto = true
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	Orient.portrait = false
 	get_window().content_scale_size = Orient.LANDSCAPE_SIZE

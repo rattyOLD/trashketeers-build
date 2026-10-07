@@ -11,6 +11,7 @@ var last_wave := 0
 
 
 func _ready() -> void:
+	WeaponController.force_auto = true
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	rng.seed = int(OS.get_environment("SEED")) if OS.get_environment("SEED") != "" else 1
 	seed(rng.seed)

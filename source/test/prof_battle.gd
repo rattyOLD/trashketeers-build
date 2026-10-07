@@ -5,6 +5,7 @@ var _frames := 0
 
 
 func _ready() -> void:
+	WeaponController.force_auto = true
 	Controls.apply_keys()
 	seed(17032)
 	Engine.max_fps = 60

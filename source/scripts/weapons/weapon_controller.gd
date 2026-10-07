@@ -1,6 +1,8 @@
 class_name WeaponController
 extends Node2D
-## Автоприцел и стрельба игрока. Цель выдаёт target_finder режима (бой / Налёт):
+## Стрельба игрока. Стреляет, пока зажат палец на правом стике (или левая кнопка мыши): trigger + manual_aim.
+## Подсказка прицела: враг в узком конусе вокруг направления пальца ловится точно. Автострельба (auto_mode)
+## осталась только для ботов и тестов. Цель выдаёт target_finder режима (бой / Налёт):
 ## Callable(from: Vector2, max_distance: float) -> Node2D. Это O(n) по distance_squared
 ## раз в RETARGET_INTERVAL, а не Area2D-детектор: пулированные враги включаются deferred,
 ## и Area2D выдавала бы устаревшие цели. Цель обязана иметь метод is_targetable().
@@ -32,8 +34,16 @@ var active_slot := 0
 var slot_count := 2
 var weapon: WeaponData
 var aim_direction := Vector2.RIGHT
-## Ручной прицел: направление от пальца/мыши, пока он зажат; ZERO — работает автоприцел.
 var has_target := false
+## Зажат ли «курок» и куда целятся (нормаль; ZERO — в последнем направлении).
+var trigger := false
+var manual_aim := Vector2.ZERO
+## Старое автонаведение: только боты и тесты (force_auto включают тестовые сцены).
+static var force_auto := false
+var auto_mode := false
+## Конус подсказки прицела: огнестрел — узкий, ближний бой — шире.
+const ASSIST_COS_GUN := 0.97
+const ASSIST_COS_MELEE := 0.8
 ## Callable(direction: Vector2) -> Vector2: глобальная точка дула нарисованного ствола.
 var muzzle_provider: Callable
 
@@ -52,6 +62,7 @@ var melee: MeleeFighter
 
 
 func _init() -> void:
+	auto_mode = force_auto
 	melee = MeleeFighter.new()
 	add_child(melee)
 
@@ -146,13 +157,22 @@ func _physics_process(delta: float) -> void:
 		_melee_step(delta)
 		return
 
-	var auto := _target != null and _is_target_valid() and global_position.distance_squared_to(_target.global_position) <= AUTO_SCREEN_RANGE * AUTO_SCREEN_RANGE
-	has_target = auto
-	if not auto:
-		_spin_up = maxf(_spin_up - delta * 0.8, 0.0)
-		return
-
-	var aim_point := _target.global_position
+	var aim_point := Vector2.ZERO
+	if auto_mode:
+		var auto := _target != null and _is_target_valid() and global_position.distance_squared_to(_target.global_position) <= AUTO_SCREEN_RANGE * AUTO_SCREEN_RANGE
+		has_target = auto
+		if not auto:
+			_spin_up = maxf(_spin_up - delta * 0.8, 0.0)
+			return
+		aim_point = _target.global_position
+	else:
+		has_target = trigger
+		if not trigger:
+			_spin_up = maxf(_spin_up - delta * 0.8, 0.0)
+			return
+		var dir := manual_aim if manual_aim.length_squared() > 0.01 else aim_direction
+		var helped := _assist_target(dir, ASSIST_COS_GUN, minf(weapon.max_distance, AUTO_SCREEN_RANGE))
+		aim_point = helped.global_position if helped != null else global_position + dir * weapon.max_distance
 	aim_direction = global_position.direction_to(aim_point)
 	if _cooldown > 0.0:
 		return
@@ -182,10 +202,28 @@ func _physics_process(delta: float) -> void:
 
 
 func _melee_step(delta: float) -> void:
-	has_target = _target != null or melee.busy
-	melee.tick(delta, weapon, _target, global_position)
-	if melee.busy or _target != null:
-		aim_direction = melee.direction
+	if auto_mode:
+		has_target = _target != null or melee.busy
+		melee.tick(delta, weapon, _target, global_position)
+		if melee.busy or _target != null:
+			aim_direction = melee.direction
+		return
+	has_target = trigger or melee.busy
+	var dir := manual_aim if manual_aim.length_squared() > 0.01 else aim_direction
+	var target: Node2D = _assist_target(dir, ASSIST_COS_MELEE, weapon.max_distance) if trigger else null
+	melee.tick(delta, weapon, target, global_position, dir if trigger else Vector2.ZERO)
+	if melee.busy or trigger:
+		aim_direction = melee.direction if melee.busy else dir
+
+
+## Ближайшая к прицелу цель в конусе: ловит врага, если палец смотрит почти на него.
+func _assist_target(dir: Vector2, min_cos: float, max_distance: float) -> Node2D:
+	if _target == null or not _is_target_valid():
+		return null
+	var to := _target.global_position - global_position
+	if to.length_squared() > max_distance * max_distance or to.length_squared() < 1.0:
+		return null
+	return _target if to.normalized().dot(dir) >= min_cos else null
 
 
 func _trait_scale(target_distance: float) -> float:

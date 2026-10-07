@@ -1,6 +1,7 @@
 extends Node
 ## Прогон героев в бою выживания: берём героя, 6 с боя, использует навык, ловим ошибки. HERO=id
 func _ready() -> void:
+	WeaponController.force_auto = true
 	Orient.portrait = false
 	get_window().content_scale_size = Orient.LANDSCAPE_SIZE
 	var hero := OS.get_environment("HERO")

@@ -394,6 +394,7 @@ func _physics_process(delta: float) -> void:
 	if not hud.joystick.is_active():
 		input = Input.get_vector(&"move_left", &"move_right", &"move_up", &"move_down")
 	player.move_input = input
+	_update_trigger()
 	camera.global_position = player.global_position
 	hud.set_skill_cooldown(hero_skills.fraction())
 	hud.set_dash_cooldown(player.dash_remaining, player.dash_cooldown)
@@ -405,7 +406,32 @@ func _physics_process(delta: float) -> void:
 	_update_shake(delta)
 
 
+## Курок: правый стик на телефоне, левая кнопка мыши на компьютере (прицел — на курсор).
+func _update_trigger() -> void:
+	var wc := player.weapon_controller
+	if wc.auto_mode:
+		return
+	if hud.aim_stick.is_active():
+		wc.trigger = true
+		wc.manual_aim = hud.aim_stick.direction
+		return
+	var mouse_fire := _mouse_fire and not Platform.is_touch()
+	wc.trigger = mouse_fire
+	wc.manual_aim = player.global_position.direction_to(player.get_global_mouse_position()) if mouse_fire else Vector2.ZERO
+
+
+var _mouse_fire := false
+
+
+## Нажатие ЛКМ доходит сюда, только если его не забрала кнопка интерфейса; отпускание ловим всегда.
+func _input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT and not event.pressed:
+		_mouse_fire = false
+
+
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		_mouse_fire = true
 	if event.is_action_pressed(&"dash"):
 		_request_skill()
 	elif event.is_action_pressed(&"dodge"):

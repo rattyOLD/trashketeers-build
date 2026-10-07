@@ -69,6 +69,11 @@ func _cancel_scroll_press() -> void:
 			if button != null and not button.disabled:
 				button.disabled = true
 				button.set_deferred("disabled", false)
+				# Отмена нажатия не присылает button_up — утопленную кнопку возвращаем сами.
+				var press: Variant = button.get_meta(&"press_tween", null)
+				if press is Tween and (press as Tween).is_valid():
+					(press as Tween).kill()
+				button.scale = Vector2.ONE
 			return
 		node = node.get_parent()
 
@@ -402,9 +407,12 @@ func haptic(style: String = "light") -> void:
 		return
 	if is_telegram:
 		_js("Telegram.WebApp.HapticFeedback.impactOccurred(%s);" % JSON.stringify(style))
-	elif is_web:
+	else:
 		var ms: int = {"light": 8, "soft": 8, "medium": 14, "rigid": 14, "heavy": 24}.get(style, 10)
-		_js("if (navigator.vibrate) navigator.vibrate(%d);" % ms)
+		if is_web:
+			_js("if (navigator.vibrate) navigator.vibrate(%d);" % ms)
+		elif OS.has_feature("mobile"):
+			Input.vibrate_handheld(ms * 2)
 
 
 ## kind: "success" | "warning" | "error".

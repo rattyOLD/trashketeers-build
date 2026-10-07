@@ -1,6 +1,7 @@
 extends Node
 ## NativeTelemetry против локального приёмника: старт, отчёт боя, ошибка скрипта из журнала.
 func _ready() -> void:
+	WeaponController.force_auto = true
 	var t := NativeTelemetry.new()
 	t.endpoint = "http://127.0.0.1:8899/"
 	add_child(t)

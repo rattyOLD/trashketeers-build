@@ -6,6 +6,7 @@ var output := ""
 
 
 func _ready() -> void:
+	WeaponController.force_auto = true
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_run.call_deferred()
 

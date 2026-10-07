@@ -1,6 +1,7 @@
 extends Node
 ## Вся карта выживания сверху (глава PROBE_CH, зерно SEED): камера вписывает границы арены.
 func _ready() -> void:
+	WeaponController.force_auto = true
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	Orient.portrait = false
 	get_window().content_scale_size = Orient.LANDSCAPE_SIZE

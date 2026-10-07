@@ -1,6 +1,7 @@
 extends Node
 ## Снимок шапки боя (виртуальный экран): выживание и сюжет.
 func _ready() -> void:
+	WeaponController.force_auto = true
 	Orient.portrait = false
 	get_window().content_scale_size = Orient.LANDSCAPE_SIZE
 	var story := OS.get_environment("HUD_STORY") == "1"

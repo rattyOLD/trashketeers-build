@@ -19,6 +19,7 @@ func _check_field(field: FlowField) -> void:
 
 
 func _ready() -> void:
+	WeaponController.force_auto = true
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 17032
 	var field := FlowField.new()

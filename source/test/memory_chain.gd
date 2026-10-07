@@ -6,6 +6,7 @@ var step := 0
 
 
 func _ready() -> void:
+	WeaponController.force_auto = true
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	SaveService.data = SaveService.DEFAULTS.duplicate(true)
 	SaveService._sanitize_arsenal()

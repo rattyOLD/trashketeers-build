@@ -1,5 +1,6 @@
 extends Node
 func _ready() -> void:
+	WeaponController.force_auto = true
 	Orient.portrait = false
 	get_window().content_scale_size = Orient.LANDSCAPE_SIZE
 	SaveService.data["show_fps"] = true

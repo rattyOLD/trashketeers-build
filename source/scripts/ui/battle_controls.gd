@@ -166,39 +166,3 @@ class InteractButton:
 		var title := weapon.get_title() if weapon != null else "Хлопушка T1"
 		draw_string(font, Vector2(text_x, 62.0 * k), title, HORIZONTAL_ALIGNMENT_LEFT, 138.0 * k, maxi(roundi(16.0 * k), 7), Color(accent, 1.0))
 		draw_string(font, Vector2(text_x, 84.0 * k), note, HORIZONTAL_ALIGNMENT_LEFT, 138.0 * k, maxi(roundi(14.0 * k), 6), Color(1, 1, 1, 0.6))
-
-
-## Свайп вверх/вниз по свободной половине экрана листает слоты оружия.
-class SwipeSwitch:
-	extends Control
-	signal swiped
-
-	const MIN_DISTANCE := 120.0
-	const MAX_TIME := 0.55
-
-	var _index := -1
-	var _start := Vector2.ZERO
-	var _t0 := 0
-
-	func _init() -> void:
-		set_anchors_preset(Control.PRESET_FULL_RECT)
-		mouse_filter = Control.MOUSE_FILTER_IGNORE
-
-	func _input(event: InputEvent) -> void:
-		if not is_visible_in_tree() or get_tree().paused or not bool(Controls.get_value("swipe_switch")):
-			return
-		var left_side := bool(Controls.get_value("left_handed"))
-		if event is InputEventScreenTouch:
-			var touch := event as InputEventScreenTouch
-			if touch.pressed and _index == -1:
-				var on_free_side := touch.position.x < size.x * 0.4 if left_side else touch.position.x > size.x * 0.6
-				if on_free_side and touch.position.y > 220.0:
-					_index = touch.index
-					_start = touch.position
-					_t0 = Time.get_ticks_msec()
-			elif not touch.pressed and touch.index == _index:
-				var delta := touch.position - _start
-				var fast := Time.get_ticks_msec() - _t0 < int(MAX_TIME * 1000.0)
-				_index = -1
-				if fast and absf(delta.y) > MIN_DISTANCE and absf(delta.y) > absf(delta.x) * 1.4:
-					swiped.emit()

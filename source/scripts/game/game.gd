@@ -253,7 +253,6 @@ func start(_weapon_id: StringName = &"") -> void:
 	hud.slot_pressed.connect(_switch_slot)
 	hud.orders_requested.connect(_open_orders)
 	hud.interact_pressed.connect(_try_pick)
-	hud.weapon_swiped.connect(_cycle_weapon)
 	_refresh_slots()
 	_apply_tester_flags()
 	_apply_tester_start()

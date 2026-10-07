@@ -78,7 +78,7 @@ func effective_reach(weapon: WeaponData) -> float:
 
 
 ## Вызывается контроллером каждый физический кадр, пока в руках клинок. target — ближайшая цель или null.
-func tick(delta: float, weapon: WeaponData, target: Node2D, origin: Vector2) -> void:
+func tick(delta: float, weapon: WeaponData, target: Node2D, origin: Vector2, forced_dir: Vector2 = Vector2.ZERO) -> void:
 	_weapon = weapon
 	size_scale = 1.0 + (growth() if weapon.trait_id == &"junk_grow" else 0.0)
 	_speed = maxf((weapon.windup + weapon.swing + weapon.recovery) / maxf(weapon.fire_interval, 0.02), 0.2)
@@ -99,6 +99,10 @@ func tick(delta: float, weapon: WeaponData, target: Node2D, origin: Vector2) -> 
 				direction = to_target.normalized() if to_target.length_squared() > 1.0 else direction
 				if to_target.length() <= weapon.max_distance:
 					_begin_swing(origin, to_target.length())
+			elif forced_dir != Vector2.ZERO:
+				# Ручная атака: палец зажат — машем туда, куда он смотрит, даже по пустому месту.
+				direction = forced_dir.normalized()
+				_begin_swing(origin, effective_reach(weapon) * 0.7)
 		_:
 			busy = true
 			_advance(delta, origin)

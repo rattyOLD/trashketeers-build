@@ -4,6 +4,7 @@ var failures := 0
 
 
 func _ready() -> void:
+	WeaponController.force_auto = true
 	_run.call_deferred()
 
 

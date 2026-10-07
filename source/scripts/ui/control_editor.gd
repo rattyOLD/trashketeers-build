@@ -18,7 +18,6 @@ var _joystick_slider: HSlider
 var _opacity_slider: HSlider
 var _element_opacity_slider: HSlider
 var _fixed_toggle: Button
-var _swipe_toggle: Button
 var _preset_buttons: Array[Button] = []
 var _collapsed := false
 var _summary: Control
@@ -150,12 +149,6 @@ func _build() -> void:
 		Controls.set_value("joystick_fixed", not bool(Controls.get_value("joystick_fixed")))
 		_sync())
 	toggles.add_child(_fixed_toggle)
-	_swipe_toggle = UiStyle.button("", UiStyle.PANEL_LIGHT, 19, Vector2(0, 58))
-	_swipe_toggle.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_swipe_toggle.pressed.connect(func() -> void:
-		Controls.set_value("swipe_switch", not bool(Controls.get_value("swipe_switch")))
-		_sync())
-	toggles.add_child(_swipe_toggle)
 	_summary.add_child(toggles)
 
 	var presets := UiStyle.label("ПРЕСЕТЫ", 22, UiStyle.NEON, 5)
@@ -231,7 +224,6 @@ func _sync() -> void:
 	_opacity_slider.set_value_no_signal(float(Controls.get_value("opacity")))
 	_element_opacity_slider.set_value_no_signal(Controls.element_opacity(_selected))
 	_fixed_toggle.text = "Джойстик: %s" % ("фиксированный" if bool(Controls.get_value("joystick_fixed")) else "плавающий")
-	_swipe_toggle.text = "Свайп смены ствола: %s" % ("вкл" if bool(Controls.get_value("swipe_switch")) else "выкл")
 	for i in _preset_buttons.size():
 		_preset_buttons[i].disabled = not Controls.has_preset(i)
 	_place_all()

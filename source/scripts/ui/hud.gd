@@ -14,7 +14,6 @@ signal dash_pressed
 signal skill_pressed
 signal slot_pressed(index: int)
 signal interact_pressed
-signal weapon_swiped
 signal orders_requested
 signal pause_pressed
 signal resume_pressed
@@ -22,6 +21,7 @@ signal revive_requested(with_ad: bool)
 signal revive_declined
 
 var joystick: VirtualJoystick
+var aim_stick: AimStick
 
 var _root: Control
 var _hp_bar: HudWidgets.OutlineBar
@@ -131,6 +131,9 @@ func build(currency_icon: Texture2D, weapon: WeaponData) -> void:
 
 	joystick = VirtualJoystick.new()
 	_root.add_child(joystick)
+	# Под кнопками: касание кнопки забирает интерфейс, стик получает только пустое место.
+	aim_stick = AimStick.new()
+	_root.add_child(aim_stick)
 
 	var top: Control = _root
 	if Orient.portrait:
@@ -170,9 +173,6 @@ func build(currency_icon: Texture2D, weapon: WeaponData) -> void:
 	top.add_child(_rail_combo)
 	_root.add_child(_build_weapon_chip(weapon))
 	_weapon_chip.visible = false
-	var swipe := BattleControls.SwipeSwitch.new()
-	swipe.swiped.connect(func() -> void: weapon_swiped.emit())
-	_root.add_child(swipe)
 	_skill = SkillButton.new()
 	_skill.visible = false
 	_skill.pressed.connect(func() -> void: skill_pressed.emit())
@@ -467,6 +467,7 @@ func set_weapon(weapon: WeaponData) -> void:
 
 func reset_background_input() -> void:
 	joystick._reset()
+	aim_stick._reset()
 	_slot_bar._hold_index = -1
 	_interact._touch = -1
 	_hold._cancel()
