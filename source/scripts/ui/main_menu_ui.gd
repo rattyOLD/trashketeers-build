@@ -157,6 +157,8 @@ func _build() -> void:
 	for popup in [_settings, _shop, _skins, _armory, _upgrades, _camp, _account, _achievements, _profile, _chronicle, _friends, _tester, _chests, _changelog, _daily, _currency, _vip, _pass, _odds, _mode_intro]:
 		add_child(popup)
 		popup.closed.connect(_refresh)
+	# Покупки внутри окон списывают монеты сразу — цифры в шапке меню за окном обновляем тут же, а не после закрытия.
+	SaveService.changed.connect(_refresh_wallet)
 	_refresh()
 	UiStyle.pop_in(column, 0.8)
 	get_tree().create_timer(1.6).timeout.connect(_maybe_whats_new)
@@ -875,6 +877,11 @@ func _on_weapon_changed(_weapon_id: StringName) -> void:
 	_preview.raccoon.weapon_icon = weapon.icon
 	_preview.raccoon.weapon_color = weapon.effect_color
 	_refresh()
+
+
+func _refresh_wallet() -> void:
+	_nuts_label.text = str(SaveService.get_nuts())
+	_dust_label.text = str(SaveService.get_star_dust())
 
 
 func _refresh() -> void:

@@ -121,6 +121,7 @@ func _init() -> void:
 
 
 func _process(_delta: float) -> void:
+	super._process(_delta)
 	if not _waiting:
 		return
 	var picked_file: Variant = Platform.pick_file_result()
@@ -130,6 +131,8 @@ func _process(_delta: float) -> void:
 	var info: Dictionary = picked_file
 	if info.is_empty():
 		_hint.text = "Фото не выбрано."
+	elif bool(info.get("need_permission", false)):
+		_hint.text = "Разреши игре доступ к фото и нажми кнопку ещё раз."
 	elif bool(info.get("too_big", false)):
 		_hint.text = "Фото слишком большое (до 12 МБ)."
 	elif store_photo(info):

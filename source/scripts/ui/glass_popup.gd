@@ -191,9 +191,13 @@ func _fit_popup_height() -> void:
 	if _content_scroll_view == null or not is_inside_tree():
 		return
 	var safe := ScreenSafeArea.rect(get_viewport_rect().size)
-	ScreenSafeArea.fit(_center, get_viewport_rect().size, 12.0)
-	_panel.custom_minimum_size.x = minf(panel_width(), safe.size.x - 48.0)
 	var available := maxf(180.0, safe.size.y - 112.0)
+	if _lifted:
+		# Окно поднято над клавиатурой: место по высоте — только видимая над ней часть, рамку окна не трогаем.
+		available = maxf(120.0, _lift_height() - 112.0)
+	else:
+		ScreenSafeArea.fit(_center, get_viewport_rect().size, 12.0)
+	_panel.custom_minimum_size.x = minf(panel_width(), safe.size.x - 48.0)
 	_content_scroll_view.custom_minimum_size.y = minf(content.get_combined_minimum_size().y, available)
 
 
@@ -210,10 +214,12 @@ func _watch_inputs(node: Node) -> void:
 
 
 func _lift(up: bool) -> void:
-	if not Orient.portrait:
+	if not Platform.is_touch():
 		return
 	_lifted = up
-	set_process(up)
+	# Обработку не выключаем: чат и выбор фото опрашивают сервер/браузер в своём _process.
+	if up:
+		set_process(true)
 	if up:
 		_apply_lift()
 	else:
@@ -221,6 +227,14 @@ func _lift(up: bool) -> void:
 		_center.anchor_bottom = 1.0
 		_center.offset_top = 0.0
 		_center.offset_bottom = 0.0
+	_fit_popup_height.call_deferred()
+
+
+## Высота области над клавиатурой, в которую должно уместиться поднятое окно.
+func _lift_height() -> float:
+	var view_h := get_viewport_rect().size.y
+	var inset := Platform.keyboard_inset()
+	return view_h - inset - 24.0 if inset > 60.0 else view_h * 0.5 - 40.0
 
 
 ## Пока открыта клавиатура, окно целиком умещается над ней (высота берётся из видимой области браузера).
@@ -240,7 +254,10 @@ func _apply_lift() -> void:
 
 func _process(_delta: float) -> void:
 	if _lifted:
+		var before := _center.offset_bottom
 		_apply_lift()
+		if not is_equal_approx(before, _center.offset_bottom):
+			_fit_popup_height()
 
 
 func _sync_glass() -> void:

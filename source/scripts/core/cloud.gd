@@ -168,6 +168,34 @@ func login_guest(key: String) -> String:
 	return "ok"
 
 
+## ID друга из того, что ввёл или вставил игрок: русские буквы-двойники (Х, А, С, Е, В, У) → латиница,
+## регистр, пробелы, «#», «ID», ссылка с ?f=КОД. Код на сервере — 6 знаков из 2–9, A–F, X, Y.
+static func normalize_code(raw: String) -> String:
+	var text := raw.strip_edges()
+	var link := text.find("f=")
+	if link >= 0:
+		text = text.substr(link + 2)
+	var twins := {"А": "A", "В": "B", "С": "C", "Е": "E", "Х": "X", "У": "Y"}
+	var words := PackedStringArray()
+	var word := ""
+	for ch in text.to_upper() + " ":
+		ch = str(twins.get(ch, ch))
+		if (ch >= "A" and ch <= "Z") or (ch >= "0" and ch <= "9"):
+			word += ch
+		elif not word.is_empty():
+			words.append(word)
+			word = ""
+	# Слово ровно из 6 знаков кода — это он (вставили «ID для друзей: E58CY3»); иначе — всё подряд («E5 8C Y3»).
+	var code_chars := RegEx.create_from_string("^[2-9A-FXY]{6}$")
+	for i in range(words.size() - 1, -1, -1):
+		if code_chars.search(words[i]) != null:
+			return words[i]
+	var joined := "".join(words)
+	if joined.begins_with("ID") and joined.length() > 6:
+		joined = joined.substr(2)
+	return joined.left(6)
+
+
 func has_code() -> bool:
 	return not friend_code.is_empty()
 

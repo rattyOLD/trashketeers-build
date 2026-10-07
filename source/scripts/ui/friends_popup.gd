@@ -197,6 +197,10 @@ func _add_by_id(edit: LineEdit, add: Button) -> void:
 		_say("Друг добавлен по визитке" if card_result == "ok" or card_result == "bonus" else "Визитка не подошла")
 		edit.text = ""
 		return
+	code = Cloud.normalize_code(code)
+	if code.length() != 6:
+		_say("ID — 6 знаков, например E58CY3")
+		return
 	add.disabled = true
 	var result := await Cloud.request_friend(code)
 	if result == "no_server":

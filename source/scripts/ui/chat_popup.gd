@@ -188,11 +188,12 @@ func _on_input_focus(focused: bool) -> void:
 	if focused:
 		_sticker_scroll.visible = false
 	_quick.visible = not focused
-	_scroll.custom_minimum_size.y = _base_height * (0.45 if focused and Orient.portrait else 1.0)
+	_scroll.custom_minimum_size.y = _base_height * ((0.45 if Orient.portrait else 0.3) if focused else 1.0)
 	_scroll_down.call_deferred()
 
 
 func _process(delta: float) -> void:
+	super._process(delta)
 	if not visible:
 		return
 	_clock += delta

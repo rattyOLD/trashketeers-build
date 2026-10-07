@@ -40,6 +40,7 @@ func _init() -> void:
 
 
 func _process(delta: float) -> void:
+	super._process(delta)
 	_tick += delta
 	if _tick < 1.0:
 		return

@@ -631,6 +631,9 @@ func native_input_hide(id: String) -> void:
 ## Выбор файла с телефона/компьютера. Вызывать из нажатия кнопки. Результат забирать pick_file_result():
 ## null — ещё выбирают; {} — отменили; {"name", "type", "size", "data" (base64)} — файл.
 func pick_file(accept: String, max_bytes: int) -> void:
+	if OS.get_name() == "Android":
+		_android_pick_file(max_bytes)
+		return
 	if not is_web:
 		return
 	_js("""
@@ -642,7 +645,24 @@ inp.addEventListener('change', function () {
   if (!f) { window.__trash_pick = {}; return; }
   if (f.size > %d) { window.__trash_pick = {name: f.name, type: f.type, size: f.size, too_big: true}; return; }
   var rd = new FileReader();
-  rd.onload = function () { var s = String(rd.result); window.__trash_pick = {name: f.name, type: f.type, size: f.size, data: s.slice(s.indexOf(',') + 1)}; };
+  rd.onload = function () {
+    var s = String(rd.result);
+    var raw = {name: f.name, type: f.type, size: f.size, data: s.slice(s.indexOf(',') + 1)};
+    if (String(f.type).indexOf('image/') !== 0) { window.__trash_pick = raw; return; }
+    // Фото уменьшаем в браузере: он умеет HEIC с iPhone, а большие снимки не раздувают память игры.
+    var img = new Image();
+    img.onload = function () {
+      try {
+        var k = Math.min(1, 640 / Math.max(img.naturalWidth, img.naturalHeight, 1));
+        var cv = document.createElement('canvas'); cv.width = Math.max(1, Math.round(img.naturalWidth * k)); cv.height = Math.max(1, Math.round(img.naturalHeight * k));
+        cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+        var out = cv.toDataURL('image/jpeg', 0.9);
+        window.__trash_pick = {name: f.name, type: 'image/jpeg', size: f.size, data: out.slice(out.indexOf(',') + 1)};
+      } catch (e) { window.__trash_pick = raw; }
+    };
+    img.onerror = function () { window.__trash_pick = raw; };
+    img.src = s;
+  };
   rd.onerror = function () { window.__trash_pick = {}; };
   rd.readAsDataURL(f);
 });
@@ -652,6 +672,11 @@ inp.click();
 
 
 func pick_file_result() -> Variant:
+	if OS.get_name() == "Android":
+		var result: Variant = _android_pick
+		if result != null:
+			_android_pick = null
+		return result
 	if not is_web:
 		return {}
 	var raw: Variant = _js("var p = window.__trash_pick; if (p === null || p === undefined) return ''; window.__trash_pick = undefined; return JSON.stringify(p);")
@@ -659,6 +684,44 @@ func pick_file_result() -> Variant:
 		return null
 	var parsed: Variant = JSON.parse_string(str(raw))
 	return parsed if parsed is Dictionary else {}
+
+
+var _android_pick: Variant = {}
+var _android_pick_max := 0
+
+
+## APK: системный выбор фото. Файл читается по пути, поэтому нужен доступ к фото (Android 13+ — READ_MEDIA_IMAGES).
+func _android_pick_file(max_bytes: int) -> void:
+	_android_pick_max = max_bytes
+	var permission := "android.permission.READ_MEDIA_IMAGES" if int(OS.get_version().split(".")[0]) >= 13 else "android.permission.READ_EXTERNAL_STORAGE"
+	if not OS.request_permission(permission):
+		_android_pick = {"need_permission": true}
+		return
+	if not DisplayServer.has_feature(DisplayServer.FEATURE_NATIVE_DIALOG_FILE):
+		_android_pick = {}
+		return
+	_android_pick = null
+	var err := DisplayServer.file_dialog_show("Фото", "", "", false, DisplayServer.FILE_DIALOG_MODE_OPEN_FILE,
+		PackedStringArray(["*.jpg", "*.jpeg", "*.png", "*.webp"]), _on_android_picked)
+	if err != OK:
+		_android_pick = {}
+
+
+func _on_android_picked(status: bool, paths: PackedStringArray, _filter: int) -> void:
+	if not status or paths.is_empty():
+		_android_pick = {}
+		return
+	var path := paths[0]
+	var bytes := FileAccess.get_file_as_bytes(path)
+	if bytes.is_empty():
+		_android_pick = {"need_permission": true}
+		return
+	var ext := path.get_extension().to_lower()
+	if bytes.size() > _android_pick_max:
+		_android_pick = {"name": path.get_file(), "too_big": true}
+		return
+	_android_pick = {"name": path.get_file(), "type": "image/" + ("jpeg" if ext in ["jpg", "jpeg"] else ext),
+		"size": bytes.size(), "data": Marshalls.raw_to_base64(bytes)}
 
 
 ## Открыть ссылку (файл из чата) в новой вкладке. Вызывать из нажатия кнопки.
