@@ -108,19 +108,23 @@ func _init(title_text: String) -> void:
 	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	header.add_child(_title)
-	var close_button := UiStyle.button("X", UiStyle.PANEL_LIGHT, 28, Vector2(56, 56))
-	close_button.pressed.connect(close)
-	header.add_child(close_button)
+	# Место под крестик в заголовке; сам крестик — один, закреплён в углу окна и не уезжает при прокрутке.
+	var close_slot := Control.new()
+	close_slot.custom_minimum_size = Vector2(56, 56)
+	close_slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	header.add_child(close_slot)
 	_floating_close = UiStyle.button("X", UiStyle.PANEL_LIGHT, 28, Vector2(56, 56))
 	_floating_close.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 	_floating_close.offset_left = -84
 	_floating_close.offset_right = -28
 	_floating_close.offset_top = 28
 	_floating_close.offset_bottom = 84
-	_floating_close.visible = false
 	_floating_close.pressed.connect(close)
-	_frame.add_child(_floating_close)
-	_content_scroll_view.get_v_scroll_bar().value_changed.connect(func(value: float) -> void: _floating_close.visible = value > 1.0)
+	# Панель — контейнер и растянула бы кнопку на всё окно, поэтому крестик живёт в отдельном слое поверх содержимого.
+	var close_layer := Control.new()
+	close_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_panel.add_child(close_layer)
+	close_layer.add_child(_floating_close)
 
 	_panel.resized.connect(_sync_glass)
 	# Телефонная клавиатура закрывает низ экрана: пока вводят текст, окно поднимается в верхнюю половину.

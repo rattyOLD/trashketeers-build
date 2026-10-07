@@ -115,7 +115,7 @@ func _build_stage(character: Dictionary, accent: Color, owned: bool) -> Control:
 		_preview.modulate = Color.WHITE if owned else Color(0.414, 0.397, 0.373, 1.0)
 		_stage.add_child(_preview)
 		_stage.gui_input.connect(func(event: InputEvent) -> void:
-			var tapped: bool = (event is InputEventMouseButton and event.pressed) or (event is InputEventScreenTouch and event.pressed)
+			var tapped := UiStyle.is_tap(event)
 			if tapped and _preview != null:
 				_preview.fire_burst())
 	_flash = ColorRect.new()

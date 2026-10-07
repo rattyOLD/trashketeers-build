@@ -398,7 +398,7 @@ func _open_chat(code: String, nick: String, character: String = "raccoon") -> vo
 func _tappable(panel: Control, action: Callable) -> void:
 	panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	panel.gui_input.connect(func(event: InputEvent) -> void:
-		var tapped: bool = (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT) or (event is InputEventScreenTouch and event.pressed)
+		var tapped := UiStyle.is_tap(event)
 		if tapped:
 			SoundManager.play(&"ui_click")
 			action.call())

@@ -51,7 +51,7 @@ func _run() -> void:
 	previous["auto_pick"] = true
 	SaveService.data["controls"] = previous
 	var migrated := Controls.config()
-	_check(int(migrated["layout_v"]) == 11 and migrated.has("portrait_layout_backup"), "old layout backed up and migrated")
+	_check(int(migrated["layout_v"]) == 12 and migrated.has("portrait_layout_backup"), "old layout backed up and migrated")
 	_check(bool(migrated["left_handed"]) and bool(migrated["auto_pick"]) and int(migrated["keys"]["dash"][0]) == KEY_X, "preferences and bindings preserved")
 	_check(float(migrated["portrait_layout_backup"]["layout"]["dash"]["s"]) == 1.2, "custom portrait layout remains in backup")
 	Controls.apply_preset(false)

@@ -3,8 +3,14 @@ extends RefCounted
 ## Окна хаба на базе GlassPopup: Настройки, Гардероб (герои и наряды), Оружие + Merge, Прокачка, Ачивки.
 ## Длинные списки — в ScrollContainer (на телефоне листаются пальцем).
 
+## Высота списка по экрану: окно (заголовок, поиск, вкладки + список) целиком влезает по высоте, листается
+## только список. Раньше в горизонтали список 400 px не влезал, и его низ уходил под край окна.
 static func list_height() -> float:
-	return 760.0 if Orient.portrait else 400.0
+	if Orient.portrait:
+		return 760.0
+	var tree := Engine.get_main_loop() as SceneTree
+	var screen_h := tree.root.get_visible_rect().size.y if tree != null else 720.0
+	return clampf(screen_h - 380.0, 220.0, 400.0)
 
 
 static func scroll_list(parent: Control) -> VBoxContainer:
@@ -1241,7 +1247,7 @@ class Profile:
 		avatar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		avatar.mouse_filter = Control.MOUSE_FILTER_STOP
 		avatar.gui_input.connect(func(event: InputEvent) -> void:
-			var tapped: bool = (event is InputEventMouseButton and event.pressed) or (event is InputEventScreenTouch and event.pressed)
+			var tapped := UiStyle.is_tap(event)
 			if tapped:
 				_picker.open())
 		var avatar_box := VBoxContainer.new()
@@ -1463,7 +1469,7 @@ class Profile:
 		var panel := PanelContainer.new()
 		panel.mouse_filter = Control.MOUSE_FILTER_STOP
 		panel.gui_input.connect(func(event: InputEvent) -> void:
-			var tapped: bool = (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT) or (event is InputEventScreenTouch and event.pressed)
+			var tapped := UiStyle.is_tap(event)
 			if tapped:
 				SoundManager.play(&"ui_click")
 				chronicle_requested.emit())
@@ -1483,7 +1489,7 @@ class Profile:
 		panel.mouse_filter = Control.MOUSE_FILTER_STOP
 		panel.custom_minimum_size = Vector2(0, 96)
 		panel.gui_input.connect(func(event: InputEvent) -> void:
-			var tapped: bool = (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT) or (event is InputEventScreenTouch and event.pressed)
+			var tapped := UiStyle.is_tap(event)
 			if tapped:
 				SoundManager.play(&"ui_click")
 				friends_requested.emit())
@@ -1518,7 +1524,7 @@ class Profile:
 		var panel := PanelContainer.new()
 		panel.mouse_filter = Control.MOUSE_FILTER_STOP
 		panel.gui_input.connect(func(event: InputEvent) -> void:
-			var tapped: bool = (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT) or (event is InputEventScreenTouch and event.pressed)
+			var tapped := UiStyle.is_tap(event)
 			if tapped:
 				SoundManager.play(&"ui_click")
 				achievements_requested.emit())

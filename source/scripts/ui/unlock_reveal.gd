@@ -145,7 +145,7 @@ func draw_glow(at: Vector2, radius: float, color: Color) -> void:
 func _input(event: InputEvent) -> void:
 	if not visible or not _dismiss_ready:
 		return
-	var tapped: bool = (event is InputEventMouseButton and event.pressed) or (event is InputEventScreenTouch and event.pressed)
+	var tapped := UiStyle.is_tap(event)
 	if tapped:
 		get_viewport().set_input_as_handled()
 		visible = false

@@ -170,7 +170,7 @@ func _tile(entry: Array, state: int, selected: bool) -> Control:
 	var tile := PortraitTile.new(str(entry[0]), str(entry[1]), state, selected)
 	tile.custom_minimum_size = Vector2((panel_width() - 70.0) / float(COLUMNS) - 8.0, TILE + 36.0)
 	tile.gui_input.connect(func(event: InputEvent) -> void:
-		var tapped: bool = (event is InputEventMouseButton and event.pressed) or (event is InputEventScreenTouch and event.pressed)
+		var tapped := UiStyle.is_tap(event)
 		if not tapped:
 			return
 		if state == 0:

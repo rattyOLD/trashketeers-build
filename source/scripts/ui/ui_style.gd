@@ -82,6 +82,16 @@ static func kit_box(family: String, state: String, small: bool, tint: Color = Co
 	return sb
 
 
+## Тап по плитке-панели: на отпускании и только если палец почти не двигался (иначе это прокрутка списка).
+static func is_tap(event: InputEvent) -> bool:
+	if event is InputEventScreenTouch:
+		return not (event as InputEventScreenTouch).pressed and not Platform.touch_moved()
+	if event is InputEventMouseButton and not Platform.is_touch():
+		var mouse := event as InputEventMouseButton
+		return mouse.button_index == MOUSE_BUTTON_LEFT and not mouse.pressed
+	return false
+
+
 static func button(text: String, color: Color, font_size: int = 30, min_size: Vector2 = Vector2(0, 84)) -> Button:
 	var b := Button.new()
 	b.text = text

@@ -379,7 +379,7 @@ func _cell(track: String, tier: int) -> Control:
 	if claimable:
 		panel.mouse_filter = Control.MOUSE_FILTER_STOP
 		panel.gui_input.connect(func(event: InputEvent) -> void:
-			var tapped: bool = (event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT) or (event is InputEventScreenTouch and event.pressed)
+			var tapped := UiStyle.is_tap(event)
 			if tapped and BattlePass.claim(track, tier):
 				SoundManager.play(&"star_dust")
 				changed.emit()

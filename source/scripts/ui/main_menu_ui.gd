@@ -162,10 +162,12 @@ func _build() -> void:
 	get_tree().create_timer(1.6).timeout.connect(_maybe_whats_new)
 
 
-## Закрыл окно, открытое из профиля: возвращаемся в меню (раньше снова открывался профиль, и казалось,
-## что из ачивок не выйти).
+## Закрыл ачивки/летопись, открытые из профиля: возвращаемся в профиль (просьба тестеров); из профиля — крестиком в меню.
 func _back_to_profile(_popup: Control) -> void:
+	if not _from_profile:
+		return
 	_from_profile = false
+	_profile.open()
 
 
 # --- Верхняя панель ---------------------------------------------------------------------------
@@ -538,7 +540,7 @@ func _build_stage() -> Control:
 	_stage = stage
 	_sync_tester_button()
 	stage.gui_input.connect(func(event: InputEvent) -> void:
-		var tapped: bool = (event is InputEventMouseButton and event.pressed) or (event is InputEventScreenTouch and event.pressed)
+		var tapped := UiStyle.is_tap(event)
 		if tapped:
 			_preview.celebrate()
 			_preview.fire_burst())

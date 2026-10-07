@@ -32,6 +32,47 @@ var _ad_callback: Callable
 var _ad_simulated := false
 
 
+## Прокрутка списков пальцем не должна нажимать кнопки: если палец уехал дальше SCROLL_SLOP,
+## кнопка под ним внутри ScrollContainer отпускается без нажатия (жалоба тестеров: «тапаются опции, когда скролишь»).
+const SCROLL_SLOP := 14.0
+var _touch_from := Vector2.INF
+var _touch_moved := false
+
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventScreenTouch:
+		var touch := event as InputEventScreenTouch
+		_touch_from = touch.position if touch.pressed else Vector2.INF
+		if touch.pressed:
+			_touch_moved = false
+	elif event is InputEventScreenDrag and not _touch_moved and _touch_from != Vector2.INF:
+		if (event as InputEventScreenDrag).position.distance_to(_touch_from) > SCROLL_SLOP:
+			_touch_moved = true
+			_cancel_scroll_press()
+
+
+## Текущее (или только что отпущенное) касание уехало дальше SCROLL_SLOP — это прокрутка, не тап.
+func touch_moved() -> bool:
+	return _touch_moved
+
+
+func _cancel_scroll_press() -> void:
+	var viewport := get_viewport()
+	if viewport == null or not viewport.has_method("gui_get_hovered_control"):
+		return
+	var node: Node = viewport.call("gui_get_hovered_control")
+	var button: BaseButton = null
+	while node != null:
+		if button == null and node is BaseButton:
+			button = node as BaseButton
+		if node is ScrollContainer:
+			if button != null and not button.disabled:
+				button.disabled = true
+				button.set_deferred("disabled", false)
+			return
+		node = node.get_parent()
+
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	is_web = OS.has_feature("web")
