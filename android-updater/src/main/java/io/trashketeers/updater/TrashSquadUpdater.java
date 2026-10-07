@@ -7,6 +7,9 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
+import android.view.Display;
+import android.view.Window;
+import android.view.WindowManager;
 import androidx.core.content.FileProvider;
 import java.io.File;
 import java.util.HashSet;
@@ -26,6 +29,32 @@ public final class TrashSquadUpdater extends GodotPlugin {
         signals.add(new SignalInfo("installer_error", String.class));
         signals.add(new SignalInfo("installer_opened"));
         return signals;
+    }
+
+    /** Просит экран работать с частотой до hz (60/90/120): без этого Android держит игру на 60 Гц. */
+    @UsedByGodot public boolean set_refresh_rate(float hz) {
+        Activity activity = getActivity();
+        if (activity == null || Build.VERSION.SDK_INT < 23) return false;
+        activity.runOnUiThread(() -> {
+            try {
+                Window window = activity.getWindow();
+                Display display = window.getWindowManager().getDefaultDisplay();
+                Display.Mode current = display.getMode();
+                Display.Mode best = null;
+                for (Display.Mode mode : display.getSupportedModes()) {
+                    if (mode.getPhysicalWidth() != current.getPhysicalWidth() || mode.getPhysicalHeight() != current.getPhysicalHeight()) continue;
+                    if (mode.getRefreshRate() > hz + 0.5f) continue;
+                    if (best == null || mode.getRefreshRate() > best.getRefreshRate()) best = mode;
+                }
+                if (best == null) best = current;
+                WindowManager.LayoutParams params = window.getAttributes();
+                params.preferredDisplayModeId = best.getModeId();
+                if (Build.VERSION.SDK_INT >= 30) params.preferredRefreshRate = Math.min(best.getRefreshRate(), hz);
+                window.setAttributes(params);
+            } catch (RuntimeException ignored) {
+            }
+        });
+        return true;
     }
 
     @UsedByGodot public boolean can_install_packages() {

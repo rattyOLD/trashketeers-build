@@ -741,7 +741,7 @@ func _select_mode(mode: int) -> void:
 		if _mode_hint == null:
 			_mode_hint = HintBubble.new()
 			add_child(_mode_hint)
-		_mode_hint.show_for(_mode_buttons[0], "Пройдите сюжет, и тогда откроется доступ.")
+		_mode_hint.show_for(_mode_buttons[0], "Пройди первую миссию «Кампании» — и выживание откроется.")
 		if _mode == Mode.SURVIVAL:
 			mode = Mode.STORY
 		else:

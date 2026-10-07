@@ -503,6 +503,11 @@ func apply_quality() -> void:
 	var caps := [1.5, 2.0, 2.5] if Platform.is_touch() else [1.25, 2.0, 3.0]
 	Platform.set_render_cap(caps[get_quality()])
 	Engine.max_fps = get_fps_cap()
+	# APK: без явной просьбы Android держит экран на 60 Гц и «120 FPS» в настройках ничего не меняло.
+	if Engine.has_singleton("TrashSquadUpdater"):
+		var native := Engine.get_singleton("TrashSquadUpdater")
+		if native.has_method("set_refresh_rate"):
+			native.call("set_refresh_rate", float(get_fps_cap()))
 
 
 func is_minimap_enabled() -> bool:
