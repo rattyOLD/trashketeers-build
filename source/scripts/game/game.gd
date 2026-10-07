@@ -7,6 +7,7 @@ extends BattleBase
 ## ящиков, возрождение за рекламу или неонит. Все пулы создаются в start() — до геймплея.
 
 const ENEMY_CAPACITY := 90
+const COIN_DROP_SCALE := 0.7
 const WEAPON_PICKUPS := 6
 const XP_BASE := 5
 const XP_STEP := 5
@@ -844,7 +845,8 @@ func _on_enemy_died(enemy: Enemy) -> void:
 		SaveService.add_stat("marauders", 1, false)
 		hud.toast("МАРОДЁР ПОЙМАН!", "+%d монет добычи" % enemy.loot, Color("#ffd23f"))
 		fx.confetti(at, 40)
-	if randf() < data.nut_drop_chance and data.nut_drop > 0:
+	# Врагов в волнах больше (difficulty.count_mult) — монеты с каждого реже, иначе экономика раздувается.
+	if randf() < data.nut_drop_chance * COIN_DROP_SCALE and data.nut_drop > 0:
 		pickups.spawn(at, data.nut_drop * (2 if randf() < stats.get_stat(&"double_drop") else 1))
 	if data.is_boss():
 		_on_boss_killed(enemy, at)

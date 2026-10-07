@@ -44,8 +44,9 @@ const DEFAULT_KEYS := {
 
 const SKILL_X := 0.92
 const SKILL_Y := 0.8
-const SLOTS_X := 0.60
-const SLOTS_Y := 0.84
+const SLOTS_X := 0.835
+const SLOTS_Y := 0.6
+const INTERACT_Y := 0.4
 
 static var revision := 0
 
@@ -68,10 +69,10 @@ static func default_config(left_handed: bool = false) -> Dictionary:
 			"dash": {"x": cx, "y": SKILL_Y, "s": 1.0},
 			"dodge": {"x": 0.79 if not left_handed else 0.21, "y": 0.8, "s": 1.0},
 			"slots": {"x": sx, "y": SLOTS_Y, "s": 1.0},
-			"interact": {"x": 0.79 if not left_handed else 0.21, "y": 0.51, "s": 1.0},
+			"interact": {"x": 0.79 if not left_handed else 0.21, "y": INTERACT_Y, "s": 1.0},
 		},
 		"hud": {},
-		"layout_v": 11,
+		"layout_v": 12,
 		"keys": {},
 		"presets": {},
 	}
@@ -147,6 +148,18 @@ static func config() -> Dictionary:
 		stored["layout"] = (base["layout"] as Dictionary).duplicate(true)
 		stored["hud"] = {}
 		stored["layout_v"] = 11
+	if int(stored.get("layout_v", 1)) < 12:
+		# Слоты оружия — над рывком и навыком (тот же большой палец), «ВЗЯТЬ» — выше слотов. Свои раскладки не трогаем.
+		stored["layout_v"] = 12
+		var left := bool(stored.get("left_handed", false))
+		var fresh_layout: Dictionary = stored["layout"]
+		var slots_now: Dictionary = fresh_layout["slots"]
+		if absf(float(slots_now["x"]) - (0.4 if left else 0.6)) < 0.005 and absf(float(slots_now["y"]) - 0.84) < 0.005:
+			slots_now["x"] = 1.0 - SLOTS_X if left else SLOTS_X
+			slots_now["y"] = SLOTS_Y
+		var take: Dictionary = fresh_layout["interact"]
+		if absf(float(take["y"]) - 0.51) < 0.005:
+			take["y"] = INTERACT_Y
 	return stored
 
 

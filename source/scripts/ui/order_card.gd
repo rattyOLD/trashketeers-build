@@ -124,8 +124,9 @@ func _draw() -> void:
 	draw_rect(tag, Color(accent, 0.9))
 	draw_string(font, tag.position + Vector2(0.0, 11.5), "ЗАКАЗ", HORIZONTAL_ALIGNMENT_CENTER, tag.size.x, 12, Color("#1a1917"))
 	var text := "ГОТОВО" if _done else "%d / %d" % [_progress, _goal]
-	draw_string(font, Vector2(SIZE.x - 64.0, 19.0), text, HORIZONTAL_ALIGNMENT_RIGHT, 58.0, 14, accent)
-	draw_string(font, Vector2(68.0, 19.0), _title, HORIZONTAL_ALIGNMENT_LEFT, SIZE.x - 140.0, 13, Color(1, 1, 1, 0.9))
+	# Счётчик до «999 / 999» целиком: раньше в 58 px «26 / 200» обрезалось до «26 / 20».
+	draw_string(font, Vector2(SIZE.x - 92.0, 19.0), text, HORIZONTAL_ALIGNMENT_RIGHT, 86.0, 14, accent)
+	draw_string(font, Vector2(68.0, 19.0), _title, HORIZONTAL_ALIGNMENT_LEFT, SIZE.x - 168.0, 13, Color(1, 1, 1, 0.9))
 	var bar := Rect2(6.0, 28.0, SIZE.x - 12.0, 10.0)
 	draw_rect(bar, Color(0, 0, 0, 0.55))
 	var fill := Rect2(bar.position, Vector2(bar.size.x * _shown, bar.size.y))

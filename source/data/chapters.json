@@ -1765,7 +1765,7 @@
  ],
  "difficulty": {
   "hp_per_wave": 0.105,
-  "damage_per_wave": 0.065,
+  "damage_per_wave": 0.075,
   "speed_per_wave": 0.012,
   "loop_hp": 1.9,
   "loop_damage": 1.35,
@@ -1779,6 +1779,9 @@
     "early_waves": 4,
     "early_count": 1.25,
     "early_damage": 1.15,
-    "mini_hp": 0.6
+    "mini_hp": 0.6,
+    "count_mult": 1.3,
+    "alive_mult": 1.25,
+    "interval_mult": 0.85
  }
 }

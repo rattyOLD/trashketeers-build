@@ -242,9 +242,9 @@ func _start_wave(number: int) -> void:
 	_dmg_mult *= 1.0 + (adapt - 1.0) * 0.5
 	var count_adapt := 1.0 + (adapt - 1.0) * 0.35
 	var early_count := float(d.get("early_count", 1.0)) if loop == 0 and chapter_wave() <= int(d.get("early_waves", 0)) else 1.0
-	remaining_to_spawn = int(ceil(float(_wave["count"]) * pow(float(d["loop_count"]), loop) * float(_chapter.get("count_mult", 1.0)) * count_adapt * early_count))
-	_interval = maxf(float(_wave["spawn_interval"]) * pow(float(d["loop_interval"]), loop), 0.25)
-	_max_alive = int(_wave["max_alive"]) + int(d["loop_max_alive"]) * loop
+	remaining_to_spawn = int(ceil(float(_wave["count"]) * pow(float(d["loop_count"]), loop) * float(_chapter.get("count_mult", 1.0)) * count_adapt * early_count * float(d.get("count_mult", 1.0))))
+	_interval = maxf(float(_wave["spawn_interval"]) * pow(float(d["loop_interval"]), loop) * float(d.get("interval_mult", 1.0)), 0.25)
+	_max_alive = int(round((int(_wave["max_alive"]) + int(d["loop_max_alive"]) * loop) * float(d.get("alive_mult", 1.0))))
 	_boss_pending = false
 	phase = Phase.INTRO
 	_phase_time = INTRO_TIME
