@@ -73,6 +73,23 @@ const COLLAPSE_INTERVAL := 2.6
 const COLLAPSE_ZONES := 5
 const MAGNET := Color("#b46bff")
 
+## Жёсткость «как в соулслайках» — общий слой поверх сценариев всех боссов:
+##   толще и бьют больнее; атаки идут сериями (после удара босс часто сразу продолжает комбо);
+##   окно наказания — после серии босс «открыт» (золотое кольцо под ногами) и получает больше урона;
+##   на 25% HP — третья фаза «Последний рубеж»: быстрее, чаще, злее. Рывок Енота даёт честное окно неуязвимости.
+const BOSS_HP_MULT := 1.35
+const BOSS_HIT_MULT := 1.5
+const BASE_TEMPO := 0.85
+const DESPERATE_PHASE := 0.25
+const DESPERATE_TEMPO := 0.78
+const CHAIN_CHANCE_P2 := 0.35
+const CHAIN_CHANCE_P3 := 0.55
+const OPENING_TIME := 1.1
+const OPENING_MULT := 1.4
+const OPENING_COLOR := Color("#ffd257")
+var desperate := false
+var opening := 0.0
+
 ## Сюжетные фазы Короля (кран-магнит и обвал) включает StoryRun; в обычных забегах Король прежний.
 static var story_phases := false
 
@@ -138,6 +155,9 @@ var _collapse_timer := 0.0
 func setup(owner: Enemy) -> void:
 	enemy = owner
 	pattern = owner.data.boss_pattern
+	owner.max_hp *= BOSS_HP_MULT
+	owner.hp = owner.max_hp
+	owner.damage_mult *= BOSS_HIT_MULT
 	state = State.WALK
 	state_time = 0.0
 	phase = 1
@@ -210,7 +230,9 @@ func damage_taken_mult() -> float:
 		return FOAM_MULT
 	if pattern == "overlord" and _speakers_alive > 0:
 		return SPEAKER_MULT
-	return GOLD_SHELL_MULT if shell_left > 0.0 else 1.0
+	if shell_left > 0.0:
+		return GOLD_SHELL_MULT
+	return OPENING_MULT if opening > 0.0 else 1.0
 
 
 ## Колонки трона получают урон только в окне после призыва подручных.
@@ -283,13 +305,13 @@ func fury() -> bool:
 ## Скорость движения с учётом фазы (во второй фазе боссы налегке).
 func speed() -> float:
 	var boost := 1.3 if pattern == "shaman" else 1.8
-	return enemy.data.move_speed * (boost if phase == 2 else 1.0) * (1.2 if enraged else 1.0)
+	return enemy.data.move_speed * (boost if phase == 2 else 1.0) * (1.2 if enraged else 1.0) * (1.15 if desperate else 1.0)
 
 
 ## Темп атак: ярость ускоряет всё на треть.
 func _tempo() -> float:
-	var base := 0.8 if pattern == "baron" else 1.0
-	return base * (0.72 if enraged else 1.0)
+	var base := (0.8 if pattern == "baron" else 1.0) * BASE_TEMPO
+	return base * (0.72 if enraged else 1.0) * (DESPERATE_TEMPO if desperate else 1.0)
 
 
 ## Желаемая скорость босса на этот кадр.
@@ -299,11 +321,18 @@ func tick(player: Player, dir: Vector2, path_dir: Vector2, dist: float, delta: f
 	if enemy.posture_stun > 0.0:
 		return Vector2.ZERO
 	state_time += delta
+	if opening > 0.0:
+		opening = maxf(opening - delta, 0.0)
+		enemy.queue_redraw()
 	_flash_clip = maxf(_flash_clip - delta, 0.0)
 	windup = move_toward(windup, 0.0, delta * 2.0)
 	strike = move_toward(strike, 0.0, delta * 3.0)
 	if phase == 1 and state != State.TRANSFORM and enemy.hp < enemy.max_hp * phase_threshold():
 		_begin_transform()
+	elif phase == 2 and not desperate and state != State.TRANSFORM and enemy.hp < enemy.max_hp * DESPERATE_PHASE:
+		desperate = true
+		opening = 0.0
+		enemy.request_fx("enrage")
 	if player.is_dead:
 		return Vector2.ZERO
 	_fight_time += delta
@@ -840,6 +869,13 @@ func _enter(next: State) -> void:
 
 func _rest(extra: float = 0.0) -> void:
 	_enter(State.WALK)
+	# Серия: со второй фазы босс часто продолжает комбо без передышки — расслабляться после одного удара нельзя.
+	var chain := CHAIN_CHANCE_P3 if desperate else (CHAIN_CHANCE_P2 if phase == 2 else 0.0)
+	if randf() < chain:
+		_cooldown = 0.12
+		return
+	# Серия кончилась — окно наказания: босс выдохся и получает больше урона.
+	opening = OPENING_TIME
 	_cooldown = ((0.6 if phase == 2 else 1.0) + randf_range(0.0, 0.3) + extra) * _tempo()
 
 
@@ -1121,6 +1157,9 @@ func _draw_speaker_links(canvas: Node2D) -> void:
 
 ## Телеграфы в локальных координатах врага (Enemy._draw вызывает под спрайтом).
 func draw(canvas: Node2D) -> void:
+	if opening > 0.0 and state == State.WALK:
+		var fade := clampf(opening / OPENING_TIME, 0.0, 1.0)
+		canvas.draw_arc(Vector2.ZERO, enemy.data.radius * 1.5, 0.0, TAU, 40, Color(OPENING_COLOR, 0.75 * fade), 5.0, true)
 	if pattern == "overlord" and _speakers_alive > 0:
 		_draw_speaker_links(canvas)
 	match state:

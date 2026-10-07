@@ -60,6 +60,8 @@ const DEFAULTS := {
 }
 
 const RARITIES := ["common", "rare", "epic", "legendary"]
+const MELEE_DAMAGE_BOOST := 1.6
+const MELEE_REACH_BOOST := 1.15
 const RARITY_COLORS := {
 	"common": Color("#c3cad6"),
 	"rare": Color("#3da5ff"),
@@ -287,10 +289,12 @@ static func from_dict(raw: Dictionary, resolve_texture: Callable) -> WeaponData:
 	w.trait_id = StringName(d["trait"])
 	w.kind = d["kind"]
 	if w.kind == "melee":
+		# Ближний бой рискованнее огнестрела (надо подойти вплотную и прицелиться пальцем) — бьёт заметно сильнее.
+		w.damage *= MELEE_DAMAGE_BOOST
 		w.melee_class = d["melee_class"]
 		w.weight = clampi(int(d["weight"]), 1, 5)
 		w.arc_rad = deg_to_rad(clampf(d["arc_deg"], 20.0, 360.0))
-		w.melee_reach = maxf(d["reach"], 30.0)
+		w.melee_reach = maxf(d["reach"], 30.0) * MELEE_REACH_BOOST
 		w.windup = maxf(d["windup"], 0.03)
 		w.swing = maxf(d["swing"], 0.04)
 		w.recovery = maxf(d["recovery"], 0.03)

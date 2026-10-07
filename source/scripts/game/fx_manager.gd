@@ -260,9 +260,14 @@ func _init() -> void:
 	_sparks.material = additive
 	add_child(_sparks)
 
+	# Цифры урона — на своём слое поверх мира: цветокоррекция мира (CanvasModulate) делала их серыми и тусклыми.
+	var text_layer := CanvasLayer.new()
+	text_layer.layer = 4
+	text_layer.follow_viewport_enabled = true
+	add_child(text_layer)
 	_texts = DrawLayer.new()
 	_texts.painter = _draw_texts
-	add_child(_texts)
+	text_layer.add_child(_texts)
 
 
 ## Переносит «земляные» эффекты (кляксы, трупы, обломки) в слой декалей: под персонажей.
@@ -395,9 +400,9 @@ func ring(at: Vector2, color: Color, radius: float) -> void:
 func number(at: Vector2, value: float, color: Color = DAMAGE_COLOR, is_crit: bool = false, size_scale: float = 1.0) -> void:
 	var text := str(int(round(value)))
 	if is_crit:
-		_text(at + Vector2(randf_range(-14, 14), -26), text + "!", CRIT_COLOR, 40.0 * maxf(size_scale, 1.0))
+		_text(at + Vector2(randf_range(-14, 14), -26), text + "!", CRIT_COLOR, 46.0 * maxf(size_scale, 1.0))
 	else:
-		_text(at + Vector2(randf_range(-12, 12), -20), text, color, 28.0 * size_scale)
+		_text(at + Vector2(randf_range(-12, 12), -20), text, color, 34.0 * size_scale)
 
 
 ## Цвет цифры по типу урона: огонь — оранжевый, шок — голубой, яд — зелёный, взрыв — золотой.

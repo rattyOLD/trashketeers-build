@@ -182,7 +182,8 @@ func try_dash() -> bool:
 	_dash_left = DASH_DURATION
 	dash_remaining = dash_cooldown
 	_knockback = Vector2.ZERO
-	grant_invuln(0.12)
+	# Рывок — честное окно неуязвимости на всю длину рывка: удары боссов можно «пройти насквозь».
+	grant_invuln(DASH_DURATION + 0.08)
 	dash_started.emit()
 	if fx != null:
 		fx.ring(global_position, Color("#64d8f5"), 36.0)

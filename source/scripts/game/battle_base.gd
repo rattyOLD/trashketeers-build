@@ -415,7 +415,8 @@ func _update_trigger() -> void:
 		wc.trigger = true
 		wc.manual_aim = hud.aim_stick.direction
 		return
-	var mouse_fire := _mouse_fire and not Platform.is_touch()
+	# Браузер на телефоне может досылать «совместимые» клики мыши после касания — там стреляет только стик.
+	var mouse_fire := _mouse_fire and not (Platform.is_web and Platform.is_touch())
 	wc.trigger = mouse_fire
 	wc.manual_aim = player.global_position.direction_to(player.get_global_mouse_position()) if mouse_fire else Vector2.ZERO
 
@@ -430,7 +431,8 @@ func _input(event: InputEvent) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT and event.pressed:
+	# Мышь, сделанная движком из касания (DEVICE_ID_EMULATION), — не мышь: на телефоне стреляет правый стик.
+	if event is InputEventMouseButton and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT and event.pressed and event.device != InputEvent.DEVICE_ID_EMULATION:
 		_mouse_fire = true
 	if event.is_action_pressed(&"dash"):
 		_request_skill()
