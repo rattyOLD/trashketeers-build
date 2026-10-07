@@ -55,6 +55,7 @@ var _read_upto := 0
 var _picking := false
 var _uploading := false
 var _base_height := 640.0
+var _sticker_h := 440.0
 var _first_load := true
 var _reaction_rows: Dictionary = {}
 var _message_nodes: Dictionary = {}
@@ -137,7 +138,7 @@ func _refresh() -> void:
 	_sticker_scroll = DragScroll.new()
 	_sticker_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_sticker_scroll.scroll_deadzone = 16
-	_sticker_scroll.custom_minimum_size = Vector2(panel_width() - 50.0, 440.0)
+	_sticker_scroll.custom_minimum_size = Vector2(panel_width() - 50.0, _sticker_h)
 	_sticker_scroll.visible = false
 	_stickers.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_sticker_scroll.add_child(_stickers)
@@ -152,7 +153,7 @@ func _refresh() -> void:
 	var sticker_btn := ChatIcon.new(ChatIcon.Kind.STICKER)
 	sticker_btn.pressed.connect(func() -> void:
 		_sticker_scroll.visible = not _sticker_scroll.visible
-		_scroll.custom_minimum_size.y = _base_height - (440.0 if _sticker_scroll.visible else 0.0)
+		_scroll.custom_minimum_size.y = _base_height - (_sticker_h if _sticker_scroll.visible else 0.0)
 		_scroll_down.call_deferred())
 	bar.add_child(sticker_btn)
 	var attach := ChatIcon.new(ChatIcon.Kind.ATTACH)
@@ -182,6 +183,21 @@ func _refresh() -> void:
 	_media.clear()
 	_poll()
 	_poll_peer()
+	_fit_chat.call_deferred()
+
+
+## Строка ввода всегда должна влезать в экран без прокрутки окна (в горизонтали лента 360 px её выталкивала вниз).
+func _fit_chat() -> void:
+	if not is_inside_tree() or _scroll == null:
+		return
+	var available := ScreenSafeArea.rect(get_viewport_rect().size).size.y - 112.0
+	var others := content.get_combined_minimum_size().y - _scroll.custom_minimum_size.y
+	if _sticker_scroll.visible:
+		others -= _sticker_h
+	_base_height = clampf(minf(_base_height, available - others), 140.0, 900.0)
+	_sticker_h = minf(440.0, _base_height - 60.0)
+	_sticker_scroll.custom_minimum_size.y = _sticker_h
+	_scroll.custom_minimum_size.y = _base_height - (_sticker_h if _sticker_scroll.visible else 0.0)
 
 
 func _on_input_focus(focused: bool) -> void:
