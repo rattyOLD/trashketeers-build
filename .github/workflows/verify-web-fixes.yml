@@ -85,8 +85,8 @@ jobs:
                   subprocess.run(['git', 'add', '--sparse', str(target)], check=True)
           PY
           git diff --exit-code HEAD -- HANDOFF.md CLAUDE.md DEV.md
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "rattyOLD"
+          git config user.email "bmd9tzhg8n@privaterelay.appleid.com"
           if ! git diff --cached --quiet; then
             git commit -m "build: publish verified gameplay fixes"
             git push origin "HEAD:${{ github.ref_name }}"
