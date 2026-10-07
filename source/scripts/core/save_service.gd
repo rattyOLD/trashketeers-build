@@ -212,18 +212,19 @@ const HERO_HP_PER_LEVEL := 0.04
 const HERO_DAMAGE_PER_LEVEL := 0.03
 const PERK_COST_GROWTH := 1.25
 ## Общий множитель награды за забег: экономика была слишком скупой.
-const RUN_PAYOUT := 1.4
+## Монет за забег было слишком много: выплата урезана (было 1.4).
+const RUN_PAYOUT := 0.8
 const SLOT3_PRICE := 250
 
 ## stats — ключи в data["stats"] (суммируются), goal — порог; один заказ на день для сюжета и выживания.
 const NELL_ORDERS_PER_DAY := 8
 const NELL_ORDERS := [
-	{"id": "kills", "title": "Убей 120 врагов", "stats": ["kills"], "goal": 120, "nuts": 350, "dust": 2},
-	{"id": "kills_big", "title": "Убей 300 врагов", "stats": ["kills"], "goal": 300, "nuts": 700, "dust": 4},
-	{"id": "kills_mid", "title": "Убей 200 врагов", "stats": ["kills"], "goal": 200, "nuts": 500, "dust": 3},
-	{"id": "crit", "title": "Нанеси 80 критов", "stats": ["crits"], "goal": 80, "nuts": 350, "dust": 2},
-	{"id": "boss", "title": "Победи босса", "stats": ["boss_kills", "story_missions"], "goal": 1, "nuts": 800, "dust": 5},
-	{"id": "crates", "title": "Разбей 5 ящиков с оружием", "stats": ["crates"], "goal": 5, "nuts": 400, "dust": 2},
+	{"id": "kills", "title": "Убей 120 врагов", "stats": ["kills"], "goal": 120, "nuts": 210, "dust": 2},
+	{"id": "kills_big", "title": "Убей 300 врагов", "stats": ["kills"], "goal": 300, "nuts": 420, "dust": 4},
+	{"id": "kills_mid", "title": "Убей 200 врагов", "stats": ["kills"], "goal": 200, "nuts": 300, "dust": 3},
+	{"id": "crit", "title": "Нанеси 80 критов", "stats": ["crits"], "goal": 80, "nuts": 210, "dust": 2},
+	{"id": "boss", "title": "Победи босса", "stats": ["boss_kills", "story_missions"], "goal": 1, "nuts": 480, "dust": 5},
+	{"id": "crates", "title": "Разбей 5 ящиков с оружием", "stats": ["crates"], "goal": 5, "nuts": 240, "dust": 2},
 ]
 const ACHIEVEMENTS := [
 	{"id": "first_blood", "title": "Первая кровь", "description": "Победить первую крысу. Она была чьей-то мамой, но это не точно", "stat": "kills", "goal": 1, "nuts": 20, "dust": 0},
