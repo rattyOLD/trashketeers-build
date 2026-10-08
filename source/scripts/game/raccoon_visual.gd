@@ -29,10 +29,11 @@ const ARM_PATH := "res://assets/player/raccoon_arm.png"
 const OVERLAY_DIR := "res://assets/skins/"
 ## Текстуры хранятся ~3x к миру для чёткости на экранах телефонов: в мире енот ~100 px в высоту.
 const SPRITE_SCALE := 0.36
-## Покадровые анимации (idle/run/shoot от Astры): ячейка 480×320, ноги на y=304, масштаб подобран по росту старого енота.
-const CLIP_SCALE := 0.434
-const CLIP_CELL := Vector2(480, 320)
-const CLIP_FEET := 304.0
+## Покадровые анимации (idle/run/shoot от Astры): ячейка 300×200, ноги на y=190, масштаб подобран по росту старого енота.
+## Листы ужаты с 480×320 (на экране телефона енот ~230 px, больше не нужно): −24 МБ видеопамяти, iPhone реже вылетает.
+const CLIP_SCALE := 0.6944
+const CLIP_CELL := Vector2(300, 200)
+const CLIP_FEET := 190.0
 const CLIP_COUNTS := {"idle": 8, "run": 8, "shoot": 4, "hit": 4, "dash": 6, "death": 8, "revive": 6}
 const HIT_CLIP_TIME := 0.2
 const CLIP_AIM_LIMIT := 0.95
@@ -98,8 +99,8 @@ var _clip_grip: Dictionary = {}
 var _clip_hands: Dictionary = {}
 var _clip_cur := "idle"
 var _clip_idx := 0
-var _clip_grip_px := Vector2(300, 200)
-var _clip_support_px := Vector2(380, 200)
+var _clip_grip_px := Vector2(187.5, 125)
+var _clip_support_px := Vector2(237.5, 125)
 var _shoot_t := 0.0
 var arm: Sprite2D
 var _arm_material: ShaderMaterial

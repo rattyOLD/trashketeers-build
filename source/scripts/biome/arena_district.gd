@@ -324,9 +324,12 @@ func _backdrop(path: String, foot: Vector2, scale_k: float) -> Sprite2D:
 	return item
 
 
-func _light(item: Sprite2D) -> void:
-	if not is_instance_valid(item) or not item.is_inside_tree():
+## Аргумент без типа: к отложенному вызову предмет может быть уже удалён (смена главы) — типизированный
+## параметр тогда падает с «Cannot convert argument». Район вне дерева — свет не ставим (иначе утечка).
+func _light(target: Variant) -> void:
+	if not is_inside_tree() or not is_instance_valid(target) or not (target as Node).is_inside_tree():
 		return
+	var item := target as Sprite2D
 	var height := item.texture.get_height() * item.scale.y
 	_lights.append(EnvLights.add(item.global_position - Vector2(0, height * 0.4), NEON.pick_random(), 220.0, 0.55))
 

@@ -61,6 +61,14 @@ static func _legend_cell(key: String, row: int) -> Texture2D:
 	return atlas
 
 
+## Ключ из apply → текстура пули (лист грузится здесь, при первом обращении).
+static func resolve_bullet(key: String) -> Texture2D:
+	var parts := key.split(":")
+	if parts[0] == "L":
+		return _legend_cell(parts[1], 0)
+	return bullet(parts[1], int(parts[2]))
+
+
 static func bullet(rarity: String, tier: int) -> Texture2D:
 	return _cell("bullets_" + rarity, clampi(tier, 1, 5) - 1)
 
@@ -94,7 +102,8 @@ static func apply(w: WeaponData) -> void:
 	var key := legend_key(w.id)
 	if not key.is_empty():
 		w.vfx_id = "fx_" + key
-		w.bullet_texture = _legend_cell(key, 0)
+		w.bullet_texture = null
+		w.bullet_vfx_key = "L:" + key
 		w.sprite_scale = Vector2.ONE * float(LEGEND_BULLET_WIDTH[key]) / LEGEND_W
 		w.bullet_modulate = Color.WHITE
 		return
@@ -102,7 +111,8 @@ static func apply(w: WeaponData) -> void:
 		return
 	w.vfx_id = w.rarity
 	if w.vfx_bullet:
-		w.bullet_texture = bullet(w.rarity, w.tier)
+		w.bullet_texture = null
+		w.bullet_vfx_key = "R:%s:%d" % [w.rarity, w.tier]
 		var fat := clampf(w.bullet_radius / 5.0, 0.85, 1.35)
 		w.sprite_scale = Vector2(BULLET_SCALE, BULLET_SCALE * fat)
 		w.bullet_modulate = Color.WHITE

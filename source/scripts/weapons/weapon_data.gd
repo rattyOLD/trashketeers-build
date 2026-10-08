@@ -185,7 +185,14 @@ var fire_sound: StringName
 var damage: float
 var fire_interval: float
 var bullet_speed: float
-var bullet_texture: Texture2D
+## Лист пули грузится при первом выстреле (WeaponVfx.apply ставит только ключ): иначе при запуске
+## в видеопамять попадали листы всех легендарок и редкостей сразу (~9 МБ).
+var bullet_texture: Texture2D:
+	get:
+		if bullet_texture == null and not bullet_vfx_key.is_empty():
+			bullet_texture = WeaponVfx.resolve_bullet(bullet_vfx_key)
+		return bullet_texture
+var bullet_vfx_key := ""
 var sprite_scale: Vector2
 var bullet_modulate: Color
 var piercing: bool
