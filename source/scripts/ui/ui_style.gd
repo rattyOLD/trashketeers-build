@@ -136,7 +136,7 @@ static func press_feedback(b: BaseButton) -> void:
 		b.set_meta(&"press_tween", tween)
 		Platform.haptic("light"))
 	b.button_up.connect(func() -> void:
-		var old: Variant = b.get_meta(&"press_tween", null)
+		var old: Variant = b.get_meta(&"press_tween") if b.has_meta(&"press_tween") else null
 		if old is Tween and (old as Tween).is_valid():
 			(old as Tween).kill()
 		b.pivot_offset = b.size * 0.5

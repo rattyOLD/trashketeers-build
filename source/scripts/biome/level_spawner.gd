@@ -116,6 +116,10 @@ func build(layers: BiomeLayers, chapter_def: Dictionary) -> void:
 	_build_floor()
 	_build_shadow_layers()
 	_build_walls()
+	_river_points = PackedVector2Array()
+	river = null
+	if _organic:
+		_plan_river()
 	_build_district()
 	if district == null:
 		_build_border()
@@ -163,10 +167,27 @@ func clear() -> void:
 
 
 func attach_player(player: Player) -> void:
+	if river != null:
+		river.attach(player)
 	_player = player
 
 
 # --- Координаты -------------------------------------------------------------------------------
+
+## Поверхность под ногами для звука шагов.
+func surface_at(p: Vector2) -> StringName:
+	if river != null:
+		var kind := river.surface_at(p)
+		if kind != &"":
+			return kind
+	if boss_rect.has_point(p):
+		return &"stone" if layout == "bank" else &"metal"
+	if layout == "bank":
+		if _park != null and _park.distance_to(p) < _park.width * 0.5:
+			return &"stone"
+		return &"grass" if zone_at(p) == Zone.LAWN else &"stone"
+	return &"asphalt"
+
 
 func cell_to_world(cell: Vector2i) -> Vector2:
 	return _origin + (Vector2(cell) + Vector2(0.5, 0.5)) * CELL
@@ -311,7 +332,20 @@ func _physics_process(delta: float) -> void:
 	_flow_timer -= delta
 	if _flow_timer <= 0.0:
 		_flow_timer = FLOW_INTERVAL
-		_flow.rebuild(world_to_cell(_player.global_position), FLOW_RADIUS)
+		_flow.rebuild(_flow_target(world_to_cell(_player.global_position)), FLOW_RADIUS)
+
+
+## Цель поля путей: клетка героя, а если он стоит вброд в протоке — ближайшая сухая клетка берега
+## (иначе поле не строится, и толпа бежит напрямую в воду).
+func _flow_target(cell: Vector2i) -> Vector2i:
+	if not _inside(cell) or cells[_index(cell)] != CellType.WALL:
+		return cell
+	for r in range(1, 6):
+		for dx in [-r, r]:
+			var c := cell + Vector2i(dx, 0)
+			if _inside(c) and cells[_index(c)] != CellType.WALL:
+				return c
+	return cell
 
 
 # --- Зоны пола ---------------------------------------------------------------------------------
@@ -333,6 +367,9 @@ var _organic := false
 var _story_gaps: Array = []
 var _noise := _make_noise()
 var _park: ParkPaths
+var _river_points := PackedVector2Array()
+var _river_side := 1.0
+var river: AcidRiver
 const POI_SPACING := 560.0
 const RIVER_WIDTH := 200.0
 const RIVER_BRIDGE := 430.0
@@ -510,21 +547,24 @@ func _build_floor() -> void:
 	var texture: Texture2D = ArenaProp.texture_of(str(chapter.get("floor", "")))
 	if texture == null:
 		return
+	# Атлас — 8 плиток в ряд; плитка на экране — 2×2 клетки (128 px), поэтому атлас хранится в 128 px
+	# на плитку: вчетверо меньше видеопамяти без потери чёткости.
+	var tile := int(texture.get_width() / 8)
 	var source := TileSetAtlasSource.new()
 	source.texture = texture
-	source.texture_region_size = Vector2i(256, 256)
-	var cols := int(texture.get_width() / 256)
-	var rows := int(texture.get_height() / 256)
+	source.texture_region_size = Vector2i(tile, tile)
+	var cols := int(texture.get_width() / tile)
+	var rows := int(texture.get_height() / tile)
 	for r in rows:
 		for c in cols:
 			source.create_tile(Vector2i(c, r))
 	var tile_set := TileSet.new()
-	tile_set.tile_size = Vector2i(256, 256)
+	tile_set.tile_size = Vector2i(tile, tile)
 	tile_set.add_source(source, 0)
 	var tile_map := TileMapLayer.new()
 	tile_map.tile_set = tile_set
 	tile_map.position = _origin
-	tile_map.scale = Vector2.ONE * (CELL * 2.0 / 256.0)
+	tile_map.scale = Vector2.ONE * (CELL * 2.0 / tile)
 	tile_map.light_mask = BiomeLayers.LIGHT_MASK_FLOOR
 	for ty in grid_size.y / 2:
 		for tx in grid_size.x / 2:
@@ -701,6 +741,8 @@ func _build_district() -> void:
 		return
 	district = ArenaDistrict.new()
 	_own(district, _layers.floor_layer)
+	if not _river_points.is_empty():
+		district.avoid = [_river_points[0].x, _river_points[_river_points.size() - 1].x, RIVER_WIDTH * 0.5 + 80.0]
 	district.build(layout, str(chapter.get("id", "")), bounds, _arena_inner(), _origin.y + grid_size.y / 2 * CELL, GATE_HALF * CELL)
 	view_bounds = ArenaDistrict.view_rect(bounds)
 
@@ -1208,7 +1250,8 @@ func _build_park(center: Vector2) -> void:
 	_park.z_index = 1
 
 
-func _build_river() -> void:
+## Средняя линия протоки (до района: тот должен расступиться над её истоком и устьем).
+func _plan_river() -> void:
 	var inner := _arena_inner()
 	var width := RIVER_WIDTH
 	var side := -1.0 if randf() < 0.5 else 1.0
@@ -1229,12 +1272,30 @@ func _build_river() -> void:
 		var pt := points[k]
 		if pt.y < boss_rect.end.y + 200.0 and absf(pt.x - boss_rect.get_center().x) < keep:
 			points[k] = Vector2(boss_rect.get_center().x + side * keep, pt.y)
+	_river_points = points
+	_river_side = side
+
+
+func _build_river() -> void:
+	if _river_points.is_empty():
+		return
+	var inner := _arena_inner()
+	var width := RIVER_WIDTH
+	var points := _river_points
 	var mid_y := _origin.y + grid_size.y / 2 * CELL
 	var bridges := [mid_y, inner.position.y + inner.size.y * 0.24 + randf_range(-60, 60), inner.position.y + inner.size.y * 0.8 + randf_range(-60, 60)]
-	var river := AcidRiver.new()
+	river = AcidRiver.new()
 	_own(river, _layers.decals)
 	river.water = layout == "bank"
 	river.build(points, width, bridges, RIVER_BRIDGE)
+	# Исток и устье: протока выходит из-под верхнего забора и уходит под нижний (рисует район — под забором и толпой).
+	if district != null:
+		var view := view_bounds
+		var top := PackedVector2Array([Vector2(points[0].x, view.position.y - 20.0), points[0] + Vector2(0, 40)])
+		var tail := points[points.size() - 1]
+		var bottom := PackedVector2Array([tail - Vector2(0, 40), Vector2(tail.x, view.end.y + 20.0)])
+		district.add_stream(top, width, river.water, true)
+		district.add_stream(bottom, width, river.water, false)
 	var body := StaticBody2D.new()
 	body.collision_layer = PhysicsLayers.TERRAIN
 	body.collision_mask = 0

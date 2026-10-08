@@ -47,6 +47,11 @@ const PUDDLE_ART := "res://assets/raid/ice_puddle.png"
 const GLINT_ART := "res://assets/vfx/ice_glints.png"
 const GLINT_CELL := 192.0
 const DECAL_COUNT := 20
+## Ледяной завод Астры по краю алтаря (пропсы зоны m4_ice): только картинка, без коллизий.
+## Стоят на внешнем льду — когда край раскалывается, оседают и падают вместе с ним.
+const ICE_PROPS := ["ice_generator", "ice_tank", "ice_turbine", "ice_pump", "ice_pipe", "ice_icicle_rack",
+	"ice_capsule", "ice_crate", "ice_valve", "ice_conveyor"]
+const ICE_PROP_R := 900.0
 
 const RUNE_PATTERNS := [
 	[Vector2(0, -1), Vector2(0, 1), Vector2(-0.7, -0.3), Vector2(0.7, -0.3)],
@@ -58,6 +63,7 @@ const RUNE_PATTERNS := [
 ]
 
 var crystals: Array[PrismCrystal] = []
+var _ice_props: Array[Sprite2D] = []
 var crystal_spawning := true
 var min_alive_crystals := MIN_ALIVE_CRYSTALS
 ## Радиус, внутри которого лёд ещё держит: сужается по фазам боя.
@@ -99,11 +105,35 @@ func build(layers: BiomeLayers, player: Player) -> void:
 	_thin_ice.z_as_relative = false
 	add_child(_thin_ice)
 	_build_crystal_pool(layers)
+	_build_ice_props()
 	queue_redraw()
 
 
 func _exit_tree() -> void:
 	RenderingServer.set_default_clear_color(_default_clear)
+
+
+func _build_ice_props() -> void:
+	var names := ICE_PROPS.duplicate()
+	names.shuffle()
+	var count := 14
+	for i in count:
+		var angle := TAU * (i + randf_range(-0.2, 0.2)) / count - PI * 0.5
+		# Низ края — там стартует Енот и кнопки интерфейса: оставляем свободным.
+		if absf(wrapf(angle - PI * 0.5, -PI, PI)) < 0.45:
+			continue
+		var id: String = names[i % names.size()]
+		var tex := load("res://assets/props/zones/%s.png" % id) as Texture2D
+		if tex == null:
+			continue
+		var prop := Sprite2D.new()
+		prop.texture = tex
+		prop.scale = Vector2.ONE * 0.5
+		prop.offset = Vector2(0, -tex.get_height() * 0.5 + 8.0)
+		prop.position = Vector2.from_angle(angle) * (ICE_PROP_R + randf_range(-30.0, 40.0))
+		prop.flip_h = prop.position.x > 0.0
+		_world.add_child(prop)
+		_ice_props.append(prop)
 
 
 func is_in_void(point: Vector2) -> bool:
@@ -164,6 +194,18 @@ func shrink_to(target: float) -> void:
 	SoundManager.play(&"ice_blast", -6.0, false)
 
 
+## Отколовшийся край уносит пропсы: оседают, тают и падают в космос.
+func _drop_ice_props(radius: float) -> void:
+	for prop in _ice_props:
+		if not is_instance_valid(prop) or prop.position.length() < radius:
+			continue
+		var tween := prop.create_tween().set_parallel(true)
+		tween.tween_property(prop, "position", prop.position * 1.15 + Vector2(0, 260.0), 1.4).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
+		tween.tween_property(prop, "scale", prop.scale * 0.4, 1.4)
+		tween.tween_property(prop, "modulate:a", 0.0, 1.4)
+		tween.chain().tween_callback(prop.queue_free)
+
+
 func is_cracking() -> bool:
 	return _crack_state == 1
 
@@ -186,6 +228,7 @@ func _tick_crack(delta: float) -> void:
 		for crystal in crystals:
 			if crystal.is_intact() and crystal.position.length() > safe_radius - 70.0:
 				crystal.retire()
+		_drop_ice_props(safe_radius)
 		ice_dropped.emit(safe_radius)
 
 

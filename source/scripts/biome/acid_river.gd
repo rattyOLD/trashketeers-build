@@ -34,10 +34,30 @@ void fragment() {
 
 var _lights: PackedInt32Array = PackedInt32Array()
 var water := false
+## Герой (только у протоки на арене; у истока/устья за забором — null): вброд, звук, фон.
+var player: Player
+const WADE_SLOW_ACID := 0.55
+const WADE_SLOW_WATER := 0.65
+## Кислота жжёт умеренно: 4 урона раз в 0.5 с — перейти можно, стоять в ней нельзя.
+const ACID_DAMAGE := 4.0
+const ACID_TICK := 0.5
+const AMBIENT_RANGE := 900.0
+var _points := PackedVector2Array()
+var _width := 0.0
+var _bridges: Array = []
+var _bridge_len := 0.0
+var _inside := false
+var _burn := 0.0
+var _check := 0.0
+var _loop := -1
 
 
 ## points — средняя линия сверху вниз; width — ширина кислоты; bridges — Y мостов; bridge_len — длина настила.
 func build(points: PackedVector2Array, width: float, bridges: Array, bridge_len: float) -> void:
+	_points = points
+	_width = width
+	_bridge_len = bridge_len
+	set_process(false)
 	# Мокрая тёмная кайма — протока врезана в землю.
 	_line(points, width + BANK_WIDTH * 2.6, null, Color(0.02, 0.05, 0.02, 0.45) if not water else Color(0.1, 0.2, 0.1, 0.35))
 	var acid := _line(points, width, load(ACID) as Texture2D, Color(0.92, 1.0, 0.86))
@@ -59,6 +79,8 @@ func build(points: PackedVector2Array, width: float, bridges: Array, bridge_len:
 		var tex := load(kinds[i % kinds.size()]) as Texture2D
 		if tex == null:
 			continue
+		var path: String = kinds[i % kinds.size()]
+		_bridges.append([y, &"metal" if path.contains("steel") else &"wood"])
 		var deck := Sprite2D.new()
 		deck.texture = tex
 		deck.scale = Vector2.ONE * bridge_len / tex.get_width()
@@ -71,6 +93,59 @@ func build(points: PackedVector2Array, width: float, bridges: Array, bridge_len:
 		if travelled >= step:
 			travelled = 0.0
 			_lights.append(EnvLights.add(points[k], Color("#7dff4a") if not water else Color("#6fd8ff"), 260.0, 0.45 if not water else 0.3))
+
+
+## Подключить героя: вброд, звуки и фон протоки.
+func attach(target: Player) -> void:
+	player = target
+	set_process(player != null)
+
+
+## Поверхность под точкой: мост (wood/metal), протока (acid/water) или &"" — не протока.
+func surface_at(p: Vector2) -> StringName:
+	if _points.is_empty() or p.y < _points[0].y or p.y > _points[_points.size() - 1].y:
+		return &""
+	var dx := absf(p.x - _x_at(_points, p.y))
+	for b: Array in _bridges:
+		if absf(p.y - float(b[0])) < 46.0 and dx < _bridge_len * 0.5:
+			return b[1]
+	if dx < _width * 0.5:
+		return &"water" if water else &"acid"
+	return &""
+
+
+func _process(delta: float) -> void:
+	if player == null or not is_instance_valid(player):
+		return
+	_check -= delta
+	if _check > 0.0:
+		return
+	_check = 0.1
+	var p := player.global_position
+	var surface := surface_at(p)
+	var wading := surface == &"acid" or surface == &"water"
+	if wading and not player.is_dead:
+		if not _inside:
+			_inside = true
+			_burn = 0.0
+			SoundManager.play(&"enter_water" if water else &"enter_acid", 0.0, true)
+		player.terrain_slow = WADE_SLOW_WATER if water else WADE_SLOW_ACID
+		if not water:
+			_burn -= 0.1
+			if _burn <= 0.0:
+				_burn = ACID_TICK
+				Player.last_source = &"acid"
+				player.take_damage(ACID_DAMAGE, Vector2.ZERO)
+	elif _inside:
+		_inside = false
+		player.terrain_slow = 1.0
+	# Фон протоки: громче у берега, тише вдали.
+	var dist := absf(p.x - _x_at(_points, clampf(p.y, _points[0].y, _points[_points.size() - 1].y)))
+	if _loop == -1 and dist < AMBIENT_RANGE:
+		_loop = SoundManager.play_loop(&"amb_water" if water else &"amb_acid")
+	if _loop != -1:
+		var base: float = SoundManager.SFX[&"amb_water" if water else &"amb_acid"][0]
+		SoundManager.set_loop_volume(_loop, base - 22.0 * clampf(dist / AMBIENT_RANGE, 0.0, 1.0) - (40.0 if dist >= AMBIENT_RANGE else 0.0))
 
 
 static func _x_at(points: PackedVector2Array, y: float) -> float:
@@ -108,6 +183,11 @@ func _line(points: PackedVector2Array, width: float, texture: Texture2D, color: 
 
 
 func _exit_tree() -> void:
+	if _loop != -1:
+		SoundManager.stop_loop(_loop)
+		_loop = -1
+	if _inside and player != null and is_instance_valid(player):
+		player.terrain_slow = 1.0
 	for id in _lights:
 		EnvLights.remove(id)
 	_lights.clear()

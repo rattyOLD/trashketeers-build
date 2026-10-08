@@ -65,6 +65,11 @@ func release_all() -> void:
 		release(_active.back())
 
 
+func drop_pooled_visuals() -> void:
+	for enemy in _free:
+		enemy.drop_visual()
+
+
 func get_active_count() -> int:
 	return _active.size()
 

@@ -49,6 +49,10 @@ var fx: FxManager
 var external_pull := Vector2.ZERO
 ## Замедление от мин (1 — нет).
 var move_slow := 1.0
+## Вброд по протоке/каналу (AcidRiver): замедление, отдельно от ловушек, которые пишут move_slow.
+var terrain_slow := 1.0
+## Поверхность под ногами (LevelSpawner.surface_at) — для звука шагов; пусто — «камень».
+var surface_query: Callable
 
 var visual: RaccoonVisual
 var weapon_controller: WeaponController
@@ -74,7 +78,7 @@ var _last_move_direction := Vector2.RIGHT
 
 func _init() -> void:
 	collision_layer = PhysicsLayers.PLAYER
-	collision_mask = PhysicsLayers.WORLD | PhysicsLayers.OBSTACLE | PhysicsLayers.PROP | PhysicsLayers.TERRAIN
+	collision_mask = PhysicsLayers.WORLD | PhysicsLayers.OBSTACLE | PhysicsLayers.PROP
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 
 	var shape := CircleShape2D.new()
@@ -146,7 +150,7 @@ func _physics_process(delta: float) -> void:
 	dash_remaining = maxf(dash_remaining - delta, 0.0)
 	if move_input.length_squared() > 0.04:
 		_last_move_direction = move_input.normalized()
-	var speed := move_speed * (1.0 + _speed_buff) * move_slow * (0.15 if _snare > 0.0 else 1.0)
+	var speed := move_speed * (1.0 + _speed_buff) * move_slow * terrain_slow * (0.15 if _snare > 0.0 else 1.0)
 	velocity = (Vector2.ZERO if _stun > 0.0 else move_input.limit_length(1.0) * speed) + _knockback + external_pull
 	var dashing := _dash_left > 0.0 and _stun <= 0.0
 	if dashing:
@@ -169,8 +173,10 @@ func _physics_process(delta: float) -> void:
 		visual.melee_scale = weapon_controller.melee.size_scale
 	var steps := visual.footsteps
 	visual.update_motion(velocity, aim, delta)
-	if visual.footsteps != steps and fx != null:
-		fx.dust(global_position + Vector2(-8.0 * signf(velocity.x), 6.0), 1, 6.0)
+	if visual.footsteps != steps:
+		if fx != null:
+			fx.dust(global_position + Vector2(-8.0 * signf(velocity.x), 6.0), 1, 6.0)
+		SoundManager.play_step(surface_query.call(global_position) if surface_query.is_valid() else &"stone")
 	visual.set_env_light(EnvLights.sample(global_position), delta)
 	visual.modulate.a = 0.55 if _invuln > 0.0 and int(_invuln * 20.0) % 2 == 0 else 1.0
 

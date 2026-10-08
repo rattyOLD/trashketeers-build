@@ -75,6 +75,7 @@ func start(_weapon_id: StringName = &"") -> void:
 	add_child(blizzard)
 
 	_spawn_player(PLAYER_START, SaveService.get_loadout(), _find_target)
+	player.surface_query = func(_p: Vector2) -> StringName: return &"ice"
 	gauge = ChillGauge.new()
 	player.add_child(gauge)
 	dragon = WhiteDragon.new()

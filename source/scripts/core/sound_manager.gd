@@ -19,7 +19,9 @@ const SFX_BUDGET_PER_SEC := 10.0
 const SFX_BUDGET_BURST := 5.0
 const PRIORITY_SFX: Array[StringName] = [&"player_hurt", &"explosion", &"level_up", &"boss_spawn", &"victory", &"defeat",
 	&"ui_click", &"ui_confirm", &"achievement", &"weapon_pickup", &"crate_break", &"dash", &"shield_up", &"star_dust", &"merge"]
-const LOOP_CHANNELS := 2
+const LOOP_CHANNELS := 3
+## Сколько запусков должно оставаться в бюджете, чтобы сыграл шаг.
+const STEP_BUDGET_RESERVE := 3.0
 const PITCH_MIN := 0.95
 const PITCH_MAX := 1.05
 const MUSIC_FADE := 0.8
@@ -73,6 +75,36 @@ const SFX := {
 	&"hitmarker": [-12.0, 0.045],
 	&"kill_confirm": [-8.0, 0.05],
 	&"burp": [-2.0, 0.6],
+	&"step_asphalt_0": [-17.0, 0.05],
+	&"step_asphalt_1": [-17.0, 0.05],
+	&"step_asphalt_2": [-17.0, 0.05],
+	&"step_grass_0": [-19.0, 0.05],
+	&"step_grass_1": [-19.0, 0.05],
+	&"step_grass_2": [-19.0, 0.05],
+	&"step_stone_0": [-17.0, 0.05],
+	&"step_stone_1": [-17.0, 0.05],
+	&"step_stone_2": [-17.0, 0.05],
+	&"step_metal_0": [-17.0, 0.05],
+	&"step_metal_1": [-17.0, 0.05],
+	&"step_metal_2": [-17.0, 0.05],
+	&"step_wood_0": [-14.0, 0.05],
+	&"step_wood_1": [-14.0, 0.05],
+	&"step_wood_2": [-14.0, 0.05],
+	&"step_water_0": [-13.0, 0.05],
+	&"step_water_1": [-13.0, 0.05],
+	&"step_water_2": [-13.0, 0.05],
+	&"step_acid_0": [-13.0, 0.05],
+	&"step_acid_1": [-13.0, 0.05],
+	&"step_acid_2": [-13.0, 0.05],
+	&"enter_water": [-6.0, 0.6],
+	&"step_ice_0": [-17.0, 0.05],
+	&"step_ice_1": [-17.0, 0.05],
+	&"step_ice_2": [-17.0, 0.05],
+	&"amb_birds": [-16.0, 2.0],
+	&"amb_park": [-20.0, 0.5],
+	&"enter_acid": [-5.0, 0.6],
+	&"amb_acid": [-14.0, 0.5],
+	&"amb_water": [-16.0, 0.5],
 	&"k_perfect": [-7.0, 0.6],
 	&"weapon_pickup": [-6.0, 0.1],
 	&"crate_break": [-6.0, 0.08],
@@ -85,10 +117,13 @@ const SFX := {
 }
 
 ## Звуки, которые проигрываются циклично через play_loop (пул SFX их не трогает).
-const LOOPED_SFX: Array[StringName] = [&"beam_loop", &"amb_hum", &"amb_wind"]
+const LOOPED_SFX: Array[StringName] = [&"beam_loop", &"amb_hum", &"amb_wind", &"amb_acid", &"amb_water", &"amb_park"]
 ## Фон Свалки: два бесконечных слоя + редкие одиночные события со случайной паузой.
 const AMBIENT_LOOPS: Array[StringName] = [&"amb_hum", &"amb_wind"]
 const AMBIENT_EVENTS := {&"amb_siren": Vector2(22.0, 45.0), &"amb_neon": Vector2(6.0, 14.0)}
+const BANK_AMBIENT_LOOPS: Array[StringName] = [&"amb_park"]
+const BANK_AMBIENT_EVENTS := {&"amb_birds": Vector2(4.0, 11.0)}
+var _ambient_events: Dictionary = AMBIENT_EVENTS
 
 const MUSIC := {
 	&"menu": -12.0,
@@ -155,6 +190,23 @@ func _play(id: StringName, volume_offset_db: float, pitch: float) -> void:
 	player.pitch_scale = pitch
 	player.play()
 	_started_ms[index] = now
+
+
+## Шаг по поверхности (surface: asphalt, grass, stone, metal, wood, water, acid): один из трёх вариантов.
+## Шаги — фон: играют, только пока в бюджете запусков есть запас, чтобы не отнимать его у выстрелов
+## (в вебе каждый запуск — новые аудио-узлы, на iOS их лишние сотни роняли вкладку).
+func play_step(surface: StringName, volume_offset_db: float = 0.0) -> void:
+	_budget = minf(_budget + float(Time.get_ticks_msec() - _budget_ms) * 0.001 * SFX_BUDGET_PER_SEC, SFX_BUDGET_BURST)
+	_budget_ms = Time.get_ticks_msec()
+	if _budget < STEP_BUDGET_RESERVE:
+		return
+	_play(StringName("step_%s_%d" % [surface, randi() % 3]), volume_offset_db, randf_range(0.92, 1.08))
+
+
+## Громкость петли (фон протоки зависит от расстояния до неё).
+func set_loop_volume(channel: int, volume_db: float) -> void:
+	if channel >= 0 and channel < _loops.size():
+		_loops[channel].volume_db = volume_db
 
 
 ## Возвращает номер канала для stop_loop или -1, если звук не запущен.
@@ -242,18 +294,26 @@ func apply_enabled() -> void:
 	AudioServer.set_bus_volume_db(music, linear_to_db(maxf(get_volume("music"), 0.001)))
 
 
-func start_ambient() -> void:
+## Фон по стилю локации: Свалка — гул и ветер, сирена и треск неона; Банк — ветер в листве и птицы.
+func start_ambient(style: String = "junkyard") -> void:
 	_ambient_on = true
-	for i in AMBIENT_LOOPS.size():
-		var id := AMBIENT_LOOPS[i]
-		if not _streams.has(id) or _ambient[i].playing:
+	var loops: Array = AMBIENT_LOOPS if style != "bank" else BANK_AMBIENT_LOOPS
+	_ambient_events = AMBIENT_EVENTS if style != "bank" else BANK_AMBIENT_EVENTS
+	_ambient_timers.clear()
+	for i in _ambient.size():
+		if i >= loops.size():
+			_ambient[i].stop()
+			_ambient[i].stream = null
+			continue
+		var id: StringName = loops[i]
+		if not _streams.has(id) or (_ambient[i].playing and _ambient[i].stream == _streams[id]):
 			continue
 		_ambient[i].stream = _streams[id]
 		_ambient[i].volume_db = SFX[id][0]
 		if unlocked:
 			_ambient[i].play()
-	for id in AMBIENT_EVENTS:
-		_ambient_timers[id] = randf_range(AMBIENT_EVENTS[id].x * 0.3, AMBIENT_EVENTS[id].y * 0.5)
+	for id in _ambient_events:
+		_ambient_timers[id] = randf_range(_ambient_events[id].x * 0.3, _ambient_events[id].y * 0.5)
 
 
 func stop_ambient() -> void:
@@ -271,7 +331,7 @@ func _process(delta: float) -> void:
 	for id in _ambient_timers:
 		_ambient_timers[id] -= delta
 		if _ambient_timers[id] <= 0.0:
-			var range_s: Vector2 = AMBIENT_EVENTS[id]
+			var range_s: Vector2 = _ambient_events[id]
 			_ambient_timers[id] = randf_range(range_s.x, range_s.y)
 			play(id, randf_range(-4.0, 0.0))
 

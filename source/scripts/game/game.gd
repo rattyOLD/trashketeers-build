@@ -168,6 +168,7 @@ func start(_weapon_id: StringName = &"") -> void:
 		loadout = WeaponDB.get_weapon(RunMods.SHOTGUN_IDS[0]).with_tier(1)
 	_spawn_player(map.player_start, loadout, _find_target)
 	map.attach_player(player)
+	player.surface_query = map.surface_at
 	enemies = EnemyManager.new()
 	add_child(enemies)
 	enemies.setup(player, entities, ENEMY_CAPACITY, map.nav_direction)
@@ -280,7 +281,7 @@ func start(_weapon_id: StringName = &"") -> void:
 			get_tree().create_timer(3.0, false).timeout.connect(func() -> void: hud.toast("МОДИФИКАТОР: %s" % str(RunMods.info(RunMods.active)["title"]).to_upper(), "%s. Монеты ×%.1f" % [RunMods.info(RunMods.active)["desc"], RunMods.mult_of(RunMods.active)], Color("#ff9a3d")))
 			SaveService.add_stat("mod_runs", 1, false)
 	SoundManager.play_music(StringName(str(chapter.get("music", "battle"))))
-	SoundManager.start_ambient()
+	SoundManager.start_ambient(map.layout)
 	if story_mission.is_empty():
 		radio = SurvivalRadio.new()
 		add_child(radio)
@@ -552,8 +553,20 @@ func _enter_portal() -> void:
 
 func _switch_chapter(index: int = -1) -> void:
 	var chapter := ContentDB.get_chapter(director.chapter_index + 1 if index < 0 else index)
-	warm_chapter(chapter)
 	enemies.release_all()
+	# Текстуры прошлой главы (враги, босс, пропсы, живность) — из видеопамяти до прогрева новой:
+	# к 4–6 главе забег держал всех боссов сразу, и iPhone убивал вкладку по памяти.
+	enemies.drop_pooled_visuals()
+	for id in ContentDB.get_enemy_ids():
+		var data := ContentDB.get_enemy(id)
+		if data != null:
+			data.release_textures()
+	FrameDB.release_textures()
+	ContentDB._texture_cache.clear()
+	ArenaProp._textures.clear()
+	AmbientLife._frames.clear()
+	AmbientLife._textures.clear()
+	warm_chapter(chapter)
 	BulletPool.release_all()
 	lobs.clear()
 	traps.clear()
@@ -562,6 +575,9 @@ func _switch_chapter(index: int = -1) -> void:
 	pickups.clear()
 	map.clear()
 	map.build(layers, chapter)
+	player.terrain_slow = 1.0
+	map.attach_player(player)
+	SoundManager.start_ambient(map.layout)
 	hazards.attach_level(map)
 	light_map.set_layout(map.layout)
 	_portal = null

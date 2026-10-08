@@ -70,7 +70,7 @@ func _cancel_scroll_press() -> void:
 				button.disabled = true
 				button.set_deferred("disabled", false)
 				# Отмена нажатия не присылает button_up — утопленную кнопку возвращаем сами.
-				var press: Variant = button.get_meta(&"press_tween", null)
+				var press: Variant = button.get_meta(&"press_tween") if button.has_meta(&"press_tween") else null
 				if press is Tween and (press as Tween).is_valid():
 					(press as Tween).kill()
 				button.scale = Vector2.ONE

@@ -331,6 +331,18 @@ func deactivate() -> void:
 	_collision.set_deferred("disabled", true)
 
 
+## Смена главы: свободный экземпляр пула отпускает текстуры прошлой главы (иначе пул держит их в
+## видеопамяти до конца забега). Следующий activate() соберёт картинку заново.
+func drop_visual() -> void:
+	_visual_id = ""
+	_sprite.texture = null
+	_sprite.rig = {}
+	_sprite.frame_sheet = {}
+	_sprite.frame_index = -1
+	_sprite.shader_material.set_shader_parameter("regions0", null)
+	_sprite.shader_material.set_shader_parameter("regions1", null)
+
+
 func get_radius() -> float:
 	return _shape.radius
 

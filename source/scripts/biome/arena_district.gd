@@ -50,6 +50,9 @@ var _timer: PackedFloat32Array = PackedFloat32Array()
 var _tick := 0.0
 var _time := 0.0
 var _textures := {}
+## Протока: [x у верхнего края, x у нижнего края, полуширина просвета] — там толпа и дома расступаются.
+var avoid: Array = []
+var _inner := Rect2()
 var _holder: Node2D
 ## Ночью на Свалке у домов горят вывески и окна: мягкие пятна света (EnvLights), иначе район тонет в темноте.
 var _neon := false
@@ -77,6 +80,7 @@ func build(layout: String, chapter_id: String, bounds: Rect2, inner: Rect2, gate
 	var special: Array = CHAPTERS[chapter_key]
 	var chapter_dir := ROOT + chapter_key + "/"
 	var view := view_rect(bounds)
+	_inner = inner
 	# Земля района — всё вне игровой площадки: кольцо стен и поля камеры за ним.
 	var ground := dir + str(district["prefix"]) + "_ground_tile.png"
 	_ground(ground, Rect2(view.position, Vector2(view.size.x, inner.position.y - view.position.y)))
@@ -200,6 +204,15 @@ func _ground(path: String, rect: Rect2) -> void:
 	_ground_holder().add_child(ground)
 
 
+## Протока за забором (исток/устье): под забором и толпой, над землёй района.
+func add_stream(points: PackedVector2Array, width: float, water: bool, _top: bool) -> void:
+	var stream := AcidRiver.new()
+	stream.water = water
+	_ground_holder().add_child(stream)
+	stream.position = -_ground_holder().position
+	stream.build(points, width, [], 1.0)
+
+
 ## Земля — в отдельном узле далеко «сверху» по Y: в сортировке по Y он всегда первый, поэтому земля под
 ## толпой и домами, но над плиткой пола арены (тот же слой, без отрицательного z).
 func _ground_holder() -> Node2D:
@@ -249,7 +262,18 @@ func _crowd_row(paths: Array[String], from_x: float, to_x: float, foot_y: float,
 		x += spacing * randf_range(0.8, 1.25)
 
 
+func _blocked(x: float, y: float, half: float) -> bool:
+	if avoid.is_empty():
+		return false
+	var sx: float = avoid[0] if y < _inner.get_center().y else avoid[1]
+	if y > _inner.position.y and y < _inner.end.y:
+		return false
+	return absf(x - sx) < float(avoid[2]) + half
+
+
 func _spectator(path: String, foot: Vector2) -> void:
+	if _blocked(foot.x, foot.y, 30.0):
+		return
 	var texture := _texture(path)
 	if texture == null:
 		return
@@ -273,6 +297,10 @@ func _backdrop_row(big: Array[String], small: Array[String], from_x: float, to_x
 		var item := _backdrop(path, Vector2.ZERO, scale_k)
 		var width := item.get_rect().size.x * item.scale.x
 		item.position = Vector2(x + width * 0.5, foot_y + randf_range(-10.0, 10.0))
+		if _blocked(item.position.x, foot_y, width * 0.5):
+			item.queue_free()
+			x += width
+			continue
 		item.flip_h = randf() < 0.5
 		x += width * randf_range(0.92, 1.08)
 
