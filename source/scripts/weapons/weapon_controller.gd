@@ -38,6 +38,8 @@ var has_target := false
 ## Зажат ли «курок» и куда целятся (нормаль; ZERO — в последнем направлении).
 var trigger := false
 var manual_aim := Vector2.ZERO
+## Цель, которую поймала подсказка прицела (прицел краснеет), или null.
+var aim_target: Node2D
 ## Старое автонаведение: только боты и тесты (force_auto включают тестовые сцены).
 static var force_auto := false
 var auto_mode := false
@@ -168,10 +170,12 @@ func _physics_process(delta: float) -> void:
 	else:
 		has_target = trigger
 		if not trigger:
+			aim_target = null
 			_spin_up = maxf(_spin_up - delta * 0.8, 0.0)
 			return
 		var dir := manual_aim if manual_aim.length_squared() > 0.01 else aim_direction
 		var helped := _assist_target(dir, ASSIST_COS_GUN, minf(weapon.max_distance, AUTO_SCREEN_RANGE))
+		aim_target = helped
 		aim_point = helped.global_position if helped != null else global_position + dir * weapon.max_distance
 	aim_direction = global_position.direction_to(aim_point)
 	if _cooldown > 0.0:
@@ -211,6 +215,7 @@ func _melee_step(delta: float) -> void:
 	has_target = trigger or melee.busy
 	var dir := manual_aim if manual_aim.length_squared() > 0.01 else aim_direction
 	var target: Node2D = _assist_target(dir, ASSIST_COS_MELEE, weapon.max_distance) if trigger else null
+	aim_target = target
 	melee.tick(delta, weapon, target, global_position, dir if trigger else Vector2.ZERO)
 	if melee.busy or trigger:
 		aim_direction = melee.direction if melee.busy else dir
