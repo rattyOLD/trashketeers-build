@@ -1432,6 +1432,204 @@
         ],
         "flicker": 0.2
       }
+    },
+    "b_rats_shack": {
+      "texture": "res://assets/district/junkyard/rats_shack.png",
+      "width": 362,
+      "footprint": [
+        282,
+        123
+      ],
+      "shadow": 109,
+      "flip": true,
+      "building": true
+    },
+    "b_rats_garage": {
+      "texture": "res://assets/district/junkyard/rats_garage.png",
+      "width": 392,
+      "footprint": [
+        306,
+        133
+      ],
+      "shadow": 118,
+      "flip": true,
+      "building": true
+    },
+    "b_rats_apartment": {
+      "texture": "res://assets/district/junkyard/rats_apartment.png",
+      "width": 406,
+      "footprint": [
+        317,
+        138
+      ],
+      "shadow": 122,
+      "flip": true,
+      "building": true
+    },
+    "b_rats_bar": {
+      "texture": "res://assets/district/junkyard/rats_bar_hangar.png",
+      "width": 406,
+      "footprint": [
+        317,
+        138
+      ],
+      "shadow": 122,
+      "flip": true,
+      "building": true
+    },
+    "b_rats_shawarma": {
+      "texture": "res://assets/district/junkyard/rats_shawarma_kiosk.png",
+      "width": 334,
+      "footprint": [
+        261,
+        114
+      ],
+      "shadow": 100,
+      "flip": true,
+      "building": true
+    },
+    "b_beer_pub": {
+      "texture": "res://assets/district/ch1/ch1_beer_pub.png",
+      "width": 362,
+      "footprint": [
+        282,
+        123
+      ],
+      "shadow": 109,
+      "flip": true,
+      "building": true
+    },
+    "b_brewery": {
+      "texture": "res://assets/district/ch1/ch1_brewery.png",
+      "width": 362,
+      "footprint": [
+        282,
+        123
+      ],
+      "shadow": 109,
+      "flip": true,
+      "building": true
+    },
+    "b_draft_kiosk": {
+      "texture": "res://assets/district/ch1/ch1_draft_kiosk.png",
+      "width": 334,
+      "footprint": [
+        261,
+        114
+      ],
+      "shadow": 100,
+      "flip": true,
+      "building": true
+    },
+    "b_electric_hut": {
+      "texture": "res://assets/district/ch2/ch2_electrician_hut.png",
+      "width": 348,
+      "footprint": [
+        271,
+        118
+      ],
+      "shadow": 104,
+      "flip": true,
+      "building": true
+    },
+    "b_substation": {
+      "texture": "res://assets/district/ch2/ch2_substation.png",
+      "width": 362,
+      "footprint": [
+        282,
+        123
+      ],
+      "shadow": 109,
+      "flip": true,
+      "building": true
+    },
+    "b_fish_market": {
+      "texture": "res://assets/district/ch3/ch3_fish_market.png",
+      "width": 362,
+      "footprint": [
+        282,
+        123
+      ],
+      "shadow": 109,
+      "flip": true,
+      "building": true
+    },
+    "b_pigs_villa": {
+      "texture": "res://assets/district/bank/pigs_villa.png",
+      "width": 435,
+      "footprint": [
+        339,
+        148
+      ],
+      "shadow": 130,
+      "flip": true,
+      "building": true
+    },
+    "b_pigs_boutique": {
+      "texture": "res://assets/district/bank/pigs_boutique.png",
+      "width": 406,
+      "footprint": [
+        317,
+        138
+      ],
+      "shadow": 122,
+      "flip": true,
+      "building": true
+    },
+    "b_pigs_restaurant": {
+      "texture": "res://assets/district/bank/pigs_restaurant.png",
+      "width": 420,
+      "footprint": [
+        328,
+        143
+      ],
+      "shadow": 126,
+      "flip": true,
+      "building": true
+    },
+    "b_pigs_gazebo": {
+      "texture": "res://assets/district/bank/pigs_gazebo.png",
+      "width": 334,
+      "footprint": [
+        261,
+        114
+      ],
+      "shadow": 100,
+      "flip": true,
+      "building": true
+    },
+    "b_pigs_chalet": {
+      "texture": "res://assets/district/bank/pigs_chalet_pool.png",
+      "width": 420,
+      "footprint": [
+        328,
+        143
+      ],
+      "shadow": 126,
+      "flip": true,
+      "building": true
+    },
+    "b_patisserie": {
+      "texture": "res://assets/district/ch5/ch5_patisserie.png",
+      "width": 392,
+      "footprint": [
+        306,
+        133
+      ],
+      "shadow": 118,
+      "flip": true,
+      "building": true
+    },
+    "b_golf_clubhouse": {
+      "texture": "res://assets/district/ch6/ch6_golf_clubhouse.png",
+      "width": 406,
+      "footprint": [
+        317,
+        138
+      ],
+      "shadow": 122,
+      "flip": true,
+      "building": true
     }
   }
 }

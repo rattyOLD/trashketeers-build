@@ -3429,5 +3429,203 @@
     ]
    }
   ]
+ },
+ "quarters": {
+  "_doc": "Кварталы выживания: внутренность карты делится на 3×3, центр (бой), клетки старта и босса свободны. В остальных — квартал: здания в глубине (b_*), перед ними двор — сектор по имени (sectors), жители. chapters — только для этих глав (иначе для всех глав раскладки).",
+  "junkyard": [
+   {
+    "name": "Шаурма-угол",
+    "buildings": [
+     "b_rats_shawarma",
+     "b_rats_shack"
+    ],
+    "yard": "cafe",
+    "life": [
+     [
+      "npc_rat_worker",
+      0.0,
+      -0.75
+     ]
+    ]
+   },
+   {
+    "name": "Гаражи",
+    "buildings": [
+     "b_rats_garage",
+     "b_rats_shack"
+    ],
+    "yard": "lot",
+    "life": [
+     [
+      "npc_robot_cleaner",
+      0.3,
+      -0.7
+     ]
+    ]
+   },
+   {
+    "name": "Жилой двор",
+    "buildings": [
+     "b_rats_apartment"
+    ],
+    "yard": "park",
+    "life": [
+     [
+      "npc_rat_grandma",
+      -0.2,
+      -0.7
+     ]
+    ]
+   },
+   {
+    "name": "Бар в ангаре",
+    "buildings": [
+     "b_rats_bar",
+     "b_draft_kiosk"
+    ],
+    "yard": "cafe",
+    "life": [
+     [
+      "npc_barrel_fire",
+      0.45,
+      -0.65
+     ]
+    ]
+   },
+   {
+    "name": "Пивной двор",
+    "buildings": [
+     "b_beer_pub",
+     "b_brewery"
+    ],
+    "yard": "grass",
+    "life": [
+     [
+      "npc_barrel_fire",
+      -0.4,
+      -0.6
+     ]
+    ],
+    "chapters": [
+     "junkyard"
+    ]
+   },
+   {
+    "name": "Подстанция",
+    "buildings": [
+     "b_substation",
+     "b_electric_hut"
+    ],
+    "yard": "power",
+    "life": [
+     [
+      "npc_crow_lamp",
+      0.5,
+      -0.7
+     ]
+    ],
+    "chapters": [
+     "junkyard_2"
+    ]
+   },
+   {
+    "name": "Рыбный рынок",
+    "buildings": [
+     "b_fish_market",
+     "b_rats_shack"
+    ],
+    "yard": "dock",
+    "life": [
+     [
+      "npc_raccoon_fisher",
+      0.2,
+      -0.7
+     ]
+    ],
+    "chapters": [
+     "junkyard_3"
+    ]
+   }
+  ],
+  "bank": [
+   {
+    "name": "Вилла",
+    "buildings": [
+     "b_pigs_villa"
+    ],
+    "yard": "lawn",
+    "life": [
+     [
+      "npc_pig_guard",
+      0.45,
+      -0.7
+     ]
+    ]
+   },
+   {
+    "name": "Бутики",
+    "buildings": [
+     "b_pigs_boutique",
+     "b_patisserie"
+    ],
+    "yard": "cafe",
+    "life": [
+     [
+      "npc_pigeon_postman",
+      0.0,
+      -0.7
+     ]
+    ]
+   },
+   {
+    "name": "Ресторан",
+    "buildings": [
+     "b_pigs_restaurant"
+    ],
+    "yard": "cafe",
+    "life": [
+     [
+      "npc_pig_mechanic",
+      -0.4,
+      -0.7
+     ]
+    ]
+   },
+   {
+    "name": "Шале",
+    "buildings": [
+     "b_pigs_chalet",
+     "b_pigs_gazebo"
+    ],
+    "yard": "pool",
+    "life": []
+   },
+   {
+    "name": "Стоянка у бутика",
+    "buildings": [
+     "b_pigs_boutique"
+    ],
+    "yard": "parking",
+    "life": [
+     [
+      "npc_pig_guard",
+      -0.4,
+      -0.7
+     ]
+    ]
+   },
+   {
+    "name": "Гольф-клуб",
+    "buildings": [
+     "b_golf_clubhouse",
+     "b_pigs_gazebo"
+    ],
+    "yard": "golf",
+    "life": [],
+    "chapters": [
+     "bank_3"
+    ]
+   }
+  ]
  }
 }

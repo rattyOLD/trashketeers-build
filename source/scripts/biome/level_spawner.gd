@@ -101,6 +101,9 @@ func build(layers: BiomeLayers, chapter_def: Dictionary) -> void:
 	_organic = _story.is_empty() and (layout == "junkyard" or layout == "bank")
 	_noise.seed = randi()
 	_park = null
+	_streets = null
+	# Дворы прошлой главы — иначе новые «упираются» в них, а шаги звучат по чужому покрытию.
+	_sectors.clear()
 	if _story.is_empty():
 		grid_size = Vector2i((Vector2(grid_size) * SURVIVAL_SCALE).round())
 	_origin = -Vector2(grid_size) * CELL * 0.5
@@ -1471,7 +1474,8 @@ func _build_organic() -> void:
 	var target := int(round(7.5 * _area_scale))
 	var bag: Array = []
 	var center := Vector2(0, _origin.y + grid_size.y * 0.5 * CELL)
-	_build_sectors(root, defs, area, center)
+	if _build_quarters(root, defs, area) < 3:
+		_build_sectors(root, defs, area, center)
 	target += _cover_spots.size()
 	for attempt in 2500:
 		if _cover_spots.size() >= target:
@@ -1479,7 +1483,7 @@ func _build_organic() -> void:
 		var p := Vector2(randf_range(area.position.x, area.end.x), randf_range(area.position.y, area.end.y)).snapped(Vector2(16, 16))
 		if _density(p) < POI_OPEN or not _cover_allowed(p, 120.0) or p.distance_to(center) < 420.0 or boss_rect.grow(300.0).has_point(p):
 			continue
-		if not _scene_spacing_ok_by(p, POI_SPACING) or _in_sector(p, 140.0):
+		if not _scene_spacing_ok_by(p, POI_SPACING) or _in_sector(p, 140.0) or (_streets != null and _streets.distance_to(p) < 170.0):
 			continue
 		if layout == "bank" and (zone_at(p) != Zone.LAWN or (_park != null and _park.distance_to(p) < 260.0)):
 			continue
@@ -1495,7 +1499,6 @@ func _build_organic() -> void:
 ## Секторы выживания: мини-парки, кафе, стоянки, полянки — у каждого своё покрытие и свои предметы
 ## (data/lots.json → sectors по главе). Ставятся первыми, общий разброс обходит их.
 func _build_sectors(root: Dictionary, defs: Dictionary, area: Rect2, center: Vector2) -> void:
-	_sectors.clear()
 	var all: Dictionary = root.get("sectors", {})
 	var themes: Array = all.get(str(chapter.get("id", "")), all.get(layout, []))
 	if themes.is_empty():
@@ -1517,43 +1520,173 @@ func _build_sectors(root: Dictionary, defs: Dictionary, area: Rect2, center: Vec
 				continue
 			if _park != null and _park.distance_to(p) < radius + 60.0:
 				continue
-			var ground := str(theme.get("ground", ""))
-			_sectors.append([p, radius, &"grass" if ground.contains("grass") or ground.is_empty() else (&"asphalt" if ground.contains("asphalt") else &"stone")])
-			if not ground.is_empty() and ResourceLoader.exists(ground):
-				var patch := SectorPatch.new()
-				_own(patch, _layers.floor_layer)
-				var grass := ground.contains("grass")
-				var tint := Color(0.92, 0.9, 0.94)
-				if layout != "bank" and grass:
-					tint = Color(0.5, 0.62, 0.52)
-				elif layout == "bank" and grass:
-					tint = Color(1.0, 1.0, 1.0)
-				patch.build(p, radius, load(ground) as Texture2D, tint, Color("#c9962e") if layout == "bank" else Color("#4a4766"), rng_seed + _sectors.size(), str(theme.get("shape", "blob")), theme.get("deco", []))
-			# Своя планировка сектора: предметы по долям его прямоугольника (столики рядами, машины на местах).
-			var plan: Array = theme.get("layout", [])
-			if not plan.is_empty():
-				var half := Vector2(radius, radius * 0.72)
-				var mirror := -1.0 if randf() < 0.5 else 1.0
-				_in_scene = true
-				for item: Array in plan:
-					_lot_item(str(item[0]), (p + Vector2(float(item[1]) * mirror * half.x, float(item[2]) * half.y)).snapped(Vector2(8, 8)))
-				_in_scene = false
-				_cover_spots.append(p)
-				_spawn_life(theme.get("life", []), p, half, mirror)
-				if (theme.get("deco", []) as Array).has("pool"):
-					_block_rect(Rect2(p - half * Vector2(0.5, 0.42), half * Vector2(1.0, 0.84)))
-				break
-			var pois: Array = theme.get("poi", [])
-			var placed := 0
-			for k in 8:
-				if placed >= 2 or pois.is_empty():
-					break
-				var at := p + Vector2.from_angle(randf() * TAU) * randf_range(0.0, radius * 0.45)
-				var items: Array = defs.get(str(pois[placed % pois.size()]), [])
-				if not items.is_empty() and _scene_spacing_ok_by(at, 260.0) and _build_poi(items, at.snapped(Vector2(16, 16))):
-					_cover_spots.append(at)
-					placed += 1
+			_make_sector(theme, p, radius, defs, rng_seed + _sectors.size())
 			break
+
+
+## Двор/сектор в точке p: покрытие, своя планировка предметов и жители (или 1–2 точки интереса).
+func _make_sector(theme: Dictionary, p: Vector2, radius: float, defs: Dictionary, seed_value: int) -> void:
+	var ground := str(theme.get("ground", ""))
+	_sectors.append([p, radius, &"grass" if ground.contains("grass") or ground.is_empty() else (&"asphalt" if ground.contains("asphalt") else &"stone")])
+	if not ground.is_empty() and ResourceLoader.exists(ground):
+		var patch := SectorPatch.new()
+		_own(patch, _layers.floor_layer)
+		var grass := ground.contains("grass")
+		var tint := Color(0.92, 0.9, 0.94)
+		if layout != "bank" and grass:
+			tint = Color(0.5, 0.62, 0.52)
+		elif layout == "bank" and grass:
+			tint = Color(1.0, 1.0, 1.0)
+		patch.build(p, radius, load(ground) as Texture2D, tint, Color("#c9962e") if layout == "bank" else Color("#4a4766"), seed_value, str(theme.get("shape", "blob")), theme.get("deco", []))
+	# Своя планировка сектора: предметы по долям его прямоугольника (столики рядами, машины на местах).
+	var plan: Array = theme.get("layout", [])
+	if not plan.is_empty():
+		var half := Vector2(radius, radius * 0.72)
+		var mirror := -1.0 if randf() < 0.5 else 1.0
+		_in_scene = true
+		for item: Array in plan:
+			_lot_item(str(item[0]), (p + Vector2(float(item[1]) * mirror * half.x, float(item[2]) * half.y)).snapped(Vector2(8, 8)))
+		_in_scene = false
+		_cover_spots.append(p)
+		_spawn_life(theme.get("life", []), p, half, mirror)
+		if (theme.get("deco", []) as Array).has("pool"):
+			_block_rect(Rect2(p - half * Vector2(0.5, 0.42), half * Vector2(1.0, 0.84)))
+		return
+	var pois: Array = theme.get("poi", [])
+	var placed := 0
+	for k in 8:
+		if placed >= 2 or pois.is_empty():
+			break
+		var at := p + Vector2.from_angle(randf() * TAU) * randf_range(0.0, radius * 0.45)
+		var items: Array = defs.get(str(pois[placed % pois.size()]), [])
+		if not items.is_empty() and _scene_spacing_ok_by(at, 260.0) and _build_poi(items, at.snapped(Vector2(16, 16))):
+			_cover_spots.append(at)
+			placed += 1
+
+
+var _quarter_doors: Array[Vector2] = []
+var _streets: ParkPaths
+
+
+## Кварталы выживания (data/lots.json → quarters): внутренность карты делится на 3×3. Центр (бой), клетка
+## старта и клетка помоста босса свободны; в остальных — квартал: 1–2 здания в глубине, перед ними двор
+## (сектор по имени), жители, тёплый свет окон. Возвращает число поставленных кварталов.
+func _build_quarters(root: Dictionary, defs: Dictionary, area: Rect2) -> int:
+	var chapter_id := str(chapter.get("id", ""))
+	var list: Array = ((root.get("quarters", {}) as Dictionary).get(layout, []) as Array).filter(
+		func(q: Dictionary) -> bool: return not q.has("chapters") or (q["chapters"] as Array).has(chapter_id))
+	if list.is_empty():
+		return 0
+	list.shuffle()
+	var yards := {}
+	var all: Dictionary = root.get("sectors", {})
+	for key: String in [chapter_id, layout] + all.keys():
+		for theme: Dictionary in all.get(key, []):
+			if not yards.has(str(theme.get("name", ""))):
+				yards[str(theme.get("name", ""))] = theme
+	var cell := area.size / 3.0
+	var cells: Array[Rect2] = []
+	for gy in 3:
+		for gx in 3:
+			var r := Rect2(area.position + cell * Vector2(gx, gy), cell)
+			if (gx == 1 and gy == 1) or r.has_point(player_start) or r.has_point(boss_rect.get_center()):
+				continue
+			cells.append(r)
+	cells.shuffle()
+	var placed := 0
+	_quarter_doors.clear()
+	for r in cells:
+		if _place_quarter(list[placed % list.size()], r.grow(-50.0), yards, defs):
+			placed += 1
+	if layout != "bank" and not _quarter_doors.is_empty():
+		# Протоптанные улицы от каждого квартала к центральной площади: карта читается как посёлок, а не россыпь.
+		var center := Vector2(0, _origin.y + grid_size.y * 0.5 * CELL)
+		_streets = ParkPaths.new()
+		for door: Vector2 in _quarter_doors:
+			_streets.paths.append(ParkPaths.curve(door, center + (door - center).normalized() * 300.0, randf_range(-90.0, 90.0)))
+		_streets.width = 150.0
+		_own(_streets, _layers.floor_layer)
+		_streets.z_index = 1
+		_streets.build_trail(Color(0.02, 0.0, 0.05, 0.22))
+	return placed
+
+
+func _place_quarter(q: Dictionary, r: Rect2, yards: Dictionary, defs: Dictionary) -> bool:
+	var ids: Array = []
+	var widths: Array[float] = []
+	var total := 0.0
+	for id: String in q.get("buildings", []):
+		var w := ArenaProp.visual_size(id).x
+		if not ids.is_empty() and total + w > r.size.x:
+			break
+		ids.append(id)
+		widths.append(w)
+		total += w + 50.0
+	var x := r.get_center().x - (total - 50.0) * 0.5 + randf_range(-40.0, 40.0)
+	var foot_y := r.position.y + r.size.y * 0.42
+	var built := 0
+	for i in ids.size():
+		var w: float = widths[i]
+		var base := Vector2(x + w * 0.5, foot_y + randf_range(-24.0, 24.0)).snapped(Vector2(8, 8))
+		x += w + 50.0
+		for shift in 5:
+			# Здание у протоки — сдвигаем к середине карты, пока берег не освободится.
+			if _quarter_ok(base, w):
+				break
+			base.x = move_toward(base.x, 0.0, 90.0)
+		if not _quarter_ok(base, w):
+			continue
+		var prop := _place_prop(base, str(ids[i]), false)
+		if prop == null:
+			continue
+		built += 1
+		_cover_spots.append(base)
+		if SaveService.get_quality() > 0:
+			# Свет из окон и над дверью: квартал живёт и в темноте.
+			_life_lights.append(EnvLights.add(base + Vector2(0, -ArenaProp.visual_size(str(ids[i])).y * 0.3), Color("#ffc46b") if layout != "bank" else Color("#fff0c8"), 230.0, 0.45))
+	if built == 0:
+		return false
+	var theme: Dictionary = yards.get(str(q.get("yard", "")), {})
+	if not theme.is_empty():
+		var radius := clampf(minf(r.size.x * 0.4, r.size.y * 0.3), 220.0, 340.0)
+		var p := Vector2(r.get_center().x, r.position.y + r.size.y * 0.76)
+		for shift in 5:
+			# Двор у протоки — сдвигаем к середине карты, пока берег не станет свободным.
+			if _yard_ok(p, radius):
+				_make_sector(theme, p.snapped(Vector2(16, 16)), radius, defs, randi())
+				break
+			p.x = move_toward(p.x, 0.0, 90.0)
+	_spawn_life(q.get("life", []), r.get_center(), r.size * 0.5, 1.0)
+	# Выход квартала — ближняя к центру точка его клетки: оттуда улица к площади.
+	var hub := Vector2(0, _origin.y + grid_size.y * 0.5 * CELL)
+	_quarter_doors.append(Vector2(clampf(hub.x, r.position.x, r.end.x), clampf(hub.y, r.position.y, r.end.y)))
+	return true
+
+
+## Место под здание: не на берегу протоки, не на аллеях/воротах/помосте, не у старта и центра.
+func _quarter_ok(p: Vector2, width: float) -> bool:
+	if not _river_points.is_empty() and absf(p.x - AcidRiver._x_at(_river_points, p.y)) < RIVER_WIDTH * 0.5 + 190.0 + width * 0.5:
+		return false
+	var zone := zone_at(p)
+	if zone == Zone.LANE or zone == Zone.BOSS or zone == Zone.GATE or zone == Zone.EDGE:
+		return false
+	var center := Vector2(0, _origin.y + grid_size.y * 0.5 * CELL)
+	if p.distance_to(center) < 420.0 + width * 0.5 or p.distance_to(player_start) < 320.0 or boss_rect.grow(220.0).has_point(p):
+		return false
+	for g in gate_rects:
+		if g.grow(260.0 + width * 0.5).has_point(p):
+			return false
+	if _park != null and _park.distance_to(p) < width * 0.55:
+		return false
+	return true
+
+
+func _yard_ok(p: Vector2, radius: float) -> bool:
+	if not _river_points.is_empty() and absf(p.x - AcidRiver._x_at(_river_points, p.y)) < RIVER_WIDTH * 0.5 + 120.0 + radius:
+		return false
+	if _in_sector(p, radius + 60.0) or (_park != null and _park.distance_to(p) < radius + 40.0):
+		return false
+	return p.distance_to(player_start) > 200.0 + radius and not boss_rect.grow(radius + 120.0).has_point(p)
 
 
 ## Жители секторов (арт Астры из assets/npc): кот в парке, рабочий в кафе, робот-уборщик на стоянке,
