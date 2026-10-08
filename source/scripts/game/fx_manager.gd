@@ -114,9 +114,17 @@ var _mk_next := 0
 var _mk_target: Array[Node2D] = []
 var _callout := -1
 var _stream: Array[Bullet] = []
+var _streams: DrawLayer
+const STREAM_FLOW := 260.0
+const STREAM_THICKNESS := 2.6
+const LIQUID_DIR := "res://assets/vfx/liquid/"
+var _beer_stream_tex: Texture2D = load(LIQUID_DIR + "astra_beer_stream.png")
+var _beer_head_tex: Texture2D = load(LIQUID_DIR + "astra_beer_head.png")
+var _puke_stream_tex: Texture2D = load(LIQUID_DIR + "astra_puke_stream.png")
+var _puke_head_tex: Texture2D = load(LIQUID_DIR + "astra_puke_head.png")
 const STREAM_FRAME_GAP := 6
 const STREAM_MAX_GAP := 150.0
-const STREAM_MAX_ANGLE := 0.12
+const STREAM_MAX_ANGLE := 0.3
 var _callout_text := ""
 
 const BOLT_CAPACITY := 16
@@ -252,6 +260,12 @@ func _init() -> void:
 		casing_sprite.scale = Vector2.ONE * 0.42
 		add_child(casing_sprite)
 		_cs_nodes.append(casing_sprite)
+
+	# Струи пива и рвоты — текстурная лента Астры (обычное смешивание, повтор текстуры по длине).
+	_streams = DrawLayer.new()
+	_streams.painter = _draw_stream_textures
+	_streams.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+	add_child(_streams)
 
 	_sparks = DrawLayer.new()
 	_sparks.painter = _draw_sparks
@@ -703,13 +717,15 @@ func _process(delta: float) -> void:
 		if _mk_life[i] > 0.0:
 			_mk_life[i] -= delta
 	_sparks.queue_redraw()
+	_streams.queue_redraw()
 	_texts.queue_redraw()
 	_ground.queue_redraw()
 
 
 func _draw_sparks(canvas: CanvasItem) -> void:
 	var batch := _batch
-	_draw_liquid_streams(batch)
+	if _beer_stream_tex == null:
+		_draw_liquid_streams(batch)
 	for i in SPARK_CAPACITY:
 		var life := _sp_life[i]
 		if life <= 0.0:
@@ -818,6 +834,98 @@ func _draw_liquid_streams(batch: PolyBatch) -> void:
 			batch.line(pa, pb, Color(c.lightened(0.1), 0.92), w * 1.4)
 			var lift := Vector2(0, -w * 0.25)
 			batch.line(pa + lift, pb + lift, Color(1.0, 0.96, 0.82, 0.55), w * 0.3)
+
+
+## Струя Барона — сплошная лента: тайл струи тянется между соседними каплями одной очереди и течёт
+## по длине (сдвиг UV со временем), на переднем конце — «голова» струи с пеной/комками.
+var _strip_points := PackedVector2Array([Vector2.ZERO, Vector2.ZERO, Vector2.ZERO, Vector2.ZERO])
+var _strip_uvs := PackedVector2Array([Vector2.ZERO, Vector2.ZERO, Vector2.ZERO, Vector2.ZERO])
+var _strip_colors := PackedColorArray([Color.WHITE, Color.WHITE, Color.WHITE, Color.WHITE])
+
+
+func _draw_stream_textures(canvas: CanvasItem) -> void:
+	if _beer_stream_tex == null:
+		return
+	_stream.clear()
+	for bullet in BulletPool._active:
+		if bullet.is_liquid:
+			_stream.append(bullet)
+	if _stream.is_empty():
+		return
+	_stream.sort_custom(func(a: Bullet, b: Bullet) -> bool: return a.spawn_frame < b.spawn_frame)
+	var flow := Time.get_ticks_msec() * 0.001 * STREAM_FLOW
+	var last := {}
+	var chains := {}
+	var heads := {}
+	for b in _stream:
+		var key := b.weapon
+		var a: Bullet = last.get(key)
+		last[key] = b
+		var broken := a == null or b.spawn_frame - a.spawn_frame > STREAM_FRAME_GAP
+		if not broken:
+			broken = a.global_position.distance_squared_to(b.global_position) > STREAM_MAX_GAP * STREAM_MAX_GAP \
+				or absf(a.velocity.angle_to(b.velocity)) > STREAM_MAX_ANGLE
+		if broken:
+			heads[b] = true
+			if chains.has(key):
+				_draw_stream_strip(canvas, chains[key], flow)
+			chains[key] = [b]
+		else:
+			(chains[key] as Array).append(b)
+	for key in chains:
+		_draw_stream_strip(canvas, chains[key], flow)
+	for b: Bullet in heads:
+		var puke := b.weapon.id == &"puke_v1"
+		var head := _puke_head_tex if puke else _beer_head_tex
+		var h := b.weapon.bullet_radius * 2.0 * STREAM_THICKNESS * 1.5
+		var size := Vector2(h * head.get_width() / float(head.get_height()), h)
+		canvas.draw_set_transform(b.global_position, b.velocity.angle(), Vector2.ONE)
+		canvas.draw_texture_rect(head, Rect2(Vector2(-size.x * 0.75, -size.y * 0.5), size), false)
+	canvas.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+
+## Струя одной лентой: точки — капли подряд, на изгибах нормали усредняются, поэтому лента гнётся без швов;
+## к хвосту (у рта босса) и к голове — тоньше. Текстура Астры течёт вдоль ленты.
+func _draw_stream_strip(canvas: CanvasItem, chain: Array, flow: float) -> void:
+	var count := chain.size()
+	if count < 2:
+		return
+	var first: Bullet = chain[0]
+	var puke := first.weapon.id == &"puke_v1"
+	var tex := _puke_stream_tex if puke else _beer_stream_tex
+	var w := first.weapon.bullet_radius * 2.0 * STREAM_THICKNESS
+	var tex_w := float(tex.get_width())
+	var k := float(tex.get_height()) / w / tex_w
+	var u := 0.0
+	var prev_left := Vector2.ZERO
+	var prev_right := Vector2.ZERO
+	var prev_u := 0.0
+	for i in count:
+		var p: Vector2 = (chain[i] as Bullet).global_position
+		var before: Vector2 = (chain[maxi(i - 1, 0)] as Bullet).global_position
+		var after: Vector2 = (chain[mini(i + 1, count - 1)] as Bullet).global_position
+		var normal := (after - before).orthogonal().normalized()
+		if i > 0:
+			u += p.distance_to((chain[i - 1] as Bullet).global_position)
+		var edge := float(mini(i, count - 1 - i))
+		var half := w * 0.5 * clampf(0.45 + edge * 0.28, 0.45, 1.0)
+		var left := p + normal * half
+		var right := p - normal * half
+		if i > 0:
+			_strip_points[0] = prev_left
+			_strip_points[1] = left
+			_strip_points[2] = right
+			_strip_points[3] = prev_right
+			var u0 := (prev_u + flow) * k
+			var u1 := (u + flow) * k
+			_strip_uvs[0] = Vector2(u0, 0.0)
+			_strip_uvs[1] = Vector2(u1, 0.0)
+			_strip_uvs[2] = Vector2(u1, 1.0)
+			_strip_uvs[3] = Vector2(u0, 1.0)
+			canvas.draw_polygon(_strip_points, _strip_colors, _strip_uvs, tex)
+		prev_left = left
+		prev_right = right
+		prev_u = u
 
 
 ## Крестик из четырёх штрихов по диагоналям: выпрыгивает крупнее и быстро садится; у убийства — крупнее и дольше.

@@ -167,17 +167,11 @@ class Puddles:
 		_time += delta
 		queue_redraw()
 
+	## Дождевые лужи: тёмная вода с отражением неонового неба, бликами и рябью (общая отрисовка луж).
 	func _draw() -> void:
-		var b := ArenaDecor._batch
 		for p in puddles:
 			var r: Vector2 = p[1]
-			b.set_transform(p[0], p[2], Vector2(1.0, r.y / r.x))
-			b.circle(Vector2.ZERO, r.x, Color(0.06, 0.04, 0.14, 0.55))
-			b.circle(Vector2(-r.x * 0.15, -r.x * 0.1), r.x * 0.72, Color(0.16, 0.1, 0.3, 0.35))
-			var shimmer := 0.5 + 0.5 * sin(_time * 1.2 + p[3])
-			b.arc(Vector2.ZERO, r.x * 0.8, -2.3, -1.0, 16, Color(0.7, 0.55, 0.95, 0.12 + 0.06 * shimmer), 4.0, true)
-		b.reset_transform()
-		b.flush(self)
+			LiquidDraw.puddle(self, p[0], r.x, Color(0.13, 0.12, 0.3), int(float(p[3]) * 1000.0) + 7, _time, 1.0, Color(0, 0, 0, 0), false)
 
 
 ## Решётка вентиляции с паром (декор главы 1): тёмный металл, пар поднимается и тает.

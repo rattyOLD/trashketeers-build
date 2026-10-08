@@ -72,6 +72,7 @@ const SFX := {
 	&"k_combo": [-12.0, 0.06],
 	&"hitmarker": [-12.0, 0.045],
 	&"kill_confirm": [-8.0, 0.05],
+	&"burp": [-2.0, 0.6],
 	&"k_perfect": [-7.0, 0.6],
 	&"weapon_pickup": [-6.0, 0.1],
 	&"crate_break": [-6.0, 0.08],

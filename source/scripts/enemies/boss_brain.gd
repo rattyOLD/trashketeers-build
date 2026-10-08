@@ -758,8 +758,11 @@ func _next_baron_attack() -> void:
 		_enter(State.SUMMON)
 		SoundManager.play(&"boss_spawn", -8.0)
 		return
-	var cycle: Array = [0, 1, 2, 0, 2] if phase == 1 else [0, 2, 1, 2, 0]
+	# 0 — пивная струя, 1 — пивной пресс, 2 — прыжок с ударом, 3 — отрыжка и рвота веером.
+	var cycle: Array = [0, 1, 3, 0, 2] if phase == 1 else [0, 3, 1, 2, 0]
 	match cycle[(_step - 1) % cycle.size()]:
+		3:
+			_start_vomit()
 		0:
 			_enter(State.BEAM_WINDUP)
 			SoundManager.play(&"beam_charge", -4.0)
@@ -769,6 +772,13 @@ func _next_baron_attack() -> void:
 			SoundManager.play(&"beam_charge", -4.0)
 		_:
 			_enter(State.SMASH_WINDUP)
+
+
+## Барон громко рыгает (волна, звук — это и есть подсказка), через полсекунды льётся рвота.
+func _start_vomit() -> void:
+	_enter(State.VOMIT_WINDUP)
+	_aim_dir = enemy.global_position.direction_to(enemy.target_point())
+	enemy.request_fx("burp", 0.0, enemy.part_muzzle(0))
 
 
 ## Шаман: молнии веером → электро-поле под ногами → ударная дуга вблизи; каждая пятая атака — призыв.
@@ -828,7 +838,7 @@ func _smash_impact(player: Player) -> void:
 		if player.hp < before:
 			player.stun(STUN_TIME)
 			player.apply_knockback(_leap_dir * 260.0)
-			_enter(State.VOMIT_WINDUP)
+			_start_vomit()
 			enemy.request_fx("muzzle", 0.0, enemy.global_position)
 			return
 	_hangover()

@@ -689,9 +689,16 @@ func _on_enemy_fx(_enemy: Enemy, kind: String, at: Vector2, radius: float) -> vo
 			fx.burst(at, Color("#ffcf4a") if not foamy else Color("#f6e3a0"), 4, 200.0, 3.0)
 			fx.burst(at, Color("#fff6dc"), 3, 140.0, 2.4)
 			liquids.splash(at, 1 if foamy else 0, 44.0 if not foamy else 56.0)
-			liquids.puddle(at, 1 if foamy else 0, 34.0 if not foamy else 46.0, 2.8)
+			liquids.puddle(at, 1 if foamy else 0, 50.0 if not foamy else 60.0, 3.2)
 			if not foamy:
 				liquids.foam(at + Vector2(0, -8), 38.0)
+		"burp":
+			SoundManager.play(&"burp")
+			fx.ring(at, Color("#d8e86a"), 150.0)
+			fx.ring(at, Color("#fff3c4"), 90.0)
+			fx.burst(at, Color("#b9d35a"), 8, 260.0, 3.2)
+			liquids.splash(at, 1, 60.0)
+			add_shake(0.35)
 		"muzzle":
 			fx.muzzle_flash(at, (player.global_position - at).angle(), Color("#ffb347"), 1.4)
 		"summon":
