@@ -700,16 +700,33 @@ func _build_boss_zone() -> void:
 		_decor_prop(Vector2(cx, back_y), "vault_door")
 		for side in [-1.0, 1.0]:
 			_decor_prop(Vector2(cx + side * 215.0, back_y + 4.0), "pig_statue", 1 if side < 0.0 else -1)
+			# Фонари с флагами по передним углам помоста.
+			_decor_prop(Vector2(cx + side * (boss_rect.size.x * 0.5 + 34.0), boss_rect.end.y + 36.0), "lamp_banner")
 	else:
-		for side in [-1.0, 1.0]:
-			_decor_prop(Vector2(cx + side * 150.0, back_y - 20.0), "container", 1 if side < 0.0 else -1)
-		var sign := NeonSign.new()
-		sign.setup(NeonSign.Icon.CHEESE, Color("#ff2e63"))
-		sign.position = Vector2(cx, back_y - 150.0)
-		sign.scale = Vector2.ONE * 1.4
-		_own(sign, _layers.world)
-		for side in [-1.0, 1.0]:
-			_place_prop(Vector2(boss_rect.get_center().x + side * (boss_rect.size.x * 0.5 + 60.0), boss_rect.end.y - 10.0), "floodlight", true)
+		_build_boss_set(cx, back_y)
+
+
+## Арена Короля Свалки: за помостом трон из хлама с короной, по бокам стеки колонок, у передних углов
+## прожекторы (их лучи рисует BossStage), над троном — неоновая вывеска банды. Всё без коллизий.
+func _build_boss_set(cx: float, back_y: float) -> void:
+	var pieces := ArenaDecor.BossSet.new()
+	_own(pieces, _layers.world)
+	var top := boss_rect.position.y
+	pieces.piece("res://assets/story/boss/throne.png", Rect2(), Vector2(cx, top + 96.0), 330.0)
+	pieces.piece("res://assets/story/boss/speakers.png", Rect2(0, 0, 272, 384), Vector2(cx - 270.0, top + 70.0), 170.0)
+	pieces.piece("res://assets/story/boss/speakers.png", Rect2(268, 0, 244, 384), Vector2(cx + 270.0, top + 70.0), 150.0, true)
+	for side in [-1.0, 1.0]:
+		var inset := 70.0 if not _story.is_empty() else -40.0
+		var at := Vector2(cx + side * (boss_rect.size.x * 0.5 - inset), boss_rect.end.y + (-30.0 if not _story.is_empty() else 40.0))
+		pieces.piece("res://assets/story/boss/spotlights.png", Rect2(0, 0, 268, 384) if side < 0.0 else Rect2(270, 0, 242, 384), at, 120.0, side > 0.0)
+		pieces.light(at + Vector2(0, -90), Color(1.0, 0.86, 0.55), 280.0, 0.7)
+	pieces.light(Vector2(cx, top + 40.0), Color("#ff2e63"), 320.0, 0.6)
+	pieces.light(boss_rect.get_center(), Color(1.0, 0.9, 0.7), 320.0, 0.45)
+	var sign := NeonSign.new()
+	sign.setup(NeonSign.Icon.CHEESE, Color("#ff2e63"))
+	sign.position = Vector2(cx, top - 150.0)
+	sign.scale = Vector2.ONE * 1.1
+	_own(sign, _layers.world)
 
 
 func _build_spotlights() -> void:
@@ -796,6 +813,8 @@ func _story_wall_visual(block: Rect2i) -> void:
 
 ## Тронный зал: плиты пола с жёлто-чёрной окантовкой и трон за спиной Короля.
 func _story_boss_visuals() -> void:
+	if layout != "bank":
+		return
 	var floor_sprite := _tiled_sprite("res://assets/story/boss/floor_1.png", boss_rect, 0.5, Color(1, 1, 1, 0.92))
 	if floor_sprite != null:
 		_own(floor_sprite, self)
@@ -1148,7 +1167,7 @@ func _build_organic() -> void:
 		if _cover_spots.size() >= target:
 			break
 		var p := Vector2(randf_range(area.position.x, area.end.x), randf_range(area.position.y, area.end.y)).snapped(Vector2(16, 16))
-		if _density(p) < POI_OPEN or not _cover_allowed(p, 120.0) or p.distance_to(center) < 420.0:
+		if _density(p) < POI_OPEN or not _cover_allowed(p, 120.0) or p.distance_to(center) < 420.0 or boss_rect.grow(300.0).has_point(p):
 			continue
 		if not _scene_spacing_ok_by(p, POI_SPACING):
 			continue
@@ -1206,7 +1225,7 @@ func _scatter_singles(area: Rect2, center: Vector2) -> void:
 			var p := Vector2(x, y) + Vector2(randf_range(-150, 150), randf_range(-150, 150))
 			x += step
 			var d := _density(p)
-			if d < POI_OPEN + 0.18 or p.distance_to(center) < 400.0 or not _cover_allowed(p, 40.0):
+			if d < POI_OPEN + 0.18 or p.distance_to(center) < 400.0 or not _cover_allowed(p, 40.0) or boss_rect.grow(220.0).has_point(p):
 				continue
 			if not _scene_spacing_ok_by(p, 300.0):
 				continue

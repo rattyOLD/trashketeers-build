@@ -11,18 +11,60 @@ static var _batch := PolyBatch.new()
 ## Помост босса. junkyard — стальная сцена с жёлто-чёрной окантовкой, передней гранью-ступенью
 ## и красной неоновой полосой у задника; bank — красная ковровая дорожка с золотыми кантами
 ## и ступенями из белого мрамора (сами плиты — тайлы пола).
+## Декорации трона босса на слое мира (сортировка по Y): трон из хлама, колонки, прожекторы и свет.
+class BossSet:
+	extends Node2D
+	var _lights: PackedInt32Array = PackedInt32Array()
+
+	func _init() -> void:
+		y_sort_enabled = true
+
+	## region пустой — вся картинка; width — ширина в мире; foot — точка касания пола.
+	func piece(path: String, region: Rect2, foot: Vector2, width: float, flip: bool = false) -> Sprite2D:
+		var tex := load(path) as Texture2D
+		if tex == null:
+			return null
+		var sprite := Sprite2D.new()
+		if region.size != Vector2.ZERO:
+			var atlas := AtlasTexture.new()
+			atlas.atlas = tex
+			atlas.region = region
+			tex = atlas
+		sprite.texture = tex
+		sprite.scale = Vector2.ONE * width / tex.get_width()
+		sprite.offset = Vector2(0, -tex.get_height() * 0.5 + 6.0)
+		sprite.position = foot
+		sprite.flip_h = flip
+		add_child(sprite)
+		return sprite
+
+	func light(at: Vector2, color: Color, radius: float, strength: float) -> void:
+		_lights.append(EnvLights.add(at, color, radius, strength))
+
+	func _exit_tree() -> void:
+		for id in _lights:
+			EnvLights.remove(id)
+		_lights.clear()
+
+
 class BossStage:
 	extends Node2D
 	var rect := Rect2()
 	var style := "junkyard"
 	var _time := 0.0
+	var _tiles: Array[Texture2D] = []
 
 	func _ready() -> void:
-		set_process(style == "junkyard")
+		set_process(true)
 
 	func _process(delta: float) -> void:
 		_time += delta
-		if int(_time * 8.0) != int((_time - delta) * 8.0):
+		var rate := 20.0 if SaveService.get_quality() > 0 else 8.0
+		if int(_time * rate) == int((_time - delta) * rate):
+			return
+		# Анимация помоста (ринг, огни, лучи) — только пока он в кадре.
+		var view := get_viewport().get_canvas_transform().affine_inverse() * get_viewport_rect()
+		if view.intersects(rect.grow(300.0)):
 			queue_redraw()
 
 	func _draw() -> void:
@@ -31,35 +73,66 @@ class BossStage:
 		else:
 			_draw_junkyard()
 
+	## Помост Короля Свалки: клёпаные плиты Астры с сигнальной окантовкой, передний борт с тенью,
+	## неоновое кольцо-ринг в центре с бегущими огнями и метки углов; два луча прожекторов скрещиваются
+	## на центре и медленно ходят. Трон, колонки и прожекторы — BossSet на слое мира.
 	func _draw_junkyard() -> void:
 		var b := ArenaDecor._batch
 		var r := rect
-		b.rect(Rect2(r.position + Vector2(0, r.size.y), Vector2(r.size.x, 26)), Color("#12131c"))
-		b.rect(Rect2(r.position + Vector2(0, r.size.y), Vector2(r.size.x, 4)), Color("#3a3d56"))
-		b.rect(r, Color("#262a3c"))
-		var step := 64.0
-		var x := r.position.x + step
-		while x < r.end.x:
-			b.line(Vector2(x, r.position.y), Vector2(x, r.end.y), Color("#1a1c2a"), 3.0)
-			x += step
-		var y := r.position.y + step
-		while y < r.end.y:
-			b.line(Vector2(r.position.x, y), Vector2(r.end.x, y), Color("#1a1c2a"), 3.0)
-			y += step
-		for py in range(int(r.position.y) + 12, int(r.end.y), 64):
-			for px in range(int(r.position.x) + 12, int(r.end.x), 64):
-				b.circle(Vector2(px, py), 2.5, Color("#4a4e68"))
-		_hazard(b, Rect2(r.position, Vector2(r.size.x, 14)))
+		# Передний борт помоста — помост приподнят.
+		b.rect(Rect2(r.position + Vector2(-10, r.size.y - 4), Vector2(r.size.x + 20, 34)), Color("#0c0d14"))
+		b.rect(Rect2(r.position + Vector2(-10, r.size.y - 4), Vector2(r.size.x + 20, 6)), Color("#4b4f6b"))
+		b.rect(r.grow(10), Color("#14151f"))
+		b.flush(self)
+		if _tiles.is_empty():
+			for i in 3:
+				var tex := load("res://assets/story/boss/floor_%d.png" % (i + 1)) as Texture2D
+				if tex != null:
+					_tiles.append(tex)
+		var cell := 192.0
+		if not _tiles.is_empty():
+			var y := r.position.y
+			var row := 0
+			while y < r.end.y - 1.0:
+				var x := r.position.x
+				var col := 0
+				while x < r.end.x - 1.0:
+					var size := Vector2(minf(cell, r.end.x - x), minf(cell, r.end.y - y))
+					var tex: Texture2D = _tiles[(col * 7 + row * 13) % _tiles.size()]
+					draw_texture_rect_region(tex, Rect2(Vector2(x, y), size), Rect2(Vector2.ZERO, size * 256.0 / cell), Color(0.82, 0.8, 0.9))
+					x += cell
+					col += 1
+				y += cell
+				row += 1
+		var c := r.get_center() + Vector2(0, 10)
+		var rad := minf(r.size.x * 0.34, r.size.y * 0.62)
+		var squash := Vector2(1.0, 0.62)
+		var pulse := 0.6 + 0.3 * sin(_time * 3.0)
+		b.set_transform(Vector2.ZERO, 0.0, squash)
+		var cs := c / squash
+		# Ринг: тёмная чаша, двойное неоновое кольцо, бегущие огни.
+		b.circle(cs, rad * 1.04, Color(0.02, 0.0, 0.04, 0.45))
+		b.arc(cs, rad * 1.02, 0.0, TAU, 64, Color(1.0, 0.16, 0.36, 0.25 * pulse), 22.0)
+		b.arc(cs, rad, 0.0, TAU, 64, Color(1.0, 0.3, 0.5, pulse), 9.0)
+		b.arc(cs, rad * 0.92, 0.0, TAU, 64, Color(1.0, 0.6, 0.25, 0.6 * pulse), 4.0)
+		b.arc(cs, rad * 0.38, 0.0, TAU, 40, Color(1.0, 0.16, 0.36, 0.35 * pulse), 4.0)
+		for k in 16:
+			var ang := TAU * k / 16.0 + _time * 0.6
+			var lit := 0.35 + 0.65 * maxf(0.0, sin(_time * 4.0 - k * 0.8))
+			b.circle(cs + Vector2.from_angle(ang) * rad * 1.08, 6.0, Color(1.0, 0.82, 0.35, lit))
+		b.reset_transform()
+		# Перекрестие в центре — «здесь дерётся босс».
+		for side in [-1.0, 1.0]:
+			b.line(c + Vector2(side * rad * 0.22, 0), c + Vector2(side * rad * 0.5, 0), Color(1.0, 0.16, 0.36, 0.5 * pulse), 4.0)
 		_hazard(b, Rect2(Vector2(r.position.x, r.end.y - 14), Vector2(r.size.x, 14)))
-		_hazard(b, Rect2(r.position, Vector2(14, r.size.y)))
-		_hazard(b, Rect2(Vector2(r.end.x - 14, r.position.y), Vector2(14, r.size.y)))
-		var pulse := 0.55 + 0.25 * sin(_time * 3.0)
-		b.rect(Rect2(r.position + Vector2(40, 22), Vector2(r.size.x - 80, 6)), Color(1.0, 0.18, 0.3, pulse))
+		b.flush(self)
+		_beams(c, rad, Color(1.0, 0.92, 0.6))
 		var cx := r.get_center().x
 		for k in 3:
-			var w := 220.0 - k * 36.0
-			var sy := r.end.y + 4.0 + k * 8.0
-			b.rect(Rect2(cx - w * 0.5, sy, w, 8), Color("#2f3348").darkened(k * 0.15))
+			var sw := 260.0 - k * 40.0
+			var sy := r.end.y + 30.0 + k * 9.0
+			b.rect(Rect2(cx - sw * 0.5, sy, sw, 9), Color("#3a3f58").darkened(k * 0.18))
+			b.rect(Rect2(cx - sw * 0.5, sy, sw, 2), Color("#6b7090").darkened(k * 0.18))
 		b.flush(self)
 
 	func _hazard(b: PolyBatch, r: Rect2) -> void:
@@ -79,18 +152,76 @@ class BossStage:
 			b.polygon(poly, Color("#e8b41a"))
 			t += stripe * 2.0
 
+	## Лучи прожекторов из передних углов помоста на центр, медленно ходят.
+	func _beams(c: Vector2, rad: float, tint: Color) -> void:
+		var r := rect
+		var squash := Vector2(1.0, 0.62)
+		for side in [-1.0, 1.0]:
+			var from := Vector2(c.x + side * (r.size.x * 0.5 + 40.0), r.end.y + 30.0)
+			var aim := c + Vector2(sin(_time * 0.7 + side) * rad * 0.35, cos(_time * 0.5) * rad * 0.12)
+			var dir := (aim - from).normalized()
+			var n := dir.orthogonal()
+			var far := aim + dir * rad * 0.35
+			var w := rad * 0.34
+			draw_polygon(PackedVector2Array([from - n * 10.0, from + n * 10.0, far + n * w, far - n * w]),
+				PackedColorArray([Color(tint, 0.34), Color(tint, 0.34), Color(tint, 0.0), Color(tint, 0.0)]))
+			draw_set_transform(Vector2.ZERO, 0.0, squash)
+			draw_circle(aim / squash, w * 0.85, Color(tint, 0.16))
+			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+	## Помост Магната: мраморный подиум с золотой окантовкой и шахматной инкрустацией, золотой
+	## медальон-ринг в центре, красная дорожка через ступени, лучи прожекторов.
 	func _draw_bank() -> void:
+		var b := ArenaDecor._batch
 		var r := rect
 		var cx := r.get_center().x
+		b.rect(Rect2(r.position + Vector2(-12, r.size.y - 4), Vector2(r.size.x + 24, 34)), Color("#9c8a84"))
+		b.rect(Rect2(r.position + Vector2(-12, r.size.y - 4), Vector2(r.size.x + 24, 5)), Color("#f6eee8"))
+		b.rect(r.grow(12), Color("#c9962e"))
+		b.rect(r.grow(5), Color("#7a5418"))
+		b.rect(r, Color("#efe3dc"))
+		var cell := 96.0
+		var y := r.position.y
+		var row := 0
+		while y < r.end.y - 1.0:
+			var x := r.position.x
+			var col := 0
+			while x < r.end.x - 1.0:
+				if (row + col) % 2 == 0:
+					b.rect(Rect2(x, y, minf(cell, r.end.x - x), minf(cell, r.end.y - y)), Color("#e2d0c8"))
+				x += cell
+				col += 1
+			y += cell
+			row += 1
+		var inner := r.grow(-22)
+		for e in [[inner.position, Vector2(inner.end.x, inner.position.y)], [Vector2(inner.position.x, inner.end.y), inner.end],
+				[inner.position, Vector2(inner.position.x, inner.end.y)], [Vector2(inner.end.x, inner.position.y), inner.end]]:
+			b.line(e[0], e[1], Color("#d4a33c"), 4.0)
+		var c := r.get_center() + Vector2(0, 10)
+		var rad := minf(r.size.x * 0.34, r.size.y * 0.62)
+		var squash := Vector2(1.0, 0.62)
+		var pulse := 0.65 + 0.25 * sin(_time * 2.4)
+		b.set_transform(Vector2.ZERO, 0.0, squash)
+		var cs := c / squash
+		b.circle(cs, rad * 1.02, Color(1.0, 0.85, 0.4, 0.18 * pulse))
+		b.arc(cs, rad, 0.0, TAU, 64, Color("#c9962e"), 12.0)
+		b.arc(cs, rad, 0.0, TAU, 64, Color(1.0, 0.9, 0.5, pulse), 4.0)
+		b.arc(cs, rad * 0.8, 0.0, TAU, 56, Color("#d4a33c"), 4.0)
+		for k in 12:
+			var ang := TAU * k / 12.0 + _time * 0.3
+			b.circle(cs + Vector2.from_angle(ang) * rad * 0.9, 7.0, Color(1.0, 0.92, 0.6, 0.5 + 0.5 * maxf(0.0, sin(_time * 3.0 - k))))
+		b.reset_transform()
+		b.flush(self)
 		var carpet := Rect2(cx - 90, r.position.y + 30, 180, r.size.y + 150)
 		draw_rect(carpet.grow(8), Color("#b8862e"))
 		draw_rect(carpet, Color("#b3122e"))
 		draw_rect(Rect2(carpet.position.x + 12, carpet.position.y, 6, carpet.size.y), Color("#e8b84a"))
 		draw_rect(Rect2(carpet.end.x - 18, carpet.position.y, 6, carpet.size.y), Color("#e8b84a"))
 		for k in 3:
-			var sy := r.end.y + k * 16.0
+			var sy := r.end.y + 30.0 + k * 16.0
 			draw_rect(Rect2(r.position.x + 40 + k * 20, sy, r.size.x - 80 - k * 40, 14), Color("#f4efe6").darkened(0.06 * k))
 			draw_rect(Rect2(r.position.x + 40 + k * 20, sy + 12, r.size.x - 80 - k * 40, 3), Color("#c9a86a"))
+		_beams(c, rad, Color(1.0, 0.95, 0.8))
 
 
 ## Ворота спавна по бокам арены: тёмная решётка с шевронами «внутрь» и полосой цвета главы.
