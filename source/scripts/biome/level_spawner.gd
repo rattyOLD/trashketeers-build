@@ -481,7 +481,25 @@ func _cells_rect(cell: Vector2i, size_cells: Vector2i) -> Rect2:
 # --- Пол ---------------------------------------------------------------------------------------
 
 ## Тайлы пола — 128 px мира (2×2 клетки), атлас главы 256 px/тайл, ряд — по зоне.
+## Земля Свалки во всех режимах — асфальт района Астры в трещинах (лужи, решётки, мусор): одна
+## тайловая картинка на всю карту, как за забором — арена и район один мир.
+const JUNK_GROUND := "res://assets/district/junkyard/rats_ground_tile.png"
+
+
 func _build_floor() -> void:
+	if layout == "junkyard" and ResourceLoader.exists(JUNK_GROUND):
+		var ground := Sprite2D.new()
+		ground.texture = load(JUNK_GROUND) as Texture2D
+		ground.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+		ground.region_enabled = true
+		ground.region_rect = Rect2(bounds.position, bounds.size)
+		ground.centered = false
+		ground.position = bounds.position
+		ground.modulate = Color(0.9, 0.88, 0.94)
+		ground.light_mask = BiomeLayers.LIGHT_MASK_FLOOR
+		_own(ground, self)
+		_add_macro_overlay(float(chapter.get("macro", 1.0)))
+		return
 	var texture: Texture2D = ArenaProp.texture_of(str(chapter.get("floor", "")))
 	if texture == null:
 		return
@@ -1405,7 +1423,8 @@ func _build_lot(plan: Array, rect: Rect2, frame: String = "") -> void:
 	_in_scene = false
 	_cover_spots.append(rect.get_center())
 	_lots.append(rect)
-	_lot_ground(rect)
+	if layout != "junkyard":
+		_lot_ground(rect)
 
 
 ## Двор Свалки — земля района Астры (асфальт в трещинах, лужи, мусор), как за забором: карта и фон — один мир.
