@@ -149,6 +149,9 @@ static var next_kind: StringName = &""
 static var global_speed_mult := 1.0
 static var mod_speed_mult := 1.0
 var _pop := 0.0
+## Появление: враг вырастает из-под земли с перебором масштаба и облачком пыли.
+var _emerge := 0.0
+const EMERGE_TIME := 0.42
 var _attack_timer := 0.0
 var _strafe_sign := 1.0
 var _facing_left := false
@@ -261,6 +264,7 @@ func activate(enemy_data: EnemyData, at: Vector2, hp_mult: float = 1.0, dmg_mult
 	_knockback = Vector2.ZERO
 	_flash = -1.0
 	_pop = 0.0
+	_emerge = 0.0 if data.is_boss() else EMERGE_TIME
 	_recoil = 0.0
 	_alt_time = 0.0
 	_block_cooldown = 0.0
@@ -287,6 +291,8 @@ func activate(enemy_data: EnemyData, at: Vector2, hp_mult: float = 1.0, dmg_mult
 	_setup_visual()
 	if _brain != null:
 		_brain.setup(self)
+	if _emerge > 0.0:
+		request_fx("emerge", data.radius)
 	_sprite.rotation = 0.0
 	_sprite.position = Vector2(0, _sprite_base_y())
 	_apply_sprite_scale(1.0, 1.0)
@@ -1086,6 +1092,14 @@ func _animate(delta: float, desired: Vector2) -> void:
 	_pop = maxf(_pop - delta, 0.0)
 	var hurt := _pop / HIT_POP
 	var pop := 1.0 + hurt * 0.2
+	var rise := 0.0
+	if _emerge > 0.0:
+		_emerge = maxf(_emerge - delta, 0.0)
+		# easeOutBack: вырастает с перебором и садится в обычный размер, поднимаясь из-под земли.
+		var t := 1.0 - _emerge / EMERGE_TIME
+		var back := 1.0 + 2.70158 * pow(t - 1.0, 3.0) + 1.70158 * pow(t - 1.0, 2.0)
+		pop *= lerpf(0.25, 1.0, back)
+		rise = 22.0 * pow(1.0 - t, 2.0)
 	_recoil = move_toward(_recoil, 0.0, delta * 4.0)
 
 	if data.shield:
@@ -1098,7 +1112,7 @@ func _animate(delta: float, desired: Vector2) -> void:
 	var tremble := Vector2.ZERO
 	if _brain != null and windup > 0.2:
 		tremble = Vector2(sin(_time * 70.0), cos(_time * 83.0)) * 3.0 * windup
-	_sprite.position = Vector2(0, _sprite_base_y() + hover_bob - (0.0 if data.flying else hop)) + tremble
+	_sprite.position = Vector2(0, _sprite_base_y() + hover_bob - (0.0 if data.flying else hop) + rise) + tremble
 	var sway := sin(_gait) * (0.025 if (_framed or _auto) else 0.06) * _move_amount
 	if _act == Act.MOVE:
 		lean += 0.16 * _move_amount

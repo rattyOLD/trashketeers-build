@@ -24,8 +24,24 @@ func setup(player: Player, stats: RunStats, fx: FxManager) -> void:
 	_query.collide_with_areas = false
 	_player.dash_started.connect(func() -> void:
 		_seen.clear()
-		_element_used = false)
+		_element_used = false
+		_ghost_step = 0
+		if _fx != null:
+			_fx.dust(_player.global_position + Vector2(0, 8), 5, 40.0))
 	_player.dash_moved.connect(_on_moved)
+	_player.dash_moved.connect(_leave_ghost)
+
+
+## Послеобразы рывка: голубые полупрозрачные копии героя по пути (каждый второй кадр — шлейф без каши).
+var _ghost_step := 0
+
+
+func _leave_ghost(from: Vector2, _to: Vector2) -> void:
+	_ghost_step += 1
+	if _ghost_step % 2 == 0 or _fx == null or _player.visual == null:
+		return
+	var visual := _player.visual
+	_fx.ghost(visual.get_ghost_texture(), from + visual.get_ghost_offset(), visual.get_ghost_scale(), Color(0.45, 0.85, 1.0))
 
 
 func _on_moved(from: Vector2, to: Vector2) -> void:

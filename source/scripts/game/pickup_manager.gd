@@ -12,6 +12,8 @@ signal xp_collected(amount: int)
 enum Kind { NUT, XP, XP_GOLD }
 
 const CAPACITY := 320
+const HOP_SPEED := 150.0
+const HOP_TIME := 0.13
 const COLLECT_DISTANCE := 24.0
 const FRICTION := 5.0
 const ATTRACT_ACCEL := 2600.0
@@ -170,12 +172,20 @@ func _physics_process(delta: float) -> void:
 		if _attracted[i] == 0 and dist_sq < magnet_sq:
 			_attracted[i] = 1
 			_attract_time[i] = 0.0
+			# Подскок перед полётом: лут на миг отпрыгивает от героя и вверх, потом летит к нему.
+			v = (p - target).normalized() * HOP_SPEED + Vector2(0.0, -HOP_SPEED * 0.8)
 		var reached := false
 		if _attracted[i] == 1:
 			# Чистое самонаведение без инерции: скорость растёт, направление — всегда на Енота.
 			# Раньше лут разгонялся ускорением, проскакивал мимо и выходил на орбиту вокруг
 			# бегущего Енота — монеты летали за ним всю игру.
 			_attract_time[i] += delta
+			if _attract_time[i] < HOP_TIME:
+				v = v.lerp(Vector2.ZERO, clampf(9.0 * delta, 0.0, 1.0))
+				_pos[i] = p + v * delta
+				_vel[i] = v
+				i += 1
+				continue
 			var speed := minf(maxf(v.length(), ATTRACT_START) + ATTRACT_ACCEL * delta, MAX_SPEED)
 			var step := speed * delta
 			var dist := sqrt(dist_sq)

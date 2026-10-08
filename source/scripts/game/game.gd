@@ -477,6 +477,12 @@ func _on_wave_started(number: int, title: String, mood: String, is_boss: bool) -
 		radio.on_wave(is_boss)
 	atmosphere.letterbox(true)
 	get_tree().create_timer(1.9, false).timeout.connect(func() -> void: atmosphere.letterbox(false))
+	# Старт волны — ударная волна от героя (у босса красная) и короткая встряска.
+	if player != null:
+		var wave_color := Color("#ff3b30") if is_boss else Color("#ffd257")
+		fx.ring(player.global_position, wave_color, 360.0)
+		fx.ring(player.global_position, Color(wave_color, 0.6), 220.0)
+		add_shake(0.3 if is_boss else 0.14)
 	if director.elapsed < 4.0:
 		get_tree().create_timer(2.8, false).timeout.connect(func() -> void: hud.show_wave_intro(maxi(director.wave_number, 1), title, is_boss, director.chapter_index + 1))
 	else:
@@ -658,6 +664,8 @@ func _on_enemy_blinked(_enemy: Enemy, from: Vector2, to: Vector2) -> void:
 
 func _on_enemy_fx(_enemy: Enemy, kind: String, at: Vector2, radius: float) -> void:
 	match kind:
+		"emerge":
+			fx.dust(at + Vector2(0, 6), 3, radius * 1.6)
 		"transform":
 			fx.burst(at + Vector2(0, -60), Color("#ffd257"), 60, 520.0, 5.0)
 			fx.chunks(at, Color("#6a6070"), 26, 420.0, 6.0)
@@ -1430,6 +1438,7 @@ func _on_nuts_collected(amount: int) -> void:
 	nuts += int(amount * events.coin_mult + randf()) if events.coin_mult > 1.0 else amount
 	hud.set_nuts(nuts)
 	hud.punch_nuts()
+	fx.burst(player.global_position + Vector2(0, -10), Color("#ffd257"), 3, 150.0, 2.4)
 	_combo = mini(_combo + 1, 14)
 	_combo_timer = PICKUP_COMBO_WINDOW
 	SoundManager.play_pitched(&"nut_pickup", 1.0 + 0.045 * _combo)
