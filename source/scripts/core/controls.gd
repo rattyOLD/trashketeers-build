@@ -3,7 +3,7 @@ extends RefCounted
 ## Настройки управления: раскладка кнопок на экране (положение и размер), сторона джойстика,
 ## жесты, переназначение клавиш и пять пресетов. Хранится в SaveService.data["controls"].
 
-const ELEMENTS := ["dash", "dodge", "slots", "interact"]
+const ELEMENTS := ["dash", "dodge", "slots", "interact", "move", "aim"]
 ## Остальные элементы боевого интерфейса, которые игрок может двигать, масштабировать и делать прозрачными.
 const HUD_ELEMENTS := ["hp", "xp", "coins", "pause", "time", "kills", "loot", "fps", "wave", "boss", "minimap", "order", "story_bar", "story_meter", "wanted", "barks"]
 const HUD_TITLES := {
@@ -11,8 +11,8 @@ const HUD_TITLES := {
 	"loot": "ЛУТ НА КАРТЕ", "fps": "СЧЁТЧИК FPS", "wave": "ВОЛНА", "boss": "ПОЛОСА БОССА", "minimap": "МИНИКАРТА",
 	"order": "ЗАДАНИЕ", "story_bar": "ОЧКИ, ЖИЗНИ, ЗОНА", "story_meter": "ДЕТАЛИ СУПЕР-СТВОЛА", "wanted": "РОЗЫСК", "barks": "РЕПЛИКИ",
 }
-const ELEMENT_TITLES := {"dash": "НАВЫК", "dodge": "РЫВОК", "slots": "СЛОТЫ ОРУЖИЯ", "interact": "ВЗЯТЬ"}
-const ELEMENT_SIZE := {"dash": Vector2(160, 160), "dodge": Vector2(144, 144), "slots": Vector2(200, 96), "interact": Vector2(250, 96)}
+const ELEMENT_TITLES := {"dash": "НАВЫК", "dodge": "РЫВОК", "slots": "СЛОТЫ ОРУЖИЯ", "interact": "ВЗЯТЬ", "move": "ДЖОЙСТИК ХОДЬБЫ", "aim": "СТИК СТРЕЛЬБЫ"}
+const ELEMENT_SIZE := {"dash": Vector2(160, 160), "dodge": Vector2(144, 144), "slots": Vector2(200, 96), "interact": Vector2(250, 96), "move": Vector2(220, 220), "aim": Vector2(192, 192)}
 const PRESET_SLOTS := 3
 
 const KEY_ACTIONS := [
@@ -70,6 +70,9 @@ static func default_config(left_handed: bool = false) -> Dictionary:
 			"dodge": {"x": 0.79 if not left_handed else 0.21, "y": 0.8, "s": 1.0},
 			"slots": {"x": sx, "y": SLOTS_Y, "s": 1.0},
 			"interact": {"x": 0.79 if not left_handed else 0.21, "y": INTERACT_Y, "s": 1.0},
+			# Стики: «дом» джойстика ходьбы и стика стрельбы (там подсказка; в фиксированном режиме — сам стик).
+			"move": {"x": 0.16 if not left_handed else 0.84, "y": 0.8, "s": 1.0},
+			"aim": {"x": 0.62 if not left_handed else 0.38, "y": 0.66, "s": 1.0},
 		},
 		"hud": {},
 		"layout_v": 12,
@@ -177,6 +180,23 @@ static func set_element(id: String, x: float, y: float, scale: float) -> void:
 	e["x"] = clampf(x, 0.06, 0.94)
 	e["y"] = clampf(y, 0.14, 0.94)
 	e["s"] = clampf(scale, 0.6, 1.6)
+
+
+## Центр стика (move/aim) в координатах области area.
+static func stick_home(id: String, area: Vector2) -> Vector2:
+	var e := element(id)
+	return Vector2(float(e["x"]) * area.x, float(e["y"]) * area.y)
+
+
+## Чей палец: касание достаётся стику, на чьей стороне экрана его «дом» (если оба на одной стороне —
+## граница посередине между ними). true — ходьба, false — стрельба.
+static func touch_is_move(point: Vector2, area: Vector2) -> bool:
+	var mx := float(element("move")["x"]) * area.x
+	var ax := float(element("aim")["x"]) * area.x
+	var split := area.x * 0.5
+	if (mx < split) == (ax < split):
+		split = (mx + ax) * 0.5
+	return (point.x < split) == (mx < ax or is_equal_approx(mx, ax))
 
 
 static func title_of(id: String) -> String:

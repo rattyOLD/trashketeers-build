@@ -17,7 +17,7 @@ static func should_show() -> bool:
 	var latest := entries[0] as Dictionary
 	if not (latest.get("short") is Array) or (latest["short"] as Array).is_empty():
 		return false
-	return str(SaveService.data.get(SEEN_KEY, "")) != str(latest.get("version", ""))
+	return str(SaveService.data.get(SEEN_KEY, "")) != ChangelogPopup.latest_key()
 
 
 func _init() -> void:
@@ -28,7 +28,7 @@ func _init() -> void:
 
 func _ready() -> void:
 	var entry := ChangelogPopup.load_entries()[0] as Dictionary
-	SaveService.data[SEEN_KEY] = str(entry.get("version", ""))
+	SaveService.data[SEEN_KEY] = ChangelogPopup.latest_key()
 	SaveService.save_data()
 	var dim := ColorRect.new()
 	dim.color = Color(0.074, 0.071, 0.066, 0.82)

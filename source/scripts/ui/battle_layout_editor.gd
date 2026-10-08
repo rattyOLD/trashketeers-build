@@ -281,6 +281,15 @@ func _draw() -> void:
 		var rect := _rect(id)
 		if rect.size.x < 1.0:
 			continue
+		if id == "move" or id == "aim":
+			# Стики рисуются только под пальцем — в редакторе показываем их кругом с подписью.
+			var c := rect.get_center()
+			var r := rect.size.x * 0.5
+			var tint := UiStyle.NEON if id == "move" else Color("#ff6a3d")
+			draw_circle(c, r, Color(tint, 0.12))
+			draw_arc(c, r, 0.0, TAU, 48, Color(tint, 0.8), 4.0, true)
+			draw_circle(c, r * 0.4, Color(tint, 0.35))
+			draw_string(ThemeDB.fallback_font, c + Vector2(-r, r + 26.0), "ХОДЬБА" if id == "move" else "СТРЕЛЬБА", HORIZONTAL_ALIGNMENT_CENTER, r * 2.0, 20, Color(1, 1, 1, 0.8))
 		if id == _selected:
 			draw_rect(rect.grow(6.0), Color(UiStyle.GOLD, 0.95), false, 4.0)
 		else:

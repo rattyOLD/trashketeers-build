@@ -23,6 +23,7 @@ var _batch := PolyBatch.new()
 ## Пока игрок ни разу не стрелял стиком, справа мерцает подсказка «зажми и тяни».
 var _hint := false
 var _hint_time := 0.0
+var _scale := 1.0
 
 
 func _init() -> void:
@@ -84,9 +85,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func _in_zone(point: Vector2) -> bool:
 	if point.y <= ZONE_TOP:
 		return false
-	if bool(Controls.get_value("left_handed")):
-		return point.x < size.x * ZONE_WIDTH_FRACTION
-	return point.x > size.x * (1.0 - ZONE_WIDTH_FRACTION)
+	return not Controls.touch_is_move(point, size)
 
 
 func _reset() -> void:
@@ -100,17 +99,17 @@ func _draw() -> void:
 		if _hint:
 			_draw_hint()
 		return
-	_batch.circle(_base, BASE_RADIUS, Color(0.1, 0.02, 0.02, 0.3))
-	_batch.arc(_base, BASE_RADIUS, 0.0, TAU, 48, Color(ACCENT, 0.6), 5.0)
-	_batch.circle(_knob, KNOB_RADIUS + 4.0, UiStyle.OUTLINE)
-	_batch.circle(_knob, KNOB_RADIUS, Color(ACCENT, 0.8))
-	_batch.circle(_knob + Vector2(-10, -10), KNOB_RADIUS * 0.3, Color(1, 1, 1, 0.35))
+	var knob := _base + (_knob - _base).limit_length(BASE_RADIUS * _scale)
+	_batch.circle(_base, BASE_RADIUS * _scale, Color(0.1, 0.02, 0.02, 0.3))
+	_batch.arc(_base, BASE_RADIUS * _scale, 0.0, TAU, 48, Color(ACCENT, 0.6), 5.0)
+	_batch.circle(knob, KNOB_RADIUS * _scale + 4.0, UiStyle.OUTLINE)
+	_batch.circle(knob, KNOB_RADIUS * _scale, Color(ACCENT, 0.8))
+	_batch.circle(knob + Vector2(-10, -10), KNOB_RADIUS * _scale * 0.3, Color(1, 1, 1, 0.35))
 	_batch.flush(self)
 
 
 func _draw_hint() -> void:
-	var left := bool(Controls.get_value("left_handed"))
-	var at := Vector2(size.x * (0.4 if left else 0.6), size.y * 0.66)
+	var at := Controls.stick_home("aim", size)
 	var pulse := 0.5 + 0.5 * sin(_hint_time * 4.0)
 	var drift := Vector2.from_angle(-0.5) * (BASE_RADIUS * 0.55) * fmod(_hint_time * 0.8, 1.0)
 	_batch.arc(at, BASE_RADIUS, 0.0, TAU, 48, Color(ACCENT, 0.25 + 0.3 * pulse), 4.0)

@@ -18,6 +18,8 @@ var _touch_index := -1
 var _base := Vector2.ZERO
 var _knob := Vector2.ZERO
 var _batch := PolyBatch.new()
+## Точка поверх кнопки интерфейса (навык, рывок, слоты) — не наша: стик можно сдвинуть к кнопкам.
+var blocker: Callable
 
 
 func _init() -> void:
@@ -53,7 +55,7 @@ func _input(event: InputEvent) -> void:
 		if touch.pressed and _in_zone(point) and _touch_index != -1 and touch.index != _touch_index:
 			_reset()
 		if touch.pressed and _touch_index == -1 and _in_zone(point):
-			var scale := float(Controls.get_value("joystick_scale"))
+			var scale := float(Controls.get_value("joystick_scale")) * float(Controls.element("move")["s"])
 			BASE_RADIUS = BASE_RADIUS_DEFAULT * scale
 			KNOB_RADIUS = KNOB_RADIUS_DEFAULT * scale
 			_touch_index = touch.index
@@ -72,14 +74,14 @@ func _input(event: InputEvent) -> void:
 func _in_zone(point: Vector2) -> bool:
 	if point.y <= ZONE_TOP:
 		return false
-	if bool(Controls.get_value("left_handed")):
-		return point.x > size.x * (1.0 - ZONE_WIDTH_FRACTION)
-	return point.x < size.x * ZONE_WIDTH_FRACTION
+	if blocker.is_valid() and bool(blocker.call(get_global_transform() * point)):
+		return false
+	return Controls.touch_is_move(point, size)
 
 
+## «Дом» джойстика — двигается в редакторе управления.
 func _hint_position() -> Vector2:
-	var x := size.x * (0.84 if bool(Controls.get_value("left_handed")) else 0.16)
-	return Vector2(x, size.y * 0.8)
+	return Controls.stick_home("move", size)
 
 
 func _update_output() -> void:
@@ -98,6 +100,9 @@ func _reset() -> void:
 
 func _draw() -> void:
 	if not is_active():
+		var hint_scale := float(Controls.get_value("joystick_scale")) * float(Controls.element("move")["s"])
+		BASE_RADIUS = BASE_RADIUS_DEFAULT * hint_scale
+		KNOB_RADIUS = KNOB_RADIUS_DEFAULT * hint_scale
 		var hint := _hint_position()
 		_batch.arc(hint, BASE_RADIUS, 0.0, TAU, 48, Color(1, 1, 1, 0.1), 4.0)
 		_batch.circle(hint, KNOB_RADIUS, Color(1, 1, 1, 0.06))

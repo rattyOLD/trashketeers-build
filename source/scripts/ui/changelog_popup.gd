@@ -36,8 +36,17 @@ static func latest_version() -> String:
 	return str((entries[0] as Dictionary).get("version", "")) if not entries.is_empty() else ""
 
 
+## Ключ прочтения: версия + дата + заголовок. Новая запись в ту же версию тоже зажигает значок «Обновления».
+static func latest_key() -> String:
+	var entries := load_entries()
+	if entries.is_empty():
+		return ""
+	var e: Dictionary = entries[0]
+	return "%s|%s|%s" % [e.get("version", ""), e.get("date", ""), e.get("title", "")]
+
+
 static func has_unseen() -> bool:
-	var latest := latest_version()
+	var latest := latest_key()
 	return not latest.is_empty() and str(SaveService.data.get("changelog_seen", "")) != latest
 
 
@@ -45,7 +54,7 @@ func _refresh() -> void:
 	MenuPopups.clear(_list)
 	for entry in load_entries():
 		_list.add_child(_make_entry(entry as Dictionary))
-	SaveService.data["changelog_seen"] = latest_version()
+	SaveService.data["changelog_seen"] = latest_key()
 	SaveService.save_data()
 
 

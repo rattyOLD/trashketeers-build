@@ -1,6 +1,6 @@
 class_name ControlEditor
 extends Control
-## Редактор раскладки: кнопки навыка, слотов оружия и «ВЗЯТЬ» перетаскиваются пальцем,
+## Редактор раскладки: стики ходьбы и стрельбы, кнопки навыка, слотов оружия и «ВЗЯТЬ» перетаскиваются пальцем,
 ## размер и прозрачность — ползунками, есть режимы правши/левши, фиксированный джойстик
 ## и три ячейки пресетов. Всё живёт в Controls и применяется в бою при следующем запуске.
 
@@ -59,7 +59,12 @@ func _build() -> void:
 	dash.caption = "НАВЫК"
 	var dodge := DashPreview.new()
 	dodge.caption = "РЫВОК"
-	_items = {"dash": dash, "dodge": dodge, "slots": slot_bar, "interact": interact}
+	var move := StickPreview.new()
+	move.caption = "ХОДЬБА"
+	var aim := StickPreview.new()
+	aim.caption = "СТРЕЛЬБА"
+	aim.tint = Color("#ff6a3d")
+	_items = {"move": move, "aim": aim, "dash": dash, "dodge": dodge, "slots": slot_bar, "interact": interact}
 	for id in _items:
 		_items[id].mouse_filter = Control.MOUSE_FILTER_IGNORE
 		add_child(_items[id])
@@ -101,7 +106,7 @@ func _build() -> void:
 	_options_scroll.custom_minimum_size = Vector2(0, 300)
 	_body.add_child(_options_scroll)
 	_options_scroll.add_child(_summary)
-	var hint := UiStyle.label("Тащи кнопки пальцем. Тап по кнопке выбирает её: ниже её размер и прозрачность.", 18, UiStyle.TEXT_DIM, 4)
+	var hint := UiStyle.label("Тащи пальцем кнопки и оба стика (ходьба, стрельба). Тап выбирает элемент: ниже его размер и прозрачность.", 18, UiStyle.TEXT_DIM, 4)
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_summary.add_child(hint)
 
@@ -233,15 +238,13 @@ func _place_all() -> void:
 	var count := Controls.weapon_slot_count()
 	for id in _items:
 		var base: Vector2 = BattleControls.slots_base_size(count) if id == "slots" else Vector2.ZERO
+		if id == "move":
+			base = Controls.ELEMENT_SIZE["move"] * float(Controls.get_value("joystick_scale"))
 		Controls.place(_items[id], id, size, base)
 		_items[id].modulate.a = float(Controls.get_value("opacity")) * Controls.element_opacity(id)
 		_items[id].queue_redraw()
 	Controls.resolve_overlap(_items["dash"], _items["dodge"], _items["slots"], size)
 	queue_redraw()
-
-
-func _joystick_center() -> Vector2:
-	return Vector2(size.x * (0.84 if bool(Controls.get_value("left_handed")) else 0.16), size.y * 0.8)
 
 
 func _draw() -> void:
@@ -251,12 +254,6 @@ func _draw() -> void:
 		draw_line(Vector2(i * step, 0), Vector2(i * step, size.y), Color(1, 1, 1, 0.035), 2.0)
 	for j in int(size.y / step) + 1:
 		draw_line(Vector2(0, j * step), Vector2(size.x, j * step), Color(1, 1, 1, 0.035), 2.0)
-	var radius := 110.0 * float(Controls.get_value("joystick_scale"))
-	var center := _joystick_center()
-	draw_circle(center, radius, Color(0.05, 0.02, 0.1, 0.5))
-	draw_arc(center, radius, 0.0, TAU, 48, Color(UiStyle.NEON, 0.6), 5.0)
-	draw_circle(center, 46.0 * float(Controls.get_value("joystick_scale")), Color(UiStyle.NEON, 0.6))
-	draw_string(ThemeDB.fallback_font, center + Vector2(-90, radius + 34.0), "ДЖОЙСТИК", HORIZONTAL_ALIGNMENT_CENTER, 180, 22, Color(1, 1, 1, 0.5))
 	if _items.has(_selected):
 		var item: Control = _items[_selected]
 		draw_rect(Rect2(item.position, item.size).grow(8.0), Color(UiStyle.GOLD, 0.95), false, 4.0)
@@ -266,7 +263,7 @@ func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
 			_dragging = ""
-			for id in ["interact", "slots", "dodge", "dash"]:
+			for id in ["interact", "slots", "dodge", "dash", "aim", "move"]:
 				var item: Control = _items[id]
 				if Rect2(item.position, item.size).grow(12.0).has_point(event.position):
 					_dragging = id
@@ -284,6 +281,20 @@ func _gui_input(event: InputEvent) -> void:
 		var y_min := 0.16 if _collapsed else 0.16
 		Controls.set_element(_dragging, center.x / size.x, maxf(center.y / size.y, y_min), float(e["s"]))
 		_place_all()
+
+
+class StickPreview:
+	extends Control
+	var caption := "ХОДЬБА"
+	var tint := UiStyle.NEON
+
+	func _draw() -> void:
+		var c := size * 0.5
+		var r := size.x * 0.5
+		draw_circle(c, r, Color(0.05, 0.02, 0.1, 0.5))
+		draw_arc(c, r, 0.0, TAU, 48, Color(tint, 0.7), 5.0, true)
+		draw_circle(c, r * 0.42, Color(tint, 0.6))
+		draw_string(ThemeDB.fallback_font, Vector2(0, size.y + 28.0), caption, HORIZONTAL_ALIGNMENT_CENTER, size.x, 20, Color(1, 1, 1, 0.6))
 
 
 class DashPreview:

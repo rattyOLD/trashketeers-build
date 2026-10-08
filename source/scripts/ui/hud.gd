@@ -22,6 +22,8 @@ signal revive_declined
 
 var joystick: VirtualJoystick
 var aim_stick: AimStick
+var _move_home: Control
+var _aim_home: Control
 var combat_feed: CombatFeed
 
 var _root: Control
@@ -131,7 +133,15 @@ func build(currency_icon: Texture2D, weapon: WeaponData) -> void:
 	add_child(_root)
 
 	joystick = VirtualJoystick.new()
+	joystick.blocker = _point_on_buttons
 	_root.add_child(joystick)
+	# Невидимые «дома» стиков: их таскают в редакторе управления (рамка = зона стика).
+	_move_home = Control.new()
+	_move_home.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_root.add_child(_move_home)
+	_aim_home = Control.new()
+	_aim_home.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_root.add_child(_aim_home)
 	# Под кнопками: касание кнопки забирает интерфейс, стик получает только пустое место.
 	aim_stick = AimStick.new()
 	_root.add_child(aim_stick)
@@ -546,7 +556,19 @@ func element_node(id: String) -> Control:
 			return _slot_bar
 		"interact":
 			return _interact
+		"move":
+			return _move_home
+		"aim":
+			return _aim_home
 	return hud_node(id)
+
+
+## Касание по кнопке боя — джойстик его не забирает (стик могли сдвинуть к кнопкам).
+func _point_on_buttons(point: Vector2) -> bool:
+	for node: Control in [_skill, _dash, _slot_bar, _interact]:
+		if _visible_node(node) and Rect2(node.get_global_position(), node.size * node.get_global_transform().get_scale()).grow(8.0).has_point(point):
+			return true
+	return false
 
 
 func editable_ids() -> Array[String]:
@@ -705,13 +727,18 @@ func apply_layout() -> void:
 	Controls.place(_dash, "dodge", area)
 	Controls.place(_slot_bar, "slots", area, BattleControls.slots_base_size(_slot_bar.count))
 	Controls.place(_interact, "interact", area)
+	Controls.place(_move_home, "move", area, Controls.ELEMENT_SIZE["move"] * float(Controls.get_value("joystick_scale")))
+	Controls.place(_aim_home, "aim", area)
+	joystick.queue_redraw()
+	aim_stick.queue_redraw()
 	Controls.resolve_overlap(_skill, _dash, _slot_bar, area)
 	var opacity := clampf(float(Controls.get_value("opacity")), 0.3, 1.0)
 	_skill.modulate.a = opacity * Controls.element_opacity("dash")
 	_dash.modulate.a = opacity * Controls.element_opacity("dodge")
 	_slot_bar.modulate.a = opacity * Controls.element_opacity("slots")
 	_interact.modulate.a = Controls.element_opacity("interact")
-	joystick.modulate.a = opacity
+	joystick.modulate.a = opacity * Controls.element_opacity("move")
+	aim_stick.modulate.a = Controls.element_opacity("aim")
 	_apply_hud_items()
 	_layout_revision = Controls.revision
 
