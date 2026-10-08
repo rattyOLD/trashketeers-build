@@ -1212,6 +1212,226 @@
         "effect": "wood",
         "sound": "obstacle_break"
       }
+    },
+    "s_kegs": {
+      "texture": "res://assets/district/ch1/ch1_keg_stack.png",
+      "width": 120,
+      "footprint": [
+        98,
+        38
+      ],
+      "shadow": 36,
+      "flip": true
+    },
+    "s_plastic_tables": {
+      "texture": "res://assets/district/ch1/ch1_plastic_tables.png",
+      "width": 140,
+      "footprint": [
+        114,
+        44
+      ],
+      "shadow": 42,
+      "flip": true
+    },
+    "s_transformer": {
+      "texture": "res://assets/district/ch2/ch2_transformer_box.png",
+      "width": 120,
+      "footprint": [
+        98,
+        38
+      ],
+      "shadow": 36,
+      "flip": true,
+      "light": {
+        "color": "#7fd8ff",
+        "radius": 140,
+        "energy": 0.3,
+        "offset": [
+          0,
+          -60
+        ],
+        "flicker": 0.2
+      }
+    },
+    "s_wires": {
+      "texture": "res://assets/district/ch2/ch2_sparking_wires.png",
+      "width": 120,
+      "footprint": [
+        98,
+        38
+      ],
+      "shadow": 36,
+      "flip": true,
+      "light": {
+        "color": "#7fd8ff",
+        "radius": 150,
+        "energy": 0.4,
+        "offset": [
+          0,
+          -40
+        ],
+        "flicker": 0.5
+      }
+    },
+    "s_anchor": {
+      "texture": "res://assets/district/ch3/ch3_anchor_chain.png",
+      "width": 120,
+      "footprint": [
+        98,
+        38
+      ],
+      "shadow": 36,
+      "flip": true
+    },
+    "s_fish_crates": {
+      "texture": "res://assets/district/ch3/ch3_fish_crates.png",
+      "width": 120,
+      "footprint": [
+        98,
+        38
+      ],
+      "shadow": 36,
+      "flip": true
+    },
+    "s_pig_fountain": {
+      "texture": "res://assets/district/ch4/ch4_pig_fountain.png",
+      "width": 150,
+      "footprint": [
+        122,
+        48
+      ],
+      "shadow": 45,
+      "flip": true
+    },
+    "s_loungers": {
+      "texture": "res://assets/district/ch4/ch4_pool_loungers.png",
+      "width": 140,
+      "footprint": [
+        114,
+        44
+      ],
+      "shadow": 42,
+      "flip": true
+    },
+    "s_cake_cart": {
+      "texture": "res://assets/district/ch5/ch5_cake_cart.png",
+      "width": 110,
+      "footprint": [
+        90,
+        35
+      ],
+      "shadow": 33,
+      "flip": true
+    },
+    "s_cloche_tables": {
+      "texture": "res://assets/district/ch5/ch5_cloche_tables.png",
+      "width": 140,
+      "footprint": [
+        114,
+        44
+      ],
+      "shadow": 42,
+      "flip": true
+    },
+    "s_golf_cart": {
+      "texture": "res://assets/district/ch6/ch6_golf_cart.png",
+      "width": 130,
+      "footprint": [
+        106,
+        41
+      ],
+      "shadow": 39,
+      "flip": true
+    },
+    "s_golf_flag": {
+      "texture": "res://assets/district/ch6/ch6_golf_flag.png",
+      "width": 110,
+      "footprint": [
+        90,
+        35
+      ],
+      "shadow": 33,
+      "flip": true
+    },
+    "s_rat_car": {
+      "texture": "res://assets/district/junkyard/rats_car.png",
+      "width": 180,
+      "footprint": [
+        147,
+        57
+      ],
+      "shadow": 54,
+      "flip": true
+    },
+    "s_rat_van": {
+      "texture": "res://assets/district/junkyard/rats_van.png",
+      "width": 180,
+      "footprint": [
+        147,
+        57
+      ],
+      "shadow": 54,
+      "flip": true
+    },
+    "s_sportscar": {
+      "texture": "res://assets/district/bank/pigs_sportscar.png",
+      "width": 180,
+      "footprint": [
+        147,
+        57
+      ],
+      "shadow": 54,
+      "flip": true
+    },
+    "s_convertible": {
+      "texture": "res://assets/district/bank/pigs_convertible.png",
+      "width": 180,
+      "footprint": [
+        147,
+        57
+      ],
+      "shadow": 54,
+      "flip": true
+    },
+    "s_limo": {
+      "texture": "res://assets/district/bank/pigs_limousine.png",
+      "width": 190,
+      "footprint": [
+        155,
+        60
+      ],
+      "shadow": 57,
+      "flip": true
+    },
+    "ledge_concrete": {
+      "texture": "res://assets/terrain/ledge_concrete.png",
+      "width": 190,
+      "footprint": [
+        178,
+        30
+      ],
+      "shadow": 24,
+      "flip": true
+    },
+    "ledge_reactor": {
+      "texture": "res://assets/terrain/ledge_reactor.png",
+      "width": 190,
+      "footprint": [
+        178,
+        30
+      ],
+      "shadow": 24,
+      "flip": true,
+      "light": {
+        "color": "#ff4fd8",
+        "radius": 150,
+        "energy": 0.3,
+        "offset": [
+          0,
+          -20
+        ],
+        "flicker": 0.2
+      }
     }
   }
 }

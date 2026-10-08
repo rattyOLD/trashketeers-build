@@ -27,11 +27,6 @@ PROPS = {
     "z_pump": ("zones/m6_heart/pump.png", 140), "z_speaker": ("zones/m6_heart/speaker.png", 110),
     "z_stuffed_toy": ("zones/m6_heart/stuffed_toy.png", 90), "z_toy_truck": ("zones/m6_heart/toy_truck.png", 140),
     "z_valve": ("zones/m6_heart/valve.png", 100),
-    "ice_capsule": ("zones/m4_ice/capsule.png", 120), "ice_conveyor": ("zones/m4_ice/conveyor.png", 180),
-    "ice_crate": ("zones/m4_ice/crate.png", 120), "ice_generator": ("zones/m4_ice/generator.png", 160),
-    "ice_pipe": ("zones/m4_ice/ice_pipe.png", 140), "ice_icicle_rack": ("zones/m4_ice/icicle_rack.png", 150),
-    "ice_pump": ("zones/m4_ice/pump.png", 150), "ice_tank": ("zones/m4_ice/tank.png", 140),
-    "ice_turbine": ("zones/m4_ice/turbine.png", 160), "ice_valve": ("zones/m4_ice/valve.png", 110),
     "wall_intact": ("terrain/break_wall_intact.png", 150), "wall_destroyed": ("terrain/break_wall_destroyed.png", 150),
 }
 TERRAIN = {  # мосты и уступы — без ужатия по ширине (тайлятся/тянутся в игре)

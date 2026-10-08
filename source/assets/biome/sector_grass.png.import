@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cjuafydh4dpqf"
-path="res://.godot/imported/ice_conveyor.png-df40a39a876b81d61ca01508c61b20b5.ctex"
+uid="uid://bscl1d16kq44h"
+path="res://.godot/imported/sector_grass.png-a41b6ae59c27dc8372027701c4b2d94d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/props/zones/ice_conveyor.png"
-dest_files=["res://.godot/imported/ice_conveyor.png-df40a39a876b81d61ca01508c61b20b5.ctex"]
+source_file="res://assets/biome/sector_grass.png"
+dest_files=["res://.godot/imported/sector_grass.png-a41b6ae59c27dc8372027701c4b2d94d.ctex"]
 
 [params]
 

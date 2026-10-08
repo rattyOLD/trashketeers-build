@@ -7,6 +7,9 @@ signal chosen(upgrade: UpgradeData)
 signal reroll_requested
 
 var _box: VBoxContainer
+## Обёртка окна: её масштабируем, если окно не влезает в видимую область (узкий экран, вырез),
+## а у самого окна масштаб занят пружинящим появлением.
+var _holder: Control
 var _title: Label
 var _cards: BoxContainer
 var _choices: Array[UpgradeData] = []
@@ -27,9 +30,12 @@ func _init() -> void:
 
 	# Окно ставим по центру видимой области сами: на части Android (вырез, смена размера окна при
 	# переходе во весь экран) контейнер-центровщик оставлял панель съехавшей вправо за край экрана.
+	_holder = Control.new()
+	_holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_holder)
 	_box = VBoxContainer.new()
 	_box.add_theme_constant_override("separation", 12)
-	add_child(_box)
+	_holder.add_child(_box)
 	_box.minimum_size_changed.connect(_center_box.call_deferred)
 	resized.connect(_center_box.call_deferred)
 
@@ -68,6 +74,9 @@ func open(choices: Array[UpgradeData], level: int, stats: RunStats, bonus: bool 
 	_reroll.modulate = Color.WHITE if reroll_ok else Color(1, 1, 1, 0.5)
 	visible = true
 	_center_box()
+	# Подписи с переносом меряют высоту только после первой раскладки — центрируем ещё раз.
+	get_tree().create_timer(0.05, true, false, true).timeout.connect(_center_box)
+	get_tree().create_timer(0.3, true, false, true).timeout.connect(_center_box)
 	# Короткая пауза, чтобы палец, которым только что стреляли, не выбрал карточку случайно.
 	_armed_at = Time.get_ticks_msec() + 350
 	UiStyle.pop_in(_box)
@@ -76,18 +85,21 @@ func open(choices: Array[UpgradeData], level: int, stats: RunStats, bonus: bool 
 func _center_box() -> void:
 	if not is_inside_tree():
 		return
-	var area := get_viewport_rect().size
+	# Видимая область — собственный прямоугольник панели (он на весь корень HUD), а не вьюпорт:
+	# на iPhone в «альбомной» вкладке и с вырезом они расходились, и окно уезжало влево за край.
+	var area := size if size.x > 1.0 else get_viewport_rect().size
 	_box.reset_size()
 	_box.size = _box.get_combined_minimum_size()
-	# position, а не global_position: во время пружинящего появления масштаб ≠ 1, и глобальная установка
-	# сдвигала окно на долю его размера (влево-вверх или вправо на других экранах).
-	_box.position = ((area - _box.size) * 0.5).max(Vector2.ZERO) - global_position
+	_box.position = Vector2.ZERO
 	_box.pivot_offset = _box.size * 0.5
+	var fit := minf(1.0, minf((area.x - 16.0) / maxf(_box.size.x, 1.0), (area.y - 16.0) / maxf(_box.size.y, 1.0)))
+	_holder.scale = Vector2.ONE * fit
+	_holder.position = (area - _box.size * fit) * 0.5
 
 
 ## Ширина карточки в горизонтали: три карточки и отступы должны влезть в видимую ширину.
 func _card_width() -> float:
-	var area := get_viewport_rect().size.x if is_inside_tree() else 1280.0
+	var area := (size.x if size.x > 1.0 else get_viewport_rect().size.x) if is_inside_tree() else 1280.0
 	return clampf((area - 60.0 - 28.0) / 3.0, 240.0, 340.0)
 
 

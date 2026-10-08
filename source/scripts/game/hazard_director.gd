@@ -128,7 +128,8 @@ func _spawn_event(wave: int) -> void:
 	if wave >= 3:
 		options.append("laser" if bank else "acid")
 	if wave >= 5:
-		options.append("acid" if bank else "laser")
+		# В Банке кислоты нет: там парк и вода, вместо луж — второй лазер.
+		options.append("laser")
 		options.append("shells")
 	var pick: String = options.pick_random()
 	var exact := camping or randf() < 0.35

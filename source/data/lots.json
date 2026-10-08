@@ -1842,6 +1842,206 @@
     80,
     90
    ]
+  ],
+  "beer_corner": [
+   [
+    "s_plastic_tables",
+    0,
+    0
+   ],
+   [
+    "s_kegs",
+    -150,
+    -20
+   ],
+   [
+    "d_barrel",
+    140,
+    30
+   ],
+   [
+    "umbrella",
+    60,
+    -60
+   ]
+  ],
+  "rat_parking": [
+   [
+    "s_rat_car",
+    -110,
+    0
+   ],
+   [
+    "s_rat_van",
+    120,
+    -10
+   ],
+   [
+    "ledge_concrete",
+    0,
+    110
+   ],
+   [
+    "m1_tire",
+    -230,
+    70
+   ]
+  ],
+  "power_box": [
+   [
+    "s_transformer",
+    0,
+    0
+   ],
+   [
+    "s_wires",
+    140,
+    30
+   ],
+   [
+    "ledge_reactor",
+    -20,
+    100
+   ],
+   [
+    "d_crt",
+    -140,
+    40
+   ]
+  ],
+  "dock_corner": [
+   [
+    "s_fish_crates",
+    0,
+    0
+   ],
+   [
+    "s_anchor",
+    140,
+    10
+   ],
+   [
+    "d_crates",
+    -130,
+    40
+   ]
+  ],
+  "green_rest": [
+   [
+    "bush",
+    -110,
+    0
+   ],
+   [
+    "spruce",
+    0,
+    -50
+   ],
+   [
+    "bush_low",
+    110,
+    10
+   ],
+   [
+    "rocks",
+    40,
+    80
+   ]
+  ],
+  "pig_cafe": [
+   [
+    "s_cloche_tables",
+    0,
+    0
+   ],
+   [
+    "umbrella",
+    -110,
+    -20
+   ],
+   [
+    "s_cake_cart",
+    130,
+    10
+   ],
+   [
+    "planter",
+    0,
+    100
+   ]
+  ],
+  "pool_rest": [
+   [
+    "s_loungers",
+    -80,
+    0
+   ],
+   [
+    "s_pig_fountain",
+    100,
+    -10
+   ],
+   [
+    "planter",
+    -200,
+    30
+   ]
+  ],
+  "pig_parking": [
+   [
+    "s_sportscar",
+    -120,
+    0
+   ],
+   [
+    "s_limo",
+    120,
+    0
+   ],
+   [
+    "ledge_concrete",
+    0,
+    100
+   ]
+  ],
+  "golf_corner": [
+   [
+    "s_golf_cart",
+    -70,
+    0
+   ],
+   [
+    "s_golf_flag",
+    110,
+    -10
+   ],
+   [
+    "planter",
+    0,
+    90
+   ]
+  ],
+  "garden_rest": [
+   [
+    "planter",
+    -100,
+    0
+   ],
+   [
+    "planter",
+    100,
+    0
+   ],
+   [
+    "column",
+    0,
+    -60
+   ],
+   [
+    "umbrella",
+    0,
+    60
+   ]
   ]
  },
  "poi_sets": {
@@ -1932,6 +2132,305 @@
    "teller_kiosk",
    "rose_garden",
    "cafe_terrace"
+  ]
+ },
+ "sectors": {
+  "junkyard": [
+   {
+    "name": "park",
+    "ground": "res://assets/biome/sector_grass.png",
+    "r": [
+     300,
+     420
+    ],
+    "poi": [
+     "green_rest",
+     "grove",
+     "water_tower"
+    ],
+    "n": 2
+   },
+   {
+    "name": "cafe",
+    "ground": "res://assets/biome/sector_tiles.png",
+    "r": [
+     260,
+     340
+    ],
+    "poi": [
+     "beer_corner"
+    ],
+    "n": 2
+   },
+   {
+    "name": "lot",
+    "ground": "res://assets/biome/sector_asphalt.png",
+    "r": [
+     280,
+     380
+    ],
+    "poi": [
+     "rat_parking",
+     "checkpoint"
+    ],
+    "n": 2
+   },
+   {
+    "name": "grass",
+    "ground": "res://assets/biome/sector_grass.png",
+    "r": [
+     220,
+     320
+    ],
+    "poi": [
+     "green_rest"
+    ],
+    "n": 1
+   }
+  ],
+  "junkyard_2": [
+   {
+    "name": "park",
+    "ground": "res://assets/biome/sector_grass.png",
+    "r": [
+     300,
+     420
+    ],
+    "poi": [
+     "green_rest",
+     "grove"
+    ],
+    "n": 2
+   },
+   {
+    "name": "power",
+    "ground": "res://assets/biome/sector_asphalt.png",
+    "r": [
+     280,
+     360
+    ],
+    "poi": [
+     "power_box",
+     "power_crt"
+    ],
+    "n": 2
+   },
+   {
+    "name": "cafe",
+    "ground": "res://assets/biome/sector_tiles.png",
+    "r": [
+     260,
+     340
+    ],
+    "poi": [
+     "beer_corner"
+    ],
+    "n": 2
+   },
+   {
+    "name": "lot",
+    "ground": "res://assets/biome/sector_asphalt.png",
+    "r": [
+     280,
+     380
+    ],
+    "poi": [
+     "rat_parking"
+    ],
+    "n": 2
+   }
+  ],
+  "junkyard_3": [
+   {
+    "name": "park",
+    "ground": "res://assets/biome/sector_grass.png",
+    "r": [
+     300,
+     420
+    ],
+    "poi": [
+     "grove",
+     "green_rest"
+    ],
+    "n": 2
+   },
+   {
+    "name": "dock",
+    "ground": "res://assets/biome/sector_tiles.png",
+    "r": [
+     260,
+     340
+    ],
+    "poi": [
+     "dock_corner",
+     "fridge_dump"
+    ],
+    "n": 2
+   },
+   {
+    "name": "lot",
+    "ground": "res://assets/biome/sector_asphalt.png",
+    "r": [
+     280,
+     380
+    ],
+    "poi": [
+     "rat_parking"
+    ],
+    "n": 2
+   },
+   {
+    "name": "grass",
+    "ground": "res://assets/biome/sector_grass.png",
+    "r": [
+     220,
+     320
+    ],
+    "poi": [
+     "green_rest"
+    ],
+    "n": 1
+   }
+  ],
+  "bank": [
+   {
+    "name": "cafe",
+    "ground": "res://assets/biome/bank_path.png",
+    "r": [
+     260,
+     340
+    ],
+    "poi": [
+     "pig_cafe",
+     "cafe_terrace"
+    ],
+    "n": 2
+   },
+   {
+    "name": "pool",
+    "ground": "res://assets/biome/bank_plaza.png",
+    "r": [
+     260,
+     340
+    ],
+    "poi": [
+     "pool_rest"
+    ],
+    "n": 1
+   },
+   {
+    "name": "parking",
+    "ground": "res://assets/biome/sector_asphalt.png",
+    "r": [
+     260,
+     340
+    ],
+    "poi": [
+     "pig_parking"
+    ],
+    "n": 1
+   },
+   {
+    "name": "lawn",
+    "ground": "",
+    "r": [
+     260,
+     360
+    ],
+    "poi": [
+     "garden_rest"
+    ],
+    "n": 1
+   }
+  ],
+  "bank_2": [
+   {
+    "name": "cafe",
+    "ground": "res://assets/biome/bank_path.png",
+    "r": [
+     260,
+     340
+    ],
+    "poi": [
+     "pig_cafe",
+     "picnic_lawn"
+    ],
+    "n": 2
+   },
+   {
+    "name": "pool",
+    "ground": "res://assets/biome/bank_plaza.png",
+    "r": [
+     260,
+     340
+    ],
+    "poi": [
+     "pool_rest"
+    ],
+    "n": 2
+   },
+   {
+    "name": "lawn",
+    "ground": "",
+    "r": [
+     260,
+     360
+    ],
+    "poi": [
+     "garden_rest"
+    ],
+    "n": 1
+   }
+  ],
+  "bank_3": [
+   {
+    "name": "golf",
+    "ground": "",
+    "r": [
+     280,
+     380
+    ],
+    "poi": [
+     "golf_corner"
+    ],
+    "n": 2
+   },
+   {
+    "name": "cafe",
+    "ground": "res://assets/biome/bank_path.png",
+    "r": [
+     260,
+     340
+    ],
+    "poi": [
+     "pig_cafe"
+    ],
+    "n": 1
+   },
+   {
+    "name": "parking",
+    "ground": "res://assets/biome/sector_asphalt.png",
+    "r": [
+     260,
+     340
+    ],
+    "poi": [
+     "pig_parking"
+    ],
+    "n": 1
+   },
+   {
+    "name": "pool",
+    "ground": "res://assets/biome/bank_plaza.png",
+    "r": [
+     260,
+     340
+    ],
+    "poi": [
+     "pool_rest"
+    ],
+    "n": 1
+   }
   ]
  }
 }

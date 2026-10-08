@@ -774,11 +774,54 @@ class Armory:
 		var status_label := _note(status, 17, status_color)
 		status_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		column.add_child(status_label)
+		_add_quick_actions(column, base, owned, selected, tier)
 		panel.mouse_filter = Control.MOUSE_FILTER_STOP
 		panel.gui_input.connect(func(event: InputEvent) -> void:
 			if UiStyle.is_tap(event):
 				_open_detail(base.id, tier))
 		return panel
+
+	## Быстрые действия прямо на плитке, без захода в витрину: взять в руки, слить в следующий тир,
+	## докупить копию (копии нужны для слияния). Витрина по тапу по плитке осталась.
+	func _add_quick_actions(column: VBoxContainer, base: WeaponData, owned: bool, selected: bool, tier: int) -> void:
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 6)
+		if owned and not selected:
+			var equip := UiStyle.button("В РУКИ", base.get_rarity_color().darkened(0.35), 16, Vector2(0, 42))
+			equip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			equip.pressed.connect(func() -> void:
+				SaveService.set_selected_weapon(base.id, tier if base.has_tiers() else 1)
+				weapon_changed.emit(base.id)
+				_refresh())
+			row.add_child(equip)
+		if owned and base.has_tiers():
+			for t in range(1, WeaponData.MAX_TIER):
+				if SaveService.can_merge(base.id, t):
+					var merge := UiStyle.button("T%d → T%d" % [t, t + 1], Color("#7ed321").darkened(0.2), 16, Vector2(0, 42))
+					merge.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+					var from_tier := t
+					merge.pressed.connect(func() -> void:
+						if SaveService.merge(base.id, from_tier):
+							SoundManager.play(&"merge", 0.0, false)
+							if SaveService.get_selected_weapon() == base.id:
+								SaveService.set_selected_weapon(base.id, from_tier + 1)
+							weapon_changed.emit(base.id)
+							_refresh())
+					row.add_child(merge)
+					break
+		if Economy.is_buyable(base) and (owned or row.get_child_count() == 0):
+			var coins := Economy.shop_price(base)
+			var gems := Economy.shop_gem_price(base)
+			var with_gems := coins <= 0
+			var price := SaveService.format_coins(coins) if not with_gems else Economy.format_gems(gems)
+			var afford := (SaveService.get_coins() >= coins) if not with_gems else (SaveService.get_gems() >= gems)
+			var buy := UiStyle.button(("+КОПИЯ " if owned else "КУПИТЬ ") + price, Color("#e0a020") if afford else UiStyle.PANEL, 16, Vector2(0, 42))
+			buy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			buy.disabled = not afford
+			buy.pressed.connect(func() -> void: _buy(base, with_gems))
+			row.add_child(buy)
+		if row.get_child_count() > 0:
+			column.add_child(row)
 
 	func _note(text: String, size: int, color: Color) -> Label:
 		var label := UiStyle.label(text, size, color, 4)

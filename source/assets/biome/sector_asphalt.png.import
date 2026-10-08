@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dqxikkn42m15r"
-path="res://.godot/imported/ice_pump.png-98df721dac403b51285409ab5c3070f1.ctex"
+uid="uid://csu0jsrmxpnqs"
+path="res://.godot/imported/sector_asphalt.png-efb0afb3f4ef46839c45e768a6e2e7a6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/props/zones/ice_pump.png"
-dest_files=["res://.godot/imported/ice_pump.png-98df721dac403b51285409ab5c3070f1.ctex"]
+source_file="res://assets/biome/sector_asphalt.png"
+dest_files=["res://.godot/imported/sector_asphalt.png-efb0afb3f4ef46839c45e768a6e2e7a6.ctex"]
 
 [params]
 

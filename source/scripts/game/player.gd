@@ -103,6 +103,9 @@ func _init() -> void:
 	weapon_controller = WeaponController.new()
 	weapon_controller.position = Vector2(0, 4)
 	weapon_controller.muzzle_provider = visual.get_muzzle_global
+	var aim_line := AimLine.new()
+	aim_line.controller = weapon_controller
+	add_child(aim_line)
 	add_child(weapon_controller)
 	weapon_controller.weapon_changed.connect(_on_weapon_changed)
 	weapon_controller.fired.connect(_on_fired)

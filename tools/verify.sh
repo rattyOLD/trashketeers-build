@@ -44,6 +44,11 @@ XDG_DATA_HOME="$LOG/levelup-user" xvfb-run -a -s "-screen 0 1700x900x24" "$GODOT
 if ! grep -q 'LEVELUP_LAYOUT failures=0' "$LOG/levelup.log" || grep -q 'SCRIPT ERROR' "$LOG/levelup.log"; then
   fail=1
 fi
+# Узкий телефон (iPhone в «альбомной» вкладке): окно должно ужаться и встать по центру.
+XDG_DATA_HOME="$LOG/levelup-narrow-user" xvfb-run -a -s "-screen 0 1700x900x24" "$GODOT" --rendering-driver opengl3 --resolution 923x420 --path $P res://test/levelup_layout_test.tscn > "$LOG/levelup-narrow.log" 2>&1
+if ! grep -q 'LEVELUP_LAYOUT failures=0' "$LOG/levelup-narrow.log" || grep -q 'SCRIPT ERROR' "$LOG/levelup-narrow.log"; then
+  fail=1
+fi
 for m in survival story raid mod:blast; do
   MODE=$m DURATION=45 timeout 300 xvfb-run -a -s "-screen 0 1280x1400x24" "$GODOT" --rendering-driver opengl3 \
     --resolution 1280x720 --path $P res://test/mode_audit.tscn > "$LOG/$m.log" 2>&1

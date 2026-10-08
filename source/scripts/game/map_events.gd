@@ -241,7 +241,7 @@ func _drop_coins() -> void:
 
 func _leak() -> void:
 	var placed := 0
-	for i in pools.size():
+	for i in (pools.size() if map.layout != "bank" else 0):
 		var at := map.find_spawn_point(player.global_position, 200.0 + 60.0 * i, 460.0, 60.0)
 		if at == Vector2.INF:
 			continue

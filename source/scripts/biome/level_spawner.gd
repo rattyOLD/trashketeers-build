@@ -182,6 +182,9 @@ func surface_at(p: Vector2) -> StringName:
 			return kind
 	if boss_rect.has_point(p):
 		return &"stone" if layout == "bank" else &"metal"
+	for sec: Array in _sectors:
+		if p.distance_to(sec[0]) < float(sec[1]):
+			return sec[2]
 	if layout == "bank":
 		if _park != null and _park.distance_to(p) < _park.width * 0.5:
 			return &"stone"
@@ -368,6 +371,8 @@ var _story_gaps: Array = []
 var _noise := _make_noise()
 var _park: ParkPaths
 var _river_points := PackedVector2Array()
+## Секторы выживания: [центр, радиус].
+var _sectors: Array = []
 var _river_side := 1.0
 var river: AcidRiver
 const POI_SPACING := 560.0
@@ -530,6 +535,25 @@ func _cells_rect(cell: Vector2i, size_cells: Vector2i) -> Rect2:
 ## Земля Свалки во всех режимах — асфальт района Астры в трещинах (лужи, решётки, мусор): одна
 ## тайловая картинка на всю карту, как за забором — арена и район один мир.
 const JUNK_GROUND := "res://assets/district/junkyard/rats_ground_tile.png"
+const GROUND_SCALE := 1.35
+static var _calm: Shader
+
+
+static func _calm_shader() -> Shader:
+	if _calm == null:
+		_calm = Shader.new()
+		_calm.code = """
+shader_type canvas_item;
+void fragment() {
+	vec4 c = texture(TEXTURE, UV);
+	float l = dot(c.rgb, vec3(0.3, 0.55, 0.15));
+	vec3 grey = vec3(l);
+	vec3 rgb = mix(grey, c.rgb, 0.55);
+	rgb = mix(vec3(0.22, 0.2, 0.3), rgb, 0.72);
+	COLOR = vec4(rgb * vec3(0.92, 0.9, 1.0), c.a);
+}
+"""
+	return _calm
 
 
 func _build_floor() -> void:
@@ -541,8 +565,15 @@ func _build_floor() -> void:
 		ground.region_rect = Rect2(bounds.position, bounds.size)
 		ground.centered = false
 		ground.position = bounds.position
-		ground.modulate = Color(0.9, 0.88, 0.94)
 		ground.light_mask = BiomeLayers.LIGHT_MASK_FLOOR
+		# Земля спокойнее: приглушённые цвета и пониже контраст, крупнее рисунок (меньше повторов) —
+		# лужи и мусор на ней больше не рябят в глазах и не спорят с врагами.
+		ground.scale = Vector2.ONE * GROUND_SCALE
+		ground.region_rect = Rect2(bounds.position / GROUND_SCALE, bounds.size / GROUND_SCALE)
+		ground.position = bounds.position
+		var calm := ShaderMaterial.new()
+		calm.shader = _calm_shader()
+		ground.material = calm
 		_own(ground, self)
 		_add_macro_overlay(float(chapter.get("macro", 1.0)))
 		return
@@ -1424,13 +1455,15 @@ func _build_organic() -> void:
 	var target := int(round(7.5 * _area_scale))
 	var bag: Array = []
 	var center := Vector2(0, _origin.y + grid_size.y * 0.5 * CELL)
+	_build_sectors(root, defs, area, center)
+	target += _cover_spots.size()
 	for attempt in 2500:
 		if _cover_spots.size() >= target:
 			break
 		var p := Vector2(randf_range(area.position.x, area.end.x), randf_range(area.position.y, area.end.y)).snapped(Vector2(16, 16))
 		if _density(p) < POI_OPEN or not _cover_allowed(p, 120.0) or p.distance_to(center) < 420.0 or boss_rect.grow(300.0).has_point(p):
 			continue
-		if not _scene_spacing_ok_by(p, POI_SPACING):
+		if not _scene_spacing_ok_by(p, POI_SPACING) or _in_sector(p, 140.0):
 			continue
 		if layout == "bank" and (zone_at(p) != Zone.LAWN or (_park != null and _park.distance_to(p) < 260.0)):
 			continue
@@ -1441,6 +1474,64 @@ func _build_organic() -> void:
 		if not poi.is_empty() and _build_poi(poi, p):
 			_cover_spots.append(p)
 	_scatter_singles(area, center)
+
+
+## Секторы выживания: мини-парки, кафе, стоянки, полянки — у каждого своё покрытие и свои предметы
+## (data/lots.json → sectors по главе). Ставятся первыми, общий разброс обходит их.
+func _build_sectors(root: Dictionary, defs: Dictionary, area: Rect2, center: Vector2) -> void:
+	_sectors.clear()
+	var all: Dictionary = root.get("sectors", {})
+	var themes: Array = all.get(str(chapter.get("id", "")), all.get(layout, []))
+	if themes.is_empty():
+		return
+	var queue: Array = []
+	for theme: Dictionary in themes:
+		for i in int(theme.get("n", 1)):
+			queue.append(theme)
+	queue.shuffle()
+	var rng_seed := randi()
+	for theme: Dictionary in queue:
+		var r_range: Array = theme.get("r", [280, 360])
+		var radius := randf_range(float(r_range[0]), float(r_range[1]))
+		for attempt in 200:
+			var p := Vector2(randf_range(area.position.x + radius, area.end.x - radius), randf_range(area.position.y + radius * 0.8, area.end.y - radius * 0.8)).snapped(Vector2(16, 16))
+			if p.distance_to(center) < 420.0 + radius or p.distance_to(player_start) < 200.0 + radius or boss_rect.grow(radius + 160.0).has_point(p):
+				continue
+			if not _cover_allowed(p, radius * 0.6) or _in_sector(p, radius + 120.0):
+				continue
+			if _park != null and _park.distance_to(p) < radius + 60.0:
+				continue
+			var ground := str(theme.get("ground", ""))
+			_sectors.append([p, radius, &"grass" if ground.contains("grass") or ground.is_empty() else (&"asphalt" if ground.contains("asphalt") else &"stone")])
+			if not ground.is_empty() and ResourceLoader.exists(ground):
+				var patch := SectorPatch.new()
+				_own(patch, _layers.floor_layer)
+				var grass := ground.contains("grass")
+				var tint := Color(0.92, 0.9, 0.94)
+				if layout != "bank" and grass:
+					tint = Color(0.5, 0.62, 0.52)
+				elif layout == "bank" and ground.contains("asphalt"):
+					# Тёмный асфальт Свалки в солнечном Банке — светло-серая парковка.
+					tint = Color(2.6, 2.6, 2.7)
+				patch.build(p, radius, load(ground) as Texture2D, tint, Color("#c9962e") if layout == "bank" else Color("#4a4766"), rng_seed + _sectors.size())
+			var pois: Array = theme.get("poi", [])
+			var placed := 0
+			for k in 8:
+				if placed >= 2 or pois.is_empty():
+					break
+				var at := p + Vector2.from_angle(randf() * TAU) * randf_range(0.0, radius * 0.45)
+				var items: Array = defs.get(str(pois[placed % pois.size()]), [])
+				if not items.is_empty() and _scene_spacing_ok_by(at, 260.0) and _build_poi(items, at.snapped(Vector2(16, 16))):
+					_cover_spots.append(at)
+					placed += 1
+			break
+
+
+func _in_sector(p: Vector2, pad: float) -> bool:
+	for s: Array in _sectors:
+		if p.distance_to(s[0]) < float(s[1]) + pad:
+			return true
+	return false
 
 
 func _scene_spacing_ok_by(p: Vector2, spacing: float) -> bool:
@@ -1494,7 +1585,7 @@ func _scatter_singles(area: Rect2, center: Vector2) -> void:
 				continue
 			if not _scene_spacing_ok_by(p, 300.0):
 				continue
-			if (layout == "bank" and zone_at(p) == Zone.FLOOR) or (_park != null and _park.distance_to(p) < 140.0):
+			if (layout == "bank" and zone_at(p) == Zone.FLOOR) or (_park != null and _park.distance_to(p) < 140.0) or _in_sector(p, 40.0):
 				continue
 			if randf() < 0.5:
 				_in_scene = true

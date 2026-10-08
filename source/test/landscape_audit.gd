@@ -66,6 +66,9 @@ func _run() -> void:
 			for count in [2, 3]:
 				var areas: Array[Rect2] = []
 				for id in Controls.ELEMENTS:
+					# «Дома» стиков — не кнопки: могут лежать где угодно, в том числе под кнопками.
+					if id == "move" or id == "aim":
+						continue
 					var control := Control.new()
 					var base := BattleControls.slots_base_size(count) if id == "slots" else Vector2.ZERO
 					Controls.place(control, id, Vector2(1280, 720), base)

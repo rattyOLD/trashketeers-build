@@ -35,18 +35,24 @@ func _run() -> void:
 		game._open_level_up()
 		await _wait(1.0)
 		var box: Control = game.hud._level_up._box
-		var r := box.get_global_rect()
+		var r := _rect(box)
 		_check(r, view)
 		game.hud._level_up._armed_at = 0
 		if round < 3:
 			game.hud._level_up.reroll_requested.emit()
 			await _wait(0.6)
-			r = box.get_global_rect()
+			r = _rect(box)
 			_check(r, view)
 		game.hud._level_up._pick(0)
 		await _wait(0.5)
 	print("LEVELUP_LAYOUT failures=%d" % failures)
 	get_tree().quit()
+
+
+## Экранный прямоугольник с учётом масштаба обёртки (узкий экран ужимает окно).
+func _rect(box: Control) -> Rect2:
+	var xf := box.get_global_transform()
+	return Rect2(xf.origin, box.size * xf.get_scale())
 
 
 func _check(r: Rect2, view: Vector2) -> void:

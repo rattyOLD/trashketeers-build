@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dgd88vm6jibl2"
-path="res://.godot/imported/ice_icicle_rack.png-ceb09b7ec741c4a72572c88123c0d0cb.ctex"
+uid="uid://dp55xcob7fvi8"
+path="res://.godot/imported/sector_tiles.png-6faf3c1a780f0cc14bd8094a508c217d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/props/zones/ice_icicle_rack.png"
-dest_files=["res://.godot/imported/ice_icicle_rack.png-ceb09b7ec741c4a72572c88123c0d0cb.ctex"]
+source_file="res://assets/biome/sector_tiles.png"
+dest_files=["res://.godot/imported/sector_tiles.png-6faf3c1a780f0cc14bd8094a508c217d.ctex"]
 
 [params]
 
