@@ -148,6 +148,7 @@ func clear() -> void:
 	_cover_spots.clear()
 	_destr_done.clear()
 	_puddles.clear()
+	_lots.clear()
 	gate_rects.clear()
 	story_gates.clear()
 	story_cells.clear()
@@ -315,6 +316,11 @@ var _lane_wide := 0.0
 var _road_x: Array[int] = []
 var _road_y: Array[int] = []
 var _district_theme: Array[String] = []
+## Прямоугольники собранных кварталов: остаток разрушаемого и мусор ставятся только в них.
+var _lots: Array[Rect2] = []
+## Ряды стен сюжетной карты (клетки): между ними — комнаты, в комнате два двора по сторонам дороги.
+var _story_rows: Array[int] = []
+const LOTS_PATH := "res://data/lots.json"
 
 
 ## Каждый забег двигает и утолщает дорожки, поэтому даже одна и та же глава каждый раз выглядит иначе.
@@ -722,8 +728,10 @@ func _build_story_walls() -> void:
 	rows.append([RING_TOP + _boss_cells.y, "boss", w / 2 - DOOR_GAP / 2])
 	var body := StaticBody2D.new()
 	body.collision_layer = PhysicsLayers.WORLD
+	_story_rows.clear()
 	for entry in rows:
 		var row: int = entry[0]
+		_story_rows.append(row)
 		var gap_x: int = entry[2]
 		_wall_block(body, Rect2i(RING_SIDE, row, gap_x - RING_SIDE, WALL_THICK))
 		_wall_block(body, Rect2i(gap_x + DOOR_GAP, row, w - RING_SIDE - gap_x - DOOR_GAP, WALL_THICK))
@@ -1014,6 +1022,8 @@ func _build_scenes() -> void:
 	if not _road_x.is_empty():
 		_build_districts(library, area)
 		return
+	if not _story.is_empty() and _build_story_lots():
+		return
 	var entries: Array = chapter.get("scenes", []).duplicate()
 	entries.shuffle()
 	for index in entries.size():
@@ -1035,35 +1045,45 @@ func _build_scenes() -> void:
 				done += 1
 
 
-## Районы: у каждого своя тема (сцена из списка главы), её группы стоят у дорог своего района.
-## Центральный район — площадь с граффити, нижний средний — старт: там пусто.
+## Районы-кварталы: у каждого своя тема (из сцен главы), и квартал собирается по планировке из
+## data/lots.json — ряды контейнеров, мусорный переулок вдоль бордюра, шиномонтаж, газон с пикником,
+## всё по осям квартала и с проходами. Центр (площадь), квартал под помостом босса и стартовый — пустые.
 func _build_districts(library: Dictionary, area: Rect2) -> void:
+	var lots_root: Dictionary = ConfigLoader.load_json(LOTS_PATH)
+	var lots: Dictionary = lots_root.get("lots", {})
 	var themes: Array = []
 	for entry: Array in chapter.get("scenes", []):
-		if library.has(str(entry[0])):
-			themes.append(str(entry[0]))
+		var key := str(entry[0])
+		if (lots.has(key) or library.has(key)) and not themes.has(key):
+			themes.append(key)
+	for key in lots_root.get("extra", {}).get(layout, []):
+		if lots.has(key) and not themes.has(key):
+			themes.append(key)
 	if themes.is_empty():
 		return
 	themes.shuffle()
 	_district_theme.clear()
 	var center := DISTRICTS * DISTRICTS / 2
 	var start := _district_of(player_start)
+	var boss := _district_of(boss_rect.get_center() + Vector2(0, boss_rect.size.y))
 	var next := 0
 	for d in DISTRICTS * DISTRICTS:
-		if d == center or d == start:
+		if d == center or d == start or d == boss:
 			_district_theme.append("")
 		else:
 			_district_theme.append(str(themes[next % themes.size()]))
 			next += 1
-	var per := maxi(int(round(3.0 * _area_scale / 1.6)), 3)
 	for d in _district_theme.size():
 		var theme := _district_theme[d]
 		if theme.is_empty():
 			continue
+		if lots.has(theme):
+			_build_lot(lots[theme], _lot_rect(d), str(lots_root.get("frame", {}).get(layout, "")))
+			continue
 		var scene: Dictionary = library[theme]
 		var done := 0
 		for attempt in 160:
-			if done >= per:
+			if done >= 3:
 				break
 			var p := _district_point(d, area)
 			if p == Vector2.INF or not _scene_spacing_ok(p):
@@ -1071,6 +1091,120 @@ func _build_districts(library: Dictionary, area: Rect2) -> void:
 			if _place_scene(scene, p):
 				_cover_spots.append(p)
 				done += 1
+
+
+## Сюжет: каждая комната между стенами — два двора слева и справа от центральной дороги, темы по кругу.
+func _build_story_lots() -> bool:
+	var lots_root: Dictionary = ConfigLoader.load_json(LOTS_PATH)
+	var lots: Dictionary = lots_root.get("lots", {})
+	var themes: Array = []
+	for entry: Array in chapter.get("scenes", []):
+		if lots.has(str(entry[0])) and not themes.has(str(entry[0])):
+			themes.append(str(entry[0]))
+	for key in lots_root.get("extra", {}).get(layout, []):
+		if lots.has(key) and not themes.has(key):
+			themes.append(key)
+	if themes.is_empty() or _story_rows.is_empty():
+		return false
+	themes.shuffle()
+	var frame := str(lots_root.get("frame", {}).get(layout, ""))
+	var rows := _story_rows.duplicate()
+	rows.append(grid_size.y - RING_BOTTOM)
+	rows.sort()
+	var cx := grid_size.x / 2
+	var road := 5 if layout == "bank" else 4
+	var next := 0
+	for i in rows.size() - 1:
+		var top: int = rows[i] + WALL_THICK + 2
+		var bottom: int = rows[i + 1] - 2
+		if bottom - top < 8:
+			continue
+		for span in [Vector2i(RING_SIDE + 1, cx - road), Vector2i(cx + road, grid_size.x - RING_SIDE - 1)]:
+			var rect := Rect2(_origin + Vector2(span.x, top) * CELL, Vector2(span.y - span.x, bottom - top) * CELL)
+			_build_lot(lots[themes[next % themes.size()]], rect, frame)
+			next += 1
+	return true
+
+
+## Прямоугольник квартала d без дорог и тротуара (мировые координаты).
+func _lot_rect(d: int) -> Rect2:
+	var col := d % DISTRICTS
+	var row := d / DISTRICTS
+	var road := 4 if layout != "bank" else 3
+	var side := RING_SIDE + (4 if layout == "bank" else 1)
+	var left := side if col == 0 else _road_x[col - 1] + road
+	var right := grid_size.x - side if col == DISTRICTS - 1 else _road_x[col] - road
+	var top := RING_TOP + _boss_cells.y + 2 if row == 0 else _road_y[row - 1] + road
+	var bottom := grid_size.y - RING_BOTTOM - 2 if row == DISTRICTS - 1 else _road_y[row] - road
+	return Rect2(_origin + Vector2(left, top) * CELL, Vector2(right - left, bottom - top) * CELL)
+
+
+## Квартал по планировке: каждый предмет — на своей доле прямоугольника, ряды — с шагом вдоль линии.
+## Планировка случайно зеркалится; если предмет не влез (занято), квартал просто без него.
+func _build_lot(plan: Array, rect: Rect2, frame: String = "") -> void:
+	if rect.size.x < CELL * 5 or rect.size.y < CELL * 5:
+		return
+	var flip_u := randf() < 0.5
+	var flip_v := randf() < 0.5
+	var at := func(u: float, v: float) -> Vector2:
+		var uu := 1.0 - u if flip_u else u
+		var vv := 1.0 - v if flip_v else v
+		return (rect.position + Vector2(uu, vv) * rect.size).snapped(Vector2(16.0, 16.0))
+	_in_scene = true
+	if not frame.is_empty():
+		# Ограда двора вдоль дальнего края (после зеркала — ближнего), проход посередине и по краям.
+		var step := ArenaProp.visual_size(frame).x * 0.92
+		var y: float = at.call(0.5, -0.02).y
+		var count := int(rect.size.x / step)
+		var left := rect.get_center().x - step * (count - 1) * 0.5
+		for k in count:
+			if k == count / 2 and count >= 4:
+				continue
+			_lot_item(frame, Vector2(left + step * k, y).snapped(Vector2(16, 16)))
+	for item: Array in plan:
+		if str(item[0]) == "row":
+			var from: Vector2 = at.call(float(item[2]), float(item[3]))
+			var to: Vector2 = at.call(float(item[4]), float(item[5]))
+			var count := maxi(int(from.distance_to(to) / float(item[6])) + 1, 1)
+			for k in count:
+				var t := 0.5 if count == 1 else float(k) / float(count - 1)
+				_lot_item(str(item[1]), from.lerp(to, t))
+		else:
+			_lot_item(str(item[0]), at.call(float(item[1]), float(item[2])))
+	_in_scene = false
+	_cover_spots.append(rect.get_center())
+	_lots.append(rect)
+	_lot_ground(rect)
+
+
+## Двор Свалки — земля района Астры (асфальт в трещинах, лужи, мусор), как за забором: карта и фон — один мир.
+func _lot_ground(rect: Rect2) -> void:
+	var path := "res://assets/district/junkyard/rats_ground_tile.png" if layout == "junkyard" else ""
+	if path.is_empty():
+		return
+	var ground := Sprite2D.new()
+	ground.texture = load(path) as Texture2D
+	ground.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+	ground.region_enabled = true
+	var area := rect.grow(CELL * 0.75)
+	ground.region_rect = Rect2(area.position, area.size)
+	ground.centered = false
+	ground.position = area.position
+	ground.modulate = Color(0.95, 0.92, 1.0, 0.9)
+	ground.light_mask = BiomeLayers.LIGHT_MASK_FLOOR
+	_own(ground, _layers.floor_layer)
+
+
+func _lot_item(id: String, p: Vector2) -> bool:
+	if p.distance_to(player_start) < 200.0:
+		return false
+	var ok := false
+	if not ArenaProp.get_def(id).has("destructible"):
+		ok = _place_prop(p, id, true) != null
+	elif _place_destructible(p, id) != null:
+		_destr_done[id] = int(_destr_done.get(id, 0)) + 1
+		ok = true
+	return ok
 
 
 ## Точка в районе d у его дороги (2–5 клеток от линии дороги), по сетке 32 px.
@@ -1180,7 +1314,9 @@ func _build_destructibles() -> void:
 			if done >= need:
 				break
 			var p: Vector2
-			if not _cover_spots.is_empty() and (chapter.has("scenes") or (prop_id == "d_barrel" and randf() < 0.6)):
+			if not _lots.is_empty():
+				p = _lot_edge_point(_lots.pick_random())
+			elif not _cover_spots.is_empty() and (chapter.has("scenes") or (prop_id == "d_barrel" and randf() < 0.6)):
 				p = _cover_spots.pick_random() + Vector2(randf_range(-190, 190), randf_range(50, 130))
 			else:
 				p = Vector2(randf_range(area.position.x, area.end.x), randf_range(area.position.y, area.end.y))
@@ -1198,9 +1334,25 @@ func _build_destructibles() -> void:
 				done += 1
 
 
+## Точка у края квартала (у забора двора / бордюра): бочки и ящики стоят вдоль стен, а не посреди двора.
+func _lot_edge_point(rect: Rect2) -> Vector2:
+	var inner := rect.grow(-28.0)
+	var t := randf()
+	match randi() % 4:
+		0:
+			return Vector2(lerpf(inner.position.x, inner.end.x, t), inner.position.y).snapped(Vector2(16, 16))
+		1:
+			return Vector2(lerpf(inner.position.x, inner.end.x, t), inner.end.y).snapped(Vector2(16, 16))
+		2:
+			return Vector2(inner.position.x, lerpf(inner.position.y, inner.end.y, t)).snapped(Vector2(16, 16))
+	return Vector2(inner.end.x, lerpf(inner.position.y, inner.end.y, t)).snapped(Vector2(16, 16))
+
+
 func _build_decor() -> void:
 	var area := _interior_rect()
-	for id in chapter.get("flat", []):
+	if not _lots.is_empty():
+		_build_lot_flats()
+	for id in ([] if not _lots.is_empty() else chapter.get("flat", [])):
 		for n in 1:
 			for attempt in 30:
 				var p := _near_scene_point(area, 160.0, 320.0)
@@ -1236,6 +1388,21 @@ func _build_decor() -> void:
 				vent.position = p
 				_own(vent, _layers.decals)
 				break
+
+
+## Обломки (плоские пропы) в кварталах: по одному у угла двора, не посреди прохода.
+func _build_lot_flats() -> void:
+	var flats: Array = chapter.get("flat", []).duplicate()
+	flats.shuffle()
+	for i in mini(_lots.size(), flats.size()):
+		var rect := _lots[i].grow(-70.0)
+		var corner := Vector2(rect.position.x if randf() < 0.5 else rect.end.x, rect.position.y if randf() < 0.5 else rect.end.y)
+		if not is_area_clear(corner, CELL * 1.4):
+			continue
+		var prop := ArenaProp.new()
+		prop.position = corner
+		prop.setup(str(flats[i]), false)
+		_own(prop, _layers.decals)
 
 
 ## Точка в кольце min..max вокруг случайной уже поставленной сцены (без сцен — случайная по арене).
