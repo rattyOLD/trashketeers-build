@@ -18,7 +18,7 @@ func _ready() -> void:
 			v.melee_active = true
 			v.melee_offset = [0.0, -0.9, 0.9, 0.3][i]
 		add_child(v)
-		v.apply_look(CharacterDB.get_character("raccoon"), {})
+		v.apply_look(CharacterDB.get_character(OS.get_environment("SHOT_H") if OS.get_environment("SHOT_H") != "" else "raccoon"), {})
 		for k in 40:
 			v.update_motion(poses[i][0], poses[i][1], 0.03)
 	await get_tree().create_timer(0.3).timeout

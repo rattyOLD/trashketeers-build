@@ -26,7 +26,8 @@
       "lore": "Знает каждую щель на Неоновой Свалке. Крысы зовут его Бродягой и только шёпотом. Десять лет назад был капитаном «Особой Семёрки», отряда, которого боялись даже те, кто никого не боялся.",
       "sprite": {
         "path": "res://assets/heroes/raccoon_hero.png",
-        "clips": "res://assets/heroes/raccoon_",
+        "clips": "res://assets/heroes/tactical/raccoon_",
+        "clips_grip": "res://data/grip_raccoon.json",
         "cells": 4,
         "cell_w": 384,
         "cell_h": 288,
@@ -101,6 +102,8 @@
       "portrait": "res://assets/ui/portraits/red_panda.png",
       "sprite": {
         "path": "res://assets/heroes/red_panda.png",
+        "clips": "res://assets/heroes/tactical/red_panda_",
+        "clips_grip": "res://data/grip_red_panda.json",
         "cells": 4,
         "cell_w": 384,
         "cell_h": 288,
@@ -182,6 +185,8 @@
       "portrait": "res://assets/ui/portraits/snow.png",
       "sprite": {
         "path": "res://assets/heroes/snow.png",
+        "clips": "res://assets/heroes/tactical/snow_",
+        "clips_grip": "res://data/grip_snow.json",
         "cells": 4,
         "cell_w": 384,
         "cell_h": 288,

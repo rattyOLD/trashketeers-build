@@ -279,10 +279,11 @@ func _enter_hero(cfg: Dictionary) -> void:
 
 ## Листы Astры (RGBA, 8+8+4 кадра) и точки хвата. false — файлов нет, остаёмся на старом теле.
 func _load_clips(prefix: String) -> bool:
-	if not _clip_cache.is_empty():
-		_clip_frames = _clip_cache["frames"]
-		_clip_grip = _clip_cache["grip"]
-		_clip_hands = _clip_cache["hands"]
+	if _clip_cache.has(prefix):
+		var cached: Dictionary = _clip_cache[prefix]
+		_clip_frames = cached["frames"]
+		_clip_grip = cached["grip"]
+		_clip_hands = cached["hands"]
 		return true
 	var frames: Dictionary = {}
 	for clip: String in CLIP_COUNTS:
@@ -297,7 +298,7 @@ func _load_clips(prefix: String) -> bool:
 			atlas.region = Rect2((i % 4) * CLIP_CELL.x, (i / 4) * CLIP_CELL.y, CLIP_CELL.x, CLIP_CELL.y)
 			list.append(atlas)
 		frames[clip] = list
-	var grip_path := "res://data/raccoon_grip.json"
+	var grip_path := str(_hero_cfg.get("clips_grip", "res://data/raccoon_grip.json"))
 	var grip: Dictionary = {}
 	if FileAccess.file_exists(grip_path):
 		var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(grip_path))
@@ -315,7 +316,8 @@ func _load_clips(prefix: String) -> bool:
 			hand_atlas.region = Rect2((i % 4) * CLIP_CELL.x, (i / 4) * CLIP_CELL.y, CLIP_CELL.x, CLIP_CELL.y)
 			hand_list.append(hand_atlas)
 		hands[clip] = hand_list
-	_clip_cache = {"frames": frames, "grip": grip, "hands": hands}
+	# Кэш по префиксу: у каждого героя свои листы (в видеопамяти держим только выбранных).
+	_clip_cache[prefix] = {"frames": frames, "grip": grip, "hands": hands}
 	_clip_frames = frames
 	_clip_grip = grip
 	_clip_hands = hands
