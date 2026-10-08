@@ -53,6 +53,10 @@ var _thermos_button: Button
 var _debug := false
 
 
+
+func _threat_direction() -> Vector2:
+	return player.global_position.direction_to(dragon.global_position) if dragon != null and is_instance_valid(dragon) else Vector2.ZERO
+
 func start(_weapon_id: StringName = &"") -> void:
 	randomize()
 	_build_layers()

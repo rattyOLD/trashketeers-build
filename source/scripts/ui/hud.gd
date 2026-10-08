@@ -22,6 +22,7 @@ signal revive_declined
 
 var joystick: VirtualJoystick
 var aim_stick: AimStick
+var combat_feed: CombatFeed
 
 var _root: Control
 var _hp_bar: HudWidgets.OutlineBar
@@ -134,6 +135,8 @@ func build(currency_icon: Texture2D, weapon: WeaponData) -> void:
 	# Под кнопками: касание кнопки забирает интерфейс, стик получает только пустое место.
 	aim_stick = AimStick.new()
 	_root.add_child(aim_stick)
+	combat_feed = CombatFeed.new()
+	_root.add_child(combat_feed)
 
 	var top: Control = _root
 	if Orient.portrait:
@@ -349,6 +352,8 @@ func set_health(hp: float, max_hp: float) -> void:
 	var healed := _hp_last >= 0.0 and hp > _hp_last + max_hp * 0.2
 	_hp_last = hp
 	_low_hp = max_hp > 0.0 and hp / max_hp < 0.3 and hp > 0.0
+	if combat_feed != null:
+		combat_feed.set_low_hp(clampf((0.3 - hp / max_hp) / 0.3 + 0.35, 0.0, 1.0) if _low_hp else 0.0)
 	if _barks != null:
 		if _low_hp and not _low_said:
 			_low_said = true

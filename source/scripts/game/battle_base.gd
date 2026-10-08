@@ -682,12 +682,18 @@ func _on_explosion(at: Vector2, radius: float, color: Color, _team: Bullet.Team)
 
 
 func _on_player_damaged(_amount: float) -> void:
+	hud.combat_feed.damage_from(_threat_direction())
 	add_shake(0.4)
 	fx.burst(player.global_position, UiStyle.DANGER, 10, 240.0, 3.5)
 	atmosphere.flash(Color(1.0, 0.1, 0.15), 0.18, 0.25)
 	atmosphere.hit_pulse(1.0)
 	SoundManager.play(&"player_hurt")
 	hitstop(0.05)
+
+
+## Откуда пришёл удар (для красной дуги у края экрана); режимы без списка врагов возвращают ZERO.
+func _threat_direction() -> Vector2:
+	return Vector2.ZERO
 
 
 ## round_up — для обратного отсчёта, чтобы «0:00» появлялось ровно в момент окончания.

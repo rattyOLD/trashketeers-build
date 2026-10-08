@@ -86,7 +86,7 @@ var _adrenaline_left := ADRENALINE_TIME
 var _combo := 0
 ## Серия убийств подряд (окно MULTI_WINDOW): на порогах — выкрик над енотом, звук и встряска.
 const MULTI_WINDOW := 0.55
-const MULTI_CALLS := {3: "ТРОЙНОЕ!", 5: "РЕЗНЯ!", 8: "МЯСОРУБКА!", 12: "АПОКАЛИПСИС!"}
+const MULTI_CALLS := {2: "ДВОЙНОЕ!", 3: "ТРОЙНОЕ!", 5: "РЕЗНЯ!", 8: "МЯСОРУБКА!", 12: "АПОКАЛИПСИС!"}
 var _multi := 0
 ## Для отчёта о забеге (баланс): здоровье в % на старте каждой волны и полученный урон по источникам.
 var _wave_hp := PackedStringArray()
@@ -777,15 +777,21 @@ func _split_enemy(enemy: Enemy, at: Vector2) -> void:
 var _torch_depth := 0
 
 
+func _threat_direction() -> Vector2:
+	var near := enemies.find_nearest(player.global_position, 700.0)
+	return player.global_position.direction_to(near.global_position) if near != null else Vector2.ZERO
+
+
 func _count_multikill() -> void:
 	_multi = _multi + 1 if _multi_left > 0.0 else 1
 	_multi_left = MULTI_WINDOW
 	if not MULTI_CALLS.has(_multi):
 		return
 	var heat := minf(_multi / 12.0, 1.0)
-	fx.callout(player.global_position + Vector2(0, -175), MULTI_CALLS[_multi], Color("#ffd257").lerp(Color("#ff3b30"), heat), 30.0 + 8.0 * heat)
-	SoundManager.play(&"k_perfect")
-	add_shake(0.12)
+	hud.combat_feed.medal(MULTI_CALLS[_multi], heat)
+	if _multi >= 3:
+		SoundManager.play(&"k_perfect")
+		add_shake(0.12)
 
 
 func _on_enemy_died(enemy: Enemy) -> void:
@@ -811,6 +817,12 @@ func _on_enemy_died(enemy: Enemy) -> void:
 		var wave := maxi(director.wave_number, 1)
 		BulletPool.explode(at, RunMods.BLAST_RADIUS, RunMods.BLAST_DAMAGE_BASE + RunMods.BLAST_DAMAGE_PER_WAVE * wave, Bullet.Team.ENEMY, Color("#ff7a3d"), 1.0)
 	kills += 1
+	if data.is_boss():
+		hud.combat_feed.kill(500, "БОСС", Color("#ff7ae0"))
+	elif data.max_hp >= 120.0:
+		hud.combat_feed.kill(25, "ЭЛИТА", Color("#ffd257"))
+	else:
+		hud.combat_feed.kill(10, "УБИЙСТВО")
 	hero_skills.on_kill()
 	fx.hitmarker(body, 2)
 	SoundManager.play(&"k_combo")
