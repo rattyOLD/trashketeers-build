@@ -120,7 +120,7 @@ func build(layout: String, chapter_id: String, bounds: Rect2, inner: Rect2, gate
 	_backdrop_row(buildings, small, view.position.x, view.end.x, inner.position.y - 215.0, 0.72)
 	# Низ: забор по краю, за ним (ближе к камере) машины и объекты — без зрителей: там кнопки.
 	_fence_row(fence_h, inner.position.x - 40.0, inner.end.x + 40.0, inner.end.y + 92.0)
-	_backdrop_row(small, small, view.position.x, view.end.x, inner.end.y + 200.0, 0.62)
+	_backdrop_row(buildings, small, view.position.x, view.end.x, inner.end.y + 200.0, 0.55)
 	# Бока: забор столбом по краю площадки (проход у ворот), зрители в два столбца, дома дальше.
 	for side: float in [-1.0, 1.0]:
 		var edge: float = inner.position.x if side < 0.0 else inner.end.x
@@ -292,8 +292,15 @@ func _spectator(path: String, foot: Vector2) -> void:
 
 func _backdrop_row(big: Array[String], small: Array[String], from_x: float, to_x: float, foot_y: float, scale_k: float) -> void:
 	var x := from_x + randf_range(0.0, 60.0)
+	var last := ""
 	while x < to_x:
 		var path: String = big.pick_random() if randf() < 0.65 else small.pick_random()
+		# Без двух одинаковых подряд: ряд из шести одинаковых столиков выглядел штамповкой.
+		for retry in 4:
+			if path != last:
+				break
+			path = big.pick_random() if randf() < 0.5 else small.pick_random()
+		last = path
 		var item := _backdrop(path, Vector2.ZERO, scale_k)
 		var width := item.get_rect().size.x * item.scale.x
 		item.position = Vector2(x + width * 0.5, foot_y + randf_range(-10.0, 10.0))
@@ -302,7 +309,7 @@ func _backdrop_row(big: Array[String], small: Array[String], from_x: float, to_x
 			x += width
 			continue
 		item.flip_h = randf() < 0.5
-		x += width * randf_range(0.92, 1.08)
+		x += width * randf_range(1.0, 1.25)
 
 
 func _backdrop(path: String, foot: Vector2, scale_k: float) -> Sprite2D:

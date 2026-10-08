@@ -27,6 +27,9 @@ void fragment() {
 		float l = dot(c.rgb, vec3(0.3, 0.55, 0.15));
 		rgb = mix(vec3(0.05, 0.32, 0.62), vec3(0.75, 0.97, 1.0), smoothstep(0.35, 0.95, l));
 	}
+	// Блики: редкие бегущие светлые искры по поверхности — жидкость, а не ковёр.
+	float spec = pow(max(0.0, sin(UV.x * 9.0 + TIME * 1.7) * sin(UV.y * 6.0 - TIME * 1.1 + UV.x * 2.0)), 14.0);
+	rgb += vec3(spec * (water > 0.5 ? 0.55 : 0.35));
 	// COLOR во fragment уже умножен на текстуру — берём чистый цвет вершины.
 	COLOR = vec4(rgb * glow, c.a) * tint;
 }

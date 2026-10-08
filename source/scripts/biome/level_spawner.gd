@@ -159,6 +159,10 @@ func clear() -> void:
 	_destr_done.clear()
 	_puddles.clear()
 	_lots.clear()
+	_life = null
+	for id in _life_lights:
+		EnvLights.remove(id)
+	_life_lights.clear()
 	gate_rects.clear()
 	story_gates.clear()
 	story_cells.clear()
@@ -373,6 +377,8 @@ var _park: ParkPaths
 var _river_points := PackedVector2Array()
 ## Секторы выживания: [центр, радиус].
 var _sectors: Array = []
+var _life: AmbientLife
+var _life_lights: PackedInt32Array = PackedInt32Array()
 var _river_side := 1.0
 var river: AcidRiver
 const POI_SPACING := 560.0
@@ -1523,6 +1529,7 @@ func _build_sectors(root: Dictionary, defs: Dictionary, area: Rect2, center: Vec
 					_lot_item(str(item[0]), (p + Vector2(float(item[1]) * mirror * half.x, float(item[2]) * half.y)).snapped(Vector2(8, 8)))
 				_in_scene = false
 				_cover_spots.append(p)
+				_spawn_life(theme.get("life", []), p, half, mirror)
 				if (theme.get("deco", []) as Array).has("pool"):
 					_block_rect(Rect2(p - half * Vector2(0.5, 0.42), half * Vector2(1.0, 0.84)))
 				break
@@ -1537,6 +1544,25 @@ func _build_sectors(root: Dictionary, defs: Dictionary, area: Rect2, center: Vec
 					_cover_spots.append(at)
 					placed += 1
 			break
+
+
+## Жители секторов (арт Астры из assets/npc): кот в парке, рабочий в кафе, робот-уборщик на стоянке,
+## бочка с огнём, ворона на фонаре; в Банке — голубь-почтальон, свин-охранник. Без коллизий, пугаются взрывов.
+func _spawn_life(list: Array, at: Vector2, half: Vector2, mirror: float) -> void:
+	if list.is_empty() or SaveService.get_quality() == 0:
+		return
+	if _life == null:
+		_life = AmbientLife.new()
+		_life.setup(is_walkable)
+		_own(_life, self)
+	for item: Array in list:
+		var p := at + Vector2(float(item[1]) * mirror * half.x, float(item[2]) * half.y)
+		var actor := _life.spawn(str(item[0]), p, _layers.world)
+		if actor == null:
+			continue
+		_owned.append(actor)
+		if str(item[0]) == "npc_barrel_fire":
+			_life_lights.append(EnvLights.add(p + Vector2(0, -30), Color("#ff9a3d"), 220.0, 0.6))
 
 
 ## Вода бассейна: в неё не заходят (клетки — стена сетки, коллизия — рельеф, пули пролетают).
