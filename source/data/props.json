@@ -848,6 +848,370 @@
         "effect": "explode",
         "sound": "explosion"
       }
+    },
+    "z_bus": {
+      "texture": "res://assets/props/zones/z_bus.png",
+      "width": 300,
+      "footprint": [
+        240,
+        90
+      ],
+      "shadow": 96,
+      "flip": true
+    },
+    "z_truck": {
+      "texture": "res://assets/props/zones/z_truck.png",
+      "width": 260,
+      "footprint": [
+        208,
+        78
+      ],
+      "shadow": 83,
+      "flip": true,
+      "light": {
+        "color": "#ff8a3d",
+        "radius": 230,
+        "energy": 0.5,
+        "offset": [
+          30,
+          -90
+        ],
+        "flicker": 0.25
+      }
+    },
+    "z_dumpster": {
+      "texture": "res://assets/props/zones/z_dumpster.png",
+      "width": 150,
+      "footprint": [
+        120,
+        45
+      ],
+      "shadow": 48,
+      "flip": true
+    },
+    "z_gear": {
+      "texture": "res://assets/props/zones/z_gear.png",
+      "width": 150,
+      "footprint": [
+        120,
+        45
+      ],
+      "shadow": 48,
+      "flip": true
+    },
+    "z_hydrant": {
+      "texture": "res://assets/props/zones/z_hydrant.png",
+      "width": 80,
+      "footprint": [
+        36,
+        20
+      ],
+      "shadow": 25,
+      "flip": true
+    },
+    "z_rubble": {
+      "texture": "res://assets/props/zones/z_rubble.png",
+      "width": 170,
+      "footprint": [
+        136,
+        51
+      ],
+      "shadow": 54,
+      "flip": true
+    },
+    "z_sign": {
+      "texture": "res://assets/props/zones/z_sign.png",
+      "width": 170,
+      "footprint": [
+        136,
+        51
+      ],
+      "shadow": 54,
+      "flip": true
+    },
+    "z_tower": {
+      "texture": "res://assets/props/zones/z_tower.png",
+      "width": 220,
+      "footprint": [
+        176,
+        66
+      ],
+      "shadow": 70,
+      "flip": true
+    },
+    "z_traffic": {
+      "texture": "res://assets/props/zones/z_traffic.png",
+      "width": 100,
+      "footprint": [
+        45,
+        25
+      ],
+      "shadow": 32,
+      "flip": true,
+      "light": {
+        "color": "#7dff6a",
+        "radius": 140,
+        "energy": 0.35,
+        "offset": [
+          0,
+          -90
+        ],
+        "flicker": 0.25
+      }
+    },
+    "z_antenna": {
+      "texture": "res://assets/props/zones/z_antenna.png",
+      "width": 120,
+      "footprint": [
+        54,
+        30
+      ],
+      "shadow": 38,
+      "flip": true
+    },
+    "z_billboard": {
+      "texture": "res://assets/props/zones/z_billboard.png",
+      "width": 190,
+      "footprint": [
+        152,
+        57
+      ],
+      "shadow": 60,
+      "flip": true,
+      "light": {
+        "color": "#ff6ad5",
+        "radius": 180,
+        "energy": 0.35,
+        "offset": [
+          0,
+          -120
+        ],
+        "flicker": 0.25
+      }
+    },
+    "z_cable_reel": {
+      "texture": "res://assets/props/zones/z_cable_reel.png",
+      "width": 120,
+      "footprint": [
+        96,
+        36
+      ],
+      "shadow": 38,
+      "flip": true
+    },
+    "z_chimney": {
+      "texture": "res://assets/props/zones/z_chimney.png",
+      "width": 110,
+      "footprint": [
+        88,
+        33
+      ],
+      "shadow": 35,
+      "flip": true
+    },
+    "z_pigeon_tower": {
+      "texture": "res://assets/props/zones/z_pigeon_tower.png",
+      "width": 120,
+      "footprint": [
+        96,
+        36
+      ],
+      "shadow": 38,
+      "flip": true
+    },
+    "z_radio_mast": {
+      "texture": "res://assets/props/zones/z_radio_mast.png",
+      "width": 130,
+      "footprint": [
+        58,
+        32
+      ],
+      "shadow": 41,
+      "flip": true
+    },
+    "z_roof_vent": {
+      "texture": "res://assets/props/zones/z_roof_vent.png",
+      "width": 100,
+      "footprint": [
+        80,
+        30
+      ],
+      "shadow": 32,
+      "flip": true
+    },
+    "z_satellite": {
+      "texture": "res://assets/props/zones/z_satellite.png",
+      "width": 130,
+      "footprint": [
+        104,
+        39
+      ],
+      "shadow": 41,
+      "flip": true
+    },
+    "z_water_tank": {
+      "texture": "res://assets/props/zones/z_water_tank.png",
+      "width": 150,
+      "footprint": [
+        120,
+        45
+      ],
+      "shadow": 48,
+      "flip": true
+    },
+    "z_wire_pole": {
+      "texture": "res://assets/props/zones/z_wire_pole.png",
+      "width": 120,
+      "footprint": [
+        54,
+        30
+      ],
+      "shadow": 38,
+      "flip": true
+    },
+    "z_coil": {
+      "texture": "res://assets/props/zones/z_coil.png",
+      "width": 140,
+      "footprint": [
+        112,
+        42
+      ],
+      "shadow": 44,
+      "flip": true,
+      "light": {
+        "color": "#ff4fd8",
+        "radius": 160,
+        "energy": 0.35,
+        "offset": [
+          0,
+          -60
+        ],
+        "flicker": 0.25
+      }
+    },
+    "z_console": {
+      "texture": "res://assets/props/zones/z_console.png",
+      "width": 120,
+      "footprint": [
+        96,
+        36
+      ],
+      "shadow": 38,
+      "flip": true,
+      "light": {
+        "color": "#5dffc0",
+        "radius": 150,
+        "energy": 0.35,
+        "offset": [
+          0,
+          -70
+        ],
+        "flicker": 0.25
+      }
+    },
+    "z_core": {
+      "texture": "res://assets/props/zones/z_core.png",
+      "width": 130,
+      "footprint": [
+        104,
+        39
+      ],
+      "shadow": 41,
+      "flip": true,
+      "light": {
+        "color": "#ff4fd8",
+        "radius": 200,
+        "energy": 0.5,
+        "offset": [
+          0,
+          -70
+        ],
+        "flicker": 0.25
+      }
+    },
+    "z_pipe": {
+      "texture": "res://assets/props/zones/z_pipe.png",
+      "width": 130,
+      "footprint": [
+        104,
+        39
+      ],
+      "shadow": 41,
+      "flip": true
+    },
+    "z_pump": {
+      "texture": "res://assets/props/zones/z_pump.png",
+      "width": 140,
+      "footprint": [
+        112,
+        42
+      ],
+      "shadow": 44,
+      "flip": true
+    },
+    "z_speaker": {
+      "texture": "res://assets/props/zones/z_speaker.png",
+      "width": 110,
+      "footprint": [
+        88,
+        33
+      ],
+      "shadow": 35,
+      "flip": true
+    },
+    "z_stuffed_toy": {
+      "texture": "res://assets/props/zones/z_stuffed_toy.png",
+      "width": 90,
+      "footprint": [
+        72,
+        27
+      ],
+      "shadow": 28,
+      "flip": true
+    },
+    "z_toy_truck": {
+      "texture": "res://assets/props/zones/z_toy_truck.png",
+      "width": 140,
+      "footprint": [
+        112,
+        42
+      ],
+      "shadow": 44,
+      "flip": true
+    },
+    "z_valve": {
+      "texture": "res://assets/props/zones/z_valve.png",
+      "width": 100,
+      "footprint": [
+        80,
+        30
+      ],
+      "shadow": 32,
+      "flip": true
+    },
+    "z_crater": {
+      "texture": "res://assets/props/zones/z_crater.png",
+      "width": 210,
+      "flat": true,
+      "flip": true
+    },
+    "d_wall": {
+      "texture": "res://assets/props/zones/wall_intact.png",
+      "width": 150,
+      "footprint": [
+        132,
+        40
+      ],
+      "shadow": 44,
+      "flip": true,
+      "destructible": {
+        "hp": 70,
+        "broken": "res://assets/props/zones/wall_destroyed.png",
+        "broken_width": 150,
+        "reward": 6,
+        "effect": "wood",
+        "sound": "obstacle_break"
+      }
     }
   }
 }

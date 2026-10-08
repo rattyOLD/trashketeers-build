@@ -118,6 +118,8 @@ func build(layers: BiomeLayers, chapter_def: Dictionary) -> void:
 	_build_district()
 	if district == null:
 		_build_border()
+	if _organic:
+		_build_river()
 	_build_boss_zone()
 	if _story.is_empty():
 		_build_center()
@@ -328,6 +330,9 @@ var _story_rows: Array[int] = []
 var _organic := false
 var _noise := _make_noise()
 const POI_SPACING := 560.0
+const RIVER_WIDTH := 200.0
+const RIVER_BRIDGE := 430.0
+const RIVER_BRIDGE_BAND := 70.0
 const POI_OPEN := -0.16
 const LOTS_PATH := "res://data/lots.json"
 
@@ -1133,6 +1138,59 @@ func _build_districts(library: Dictionary, area: Rect2) -> void:
 ## Игровая площадка без кольца стен.
 func _arena_inner() -> Rect2:
 	return Rect2(bounds.position + Vector2(RING_SIDE, RING_TOP) * CELL, bounds.size - Vector2(RING_SIDE * 2, RING_TOP + RING_BOTTOM) * CELL)
+
+
+## Кислотная протока (AcidRiver): извилистая линия сверху вниз по левой или правой трети площадки,
+## три моста (один — на уровне ворот, чтобы толпа из боковых ворот шла через него). Клетки протоки —
+## стены сетки (поле потока ведёт пеших к мостам, расстановка их обходит), коллизия — слой TERRAIN.
+func _build_river() -> void:
+	var inner := _arena_inner()
+	var width := RIVER_WIDTH
+	var side := -1.0 if randf() < 0.5 else 1.0
+	var x0 := inner.position.x + inner.size.x * (0.5 + side * 0.24)
+	var ph := randf() * TAU
+	var ph2 := randf() * TAU
+	var points := PackedVector2Array()
+	var y := inner.position.y + 8.0
+	while y <= inner.end.y - 8.0:
+		points.append(Vector2(x0 + 170.0 * sin(y * 0.0022 + ph) + 60.0 * sin(y * 0.006 + ph2), y))
+		y += 48.0
+	var tail_y := inner.end.y - 8.0
+	if tail_y - points[points.size() - 1].y > 16.0:
+		points.append(Vector2(x0 + 170.0 * sin(tail_y * 0.0022 + ph) + 60.0 * sin(tail_y * 0.006 + ph2), tail_y))
+	var mid_y := _origin.y + grid_size.y / 2 * CELL
+	var bridges := [mid_y, inner.position.y + inner.size.y * 0.24 + randf_range(-60, 60), inner.position.y + inner.size.y * 0.8 + randf_range(-60, 60)]
+	var river := AcidRiver.new()
+	_own(river, _layers.decals)
+	river.build(points, width, bridges, RIVER_BRIDGE)
+	var body := StaticBody2D.new()
+	body.collision_layer = PhysicsLayers.TERRAIN
+	body.collision_mask = 0
+	var first := world_to_cell(inner.position)
+	var last := world_to_cell(inner.end - Vector2.ONE)
+	for cy in range(first.y, last.y + 1):
+		var run_start := -1
+		for cx in range(first.x, last.x + 2):
+			var wet := false
+			if cx <= last.x:
+				var p := cell_to_world(Vector2i(cx, cy))
+				wet = absf(p.x - AcidRiver._x_at(points, p.y)) < width * 0.5 + 10.0
+				for by: float in bridges:
+					if absf(p.y - by) < RIVER_BRIDGE_BAND:
+						wet = false
+			if wet:
+				cells[_index(Vector2i(cx, cy))] = CellType.WALL
+				if run_start == -1:
+					run_start = cx
+			elif run_start != -1:
+				var shape := RectangleShape2D.new()
+				shape.size = Vector2(cx - run_start, 1) * CELL
+				var collision := CollisionShape2D.new()
+				collision.shape = shape
+				collision.position = _origin + (Vector2(run_start, cy) + Vector2(cx - run_start, 1) * 0.5) * CELL
+				body.add_child(collision)
+				run_start = -1
+	_own(body, self)
 
 
 static func _make_noise() -> FastNoiseLite:

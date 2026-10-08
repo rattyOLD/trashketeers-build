@@ -306,7 +306,7 @@ func activate(enemy_data: EnemyData, at: Vector2, hp_mult: float = 1.0, dmg_mult
 	collision_layer = PhysicsLayers.ENEMY
 	collision_mask = PhysicsLayers.WORLD | PhysicsLayers.ENEMY
 	if not data.flying:
-		collision_mask |= PhysicsLayers.OBSTACLE
+		collision_mask |= PhysicsLayers.OBSTACLE | PhysicsLayers.TERRAIN
 	visible = true
 	_collision.set_deferred("disabled", false)
 	queue_redraw()

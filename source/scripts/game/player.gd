@@ -74,7 +74,7 @@ var _last_move_direction := Vector2.RIGHT
 
 func _init() -> void:
 	collision_layer = PhysicsLayers.PLAYER
-	collision_mask = PhysicsLayers.WORLD | PhysicsLayers.OBSTACLE | PhysicsLayers.PROP
+	collision_mask = PhysicsLayers.WORLD | PhysicsLayers.OBSTACLE | PhysicsLayers.PROP | PhysicsLayers.TERRAIN
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 
 	var shape := CircleShape2D.new()

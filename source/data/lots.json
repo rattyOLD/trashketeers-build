@@ -1303,6 +1303,287 @@
     -140,
     70
    ]
+  ],
+  "bus_wreck": [
+   [
+    "z_bus",
+    0,
+    0
+   ],
+   [
+    "z_rubble",
+    -210,
+    50
+   ],
+   [
+    "m1_tire",
+    180,
+    60
+   ],
+   [
+    "d_crates",
+    60,
+    105
+   ]
+  ],
+  "burning_truck": [
+   [
+    "z_truck",
+    0,
+    0
+   ],
+   [
+    "z_hydrant",
+    -175,
+    40
+   ],
+   [
+    "d_barrel",
+    165,
+    75
+   ],
+   [
+    "r_tires",
+    -40,
+    -110
+   ]
+  ],
+  "crossroad": [
+   [
+    "z_traffic",
+    0,
+    0
+   ],
+   [
+    "z_sign",
+    -160,
+    20
+   ],
+   [
+    "z_hydrant",
+    130,
+    40
+   ],
+   [
+    "d_cans",
+    40,
+    95
+   ]
+  ],
+  "ruin": [
+   [
+    "z_tower",
+    0,
+    -10
+   ],
+   [
+    "z_rubble",
+    -180,
+    60
+   ],
+   [
+    "z_rubble",
+    170,
+    70
+   ],
+   [
+    "d_junk",
+    0,
+    115
+   ]
+  ],
+  "gear_pit": [
+   [
+    "z_crater",
+    0,
+    10
+   ],
+   [
+    "z_gear",
+    160,
+    -40
+   ],
+   [
+    "z_dumpster",
+    -170,
+    -30
+   ],
+   [
+    "d_toxic",
+    70,
+    100
+   ]
+  ],
+  "roof_antenna": [
+   [
+    "z_satellite",
+    -85,
+    0
+   ],
+   [
+    "z_antenna",
+    85,
+    -20
+   ],
+   [
+    "z_cable_reel",
+    0,
+    85
+   ],
+   [
+    "d_crates",
+    -165,
+    90
+   ]
+  ],
+  "water_post": [
+   [
+    "z_water_tank",
+    0,
+    0
+   ],
+   [
+    "z_roof_vent",
+    -145,
+    40
+   ],
+   [
+    "z_chimney",
+    145,
+    30
+   ],
+   [
+    "d_barrel",
+    40,
+    95
+   ]
+  ],
+  "radio_point": [
+   [
+    "z_radio_mast",
+    0,
+    0
+   ],
+   [
+    "z_wire_pole",
+    -155,
+    30
+   ],
+   [
+    "z_billboard",
+    160,
+    -10
+   ],
+   [
+    "d_crt",
+    -40,
+    100
+   ]
+  ],
+  "pigeon_loft": [
+   [
+    "z_pigeon_tower",
+    0,
+    0
+   ],
+   [
+    "z_roof_vent",
+    135,
+    40
+   ],
+   [
+    "m1_crate",
+    -125,
+    50
+   ]
+  ],
+  "reactor_core": [
+   [
+    "z_core",
+    0,
+    0
+   ],
+   [
+    "z_coil",
+    -160,
+    20
+   ],
+   [
+    "z_console",
+    160,
+    20
+   ],
+   [
+    "z_pipe",
+    0,
+    115
+   ]
+  ],
+  "pump_station": [
+   [
+    "z_pump",
+    -85,
+    0
+   ],
+   [
+    "z_valve",
+    85,
+    10
+   ],
+   [
+    "z_pipe",
+    0,
+    -95
+   ],
+   [
+    "d_barrel",
+    155,
+    85
+   ]
+  ],
+  "toy_pile": [
+   [
+    "z_toy_truck",
+    -65,
+    0
+   ],
+   [
+    "z_stuffed_toy",
+    85,
+    20
+   ],
+   [
+    "z_speaker",
+    0,
+    -85
+   ],
+   [
+    "d_junk",
+    -150,
+    90
+   ]
+  ],
+  "break_walls": [
+   [
+    "d_wall",
+    -95,
+    0
+   ],
+   [
+    "d_wall",
+    95,
+    0
+   ],
+   [
+    "m1_crate",
+    0,
+    -70
+   ],
+   [
+    "d_barrel",
+    -200,
+    40
+   ]
   ]
  },
  "poi_sets": {
@@ -1316,7 +1597,13 @@
    "toxic_spill",
    "wreck_van",
    "power_crt",
-   "fridge_dump"
+   "fridge_dump",
+   "bus_wreck",
+   "burning_truck",
+   "crossroad",
+   "gear_pit",
+   "ruin",
+   "break_walls"
   ],
   "junkyard_2": [
    "container_stack",
@@ -1329,7 +1616,13 @@
    "water_tower",
    "grove",
    "wreck_van",
-   "toxic_spill"
+   "toxic_spill",
+   "reactor_core",
+   "pump_station",
+   "radio_point",
+   "roof_antenna",
+   "break_walls",
+   "toy_pile"
   ],
   "junkyard_3": [
    "container_stack",
@@ -1342,7 +1635,14 @@
    "toxic_spill",
    "wreck_van",
    "generator_post",
-   "fridge_dump"
+   "fridge_dump",
+   "water_post",
+   "pigeon_loft",
+   "roof_antenna",
+   "ruin",
+   "bus_wreck",
+   "burning_truck",
+   "break_walls"
   ]
  }
 }
