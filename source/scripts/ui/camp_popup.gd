@@ -40,23 +40,27 @@ func _init() -> void:
 	note.custom_minimum_size = Vector2(520, 0)
 	content.add_child(note)
 	content.add_child(_online_plate())
-	if Orient.portrait:
-		_list = MenuPopups.scroll_list(content)
-	else:
-		_list = VBoxContainer.new()
-		content.add_child(_list)
+	# Торговцы — в прокрутке и в горизонтальном виде: на телефоне (экран ниже 720) с кнопкой чекпоинта
+	# окно не влезало и верх обрезался.
+	_list = MenuPopups.scroll_list(content)
+	var buttons := BoxContainer.new()
+	buttons.vertical = Orient.portrait
+	buttons.add_theme_constant_override("separation", 12)
+	content.add_child(buttons)
 	_resume = UiStyle.button("ПРОДОЛЖИТЬ С ЧЕКПОИНТА", Color("#1d8fb0"), 26, Vector2(0, 70))
+	_resume.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_resume.pressed.connect(func() -> void:
 		SaveService.resume_requested = true
 		close()
 		departed.emit())
-	content.add_child(_resume)
-	var go := UiStyle.button("В ПУТЬ", Color("#2fae5f"), 30, Vector2(0, 76))
+	buttons.add_child(_resume)
+	var go := UiStyle.button("В ПУТЬ", Color("#2fae5f"), 30, Vector2(0, 70))
+	go.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	go.pressed.connect(func() -> void:
 		SaveService.resume_requested = false
 		close()
 		departed.emit())
-	content.add_child(go)
+	buttons.add_child(go)
 
 
 ## Плашка-крючок: история продолжится в онлайне (Реестр не закрыт). Пока только анонс.
@@ -85,7 +89,7 @@ func _refresh() -> void:
 		var card := _trader_card(trader_id)
 		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		if not Orient.portrait:
-			card.custom_minimum_size.x = (panel_width() - 84.0) * 0.5
+			card.custom_minimum_size.x = (panel_width() - 120.0) * 0.5
 		traders.add_child(card)
 
 

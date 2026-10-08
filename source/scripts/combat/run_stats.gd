@@ -193,9 +193,17 @@ func archetype_shares(pool: Array[UpgradeData]) -> Dictionary:
 ## avoid — id улучшений, только что показанных: при реролле их вес резко падает, чтобы выпало другое.
 func roll_choices(pool: Array[UpgradeData], count: int, luck: float = 0.0, guarantee_rarity: int = 0, avoid: Array[StringName] = []) -> Array[UpgradeData]:
 	var candidates: Array[UpgradeData] = []
+	var filler: Array[UpgradeData] = []
 	for upgrade in pool:
 		if is_available(upgrade):
-			candidates.append(upgrade)
+			if upgrade.category == "endless":
+				filler.append(upgrade)
+			else:
+				candidates.append(upgrade)
+	# «Хлам» (+2% навсегда) — только добивка, когда настоящих улучшений не хватает на выбор:
+	# иначе мелкие карточки вылезали в каждом окне и мешали (жалоба тестеров).
+	if candidates.size() < count:
+		candidates.append_array(filler)
 	var shares := archetype_shares(pool)
 	var picked: Array[UpgradeData] = []
 	var categories := {}

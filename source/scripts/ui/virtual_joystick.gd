@@ -22,6 +22,15 @@ var _batch := PolyBatch.new()
 var blocker: Callable
 
 
+## Браузер на компьютере без сенсора: касания тут — эмуляция клика мыши. ЛКМ стреляет в курсор, ходьба — WASD,
+## поэтому стик не появляется (иначе клик в левой половине экрана вместо выстрела тащил героя к курсору).
+var _mouse_only := false
+
+
+func _ready() -> void:
+	_mouse_only = Platform.is_web and not Platform.is_touch() and not AimStick.force_touch
+
+
 func _init() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -46,6 +55,8 @@ func _notification(what: int) -> void:
 
 
 func _input(event: InputEvent) -> void:
+	if _mouse_only:
+		return
 	if event is InputEventScreenTouch:
 		var touch := event as InputEventScreenTouch
 		var point := get_global_transform().affine_inverse() * touch.position
@@ -99,6 +110,8 @@ func _reset() -> void:
 
 
 func _draw() -> void:
+	if _mouse_only:
+		return
 	if not is_active():
 		var hint_scale := float(Controls.get_value("joystick_scale")) * float(Controls.element("move")["s"])
 		BASE_RADIUS = BASE_RADIUS_DEFAULT * hint_scale
