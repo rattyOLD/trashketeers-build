@@ -88,7 +88,8 @@ func _init() -> void:
 	add_child(collision)
 
 	visual = RaccoonVisual.new()
-	visual.show_aim_line = true
+	# Линию прицела рисует AimLine (от дула, по направлению пуль); у визуала своя не нужна — было две разных.
+	visual.show_aim_line = false
 	add_child(visual)
 	# Своё мягкое пятно света на полу: енот читается даже в тёмных углах карты.
 	var glow := PointLight2D.new()

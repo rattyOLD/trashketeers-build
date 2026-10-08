@@ -461,7 +461,10 @@ class RaccoonPreview:
 		_cheer_timer -= delta
 		if _cheer_timer <= 0.0:
 			_cheer_timer = randf_range(6.0, 11.0)
-			raccoon.cheer()
+			# Покадровые герои показывают свой «тик» (если нарисован), остальные — подпрыгивают.
+			if not raccoon.uses_clips() or (_aim_hold <= 0.0 and not raccoon.play_fidget()):
+				if not raccoon.uses_clips():
+					raccoon.cheer()
 		_move_tracers(delta)
 
 	func _tick_burst(delta: float) -> void:

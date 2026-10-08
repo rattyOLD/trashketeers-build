@@ -932,6 +932,8 @@ func toast(title: String, text: String, color: Color = UiStyle.GOLD) -> void:
 
 func show_level_up(choices: Array[UpgradeData], level: int, stats: RunStats, bonus: bool = false, reroll_text: String = "", reroll_ok: bool = false) -> void:
 	_clear_wave_titles()
+	if _portrait != null:
+		_portrait.react("grin", 1.6)
 	_level_up.open(choices, level, stats, bonus, reroll_text, reroll_ok)
 
 
@@ -1236,6 +1238,9 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	_portrait.position = Vector2(0, 0)
 	_portrait.scale = Vector2.ONE * 0.74
 	_portrait.set_character(SaveService.get_character())
+	# Лицо реагирует: серия убийств — гордость, новый уровень — ухмылка (попадание и испуг — в самом портрете).
+	if combat_feed != null:
+		combat_feed.medaled.connect(func() -> void: _portrait.react("proud", 1.6))
 	head.add_child(_portrait)
 	if Orient.portrait:
 		# Шапка телефона компактнее: портрет меньше, полосы и медаль уровня сдвинуты за ним.

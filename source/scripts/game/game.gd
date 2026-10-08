@@ -1723,7 +1723,7 @@ func _finish() -> void:
 	SoundManager.stop_all_loops()
 	SoundManager.stop_ambient()
 	SoundManager.stop_music()
-	SoundManager.play(&"victory" if bosses_killed > 0 else &"defeat", 0.0, false)
+	SoundManager.play_result(bosses_killed > 0)
 	hud.show_run_result(summary)
 
 

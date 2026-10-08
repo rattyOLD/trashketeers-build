@@ -1,7 +1,7 @@
 class_name AimLine
 extends Node2D
 ## Тонкая прозрачная линия прицела: пока игрок держит стик стрельбы (или мышь), от ствола тянется
-## пунктир туда, куда полетят пули. Не мешает обзору: светлая, гаснет к концу, у ближнего боя короче.
+## пунктир от дула туда, куда полетят пули (с учётом доводки). Не мешает обзору: светлая, гаснет к концу, у ближнего боя короче.
 
 const LENGTH := 520.0
 const MELEE_LENGTH := 150.0
@@ -11,6 +11,7 @@ const GAP := 14.0
 var controller: WeaponController
 var _alpha := 0.0
 var _dir := Vector2.RIGHT
+var _from := Vector2.ZERO
 
 
 func _init() -> void:
@@ -24,7 +25,11 @@ func _process(delta: float) -> void:
 	var aiming := controller.manual_aim.length_squared() > 0.01 and not controller.auto_mode
 	_alpha = move_toward(_alpha, 1.0 if aiming else 0.0, delta * (8.0 if aiming else 4.0))
 	if aiming:
-		_dir = controller.manual_aim.normalized()
+		# Ровно туда, куда летят пули: с доводкой на врага (aim_direction), а не просто по стику.
+		_dir = (controller.aim_direction if controller.has_target and controller.aim_direction.length_squared() > 0.01 else controller.manual_aim).normalized()
+		_from = _dir * 34.0 + Vector2(0, -18)
+		if controller.muzzle_provider.is_valid():
+			_from = to_local(controller.muzzle_provider.call(_dir))
 	if _alpha > 0.0 or visible:
 		queue_redraw()
 
@@ -34,7 +39,7 @@ func _draw() -> void:
 		return
 	var melee := controller.weapon != null and controller.weapon.is_melee()
 	var length := MELEE_LENGTH if melee else LENGTH
-	var from := _dir * 34.0 + Vector2(0, -18)
+	var from := _from
 	var t := 0.0
 	while t < length:
 		var a := from + _dir * t

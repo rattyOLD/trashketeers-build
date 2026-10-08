@@ -1,3 +1,4 @@
 .godot/
 *.tmp
 tools/site/
+__pycache__/

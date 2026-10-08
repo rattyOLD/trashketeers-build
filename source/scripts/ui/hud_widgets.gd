@@ -124,6 +124,24 @@ class DamagePortrait:
 	var _shake := 0.0
 	var _clock := 0.0
 	var _stage := 0
+	## Короткая реакция лица (face_<вид>.png): попадание, ухмылка, гордость за серию, испуг.
+	const FACE_DIR := "res://assets/ui/portraits/face/"
+	var _hero_id := ""
+	var _react_left := 0.0
+	var _react_cache := {}
+	var _scared_done := false
+
+	func react(kind: String, time: float = 1.4) -> void:
+		var key := "%s_%s" % [_hero_id, kind]
+		if not _react_cache.has(key):
+			var path := FACE_DIR + key + ".png"
+			_react_cache[key] = AvatarPicker.portrait_texture(path) if ResourceLoader.exists(path) else null
+		var tex: Texture2D = _react_cache[key]
+		if tex == null:
+			return
+		_face.tex = tex
+		_face.queue_redraw()
+		_react_left = time
 
 	func _init() -> void:
 		custom_minimum_size = Vector2(SIDE, SIDE)
@@ -139,6 +157,8 @@ class DamagePortrait:
 	## Какой герой сейчас в бою: берём его портрет и кадры повреждений, если они нарисованы.
 	func set_character(character: Dictionary) -> void:
 		var id := str(character.get("id", ""))
+		_hero_id = id
+		_react_cache.clear()
 		_faces.clear()
 		for n in 4:
 			var path := "%s%s_%d.png" % [HUD_DIR, id, n]
@@ -169,8 +189,17 @@ class DamagePortrait:
 		var f := clampf(fraction, 0.0, 1.0)
 		if f < health - 0.004:
 			_shake = 0.3
+		var big_hit := f < health - 0.08
 		health = f
-		_pick_face()
+		if _react_left <= 0.0:
+			_pick_face()
+		if f > 0.0 and f < 0.2 and not _scared_done:
+			_scared_done = true
+			react("scared", 1.8)
+		elif big_hit:
+			react("hit", 0.9)
+		if f > 0.5:
+			_scared_done = false
 		queue_redraw()
 
 	func damage() -> float:
@@ -179,6 +208,10 @@ class DamagePortrait:
 	func _process(delta: float) -> void:
 		_clock += delta
 		_shake = maxf(_shake - delta, 0.0)
+		if _react_left > 0.0:
+			_react_left -= delta
+			if _react_left <= 0.0:
+				_pick_face()
 		var d := damage()
 		var painted := has_art(_stage) and _stage > 0
 		# Нарисованный кадр сам несёт перекошенное лицо, код добавляет только дрожь.

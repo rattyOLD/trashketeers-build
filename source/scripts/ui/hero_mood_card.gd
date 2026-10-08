@@ -6,10 +6,12 @@ extends PanelContainer
 
 const LINES_PATH := "res://data/hero_lines.json"
 const HUD_DIR := "res://assets/ui/portraits/hud/"
+const POSE_DIR := "res://assets/ui/portraits/pose/"
 const SIDE := 188.0
 ## win/lose — манера движения, mood — как герой переживает поражение.
 const STYLES := {
 	"raccoon": {"win": "hop", "lose": "slump", "mood": "sad"},
+	"maloy": {"win": "bounce", "lose": "wobble", "mood": "sad"},
 	"red_panda": {"win": "flex", "lose": "jitter", "mood": "angry"},
 	"snow": {"win": "steady", "lose": "slump", "mood": "stoic"},
 	"night": {"win": "sway", "lose": "flicker", "mood": "angry"},
@@ -22,6 +24,7 @@ static var _lines: Dictionary = {}
 
 var _character: Dictionary
 var _win := false
+var _posed := false
 var _style: Dictionary
 var _t := 0.0
 var _face: TextureRect
@@ -85,6 +88,8 @@ func _init(character: Dictionary, win: bool, extra_line: String = "") -> void:
 	_over = MoodOver.new(win, str(_style.get("mood", "sad")), str(id).hash())
 	_over.size = Vector2(SIDE, SIDE)
 	_over.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# На нарисованной позе эмоция уже есть — рисованные поверх слёзы и ссадины только мешают.
+	_over.visible = not _posed
 	frame.add_child(_over)
 
 	var column := VBoxContainer.new()
@@ -130,6 +135,15 @@ static func _mood_name(mood: String) -> String:
 
 ## Победа: самый бодрый кадр. Поражение: кадр «сильно побит»; если нарисован один кадр, остальное дорисует код.
 func _pick_texture(id: String, win: bool) -> Texture2D:
+	# Нарисованные позы итога (Астра): победа — салют/кружка, поражение — понурый герой. Иначе — портрет боя.
+	var poses: Array[String] = []
+	for n in 6:
+		var pose := "%s%s_%s_%d.png" % [POSE_DIR, id, "win" if win else "lose", n]
+		if ResourceLoader.exists(pose):
+			poses.append(pose)
+	if not poses.is_empty():
+		_posed = true
+		return load(poses.pick_random()) as Texture2D
 	var order := PackedInt32Array([0, 1]) if win else PackedInt32Array([3, 2])
 	for n in order:
 		var path := "%s%s_%d.png" % [HUD_DIR, id, n]

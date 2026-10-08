@@ -131,6 +131,7 @@ const MUSIC := {
 	&"battle": -13.0,
 	&"raid": -11.0,
 	&"knife": -12.0,
+	&"win": -11.0,
 }
 
 var unlocked := false
@@ -247,6 +248,15 @@ func play_music(id: StringName) -> void:
 	_music.volume_db = -40.0
 	_music.play()
 	_fade_music_to(MUSIC[id])
+
+
+## Итог боя: победа — бодрые фанфары, затем весёлая петля на экране итогов; поражение — короткий грустный звук.
+func play_result(victory: bool) -> void:
+	play(&"victory" if victory else &"defeat", 0.0, false)
+	if victory:
+		get_tree().create_timer(1.9, true, false, true).timeout.connect(func() -> void:
+			if _music_id == &"" or not _music.playing:
+				play_music(&"win"))
 
 
 func stop_music() -> void:

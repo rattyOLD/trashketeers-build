@@ -110,6 +110,8 @@ func _spawn_player(at: Vector2, weapon: WeaponData, target_finder: Callable) -> 
 	match hero:
 		"raccoon":
 			stats.add_flat(&"magnet_mult", 0.5)
+		"maloy":
+			stats.add_flat(&"extra_ricochets", 1.0)
 		"red_panda":
 			stats.add_flat(&"burn_chance", 0.25)
 		"night":
@@ -527,7 +529,7 @@ func _show_result(victory: bool, lines: PackedStringArray, title: String = "", c
 	SoundManager.stop_all_loops()
 	SoundManager.stop_ambient()
 	SoundManager.stop_music()
-	SoundManager.play(&"victory" if victory else &"defeat", 0.0, false)
+	SoundManager.play_result(victory)
 	hud.show_result(victory, lines, title, can_upgrade)
 
 

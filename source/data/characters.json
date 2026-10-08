@@ -55,6 +55,58 @@
       }
     },
     {
+      "id": "maloy",
+      "title": "Малой «Рико-младший»",
+      "description": "Мелкий, вёрткий и вечно с петардами.",
+      "currency": "nuts",
+      "price": 2500,
+      "recolor": {},
+      "proportions": {},
+      "stats": {
+        "speed": 0.1,
+        "hp": -0.08,
+        "dash": 0.1,
+        "crit": 0.03
+      },
+      "traits": "Быстрый, рикошеты, хлопушки",
+      "portrait": "res://assets/ui/portraits/maloy.png",
+      "hud_portrait": "res://assets/ui/portraits/hud/maloy_0.png",
+      "passive": {
+        "title": "Весь в отца",
+        "text": "Пули отскакивают от цели к ещё одному врагу. Бег +10%"
+      },
+      "role": "Ловкач",
+      "lore": "Сын Рико. Носит отцовскую красную толстовку, которая ему велика на два размера, и уверен, что «Особая Семёрка» — это про него. Где Малой, там шум, дым и разбитые бутылки.",
+      "sprite": {
+        "path": "res://assets/heroes/raccoon_hero.png",
+        "clips": "res://assets/heroes/raccoon_",
+        "clips_grip": "res://data/raccoon_grip.json",
+        "cells": 4,
+        "cell_w": 384,
+        "cell_h": 288,
+        "run": [
+          1,
+          2
+        ],
+        "shoulder": [
+          8,
+          -126
+        ],
+        "arm": "res://assets/heroes/raccoon_hero_arm.png",
+        "arm_scale": 0.26,
+        "arm_len": 100,
+        "arm_pivot_y": 51
+      },
+      "quote": "Пап, смотри, как я умею!",
+      "skill": {
+        "id": "firecrackers",
+        "title": "Петарды",
+        "cooldown": 16.0,
+        "text": "Раскидывает вокруг связку петард: 8 хлопков подряд оглушают и отбрасывают врагов.",
+        "color": "#ff6a3d"
+      }
+    },
+    {
       "id": "red_panda",
       "title": "Тимур «Фитиль»",
       "description": "Быстрый, злой, слегка хрупкий.",

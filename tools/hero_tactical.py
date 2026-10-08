@@ -129,6 +129,12 @@ def main():
             shrink(sheet_of(frames)).save(f"{DST}/{hero}_{clip}.png", optimize=True)
             shrink(sheet_of(hands)).save(f"{DST}/{hero}_hand_{clip}.png", optimize=True)
             grip[clip] = points
+        fidget = base + "idle_fidget.png"
+        if os.path.exists(fidget):
+            # «Тик» в покое: целые кадры (руки нарисованы), по корпусу — к средней стойке.
+            fr = cells(rgba(fidget), 8)
+            shift = idle_x - np.mean([anchor(b)[0] for b in fr])
+            shrink(sheet_of([shifted(b, shift, 0) for b in fr])).save(f"{DST}/{hero}_fidget.png", optimize=True)
         json.dump(grip, open(f"source/data/grip_{hero}.json", "w"))
         print(hero, {c: len(v) for c, v in grip.items()})
 
@@ -160,6 +166,27 @@ def ui():
         for i in range(4):
             im = rgba(f"{base}ui/hud_{hero}_{i}.png").resize((256, 256), Image.LANCZOS)
             im.save(f"{PORTRAITS}/hud/{hero}_{i}.png", optimize=True)
+        # Позы итога боя: победа / поражение (у Рико на победе ещё кружка и семейное фото с Малым).
+        os.makedirs(f"{PORTRAITS}/pose", exist_ok=True)
+        wins = ["ui/win_0.png", "ui/win_1.png"] + (["ui/rico_beer_raise.png", "ui/rico_beer_toast.png", "ui/win_family.png"] if hero == "raccoon" else [])
+        for kind, files in (("win", wins), ("lose", ["ui/lose_0.png", "ui/lose_1.png"])):
+            for n, src in enumerate(files):
+                if os.path.exists(base + src):
+                    rgba(base + src).resize((256, 256), Image.LANCZOS).save(f"{PORTRAITS}/pose/{hero}_{kind}_{n}.png", optimize=True)
+    # Лица-реакции боя (face_<вид>): попадание, ухмылка, гордость за серию, испуг.
+    os.makedirs(f"{PORTRAITS}/face", exist_ok=True)
+    for hero in UI:
+        for kind in ("hit", "angry", "grin", "proud", "scared", "tired"):
+            src = f"{SRC}/{hero}/ui/face_{kind}.png"
+            if os.path.exists(src):
+                rgba(src).resize((256, 256), Image.LANCZOS).save(f"{PORTRAITS}/face/{hero}_{kind}.png", optimize=True)
+    # Новый Рико в диалогах сюжета (старые портреты — теперь Малой: story/portraits/maloy*.png).
+    rgba(f"{SRC}/raccoon/ui/face_neutral.png").resize((256, 256), Image.LANCZOS).save("source/assets/story/portraits/rico.png", optimize=True)
+    rgba(f"{SRC}/raccoon/ui/face_angry.png").resize((256, 256), Image.LANCZOS).save("source/assets/story/portraits/rico_alt.png", optimize=True)
+    # Малой (сын Рико, прежняя модель енота): карточка и лица боя.
+    fit(rgba(f"{SRC}/maloy/ui/maloy.png"), 300).save(f"{PORTRAITS}/maloy.png", optimize=True)
+    for i in range(4):
+        rgba(f"{SRC}/maloy/ui/hud_maloy_{i}.png").resize((256, 256), Image.LANCZOS).save(f"{PORTRAITS}/hud/maloy_{i}.png", optimize=True)
     print("ui ok")
 
 

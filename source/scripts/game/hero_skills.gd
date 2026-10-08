@@ -81,6 +81,8 @@ func try_use() -> bool:
 			_drone_strike()
 		"squall":
 			_squall()
+		"firecrackers":
+			_firecrackers()
 	if _shake.is_valid():
 		_shake.call(0.35)
 	SoundManager.play(&"shield_up")
@@ -160,6 +162,24 @@ func _fire_ring() -> void:
 	for enemy in _enemies_in(at, 320.0):
 		enemy.add_bleed(16.0 * _power(), 4.0, true)
 	_player.grant_invuln(0.25)
+
+
+## Малой «Петарды»: связка из 8 петард разлетается вокруг и хлопает по очереди — оглушает и отбрасывает.
+func _firecrackers() -> void:
+	var at := _player.global_position
+	var base := randf() * TAU
+	_fx.popup(at + Vector2(0, -90), "ПЕТАРДЫ!", Color("#ff6a3d"), 28.0)
+	for k in 8:
+		var spot := at + Vector2.from_angle(base + TAU * k / 8.0 + randf_range(-0.2, 0.2)) * randf_range(120.0, 260.0)
+		_later(0.25 + 0.12 * k, func() -> void:
+			if not is_instance_valid(_player):
+				return
+			BulletPool.explode(spot, 120.0, 55.0 * _power(), Bullet.Team.PLAYER, Color("#ff6a3d"), 1.0, &"fire")
+			_fx.burst(spot, Color("#ffd257"), 14, 300.0, 4.0)
+			for enemy in _enemies_in(spot, 130.0):
+				enemy.add_stagger(1.0, true)
+			if _shake.is_valid():
+				_shake.call(0.08))
 
 
 ## Рико «Шквал»: 5 с скорострельность +50%, пули прошивают врагов насквозь.

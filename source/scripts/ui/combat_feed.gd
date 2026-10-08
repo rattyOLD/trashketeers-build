@@ -49,7 +49,11 @@ func kill(points: int, label: String, color: Color = Color.WHITE) -> void:
 
 
 ## Медаль серии: крупная надпись, влетает с перебором масштаба и гаснет.
+signal medaled
+
+
 func medal(text: String, heat: float) -> void:
+	medaled.emit()
 	_medal = text
 	_medal_color = GOLD.lerp(HOT, clampf(heat, 0.0, 1.0))
 	_medal_life = MEDAL_LIFE

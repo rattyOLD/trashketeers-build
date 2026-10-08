@@ -11,6 +11,8 @@ const ENTRIES := [
 	["", "Герой", "open", 0, ""],
 	["res://assets/story/portraits/rico.png", "Рико", "open", 0, ""],
 	["res://assets/story/portraits/rico_alt.png", "Рико злой", "story", 1, "Пройди миссию 1"],
+	["res://assets/story/portraits/maloy.png", "Малой", "open", 0, ""],
+	["res://assets/story/portraits/maloy_alt.png", "Малой злой", "story", 1, "Пройди миссию 1"],
 	["res://assets/story/portraits/nell.png", "Нэлл", "open", 0, ""],
 	["res://assets/story/portraits/nell_alt.png", "Нэлл в бешенстве", "story", 1, "Пройди миссию 1"],
 	["res://assets/story/portraits/baron.png", "Барон", "stat:k_beer_baron", 1, "Победи Пивного Барона"],

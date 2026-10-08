@@ -36,11 +36,13 @@ const CLIP_CELL := Vector2(300, 200)
 const CLIP_FEET := 190.0
 const CLIP_COUNTS := {"idle": 8, "run": 8, "shoot": 4, "hit": 4, "dash": 6, "death": 8, "revive": 6}
 const HIT_CLIP_TIME := 0.2
-const CLIP_AIM_LIMIT := 0.6
+## Ствол идёт ровно за прицелом (иначе дуло смотрит в одну сторону, а пули летят в другую).
+const CLIP_AIM_LIMIT := PI
 ## Рисованный енот крупнее старого, а ствол на нём должен читаться силуэтом, а не пятном.
 const CLIP_GUN_BOOST := 1.5
 const DASH_CLIP_TIME := 0.16
 const IDLE_FPS := 7.0
+const FIDGET_TIME := 2.4
 const SHOOT_ANIM_TIME := 0.24
 const ARM_REST := 0.055
 const ARM_MIN := -1.05
@@ -92,6 +94,7 @@ var _hero_cfg: Dictionary = {}
 var _hero_frames: Array[AtlasTexture] = []
 var _hero_shoulder := Vector2.ZERO
 var _clip_mode := false
+var _fidget_t := 0.0
 var _dash_t := 0.0
 var _reviving := false
 var _clip_frames: Dictionary = {}
@@ -324,6 +327,28 @@ func _load_clips(prefix: String) -> bool:
 	return true
 
 
+## «Тик» героя в покое (Фрост стряхивает иней, Фитиль крутит спичку): лист <prefix>fidget.png, грузится при первом
+## показе; оружие на это время убрано. false — у героя такой сценки нет или он идёт.
+func play_fidget() -> bool:
+	if not _clip_mode or _run > 0.12 or _dead:
+		return false
+	if not _clip_frames.has("fidget"):
+		var path := str(_hero_cfg.get("clips", "")) + "fidget.png"
+		if not ResourceLoader.exists(path):
+			return false
+		var tex: Texture2D = load(path)
+		var list: Array[AtlasTexture] = []
+		var count := int(tex.get_height() / CLIP_CELL.y) * 4
+		for i in count:
+			var atlas := AtlasTexture.new()
+			atlas.atlas = tex
+			atlas.region = Rect2((i % 4) * CLIP_CELL.x, (i / 4) * CLIP_CELL.y, CLIP_CELL.x, CLIP_CELL.y)
+			list.append(atlas)
+		_clip_frames["fidget"] = list
+	_fidget_t = FIDGET_TIME
+	return true
+
+
 ## Покадровый герой (руки нарисованы в кадре): прицел ему водить плавно и в пределах хвата.
 func uses_clips() -> bool:
 	return _clip_mode
@@ -344,6 +369,10 @@ func _clip_pick() -> void:
 		else:
 			clip = "death"
 			idx = clampi(int(_death_t * 8.0), 0, 7)
+	elif _fidget_t > 0.0 and _run < 0.12 and _clip_frames.has("fidget"):
+		clip = "fidget"
+		var count: int = (_clip_frames["fidget"] as Array).size()
+		idx = clampi(int((1.0 - _fidget_t / FIDGET_TIME) * count), 0, count - 1)
 	elif dashing:
 		clip = "dash"
 		idx = clampi(int(_dash_t / DASH_CLIP_TIME * 6.0), 0, 5)
@@ -448,6 +477,7 @@ func update_motion(velocity: Vector2, aim: Vector2, delta: float) -> void:
 	_hurt = maxf(_hurt - delta, 0.0)
 	_pickup = maxf(_pickup - delta, 0.0)
 	_cheer = maxf(_cheer - delta, 0.0)
+	_fidget_t = maxf(_fidget_t - delta, 0.0)
 	_kick = lerpf(_kick, 0.0, clampf(KICK_DECAY * delta, 0.0, 1.0))
 	_climb = lerpf(_climb, 0.0, clampf(10.0 * delta, 0.0, 1.0))
 	_flash_t = maxf(_flash_t - delta, 0.0)
@@ -932,7 +962,7 @@ func _draw_hero_arm(tex: Texture2D, shoulder: Vector2, paw: Vector2) -> void:
 
 
 func _draw_gun_layer() -> void:
-	if _dead or not _rig_ok:
+	if _dead or not _rig_ok or _fidget_t > 0.0:
 		return
 	if _hero_mode and bool(_hero_cfg.get("baked_gun", false)):
 		return
