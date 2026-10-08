@@ -206,10 +206,6 @@ func build(currency_icon: Texture2D, weapon: WeaponData) -> void:
 	_root.add_child(_level_up)
 
 	_pause = PausePanel.new()
-	# Мини-карта не должна просвечивать поверх паузы (жалоба владельца: висела на панели).
-	_pause.visibility_changed.connect(func() -> void:
-		if _minimap_slot != null:
-			_minimap_slot.modulate.a = 0.0 if _pause.visible else 1.0)
 	_pause.resumed.connect(func() -> void: resume_pressed.emit())
 	_pause.exit_pressed.connect(func() -> void: menu_pressed.emit())
 	_pause.restart_pressed.connect(func() -> void: restart_pressed.emit())
@@ -972,6 +968,9 @@ func is_pause_open() -> bool:
 
 
 func _process(delta: float) -> void:
+	# Мини-карта прячется под любым окном (пауза, прокачка, сундук): иначе вылезает поверх интерфейса.
+	if _minimap_slot != null:
+		_minimap_slot.modulate.a = 0.0 if get_tree().paused else 1.0
 	if _band != null and _rail_combo.visible:
 		_rail_combo.modulate.a = 0.0 if (_chapter_card.visible or _toast.visible or _banner.visible or (_wave_sub.visible and _wave_sub.modulate.a > 0.05)) else 1.0
 	_items_clock += delta

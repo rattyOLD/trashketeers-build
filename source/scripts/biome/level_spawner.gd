@@ -85,7 +85,7 @@ var _puddles: Array = []
 var _ripple_timer := 0.0
 var _portal: Portal
 var _story: Dictionary = {}
-var _boss_cells := Vector2i(12, 6)
+var _boss_cells := Vector2i(16, 8)
 var _area_scale := 1.0
 var _story_clear: Array[Rect2] = []
 var _flow_ready := false
@@ -1223,6 +1223,12 @@ func _build_river() -> void:
 	var tail_y := inner.end.y - 8.0
 	if tail_y - points[points.size() - 1].y > 16.0:
 		points.append(Vector2(x0 + 170.0 * sin(tail_y * 0.0022 + ph) + 60.0 * sin(tail_y * 0.006 + ph2), tail_y))
+	# Протока обходит помост босса: у верхнего края держится сбоку от него.
+	var keep := boss_rect.size.x * 0.5 + width * 0.5 + 140.0
+	for k in points.size():
+		var pt := points[k]
+		if pt.y < boss_rect.end.y + 200.0 and absf(pt.x - boss_rect.get_center().x) < keep:
+			points[k] = Vector2(boss_rect.get_center().x + side * keep, pt.y)
 	var mid_y := _origin.y + grid_size.y / 2 * CELL
 	var bridges := [mid_y, inner.position.y + inner.size.y * 0.24 + randf_range(-60, 60), inner.position.y + inner.size.y * 0.8 + randf_range(-60, 60)]
 	var river := AcidRiver.new()
