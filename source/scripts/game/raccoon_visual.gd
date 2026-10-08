@@ -36,7 +36,7 @@ const CLIP_CELL := Vector2(300, 200)
 const CLIP_FEET := 190.0
 const CLIP_COUNTS := {"idle": 8, "run": 8, "shoot": 4, "hit": 4, "dash": 6, "death": 8, "revive": 6}
 const HIT_CLIP_TIME := 0.2
-const CLIP_AIM_LIMIT := 0.95
+const CLIP_AIM_LIMIT := 0.6
 ## Рисованный енот крупнее старого, а ствол на нём должен читаться силуэтом, а не пятном.
 const CLIP_GUN_BOOST := 1.5
 const DASH_CLIP_TIME := 0.16
@@ -322,6 +322,11 @@ func _load_clips(prefix: String) -> bool:
 	_clip_grip = grip
 	_clip_hands = hands
 	return true
+
+
+## Покадровый герой (руки нарисованы в кадре): прицел ему водить плавно и в пределах хвата.
+func uses_clips() -> bool:
+	return _clip_mode
 
 
 func _sc() -> float:

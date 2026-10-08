@@ -403,6 +403,7 @@ class RaccoonPreview:
 	var _volley_timer := 0.0
 	var _aim_dir := Vector2.RIGHT
 	var _aim_hold := 0.0
+	var _idle_side := 1.0
 	var _shots_left := 0
 	var _shot_timer := 0.0
 	var _tracers: Array[Vector3] = []
@@ -443,6 +444,10 @@ class RaccoonPreview:
 		_time += delta
 		raccoon.position = Vector2(size.x * 0.5, size.y * 0.5 + 34.0 * _scale)
 		var look := Vector2(cos(_time * 0.7), sin(_time * 1.1) * 0.3)
+		if raccoon.uses_clips():
+			# Руки нарисованы в кадре: ствол не гуляет по кругу и герой не вертится — стоит к зрителю
+			# в три четверти, лишь чуть поводя стволом.
+			look = Vector2(_idle_side, sin(_time * 0.9) * 0.06)
 		if _aim_hold > 0.0:
 			_aim_hold -= delta
 			look = _aim_dir

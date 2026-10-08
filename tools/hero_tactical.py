@@ -104,9 +104,18 @@ def main():
         fist_arr[..., 3] *= fade
         fist = Image.fromarray(fist_arr.clip(0, 255).astype(np.uint8), "RGBA")
         grip = {}
+        # Среднее положение корпуса в стойке: бег и стрельба сдвигаются к нему целиком (по X), иначе при смене
+        # позы тело прыгало на 10–20 px. Движение внутри клипа сохраняется.
+        idle_x = np.mean([anchor(b)[0] for b in cells(rgba(base + "body_nohands_idle.png"), COUNTS["idle"])])
         for clip in HANDS:
             bodies = cells(rgba(base + "body_nohands_" + clip + ".png"), COUNTS[clip])
             order = smooth_order(bodies) if clip == "idle" else list(range(len(bodies)))
+            shift = idle_x - np.mean([anchor(b)[0] for b in bodies])
+            bodies = [shifted(b, shift, 0) for b in bodies]
+            if clip == "idle":
+                # Стойка: раскачку корпуса гасим на 60% — кадров мало, крупные шаги смотрелись рывками.
+                mean_x = np.mean([anchor(b)[0] for b in bodies])
+                bodies = [shifted(b, (mean_x - anchor(b)[0]) * 0.6, 0) for b in bodies]
             frames, hands, points = [], [], []
             for i in order:
                 ax, ay = anchor(bodies[i])
