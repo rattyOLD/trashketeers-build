@@ -23,6 +23,12 @@ js = js[:start] + ("SampleNodeBus:class SampleNodeBus{static create(bus){return 
     "getInputNode(){return this._gain}getOutputNode(){return this._gain}"
     "setVolume(volume){const l=volume[GodotAudio.GodotChannel.CHANNEL_L]??0;const r=volume[GodotAudio.GodotChannel.CHANNEL_R]??0;this._gain.gain.value=Math.max(l,r)}"
     "clear(){this._bus=null;if(this._gain){this._gain.disconnect();this._gain=null}}}") + js[end:]
+# Размер холста — по видимой области (window.__trashViewport из render_scale.js): Safari iOS 26 в альбомной
+# ориентации считает innerHeight вместе с панелью браузера, и низ игры уходил за край экрана.
+size_needle = "width=window.innerWidth*scale;height=window.innerHeight*scale"
+assert size_needle in js, "canvas size hook not found"
+js = js.replace(size_needle, "const tv=window.__trashViewport?window.__trashViewport():[window.innerWidth,window.innerHeight,0];"
+    "width=tv[0]*scale;height=tv[1]*scale;canvas.style.top=tv[2]+'px'")
 open(os.path.join(site, "index.js"), "w", encoding="utf-8").write(js)
 for name in os.listdir(site):
     if name.startswith(("raccoon.pack", "raccoon.core")):
@@ -51,7 +57,7 @@ with open(os.path.join(build, "index.wasm"), "rb") as src:
 for extra in ("manifest.webmanifest", "sw.js", "icon180.png", "icon192.png", "icon512.png", "og.jpg"):
     shutil.copy(os.path.join(ROOT, "tools", extra), os.path.join(site, extra))
 shutil.copy(os.path.join(ROOT, "audio_unlock.js"), os.path.join(site, "audio_unlock.js"))
-shutil.copy(os.path.join(ROOT, "render_scale.js"), os.path.join(site, "render_scale.js"))
+shutil.copy(os.path.join(ROOT, "source/web/render_scale.js"), os.path.join(site, "render_scale.js"))
 page = open(os.path.join(ROOT, "tools", "site_template.html"), encoding="utf-8").read()
 import json as _json
 _studio = str(_json.load(open(os.path.join(ROOT, "source", "data", "brand.json"))).get("studio", "")).strip()

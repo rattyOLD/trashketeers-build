@@ -54,3 +54,41 @@
 		setTimeout(function () { location.reload(); }, 400);
 	}, true);
 })();
+
+// Видимая область окна. Safari на iOS 26 в альбомной ориентации отдаёт в innerHeight всю высоту экрана,
+// хотя сверху её занимает панель браузера: холст Godot (он берёт innerWidth × innerHeight) и экран загрузки
+// уезжали низом за край. Берём высоту и сдвиг из visualViewport, если она заметно меньше.
+// Пока печатают в поле ввода — как раньше (клавиатуру обрабатывает код в странице).
+(function () {
+	'use strict';
+	window.__trashViewport = function () {
+		var w = window.innerWidth;
+		var h = window.innerHeight;
+		var top = 0;
+		var vv = window.visualViewport;
+		var el = document.activeElement;
+		var typing = !!el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA');
+		if (vv && !typing && Math.abs(vv.scale - 1) < 0.01 && vv.height > 120 && vv.height < h - 2) {
+			h = Math.round(vv.height);
+			top = Math.max(0, Math.round(vv.offsetTop));
+		}
+		return [w, h, top];
+	};
+	var fitBoot = function () {
+		var boot = document.getElementById('boot');
+		if (!boot) { return; }
+		var v = window.__trashViewport();
+		var full = v[1] >= window.innerHeight - 2 && v[2] === 0;
+		boot.style.top = full ? '' : v[2] + 'px';
+		boot.style.height = full ? '' : v[1] + 'px';
+		boot.style.bottom = full ? '' : 'auto';
+	};
+	window.addEventListener('resize', fitBoot);
+	window.addEventListener('orientationchange', function () { setTimeout(fitBoot, 300); });
+	if (window.visualViewport) {
+		window.visualViewport.addEventListener('resize', fitBoot);
+		window.visualViewport.addEventListener('scroll', fitBoot);
+	}
+	document.addEventListener('DOMContentLoaded', fitBoot);
+	setInterval(fitBoot, 1000);
+})();
