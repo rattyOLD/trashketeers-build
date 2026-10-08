@@ -135,7 +135,7 @@ func _run() -> void:
 		_inside(battle.hud._dash, mode + " dash")
 		_inside(battle.hud._slot_bar, mode + " weapon slots")
 		_inside(battle.hud._interact, mode + " pickup")
-		_check(is_equal_approx(battle.camera.zoom.x, 1.05), mode + " camera shows more arena")
+		_check(is_equal_approx(battle.camera.zoom.x, BattleBase.LANDSCAPE_ZOOM) and BattleBase.LANDSCAPE_ZOOM < 1.0, mode + " camera shows more arena")
 		await _shot(mode)
 		await get_tree().create_timer(3.0).timeout
 		battle.hud._barks.say("heal", true)
