@@ -966,10 +966,35 @@ func _build_gates() -> void:
 		gate.inward = 1.0 if side == 0 else -1.0
 		gate.color = color
 		_own(gate, _layers.decals)
+		if district != null:
+			_gate_frame(side, r)
+			continue
 		var post := "tire_stack" if layout != "bank" else "lamp_banner"
 		for dy in [-1.0, 1.0]:
 			var at := Vector2(r.get_center().x, r.get_center().y + dy * (GATE_HALF * CELL + 26.0) + (40.0 if dy > 0.0 else 0.0))
 			_decor_prop(at, post)
+
+
+## Ворота в линии забора, стоят вертикально («|»): на Свалке — рама с поднятой ставней (арт Астры,
+## повёрнут вдоль стены), в Банке — фонари с флагами ровно по краям проёма.
+func _gate_frame(side: int, r: Rect2) -> void:
+	var inner := _arena_inner()
+	var x := inner.position.x - 30.0 if side == 0 else inner.end.x + 30.0
+	var cy := r.get_center().y
+	var half := GATE_HALF * CELL * ArenaDistrict.GATE_CLEAR
+	if layout == "bank":
+		for dy in [-1.0, 1.0]:
+			_decor_prop(Vector2(x, cy + dy * half + (24.0 if dy > 0.0 else 0.0)), "lamp_banner")
+		return
+	var tex := load("res://assets/story/gates/open.png") as Texture2D
+	if tex == null:
+		return
+	var frame := Sprite2D.new()
+	frame.texture = tex
+	frame.rotation = PI * 0.5 if side == 0 else -PI * 0.5
+	frame.scale = Vector2.ONE * (half * 2.0 + 30.0) / tex.get_width()
+	frame.position = Vector2(x, cy)
+	_own(frame, _layers.decals)
 
 
 func _build_lamps() -> void:
