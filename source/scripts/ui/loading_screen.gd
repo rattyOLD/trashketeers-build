@@ -243,8 +243,9 @@ func _init() -> void:
 	_bar = Control.new()
 	_bar.anchor_left = (1.0 - BAR_WIDTH_FRACTION) * 0.5
 	_bar.anchor_right = 1.0 - (1.0 - BAR_WIDTH_FRACTION) * 0.5
-	_bar.anchor_top = 0.62
-	_bar.anchor_bottom = 0.62
+	# Полоса загрузки — внизу экрана, совет — над ней.
+	_bar.anchor_top = 0.78
+	_bar.anchor_bottom = 0.78
 	_bar.offset_bottom = BAR_HEIGHT
 	_bar.draw.connect(_draw_bar)
 	_root.add_child(_bar)
@@ -274,12 +275,13 @@ func _init() -> void:
 		if tip_text.begins_with(prefix):
 			tag = prefix.trim_suffix(": ").to_upper()
 			tip_text = tip_text.trim_prefix(prefix)
+			tip_text = tip_text.left(1).to_upper() + tip_text.substr(1)
 	var card := PanelContainer.new()
 	card.add_theme_stylebox_override("panel", UiStyle.box(Color(0.129, 0.124, 0.116, 0.88), Color("#ffb347", 0.55), 3, 14))
 	card.anchor_left = 0.08
 	card.anchor_right = 0.92
-	card.anchor_top = 0.77
-	card.anchor_bottom = 0.77
+	card.anchor_top = 0.5
+	card.anchor_bottom = 0.5
 	card.grow_vertical = Control.GROW_DIRECTION_END
 	var card_col := VBoxContainer.new()
 	card_col.add_theme_constant_override("separation", 4)
