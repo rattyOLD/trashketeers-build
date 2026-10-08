@@ -162,6 +162,7 @@ func _setup_common(camera_bounds: Rect2, currency_icon: Texture2D) -> void:
 	add_child(hud)
 	hud.build(currency_icon, player.weapon_controller.base_weapon)
 	_warm_glyphs()
+	_warm_shaders()
 
 	player.health_changed.connect(hud.set_health)
 	player.damaged.connect(_on_player_damaged)
@@ -208,6 +209,48 @@ func _warm_glyphs() -> void:
 		holder.add_child(UiStyle.label(GLYPH_TEXT, int(pair[0]), UiStyle.TEXT, int(pair[1])))
 	hud.add_child(holder)
 	get_tree().create_timer(0.3, true).timeout.connect(holder.queue_free)
+
+
+## Видеочипы Adreno/Mali компилируют шейдер при первой отрисовке — отсюда фризы 1–7 с в начале боя на слабых
+## Android. Под заставкой загрузки один раз рисуем почти прозрачные квадраты со всеми боевыми шейдерами,
+## аддитивным смешиванием и под точечным светом: программы собираются заранее, а не посреди боя.
+const WARM_SHADERS := ["res://shaders/rig2d.gdshader", "res://shaders/flash.gdshader", "res://shaders/enemy_outline.gdshader"]
+
+
+func _warm_shaders() -> void:
+	var holder := Node2D.new()
+	holder.global_position = player.global_position
+	holder.z_index = 100
+	var image := Image.create(8, 8, false, Image.FORMAT_RGBA8)
+	image.fill(Color.WHITE)
+	var texture := ImageTexture.create_from_image(image)
+	var materials: Array[Material] = []
+	for path: String in WARM_SHADERS:
+		var shader := load(path) as Shader
+		if shader != null:
+			var material := ShaderMaterial.new()
+			material.shader = shader
+			materials.append(material)
+	var additive := CanvasItemMaterial.new()
+	additive.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	materials.append(additive)
+	var unshaded := CanvasItemMaterial.new()
+	unshaded.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
+	materials.append(unshaded)
+	for i in materials.size():
+		var sprite := Sprite2D.new()
+		sprite.texture = texture
+		sprite.material = materials[i]
+		sprite.position = Vector2(i * 10.0, 0.0)
+		sprite.modulate.a = 0.02
+		holder.add_child(sprite)
+	var light := PointLight2D.new()
+	light.texture = texture
+	light.texture_scale = 8.0
+	light.energy = 0.01
+	holder.add_child(light)
+	add_child(holder)
+	get_tree().create_timer(0.5, true).timeout.connect(holder.queue_free)
 
 
 func _apply_camera_zoom() -> void:
