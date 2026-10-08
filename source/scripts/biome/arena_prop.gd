@@ -41,6 +41,18 @@ void vertex() {
 static var _sway: ShaderMaterial
 
 
+## Попадание в куст/дерево: короткое покачивание (от основания) — растение «отзывается».
+func rustle() -> void:
+	if sprite == null or (has_meta("rustling") and bool(get_meta("rustling"))):
+		return
+	set_meta("rustling", true)
+	var tween := create_tween()
+	tween.tween_property(sprite, "rotation", 0.07, 0.07)
+	tween.tween_property(sprite, "rotation", -0.05, 0.1)
+	tween.tween_property(sprite, "rotation", 0.0, 0.12)
+	tween.tween_callback(func() -> void: set_meta("rustling", false))
+
+
 static func sway_material() -> ShaderMaterial:
 	if _sway == null:
 		var shader := Shader.new()

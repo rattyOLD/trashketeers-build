@@ -152,7 +152,53 @@ func build(layout: String, chapter_id: String, bounds: Rect2, inner: Rect2, gate
 				if absf(y - gate_y) > gate_half * GATE_CLEAR:
 					_lights.append(EnvLights.add(Vector2(edge + side * 110.0, y), NEON.pick_random(), 300.0, 0.5))
 				y += 380.0
+	if not lite:
+		# Дорога у нижнего забора: местные машины изредка проезжают в обе стороны — за забором идёт жизнь.
+		_road_y = inner.end.y + 250.0
+		_road_x = Vector2(view.position.x - 200.0, view.end.x + 200.0)
+		for id in district["cars"]:
+			if not str(id).contains("scooter") or randf() < 0.5:
+				_car_paths.append(dir + str(id) + ".png")
+		for i in 2:
+			var car := Sprite2D.new()
+			car.visible = false
+			car.offset = Vector2(0, -60.0)
+			add_child(car)
+			_traffic.append({"car": car, "wait": randf_range(1.0, 6.0) + 5.0 * i, "dir": 1.0, "speed": 0.0})
 	set_process(not _crowd.is_empty() and not lite)
+
+
+var _traffic: Array = []
+var _car_paths: Array[String] = []
+var _road_y := 0.0
+var _road_x := Vector2.ZERO
+
+
+func _drive(delta: float) -> void:
+	for t: Dictionary in _traffic:
+		var car := t["car"] as Sprite2D
+		if not car.visible:
+			t["wait"] = float(t["wait"]) - delta
+			if float(t["wait"]) > 0.0 or _car_paths.is_empty():
+				continue
+			car.texture = _texture(_car_paths.pick_random())
+			if car.texture == null:
+				continue
+			var dir := 1.0 if randf() < 0.5 else -1.0
+			t["dir"] = dir
+			t["speed"] = randf_range(140.0, 230.0)
+			car.scale = Vector2.ONE * 0.62
+			car.offset = Vector2(0, -car.texture.get_height() * 0.5)
+			car.flip_h = dir < 0.0
+			# Встречные — на своей полосе.
+			car.position = Vector2(_road_x.x if dir > 0.0 else _road_x.y, _road_y + (0.0 if dir > 0.0 else 34.0))
+			car.visible = true
+			continue
+		car.position.x += float(t["dir"]) * float(t["speed"]) * delta
+		car.position.y += sin(_time * 18.0 + car.position.x * 0.05) * 0.15
+		if car.position.x < _road_x.x - 10.0 or car.position.x > _road_x.y + 10.0:
+			car.visible = false
+			t["wait"] = randf_range(4.0, 12.0)
 
 
 ## Минимальная бодрость трибуны: убийство (+0.07), элита (+0.15), босс (1.0).
@@ -162,6 +208,7 @@ func cheer(amount: float) -> void:
 
 func _process(delta: float) -> void:
 	_time += delta
+	_drive(delta)
 	heat = maxf(heat - delta * 0.18, 0.0)
 	_tick -= delta
 	if _tick > 0.0:

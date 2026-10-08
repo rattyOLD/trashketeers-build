@@ -105,6 +105,8 @@ func build(layers: BiomeLayers, chapter_def: Dictionary) -> void:
 	_world_life = null
 	_fire_spots.clear()
 	_ropes.clear()
+	_windows.clear()
+	_music_spots.clear()
 	# Дворы прошлой главы — иначе новые «упираются» в них, а шаги звучат по чужому покрытию.
 	_sectors.clear()
 	if _story.is_empty():
@@ -1448,6 +1450,11 @@ func _build_story_organic() -> bool:
 		if not poi.is_empty() and _build_poi(poi, p):
 			_cover_spots.append(p)
 	_scatter_singles(area, Vector2(1e6, 1e6))
+	# Сюжетные комнаты тоже живые: стаи у маршрута, ветер, пыль из-под ног, листья из кустов.
+	var perches: Array[Vector2] = []
+	for k in range(1, route.size()):
+		perches.append(route[k] + Vector2(randf_range(-280.0, 280.0), 90.0))
+	_build_world_life(route[route.size() - 1], perches)
 	return true
 
 
@@ -1576,6 +1583,8 @@ var _streets: ParkPaths
 var _world_life: WorldLife
 var _fire_spots: Array[Vector2] = []
 var _ropes: Array = []
+var _windows: Array = []
+var _music_spots: Array[Vector2] = []
 
 
 ## Кварталы выживания (data/lots.json → quarters): внутренность карты делится на 3×3. Центр (бой), клетка
@@ -1654,9 +1663,11 @@ func _place_quarter(q: Dictionary, r: Rect2, yards: Dictionary, defs: Dictionary
 		var vis := ArenaProp.visual_size(str(ids[i]))
 		roofs.append(base + Vector2((w * 0.32) * (1.0 if roofs.is_empty() else -1.0), -vis.y * 0.5))
 		_cover_spots.append(base)
-		if SaveService.get_quality() > 0:
-			# Свет из окон и над дверью: квартал живёт и в темноте.
-			_life_lights.append(EnvLights.add(base + Vector2(0, -ArenaProp.visual_size(str(ids[i])).y * 0.3), Color("#ffc46b") if layout != "bank" else Color("#fff0c8"), 230.0, 0.45))
+		# Свет из окон и над дверью (им управляет WorldLife: иногда гаснет и загорается).
+		_windows.append([base + Vector2(0, -ArenaProp.visual_size(str(ids[i])).y * 0.3), Color("#ffc46b") if layout != "bank" else Color("#fff0c8")])
+		var qname := str(q.get("name", ""))
+		if qname.contains("Бар") or qname.contains("Пивн") or qname.contains("Шаурм") or qname.contains("Ресторан") or qname.contains("Бутик"):
+			_music_spots.append(base)
 	if built == 0:
 		return false
 	if roofs.size() >= 2:
@@ -1720,8 +1731,11 @@ func _yard_ok(p: Vector2, radius: float) -> bool:
 
 ## Живой мир (WorldLife): стаи птиц на дворах, площади и у кварталов, ветер с листьями/бумажками,
 ## светлячки над травой, искры над бочками, пар из люков, бельё/флажки между домами, реплики жителей.
-func _build_world_life(center: Vector2) -> void:
+func _build_world_life(center: Vector2, extra: Array[Vector2] = []) -> void:
 	var life := WorldLife.new()
+	for p in extra:
+		if is_walkable(p):
+			life.spots.append(p)
 	life.bank = layout == "bank"
 	life.bounds = _interior_rect()
 	for sec: Array in _sectors:
@@ -1737,6 +1751,9 @@ func _build_world_life(center: Vector2) -> void:
 	life.spots.shuffle()
 	life.fires = _fire_spots.duplicate()
 	life.ropes = _ropes.duplicate()
+	life.windows = _windows.duplicate()
+	life.music = _music_spots.duplicate()
+	life.surface = surface_at
 	if _streets != null:
 		life.streets = _streets.paths.duplicate()
 	if _life != null:

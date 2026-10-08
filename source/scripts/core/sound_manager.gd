@@ -105,6 +105,7 @@ const SFX := {
 	&"enter_acid": [-5.0, 0.6],
 	&"amb_acid": [-14.0, 0.5],
 	&"amb_water": [-16.0, 0.5],
+	&"amb_music": [-13.0, 0.5],
 	&"k_perfect": [-7.0, 0.6],
 	&"weapon_pickup": [-6.0, 0.1],
 	&"crate_break": [-6.0, 0.08],
@@ -117,7 +118,7 @@ const SFX := {
 }
 
 ## Звуки, которые проигрываются циклично через play_loop (пул SFX их не трогает).
-const LOOPED_SFX: Array[StringName] = [&"beam_loop", &"amb_hum", &"amb_wind", &"amb_acid", &"amb_water", &"amb_park"]
+const LOOPED_SFX: Array[StringName] = [&"beam_loop", &"amb_hum", &"amb_wind", &"amb_acid", &"amb_water", &"amb_park", &"amb_music"]
 ## Фон Свалки: два бесконечных слоя + редкие одиночные события со случайной паузой.
 const AMBIENT_LOOPS: Array[StringName] = [&"amb_hum", &"amb_wind"]
 const AMBIENT_EVENTS := {&"amb_siren": Vector2(22.0, 45.0), &"amb_neon": Vector2(6.0, 14.0)}

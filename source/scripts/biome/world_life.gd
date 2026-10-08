@@ -43,6 +43,11 @@ var meadows: Array = []
 var streets: Array[PackedVector2Array] = []
 var ropes: Array = []
 var bounds := Rect2()
+## Окна домов [точка, цвет]: свет живёт — иногда гаснет и снова загорается. Музыка — точки баров/кафе.
+var windows: Array = []
+var music: Array[Vector2] = []
+## Поверхность под ногами (LevelSpawner.surface_at): пыль из-под ног героя по ней.
+var surface: Callable
 
 var _ground: FxManager.DrawLayer
 var _air: FxManager.DrawLayer
@@ -58,6 +63,13 @@ var _bubble_cd := 4.0
 var _said := {}
 var _check := 0.0
 var _box: StyleBoxFlat
+var _lights: Array = []
+var _light_timer := 3.0
+var _music_loop := -1
+var _music_check := 0.0
+var _dust: Array = []
+var _last_step := Vector2.INF
+const MUSIC_RANGE := 760.0
 
 
 func build(ground_parent: Node2D, air_parent: Node2D) -> void:
@@ -80,9 +92,23 @@ func build(ground_parent: Node2D, air_parent: Node2D) -> void:
 				_clouds.append(Vector3(randf_range(bounds.position.x, bounds.end.x), randf_range(bounds.position.y, bounds.end.y), randf_range(260.0, 420.0)))
 	if not BulletPool.exploded.is_connected(_on_explosion):
 		BulletPool.exploded.connect(_on_explosion)
+	if not BulletPool.bullet_hit.is_connected(_on_bullet_hit):
+		BulletPool.bullet_hit.connect(_on_bullet_hit)
+	if quality > 0:
+		for w: Array in windows:
+			_lights.append([w[0], w[1], EnvLights.add(w[0], w[1], 230.0, 0.45), 0.0])
 
 
 func _exit_tree() -> void:
+	if BulletPool.bullet_hit.is_connected(_on_bullet_hit):
+		BulletPool.bullet_hit.disconnect(_on_bullet_hit)
+	for l: Array in _lights:
+		if int(l[2]) != -1:
+			EnvLights.remove(int(l[2]))
+	_lights.clear()
+	if _music_loop != -1:
+		SoundManager.stop_loop(_music_loop)
+		_music_loop = -1
 	if BulletPool.exploded.is_connected(_on_explosion):
 		BulletPool.exploded.disconnect(_on_explosion)
 	# Слои рисования живут в чужих родителях (пол/воздух биома) — убираем их вместе с собой.
@@ -101,6 +127,17 @@ func attach(hero: Player) -> void:
 ## Выстрел героя: птицы рядом взлетают.
 func on_shot(_weapon: WeaponData, origin: Vector2, _direction: Vector2) -> void:
 	_scare(origin, SCARE_SHOT)
+
+
+## Пуля в куст или дерево: оно качнётся и роняет листья.
+func _on_bullet_hit(_bullet: Bullet, target: Node2D) -> void:
+	if quality == 0 or not (target is ArenaProp) or not ArenaProp.SWAY_IDS.has((target as ArenaProp).def_id):
+		return
+	(target as ArenaProp).rustle()
+	var at := target.global_position + Vector2(0.0, -60.0)
+	for i in 5:
+		_bits.append({"p": at + Vector2(randf_range(-30.0, 30.0), randf_range(-30.0, 10.0)), "rot": randf() * TAU, "spin": randf_range(-6.0, 6.0),
+			"life": randf_range(1.2, 2.0), "kind": 0, "phase": randf() * TAU, "speed": randf_range(10.0, 30.0), "leaf": true})
 
 
 func _on_explosion(at: Vector2, radius: float, _color: Color, _team: int) -> void:
@@ -217,7 +254,7 @@ func _update_bits(delta: float) -> void:
 		var b: Dictionary = _bits[i]
 		b["life"] = float(b["life"]) - delta
 		var flutter := Vector2(0.0, sin(_time * 2.3 + float(b["phase"])) * 22.0)
-		b["p"] = (b["p"] as Vector2) + (WIND * float(b["speed"]) * gust + flutter) * delta
+		b["p"] = (b["p"] as Vector2) + (WIND * float(b["speed"]) * gust + flutter + (Vector2(0.0, 45.0) if b.has("leaf") else Vector2.ZERO)) * delta
 		b["rot"] = float(b["rot"]) + float(b["spin"]) * delta * gust
 		if float(b["life"]) <= 0.0 or not _view.grow(160.0).has_point(b["p"]):
 			_bits.remove_at(i)
@@ -259,6 +296,71 @@ func _update_bits(delta: float) -> void:
 			c.x = bounds.position.x - c.z
 			c.y = randf_range(bounds.position.y, bounds.end.y)
 		_clouds[i] = c
+
+
+# --- Окна, музыка, пыль ---------------------------------------------------------------------------------
+
+func _update_windows(delta: float) -> void:
+	_light_timer -= delta
+	for l: Array in _lights:
+		if float(l[3]) > 0.0:
+			l[3] = float(l[3]) - delta
+			if float(l[3]) <= 0.0:
+				l[2] = EnvLights.add(l[0], l[1], 230.0, 0.45)
+	if _light_timer > 0.0 or _lights.is_empty():
+		return
+	_light_timer = randf_range(4.0, 9.0)
+	# Кто-то выключил свет — через несколько секунд снова включит.
+	var pick: Array = _lights.pick_random()
+	if int(pick[2]) != -1 and float(pick[3]) <= 0.0:
+		EnvLights.remove(int(pick[2]))
+		pick[2] = -1
+		pick[3] = randf_range(2.5, 7.0)
+
+
+func _update_music(delta: float) -> void:
+	_music_check -= delta
+	if _music_check > 0.0 or music.is_empty() or player == null or not is_instance_valid(player):
+		return
+	_music_check = 0.2
+	var dist := INF
+	for m in music:
+		dist = minf(dist, m.distance_to(player.global_position))
+	if _music_loop == -1 and dist < MUSIC_RANGE:
+		_music_loop = SoundManager.play_loop(&"amb_music")
+	if _music_loop != -1:
+		var base: float = SoundManager.SFX[&"amb_music"][0]
+		SoundManager.set_loop_volume(_music_loop, base - 24.0 * clampf(dist / MUSIC_RANGE, 0.0, 1.0) - (40.0 if dist >= MUSIC_RANGE else 0.0))
+
+
+## Пыль, травинки и брызги из-под ног героя: по траве — зелёные, по асфальту и камню — серая пыль.
+func _update_dust(delta: float) -> void:
+	for i in range(_dust.size() - 1, -1, -1):
+		var d: Vector4 = _dust[i]
+		d.w += delta
+		_dust[i] = d
+		if d.w > 0.55:
+			_dust.remove_at(i)
+	if player == null or not is_instance_valid(player) or not surface.is_valid():
+		return
+	var p := player.global_position
+	if _last_step == Vector2.INF:
+		_last_step = p
+	if p.distance_to(_last_step) < 34.0:
+		return
+	var dir := (p - _last_step).normalized()
+	_last_step = p
+	var kind: StringName = surface.call(p)
+	var tone := 0.0
+	match kind:
+		&"grass":
+			tone = 1.0
+		&"water", &"acid":
+			tone = 2.0
+		&"wood", &"metal":
+			return
+	for k in 2:
+		_dust.append(Vector4(p.x - dir.x * 10.0 + randf_range(-8.0, 8.0), p.y - 2.0 + randf_range(-3.0, 3.0), tone, 0.0))
 
 
 # --- Реплики ----------------------------------------------------------------------------------------------
@@ -304,7 +406,10 @@ func _process(delta: float) -> void:
 	if quality > 0:
 		_update_flocks(delta)
 		_update_bits(delta)
+		_update_windows(delta)
+		_update_dust(delta)
 		_ground.queue_redraw()
+	_update_music(delta)
 	_update_barks(delta)
 	_air.queue_redraw()
 
@@ -329,6 +434,14 @@ func _paint_ground(ci: CanvasItem) -> void:
 		for k in 4:
 			var y := p.y - 7.0 + k * 4.5
 			ci.draw_line(Vector2(p.x - 16.0, y), Vector2(p.x + 16.0, y), Color(0.05, 0.04, 0.07), 2.0)
+	for d: Vector4 in _dust:
+		var t := d.w / 0.55
+		var col := Color(0.62, 0.6, 0.66, 0.4 * (1.0 - t))
+		if d.z == 1.0:
+			col = Color(0.45, 0.7, 0.3, 0.75 * (1.0 - t))
+		elif d.z == 2.0:
+			col = Color(0.75, 0.95, 1.0, 0.6 * (1.0 - t)) if bank else Color(0.6, 1.0, 0.3, 0.6 * (1.0 - t))
+		ci.draw_circle(Vector2(d.x, d.y - t * 10.0), 2.5 + t * (6.0 if d.z == 0.0 else 2.0), col)
 	for flock: Dictionary in _flocks:
 		if int(flock["state"]) == 2:
 			continue
@@ -364,7 +477,7 @@ func _paint_air(ci: CanvasItem) -> void:
 		var fade := clampf(float(b["life"]), 0.0, 1.0)
 		var kind := int(b["kind"])
 		ci.draw_set_transform(p, float(b["rot"]), Vector2(1.0, 0.55 + 0.45 * absf(sin(float(b["rot"])))))
-		if bank:
+		if bank or b.has("leaf"):
 			var leaf: Color = [Color("#7fbf4d"), Color("#e8a33a"), Color("#c9612f")][kind]
 			ci.draw_colored_polygon(PackedVector2Array([Vector2(-7, 0), Vector2(0, -3.5), Vector2(7, 0), Vector2(0, 3.5)]), Color(leaf, fade))
 		elif kind == 2:
