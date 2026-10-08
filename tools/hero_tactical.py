@@ -48,31 +48,77 @@ def tip(cell, slab):
     return float(xs[sel].mean()), float(ys[sel].mean())
 
 
+def cells(sheet, n):
+    return [sheet.crop(((i % 4) * CW, (i // 4) * CH, (i % 4 + 1) * CW, (i // 4 + 1) * CH)) for i in range(n)]
+
+
+def sheet_of(frames):
+    rows = (len(frames) + 3) // 4
+    out = Image.new("RGBA", (4 * CW, rows * CH), (0, 0, 0, 0))
+    for i, f in enumerate(frames):
+        out.paste(f, ((i % 4) * CW, (i // 4) * CH))
+    return out
+
+
+def anchor(cell):
+    """Корпус кадра: x — середина головы (верхние 25 px силуэта), y — макушка. По нему руки идут за телом."""
+    a = np.array(cell.getchannel("A")) > 128
+    ys, xs = np.nonzero(a)
+    top = ys.min()
+    return float(xs[ys < top + 25].mean()), float(top)
+
+
+def shifted(cell, dx, dy):
+    out = Image.new("RGBA", cell.size, (0, 0, 0, 0))
+    out.paste(cell, (round(dx), round(dy)), cell)
+    return out
+
+
+def smooth_order(frames):
+    """Стойка с рывком на стыке цикла (корпус прыгает больше 8 px) — играем первую половину туда-обратно."""
+    xs = [anchor(f)[0] for f in frames]
+    jump = max(abs(xs[i] - xs[(i + 1) % len(xs)]) for i in range(len(xs)))
+    if jump <= 8.0:
+        return list(range(len(frames)))
+    half = len(frames) // 2
+    return list(range(half)) + list(range(half - 1, -1, -1))
+
+
 def main():
+    """Клипы с оружием (idle/run/shoot) собираются из слоёв: тело без рук + руки в позе удержания из первого кадра
+    стрельбы, сдвинутые за корпусом. В нарисованных кадрах руки размахивают (бег), и ствол прыгал от кадра к кадру."""
     os.makedirs(DST, exist_ok=True)
     for hero in HEROES:
         base = f"{SRC}/{hero}/{hero}_"
         for clip in COUNTS:
-            shrink(rgba(base + clip + ".png")).save(f"{DST}/{hero}_{clip}.png", optimize=True)
+            if clip not in HANDS:
+                shrink(rgba(base + clip + ".png")).save(f"{DST}/{hero}_{clip}.png", optimize=True)
+        rear = cells(rgba(base + "rearhand_shoot.png"), 1)[0]
+        front = cells(rgba(base + "fronthand_shoot.png"), 1)[0]
+        ref = anchor(cells(rgba(base + "body_nohands_shoot.png"), 1)[0])
+        g0 = tip(rear, 22)
+        s0 = tip(front, 18)
+        yy, xx = np.mgrid[0:CH, 0:CW]
+        fade = np.clip((FIST_R + FIST_SOFT - np.sqrt((xx - g0[0]) ** 2 + (yy - g0[1]) ** 2)) / FIST_SOFT, 0.0, 1.0)
+        fist_arr = np.array(rear).astype(np.float32)
+        fist_arr[..., 3] *= fade
+        fist = Image.fromarray(fist_arr.clip(0, 255).astype(np.uint8), "RGBA")
         grip = {}
         for clip in HANDS:
-            rear = rgba(base + "rearhand_" + clip + ".png")
-            front = rgba(base + "fronthand_" + clip + ".png")
-            hands = Image.new("RGBA", rear.size, (0, 0, 0, 0))
-            points = []
-            for i in range(COUNTS[clip]):
-                box = ((i % 4) * CW, (i // 4) * CH, (i % 4 + 1) * CW, (i // 4 + 1) * CH)
-                g = tip(rear.crop(box), 22) or (300.0, 200.0)
-                s = tip(front.crop(box), 18) or (g[0] + 70.0, g[1])
-                gx, gy = g
-                cell = np.array(rear.crop(box)).astype(np.float32)
-                yy, xx = np.mgrid[0:CH, 0:CW]
-                d = np.sqrt((xx - gx) ** 2 + (yy - gy) ** 2)
-                fade = np.clip((FIST_R + FIST_SOFT - d) / FIST_SOFT, 0.0, 1.0)
-                cell[..., 3] *= fade
-                hands.paste(Image.fromarray(cell.clip(0, 255).astype(np.uint8), "RGBA"), box[:2])
-                points.append([round(gx * K, 1), round(gy * K, 1), round(s[0] * K, 1), round(s[1] * K, 1)])
-            shrink(hands).save(f"{DST}/{hero}_hand_{clip}.png", optimize=True)
+            bodies = cells(rgba(base + "body_nohands_" + clip + ".png"), COUNTS[clip])
+            order = smooth_order(bodies) if clip == "idle" else list(range(len(bodies)))
+            frames, hands, points = [], [], []
+            for i in order:
+                ax, ay = anchor(bodies[i])
+                dx, dy = ax - ref[0], ay - ref[1]
+                cell = shifted(rear, dx, dy)
+                cell.alpha_composite(bodies[i])
+                cell.alpha_composite(shifted(front, dx, dy))
+                frames.append(cell)
+                hands.append(shifted(fist, dx, dy))
+                points.append([round((g0[0] + dx) * K, 1), round((g0[1] + dy) * K, 1), round((s0[0] + dx) * K, 1), round((s0[1] + dy) * K, 1)])
+            shrink(sheet_of(frames)).save(f"{DST}/{hero}_{clip}.png", optimize=True)
+            shrink(sheet_of(hands)).save(f"{DST}/{hero}_hand_{clip}.png", optimize=True)
             grip[clip] = points
         json.dump(grip, open(f"source/data/grip_{hero}.json", "w"))
         print(hero, {c: len(v) for c, v in grip.items()})
