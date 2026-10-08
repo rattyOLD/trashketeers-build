@@ -56,7 +56,10 @@ func open(choices: Array[UpgradeData], level: int, stats: RunStats, bonus: bool 
 	_title.add_theme_color_override("font_color", Color("#ff7ae0") if bonus else UiStyle.GOLD)
 	_cards.vertical = Orient.portrait
 	_reroll.custom_minimum_size = Vector2(minf(600.0, _card_width() * 3.0), 64 if Orient.portrait else 54)
+	# Старые карточки убираем из дерева сразу: иначе в момент открытия окно меряет ширину по шести карточкам
+	# (старые ещё ждут удаления), растягивается вдвое и съезжает.
 	for child in _cards.get_children():
+		_cards.remove_child(child)
 		child.queue_free()
 	for i in choices.size():
 		_cards.add_child(_make_card(choices[i], i, stats))
@@ -74,6 +77,7 @@ func _center_box() -> void:
 	if not is_inside_tree():
 		return
 	var area := get_viewport_rect().size
+	_box.reset_size()
 	_box.size = _box.get_combined_minimum_size()
 	# position, а не global_position: во время пружинящего появления масштаб ≠ 1, и глобальная установка
 	# сдвигала окно на долю его размера (влево-вверх или вправо на других экранах).

@@ -45,15 +45,16 @@ func open() -> void:
 
 
 func _build() -> void:
-	var resume := UiStyle.flat_button(Vector2(120, 120))
-	var icon := BattlePanels.icon_rect(BattlePanels.icon("pause"), 120)
+	var resume := UiStyle.flat_button(Vector2(80, 80))
+	resume.modulate.a = 0.8
+	var icon := BattlePanels.icon_rect(BattlePanels.icon("pause"), 80)
 	icon.set_anchors_preset(Control.PRESET_FULL_RECT)
 	resume.add_child(icon)
-	UiStyle.anchor(resume, Vector2(0.5, 0.5), Rect2(-60, -60, 120, 120))
+	UiStyle.anchor(resume, Vector2(0.5, 0.5), Rect2(-40, -40, 80, 80))
 	resume.pressed.connect(_finish)
 	add_child(resume)
 	var caption := UiStyle.label("ПАУЗА. Тап, чтобы продолжить", 20, UiStyle.TEXT, 6)
-	UiStyle.anchor(caption, Vector2(0.5, 0.5), Rect2(-250, 70, 250, 110))
+	UiStyle.anchor(caption, Vector2(0.5, 0.5), Rect2(-250, 48, 250, 88))
 	caption.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(caption)
 
@@ -263,7 +264,7 @@ func _draw() -> void:
 	if hud == null:
 		return
 	for id in hud.editable_ids():
-		var rect := hud.element_rect(id)
+		var rect := _rect(id)
 		if rect.size.x < 1.0:
 			continue
 		if id == _selected:
@@ -272,11 +273,20 @@ func _draw() -> void:
 			draw_rect(rect.grow(3.0), Color(UiStyle.NEON, 0.5), false, 2.0)
 
 
+## Рамка элемента в координатах редактора: сам редактор лежит в корне HUD, сдвинутом на безопасную зону
+## (вырез камеры), а element_rect — экранные координаты. Без пересчёта рамки уезжали вбок на ширину выреза.
+func _rect(id: String) -> Rect2:
+	var rect := hud.element_rect(id)
+	if rect.size.x < 1.0:
+		return rect
+	return get_global_transform().affine_inverse() * rect
+
+
 func _pick(point: Vector2) -> String:
 	var best := ""
 	var best_area := INF
 	for id in hud.editable_ids():
-		var rect := hud.element_rect(id).grow(10.0)
+		var rect := _rect(id).grow(10.0)
 		if rect.has_point(point) and rect.get_area() < best_area:
 			best_area = rect.get_area()
 			best = id
@@ -293,7 +303,7 @@ func _gui_input(event: InputEvent) -> void:
 			_dragging = id
 			if not id.is_empty():
 				_selected = id
-				_grab = button.position - hud.element_rect(id).get_center()
+				_grab = button.position - _rect(id).get_center()
 				_sync()
 		else:
 			if not _dragging.is_empty():

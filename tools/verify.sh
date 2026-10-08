@@ -40,6 +40,10 @@ XDG_DATA_HOME="$LOG/melee-user" "$GODOT" --headless --path $P res://test/melee_p
 if ! grep -q 'MELEE_PROBE failures=0' "$LOG/melee.log" || grep -q 'SCRIPT ERROR' "$LOG/melee.log"; then
   fail=1
 fi
+XDG_DATA_HOME="$LOG/levelup-user" xvfb-run -a -s "-screen 0 1700x900x24" "$GODOT" --rendering-driver opengl3 --resolution 1560x720 --path $P res://test/levelup_layout_test.tscn > "$LOG/levelup.log" 2>&1
+if ! grep -q 'LEVELUP_LAYOUT failures=0' "$LOG/levelup.log" || grep -q 'SCRIPT ERROR' "$LOG/levelup.log"; then
+  fail=1
+fi
 for m in survival story raid mod:blast; do
   MODE=$m DURATION=45 timeout 300 xvfb-run -a -s "-screen 0 1280x1400x24" "$GODOT" --rendering-driver opengl3 \
     --resolution 1280x720 --path $P res://test/mode_audit.tscn > "$LOG/$m.log" 2>&1
