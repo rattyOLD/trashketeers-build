@@ -957,16 +957,26 @@ func _wall_block(body: StaticBody2D, block: Rect2i) -> void:
 		return
 	var rect := _cells_rect(block.position, block.size)
 	var vertical := block.size.y > block.size.x
-	var at := rect.position + Vector2(20.0, rect.size.y * 0.5 + 12.0)
+	# Хлам стоит только над самой стеной и не свешивается в проём ворот: иначе герой, проходя в ворота,
+	# оказывался «внутри» контейнера (картинка без коллизии висела над проходом).
+	const EDGE := 28.0
+	var at := rect.position + Vector2(EDGE, rect.size.y * 0.5 + 12.0)
 	if vertical:
 		at = Vector2(rect.get_center().x, rect.position.y + 50.0)
-	while (at.y < rect.end.y + 30.0) if vertical else (at.x < rect.end.x):
+	while (at.y <= rect.end.y - 10.0) if vertical else (at.x < rect.end.x - EDGE):
 		var id: String = ids.pick_random()
 		var size := ArenaProp.visual_size(id)
 		if vertical:
 			_decor_prop(at, id, 1 if randf() < 0.5 else -1)
 			at.y += maxf(size.y * 0.5, 70.0)
 		else:
+			if at.x + size.x > rect.end.x - EDGE:
+				# Не влез — пробуем предмет поуже, иначе ряд закончен.
+				var fit := ids.filter(func(other: String) -> bool: return at.x + ArenaProp.visual_size(other).x <= rect.end.x - EDGE)
+				if fit.is_empty():
+					break
+				id = fit.pick_random()
+				size = ArenaProp.visual_size(id)
 			_decor_prop(at + Vector2(size.x * 0.5, 0.0), id, 1 if randf() < 0.5 else -1)
 			at.x += size.x * 0.82
 
