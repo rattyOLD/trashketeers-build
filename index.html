@@ -91,7 +91,7 @@ html, body {
 }
 #boot .title {
 	margin: 4px 0 0;
-	font-family: Impact, "Haettenschweiler", "Arial Narrow Bold", "Arial Black", sans-serif;
+	font-family: "Russo One", Impact, "Haettenschweiler", "Arial Narrow Bold", "Arial Black", sans-serif;
 	font-weight: 400;
 	font-size: clamp(46px, 15vw, 70px);
 	line-height: 0.95;
@@ -410,6 +410,40 @@ html.orientation-ready:not(.upright) #rotate .phone, html.orientation-ready:not(
  #tip { margin-top: 8px; font-size: 12px; }
  #boot .title { font-size: 36px; }
 }
+
+/* ===== Загрузка «как в современных играх»: крупный герой справа, логотип и советы слева, тонкая полоса во всю ширину внизу. ===== */
+@keyframes bootFloat { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-1.8%) rotate(-0.6deg); } }
+@keyframes bootShine { from { transform: translateX(-120%); } to { transform: translateX(260%); } }
+@keyframes bootSpin { to { transform: rotate(360deg); } }
+@keyframes bootIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes bootHeroIn { from { opacity: 0; transform: translateX(6%); } to { opacity: 1; transform: none; } }
+@keyframes bootFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes bootGlow { 0%, 100% { opacity: 0.55; } 50% { opacity: 0.95; } }
+.boot-load .load-row { justify-content: flex-start; }
+.boot-load #pct { margin-left: auto; }
+.spin { flex: none; width: 12px; height: 12px; border: 2px solid rgba(217, 150, 43, 0.28); border-top-color: #f0b43c; border-radius: 50%; animation: bootSpin 0.8s linear infinite; align-self: center; }
+#boot .boot-load .bar { height: 10px; border-width: 1px; border-color: rgba(233, 228, 210, 0.35); background: rgba(5, 6, 6, 0.75); box-shadow: 0 0 22px rgba(240, 180, 60, 0.18), inset 0 1px 4px rgba(0, 0, 0, 0.9); }
+.bar i { overflow: hidden; box-shadow: 0 0 14px rgba(240, 180, 60, 0.55); }
+.bar i::after { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 35%; background: linear-gradient(90deg, transparent, rgba(255, 244, 210, 0.55), transparent); animation: bootShine 1.7s linear infinite; }
+#tip { transition: opacity 0.35s ease; }
+#tip.swap { opacity: 0; }
+.boot-brand { animation: bootFade 0.6s ease both; }
+.boot-status { animation: bootIn 0.6s 0.15s ease both; }
+.boot-load { animation: bootIn 0.6s 0.3s ease both; }
+@media (min-aspect-ratio: 1/1) {
+ #boot { grid-template-columns: minmax(0, 54%) 1fr; grid-template-rows: auto 1fr auto; grid-template-areas: "brand ." "info ." "load load"; align-items: start; text-align: left; }
+ .boot-brand { grid-area: brand; position: static; height: auto; align-items: flex-start; justify-content: flex-start; }
+ #boot .kicker { text-indent: 0; }
+ #boot .title { font-size: clamp(34px, 6.2vw, 84px); text-align: left; }
+ #boot .rule { margin-left: 0; background: linear-gradient(90deg, #d9962b, #d9962b 60%, transparent); }
+ #boot .hero { position: absolute; right: calc(2vw + env(safe-area-inset-right, 0px)); bottom: calc(46px + env(safe-area-inset-bottom, 0px)); width: min(44vw, 620px); height: min(80vh, 640px); padding: 0; z-index: 0; pointer-events: none; animation: bootHeroIn 0.8s 0.1s ease both; }
+ #boot .hero::after { content: ""; position: absolute; inset: 8% 10% 4%; border-radius: 50%; background: radial-gradient(closest-side, rgba(217, 150, 43, 0.26), transparent 72%); animation: bootGlow 3.2s ease-in-out infinite; z-index: -1; }
+ #boot .hero img { width: 100%; height: 100%; object-fit: contain; object-position: center bottom; animation: bootFloat 4.2s ease-in-out infinite; transform-origin: 50% 100%; }
+ .boot-status { grid-area: info; position: relative; z-index: 1; height: auto; align-self: end; align-items: flex-start; justify-content: flex-end; max-width: 560px; padding-bottom: 12px; }
+ #boot #tip { max-width: 560px; }
+ #boot .foot { align-items: flex-start; margin-top: 12px; }
+ .boot-load { position: relative; z-index: 1; max-width: none; }
+}
 </style>
 
 <div id="safe-area" aria-hidden="true"></div>
@@ -440,7 +474,7 @@ html.orientation-ready:not(.upright) #rotate .phone, html.orientation-ready:not(
 	</div>
 	<div class="boot-load">
 	<div class="bar"><i id="fill"></i></div>
-	<div class="load-row"><p id="status">Выходим на связь…</p><p id="pct">0%</p></div>
+	<div class="load-row"><span class="spin" aria-hidden="true"></span><p id="status">Выходим на связь…</p><p id="pct">0%</p></div>
 	</div>
 </div>
 
@@ -581,7 +615,7 @@ html.orientation-ready:not(.upright) #rotate .phone, html.orientation-ready:not(
 </script>
 
 <script>
-window.__trash_build = {label: 'v35.506', time: '08.10 07:17'};
+window.__trash_build = {label: 'v35.507', time: '08.10 07:45'};
 document.getElementById('ver').textContent = 'Версия ' + window.__trash_build.label + ' · сборка от ' + window.__trash_build.time;
 </script>
 <script>
@@ -646,7 +680,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	// index.wasm / index.pck и отдаём ему уже скачанные и распакованные байты.
 	const FILES = {
 		wasm: { parts: [{url:"raccoon.core.0.wasm?h=4cbe7e5f476b",bytes:5221065},{url:"raccoon.core.1.wasm?h=a8fbc151befa",bytes:4165384}] },
-		pck: { parts: [{url:"raccoon.pack.0.wasm?h=56fcf154ade2",bytes:11983420},{url:"raccoon.pack.1.wasm?h=e23dcee19558",bytes:12559744},{url:"raccoon.pack.2.wasm?h=9ef1fffd4026",bytes:12541680},{url:"raccoon.pack.3.wasm?h=ea09d1b69d17",bytes:4394322}] },
+		pck: { parts: [{url:"raccoon.pack.0.wasm?h=99d294ff45d5",bytes:11983426},{url:"raccoon.pack.1.wasm?h=e23dcee19558",bytes:12559744},{url:"raccoon.pack.2.wasm?h=9ef1fffd4026",bytes:12541680},{url:"raccoon.pack.3.wasm?h=c5d4ca263178",bytes:4396694}] },
 	};
 	const GODOT_CONFIG = {
 		args: [],
@@ -654,7 +688,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 		ensureCrossOriginIsolationHeaders: false,
 		executable: 'index',
 		experimentalVK: false,
-		fileSizes: { 'index.pck': 42531872, 'index.wasm': 43699190 },
+		fileSizes: { 'index.pck': 42534304, 'index.wasm': 43699190 },
 		focusCanvas: true,
 		gdextensionLibs: [],
 		onPrint: function () {
@@ -679,7 +713,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 
 	// Адрес сбора отчётов о вылетах (Google Apps Script / Supabase и т.п.); пусто — отчёты не отправляются.
 	const REPORT_URL = 'https://script.google.com/macros/s/AKfycbxVyy-SnRANW0Im-1Blne2TcUbca93WqzyBulpADwWWD7YH6x3KIygBYImTe8VfP5pp/exec';
-	const BUILD_ID_REPORT = '1791418657';
+	const BUILD_ID_REPORT = '1791420330';
 	const SESSION_ID = Math.random().toString(36).slice(2, 8);
 	const SESSION_START = Date.now();
 	const REPORT_CAP = 250;
@@ -896,7 +930,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	window.trkReport('session_start', gpuInfo() + ' | ' + navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + (window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio) + ' | screen ' + screen.width + 'x' + screen.height + ' | cores ' + (navigator.hardwareConcurrency || '?'));
 
 	// Вкладка могла висеть со старой версией: при возврате в неё сверяем номер сборки и предлагаем обновиться.
-	const BUILD_ID = '1791418657';
+	const BUILD_ID = '1791420330';
 	// Важное обновление: старая сборка дальше не работает, иначе аккаунты и сохранения ломаются старым кодом.
 	function blockOldBuild(v) {
 		const wall = document.createElement('div');
@@ -1083,12 +1117,27 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 		'Рико любит пиво, но только после смены. Нэлл проверяет.',
 		'Лётчик Вик, Борода и Каска держат Рико место у бара.',
 		'Бесплатный сундук в меню доступен раз в несколько часов.',
-		'Вампиризм копится медленно - не рассчитывай на бессмертие.'
+		'Вампиризм копится медленно - не рассчитывай на бессмертие.',
+		'Стреляй правым пальцем: зажми и тяни туда, куда целишься.',
+		'Золотое кольцо под боссом - он выдохся. Бей сейчас!',
+		'Рывок делает неуязвимым: проскочи сквозь удар босса.',
+		'Мечи бьют сильнее пушек, но надо подойти вплотную.'
 	];
 	let shown = 0;
 	let target = 0;
 	let ticking = false;
-	tipEl.textContent = TIPS[Math.floor(Math.random() * TIPS.length)];
+	let tipAt = Math.floor(Math.random() * TIPS.length);
+	tipEl.textContent = TIPS[tipAt];
+	// Советы сменяются, пока идёт загрузка: короткое затухание и следующий.
+	const tipTimer = setInterval(function () {
+		if (failed || tipEl.hidden || !document.body.contains(tipEl)) { clearInterval(tipTimer); return; }
+		tipEl.classList.add('swap');
+		setTimeout(function () {
+			tipAt = (tipAt + 1) % TIPS.length;
+			tipEl.textContent = TIPS[tipAt];
+			tipEl.classList.remove('swap');
+		}, 360);
+	}, 5200);
 
 	function frame() {
 		shown += (target - shown) * 0.18;
