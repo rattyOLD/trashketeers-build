@@ -197,7 +197,7 @@ func start(_weapon_id: StringName = &"") -> void:
 	_last_marker = LastEnemyMarker.new()
 	layers.fx.add_child(_last_marker)
 
-	_setup_common(map.bounds, pickups.nut_texture)
+	_setup_common(map.view_bounds, pickups.nut_texture)
 	light_map.set_layout(map.layout)
 	_last_marker.setup(director, enemies, camera)
 	minimap = Minimap.new()
@@ -568,7 +568,7 @@ func _switch_chapter(index: int = -1) -> void:
 	player.global_position = map.player_start
 	player.reset_physics_interpolation()
 	player.velocity = Vector2.ZERO
-	set_camera_bounds(map.bounds)
+	set_camera_bounds(map.view_bounds)
 	camera.global_position = player.global_position
 	camera.reset_smoothing()
 	camera.reset_physics_interpolation()
@@ -832,6 +832,8 @@ func _on_enemy_died(enemy: Enemy) -> void:
 		var wave := maxi(director.wave_number, 1)
 		BulletPool.explode(at, RunMods.BLAST_RADIUS, RunMods.BLAST_DAMAGE_BASE + RunMods.BLAST_DAMAGE_PER_WAVE * wave, Bullet.Team.ENEMY, Color("#ff7a3d"), 1.0)
 	kills += 1
+	if map.district != null:
+		map.district.cheer(1.0 if data.is_boss() else (0.15 if data.max_hp >= 120.0 else 0.06))
 	if data.is_boss():
 		hud.combat_feed.kill(500, "БОСС", Color("#ff7ae0"))
 	elif data.max_hp >= 120.0:
@@ -931,6 +933,8 @@ func _on_boss_spawned(boss: Enemy) -> void:
 	if not passive.is_empty():
 		hud.toast("ПАССИВКА БОССА", passive, Color("#ff9a3d"))
 	add_shake(0.6)
+	if map.district != null:
+		map.district.cheer(1.0)
 	fx.ring(boss.global_position, UiStyle.DANGER, 180.0)
 	fx.dust(boss.global_position + Vector2(0, 30), 16, 140.0)
 	SoundManager.play(&"boss_spawn", 0.0, false)

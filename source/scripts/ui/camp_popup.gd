@@ -207,17 +207,20 @@ func _pet_mosya() -> void:
 	var token := _pet_token
 	SoundManager.play(&"ui_confirm")
 	if _pet_times.size() >= 7:
-		_cat_face.texture = load("res://assets/ui/stickers/mosya_angry.png") as Texture2D
+		_cat_face.texture = _cat_frame(4)
 		_cat_line.text = "Мася: ФШШ. Хватит. Дай подышать."
 		_show_cat_sticker("mosya_angry")
 		_pet_times.clear()
 	else:
-		_cat_face.texture = _cat_frame(3)
+		_cat_face.texture = _cat_frame(2)
 		var total := SaveService.get_stat("mosya_pets")
 		_cat_line.text = "%s  (погладил %d)" % [MOSYA_LINES[total % MOSYA_LINES.size()], total]
 		if total % 10 == 0:
 			_show_cat_sticker("mosya_meow")
-	await get_tree().create_timer(0.8).timeout
+	await get_tree().create_timer(0.3).timeout
+	if token == _pet_token and is_instance_valid(_cat_face) and _pet_times.size() > 0:
+		_cat_face.texture = _cat_frame(3)
+	await get_tree().create_timer(0.7).timeout
 	if token == _pet_token and is_instance_valid(_cat_face):
 		_cat_face.texture = _cat_frame(0)
 

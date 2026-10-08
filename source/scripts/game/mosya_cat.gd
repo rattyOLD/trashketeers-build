@@ -2,9 +2,11 @@ class_name MosyaCat
 extends Node2D
 ## Мася, кот Рико, сидит на уровне первой главы. Подойди и тапни по нему: жмурится, мурчит, над ним всплывает «мур».
 ## Если тыкать слишком быстро, сердится. Кот всегда на месте, просто меняет позу.
+## Кадры Астры (6 × 192×256): 0 смотрит, 1 моргает, 2 жмурится, 3 мурчит, 4 шипит, 5 зевает.
 
 const FRAMES := "res://assets/ui/mosya/mosya_frames.png"
 const LINES: Array[String] = ["мур", "мррр", "мур-мур", "мрр, ещё", "мяу", "мррр-мяу"]
+const FRAME_COUNT := 6
 const NEAR := 190.0
 const TAP_RADIUS := 100.0
 ## Плашка «ПОГЛАДИТЬ» над головой (в координатах кота): тап по ней — тоже погладить.
@@ -28,7 +30,7 @@ func setup(target: Player, effects: FxManager) -> void:
 	player = target
 	fx = effects
 	var sheet := load(FRAMES) as Texture2D
-	for i in 4:
+	for i in FRAME_COUNT:
 		var atlas := AtlasTexture.new()
 		atlas.atlas = sheet
 		atlas.region = Rect2(i * 192, 0, 192, 256)
@@ -45,14 +47,20 @@ func _process(delta: float) -> void:
 	_angry = maxf(_angry - delta, 0.0)
 	var breathe := 1.0 + 0.018 * sin(_time * 2.2)
 	_sprite.scale = Vector2(0.5, 0.5 * breathe)
-	if _angry > 0.0:
-		_sprite.texture = load("res://assets/ui/stickers/mosya_angry.png") as Texture2D
-		_sprite.scale = Vector2(0.28, 0.28)
-		_sprite.offset = Vector2(0, -190)
-	else:
-		_sprite.offset = Vector2(0, -110)
-		_sprite.texture = _frames[3 if _happy > 0.0 else 0]
+	_sprite.texture = _frames[_pose()]
 	queue_redraw()
+
+
+## Сам по себе кот моргает раз в ~4 с и изредка зевает; когда гладят — жмурится, потом мурчит.
+func _pose() -> int:
+	if _angry > 0.0:
+		return 4
+	if _happy > 0.0:
+		return 2 if _happy > 0.75 else 3
+	var yawn := fmod(_time, 17.0)
+	if yawn > 15.6:
+		return 5
+	return 1 if fmod(_time, 4.3) > 4.12 else 0
 
 
 func is_near() -> bool:

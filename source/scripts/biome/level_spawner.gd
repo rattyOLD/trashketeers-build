@@ -57,6 +57,9 @@ var zones := PackedByteArray()
 var destructibles: Array[DestructibleObject] = []
 var player_start := Vector2.ZERO
 var bounds := Rect2()
+## Что видит камера: арена плюс район за забором (ArenaDistrict), если для стиля есть арт.
+var view_bounds := Rect2()
+var district: ArenaDistrict
 var boss_rect := Rect2()
 var story_gates: Dictionary = {}
 var story_cells: Dictionary = {}
@@ -111,6 +114,7 @@ func build(layers: BiomeLayers, chapter_def: Dictionary) -> void:
 	_build_shadow_layers()
 	_build_walls()
 	_build_border()
+	_build_district()
 	_build_boss_zone()
 	if _story.is_empty():
 		_build_center()
@@ -641,6 +645,17 @@ func _build_border() -> void:
 			var size := ArenaProp.visual_size(id)
 			_decor_prop(Vector2(cx + randf_range(-14.0, 14.0), y), id, 1 if side == 0 else -1)
 			y += maxf(size.y * 0.42, 70.0)
+
+
+func _build_district() -> void:
+	district = null
+	view_bounds = bounds
+	if not ArenaDistrict.has_art(layout):
+		return
+	district = ArenaDistrict.new()
+	_own(district, _layers.floor_layer)
+	district.build(layout, str(chapter.get("id", "")), bounds, _origin.y + grid_size.y / 2 * CELL, GATE_HALF * CELL)
+	view_bounds = ArenaDistrict.view_rect(bounds)
 
 
 func _decor_prop(at: Vector2, id: String, flip: int = 0) -> ArenaProp:
