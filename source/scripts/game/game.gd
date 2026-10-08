@@ -827,7 +827,6 @@ func _on_enemy_died(enemy: Enemy) -> void:
 	fx.hitmarker(body, 2)
 	SoundManager.play(&"k_combo")
 	SoundManager.play(&"kill_confirm")
-	reticle.kill()
 	if not data.is_boss() and data.max_hp >= 120.0:
 		hitstop(0.04)
 		add_shake(0.15)

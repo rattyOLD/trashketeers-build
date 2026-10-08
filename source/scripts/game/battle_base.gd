@@ -57,7 +57,7 @@ var _perf_resume_guard := 0
 var _context_timer := 0.0
 var _spikes_sent := 0
 static var _perfs_sent := 0
-const LANDSCAPE_ZOOM := 1.05
+const LANDSCAPE_ZOOM := 0.93
 var _camera_lead := Vector2.ZERO
 var _hist_timer := 0.0
 var _shot_timer := 20.0
@@ -163,16 +163,6 @@ func _setup_common(camera_bounds: Rect2, currency_icon: Texture2D) -> void:
 	hud.build(currency_icon, player.weapon_controller.base_weapon)
 	_warm_glyphs()
 	_warm_shaders()
-	var reticle_layer := CanvasLayer.new()
-	reticle_layer.layer = 4
-	reticle_layer.follow_viewport_enabled = true
-	add_child(reticle_layer)
-	reticle = AimReticle.new()
-	reticle.controller = player.weapon_controller
-	reticle.origin = player
-	reticle_layer.add_child(reticle)
-	player.weapon_controller.fired.connect(func(_w: WeaponData, _o: Vector2, _d: Vector2) -> void: reticle.kick())
-	player.weapon_controller.melee.swing_started.connect(func(_a: WeaponData, _b: Vector2, _c: Vector2, _d: int, _e: bool, _f: float) -> void: reticle.kick())
 
 	player.health_changed.connect(hud.set_health)
 	player.damaged.connect(_on_player_damaged)
@@ -475,7 +465,6 @@ func _update_trigger() -> void:
 
 
 var _mouse_fire := false
-var reticle: AimReticle
 
 
 ## Нажатие ЛКМ доходит сюда, только если его не забрала кнопка интерфейса; отпускание ловим всегда.
@@ -597,7 +586,6 @@ func _on_bullet_hit(bullet: Bullet, target: Node2D) -> void:
 	if bullet.team == Bullet.Team.PLAYER:
 		SoundManager.play(&"hit")
 		if target is Enemy:
-			reticle.hit(crit)
 			SoundManager.play_pitched(&"hitmarker", 1.35 if crit else randf_range(0.95, 1.08), -2.0 if crit else 0.0)
 		if target is Enemy and _mark_cd <= 0.0:
 			_mark_cd = MARK_GAP
