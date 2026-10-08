@@ -491,7 +491,12 @@ func _show_result(victory: bool, lines: PackedStringArray, title: String = "", c
 func _update_shake(delta: float) -> void:
 	_kick = _kick.lerp(Vector2.ZERO, clampf(CAMERA_KICK_DECAY * delta, 0.0, 1.0))
 	## В вертикали шапка закрывает верх, а пальцы на кнопках — низ: енот чуть ниже центра, посередине свободной зоны.
-	_camera_lead = _camera_lead.lerp(player.move_input.limit_length(1.0) * 36.0, minf(delta * 5.0, 1.0))
+	# Упреждение: по ходу движения и, пока стреляешь, — в сторону прицела (видно, куда бьёшь).
+	var lead_target := player.move_input.limit_length(1.0) * 36.0
+	var wc := player.weapon_controller
+	if wc.trigger and not wc.auto_mode:
+		lead_target += wc.aim_direction.normalized() * 54.0
+	_camera_lead = _camera_lead.lerp(lead_target.limit_length(72.0), minf(delta * 4.0, 1.0))
 	var base := Vector2(0.0, -PORTRAIT_CAMERA_DROP) if Orient.portrait else Vector2(0.0, 18.0 / LANDSCAPE_ZOOM) + _camera_lead
 	if _shake <= 0.0:
 		camera.offset = base + _kick

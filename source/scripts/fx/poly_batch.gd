@@ -90,14 +90,39 @@ func _pad_uvs() -> void:
 
 
 ## draw_circle(pos, radius, color) без сглаживания.
+## Детализация по размеру на экране: тени и искры в 7–10 px не нуждаются в 64 сегментах (192 вершины на кружок —
+## сотни кружков за кадр давали ~150 тыс. вершин). Крупные круги остаются как у движка.
 func circle(pos: Vector2, radius: float, color: Color) -> void:
-	if _unit_circle.is_empty():
-		_build_unit_circle()
-	if _circle_fill.size() != _unit_circle.size():
-		_circle_fill.resize(_unit_circle.size())
-	points.append_array(xform * Transform2D(Vector2(radius, 0.0), Vector2(0.0, radius), pos) * _unit_circle)
+	var on_screen := radius * absf(xform.x.x if xform.x.y == 0.0 else xform.x.length())
+	var segments := CIRCLE_SEGMENTS if exact else (12 if on_screen <= 10.0 else (20 if on_screen <= 24.0 else (32 if on_screen <= 60.0 else CIRCLE_SEGMENTS)))
+	var unit: PackedVector2Array = _lod_circles.get(segments, PackedVector2Array())
+	if unit.is_empty():
+		unit = _build_circle(segments)
+		_lod_circles[segments] = unit
+	if _circle_fill.size() != unit.size():
+		_circle_fill.resize(unit.size())
+	points.append_array(xform * Transform2D(Vector2(radius, 0.0), Vector2(0.0, radius), pos) * unit)
 	_circle_fill.fill(color)
 	colors.append_array(_circle_fill)
+
+
+static var _lod_circles := {}
+## Точный режим без детализации — для теста совпадения с рисованием движка.
+static var exact := false
+
+
+static func _build_circle(segments: int) -> PackedVector2Array:
+	if segments == CIRCLE_SEGMENTS:
+		if _unit_circle.is_empty():
+			_build_unit_circle()
+		return _unit_circle
+	var fan := PackedVector2Array()
+	fan.resize(segments * 3)
+	for i in segments:
+		fan[i * 3] = Vector2.ZERO
+		fan[i * 3 + 1] = Vector2.from_angle(TAU * i / segments)
+		fan[i * 3 + 2] = Vector2.from_angle(TAU * (i + 1) / segments)
+	return fan
 
 
 ## draw_colored_polygon(polygon, color).
@@ -182,6 +207,10 @@ func _feather(p0: Vector2, p1: Vector2, p2: Vector2, p3: Vector2, color: Color, 
 func arc(center: Vector2, radius: float, start_angle: float, end_angle: float, point_count: int, color: Color, width: float, antialiased: bool = false) -> void:
 	if point_count < 2:
 		return
+	# Детализация дуги по длине на экране: ~1 точка на 9 px, не меньше 10 и не больше запрошенного.
+	var span := absf(end_angle - start_angle) * radius * absf(xform.x.x if xform.x.y == 0.0 else xform.x.length())
+	if not exact:
+		point_count = clampi(int(span / 9.0) + 2, mini(10, point_count), point_count)
 	var key := Vector3(start_angle, end_angle, point_count)
 	var shape: Array = _arcs.get(key, [])
 	if shape.is_empty():

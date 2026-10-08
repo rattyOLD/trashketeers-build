@@ -84,6 +84,7 @@ class Native:
 
 
 func _ready() -> void:
+	PolyBatch.exact = true
 	var imgs: Array[Image] = []
 	var draws: Array[int] = []
 	for batched in [false, true]:
