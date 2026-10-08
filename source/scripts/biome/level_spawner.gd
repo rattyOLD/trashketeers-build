@@ -1510,10 +1510,22 @@ func _build_sectors(root: Dictionary, defs: Dictionary, area: Rect2, center: Vec
 				var tint := Color(0.92, 0.9, 0.94)
 				if layout != "bank" and grass:
 					tint = Color(0.5, 0.62, 0.52)
-				elif layout == "bank" and ground.contains("asphalt"):
-					# Тёмный асфальт Свалки в солнечном Банке — светло-серая парковка.
-					tint = Color(2.6, 2.6, 2.7)
-				patch.build(p, radius, load(ground) as Texture2D, tint, Color("#c9962e") if layout == "bank" else Color("#4a4766"), rng_seed + _sectors.size())
+				elif layout == "bank" and grass:
+					tint = Color(1.0, 1.0, 1.0)
+				patch.build(p, radius, load(ground) as Texture2D, tint, Color("#c9962e") if layout == "bank" else Color("#4a4766"), rng_seed + _sectors.size(), str(theme.get("shape", "blob")), theme.get("deco", []))
+			# Своя планировка сектора: предметы по долям его прямоугольника (столики рядами, машины на местах).
+			var plan: Array = theme.get("layout", [])
+			if not plan.is_empty():
+				var half := Vector2(radius, radius * 0.72)
+				var mirror := -1.0 if randf() < 0.5 else 1.0
+				_in_scene = true
+				for item: Array in plan:
+					_lot_item(str(item[0]), (p + Vector2(float(item[1]) * mirror * half.x, float(item[2]) * half.y)).snapped(Vector2(8, 8)))
+				_in_scene = false
+				_cover_spots.append(p)
+				if (theme.get("deco", []) as Array).has("pool"):
+					_block_rect(Rect2(p - half * Vector2(0.5, 0.42), half * Vector2(1.0, 0.84)))
+				break
 			var pois: Array = theme.get("poi", [])
 			var placed := 0
 			for k in 8:
@@ -1525,6 +1537,26 @@ func _build_sectors(root: Dictionary, defs: Dictionary, area: Rect2, center: Vec
 					_cover_spots.append(at)
 					placed += 1
 			break
+
+
+## Вода бассейна: в неё не заходят (клетки — стена сетки, коллизия — рельеф, пули пролетают).
+func _block_rect(rect: Rect2) -> void:
+	var body := StaticBody2D.new()
+	body.collision_layer = PhysicsLayers.TERRAIN | PhysicsLayers.OBSTACLE
+	body.collision_mask = 0
+	var shape := RectangleShape2D.new()
+	shape.size = rect.size
+	var collision := CollisionShape2D.new()
+	collision.shape = shape
+	collision.position = rect.get_center()
+	body.add_child(collision)
+	_own(body, self)
+	var a := world_to_cell(rect.position)
+	var b := world_to_cell(rect.end)
+	for y in range(a.y, b.y + 1):
+		for x in range(a.x, b.x + 1):
+			if _inside(Vector2i(x, y)):
+				cells[_index(Vector2i(x, y))] = CellType.WALL
 
 
 func _in_sector(p: Vector2, pad: float) -> bool:
