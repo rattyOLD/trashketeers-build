@@ -53,6 +53,7 @@ func spawn(sheet: String, at: Vector2, parent: Node, mode: String = "", frame_pi
 	var actor := Actor.new()
 	actor.setup(texture_of(sheet), frames, mode if not mode.is_empty() else str(def["mode"]), float(def["scale"]) * scale_mult, float(def.get("fps", 2.0)), frame_pick, _walkable)
 	actor.position = at
+	actor.set_meta("sheet", sheet)
 	parent.add_child(actor)
 	actors.append(actor)
 	return actor

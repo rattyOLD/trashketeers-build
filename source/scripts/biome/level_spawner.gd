@@ -102,6 +102,9 @@ func build(layers: BiomeLayers, chapter_def: Dictionary) -> void:
 	_noise.seed = randi()
 	_park = null
 	_streets = null
+	_world_life = null
+	_fire_spots.clear()
+	_ropes.clear()
 	# Дворы прошлой главы — иначе новые «упираются» в них, а шаги звучат по чужому покрытию.
 	_sectors.clear()
 	if _story.is_empty():
@@ -177,6 +180,8 @@ func attach_player(player: Player) -> void:
 	if river != null:
 		river.attach(player)
 	_player = player
+	if _world_life != null and is_instance_valid(_world_life):
+		_world_life.attach(player)
 
 
 # --- Координаты -------------------------------------------------------------------------------
@@ -1495,6 +1500,7 @@ func _build_organic() -> void:
 			_cover_spots.append(p)
 	_scatter_singles(area, center)
 	_spawn_walkers()
+	_build_world_life(center)
 
 
 ## Секторы выживания: мини-парки, кафе, стоянки, полянки — у каждого своё покрытие и свои предметы
@@ -1567,6 +1573,9 @@ func _make_sector(theme: Dictionary, p: Vector2, radius: float, defs: Dictionary
 
 var _quarter_doors: Array[Vector2] = []
 var _streets: ParkPaths
+var _world_life: WorldLife
+var _fire_spots: Array[Vector2] = []
+var _ropes: Array = []
 
 
 ## Кварталы выживания (data/lots.json → quarters): внутренность карты делится на 3×3. Центр (бой), клетка
@@ -1626,6 +1635,7 @@ func _place_quarter(q: Dictionary, r: Rect2, yards: Dictionary, defs: Dictionary
 	var x := r.get_center().x - (total - 50.0) * 0.5 + randf_range(-40.0, 40.0)
 	var foot_y := r.position.y + r.size.y * 0.42
 	var built := 0
+	var roofs: Array[Vector2] = []
 	for i in ids.size():
 		var w: float = widths[i]
 		var base := Vector2(x + w * 0.5, foot_y + randf_range(-24.0, 24.0)).snapped(Vector2(8, 8))
@@ -1641,12 +1651,21 @@ func _place_quarter(q: Dictionary, r: Rect2, yards: Dictionary, defs: Dictionary
 		if prop == null:
 			continue
 		built += 1
+		var vis := ArenaProp.visual_size(str(ids[i]))
+		roofs.append(base + Vector2((w * 0.32) * (1.0 if roofs.is_empty() else -1.0), -vis.y * 0.5))
 		_cover_spots.append(base)
 		if SaveService.get_quality() > 0:
 			# Свет из окон и над дверью: квартал живёт и в темноте.
 			_life_lights.append(EnvLights.add(base + Vector2(0, -ArenaProp.visual_size(str(ids[i])).y * 0.3), Color("#ffc46b") if layout != "bank" else Color("#fff0c8"), 230.0, 0.45))
 	if built == 0:
 		return false
+	if roofs.size() >= 2:
+		# Между домами квартала — бельё на верёвке (Свалка) или флажки (Банк).
+		var colors: Array = []
+		var palette: Array = [Color("#d94a3a"), Color("#3a6fd9"), Color("#f0e6d0"), Color("#e8c23a"), Color("#5aa05a")] if layout != "bank" else [Color("#ff8fb0"), Color("#ffd86b"), Color("#8fd0ff"), Color("#ffffff"), Color("#c9a0ff")]
+		for k in randi_range(4, 7):
+			colors.append(palette.pick_random())
+		_ropes.append([roofs[0], roofs[1], colors])
 	var theme: Dictionary = yards.get(str(q.get("yard", "")), {})
 	if not theme.is_empty():
 		var radius := clampf(minf(r.size.x * 0.4, r.size.y * 0.3), 220.0, 340.0)
@@ -1699,6 +1718,36 @@ func _yard_ok(p: Vector2, radius: float) -> bool:
 	return p.distance_to(player_start) > 200.0 + radius and not boss_rect.grow(radius + 120.0).has_point(p)
 
 
+## Живой мир (WorldLife): стаи птиц на дворах, площади и у кварталов, ветер с листьями/бумажками,
+## светлячки над травой, искры над бочками, пар из люков, бельё/флажки между домами, реплики жителей.
+func _build_world_life(center: Vector2) -> void:
+	var life := WorldLife.new()
+	life.bank = layout == "bank"
+	life.bounds = _interior_rect()
+	for sec: Array in _sectors:
+		# Стая садится на открытую землю перед двором, а не на столики и машины.
+		var front: Vector2 = sec[0] + Vector2(randf_range(-0.3, 0.3) * float(sec[1]), float(sec[1]) * 0.95)
+		if is_walkable(front):
+			life.spots.append(front)
+		if sec[2] == &"grass":
+			life.meadows.append([sec[0], float(sec[1])])
+	for door in _quarter_doors:
+		life.spots.append(door)
+	life.spots.append(center + Vector2(randf_range(-160.0, 160.0), 260.0))
+	life.spots.shuffle()
+	life.fires = _fire_spots.duplicate()
+	life.ropes = _ropes.duplicate()
+	if _streets != null:
+		life.streets = _streets.paths.duplicate()
+	if _life != null:
+		life.actors = _life.actors
+	_own(life, self)
+	life.build(_layers.decals, _layers.fx)
+	_world_life = life
+	if _player != null and is_instance_valid(_player):
+		life.attach(_player)
+
+
 ## Прохожие: жители ходят по улицам кварталов (Свалка) или аллеям парка (Банк) туда-обратно,
 ## останавливаются поглазеть, пугаются взрывов. На качестве 0 — нет; чем выше качество, тем больше.
 func _spawn_walkers() -> void:
@@ -1747,6 +1796,7 @@ func _spawn_life(list: Array, at: Vector2, half: Vector2, mirror: float) -> void
 			continue
 		_owned.append(actor)
 		if str(item[0]) == "npc_barrel_fire":
+			_fire_spots.append(p)
 			_life_lights.append(EnvLights.add(p + Vector2(0, -30), Color("#ff9a3d"), 220.0, 0.6))
 
 

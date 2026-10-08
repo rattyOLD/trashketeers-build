@@ -25,6 +25,31 @@ var _smoke_at := Vector2.INF
 var _smoke: PackedVector3Array = PackedVector3Array()
 
 
+## Растения качаются на ветру: верх спрайта гуляет по синусу, фаза — от положения в мире (не в унисон).
+## Один общий материал на все растения — отрисовка не дробится.
+const SWAY_IDS := ["spruce", "bush", "bush_low", "planter"]
+const SWAY_SHADER := """
+shader_type canvas_item;
+uniform float amount = 5.0;
+void vertex() {
+	vec2 world = (MODEL_MATRIX * vec4(VERTEX, 0.0, 1.0)).xy;
+	float top = 1.0 - UV.y;
+	float gust = 0.7 + 0.3 * sin(TIME * 0.37 + world.y * 0.002);
+	VERTEX.x += sin(TIME * 1.7 + world.x * 0.013 + world.y * 0.007) * amount * top * top * gust;
+}
+"""
+static var _sway: ShaderMaterial
+
+
+static func sway_material() -> ShaderMaterial:
+	if _sway == null:
+		var shader := Shader.new()
+		shader.code = SWAY_SHADER
+		_sway = ShaderMaterial.new()
+		_sway.shader = shader
+	return _sway
+
+
 static func get_def(prop_id: String) -> Dictionary:
 	if _defs.is_empty():
 		var root := ConfigLoader.load_json("res://data/props.json")
@@ -78,6 +103,8 @@ func setup(prop_id: String, solid: bool = true, flip: int = 0) -> void:
 	sprite = make_sprite(str(def.get("texture", "")), float(def.get("width", 0.0)))
 	if def.get("flip", false):
 		sprite.flip_h = (flip > 0) if flip != 0 else randf() < 0.5
+	if SWAY_IDS.has(prop_id) and SaveService.get_quality() > 0:
+		sprite.material = sway_material()
 	add_child(sprite)
 	if collision_layer != 0:
 		var collision := CollisionShape2D.new()
