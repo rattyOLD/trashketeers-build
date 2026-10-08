@@ -183,6 +183,16 @@ func cloud_load(key: String) -> void:
 # --- Графика ---------------------------------------------------------------------------------------
 
 ## Сенсорное устройство (телефон/планшет): для авто-качества графики.
+## iPhone/iPad в браузере (iPadOS притворяется Маком, выдаёт его сенсор).
+func is_ios() -> bool:
+	if _ios < 0:
+		_ios = 1 if is_web and _js_bool("/iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && (navigator.maxTouchPoints || 0) > 1)") else 0
+	return _ios == 1
+
+
+var _ios := -1
+
+
 func is_touch() -> bool:
 	if is_web:
 		return _js_bool("!!window.__trash_is_touch || ('ontouchstart' in window) || (navigator.maxTouchPoints || 0) > 0")

@@ -118,6 +118,7 @@ const DEFAULTS := {
 	"coop_rating": 0,
 	"coop_tier": "Ржавый",
 	"survival_intro_seen": false,
+	"aim_learned": false,
 	"survival_unlock_seen": false,
 }
 
@@ -476,7 +477,8 @@ func get_quality() -> int:
 	var q := int(data.get("quality", -1))
 	if q < 0:
 		return 0 if Platform.is_touch() else 1
-	return clampi(q, 0, 2)
+	# Safari на iPhone вылетал в бою на «Красиво» (память): там потолок — «Баланс».
+	return clampi(q, 0, 1 if Platform.is_ios() else 2)
 
 
 ## Лимит кадров: 30, 60 или 120. Старая «Экономия заряда» = 30.

@@ -2,7 +2,8 @@ class_name LayoutHold
 extends Control
 ## Долгое удержание экранной кнопки в бою (около двух секунд) просит открыть правку её положения,
 ## размера и прозрачности. Событие не перехватывается: обычные нажатия работают как раньше.
-## Пока палец держат, вокруг него растёт кольцо, чтобы было понятно, что сейчас откроется правка.
+## Пока палец держат, кнопка целиком (со всеми частями) наливается золотом, под ней растёт заливка её формы,
+## а по краю идёт кольцо прогресса — видно, какая именно кнопка сейчас уйдёт в правку.
 
 signal requested(id: String)
 
@@ -17,6 +18,9 @@ var _index := -1
 var _id := ""
 var _start := Vector2.ZERO
 var _t0 := 0
+var _lit: Control
+var _lit_color := Color.WHITE
+const LIT_TINT := Color(1.65, 1.35, 0.55)
 
 
 func _init() -> void:
@@ -47,6 +51,7 @@ func _input(event: InputEvent) -> void:
 				_id = id
 				_start = touch.position
 				_t0 = Time.get_ticks_msec()
+				_light((targets[id] as Callable).call())
 		elif not touch.pressed and touch.index == _index:
 			_cancel()
 	elif event is InputEventScreenDrag:
@@ -56,16 +61,38 @@ func _input(event: InputEvent) -> void:
 
 
 func _cancel() -> void:
+	_unlight()
 	if _index != -1:
 		_index = -1
 		queue_redraw()
 
 
+func _light(control: Control) -> void:
+	_unlight()
+	if control == null:
+		return
+	_lit = control
+	_lit_color = control.modulate
+
+
+func _unlight() -> void:
+	if _lit != null and is_instance_valid(_lit):
+		_lit.modulate = _lit_color
+	_lit = null
+
+
 func _process(_delta: float) -> void:
 	if _index == -1:
 		return
-	if float(Time.get_ticks_msec() - _t0) / 1000.0 >= HOLD_SEC:
+	var held := float(Time.get_ticks_msec() - _t0) / 1000.0
+	if _lit != null and is_instance_valid(_lit):
+		var glow := clampf((held - 0.25) / (HOLD_SEC - 0.25), 0.0, 1.0)
+		var pulse := 0.5 + 0.5 * sin(held * 14.0)
+		var tint := Color.WHITE.lerp(LIT_TINT, glow * (0.75 + 0.25 * pulse))
+		_lit.modulate = Color(_lit_color.r * tint.r, _lit_color.g * tint.g, _lit_color.b * tint.b, maxf(_lit_color.a, glow))
+	if held >= HOLD_SEC:
 		var id := _id
+		_unlight()
 		_index = -1
 		Platform.haptic("heavy")
 		requested.emit(id)
@@ -84,6 +111,15 @@ func _draw() -> void:
 	var rect := Rect2(control.get_global_position(), control.size * control.get_global_transform().get_scale()).grow(8.0)
 	var progress := clampf((t - RING_FROM) / (HOLD_SEC - RING_FROM), 0.0, 1.0)
 	var ratio := maxf(rect.size.x, rect.size.y) / maxf(minf(rect.size.x, rect.size.y), 1.0)
+	# Заливка формы кнопки: вся «моделька» выделена, а не только край.
+	var fill := Color(UiStyle.GOLD, 0.2 + 0.3 * progress)
+	if ratio < 1.5:
+		draw_circle(rect.get_center(), maxf(rect.size.x, rect.size.y) * 0.5, fill)
+	else:
+		var box := StyleBoxFlat.new()
+		box.bg_color = fill
+		box.set_corner_radius_all(int(minf(rect.size.x, rect.size.y) * 0.25))
+		box.draw(get_canvas_item(), rect)
 	if ratio < 1.5:
 		var radius := maxf(rect.size.x, rect.size.y) * 0.5
 		draw_arc(rect.get_center(), radius, -PI * 0.5, -PI * 0.5 + TAU * progress, 48, UiStyle.GOLD, 8.0, true)

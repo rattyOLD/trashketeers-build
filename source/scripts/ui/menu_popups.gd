@@ -262,7 +262,9 @@ class Settings:
 			var fcolor := UiStyle.NEON.darkened(0.25) if FPS_CAPS[i] == SaveService.get_fps_cap() else UiStyle.PANEL_LIGHT
 			for fstate in ["normal", "hover"]:
 				_fps_buttons[i].add_theme_stylebox_override(fstate, UiStyle.button_box(fcolor, false))
-		_quality_hint.text = QUALITY_HINTS[q] + ("\nИгра закрылась во время боя, поэтому графика снижена автоматически." if bool(SaveService.data.get("crash_downgraded", false)) else "")
+		if Platform.is_ios() and _quality_buttons.size() > 2:
+			_quality_buttons[2].disabled = true
+		_quality_hint.text = QUALITY_HINTS[q] + ("\n«Красиво» на iPhone отключено: Safari не хватает памяти, игра вылетала." if Platform.is_ios() else "") + ("\nИгра закрылась во время боя, поэтому графика снижена автоматически." if bool(SaveService.data.get("crash_downgraded", false)) else "")
 		_fps.set_pressed_no_signal(bool(SaveService.data["show_fps"]))
 		_lite.set_pressed_no_signal(SaveService.is_fx_lite())
 		_mini.set_pressed_no_signal(SaveService.is_minimap_enabled())
