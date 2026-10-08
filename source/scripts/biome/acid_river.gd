@@ -38,9 +38,9 @@ var water := false
 var player: Player
 const WADE_SLOW_ACID := 0.55
 const WADE_SLOW_WATER := 0.65
-## Кислота жжёт умеренно: 4 урона раз в 0.5 с — перейти можно, стоять в ней нельзя.
-const ACID_DAMAGE := 4.0
-const ACID_TICK := 0.5
+## Кислота жжёт сильно: перейти вброд можно (короткий путь от толпы), но это дорого — около 25 HP в секунду.
+const ACID_DAMAGE := 16.0
+const ACID_TICK := 0.45
 const AMBIENT_RANGE := 900.0
 var _points := PackedVector2Array()
 var _width := 0.0
@@ -93,6 +93,31 @@ func build(points: PackedVector2Array, width: float, bridges: Array, bridge_len:
 		if travelled >= step:
 			travelled = 0.0
 			_lights.append(EnvLights.add(points[k], Color("#7dff4a") if not water else Color("#6fd8ff"), 260.0, 0.45 if not water else 0.3))
+
+
+## Водосток в линии забора: бетонный оголовок поперёк русла и тёмный зев трубы — протока выходит
+## из-под забора (top) или уходит под него, а не начинается из ниоткуда.
+func add_culvert(x: float, y: float, top: bool) -> void:
+	var span := _width + 120.0
+	var mouth := Polygon2D.new()
+	var depth := 70.0 if top else -70.0
+	mouth.polygon = PackedVector2Array([Vector2(x - _width * 0.5, y), Vector2(x + _width * 0.5, y),
+		Vector2(x + _width * 0.42, y - depth), Vector2(x - _width * 0.42, y - depth)])
+	mouth.vertex_colors = PackedColorArray([Color(0.02, 0.03, 0.02, 0.0), Color(0.02, 0.03, 0.02, 0.0), Color(0.01, 0.02, 0.01, 0.9), Color(0.01, 0.02, 0.01, 0.9)])
+	add_child(mouth)
+	var wall := Sprite2D.new()
+	wall.texture = load("res://assets/terrain/ledge_concrete.png") as Texture2D
+	if wall.texture == null:
+		return
+	wall.scale = Vector2(span / wall.texture.get_width(), 0.9)
+	wall.position = Vector2(x, y - (24.0 if top else -6.0))
+	add_child(wall)
+	# Пена/брызги у выхода из трубы: стоячая светлая полоса.
+	var foam := Line2D.new()
+	foam.points = PackedVector2Array([Vector2(x - _width * 0.45, y + (14.0 if top else -14.0)), Vector2(x + _width * 0.45, y + (14.0 if top else -14.0))])
+	foam.width = 10.0
+	foam.default_color = Color(0.8, 1.0, 0.6, 0.35) if not water else Color(0.85, 0.97, 1.0, 0.45)
+	add_child(foam)
 
 
 ## Подключить героя: вброд, звуки и фон протоки.

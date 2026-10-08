@@ -372,6 +372,8 @@ var _river_side := 1.0
 var river: AcidRiver
 const POI_SPACING := 560.0
 const RIVER_WIDTH := 200.0
+## Среднее русло — на таком расстоянии от бокового забора.
+const RIVER_EDGE := 470.0
 const RIVER_BRIDGE := 430.0
 const RIVER_BRIDGE_BAND := 70.0
 const POI_OPEN := -0.16
@@ -1091,6 +1093,9 @@ func _interior_rect() -> Rect2:
 
 ## Точка допустима для укрытия: не на дорожках, не у центра, старта, помоста и ворот.
 func _cover_allowed(p: Vector2, margin: float) -> bool:
+	# Берега протоки и съезды с мостов свободны: ничего не загораживает переправу.
+	if not _river_points.is_empty() and absf(p.x - AcidRiver._x_at(_river_points, p.y)) < RIVER_WIDTH * 0.5 + 190.0 + margin * 0.5:
+		return false
 	var zone := zone_at(p)
 	if zone == Zone.LANE or zone == Zone.BOSS or zone == Zone.GATE or zone == Zone.EDGE:
 		return false
@@ -1253,27 +1258,28 @@ func _build_park(center: Vector2) -> void:
 ## Средняя линия протоки (до района: тот должен расступиться над её истоком и устьем).
 func _plan_river() -> void:
 	var inner := _arena_inner()
-	var width := RIVER_WIDTH
 	var side := -1.0 if randf() < 0.5 else 1.0
-	var x0 := inner.position.x + inner.size.x * (0.5 + side * 0.24)
+	# Русло в боковой полосе площадки: далеко от помоста босса и центра, у забора остаётся проход.
+	var x0 := inner.get_center().x + side * (inner.size.x * 0.5 - RIVER_EDGE)
 	var ph := randf() * TAU
 	var ph2 := randf() * TAU
 	var points := PackedVector2Array()
-	var y := inner.position.y + 8.0
-	while y <= inner.end.y - 8.0:
-		points.append(Vector2(x0 + 170.0 * sin(y * 0.0022 + ph) + 60.0 * sin(y * 0.006 + ph2), y))
+	var top := inner.position.y
+	var bottom := inner.end.y
+	var y := top
+	while y < bottom:
+		points.append(Vector2(x0 + _river_bend(y, top, bottom, ph, ph2), y))
 		y += 48.0
-	var tail_y := inner.end.y - 8.0
-	if tail_y - points[points.size() - 1].y > 16.0:
-		points.append(Vector2(x0 + 170.0 * sin(tail_y * 0.0022 + ph) + 60.0 * sin(tail_y * 0.006 + ph2), tail_y))
-	# Протока обходит помост босса: у верхнего края держится сбоку от него.
-	var keep := boss_rect.size.x * 0.5 + width * 0.5 + 140.0
-	for k in points.size():
-		var pt := points[k]
-		if pt.y < boss_rect.end.y + 200.0 and absf(pt.x - boss_rect.get_center().x) < keep:
-			points[k] = Vector2(boss_rect.get_center().x + side * keep, pt.y)
+	points.append(Vector2(x0, bottom))
 	_river_points = points
 	_river_side = side
+
+
+## Изгиб русла: у заборов — ноль (протока входит и выходит прямо, через водосток), посередине — плавные петли.
+static func _river_bend(y: float, top: float, bottom: float, ph: float, ph2: float) -> float:
+	var edge := minf(y - top, bottom - y)
+	var taper := smoothstep(0.0, 420.0, edge)
+	return taper * (190.0 * sin(y * 0.0021 + ph) + 50.0 * sin(y * 0.006 + ph2))
 
 
 func _build_river() -> void:
@@ -1288,6 +1294,8 @@ func _build_river() -> void:
 	_own(river, _layers.decals)
 	river.water = layout == "bank"
 	river.build(points, width, bridges, RIVER_BRIDGE)
+	river.add_culvert(points[0].x, inner.position.y, true)
+	river.add_culvert(points[points.size() - 1].x, inner.end.y, false)
 	# Исток и устье: протока выходит из-под верхнего забора и уходит под нижний (рисует район — под забором и толпой).
 	if district != null:
 		var view := view_bounds
