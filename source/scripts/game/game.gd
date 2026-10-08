@@ -110,13 +110,15 @@ var _boss_started := 0.0
 ## Только враги этой главы: все листы разом — лишние ~50 МБ видеопамяти на слабых телефонах.
 static func warm_chapter(chapter: Dictionary) -> void:
 	var ids := {}
+	# Телефон в браузере (iPhone Safari падает от видеопамяти): листы боссов (до 11 МБ) — к их появлению, не на старте.
+	var lean := Platform.is_web and Platform.is_touch()
 	for wave: Dictionary in chapter.get("waves", []):
 		for id in (wave.get("weights", {}) as Dictionary):
 			ids[str(id)] = true
 		for key in ["boss", "miniboss"]:
-			if not str(wave.get(key, "")).is_empty():
+			if not str(wave.get(key, "")).is_empty() and not (lean and key == "boss"):
 				ids[str(wave[key])] = true
-	if not str(chapter.get("boss", "")).is_empty():
+	if not str(chapter.get("boss", "")).is_empty() and not lean:
 		ids[str(chapter["boss"])] = true
 	var escort: Dictionary = chapter.get("escort", {})
 	if escort.has("enemy"):

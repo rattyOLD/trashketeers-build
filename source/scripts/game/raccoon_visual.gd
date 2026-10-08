@@ -43,6 +43,7 @@ const CLIP_GUN_BOOST := 1.5
 const DASH_CLIP_TIME := 0.16
 const IDLE_FPS := 7.0
 const FIDGET_TIME := 2.4
+const LAZY_CLIPS := ["death", "revive"]
 const SHOOT_ANIM_TIME := 0.24
 const ARM_REST := 0.055
 const ARM_MIN := -1.05
@@ -252,19 +253,21 @@ func _enter_hero(cfg: Dictionary) -> void:
 	if path.is_empty() or not ResourceLoader.exists(path):
 		_leave_hero()
 		return
-	if not _hero_textures.has(path):
-		_hero_textures[path] = load(path)
-	var texture: Texture2D = _hero_textures[path]
 	_hero_cfg = cfg
 	_hero_frames.clear()
 	var cell_w := int(cfg.get("cell_w", 384))
 	var cell_h := int(cfg.get("cell_h", 288))
-	for i in int(cfg.get("cells", 4)):
-		var atlas := AtlasTexture.new()
-		atlas.atlas = texture
-		atlas.region = Rect2(i * cell_w, 0, cell_w, cell_h)
-		_hero_frames.append(atlas)
 	_clip_mode = str(cfg.get("clips", "")) != "" and _load_clips(str(cfg["clips"]))
+	# Старый статичный лист нужен только героям без покадровых клипов (−1.7 МБ видеопамяти у остальных).
+	if not _clip_mode:
+		if not _hero_textures.has(path):
+			_hero_textures[path] = load(path)
+		var texture: Texture2D = _hero_textures[path]
+		for i in int(cfg.get("cells", 4)):
+			var atlas := AtlasTexture.new()
+			atlas.atlas = texture
+			atlas.region = Rect2(i * cell_w, 0, cell_w, cell_h)
+			_hero_frames.append(atlas)
 	var feet := SHADOW_OFFSET.y / _sc()
 	if _clip_mode:
 		hero.offset = Vector2(-CLIP_CELL.x * 0.5, -CLIP_FEET + feet)
@@ -293,6 +296,8 @@ func _load_clips(prefix: String) -> bool:
 		var path := "%s%s.png" % [prefix, clip]
 		if not ResourceLoader.exists(path):
 			return false
+		if LAZY_CLIPS.has(clip):
+			continue
 		var tex: Texture2D = load(path)
 		var list: Array[AtlasTexture] = []
 		for i in int(CLIP_COUNTS[clip]):
@@ -325,6 +330,18 @@ func _load_clips(prefix: String) -> bool:
 	_clip_grip = grip
 	_clip_hands = hands
 	return true
+
+
+## Смерть и подъём нужны редко — их листы грузятся при первой гибели (−5 МБ видеопамяти на старте боя).
+func _load_lazy_clip(clip: String) -> void:
+	var tex: Texture2D = load("%s%s.png" % [str(_hero_cfg.get("clips", "")), clip])
+	var list: Array[AtlasTexture] = []
+	for i in int(CLIP_COUNTS[clip]):
+		var atlas := AtlasTexture.new()
+		atlas.atlas = tex
+		atlas.region = Rect2((i % 4) * CLIP_CELL.x, (i / 4) * CLIP_CELL.y, CLIP_CELL.x, CLIP_CELL.y)
+		list.append(atlas)
+	_clip_frames[clip] = list
 
 
 ## «Тик» героя в покое (Фрост стряхивает иней, Фитиль крутит спичку): лист <prefix>fidget.png, грузится при первом
@@ -385,6 +402,8 @@ func _clip_pick() -> void:
 	elif _run > 0.12:
 		clip = "run"
 		idx = int(fposmod(_gait / TAU, 1.0) * 8.0) % 8
+	if not _clip_frames.has(clip):
+		_load_lazy_clip(clip)
 	hero.texture = (_clip_frames[clip] as Array)[idx]
 	_clip_cur = clip
 	_clip_idx = idx
