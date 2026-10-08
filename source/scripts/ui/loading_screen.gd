@@ -303,7 +303,8 @@ func _init() -> void:
 	_root.add_child(build)
 
 	_flash = ColorRect.new()
-	_flash.color = Color(1, 1, 1, 0)
+	# Переход через затемнение, а не белую вспышку: в тёмной игре белый экран режет глаза.
+	_flash.color = Color(0.035, 0.03, 0.05, 0)
 	_flash.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(_flash)

@@ -383,3 +383,21 @@ static func place(control: Control, id: String, area: Vector2, base_override: Ve
 	var size := base * s
 	control.size = size
 	control.position = Vector2(float(e["x"]) * area.x, float(e["y"]) * area.y) - size * 0.5
+
+
+## Навык и рывок не должны налезать друг на друга, а слоты — на рывок. Общее для боя и превью в редакторе.
+static func resolve_overlap(skill: Control, dodge: Control, slots: Control, area: Vector2) -> void:
+	for button in [dodge, skill]:
+		button.position.x = clampf(button.position.x, 4.0, area.x - button.size.x - 4.0)
+	var skill_rect := Rect2(skill.position, skill.size).grow(10.0)
+	if skill_rect.intersects(Rect2(dodge.position, dodge.size)):
+		dodge.position.x = skill.position.x - 14.0 - dodge.size.x if skill.position.x > area.x * 0.5 else skill.position.x + skill.size.x + 14.0
+	var main_btn: Control = dodge
+	var slot_rect := Rect2(slots.position, slots.size).grow(6.0)
+	if not slot_rect.intersects(Rect2(main_btn.position, main_btn.size)):
+		return
+	var gap := 14.0
+	var left_side := main_btn.position.x + main_btn.size.x * 0.5 > area.x * 0.5
+	var x := main_btn.position.x - gap - slots.size.x if left_side else main_btn.position.x + main_btn.size.x + gap
+	var y := main_btn.position.y + main_btn.size.y - slots.size.y
+	slots.position = Vector2(clampf(x, 4.0, area.x - slots.size.x - 4.0), maxf(y, 4.0))

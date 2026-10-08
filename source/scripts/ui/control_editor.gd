@@ -236,6 +236,7 @@ func _place_all() -> void:
 		Controls.place(_items[id], id, size, base)
 		_items[id].modulate.a = float(Controls.get_value("opacity")) * Controls.element_opacity(id)
 		_items[id].queue_redraw()
+	Controls.resolve_overlap(_items["dash"], _items["dodge"], _items["slots"], size)
 	queue_redraw()
 
 
@@ -244,7 +245,7 @@ func _joystick_center() -> Vector2:
 
 
 func _draw() -> void:
-	draw_rect(Rect2(Vector2.ZERO, size), Color(0.083, 0.079, 0.075, 0.97))
+	draw_rect(Rect2(Vector2.ZERO, size), Color(0.083, 0.079, 0.075, 1.0))
 	var step := size.x / 12.0
 	for i in 13:
 		draw_line(Vector2(i * step, 0), Vector2(i * step, size.y), Color(1, 1, 1, 0.035), 2.0)

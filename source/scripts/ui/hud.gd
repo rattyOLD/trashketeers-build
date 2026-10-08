@@ -705,7 +705,7 @@ func apply_layout() -> void:
 	Controls.place(_dash, "dodge", area)
 	Controls.place(_slot_bar, "slots", area, BattleControls.slots_base_size(_slot_bar.count))
 	Controls.place(_interact, "interact", area)
-	_resolve_button_overlap(area)
+	Controls.resolve_overlap(_skill, _dash, _slot_bar, area)
 	var opacity := clampf(float(Controls.get_value("opacity")), 0.3, 1.0)
 	_skill.modulate.a = opacity * Controls.element_opacity("dash")
 	_dash.modulate.a = opacity * Controls.element_opacity("dodge")
@@ -714,23 +714,6 @@ func apply_layout() -> void:
 	joystick.modulate.a = opacity
 	_apply_hud_items()
 	_layout_revision = Controls.revision
-
-
-func _resolve_button_overlap(area: Vector2) -> void:
-	for button in [_dash, _skill]:
-		button.position.x = clampf(button.position.x, 4.0, area.x - button.size.x - 4.0)
-	var skill_rect := Rect2(_skill.position, _skill.size).grow(10.0)
-	if skill_rect.intersects(Rect2(_dash.position, _dash.size)):
-		_dash.position.x = _skill.position.x - 14.0 - _dash.size.x if _skill.position.x > area.x * 0.5 else _skill.position.x + _skill.size.x + 14.0
-	var main_btn: Control = _dash
-	var slot_rect := Rect2(_slot_bar.position, _slot_bar.size).grow(6.0)
-	if not slot_rect.intersects(Rect2(main_btn.position, main_btn.size)):
-		return
-	var gap := 14.0
-	var left_side := main_btn.position.x + main_btn.size.x * 0.5 > area.x * 0.5
-	var x := main_btn.position.x - gap - _slot_bar.size.x if left_side else main_btn.position.x + main_btn.size.x + gap
-	var y := main_btn.position.y + main_btn.size.y - _slot_bar.size.y
-	_slot_bar.position = Vector2(clampf(x, 4.0, area.x - _slot_bar.size.x - 4.0), maxf(y, 4.0))
 
 
 func set_skill(title: String, color: Color) -> void:
@@ -1629,8 +1612,12 @@ class PausePanel:
 
 	func _open_editor() -> void:
 		if _editor == null:
+			# Свой слой: внутри паузы редактор наследовал её полупрозрачность — меню просвечивало сквозь него.
+			var layer := CanvasLayer.new()
+			layer.layer = 60
+			add_child(layer)
 			_editor = ControlEditor.new()
-			add_child(_editor)
+			layer.add_child(_editor)
 		_editor.open()
 
 	func _open_tester() -> void:

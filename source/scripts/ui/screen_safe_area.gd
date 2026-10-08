@@ -1,8 +1,15 @@
 class_name ScreenSafeArea
 extends RefCounted
 
+## Тестовые сцены подменяют вырез экрана (слева, сверху, справа, снизу в пикселях холста).
+static var test_insets := Vector4.ZERO
+
+
 static func rect(view: Vector2) -> Rect2:
 	var insets := Vector4.ZERO
+	if test_insets != Vector4.ZERO:
+		insets = test_insets
+		return Rect2(Vector2(insets.x, insets.y), Vector2(maxf(view.x - insets.x - insets.z, 1.0), maxf(view.y - insets.y - insets.w, 1.0)))
 	if OS.has_feature("web"):
 		var raw := str(JavaScriptBridge.eval("JSON.stringify(window.trashSafeInsets ? window.trashSafeInsets() : [0,0,0,0])"))
 		var values: Variant = JSON.parse_string(raw)

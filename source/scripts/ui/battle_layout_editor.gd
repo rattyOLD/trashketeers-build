@@ -16,6 +16,7 @@ var _panel_grab := Vector2.ZERO
 var _panel_drag := false
 var _body: VBoxContainer
 var _summary: VBoxContainer
+var _summary_scroll: ScrollContainer
 var _fold: Button
 var _collapsed := false
 var _title: Label
@@ -23,7 +24,6 @@ var _size_slider: HSlider
 var _alpha_slider: HSlider
 var _joystick_slider: HSlider
 var _fixed_toggle: Button
-var _swipe_toggle: Button
 var _preset_buttons: Array[Button] = []
 
 
@@ -62,12 +62,12 @@ func _build() -> void:
 	_panel.add_theme_stylebox_override("panel", UiStyle.box(Color(0.06, 0.03, 0.12, 0.62), UiStyle.NEON, 4, 22))
 	_panel.anchor_left = 0.0
 	_panel.anchor_right = 1.0
-	_panel.anchor_top = 0.5
-	_panel.anchor_bottom = 0.5
+	_panel.anchor_top = 1.0
+	_panel.anchor_bottom = 1.0
 	_panel.offset_left = 14.0
 	_panel.offset_right = -14.0
-	_panel.offset_top = -90.0
-	_panel.offset_bottom = -90.0
+	_panel.offset_top = -10.0
+	_panel.offset_bottom = -10.0
 	_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	_panel.gui_input.connect(_on_panel_input)
@@ -92,9 +92,16 @@ func _build() -> void:
 	head.add_child(done)
 	_body.add_child(head)
 
+	# Настройки листаются внутри панели: в горизонтали их полная высота больше экрана и верх уезжал за край.
+	_summary_scroll = DragScroll.new()
+	_summary_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_summary_scroll.scroll_deadzone = 12
+	_body.add_child(_summary_scroll)
 	_summary = VBoxContainer.new()
 	_summary.add_theme_constant_override("separation", 6)
-	_body.add_child(_summary)
+	_summary.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_summary_scroll.add_child(_summary)
+	_summary.minimum_size_changed.connect(_fit_summary.call_deferred)
 	_title = UiStyle.label("", 21, UiStyle.NEON, 5)
 	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -117,10 +124,6 @@ func _build() -> void:
 		Controls.set_value("joystick_fixed", not bool(Controls.get_value("joystick_fixed")))
 		_sync())
 	toggles.add_child(_fixed_toggle)
-	_swipe_toggle = _button("", 17, func() -> void:
-		Controls.set_value("swipe_switch", not bool(Controls.get_value("swipe_switch")))
-		_sync())
-	toggles.add_child(_swipe_toggle)
 	_summary.add_child(toggles)
 
 	var hands := HBoxContainer.new()
@@ -201,11 +204,23 @@ func _slider(caption: String, low: float, high: float, on_change: Callable) -> H
 	return slider
 
 
+func _fit_summary() -> void:
+	if _summary_scroll == null or not is_inside_tree():
+		return
+	var limit := get_viewport_rect().size.y * (0.62 if Orient.portrait else 0.4)
+	_summary_scroll.custom_minimum_size.y = minf(_summary.get_combined_minimum_size().y, limit)
+	_snap_panel()
+
+
+## Высота панели — по содержимому, нижний край на месте (панель растёт вверх); ширину не трогаем.
+func _snap_panel() -> void:
+	_panel.offset_top = _panel.offset_bottom
+
 func _toggle_fold() -> void:
 	_collapsed = not _collapsed
-	_summary.visible = not _collapsed
+	_summary_scroll.visible = not _collapsed
 	_fold.text = "РАЗВЕРНУТЬ" if _collapsed else "СВЕРНУТЬ"
-	_panel.reset_size()
+	_snap_panel()
 
 
 func _on_panel_input(event: InputEvent) -> void:
@@ -249,7 +264,6 @@ func _sync() -> void:
 		_alpha_slider.set_value_no_signal(Controls.opacity_of(_selected))
 	_joystick_slider.set_value_no_signal(float(Controls.get_value("joystick_scale")))
 	_fixed_toggle.text = "Джойстик: %s" % ("фикс." if bool(Controls.get_value("joystick_fixed")) else "плавающий")
-	_swipe_toggle.text = "Свайп ствола: %s" % ("вкл" if bool(Controls.get_value("swipe_switch")) else "выкл")
 	for i in _preset_buttons.size():
 		_preset_buttons[i].disabled = not Controls.has_preset(i)
 	queue_redraw()
