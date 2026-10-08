@@ -206,6 +206,10 @@ func build(currency_icon: Texture2D, weapon: WeaponData) -> void:
 	_root.add_child(_level_up)
 
 	_pause = PausePanel.new()
+	# Мини-карта не должна просвечивать поверх паузы (жалоба владельца: висела на панели).
+	_pause.visibility_changed.connect(func() -> void:
+		if _minimap_slot != null:
+			_minimap_slot.modulate.a = 0.0 if _pause.visible else 1.0)
 	_pause.resumed.connect(func() -> void: resume_pressed.emit())
 	_pause.exit_pressed.connect(func() -> void: menu_pressed.emit())
 	_pause.restart_pressed.connect(func() -> void: restart_pressed.emit())
@@ -959,6 +963,7 @@ func show_run_result(summary: Dictionary) -> void:
 
 func show_pause(lines: PackedStringArray) -> void:
 	_clear_wave_titles()
+	_pause.move_to_front()
 	_pause.open(lines)
 
 

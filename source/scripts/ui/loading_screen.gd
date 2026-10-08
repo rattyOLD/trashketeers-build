@@ -186,6 +186,7 @@ func _init() -> void:
 	var bg := ColorRect.new()
 	bg.color = BG
 	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_bleed(bg)
 	_root.add_child(bg)
 
 	_scenery = Scenery.new()
@@ -307,7 +308,17 @@ func _init() -> void:
 	_flash.color = Color(0.035, 0.03, 0.05, 0)
 	_flash.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_bleed(_flash)
 	_root.add_child(_flash)
+
+
+## _root ужат до безопасной зоны (вырез, «чёлка»), а фон и затемнение должны закрывать весь экран:
+## иначе по краям iPhone просвечивало меню под загрузкой (кнопки «Прокачка/Друзья» снизу).
+func _bleed(control: Control) -> void:
+	control.offset_left = -600.0
+	control.offset_top = -600.0
+	control.offset_right = 600.0
+	control.offset_bottom = 600.0
 
 
 func _ready() -> void:

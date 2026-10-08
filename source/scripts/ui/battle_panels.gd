@@ -43,6 +43,11 @@ static func dim() -> ColorRect:
 	var d := ColorRect.new()
 	d.color = Color(0.074, 0.071, 0.066, 0.8)
 	d.set_anchors_preset(Control.PRESET_FULL_RECT)
+	# HUD ужат до безопасной зоны — затемнение выходит за неё, чтобы закрыть края экрана у выреза.
+	d.offset_left = -600.0
+	d.offset_top = -600.0
+	d.offset_right = 600.0
+	d.offset_bottom = 600.0
 	return d
 
 
