@@ -1,23 +1,23 @@
 class_name ArenaDistrict
 extends Node2D
 ## Живой район за забором арены (арт Астры, docs/briefs/astra_full.txt, части 3–4).
-## Камера заходит за край арены на MARGIN_*: там земля района, забор по краю, за забором толпа
-## зрителей (крысы на Свалке, свиньи в Банке, плюс двое особых зрителей главы), дальше дома,
-## машины и объекты главы. Чистая картинка без коллизий: стены арены остаются как были.
+## Забор стоит ровно по краю игровой площадки, на кольце стен за ним — трибуны зрителей (крысы на
+## Свалке, свиньи в Банке, плюс двое особых зрителей главы), дальше, за краем карты (камера заходит
+## на MARGIN_*), — дома, машины и объекты главы. Чистая картинка без коллизий: стены кольца как были.
 ## Зрители — лента 4 кадра (стоит / машет / прыгает / хлопает): чем жарче бой, тем чаще
 ## реагируют; появление и смерть босса поднимают всю трибуну. Анимация — 10 раз в секунду.
 
 const ROOT := "res://assets/district/"
-const MARGIN_TOP := 360.0
-const MARGIN_SIDE := 340.0
-const MARGIN_BOTTOM := 190.0
+const MARGIN_TOP := 160.0
+const MARGIN_SIDE := 260.0
+const MARGIN_BOTTOM := 120.0
 const TICK := 0.1
 const FENCE_SCALE := 0.75
 const SIDE_FENCE_SCALE := 0.5
 const SPECTATOR_SCALE := 0.82
-const TOP_SPACING := 92.0
-const SIDE_SPACING := 118.0
-const GATE_CLEAR := 3.4
+const TOP_SPACING := 84.0
+const SIDE_SPACING := 96.0
+const GATE_CLEAR := 1.7
 
 const DISTRICTS := {
 	"junkyard": {
@@ -50,6 +50,7 @@ var _timer: PackedFloat32Array = PackedFloat32Array()
 var _tick := 0.0
 var _time := 0.0
 var _textures := {}
+var _holder: Node2D
 ## Ночью на Свалке у домов горят вывески и окна: мягкие пятна света (EnvLights), иначе район тонет в темноте.
 var _neon := false
 var _lights: PackedInt32Array = PackedInt32Array()
@@ -65,7 +66,7 @@ static func has_art(layout: String) -> bool:
 	return DISTRICTS.has(layout)
 
 
-func build(layout: String, chapter_id: String, bounds: Rect2, gate_y: float, gate_half: float) -> void:
+func build(layout: String, chapter_id: String, bounds: Rect2, inner: Rect2, gate_y: float, gate_half: float) -> void:
 	y_sort_enabled = true
 	var district: Dictionary = DISTRICTS[layout]
 	_neon = layout == "junkyard"
@@ -75,7 +76,13 @@ func build(layout: String, chapter_id: String, bounds: Rect2, gate_y: float, gat
 	var chapter_key: String = CHAPTER_OF.get(chapter_id, CHAPTER_OF.get(chapter_id.get_slice("_", 0), "ch1" if layout == "junkyard" else "ch4"))
 	var special: Array = CHAPTERS[chapter_key]
 	var chapter_dir := ROOT + chapter_key + "/"
-	_ground(dir + str(district["prefix"]) + "_ground_tile.png", view_rect(bounds))
+	var view := view_rect(bounds)
+	# Земля района — всё вне игровой площадки: кольцо стен и поля камеры за ним.
+	var ground := dir + str(district["prefix"]) + "_ground_tile.png"
+	_ground(ground, Rect2(view.position, Vector2(view.size.x, inner.position.y - view.position.y)))
+	_ground(ground, Rect2(Vector2(view.position.x, inner.end.y), Vector2(view.size.x, view.end.y - inner.end.y)))
+	_ground(ground, Rect2(Vector2(view.position.x, inner.position.y), Vector2(inner.position.x - view.position.x, inner.size.y)))
+	_ground(ground, Rect2(Vector2(inner.end.x, inner.position.y), Vector2(view.end.x - inner.end.x, inner.size.y)))
 	var buildings: Array[String] = []
 	for id in district["buildings"]:
 		buildings.append(dir + str(id) + ".png")
@@ -99,32 +106,49 @@ func build(layout: String, chapter_id: String, bounds: Rect2, gate_y: float, gat
 	var fence_v := dir + str(district["prefix"]) + "_fence_vertical.png"
 	var gate_top := gate_y - gate_half * GATE_CLEAR
 	var gate_bottom := gate_y + gate_half * GATE_CLEAR
-	# Верх: забор по краю, за ним трибуна в два ряда, дальше дома вперемешку с машинами и объектами.
-	_fence_row(fence_h, bounds.position.x - MARGIN_SIDE, bounds.end.x + MARGIN_SIDE, bounds.position.y + 4.0)
-	_crowd_row(crowd, bounds.position.x - MARGIN_SIDE + 40.0, bounds.end.x + MARGIN_SIDE, bounds.position.y - 64.0, TOP_SPACING)
-	_crowd_row(crowd, bounds.position.x - MARGIN_SIDE + 86.0, bounds.end.x + MARGIN_SIDE, bounds.position.y - 104.0, TOP_SPACING * 1.25)
-	_backdrop_row(buildings, small, bounds.position.x - MARGIN_SIDE, bounds.end.x + MARGIN_SIDE, bounds.position.y - 146.0, 0.7)
-	# Низ: забор у края, перед ним (ближе к камере) машины и объекты — без зрителей: там кнопки.
-	_fence_row(fence_h, bounds.position.x - MARGIN_SIDE, bounds.end.x + MARGIN_SIDE, bounds.end.y + 92.0)
-	_backdrop_row(small, small, bounds.position.x - MARGIN_SIDE, bounds.end.x + MARGIN_SIDE, bounds.end.y + MARGIN_BOTTOM - 6.0, 0.62)
-	# Бока: забор столбом (с проходом у ворот), зрители вдоль него, дома дальним столбцом.
+	var lite := SaveService.get_quality() == 0
+	# Верх: забор ровно по краю площадки, сразу за ним трибуна в два-три ряда, дальше дома.
+	_fence_row(fence_h, inner.position.x - 40.0, inner.end.x + 40.0, inner.position.y + 6.0)
+	_crowd_row(crowd, inner.position.x, inner.end.x, inner.position.y - 58.0, TOP_SPACING)
+	_crowd_row(crowd, inner.position.x + 46.0, inner.end.x, inner.position.y - 108.0, TOP_SPACING * (1.6 if lite else 1.1))
+	if not lite:
+		_crowd_row(crowd, inner.position.x + 20.0, inner.end.x, inner.position.y - 158.0, TOP_SPACING * 1.5)
+	_backdrop_row(buildings, small, view.position.x, view.end.x, inner.position.y - 215.0, 0.72)
+	# Низ: забор по краю, за ним (ближе к камере) машины и объекты — без зрителей: там кнопки.
+	_fence_row(fence_h, inner.position.x - 40.0, inner.end.x + 40.0, inner.end.y + 92.0)
+	_backdrop_row(small, small, view.position.x, view.end.x, inner.end.y + 200.0, 0.62)
+	# Бока: забор столбом по краю площадки (проход у ворот), зрители в два столбца, дома дальше.
 	for side: float in [-1.0, 1.0]:
-		var edge: float = bounds.position.x if side < 0.0 else bounds.end.x
-		var fence_x := edge + side * 34.0
-		var spans := [Vector2(bounds.position.y - MARGIN_TOP * 0.2, gate_top), Vector2(gate_bottom, bounds.end.y + 92.0)]
+		var edge: float = inner.position.x if side < 0.0 else inner.end.x
+		var spans := [Vector2(inner.position.y + 6.0, gate_top), Vector2(gate_bottom, inner.end.y + 92.0)]
 		for span: Vector2 in spans:
-			_fence_column(fence_v, fence_x, span.x, span.y)
-			var y := span.x + 90.0
+			_fence_column(fence_v, edge + side * 30.0, span.x, span.y)
+			var y := span.x + 70.0
 			while y < span.y - 20.0:
-				_spectator(crowd.pick_random(), Vector2(edge + side * randf_range(105.0, 135.0), y))
-				y += SIDE_SPACING * randf_range(0.8, 1.2)
-			var by := span.x + 200.0
+				_spectator(crowd.pick_random(), Vector2(edge + side * randf_range(86.0, 100.0), y))
+				if not lite and randf() < 0.55:
+					_spectator(crowd.pick_random(), Vector2(edge + side * randf_range(148.0, 162.0), y - 40.0))
+				y += SIDE_SPACING * randf_range(0.75, 1.1)
+			var by := span.x + 120.0
 			while by < span.y:
 				var path: String = buildings.pick_random() if randf() < 0.7 else small.pick_random()
-				var item := _backdrop(path, Vector2(edge + side * 245.0, by), 0.6)
+				var item := _backdrop(path, Vector2(edge + side * 330.0, by), 0.6)
 				item.flip_h = side < 0.0
 				by += maxf(item.get_rect().size.y * item.scale.y * 0.82, 150.0)
-	set_process(not _crowd.is_empty())
+	if _neon:
+		# Гирлянды над трибунами: ночью толпа у забора видна, а не тонет в темноте.
+		var x := inner.position.x + 120.0
+		while x < inner.end.x:
+			_lights.append(EnvLights.add(Vector2(x, inner.position.y - 90.0), NEON.pick_random(), 300.0, 0.5))
+			x += 380.0
+		for side: float in [-1.0, 1.0]:
+			var edge: float = inner.position.x if side < 0.0 else inner.end.x
+			var y := inner.position.y + 160.0
+			while y < inner.end.y:
+				if absf(y - gate_y) > gate_half * GATE_CLEAR:
+					_lights.append(EnvLights.add(Vector2(edge + side * 110.0, y), NEON.pick_random(), 300.0, 0.5))
+				y += 380.0
+	set_process(not _crowd.is_empty() and not lite)
 
 
 ## Минимальная бодрость трибуны: убийство (+0.07), элита (+0.15), босс (1.0).
@@ -162,19 +186,28 @@ func _texture(path: String) -> Texture2D:
 
 func _ground(path: String, rect: Rect2) -> void:
 	var texture := _texture(path)
-	if texture == null:
+	if texture == null or rect.size.x <= 0.0 or rect.size.y <= 0.0:
 		return
 	var ground := Sprite2D.new()
 	ground.texture = texture
 	ground.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
 	ground.region_enabled = true
-	ground.region_rect = Rect2(Vector2.ZERO, rect.size)
+	# Регион в мировых координатах: четыре полосы вокруг площадки стыкуются без шва.
+	ground.region_rect = Rect2(rect.position, rect.size)
 	ground.centered = false
-	ground.position = rect.position
-	ground.z_index = -1
+	ground.position = rect.position - _ground_holder().position
 	ground.modulate = Color(0.9, 0.88, 0.94)
-	add_child(ground)
-	move_child(ground, 0)
+	_ground_holder().add_child(ground)
+
+
+## Земля — в отдельном узле далеко «сверху» по Y: в сортировке по Y он всегда первый, поэтому земля под
+## толпой и домами, но над плиткой пола арены (тот же слой, без отрицательного z).
+func _ground_holder() -> Node2D:
+	if _holder == null:
+		_holder = Node2D.new()
+		_holder.position = Vector2(0, -100000)
+		add_child(_holder)
+	return _holder
 
 
 func _fence_row(path: String, from_x: float, to_x: float, foot_y: float) -> void:

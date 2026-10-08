@@ -98,6 +98,8 @@ func build(layers: BiomeLayers, chapter_def: Dictionary) -> void:
 	var size: Array = chapter.get("size", [40, 50])
 	grid_size = Vector2i(int(size[0]), int(size[1]))
 	_story = chapter.get("story", {})
+	_organic = _story.is_empty() and layout == "junkyard"
+	_noise.seed = randi()
 	if _story.is_empty():
 		grid_size = Vector2i((Vector2(grid_size) * SURVIVAL_SCALE).round())
 	_origin = -Vector2(grid_size) * CELL * 0.5
@@ -113,8 +115,9 @@ func build(layers: BiomeLayers, chapter_def: Dictionary) -> void:
 	_build_floor()
 	_build_shadow_layers()
 	_build_walls()
-	_build_border()
 	_build_district()
+	if district == null:
+		_build_border()
 	_build_boss_zone()
 	if _story.is_empty():
 		_build_center()
@@ -320,6 +323,12 @@ var _district_theme: Array[String] = []
 var _lots: Array[Rect2] = []
 ## Ряды стен сюжетной карты (клетки): между ними — комнаты, в комнате два двора по сторонам дороги.
 var _story_rows: Array[int] = []
+## Выживание на Свалке — органическая местность без сетки дорог: шум задаёт «захламлённые» зоны и чистые
+## площадки, точки интереса — пуассоновский разброс (_build_organic), земля — TerrainGround по тому же шуму.
+var _organic := false
+var _noise := _make_noise()
+const POI_SPACING := 560.0
+const POI_OPEN := -0.16
 const LOTS_PATH := "res://data/lots.json"
 
 
@@ -329,7 +338,7 @@ func _roll_run_twist() -> void:
 	_lane_wide = randf_range(-0.4, 1.0)
 	_road_x.clear()
 	_road_y.clear()
-	if _story.is_empty():
+	if _story.is_empty() and not _organic:
 		var inner_w := grid_size.x - RING_SIDE * 2
 		var top := RING_TOP + _boss_cells.y + 2
 		var inner_h := grid_size.y - RING_BOTTOM - top
@@ -366,6 +375,8 @@ func _assign_zones() -> void:
 
 ## Рисунок дорожек свалки по варианту локации: крест, кольцо, диагонали, три полосы.
 func _junk_lane(x: int, y: int, cx: int, mid_y: int) -> bool:
+	if _organic:
+		return false
 	var width := 2.0 + _lane_wide
 	if not _road_x.is_empty():
 		return _district_lane(x, y, cx, mid_y, width)
@@ -491,6 +502,10 @@ func _build_floor() -> void:
 			tile_map.set_cell(Vector2i(tx, ty), 0, Vector2i(_pick_column(zone), _zone_row(zone)))
 	_own(tile_map, self)
 	_add_macro_overlay(float(chapter.get("macro", 1.0)))
+	if _organic:
+		var terrain := TerrainGround.new()
+		_own(terrain, _layers.floor_layer)
+		terrain.build(_arena_inner(), "res://assets/district/junkyard/rats_ground_tile.png", _density, POI_OPEN + 0.12, Color(0.95, 0.92, 1.0, 0.95))
 
 
 func _zone_row(zone: int) -> int:
@@ -660,7 +675,7 @@ func _build_district() -> void:
 		return
 	district = ArenaDistrict.new()
 	_own(district, _layers.floor_layer)
-	district.build(layout, str(chapter.get("id", "")), bounds, _origin.y + grid_size.y / 2 * CELL, GATE_HALF * CELL)
+	district.build(layout, str(chapter.get("id", "")), bounds, _arena_inner(), _origin.y + grid_size.y / 2 * CELL, GATE_HALF * CELL)
 	view_bounds = ArenaDistrict.view_rect(bounds)
 
 
@@ -977,6 +992,9 @@ func _cover_allowed(p: Vector2, margin: float) -> bool:
 
 
 func _build_cover() -> void:
+	if _organic:
+		_build_organic()
+		return
 	if chapter.has("scenes"):
 		_build_scenes()
 		return
@@ -1091,6 +1109,117 @@ func _build_districts(library: Dictionary, area: Rect2) -> void:
 			if _place_scene(scene, p):
 				_cover_spots.append(p)
 				done += 1
+
+
+## Игровая площадка без кольца стен.
+func _arena_inner() -> Rect2:
+	return Rect2(bounds.position + Vector2(RING_SIDE, RING_TOP) * CELL, bounds.size - Vector2(RING_SIDE * 2, RING_TOP + RING_BOTTOM) * CELL)
+
+
+static func _make_noise() -> FastNoiseLite:
+	var noise := FastNoiseLite.new()
+	noise.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
+	noise.frequency = 0.0011
+	noise.fractal_type = FastNoiseLite.FRACTAL_FBM
+	noise.fractal_octaves = 3
+	return noise
+
+
+## Плотность хлама в точке (-1..1): выше — захламлённая зона, ниже — чистая площадка.
+func _density(p: Vector2) -> float:
+	return _noise.get_noise_2d(p.x, p.y)
+
+
+## Органическая местность: точки интереса (компактные сцены из data/lots.json → poi) пуассоновским
+## разбросом с шагом POI_SPACING только там, где шум не «чистый»; между ними — одиночные укрытия
+## и обломки по плотности шума. Чистые площадки, центр, старт, ворота и помост босса остаются свободными.
+func _build_organic() -> void:
+	var root: Dictionary = ConfigLoader.load_json(LOTS_PATH)
+	var defs: Dictionary = root.get("poi", {})
+	var sets: Dictionary = root.get("poi_sets", {})
+	var names: Array = sets.get(str(chapter.get("id", "")), sets.get("junkyard", []))
+	if names.is_empty():
+		return
+	var area := _interior_rect()
+	var target := int(round(7.5 * _area_scale))
+	var bag: Array = []
+	var center := Vector2(0, _origin.y + grid_size.y * 0.5 * CELL)
+	for attempt in 2500:
+		if _cover_spots.size() >= target:
+			break
+		var p := Vector2(randf_range(area.position.x, area.end.x), randf_range(area.position.y, area.end.y)).snapped(Vector2(16, 16))
+		if _density(p) < POI_OPEN or not _cover_allowed(p, 120.0) or p.distance_to(center) < 420.0:
+			continue
+		if not _scene_spacing_ok_by(p, POI_SPACING):
+			continue
+		if bag.is_empty():
+			bag = names.duplicate()
+			bag.shuffle()
+		var poi: Array = defs.get(str(bag.pop_back()), [])
+		if not poi.is_empty() and _build_poi(poi, p):
+			_cover_spots.append(p)
+	_scatter_singles(area, center)
+
+
+func _scene_spacing_ok_by(p: Vector2, spacing: float) -> bool:
+	for q in _cover_spots:
+		if q.distance_to(p) < spacing:
+			return false
+	return true
+
+
+func _build_poi(items: Array, at: Vector2) -> bool:
+	var mirror := -1.0 if randf() < 0.5 else 1.0
+	_in_scene = true
+	var ok := false
+	for i in items.size():
+		var item: Array = items[i]
+		var id := str(item[0])
+		var p := at + Vector2(float(item[1]) * mirror, float(item[2]))
+		var placed := false
+		if ArenaProp.is_flat(id):
+			if is_area_clear(p, CELL):
+				var flat := ArenaProp.new()
+				flat.position = p
+				flat.setup(id, false)
+				_own(flat, _layers.decals)
+				placed = true
+		else:
+			placed = _lot_item(id, p)
+		if i == 0 and not placed:
+			break
+		ok = true
+	_in_scene = false
+	return ok
+
+
+## Между точками интереса: одиночные укрытия (бочка, ящик, шина, мешки) и плоские обломки — по сетке
+## с дрожанием, только в захламлённых зонах и не вплотную к сценам.
+func _scatter_singles(area: Rect2, center: Vector2) -> void:
+	var singles := ["m1_tire", "m1_crate", "m1_garbage", "d_rust_barrel", "d_barrel", "tire_stack"]
+	var flats: Array = chapter.get("flat", [])
+	var step := 430.0
+	var y := area.position.y + step * 0.5
+	while y < area.end.y:
+		var x := area.position.x + step * 0.5
+		while x < area.end.x:
+			var p := Vector2(x, y) + Vector2(randf_range(-150, 150), randf_range(-150, 150))
+			x += step
+			var d := _density(p)
+			if d < POI_OPEN + 0.18 or p.distance_to(center) < 400.0 or not _cover_allowed(p, 40.0):
+				continue
+			if not _scene_spacing_ok_by(p, 300.0):
+				continue
+			if randf() < 0.5:
+				_in_scene = true
+				_lot_item(str(singles.pick_random()), p.snapped(Vector2(16, 16)))
+				_in_scene = false
+			elif not flats.is_empty() and is_area_clear(p, CELL * 1.4):
+				var flat := ArenaProp.new()
+				flat.position = p
+				flat.setup(str(flats.pick_random()), false)
+				_own(flat, _layers.decals)
+		y += step
 
 
 ## Сюжет: каждая комната между стенами — два двора слева и справа от центральной дороги, темы по кругу.
@@ -1352,7 +1481,7 @@ func _build_decor() -> void:
 	var area := _interior_rect()
 	if not _lots.is_empty():
 		_build_lot_flats()
-	for id in ([] if not _lots.is_empty() else chapter.get("flat", [])):
+	for id in ([] if not _lots.is_empty() or _organic else chapter.get("flat", [])):
 		for n in 1:
 			for attempt in 30:
 				var p := _near_scene_point(area, 160.0, 320.0)
@@ -1374,8 +1503,9 @@ func _build_decor() -> void:
 		if _puddles.size() >= int(PUDDLE_COUNT * _area_scale):
 			break
 		var p := Vector2(randf_range(area.position.x, area.end.x), randf_range(area.position.y, area.end.y))
-		# Вода собирается на дороге у обочины.
-		if is_walkable(p) and zone_at(p) == Zone.LANE and _near_curb(p):
+		# Вода собирается на дороге у обочины, на органической Свалке — на краю замусоренных пятен.
+		var wet := absf(_density(p) - (POI_OPEN + 0.12)) < 0.08 and is_area_clear(p, CELL) if _organic else zone_at(p) == Zone.LANE and _near_curb(p)
+		if is_walkable(p) and wet:
 			_puddles.append([p, Vector2(randf_range(70, 130), randf_range(28, 48)), randf_range(-0.4, 0.4), randf() * TAU])
 	puddles.puddles = _puddles
 	_own(puddles, _layers.decals)
@@ -1383,7 +1513,8 @@ func _build_decor() -> void:
 		for attempt in 30:
 			var p := Vector2(randf_range(area.position.x, area.end.x), randf_range(area.position.y, area.end.y))
 			# Пар идёт из люков посреди дороги.
-			if zone_at(p) == Zone.LANE and not _near_curb(p) and is_area_clear(p, CELL):
+			var road := zone_at(p) == Zone.LANE and not _near_curb(p)
+			if (road or (_organic and _density(p) < POI_OPEN)) and is_area_clear(p, CELL):
 				var vent := ArenaDecor.SteamVent.new()
 				vent.position = p
 				_own(vent, _layers.decals)
