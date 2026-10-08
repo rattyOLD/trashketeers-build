@@ -1494,6 +1494,7 @@ func _build_organic() -> void:
 		if not poi.is_empty() and _build_poi(poi, p):
 			_cover_spots.append(p)
 	_scatter_singles(area, center)
+	_spawn_walkers()
 
 
 ## Секторы выживания: мини-парки, кафе, стоянки, полянки — у каждого своё покрытие и свои предметы
@@ -1657,6 +1658,15 @@ func _place_quarter(q: Dictionary, r: Rect2, yards: Dictionary, defs: Dictionary
 				break
 			p.x = move_toward(p.x, 0.0, 90.0)
 	_spawn_life(q.get("life", []), r.get_center(), r.size * 0.5, 1.0)
+	# Табличка с названием у входа во двор — квартал узнаётся с первого взгляда.
+	var sign_at := Vector2(r.get_center().x + (r.size.x * 0.36 if randf() < 0.5 else -r.size.x * 0.36), r.position.y + r.size.y * 0.56).snapped(Vector2(8, 8))
+	if is_walkable(sign_at):
+		var plate := QuarterSign.new()
+		plate.position = sign_at
+		plate.setup(str(q.get("name", "")), layout == "bank", _quarter_doors.size())
+		_own(plate, _layers.world)
+		if layout != "bank" and SaveService.get_quality() > 0:
+			_life_lights.append(EnvLights.add(sign_at + Vector2(0, -80), plate.tint, 150.0, 0.35))
 	# Выход квартала — ближняя к центру точка его клетки: оттуда улица к площади.
 	var hub := Vector2(0, _origin.y + grid_size.y * 0.5 * CELL)
 	_quarter_doors.append(Vector2(clampf(hub.x, r.position.x, r.end.x), clampf(hub.y, r.position.y, r.end.y)))
@@ -1687,6 +1697,38 @@ func _yard_ok(p: Vector2, radius: float) -> bool:
 	if _in_sector(p, radius + 60.0) or (_park != null and _park.distance_to(p) < radius + 40.0):
 		return false
 	return p.distance_to(player_start) > 200.0 + radius and not boss_rect.grow(radius + 120.0).has_point(p)
+
+
+## Прохожие: жители ходят по улицам кварталов (Свалка) или аллеям парка (Банк) туда-обратно,
+## останавливаются поглазеть, пугаются взрывов. На качестве 0 — нет; чем выше качество, тем больше.
+func _spawn_walkers() -> void:
+	var quality := SaveService.get_quality()
+	if quality == 0:
+		return
+	var lines: Array[PackedVector2Array] = []
+	if _streets != null:
+		lines.append_array(_streets.paths)
+	if _park != null:
+		lines.append_array(_park.paths)
+	if lines.is_empty():
+		return
+	var kinds: Array = ["npc_rat_grandma", "npc_rat_worker", "npc_robot_cleaner", "npc_cat_stray"] if layout != "bank" else ["npc_pigeon_postman", "npc_pig_guard", "npc_pig_mechanic"]
+	if _life == null:
+		_life = AmbientLife.new()
+		_life.setup(is_walkable)
+		_own(_life, self)
+	lines.shuffle()
+	for i in mini(lines.size(), 6 if quality > 1 else 3):
+		var side := (lines[i][-1] - lines[i][0]).orthogonal().normalized() * randf_range(-40.0, 40.0)
+		var route := PackedVector2Array()
+		for point in lines[i]:
+			route.append(point + side)
+		var actor := _life.spawn(str(kinds[i % kinds.size()]), route[0], _layers.world, "walker")
+		if actor == null:
+			continue
+		actor.set_route(route, randi() % route.size())
+		actor.speed = randf_range(26.0, 40.0)
+		_owned.append(actor)
 
 
 ## Жители секторов (арт Астры из assets/npc): кот в парке, рабочий в кафе, робот-уборщик на стоянке,

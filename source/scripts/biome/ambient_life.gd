@@ -111,6 +111,12 @@ class Actor:
 	var _away := 0.0
 	var _walkable: Callable
 	var _fixed := false
+	## Прохожий: идёт по улице (route) туда-обратно, у концов стоит, на пути иногда останавливается поглазеть.
+	var route := PackedVector2Array()
+	var _leg := 0
+	var _dir := 1
+	var _pause := 0.0
+	var speed := 34.0
 	var _shadow_node: Sprite2D
 
 	func setup(sheet: Texture2D, cells: Array, new_mode: String, scale_value: float, new_fps: float, pick: int, walkable: Callable) -> void:
@@ -180,6 +186,8 @@ class Actor:
 				scale = Vector2(base_scale, base_scale * (1.0 + 0.018 * sin(_time * 2.2)))
 			"wander":
 				_wander(delta)
+			"walker":
+				_walk_route(delta)
 			"crow":
 				modulate.a = minf(modulate.a + delta * 0.8, 1.0)
 
@@ -203,6 +211,46 @@ class Actor:
 		if step != _frame:
 			_frame = mini(step, frames.size() - 1)
 			_apply_frame()
+
+	func set_route(points: PackedVector2Array, start: int) -> void:
+		route = points
+		_leg = clampi(start, 0, points.size() - 1)
+		_dir = 1 if randf() < 0.5 else -1
+		position = points[_leg]
+		home = position
+
+	func _walk_route(delta: float) -> void:
+		if route.size() < 2:
+			return
+		if _pause > 0.0:
+			_pause -= delta
+			if _frame != 0:
+				_frame = 0
+				_apply_frame()
+			return
+		var target := route[_leg]
+		var to := target - position
+		var step := speed * delta
+		if to.length() <= step:
+			position = target
+			_leg += _dir
+			if _leg < 0 or _leg >= route.size():
+				# Дошёл до конца улицы — постоял и пошёл обратно.
+				_dir = -_dir
+				_leg = clampi(_leg + _dir * 2, 0, route.size() - 1)
+				_pause = randf_range(2.0, 5.0)
+			elif randf() < 0.04:
+				_pause = randf_range(1.0, 2.5)
+			return
+		position += to / to.length() * step
+		scale.x = base_scale * (1.0 if to.x >= 0.0 else -1.0)
+		# Шаг: смена кадра и лёгкое покачивание вверх-вниз.
+		var phase := _time * 5.0
+		var alt := int(phase) % 2
+		if alt != _frame:
+			_frame = mini(alt, frames.size() - 1)
+			_apply_frame()
+		offset.y = offsets[_frame].y - absf(sin(phase * PI)) * 3.0
 
 	func _pick_target() -> void:
 		for attempt in 6:
@@ -235,5 +283,5 @@ class Actor:
 			_walk_cd = 0.0
 			mode = "wander" if mode == "wander" else mode
 			position = position.move_toward(home, 0.0)
-			if mode != "wander":
+			if mode != "wander" and mode != "walker":
 				position = home

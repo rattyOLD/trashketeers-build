@@ -1442,7 +1442,11 @@
       ],
       "shadow": 109,
       "flip": true,
-      "building": true
+      "building": true,
+      "smoke": [
+        -95,
+        -312
+      ]
     },
     "b_rats_garage": {
       "texture": "res://assets/district/junkyard/rats_garage.png",
@@ -1453,7 +1457,11 @@
       ],
       "shadow": 118,
       "flip": true,
-      "building": true
+      "building": true,
+      "smoke": [
+        -38,
+        -266
+      ]
     },
     "b_rats_apartment": {
       "texture": "res://assets/district/junkyard/rats_apartment.png",
@@ -1464,7 +1472,11 @@
       ],
       "shadow": 122,
       "flip": true,
-      "building": true
+      "building": true,
+      "smoke": [
+        -22,
+        -320
+      ]
     },
     "b_rats_bar": {
       "texture": "res://assets/district/junkyard/rats_bar_hangar.png",
@@ -1475,7 +1487,11 @@
       ],
       "shadow": 122,
       "flip": true,
-      "building": true
+      "building": true,
+      "smoke": [
+        -100,
+        -249
+      ]
     },
     "b_rats_shawarma": {
       "texture": "res://assets/district/junkyard/rats_shawarma_kiosk.png",
@@ -1486,7 +1502,11 @@
       ],
       "shadow": 100,
       "flip": true,
-      "building": true
+      "building": true,
+      "smoke": [
+        -11,
+        -321
+      ]
     },
     "b_beer_pub": {
       "texture": "res://assets/district/ch1/ch1_beer_pub.png",
@@ -1497,7 +1517,11 @@
       ],
       "shadow": 109,
       "flip": true,
-      "building": true
+      "building": true,
+      "smoke": [
+        -88,
+        -290
+      ]
     },
     "b_brewery": {
       "texture": "res://assets/district/ch1/ch1_brewery.png",
@@ -1508,7 +1532,11 @@
       ],
       "shadow": 109,
       "flip": true,
-      "building": true
+      "building": true,
+      "smoke": [
+        -34,
+        -288
+      ]
     },
     "b_draft_kiosk": {
       "texture": "res://assets/district/ch1/ch1_draft_kiosk.png",
@@ -1519,7 +1547,11 @@
       ],
       "shadow": 100,
       "flip": true,
-      "building": true
+      "building": true,
+      "smoke": [
+        -79,
+        -266
+      ]
     },
     "b_electric_hut": {
       "texture": "res://assets/district/ch2/ch2_electrician_hut.png",
@@ -1530,7 +1562,11 @@
       ],
       "shadow": 104,
       "flip": true,
-      "building": true
+      "building": true,
+      "smoke": [
+        -97,
+        -275
+      ]
     },
     "b_substation": {
       "texture": "res://assets/district/ch2/ch2_substation.png",
