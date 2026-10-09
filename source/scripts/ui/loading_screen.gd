@@ -741,15 +741,31 @@ class Scenery:
 	func _hash(n: float) -> float:
 		return fposmod(sin(n * 12.9898) * 43758.5453, 1.0)
 
-	## Ночная улица баров Астры (assets/ui/loading/bg_*.jpg): кадр «cover», чуть плывёт и притемнён — на нём бежит Енот.
+	## Фон загрузки Астры: кадр «cover», чуть плывёт и притемнён — на нём бежит Енот. Сцена выбирается случайно,
+	## подряд одна и та же не выпадает.
+	const VARIANTS := {
+		"street": "res://assets/ui/loading/bg_street_%s.jpg",
+		"camp": "res://assets/ui/camp/bg_%s.jpg",
+		"hangar": "res://assets/ui/loading/bg_hangar_%s.jpg",
+		"briefing": "res://assets/ui/loading/bg_briefing_%s.jpg",
+	}
+	static var _last_variant := ""
 	var _bg: Texture2D
 
 	func _draw() -> void:
 		var w := size.x
 		var h := size.y
 		if _bg == null:
-			var path := "res://assets/ui/loading/bg_%s.jpg" % ("portrait" if h > w else "landscape")
-			_bg = load(path) if ResourceLoader.exists(path) else null
+			# Каждый раз новая сцена: улица баров, лагерь старьёвщиков, ангар базы, штаб отряда (арт Астры).
+			var paths: Array[String] = []
+			for id: String in VARIANTS:
+				var path := str(VARIANTS[id]) % ("portrait" if h > w else "landscape")
+				if ResourceLoader.exists(path) and id != _last_variant:
+					paths.append(path)
+			if not paths.is_empty():
+				var pick := paths.pick_random() as String
+				_last_variant = str(VARIANTS.find_key(pick.replace("portrait", "%s").replace("landscape", "%s")))
+				_bg = load(pick)
 		if _bg != null:
 			var k := maxf(w / _bg.get_width(), h / _bg.get_height()) * 1.06
 			var shown := _bg.get_size() * k

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bdti3max1o01h"
-path="res://.godot/imported/bg_landscape.jpg-31b9c9b5d6c6f97a33ffa445c8bc4454.ctex"
+uid="uid://bqkl4ah3r1yu1"
+path="res://.godot/imported/bg_street_portrait.jpg-894c08506630336f034c8025516e5754.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/loading/bg_landscape.jpg"
-dest_files=["res://.godot/imported/bg_landscape.jpg-31b9c9b5d6c6f97a33ffa445c8bc4454.ctex"]
+source_file="res://assets/ui/loading/bg_street_portrait.jpg"
+dest_files=["res://.godot/imported/bg_street_portrait.jpg-894c08506630336f034c8025516e5754.ctex"]
 
 [params]
 

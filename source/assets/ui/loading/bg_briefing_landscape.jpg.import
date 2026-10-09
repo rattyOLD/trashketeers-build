@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://nkma3glflngo"
-path="res://.godot/imported/bg_portrait.jpg-55106f5796244bc2d72163f9158b5fec.ctex"
+uid="uid://b3pyrcrsfm80q"
+path="res://.godot/imported/bg_briefing_landscape.jpg-e690a4f684e12271a747027cb1e469d9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/ui/loading/bg_portrait.jpg"
-dest_files=["res://.godot/imported/bg_portrait.jpg-55106f5796244bc2d72163f9158b5fec.ctex"]
+source_file="res://assets/ui/loading/bg_briefing_landscape.jpg"
+dest_files=["res://.godot/imported/bg_briefing_landscape.jpg-e690a4f684e12271a747027cb1e469d9.ctex"]
 
 [params]
 
