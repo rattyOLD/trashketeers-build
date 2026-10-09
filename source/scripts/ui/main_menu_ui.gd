@@ -524,7 +524,7 @@ func _build_stage() -> Control:
 	if Orient.portrait:
 		stage.add_child(_make_side_button("gift", "res://assets/ui/hub/gift_box.png", "ПОДАРОК", false, 8.0, func() -> void: _daily.open()))
 		stage.add_child(_make_side_button("chest", "res://assets/ui/hub/chest_free.png", "БЕСПЛАТНО", false, 132.0, func() -> void: _chests.open()))
-		stage.add_child(_make_side_button("news", "res://assets/ui/hub/news.png", "ОБНОВЛЕНИЯ", true, 8.0, func() -> void: _changelog.open()))
+		stage.add_child(_make_side_button("news", "res://assets/ui/hub/news.png", "НОВОСТИ", true, 8.0, func() -> void: _changelog.open()))
 		stage.add_child(_make_side_button("vip", "res://assets/ui/hub/vip.png", "VIP", true, 124.0, func() -> void: _vip.open()))
 	else:
 		var left := [
@@ -533,7 +533,7 @@ func _build_stage() -> Control:
 		]
 		var right := [
 			["vip", "res://assets/ui/hub/vip.png", "VIP", func() -> void: _vip.open()],
-			["news", "res://assets/ui/hub/news.png", "ОБНОВЛЕНИЯ", func() -> void: _changelog.open()],
+			["news", "res://assets/ui/hub/news.png", "НОВОСТИ", func() -> void: _changelog.open()],
 		]
 		for i in left.size():
 			var spec: Array = left[i]
@@ -978,6 +978,8 @@ func _refresh() -> void:
 		_season_pill.text = "ПРОПУСК: ЕСТЬ НАГРАДЫ!"
 	else:
 		_season_pill.text = "БОЕВОЙ ПРОПУСК"
+	# Надпись целиком внутри плашки, по центру: шрифт уменьшается под ширину.
+	UiStyle.fit_button_font(_season_pill, 16, 280.0 - 20.0)
 	_set_side_alert("vip", false)
 	if _nav_upgrades != null:
 		_nav_upgrades.badge = _can_afford_perk()

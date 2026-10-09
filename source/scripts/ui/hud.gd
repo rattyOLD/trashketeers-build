@@ -1154,6 +1154,13 @@ func _next_toast() -> void:
 	_toast_text.text = item[1]
 	_fit_font(_toast_title, _band_font(18) if _band != null else 20, half * 2.0 - 48.0)
 	_fit_font(_toast_text, _band_font(13) if _band != null else 16, half * 2.0 - 48.0)
+	# Не влезло даже мелким шрифтом — переносим на строки по ширине плашки, а не даём вылезать за края.
+	var text_font := _toast_text.get_theme_font("font")
+	var too_long := text_font.get_string_size(_toast_text.text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, _toast_text.get_theme_font_size("font_size")).x > half * 2.0 - 48.0
+	_toast_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART if too_long else TextServer.AUTOWRAP_OFF
+	_toast_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	if too_long:
+		_toast_text.add_theme_font_size_override("font_size", maxi(_band_font(13) if _band != null else 16, 14) - 1)
 	if _band != null:
 		# Тост целиком помещается в строку событий (EVENT_H) и не заходит за нижнюю границу шапки.
 		var panel := _toast.get_theme_stylebox("panel") as StyleBoxFlat
@@ -1552,8 +1559,12 @@ class SkillButton:
 		_batch.flush(self)
 		var font := ThemeDB.fallback_font
 		var alpha := 1.0 if ready else 0.5
-		draw_string_outline(font, Vector2(0, c.y - 4.0), caption, HORIZONTAL_ALIGNMENT_CENTER, size.x, int(size.x * 0.2), 6, Color(0.06, 0.03, 0.1))
-		draw_string(font, Vector2(0, c.y - 4.0), caption, HORIZONTAL_ALIGNMENT_CENTER, size.x, int(size.x * 0.2), Color(accent, alpha))
+		# Заголовок по ширине круга: «РЫВОК»/«НАВЫК» не упираются в обводку.
+		var cap_size := int(size.x * 0.2)
+		while cap_size > 10 and font.get_string_size(caption, HORIZONTAL_ALIGNMENT_LEFT, -1, cap_size).x > size.x * 0.68:
+			cap_size -= 1
+		draw_string_outline(font, Vector2(0, c.y - 4.0), caption, HORIZONTAL_ALIGNMENT_CENTER, size.x, cap_size, 6, Color(0.06, 0.03, 0.1))
+		draw_string(font, Vector2(0, c.y - 4.0), caption, HORIZONTAL_ALIGNMENT_CENTER, size.x, cap_size, Color(accent, alpha))
 		var words := title.split(" ")
 		var lines: Array[String] = [""]
 		var small := int(size.x * 0.115)

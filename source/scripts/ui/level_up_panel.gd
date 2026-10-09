@@ -188,7 +188,7 @@ func _make_card(upgrade: UpgradeData, index: int, stats: RunStats) -> Button:
 			var target := card_ref.get_ref() as Button
 			var contents := column_ref.get_ref() as VBoxContainer
 			if is_instance_valid(target) and is_instance_valid(contents):
-				target.custom_minimum_size.y = maxf(280.0, contents.get_combined_minimum_size().y + 16.0))
+				target.custom_minimum_size.y = maxf(280.0, contents.get_combined_minimum_size().y + contents.offset_top + 34.0))
 	return card
 
 

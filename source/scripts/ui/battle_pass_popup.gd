@@ -508,10 +508,15 @@ class CosmeticArt:
 	extends Control
 
 	var key := ""
+	## Не выбит — картинка затемнена (не прозрачностью узла: в окне со стеклом она давала серый квадрат).
+	var dim := false
+	var _icon_rect: TextureRect
 
 	func _init() -> void:
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
 		size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		# Иконки без мип-карт: фильтр с мип-картами от родителя давал серый квадрат.
+		texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 
 	func _draw() -> void:
 		var c := size * 0.5
@@ -519,8 +524,16 @@ class CosmeticArt:
 		var rarity := Economy.rarity_color(Cosmetics.rarity_of(key))
 		var icon := Cosmetics.icon_of(key)
 		if icon != null:
-			var side := minf(size.x, size.y)
-			draw_texture_rect(icon, Rect2(c - Vector2(side, side) * 0.5, Vector2(side, side)), false)
+			# Картинка — дочерним TextureRect: прямой draw_texture_rect внутри сетки окна давал серый квадрат.
+			if _icon_rect == null:
+				_icon_rect = TextureRect.new()
+				_icon_rect.set_anchors_preset(Control.PRESET_FULL_RECT)
+				_icon_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+				_icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+				_icon_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+				add_child(_icon_rect)
+			_icon_rect.texture = icon
+			_icon_rect.self_modulate = Color(0.42, 0.42, 0.46) if dim else Color.WHITE
 			return
 		match Cosmetics.kind_of(key):
 			"dash":

@@ -46,6 +46,15 @@ const KIT_DIR := "res://assets/ui/kit/"
 static var _kit_cache: Dictionary = {}
 
 
+## Шрифт кнопки уменьшается (не меньше 11), пока надпись не влезет в max_width: текст не вылезает из плашки.
+static func fit_button_font(button: Button, base: int, max_width: float) -> void:
+	var font := button.get_theme_font("font")
+	var size := base
+	while size > 11 and font.get_string_size(button.text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, size).x > max_width:
+		size -= 1
+	button.add_theme_font_size_override("font_size", size)
+
+
 ## Текстура из набора интерфейса Астры (assets/ui/kit/<имя>) или null, если набор выключен или файла нет.
 static func kit_texture(file: String) -> Texture2D:
 	if not KIT_ON:

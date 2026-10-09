@@ -365,6 +365,11 @@ class Shop:
 			ad.icon = load("res://assets/ui/cosmetics/ad_gift.png")
 			ad.expand_icon = true
 			ad.add_theme_constant_override("icon_max_width", 44)
+			# Подарок внутри кнопки, а не на её рамке.
+			for state: String in ["normal", "hover", "pressed", "disabled"]:
+				var sb := ad.get_theme_stylebox(state).duplicate() as StyleBox
+				sb.content_margin_left = maxf(sb.content_margin_left, 44.0)
+				ad.add_theme_stylebox_override(state, sb)
 		ad.pressed.connect(func() -> void:
 			Platform.show_rewarded_ad(func(ok: bool) -> void:
 				if not ok:
@@ -408,7 +413,7 @@ class Shop:
 			var art := BattlePassPopup.CosmeticArt.new()
 			art.key = key
 			art.custom_minimum_size = Vector2(84, 84)
-			art.modulate = Color.WHITE if owned else Color(1, 1, 1, 0.35)
+			art.dim = not owned
 			col.add_child(art)
 		var title := UiStyle.label("Стандарт" if key.is_empty() else Cosmetics.title_of(key).replace("Рывок ", "").replace("Трассер ", ""), 17, UiStyle.TEXT if owned else UiStyle.TEXT_DIM, 4)
 		title.clip_text = true

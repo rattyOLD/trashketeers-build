@@ -116,8 +116,14 @@ func _draw_hint() -> void:
 	_batch.circle(at + drift, KNOB_RADIUS * 0.8, Color(ACCENT, 0.35 + 0.25 * pulse))
 	_batch.flush(self)
 	var font := ThemeDB.fallback_font
-	var caption := "ЗАЖМИ И ТЯНИ — ОГОНЬ"
-	var width := font.get_string_size(caption, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 22).x
-	var pos := Vector2(at.x - width * 0.5, at.y + BASE_RADIUS + 30.0)
-	draw_string_outline(font, pos, caption, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 22, 6, Color(0, 0, 0, 0.8))
-	draw_string(font, pos, caption, HORIZONTAL_ALIGNMENT_LEFT, -1.0, 22, Color(1, 1, 1, 0.75 + 0.25 * pulse))
+	# Подсказка — ровно по центру круга стика, в две строки: не налезает на кнопки и слоты ни в одной ориентации.
+	var lines := ["ЗАЖМИ И ТЯНИ", "— ОГОНЬ"]
+	var fs := 22
+	while fs > 12 and font.get_string_size(lines[0], HORIZONTAL_ALIGNMENT_LEFT, -1.0, fs).x > BASE_RADIUS * 1.8:
+		fs -= 1
+	var line_h := font.get_height(fs)
+	for i in lines.size():
+		var w := font.get_string_size(lines[i], HORIZONTAL_ALIGNMENT_LEFT, -1.0, fs).x
+		var pos := Vector2(at.x - w * 0.5, at.y - line_h * (lines.size() * 0.5 - i) + font.get_ascent(fs))
+		draw_string_outline(font, pos, lines[i], HORIZONTAL_ALIGNMENT_LEFT, -1.0, fs, 6, Color(0, 0, 0, 0.85))
+		draw_string(font, pos, lines[i], HORIZONTAL_ALIGNMENT_LEFT, -1.0, fs, Color(1, 1, 1, 0.75 + 0.25 * pulse))
