@@ -8,12 +8,14 @@ signal departed
 const TRADERS := {
 	"nell": {"name": "НЭЛЛ", "role": "Снабжение", "color": "#ffac56", "portrait": "res://assets/story/portraits/nell.png",
 		"quote": "Всё по описи. Чай не продаётся. Он остыл."},
-	"monya": {"name": "КРОТ МОНЯ", "role": "Барыга с лопатой", "color": "#ffb347", "portrait": "",
-		"quote": "Не спрашивай, откуда. Спрашивай, сколько."},
+	"monya": {"name": "БОБЁР МОНЯ", "role": "Оружейник", "color": "#ffb347", "portrait": "res://assets/ui/camp/beaver_silent.png",
+		"happy": "res://assets/ui/camp/beaver_happy.png", "quote": "Не спрашивай, откуда. Спрашивай, сколько."},
+	"igla": {"name": "ЁЖ ИГЛА", "role": "Санитар", "color": "#7dff9a", "portrait": "res://assets/ui/camp/hedgehog_silent.png",
+		"happy": "res://assets/ui/camp/hedgehog_happy.png", "quote": "Не дёргайся. Это не больно. Почти."},
 }
 const ITEMS: Array[Dictionary] = [
 	{"id": "vest", "trader": "nell", "title": "Бронежилет", "desc": "Гасит одно попадание целиком.", "cost": 300},
-	{"id": "thermos", "trader": "nell", "title": "Термос", "desc": "+40% к здоровью на миссию.", "cost": 250},
+	{"id": "thermos", "trader": "igla", "title": "Термос", "desc": "+40% к здоровью на миссию.", "cost": 250},
 	{"id": "shotgun", "trader": "monya", "title": "Бабах «Дед»", "desc": "Стартовый ствол миссии: дробовик вместо пистолета.", "cost": 500},
 	{"id": "whetstone", "trader": "monya", "title": "Точило", "desc": "+20% урона на миссию.", "cost": 400},
 ]
@@ -33,6 +35,17 @@ const MOSYA_LINES: Array[String] = ["мур", "мррр", "мур-мур", "мр
 
 func _init() -> void:
 	super("ЛАГЕРЬ")
+	# Ночной лагерь старьёвщиков за окном (арт Астры, assets/ui/camp/bg_*.jpg).
+	var bg_path := "res://assets/ui/camp/bg_%s.jpg" % ("portrait" if Orient.portrait else "landscape")
+	if ResourceLoader.exists(bg_path):
+		var bg := TextureRect.new()
+		bg.texture = load(bg_path)
+		bg.set_anchors_preset(Control.PRESET_FULL_RECT)
+		bg.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		bg.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(bg)
+		move_child(bg, 0)
 	_balance = UiStyle.label("", 26, UiStyle.GOLD, 6)
 	content.add_child(_balance)
 	var note := UiStyle.label("Покупки действуют одну миссию и сгорают на старте.", 19, UiStyle.TEXT_DIM, 4)
@@ -89,7 +102,7 @@ func _refresh() -> void:
 		var card := _trader_card(trader_id)
 		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		if not Orient.portrait:
-			card.custom_minimum_size.x = (panel_width() - 120.0) * 0.5
+			card.custom_minimum_size.x = (panel_width() - 120.0) / TRADERS.size()
 		traders.add_child(card)
 
 
@@ -109,6 +122,9 @@ func _trader_card(trader_id: String) -> Control:
 	frame.add_theme_stylebox_override("panel", UiStyle.box(color.darkened(0.7), color, 3, 42))
 	head.add_child(frame)
 	var path := str(info["portrait"])
+	# Довольное лицо, если у торговца уже что-то купили (арт Астры: молчит / доволен).
+	if info.has("happy") and ITEMS.any(func(it: Dictionary) -> bool: return str(it["trader"]) == trader_id and SaveService.camp_has(str(it["id"]))):
+		path = str(info["happy"])
 	if path.is_empty():
 		var glyph := UiStyle.label("М", 44, color, 6)
 		glyph.size_flags_vertical = Control.SIZE_SHRINK_CENTER
