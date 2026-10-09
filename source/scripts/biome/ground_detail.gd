@@ -14,7 +14,9 @@ func build(spots: Array[Vector2], seed_value: int, is_bank: bool) -> void:
 	bank = is_bank
 	_rng.seed = seed_value
 	for p in spots:
-		var kind := _rng.randi() % (4 if is_bank else 6)
+		# Свалка: только тихие детали (трещина, масляное пятно, редкий люк) — без пёстрых болтов и краски,
+		# чтобы пол не рябил под врагами и пулями.
+		var kind: int = _rng.randi() % 4 if is_bank else int([0, 0, 1, 1, 3][_rng.randi() % 5])
 		_items.append([p, kind, _rng.randf() * TAU, _rng.randf_range(0.7, 1.3)])
 	queue_redraw()
 

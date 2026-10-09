@@ -242,9 +242,9 @@ func _land(flock: Dictionary) -> void:
 # --- Ветер, светлячки, искры, пар ----------------------------------------------------------------------
 
 func _update_bits(delta: float) -> void:
-	var cap := 16 if quality > 1 else 8
+	var cap := 6 if quality > 1 else 3
 	var gust := 1.0 + 0.6 * sin(_time * 0.37) + 0.3 * sin(_time * 1.3)
-	if _bits.size() < cap and randf() < delta * 3.0:
+	if _bits.size() < cap and randf() < delta * 1.2:
 		var p := Vector2(_view.position.x - 40.0, randf_range(_view.position.y, _view.end.y))
 		if randf() < 0.4:
 			p = Vector2(randf_range(_view.position.x, _view.end.x), _view.position.y - 30.0)
@@ -481,9 +481,9 @@ func _paint_air(ci: CanvasItem) -> void:
 			var leaf: Color = [Color("#7fbf4d"), Color("#e8a33a"), Color("#c9612f")][kind]
 			ci.draw_colored_polygon(PackedVector2Array([Vector2(-7, 0), Vector2(0, -3.5), Vector2(7, 0), Vector2(0, 3.5)]), Color(leaf, fade))
 		elif kind == 2:
-			ci.draw_rect(Rect2(-7, -5, 14, 10), Color(0.75, 0.72, 0.85, 0.55 * fade))
+			ci.draw_rect(Rect2(-7, -5, 14, 10), Color(0.75, 0.72, 0.85, 0.35 * fade))
 		else:
-			ci.draw_rect(Rect2(-6, -4, 12, 8), Color(0.93, 0.9, 0.82, 0.8 * fade))
+			ci.draw_rect(Rect2(-6, -4, 12, 8), Color(0.93, 0.9, 0.82, 0.45 * fade))
 			ci.draw_line(Vector2(-4, -1), Vector2(4, -1), Color(0.4, 0.4, 0.5, 0.5 * fade), 1.0)
 	ci.draw_set_transform(Vector2.ZERO)
 	if quality > 0 and not bank:
