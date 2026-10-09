@@ -162,6 +162,8 @@ func start(_weapon_id: StringName = &"") -> void:
 	var chapter := ContentDB.get_chapter(0)
 	if not story_mission.is_empty():
 		chapter = StoryRun.map_chapter(ContentDB.get_chapter(StoryRun.base_chapter_index(story_mission)), story_mission)
+	else:
+		chapter = MapCards.apply_chapter(chapter)
 	map.build(layers, chapter)
 
 	meta_enabled = story_mission.is_empty()
@@ -589,6 +591,8 @@ func _switch_chapter(index: int = -1) -> void:
 		pickup.clear()
 	pickups.clear()
 	map.clear()
+	if story_mission.is_empty():
+		chapter = MapCards.apply_chapter(chapter)
 	map.build(layers, chapter)
 	player.terrain_slow = 1.0
 	map.attach_player(player)

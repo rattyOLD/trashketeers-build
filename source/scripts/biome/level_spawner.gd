@@ -592,9 +592,14 @@ void fragment() {
 
 
 func _build_floor() -> void:
-	if layout == "junkyard" and ResourceLoader.exists(JUNK_GROUND):
+	# Карта с редкостью приносит свой пол (MapCards.apply_chapter → chapter.ground), иначе — асфальт Свалки.
+	var ground_path := str(chapter.get("ground", ""))
+	var map_ground := not ground_path.is_empty() and ResourceLoader.exists(ground_path)
+	if not map_ground and layout == "junkyard":
+		ground_path = JUNK_GROUND
+	if ResourceLoader.exists(ground_path) and (map_ground or layout == "junkyard"):
 		var ground := Sprite2D.new()
-		ground.texture = load(JUNK_GROUND) as Texture2D
+		ground.texture = load(ground_path) as Texture2D
 		ground.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
 		ground.region_enabled = true
 		ground.region_rect = Rect2(bounds.position, bounds.size)
@@ -606,9 +611,10 @@ func _build_floor() -> void:
 		ground.scale = Vector2.ONE * GROUND_SCALE
 		ground.region_rect = Rect2(bounds.position / GROUND_SCALE, bounds.size / GROUND_SCALE)
 		ground.position = bounds.position
-		var calm := ShaderMaterial.new()
-		calm.shader = _calm_shader()
-		ground.material = calm
+		if not map_ground:
+			var calm := ShaderMaterial.new()
+			calm.shader = _calm_shader()
+			ground.material = calm
 		_own(ground, self)
 		_add_macro_overlay(float(chapter.get("macro", 1.0)))
 		return
@@ -1530,6 +1536,7 @@ func _build_organic() -> void:
 			_cover_spots.append(p)
 	_scatter_singles(area, center)
 	_build_run_shrines(area, center)
+	_build_map_card_art(area, center)
 	_spawn_walkers()
 	_build_ground_detail()
 	_build_world_life(center)
@@ -1881,6 +1888,58 @@ func _build_run_shrines(area: Rect2, center: Vector2) -> void:
 			shrine.position = placed[i]
 			_own(shrine, _layers.world)
 			shrines.append(shrine)
+
+
+## Карта с редкостью: её пропы (декор без столкновений, на свободных клетках) и декали пола.
+const MAP_PROPS := 10
+const MAP_DECALS := 14
+
+
+func _build_map_card_art(area: Rect2, center: Vector2) -> void:
+	var id := str(chapter.get("map_card", ""))
+	if id.is_empty():
+		return
+	var props: Array[Texture2D] = []
+	var decals: Array[Texture2D] = []
+	for dir in ["props", "decals"]:
+		var path := "res://assets/maps/%s/%s/" % [id, dir]
+		var listing := DirAccess.get_files_at(path)
+		for f in listing:
+			var name := f.trim_suffix(".import")
+			if name.ends_with(".png") and not (dir == "props" and props.any(func(t: Texture2D) -> bool: return t.resource_path.ends_with(name))) \
+					and not (dir == "decals" and decals.any(func(t: Texture2D) -> bool: return t.resource_path.ends_with(name))):
+				var t := load(path + name) as Texture2D
+				if t != null:
+					(props if dir == "props" else decals).append(t)
+	var placed := 0
+	for attempt in 600:
+		if placed >= MAP_PROPS + MAP_DECALS or (props.is_empty() and decals.is_empty()):
+			break
+		var p := Vector2(randf_range(area.position.x, area.end.x), randf_range(area.position.y, area.end.y)).snapped(Vector2(16, 16))
+		if p.distance_to(center) < 300.0 or boss_rect.grow(200.0).has_point(p) or not is_walkable(p):
+			continue
+		var as_prop := placed < MAP_PROPS and not props.is_empty()
+		if as_prop and not is_area_clear(p, CELL * 1.2):
+			continue
+		var sprite := Sprite2D.new()
+		if as_prop:
+			sprite.texture = props.pick_random()
+			sprite.centered = false
+			sprite.offset = Vector2(-128, -244)
+			sprite.scale = Vector2.ONE * randf_range(0.5, 0.62) * Vector2(-1.0 if randf() < 0.5 else 1.0, 1.0)
+			sprite.position = p
+			_own(sprite, _layers.world)
+		else:
+			if decals.is_empty():
+				continue
+			sprite.texture = decals.pick_random()
+			sprite.position = p
+			sprite.rotation = randf_range(-0.4, 0.4)
+			sprite.scale = Vector2.ONE * randf_range(0.5, 0.75)
+			sprite.modulate = Color(1, 1, 1, 0.9)
+			sprite.light_mask = BiomeLayers.LIGHT_MASK_FLOOR
+			_own(sprite, _layers.decals)
+		placed += 1
 
 
 ## Прохожие: жители ходят по улицам кварталов (Свалка) или аллеям парка (Банк) туда-обратно,

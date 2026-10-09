@@ -6,15 +6,15 @@ extends RefCounted
 
 const NONE := ""
 const CATALOG := {
-	"night_dump": {"title": "Ночная Свалка", "short": "НОЧЬ", "rarity": "rare", "mood": "night", "enemy": &"dash_rat", "share": 0.3,
+	"night_dump": {"title": "Ночная Свалка", "short": "НОЧЬ", "rarity": "rare", "mood": "night", "enemy": &"map_night_dump", "share": 0.3,
 		"hp": 1.1, "coins": 1.2, "color": "#5b6796", "desc": "Вечная ночь и костры. Шустрые крысы-рывки."},
-	"acid_rain": {"title": "Кислотный ливень", "short": "ЛИВЕНЬ", "rarity": "epic", "mood": "storm", "enemy": &"toxic_rat", "share": 0.35,
+	"acid_rain": {"title": "Кислотный ливень", "short": "ЛИВЕНЬ", "rarity": "epic", "mood": "storm", "enemy": &"map_acid_rain", "share": 0.35,
 		"hp": 1.15, "coins": 1.3, "color": "#7dff3a", "desc": "Ливень не стихает. Токсичные крысы повсюду."},
-	"neon_market": {"title": "Неоновый рынок", "short": "РЫНОК", "rarity": "epic", "mood": "party", "enemy": &"courier_rat", "share": 0.3,
+	"neon_market": {"title": "Неоновый рынок", "short": "РЫНОК", "rarity": "epic", "mood": "party", "enemy": &"map_neon_market", "share": 0.3,
 		"hp": 1.1, "coins": 1.35, "color": "#ff4dd2", "desc": "Розовая дымка и гирлянды. Курьеры с лутом."},
-	"gold_vault": {"title": "Золотое хранилище", "short": "ЗОЛОТО", "rarity": "legendary", "mood": "vault", "enemy": &"cash_collector", "share": 0.35,
+	"gold_vault": {"title": "Золотое хранилище", "short": "ЗОЛОТО", "rarity": "legendary", "mood": "vault", "enemy": &"map_gold_vault", "share": 0.35,
 		"hp": 1.25, "coins": 1.5, "color": "#ffd23f", "desc": "Золото под ногами, инкассаторы на страже. Монеты ×1.5."},
-	"pigeon_roofs": {"title": "Голубиные крыши", "short": "КРЫШИ", "rarity": "legendary", "mood": "sunny", "enemy": &"pigeon_bomber", "share": 0.4,
+	"pigeon_roofs": {"title": "Голубиные крыши", "short": "КРЫШИ", "rarity": "legendary", "mood": "sunny", "enemy": &"map_pigeon_roofs", "share": 0.4,
 		"hp": 1.2, "coins": 1.45, "color": "#8fd0ff", "desc": "Солнце, трубы и антенны. Голуби-бомбардиры роями."},
 }
 
@@ -103,6 +103,18 @@ static func featured_share() -> float:
 
 static func color_of(id: String) -> Color:
 	return Color(str(info(id).get("color", "#ffffff")))
+
+
+## Глава под карту: пол карты (Астра, assets/maps/<id>/floor.png) и метка для пропов и декалей карты.
+static func apply_chapter(chapter: Dictionary) -> Dictionary:
+	if active.is_empty():
+		return chapter
+	var c := chapter.duplicate()
+	var floor_path := "res://assets/maps/%s/floor.png" % active
+	if ResourceLoader.exists(floor_path):
+		c["ground"] = floor_path
+	c["map_card"] = active
+	return c
 
 
 static func card_art(id: String) -> Texture2D:
