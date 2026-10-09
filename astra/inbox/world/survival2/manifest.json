@@ -144,5 +144,32 @@
       ],
       "alpha": "RGBA"
     }
-  ]
+  ],
+  "vacuum_on": {
+    "cell": [
+      200,
+      200
+    ],
+    "columns": 4,
+    "frames": 4,
+    "fps": 8
+  },
+  "greed_ring": {
+    "cell": [
+      160,
+      180
+    ],
+    "columns": 4,
+    "frames": 4,
+    "fps": 8
+  },
+  "altar_active": {
+    "cell": [
+      260,
+      260
+    ],
+    "columns": 6,
+    "frames": 6,
+    "fps": 8
+  }
 }

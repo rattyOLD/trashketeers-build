@@ -1,0 +1,46 @@
+{
+  "brief": 28,
+  "fps": 12,
+  "files": {
+    "flying_slash": {
+      "cell": [
+        192,
+        96
+      ],
+      "columns": 6,
+      "frames": 6
+    },
+    "blink_cut": {
+      "cell": [
+        512,
+        64
+      ],
+      "columns": 6,
+      "frames": 6
+    },
+    "echo_ring": {
+      "cell": [
+        256,
+        256
+      ],
+      "columns": 6,
+      "frames": 6
+    },
+    "split_shot": {
+      "cell": [
+        128,
+        64
+      ],
+      "columns": 6,
+      "frames": 6
+    },
+    "overheat": {
+      "cell": [
+        128,
+        128
+      ],
+      "columns": 6,
+      "frames": 6
+    }
+  }
+}
