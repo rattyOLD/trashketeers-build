@@ -68,7 +68,7 @@ func _run() -> void:
 	popup._select_filter("bomber")
 	var bombers := 0
 	for id in ContentDB.get_enemy_ids():
-		var kind := EnemyData.Behavior.keys()[ContentDB.get_enemy(id).behavior].to_lower()
+		var kind: String = str(EnemyData.Behavior.keys()[ContentDB.get_enemy(id).behavior]).to_lower()
 		bombers += int(kind == "bomber" or kind == "exploder")
 	# Считаем по данным: с картами Выживания у голубей-бомбардиров появился фирменный собрат.
 	_check(bombers >= 3 and popup._grid.get_child_count() == bombers, "bomb filter includes explosive rat and bombers")
