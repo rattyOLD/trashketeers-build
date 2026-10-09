@@ -43,6 +43,8 @@ var rail_only: bool
 var phase2: bool
 ## "melee" — только при ближнем оружии в слотах, "ranged" — только при стрелковом; "" — всем.
 var style: String
+## Иконка карточки (необязательно; прошивки вышек — из листа Астры).
+var icon: Texture2D
 
 
 static func from_dict(raw: Dictionary) -> UpgradeData:

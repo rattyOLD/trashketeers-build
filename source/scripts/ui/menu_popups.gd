@@ -346,11 +346,25 @@ class Shop:
 	func _fill_cosmetics() -> void:
 		var hint := UiStyle.label("Скины рывка и трассеры пуль выпадают из сундуков. Надетый скин работает в каждом бою.", 18, UiStyle.TEXT_DIM, 4)
 		hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		hint.custom_minimum_size = Vector2(520, 0)
-		_list.add_child(hint)
+		hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		hint.custom_minimum_size = Vector2(360, 0)
+		var head := HBoxContainer.new()
+		head.add_theme_constant_override("separation", 12)
+		# Сундук косметики (арт Астры, assets/ui/cosmetics/chest_cosmetic.png: закрытый | открытый).
+		if ResourceLoader.exists("res://assets/ui/cosmetics/chest_cosmetic.png"):
+			var chest := AtlasTexture.new()
+			chest.atlas = load("res://assets/ui/cosmetics/chest_cosmetic.png")
+			chest.region = Rect2(0, 0, 384, 384)
+			head.add_child(BattlePanels.icon_rect(chest, 104))
+		head.add_child(hint)
+		_list.add_child(head)
 		var ad_ready := SaveService.today() != int(SaveService.data.get("skin_ad_day", -1)) and not Cosmetics.roll_ad_skin().is_empty()
 		var ad := UiStyle.button("СЛУЧАЙНЫЙ СКИН ЗА РЕКЛАМУ" if ad_ready else "СКИН ЗА РЕКЛАМУ — ЗАВТРА", Color("#2fae5f") if ad_ready else UiStyle.PANEL, 20, Vector2(0, 58))
 		ad.disabled = not ad_ready
+		if ResourceLoader.exists("res://assets/ui/cosmetics/ad_gift.png"):
+			ad.icon = load("res://assets/ui/cosmetics/ad_gift.png")
+			ad.expand_icon = true
+			ad.add_theme_constant_override("icon_max_width", 44)
 		ad.pressed.connect(func() -> void:
 			Platform.show_rewarded_ad(func(ok: bool) -> void:
 				if not ok:

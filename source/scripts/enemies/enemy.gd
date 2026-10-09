@@ -103,6 +103,8 @@ var pool_index := -1
 var damage_mult := 1.0
 ## Возвышения: элита с особенностью ("fast", "armored", "explosive"; "" — обычный враг).
 var elite := ""
+## Появился, пока жив главный босс главы (миньон боя с боссом) — без опыта и монет.
+var boss_minion := false
 var elite_speed := 1.0
 var elite_armor := 0.0
 var _elite_ring: Sprite2D

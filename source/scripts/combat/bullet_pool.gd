@@ -80,7 +80,7 @@ func spawn(weapon: WeaponData, origin: Vector2, direction: Vector2, team: Bullet
 		bullet.apply_tint(_enemy_tint)
 	elif team == Bullet.Team.PLAYER and _player_tint.a > 0.0 and weapon.bullet_texture == ConfigLoader.get_tracer_texture():
 		if _player_skin != null and not _player_rainbow:
-			bullet.apply_skin(_player_skin, _player_tint)
+			bullet.apply_skin(_player_skin, _player_tint, _player_glow if _lod == 0 else null)
 		elif _player_rainbow:
 			_rainbow_hue = fposmod(_rainbow_hue + 0.07, 1.0)
 			bullet.apply_tint(Color.from_hsv(_rainbow_hue, 0.75, 1.0))
@@ -89,10 +89,15 @@ func spawn(weapon: WeaponData, origin: Vector2, direction: Vector2, team: Bullet
 	return bullet
 
 
-func set_player_skin(color: Color, rainbow: bool, texture: Texture2D = null) -> void:
+func set_player_skin(color: Color, rainbow: bool, texture: Texture2D = null, glow: Texture2D = null) -> void:
 	_player_tint = color
 	_player_rainbow = rainbow
 	_player_skin = texture
+	# Свечение — только на средней и высокой графике: на слабых телефонах лишний спрайт на каждую пулю.
+	_player_glow = glow if SaveService.get_quality() > 0 else null
+
+
+var _player_glow: Texture2D
 
 
 ## Перекрашивает все летящие и будущие вражеские снаряды.

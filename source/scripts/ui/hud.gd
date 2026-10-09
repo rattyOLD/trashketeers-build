@@ -44,6 +44,8 @@ var _xp_label: Label
 var _nuts_label: Label
 var _nuts_row: HBoxContainer
 var _time_label: Label
+var _siren_icon: TextureRect
+const SIREN_ICON := "res://assets/world/siren.png"
 var _kills_label: Label
 var _loot_label: Label
 var _fps_label: Label
@@ -423,6 +425,26 @@ func set_time(seconds: float) -> void:
 func set_time_text(text: String, color: Color = UiStyle.TEXT) -> void:
 	_time_label.text = text
 	_time_label.add_theme_color_override("font_color", color)
+
+
+## Мигающая сирена (арт Астры, assets/world/siren.png) слева от таймера смены: до выхода босса меньше минуты.
+func set_time_alert(on: bool) -> void:
+	if on and _siren_icon == null and ResourceLoader.exists(SIREN_ICON):
+		_siren_icon = TextureRect.new()
+		_siren_icon.texture = load(SIREN_ICON)
+		_siren_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		_siren_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		_siren_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_siren_icon.size = Vector2(36, 36)
+		_time_label.add_child(_siren_icon)
+	if _siren_icon == null:
+		return
+	_siren_icon.visible = on
+	if on:
+		var font := _time_label.get_theme_font("font")
+		var text_w := font.get_string_size(_time_label.text, HORIZONTAL_ALIGNMENT_LEFT, -1, _time_label.get_theme_font_size("font_size")).x
+		_siren_icon.position = Vector2(_time_label.size.x - text_w - 44.0, (_time_label.size.y - 36.0) * 0.5)
+		_siren_icon.modulate.a = 0.55 + 0.45 * absf(sin(Time.get_ticks_msec() * 0.006))
 
 
 ## Налёт: без опыта, волн, мини-карты и счётчика крыс.

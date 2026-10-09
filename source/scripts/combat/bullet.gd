@@ -45,6 +45,8 @@ var is_liquid := false
 var pierced := 0
 
 var _sprite: Sprite2D
+## Свечение скина трассера (арт Астры glow.png), создаётся по первому скину.
+var _glow: Sprite2D
 var _shape: CircleShape2D
 var _collision: CollisionShape2D
 var _time_left := 0.0
@@ -111,6 +113,8 @@ func activate(data: WeaponData, origin: Vector2, direction: Vector2, owner_team:
 	_sprite.texture = data.bullet_texture
 	_sprite.scale = data.sprite_scale
 	_sprite.modulate = data.bullet_modulate
+	if _glow != null:
+		_glow.visible = false
 	_shape.radius = data.bullet_radius
 
 	_apply_team_masks(owner_team)
@@ -200,12 +204,25 @@ func _detonate() -> void:
 
 
 ## Трассер-скин игрока: свой рисунок пули (Астра) вместо стандартной капсулы, шлейф — цветом скина.
-func apply_skin(texture: Texture2D, color: Color) -> void:
+func apply_skin(texture: Texture2D, color: Color, glow: Texture2D = null) -> void:
 	_sprite.texture = texture
 	var k := clampf(weapon.bullet_radius / 5.0, 0.8, 1.6) if weapon != null else 1.0
 	_sprite.scale = Vector2.ONE * (38.0 / maxf(texture.get_width(), 1.0)) * k
 	_sprite.modulate = Color.WHITE
 	_trail.modulate = Color(color, 0.85)
+	if glow != null:
+		if _glow == null:
+			_glow = Sprite2D.new()
+			var add := CanvasItemMaterial.new()
+			add.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+			_glow.material = add
+			_glow.show_behind_parent = true
+			add_child(_glow)
+			move_child(_glow, 0)
+		_glow.texture = glow
+		_glow.scale = Vector2.ONE * (54.0 / maxf(glow.get_width(), 1.0)) * k
+		_glow.modulate = Color(1, 1, 1, 0.8)
+		_glow.visible = true
 
 
 func apply_tint(color: Color) -> void:

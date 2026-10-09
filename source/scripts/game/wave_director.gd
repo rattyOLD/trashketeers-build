@@ -360,6 +360,7 @@ func _tick_boss(delta: float) -> void:
 			return
 		var boss_hp := pow(float(_difficulty["loop_hp"]), loop) * float(_chapter.get("power", 1.0)) * _adaptive_boss_mult(boss_data) * BOSS_HP_TRIM * (float(_difficulty.get("mini_hp", 1.0)) if is_mini_wave() else 1.0) * (1.0 + maxf(float(wave_number) - float(_difficulty["late_start"]), 0.0) * float(_difficulty["late_hp"]))
 		boss = _enemies.spawn(boss_data, _level.boss_point, boss_hp, _dmg_mult)
+		_enemies.main_boss = boss if not is_mini_wave() else null
 		if boss == null:
 			_boss_retry = BOSS_RETRY_DELAY
 			return

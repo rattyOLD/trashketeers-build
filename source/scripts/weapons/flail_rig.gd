@@ -25,9 +25,7 @@ const ART_DIR := "res://assets/weapons/flail/"
 const BALL_DRAW := 76.0
 const LINK_DRAW := 16.0
 ## Шаг между центрами звеньев: меньше длины звена — соседние заходят друг в друга.
-const LINK_STEP := 13.0
-const LINK_LEN := 19.0
-const LINK_WIDTH := 9.0
+const LINK_STEP := 9.0
 const FAST_FPS := 14.0
 const HIT_FPS := 16.0
 const HIT_DRAW := 120.0
@@ -82,7 +80,7 @@ func tick(delta: float, at: Vector2, control: Vector2, auto: bool, weapon: Weapo
 		h[1] = float(h[1]) + delta
 	_hits = _hits.filter(func(h: Array) -> bool: return float(h[1]) < 4.0 / HIT_FPS)
 	anchor = at
-	length = clampf(weapon.melee_reach * 0.72, 80.0, 180.0)
+	length = clampf(weapon.melee_reach * 0.56, 70.0, 150.0)
 	var rel := ball - anchor
 	if control.length_squared() > 0.01:
 		var desired := anchor + control.normalized() * length
@@ -154,23 +152,21 @@ func _draw() -> void:
 		_draw_placeholder()
 		return
 	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-	# Цепь как у настоящего моргенштерна: вытянутые овальные кольца, продетые одно в другое; плоское кольцо
-	# (видна дырка) чередуется с повёрнутым ребром (узкая планка). Шаг меньше длины звена — звенья сцеплены.
-	# Цепь идёт от ушка рукояти до края шара.
-	var to_ball := ball - anchor
-	var dir_ball := to_ball.normalized() if to_ball.length_squared() > 1.0 else Vector2.RIGHT
-	var chain_end := ball - dir_ball * BALL_RADIUS * 0.85
-	var rel := chain_end - anchor
-	var slack := maxf(length - to_ball.length(), 0.0) * 0.5
+	# Цепь: звенья цепляются друг за друга — шаг меньше длины звена (перекрытие), каждое второе повёрнуто
+	# ребром (узкое), как в настоящей цепи. Число звеньев — по длине цепи, с лёгким провисом.
+	var rel := ball - anchor
+	var slack := maxf(length - rel.length(), 0.0) * 0.5
 	var sag := rel.orthogonal().normalized() * slack
 	var count := maxi(int(ceil(rel.length() / LINK_STEP)), 2)
+	var k := LINK_DRAW / link.get_width()
 	var prev := anchor
-	for i in count:
-		var t := (float(i) + 0.5) / count
-		var p := anchor.lerp(chain_end, t) + sag * sin(t * PI)
-		var nxt := anchor.lerp(chain_end, minf(t + 0.5 / count, 1.0)) + sag * sin(minf(t + 0.5 / count, 1.0) * PI)
-		var along := (nxt - prev).normalized() if (nxt - prev).length_squared() > 0.01 else dir_ball
-		_draw_link(p, along, i % 2 == 0)
+	for i in count + 1:
+		var t := float(i) / count
+		var p := anchor.lerp(ball, t) + sag * sin(t * PI)
+		var dir := (p - prev).angle() if i > 0 else rel.angle()
+		var flat := i % 2 == 0
+		draw_set_transform(p, dir, Vector2(k, k * (1.0 if flat else 0.42)))
+		draw_texture(link, -link.get_size() * 0.5, Color.WHITE if flat else Color(0.8, 0.8, 0.85))
 		prev = p
 	draw_set_transform(Vector2.ZERO)
 	# Шар: разогнанный — кадры со следом движения, повёрнутые по скорости; иначе — обычный.
@@ -192,30 +188,6 @@ func _draw() -> void:
 			draw_set_transform(h[0], 0.0, Vector2.ONE * (HIT_DRAW / cell))
 			draw_texture_rect_region(hit, Rect2(-cell * 0.5, -cell * 0.5, cell, cell), Rect2(frame * cell, 0, cell, cell))
 		draw_set_transform(Vector2.ZERO)
-
-
-## Одно звено: плоское — овальное кольцо с дыркой, ребром — узкая планка; тёмный контур, светлый блик.
-func _draw_link(at: Vector2, along: Vector2, flat: bool) -> void:
-	var half := along * LINK_LEN * 0.5
-	var side := along.orthogonal()
-	var dark := Color("#120d1c")
-	var steel := Color("#8f97a8")
-	var shine := Color("#d6dbe6")
-	if flat:
-		var r := LINK_WIDTH * 0.5
-		var ends := [at - half + along * r, at + half - along * r]
-		for pass_i in 2:
-			var width := 5.5 if pass_i == 0 else 3.0
-			var c := dark if pass_i == 0 else steel
-			draw_line(ends[0] + side * r, ends[1] + side * r, c, width, true)
-			draw_line(ends[0] - side * r, ends[1] - side * r, c, width, true)
-			draw_arc(ends[0], r, side.angle(), side.angle() + PI, 8, c, width, true)
-			draw_arc(ends[1], r, side.angle() + PI, side.angle() + TAU, 8, c, width, true)
-		draw_line(ends[0] + side * r * 1.1, ends[1] + side * r * 1.1, Color(shine, 0.7), 1.2, true)
-	else:
-		draw_line(at - half, at + half, dark, 6.0, true)
-		draw_line(at - half * 0.92, at + half * 0.92, steel.darkened(0.15), 3.2, true)
-		draw_line(at - half * 0.7 + side, at + half * 0.7 + side, Color(shine, 0.6), 1.0, true)
 
 
 ## Запасной рисунок кодом (если файлов арта нет).

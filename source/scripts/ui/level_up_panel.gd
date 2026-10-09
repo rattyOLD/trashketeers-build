@@ -125,6 +125,31 @@ func _make_card(upgrade: UpgradeData, index: int, stats: RunStats) -> Button:
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	card.add_child(column)
 
+	if upgrade.icon != null:
+		# Иконка в правом верхнем углу карточки (прошивки вышек — арт Астры).
+		var art := TextureRect.new()
+		art.texture = upgrade.icon
+		art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		# Горизонталь: крупно внизу по центру (там свободно); вертикаль: справа, текст сдвигается.
+		if Orient.portrait:
+			var side := 84.0
+			art.set_anchors_preset(Control.PRESET_CENTER_RIGHT)
+			art.offset_left = -side - 14.0
+			art.offset_right = -14.0
+			art.offset_top = -side * 0.5
+			art.offset_bottom = side * 0.5
+			column.offset_right = -side - 26.0
+			text_width -= side + 8.0
+		else:
+			var side := 120.0
+			art.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+			art.offset_left = -side * 0.5
+			art.offset_right = side * 0.5
+			art.offset_top = -side - 16.0
+			art.offset_bottom = -16.0
+		card.add_child(art)
 	var stacks := stats.get_stacks(upgrade.id)
 	var tag := "%s  •  %s" % [upgrade.rarity_title() if upgrade.category != "evolution" else "ЭВОЛЮЦИЯ", upgrade.category_title() if upgrade.category != "evolution" else "СИНЕРГИЯ"]
 	var archetype: String = ARCHETYPE_NAMES.get(RunStats.archetype_of(upgrade), "")

@@ -74,7 +74,8 @@ func build(layout: String, chapter_id: String, bounds: Rect2, inner: Rect2, gate
 	var district: Dictionary = DISTRICTS[layout]
 	_neon = layout == "junkyard"
 	# Ночная Свалка темнее карты освещения: район чуть подсвечен, чтобы толпу и дома было видно.
-	modulate = Color(1.45, 1.4, 1.5) if _neon else Color.WHITE
+	# Район — фон: чуть приглушён, чтобы взгляд оставался на поле боя.
+	modulate = Color(1.1, 1.06, 1.15) if _neon else Color(0.82, 0.82, 0.86)
 	var dir := ROOT + layout + "/"
 	var chapter_key: String = CHAPTER_OF.get(chapter_id, CHAPTER_OF.get(chapter_id.get_slice("_", 0), "ch1" if layout == "junkyard" else "ch4"))
 	var special: Array = CHAPTERS[chapter_key]
@@ -113,10 +114,8 @@ func build(layout: String, chapter_id: String, bounds: Rect2, inner: Rect2, gate
 	var lite := SaveService.get_quality() == 0
 	# Верх: забор ровно по краю площадки, сразу за ним трибуна в два-три ряда, дальше дома.
 	_fence_row(fence_h, inner.position.x - 40.0, inner.end.x + 40.0, inner.position.y + 6.0)
-	_crowd_row(crowd, inner.position.x, inner.end.x, inner.position.y - 58.0, TOP_SPACING)
-	_crowd_row(crowd, inner.position.x + 46.0, inner.end.x, inner.position.y - 108.0, TOP_SPACING * (1.6 if lite else 1.1))
-	if not lite:
-		_crowd_row(crowd, inner.position.x + 20.0, inner.end.x, inner.position.y - 158.0, TOP_SPACING * 1.5)
+	# Один редкий ряд зрителей: живо, но без пёстрой стены из толпы.
+	_crowd_row(crowd, inner.position.x, inner.end.x, inner.position.y - 58.0, TOP_SPACING * 2.0)
 	_backdrop_row(buildings, small, view.position.x, view.end.x, inner.position.y - 215.0, 0.72)
 	# Низ: забор по краю, за ним (ближе к камере) машины и объекты — без зрителей: там кнопки.
 	_fence_row(fence_h, inner.position.x - 40.0, inner.end.x + 40.0, inner.end.y + 92.0)
@@ -130,9 +129,7 @@ func build(layout: String, chapter_id: String, bounds: Rect2, inner: Rect2, gate
 			var y := span.x + 70.0
 			while y < span.y - 20.0:
 				_spectator(crowd.pick_random(), Vector2(edge + side * randf_range(86.0, 100.0), y))
-				if not lite and randf() < 0.55:
-					_spectator(crowd.pick_random(), Vector2(edge + side * randf_range(148.0, 162.0), y - 40.0))
-				y += SIDE_SPACING * randf_range(0.75, 1.1)
+				y += SIDE_SPACING * randf_range(1.6, 2.2)
 			var by := span.x + 120.0
 			while by < span.y:
 				var path: String = buildings.pick_random() if randf() < 0.7 else small.pick_random()

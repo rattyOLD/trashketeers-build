@@ -726,6 +726,10 @@ func _refresh_mod_chip() -> void:
 		_map_chip.text = MapCards.button_text()
 		var id := MapCards.chosen()
 		_map_chip.add_theme_color_override("font_color", MapCards.color_of(id) if not id.is_empty() else Color("#ffb066"))
+		# Мини-карточка выбранной карты (арт Астры, assets/maps/<id>/card.png) слева от названия.
+		_map_chip.icon = MapCards.card_art(id) if not id.is_empty() else null
+		_map_chip.expand_icon = true
+		_map_chip.add_theme_constant_override("icon_max_width", 22)
 		_map_chip.visible = _mode == Mode.SURVIVAL
 	if _chips_row != null:
 		_chips_row.visible = _mode == Mode.SURVIVAL

@@ -391,8 +391,10 @@ func _update_hud_timer() -> void:
 		# Таймер смены: сколько осталось до Сирены (босс выйдет сам).
 		var left := director.shift_left
 		hud.set_time_text("СМЕНА %s" % BattleBase.format_time(left), UiStyle.DANGER if left < 60.0 else UiStyle.TEXT)
+		hud.set_time_alert(left < 60.0)
 	else:
 		hud.set_time_text(BattleBase.format_time(director.elapsed), UiStyle.TEXT)
+		hud.set_time_alert(false)
 	if story != null:
 		hud.set_story_status(story.score, story.lives, story.zone_number(), story.zone_count(), story.zone_name(), -1, SaveService.nell_order(), story.goal_rows())
 		_tick_order()
@@ -921,10 +923,9 @@ func _on_enemy_died(enemy: Enemy) -> void:
 	# Взрывная элита (Возвышения): рвётся при смерти — не стой вплотную.
 	if enemy.elite == "explosive":
 		BulletPool.explode(at, 110.0, 10.0 * director.get_damage_mult(), Bullet.Team.ENEMY, Color("#ff7a3d"), 1.2)
-	# Миньоны и подкрепления, пока жив главный босс главы, — без опыта и монет: бой с боссом не ферма.
-	var boss_fight := not data.is_boss() and director.boss != null and is_instance_valid(director.boss) \
-		and director.boss.is_alive() and not director.is_mini_wave()
-	if not boss_fight:
+	# Только мобы, появившиеся во время боя с главным боссом (миньоны, подкрепления), — без опыта и монет:
+	# бой с боссом не ферма. Остальные враги дают лут как обычно, в том числе убитые во время боя.
+	if not enemy.boss_minion:
 		_drop_enemy_loot(enemy, data, at)
 	if data.is_boss():
 		_on_boss_killed(enemy, at)
@@ -1189,8 +1190,20 @@ func _on_tower_charged(tower: ChargeTower) -> void:
 		u.color = Color(str(row[4]))
 		u.category = "utility"
 		u.rarity_rank = rank
+		u.icon = _firmware_icon(FIRMWARE.find(row))
 		choices.append(u)
 	_queue_bonus(choices, "ВЫШКА ЗАРЯЖЕНА!")
+
+
+## Иконка прошивки из листа Астры (assets/world/firmware_icons.png, 8 ячеек 128 в порядке FIRMWARE).
+func _firmware_icon(index: int) -> Texture2D:
+	var sheet := load("res://assets/world/firmware_icons.png") as Texture2D if ResourceLoader.exists("res://assets/world/firmware_icons.png") else null
+	if sheet == null or index < 0:
+		return null
+	var atlas := AtlasTexture.new()
+	atlas.atlas = sheet
+	atlas.region = Rect2(index * 128, 0, 128, 128)
+	return atlas
 
 
 func _on_safe_requested(safe: JunkSafe) -> void:

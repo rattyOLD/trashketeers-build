@@ -37,6 +37,10 @@ func setup(player: Player, container: Node2D, capacity: int, nav: Callable = Cal
 		_free.append(enemy)
 
 
+## Главный босс главы (ставит WaveDirector): кто появился при нём — миньон боя с боссом.
+var main_boss: Enemy
+
+
 func spawn(data: EnemyData, at: Vector2, hp_mult: float = 1.0, dmg_mult: float = 1.0) -> Enemy:
 	if data == null or _free.is_empty():
 		return null
@@ -44,6 +48,8 @@ func spawn(data: EnemyData, at: Vector2, hp_mult: float = 1.0, dmg_mult: float =
 	enemy.pool_index = _active.size()
 	_active.append(enemy)
 	enemy.activate(data, at, hp_mult, dmg_mult)
+	enemy.boss_minion = not data.is_boss() and main_boss != null and main_boss.pool_index >= 0 \
+		and main_boss.data != null and main_boss.data.is_boss() and main_boss.is_alive()
 	if Ascension.active > 0:
 		if data.is_boss():
 			enemy.max_hp *= Ascension.boss_hp_mult()

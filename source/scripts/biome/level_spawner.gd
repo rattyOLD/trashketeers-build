@@ -1512,7 +1512,8 @@ func _build_organic() -> void:
 	if names.is_empty():
 		return
 	var area := _interior_rect()
-	var target := int(round(5.5 * _area_scale))
+	# Как в Megabonk: открытое поле и немного заметных ориентиров, а не россыпь сцен по всей карте.
+	var target := int(round(3.0 * _area_scale))
 	var bag: Array = []
 	var center := Vector2(0, _origin.y + grid_size.y * 0.5 * CELL)
 	if _build_quarters(root, defs, area) < 3:
@@ -1622,6 +1623,9 @@ var _music_spots: Array[Vector2] = []
 ## Кварталы выживания (data/lots.json → quarters): внутренность карты делится на 3×3. Центр (бой), клетка
 ## старта и клетка помоста босса свободны; в остальных — квартал: 1–2 здания в глубине, перед ними двор
 ## (сектор по имени), жители, тёплый свет окон. Возвращает число поставленных кварталов.
+const QUARTER_MAX := 3
+
+
 func _build_quarters(root: Dictionary, defs: Dictionary, area: Rect2) -> int:
 	var chapter_id := str(chapter.get("id", ""))
 	var list: Array = ((root.get("quarters", {}) as Dictionary).get(layout, []) as Array).filter(
@@ -1649,6 +1653,8 @@ func _build_quarters(root: Dictionary, defs: Dictionary, area: Rect2) -> int:
 				continue
 			cells.append(r)
 	cells.shuffle()
+	# Не больше трёх кварталов: остальные клетки — открытое поле для боя (уровни аналогов держат простор).
+	cells.resize(mini(cells.size(), QUARTER_MAX))
 	var placed := 0
 	_quarter_doors.clear()
 	for r in cells:
@@ -1831,7 +1837,7 @@ func _build_ground_detail() -> void:
 			continue
 		var q := (1 if p.x > area.get_center().x else 0) + (2 if p.y > area.get_center().y else 0)
 		(quads[q] as Array).append(p)
-		if quads.reduce(func(acc: int, a: Array) -> int: return acc + a.size(), 0) >= 56:
+		if quads.reduce(func(acc: int, a: Array) -> int: return acc + a.size(), 0) >= 36:
 			break
 	for i in 4:
 		var spots: Array[Vector2] = []
@@ -2113,7 +2119,7 @@ func _scatter_singles(area: Rect2, center: Vector2) -> void:
 	if layout == "bank":
 		singles = ["planter", "column", "umbrella", "crystals", "cash_pile", "lamp_banner"]
 	var flats: Array = chapter.get("flat", [])
-	var step := 560.0
+	var step := 760.0
 	var y := area.position.y + step * 0.5
 	while y < area.end.y:
 		var x := area.position.x + step * 0.5

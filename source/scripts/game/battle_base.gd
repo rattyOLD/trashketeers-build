@@ -184,7 +184,7 @@ func _setup_common(camera_bounds: Rect2, currency_icon: Texture2D) -> void:
 	dash_effects.hammer_slammed.connect(func(_at: Vector2) -> void:
 		add_shake(0.35)
 		hitstop(0.04))
-	BulletPool.set_player_skin(Cosmetics.shot_color(), Cosmetics.shot_rainbow(), Cosmetics.skin_texture("shot", "tracer"))
+	BulletPool.set_player_skin(Cosmetics.shot_color(), Cosmetics.shot_rainbow(), Cosmetics.skin_texture("shot", "tracer"), Cosmetics.skin_texture("shot", "glow"))
 	_shot_hit = Cosmetics.skin_texture("shot", "hit")
 	hero_skills = HeroSkills.new()
 	add_child(hero_skills)
