@@ -44,7 +44,7 @@ const BORDER_K := 0.55
 
 
 func _init() -> void:
-	custom_minimum_size = Vector2(560, 84)
+	custom_minimum_size = Vector2(340, 84)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_font = ThemeDB.fallback_font
 
@@ -96,7 +96,9 @@ func _process(delta: float) -> void:
 
 
 func _draw() -> void:
-	var bar_rect := Rect2(WING_WIDTH, size.y - BAR_HEIGHT - 4.0, size.x - WING_WIDTH * 2.0, BAR_HEIGHT)
+	# Без крыльев шкала почти во всю ширину (рамка Астры даёт свои края), окно в бою узкое.
+	var side_w := WING_WIDTH if winged else 26.0
+	var bar_rect := Rect2(side_w, size.y - BAR_HEIGHT - 4.0, size.x - side_w * 2.0, BAR_HEIGHT)
 	if compact:
 		var side := WING_WIDTH if winged else 8.0
 		var bar_h := 28.0
@@ -107,8 +109,8 @@ func _draw() -> void:
 	var title_color := FURY_PINK if _fury else (Color("#ffd6ac") if winged else Color("#ffd257"))
 	var shown_title := (title + " · ОГЛУШЁН") if compact and broken and posture >= 0.0 else title
 	if _plate_tex != null and not winged:
-		var tw := _font.get_string_size(shown_title, HORIZONTAL_ALIGNMENT_LEFT, -1, 26).x + 70.0
-		_draw_plate(Rect2((size.x - tw) * 0.5, title_pos.y - 27.0, tw, 34.0))
+		var tw := _font.get_string_size(shown_title, HORIZONTAL_ALIGNMENT_LEFT, -1, 26).x + 44.0
+		_draw_plate(Rect2((size.x - tw) * 0.5, title_pos.y - 25.0, tw, 30.0))
 	draw_string_outline(_font, title_pos, shown_title, HORIZONTAL_ALIGNMENT_CENTER, size.x, 26, 8, OUTLINE)
 	draw_string(_font, title_pos, shown_title, HORIZONTAL_ALIGNMENT_CENTER, size.x, 26, title_color)
 

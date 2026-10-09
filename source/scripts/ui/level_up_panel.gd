@@ -100,14 +100,14 @@ func _center_box() -> void:
 ## Ширина карточки в горизонтали: три карточки и отступы должны влезть в видимую ширину.
 func _card_width() -> float:
 	var area := (size.x if size.x > 1.0 else get_viewport_rect().size.x) if is_inside_tree() else 1280.0
-	return clampf((area - 60.0 - 28.0) / 3.0, 240.0, 340.0)
+	return clampf((area - 60.0 - 28.0) / 3.0, 230.0, 290.0)
 
 
 func _make_card(upgrade: UpgradeData, index: int, stats: RunStats) -> Button:
 	var accent := upgrade.rarity_color() if upgrade.category != "evolution" else Color("#ff5cf0")
 	var card_w := _card_width()
-	var text_width := 524.0 if Orient.portrait else card_w - 68.0
-	var card := UiStyle.button("", UiStyle.PANEL_LIGHT, 28, Vector2(600, 148) if Orient.portrait else Vector2(card_w, 280))
+	var text_width := 444.0 if Orient.portrait else card_w - 68.0
+	var card := UiStyle.button("", UiStyle.PANEL_LIGHT, 28, Vector2(520, 148) if Orient.portrait else Vector2(card_w, 280))
 	var border := 6 if upgrade.rarity_rank > 0 else 4
 	card.add_theme_stylebox_override("normal", UiStyle.box(UiStyle.PANEL_LIGHT.darkened(0.15), accent, border, 22))
 	card.add_theme_stylebox_override("hover", UiStyle.box(UiStyle.PANEL_LIGHT.lightened(0.08), accent.lightened(0.25), border, 22))

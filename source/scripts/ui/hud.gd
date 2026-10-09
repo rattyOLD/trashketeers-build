@@ -1398,7 +1398,7 @@ func _build_boss_bar() -> Control:
 	if Orient.portrait:
 		UiStyle.anchor(_boss_bar, Vector2(0.0, 0.0), RADIO_RECT)
 	else:
-		UiStyle.anchor(_boss_bar, Vector2(0.5, 0.0), Rect2(-220, 30, 440, 66))
+		UiStyle.anchor(_boss_bar, Vector2(0.5, 0.0), Rect2(-170, 30, 340, 66))
 	_boss_bar.visible = false
 	return _boss_bar
 
