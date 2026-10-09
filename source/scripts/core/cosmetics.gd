@@ -205,3 +205,17 @@ static func roll_ad_skin() -> String:
 static func icon_of(key: String) -> Texture2D:
 	var path := "res://assets/ui/cosmetics/%s_%s.png" % [kind_of(key), key.get_slice(":", 1)]
 	return load(path) as Texture2D if ResourceLoader.exists(path) else null
+
+
+## Рисунок части надетого скина (Астра, бриф v28): assets/cosmetics/<вид>/<id>/<part>.png; null — нет скина или файла.
+static var _skin_tex := {}
+
+
+static func skin_texture(kind: String, part: String) -> Texture2D:
+	var key := worn(kind)
+	if key.is_empty():
+		return null
+	var path := "res://assets/cosmetics/%s/%s/%s.png" % [kind, key.get_slice(":", 1), part]
+	if not _skin_tex.has(path):
+		_skin_tex[path] = load(path) as Texture2D if ResourceLoader.exists(path) else null
+	return _skin_tex[path]

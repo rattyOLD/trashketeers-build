@@ -199,6 +199,15 @@ func _detonate() -> void:
 		detonated.emit(self)
 
 
+## Трассер-скин игрока: свой рисунок пули (Астра) вместо стандартной капсулы, шлейф — цветом скина.
+func apply_skin(texture: Texture2D, color: Color) -> void:
+	_sprite.texture = texture
+	var k := clampf(weapon.bullet_radius / 5.0, 0.8, 1.6) if weapon != null else 1.0
+	_sprite.scale = Vector2.ONE * (38.0 / maxf(texture.get_width(), 1.0)) * k
+	_sprite.modulate = Color.WHITE
+	_trail.modulate = Color(color, 0.85)
+
+
 func apply_tint(color: Color) -> void:
 	_sprite.modulate = color
 	_trail.modulate = Color(color, 0.85)

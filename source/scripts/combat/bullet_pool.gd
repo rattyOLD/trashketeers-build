@@ -39,6 +39,7 @@ var _enemy_tint := Color(0, 0, 0, 0)
 var _player_tint := Color(0, 0, 0, 0)
 var _player_rainbow := false
 var _rainbow_hue := 0.0
+var _player_skin: Texture2D
 ## Кого догоняют самонаводящиеся вражеские снаряды (фишки Крупье); ставит режим боя.
 var homing_target: Node2D
 var _blast_query: PhysicsShapeQueryParameters2D
@@ -78,7 +79,9 @@ func spawn(weapon: WeaponData, origin: Vector2, direction: Vector2, team: Bullet
 	if team == Bullet.Team.ENEMY and _enemy_tint.a > 0.0:
 		bullet.apply_tint(_enemy_tint)
 	elif team == Bullet.Team.PLAYER and _player_tint.a > 0.0 and weapon.bullet_texture == ConfigLoader.get_tracer_texture():
-		if _player_rainbow:
+		if _player_skin != null and not _player_rainbow:
+			bullet.apply_skin(_player_skin, _player_tint)
+		elif _player_rainbow:
 			_rainbow_hue = fposmod(_rainbow_hue + 0.07, 1.0)
 			bullet.apply_tint(Color.from_hsv(_rainbow_hue, 0.75, 1.0))
 		else:
@@ -86,9 +89,10 @@ func spawn(weapon: WeaponData, origin: Vector2, direction: Vector2, team: Bullet
 	return bullet
 
 
-func set_player_skin(color: Color, rainbow: bool) -> void:
+func set_player_skin(color: Color, rainbow: bool, texture: Texture2D = null) -> void:
 	_player_tint = color
 	_player_rainbow = rainbow
+	_player_skin = texture
 
 
 ## Перекрашивает все летящие и будущие вражеские снаряды.

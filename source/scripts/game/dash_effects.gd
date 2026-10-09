@@ -42,6 +42,12 @@ func setup(player: Player, stats: RunStats, fx: FxManager) -> void:
 	_cut_query.collide_with_areas = false
 	_player.dash_moved.connect(_katana_cut)
 	_player.dash_ended.connect(_hammer_slam)
+	_player.dash_ended.connect(func(at: Vector2) -> void:
+		if _fx != null and _trail_tex != null and at.distance_to(_dash_from) > 30.0:
+			# Шлейф: хвост-рисунок от старта до конца рывка, яркий край — у героя.
+			_fx.sprite_flash(_trail_tex, (at + _dash_from) * 0.5 + Vector2(0, -24), at.distance_to(_dash_from) + 40.0, 0.3, (at - _dash_from).angle())
+		if _fx != null and _burst_tex != null:
+			_fx.flipbook(_burst_tex, at + Vector2(0, -24), 6, 22.0, 90.0))
 	_player.dash_started.connect(func() -> void:
 		_cut_seen.clear()
 		_cut_kills = 0
@@ -49,7 +55,13 @@ func setup(player: Player, stats: RunStats, fx: FxManager) -> void:
 		_element_used = false
 		_ghost_step = 0
 		_skin = Cosmetics.dash_colors()
-		if _fx != null and _skin[1].a > 0.0:
+		_dash_from = _player.global_position
+		_burst_tex = Cosmetics.skin_texture("dash", "burst")
+		_bit_tex = Cosmetics.skin_texture("dash", "bit")
+		_trail_tex = Cosmetics.skin_texture("dash", "trail")
+		if _fx != null and _burst_tex != null:
+			_fx.flipbook(_burst_tex, _player.global_position + Vector2(0, -24), 6, 22.0, 110.0)
+		elif _fx != null and _skin[1].a > 0.0:
 			_fx.burst(_player.global_position + Vector2(0, -20), _skin[0], 10, 200.0, 3.6)
 		if _fx != null:
 			_fx.dust(_player.global_position + Vector2(0, 8), 5, 40.0))
@@ -61,6 +73,11 @@ func setup(player: Player, stats: RunStats, fx: FxManager) -> void:
 var _ghost_step := 0
 ## Скин рывка (Cosmetics): [цвет послеобраза, цвет искр — прозрачный у стандартного].
 var _skin: Array[Color] = [Color(0.45, 0.85, 1.0), Color(0, 0, 0, 0)]
+## Рисунки скина рывка (Астра): вспышка старта, частица по пути, шлейф по всему пути в конце рывка.
+var _burst_tex: Texture2D
+var _bit_tex: Texture2D
+var _trail_tex: Texture2D
+var _dash_from := Vector2.ZERO
 
 
 func _leave_ghost(from: Vector2, _to: Vector2) -> void:
@@ -69,7 +86,9 @@ func _leave_ghost(from: Vector2, _to: Vector2) -> void:
 		return
 	var visual := _player.visual
 	_fx.ghost(visual.get_ghost_texture(), from + visual.get_ghost_offset(), visual.get_ghost_scale(), _skin[0])
-	if _skin[1].a > 0.0 and _ghost_step % 4 == 1:
+	if _bit_tex != null and _ghost_step % 2 == 1:
+		_fx.sprite_flash(_bit_tex, from + Vector2(randf_range(-14, 14), randf_range(-36, -8)), 22.0, 0.35)
+	elif _skin[1].a > 0.0 and _ghost_step % 4 == 1:
 		_fx.burst(from + Vector2(0, -20), _skin[1], 3, 90.0, 3.0)
 
 

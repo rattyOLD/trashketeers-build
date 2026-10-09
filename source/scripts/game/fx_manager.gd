@@ -172,6 +172,12 @@ var _cs_life := PackedFloat32Array()
 var _cs_spin := PackedFloat32Array()
 var _cs_next := 0
 var _sf_nodes: Array[Sprite2D] = []
+## Разовые анимации по листу кадров (вспышки рывка, попадания трассеров): пул спрайтов с hframes.
+const FLIPBOOK_POOL := 12
+var _fb_nodes: Array[Sprite2D] = []
+var _fb_time := PackedFloat32Array()
+var _fb_fps := PackedFloat32Array()
+var _fb_next := 0
 var _sw_nodes: Array[Sprite2D] = []
 var _sw_life := PackedFloat32Array()
 var _sw_total := PackedFloat32Array()
@@ -233,6 +239,13 @@ func _init() -> void:
 	_sf_total.resize(SPRITE_FLASH_POOL)
 	_sf_base.resize(SPRITE_FLASH_POOL)
 	_sf_flip.resize(SPRITE_FLASH_POOL)
+	_fb_time.resize(FLIPBOOK_POOL)
+	_fb_fps.resize(FLIPBOOK_POOL)
+	for i in FLIPBOOK_POOL:
+		var book := Sprite2D.new()
+		book.visible = false
+		add_child(book)
+		_fb_nodes.append(book)
 	for i in SPRITE_FLASH_POOL:
 		var flash_sprite := Sprite2D.new()
 		flash_sprite.visible = false
@@ -332,6 +345,24 @@ func sprite_flash(texture: Texture2D, at: Vector2, width: float, life: float, an
 	node.visible = true
 	_sf_life[k] = life
 	_sf_total[k] = life
+
+
+## Разовая анимация: лист frames кадров в ряд, проигрывается с fps, ширина кадра на экране — width.
+func flipbook(texture: Texture2D, at: Vector2, frames: int, fps: float, width: float, angle: float = 0.0) -> void:
+	if texture == null or frames <= 0:
+		return
+	var k := _fb_next
+	_fb_next = (_fb_next + 1) % FLIPBOOK_POOL
+	var node := _fb_nodes[k]
+	node.texture = texture
+	node.hframes = frames
+	node.frame = 0
+	node.global_position = at
+	node.rotation = angle
+	node.scale = Vector2.ONE * width / maxf(texture.get_width() / float(frames), 1.0)
+	node.visible = true
+	_fb_time[k] = 0.0
+	_fb_fps[k] = fps
 
 
 ## След взмаха: проявляется вслед за клинком, догоняет его по дуге и тает. origin — лапа енота, size — диаметр рисунка.
@@ -624,6 +655,16 @@ func _text(at: Vector2, text: String, color: Color, font_size: float) -> void:
 
 
 func _process(delta: float) -> void:
+	for i in FLIPBOOK_POOL:
+		var book := _fb_nodes[i]
+		if not book.visible:
+			continue
+		_fb_time[i] += delta
+		var f := int(_fb_time[i] * _fb_fps[i])
+		if f >= book.hframes:
+			book.visible = false
+		else:
+			book.frame = f
 	EnvLights.tick(delta)
 	_tick_frame_corpses(delta)
 	for i in SPRITE_FLASH_POOL:

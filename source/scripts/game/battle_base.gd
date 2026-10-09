@@ -184,7 +184,8 @@ func _setup_common(camera_bounds: Rect2, currency_icon: Texture2D) -> void:
 	dash_effects.hammer_slammed.connect(func(_at: Vector2) -> void:
 		add_shake(0.35)
 		hitstop(0.04))
-	BulletPool.set_player_skin(Cosmetics.shot_color(), Cosmetics.shot_rainbow())
+	BulletPool.set_player_skin(Cosmetics.shot_color(), Cosmetics.shot_rainbow(), Cosmetics.skin_texture("shot", "tracer"))
+	_shot_hit = Cosmetics.skin_texture("shot", "hit")
 	hero_skills = HeroSkills.new()
 	add_child(hero_skills)
 	hero_skills.setup(SaveService.get_character_id(), player, fx, stats, add_shake)
@@ -629,9 +630,15 @@ func _on_menu_pressed() -> void:
 	exit_requested.emit()
 
 
+var _shot_hit: Texture2D
+
+
 func _on_bullet_hit(bullet: Bullet, target: Node2D) -> void:
 	if bullet.weapon == null:
 		return
+	# Трассер-скин: своя вспышка попадания (4 кадра Астры).
+	if _shot_hit != null and bullet.team == Bullet.Team.PLAYER and bullet.weapon.bullet_texture == ConfigLoader.get_tracer_texture():
+		fx.flipbook(_shot_hit, bullet.global_position, 4, 20.0, 54.0, randf() * TAU)
 	var color := bullet.weapon.effect_color
 	var crit := bullet.last_hit_crit
 	if bullet.team == Bullet.Team.PLAYER:
