@@ -1436,7 +1436,9 @@ func _build_story_organic() -> bool:
 	area.position.y = boss_rect.end.y + CELL * 3.0
 	area.end.y = player_start.y + CELL
 	var bag: Array = []
-	var target := int(area.get_area() / (520.0 * 520.0))
+	# Обучение (первая миссия) — чистое: меньше укрытий и хлама, без «живого мира» — новичок видит врагов и путь.
+	var tutorial := str(_story.get("mission", "")) == "m1"
+	var target := int(area.get_area() / (520.0 * 520.0) * (0.6 if tutorial else 1.0))
 	for attempt in 3000:
 		if _cover_spots.size() >= target:
 			break
@@ -1449,6 +1451,8 @@ func _build_story_organic() -> bool:
 		var poi: Array = defs.get(str(bag.pop_back()), [])
 		if not poi.is_empty() and _build_poi(poi, p):
 			_cover_spots.append(p)
+	if tutorial:
+		return true
 	_scatter_singles(area, Vector2(1e6, 1e6))
 	# Сюжетные комнаты тоже живые: стаи у маршрута, ветер, пыль из-под ног, листья из кустов.
 	var perches: Array[Vector2] = []

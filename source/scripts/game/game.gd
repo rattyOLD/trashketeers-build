@@ -833,6 +833,8 @@ func _count_multikill() -> void:
 
 func _on_enemy_died(enemy: Enemy) -> void:
 	var data := enemy.data
+	if player != null and player.weapon_controller.weapon != null:
+		stats.note_kill(player.weapon_controller.weapon.is_melee())
 	if data.is_boss():
 		player.external_pull = Vector2.ZERO
 	var at := enemy.global_position
@@ -1257,6 +1259,10 @@ func _refresh_slots() -> void:
 			rail = rail or wc.slots[i].dash_charge
 	stats.close_context = close
 	stats.rail_context = rail
+	var melee := false
+	for i in wc.slot_count:
+		melee = melee or (wc.slots[i] != null and wc.slots[i].is_melee())
+	stats.melee_context = melee
 	hud.set_slots(wc.slots.slice(0, wc.slot_count), wc.active_slot, wc.slot_count)
 
 

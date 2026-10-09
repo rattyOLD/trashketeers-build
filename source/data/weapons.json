@@ -949,7 +949,8 @@
       "knockback": 1.0,
       "effect_color": "#B96BFF",
       "loot_weight": 0.6,
-      "burn": 0.3
+      "burn": 0.3,
+      "trait": "dash_cut"
     },
     {
       "weapon_id": "sledge_truck_v1",

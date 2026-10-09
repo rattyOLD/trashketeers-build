@@ -180,6 +180,7 @@ func _setup_common(camera_bounds: Rect2, currency_icon: Texture2D) -> void:
 	var dash_effects := DashEffects.new()
 	add_child(dash_effects)
 	dash_effects.setup(player, stats, fx)
+	dash_effects.katana_rage.connect(_on_katana_rage)
 	hero_skills = HeroSkills.new()
 	add_child(hero_skills)
 	hero_skills.setup(SaveService.get_character_id(), player, fx, stats, add_shake)
@@ -444,11 +445,31 @@ func _physics_process(delta: float) -> void:
 	hud.set_skill_cooldown(hero_skills.fraction())
 	hud.set_dash_cooldown(player.dash_remaining, player.dash_cooldown)
 
+	if _rage_left > 0.0:
+		_rage_left -= delta
+		if _rage_left <= 0.0:
+			stats.add_flat(&"fire_rate_mult", -RAGE_FIRE)
+			player.apply_run_stats(stats)
 	_hud_timer -= delta
 	if _hud_timer <= 0.0:
 		_hud_timer = 0.1
 		_update_hud_timer()
 	_update_shake(delta)
+
+
+## Катана: три и больше убийств одним рывком — «раж»: удары быстрее на RAGE_TIME (повтор продлевает).
+const RAGE_TIME := 5.0
+const RAGE_FIRE := 0.3
+var _rage_left := 0.0
+
+
+func _on_katana_rage(_kills: int) -> void:
+	if _rage_left <= 0.0:
+		stats.add_flat(&"fire_rate_mult", RAGE_FIRE)
+		player.apply_run_stats(stats)
+		hud.toast("РАЖ!", "Срез трёх за рывок: удары на 30% быстрее 5 с", Color("#b96bff"))
+	_rage_left = RAGE_TIME
+	add_shake(0.25)
 
 
 ## Курок: правый стик на телефоне, левая кнопка мыши на компьютере (прицел — на курсор).

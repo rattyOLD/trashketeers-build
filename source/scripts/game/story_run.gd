@@ -143,7 +143,7 @@ static func map_chapter(base: Dictionary, mission_id: String) -> Dictionary:
 			if bool(enc.get("lock", false)) and not (enc.has("boss") and not bool(enc.get("mini", false))):
 				doors.append(float(enc["at"]))
 		chapter["size"] = entry.get("size", [34, 150])
-		chapter["story"] = {"doors": doors, "boss_cells": entry.get("boss_cells", [22, 12])}
+		chapter["story"] = {"doors": doors, "boss_cells": entry.get("boss_cells", [22, 12]), "mission": mission_id}
 	return chapter
 
 

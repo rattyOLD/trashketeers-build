@@ -53,6 +53,11 @@ const INSTANT_STATS: Array[StringName] = [&"heal_pct"]
 ## Есть ли в руках ствол ближнего боя (ставит игра): без него карточки «ближнего боя» не выпадают.
 var close_context := false
 var rail_context := false
+## Убийства за забег: ближним оружием и всем остальным — по ним выдача карточек подстраивается под стиль.
+var melee_kills := 0
+var ranged_kills := 0
+## Есть ли в слотах оружие ближнего боя (до первых убийств выдача ориентируется на него).
+var melee_context := false
 var _values: Dictionary = {}
 var _stacks: Dictionary = {}
 
@@ -148,6 +153,41 @@ func is_available(upgrade: UpgradeData) -> bool:
 	return true
 
 
+## Карточки, которые работают только на снаряды (у топора и катаны их эффект нулевой).
+const PROJECTILE_ONLY: Array[StringName] = [&"extra_projectiles", &"extra_ricochets", &"piercing"]
+## Карточки, что раскрывают ближний бой: урон, скорость ударов, криты, дальность взмаха, рывки, бег, лечение.
+const MELEE_FRIENDLY: Array[StringName] = [&"damage_mult", &"fire_rate_mult", &"crit_chance_add", &"range_mult",
+	&"move_speed_mult", &"dodge_damage", &"dodge_cooldown", &"dodge_distance", &"bleed_chance", &"vampirism", &"kill_heal"]
+
+
+func note_kill(melee: bool) -> void:
+	if melee:
+		melee_kills += 1
+	else:
+		ranged_kills += 1
+
+
+## Доля ближнего боя в стиле игрока 0..1: по убийствам (после 15), раньше — по слотам.
+func melee_share() -> float:
+	var total := melee_kills + ranged_kills
+	if total < 15:
+		return 0.6 if melee_context else 0.0
+	return float(melee_kills) / float(total)
+
+
+## Подкрутка под оружие: чем больше игрок рубит в ближнем бою, тем реже бесполезные «стволы и рикошеты»
+## и тем чаще карточки, раскрывающие его оружие (по просьбе тестеров: «карточки под твоё оружие»).
+func weapon_affinity(upgrade: UpgradeData) -> float:
+	var share := melee_share()
+	if share <= 0.0:
+		return 1.0
+	if PROJECTILE_ONLY.has(upgrade.stat):
+		return maxf(1.0 - share, 0.04)
+	if MELEE_FRIENDLY.has(upgrade.stat):
+		return 1.0 + 1.3 * share
+	return 1.0
+
+
 ## Три карточки: взвешенно по редкости, без повторов, с разными категориями, если хватает пула.
 ## luck (0..1) сдвигает шансы к редким; guarantee_rarity — минимум одна карточка не ниже указанной.
 ## Архетипы билда: чистый урон, стакер эффектов (яды, огонь, замедления, взрывы), мобильность.
@@ -220,6 +260,7 @@ func roll_choices(pool: Array[UpgradeData], count: int, luck: float = 0.0, guara
 			var w := u.pick_weight(luck)
 			if not shares.is_empty():
 				w *= 1.0 + ARCHETYPE_BIAS * float(shares.get(archetype_of(u), 0.0))
+			w *= weapon_affinity(u)
 			if avoid.has(u.id):
 				w *= 0.08
 			if need_rarity and u.rarity_rank < guarantee_rarity:
