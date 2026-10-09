@@ -440,7 +440,7 @@ func _draw_melee() -> void:
 
 func _draw_slash(pivot: Vector2, alpha: float, turn: float, grow: float) -> void:
 	var tex := WeaponVfx.slash_for(weapon)
-	var visual := weapon.melee_reach * WeaponVfx.slash_scale(weapon) * MELEE_K * grow
+	var visual := weapon.melee_reach * WeaponVfx.slash_scale(weapon) * 0.5 * MELEE_K * grow
 	var flip := -1.0 if _swings % 2 == 0 else 1.0
 	if tex != null:
 		draw_set_transform(pivot, PI + turn, Vector2(1.0, flip))

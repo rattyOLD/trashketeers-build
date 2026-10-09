@@ -624,9 +624,12 @@ func _on_melee_swing(weapon: WeaponData, origin: Vector2, direction: Vector2, _c
 	var slash := WeaponVfx.slash_for(weapon)
 	if slash == null:
 		return
-	var reach := weapon.melee_reach * (1.15 if heavy else 1.0)
-	var visual := reach * WeaponVfx.slash_scale(weapon)
-	fx.slash_sweep(slash, origin, direction, visual * 2.0, 0.26 + 0.035 * weapon.weight, side, weapon.arc_rad)
+	# Дуга рисуется на всю реальную дальность удара (тестеры: «слайс внутри перса, а бьёт за 2–3 шага»).
+	# Рисунок стоит центром на 0.275 размера впереди лапы, внешний край — на 0.775 × масштаб (~0.95) размера:
+	# размер подбираем так, чтобы край лёг на границу поражения (дальность + половина тела врага).
+	var reach := player.weapon_controller.melee.effective_reach(weapon) + MeleeFighter.ENEMY_BODY * 0.5
+	var size := reach / 0.736 * WeaponVfx.slash_scale(weapon) * (1.06 if heavy else 1.0)
+	fx.slash_sweep(slash, origin, direction, size, 0.26 + 0.035 * weapon.weight, side, weapon.arc_rad)
 
 
 func _on_melee_hit(weapon: WeaponData, at: Vector2, count: int, finisher: bool, heavy: bool) -> void:

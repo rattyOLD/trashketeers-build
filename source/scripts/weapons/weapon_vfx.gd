@@ -171,22 +171,21 @@ static func melee_hit_for(w: WeaponData) -> Texture2D:
 	return slash_hit(w.vfx_id if not w.vfx_id.is_empty() else "epic", w.tier)
 
 
-## Размер дуги взмаха относительно дальности удара: рисунок должен быть соразмерен самому клинку,
-## а не всему сектору поражения (нож не должен рубить воздух полэкрана).
+## Поправка размера дуги к полной дальности удара (1.0 — край рисунка ровно на границе поражения):
+## у лёгких клинков дуга чуть уже и острее, у тяжёлых — чуть шире.
 static func slash_scale(w: WeaponData) -> float:
-	var base := 0.5
+	var base := 1.0
 	match w.melee_class:
 		"dagger":
-			base = 0.42
+			base = 0.94
 		"katana":
-			base = 0.46
+			base = 0.97
 		"sword":
-			base = 0.5
+			base = 1.0
 		"shield":
-			base = 0.46
+			base = 0.97
 		"axe":
-			base = 0.52
+			base = 1.02
 		"hammer":
-			base = 0.54
-	var result := base + (0.03 if w.rarity == "legendary" else 0.0)
-	return result * 0.72 if LEGEND_SLASH.has(w.id) else result
+			base = 1.04
+	return base
