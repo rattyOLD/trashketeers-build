@@ -44,7 +44,13 @@ func _run() -> void:
 			peak = maxi(peak, _player_bullets() - before)
 		game.hud.aim_stick._reset()
 		print("MELEE ", weapon.id, " swings=", swings[0], " fired=", shots[0], " bullets=", peak)
-		if shots[0] > 0 or peak > 0 or swings[0] == 0:
+		# Моргенштерн не машет, а держит шар на цепи: стик вправо — шар вынесен вправо на длину цепи.
+		var acting: bool = swings[0] > 0
+		if weapon.melee_class == "flail":
+			var reach := (wc.flail.ball - game.player.global_position).dot(Vector2.RIGHT) if wc.flail != null else 0.0
+			acting = wc.flail != null and wc.flail.visible and reach > 60.0
+			print("MELEE ", weapon.id, " flail_reach=", reach)
+		if shots[0] > 0 or peak > 0 or not acting:
 			failures += 1
 	print("MELEE_PROBE failures=%d" % failures)
 	get_tree().quit()
