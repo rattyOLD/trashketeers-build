@@ -59,6 +59,7 @@ const CHESTS := {
 	},
 }
 const CHEST_ORDER := ["common", "rare", "epic"]
+const MAP_RARITIES := {"rare": ["rare", "epic"], "epic": ["epic", "legendary"]}
 const COSMETIC_RARITIES := {"common": ["common", "common", "rare"], "rare": ["rare", "rare", "epic"], "epic": ["epic", "legendary"]}
 ## «Сундук дня»: один из трёх со скидкой (меняется каждые сутки), и бесплатный за рекламу раз в несколько часов.
 const DAILY_DISCOUNT := 0.3
@@ -94,6 +95,8 @@ static func item_rarity(key: String) -> String:
 	if Cosmetics.is_cosmetic(key):
 		return Cosmetics.rarity_of(key)
 	match item_kind(key):
+		"map":
+			return str(MapCards.info(item_id(key)).get("rarity", "rare"))
 		"weapon":
 			var w := WeaponDB.get_weapon(StringName(item_id(key)))
 			return w.rarity if w != null else "common"
@@ -108,6 +111,8 @@ static func item_title(key: String) -> String:
 	if Cosmetics.is_cosmetic(key):
 		return Cosmetics.title_of(key)
 	match item_kind(key):
+		"map":
+			return str(MapCards.info(item_id(key)).get("title", item_id(key)))
 		"weapon":
 			var w := WeaponDB.get_weapon(StringName(item_id(key)))
 			return w.display_name if w != null else item_id(key)
@@ -128,6 +133,8 @@ static func item_type_name(key: String) -> String:
 			return "Герой"
 		"skin":
 			return "Наряд"
+		"map":
+			return "Карта"
 	return "Предмет"
 
 
@@ -139,6 +146,8 @@ static func owns_item(key: String) -> bool:
 	if Cosmetics.is_cosmetic(key):
 		return Cosmetics.owns(key)
 	match item_kind(key):
+		"map":
+			return MapCards.owns(item_id(key))
 		"weapon":
 			return SaveService.owns_weapon(StringName(item_id(key)))
 		"hero":
@@ -222,6 +231,14 @@ static func featured(chest_id: String) -> Array[String]:
 		cosm.assign(fresh)
 	if not cosm.is_empty():
 		out.append(cosm[rng.randi() % cosm.size()])
+	# Карта Выживания с редкостью: в редком (редкие/эпические) и эпическом (эпические/легендарные) сундуках.
+	if MAP_RARITIES.has(chest_id):
+		var maps: Array[String] = []
+		for rarity in MAP_RARITIES[chest_id]:
+			maps.append_array(MapCards.keys_of(str(rarity)))
+		var unowned := maps.filter(func(k: String) -> bool: return not MapCards.owns(item_id(k)))
+		if not unowned.is_empty():
+			out.append(unowned[rng.randi() % unowned.size()])
 	return out
 
 
@@ -429,6 +446,8 @@ static func give_item(key: String) -> void:
 		Cosmetics.give(key)
 		return
 	match item_kind(key):
+		"map":
+			MapCards.give(item_id(key))
 		"weapon":
 			SaveService.add_weapon(StringName(item_id(key)), 1, false)
 		"hero":

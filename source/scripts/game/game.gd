@@ -138,8 +138,10 @@ static func warm_chapter(chapter: Dictionary) -> void:
 func start(_weapon_id: StringName = &"") -> void:
 	randomize()
 	RunMods.clear()
+	MapCards.clear()
 	if story_mission.is_empty():
 		RunMods.resolve()
+		MapCards.resolve()
 		Enemy.mod_speed_mult = RunMods.ENEMY_SPEED if RunMods.has(&"fast_enemies") else 1.0
 	for id in ContentDB.get_enemy_ids():
 		var enemy_data := ContentDB.get_enemy(id)
@@ -282,6 +284,10 @@ func start(_weapon_id: StringName = &"") -> void:
 			hud.show_mod_badge(str(RunMods.info(RunMods.active)["title"]))
 			get_tree().create_timer(3.0, false).timeout.connect(func() -> void: hud.toast("МОДИФИКАТОР: %s" % str(RunMods.info(RunMods.active)["title"]).to_upper(), "%s. Монеты ×%.1f" % [RunMods.info(RunMods.active)["desc"], RunMods.mult_of(RunMods.active)], Color("#ff9a3d")))
 			SaveService.add_stat("mod_runs", 1, false)
+		if not MapCards.active.is_empty():
+			var card := MapCards.info(MapCards.active)
+			get_tree().create_timer(1.2, false).timeout.connect(func() -> void:
+				hud.toast("КАРТА: %s" % str(card["title"]).to_upper(), "%s Монеты ×%.2f" % [card["desc"], float(card["coins"])], MapCards.color_of(MapCards.active)))
 	SoundManager.play_music(StringName(str(chapter.get("music", "battle"))))
 	SoundManager.start_ambient(map.layout)
 	if story_mission.is_empty():
@@ -473,7 +479,7 @@ func _on_wave_started(number: int, title: String, mood: String, is_boss: bool) -
 	if story_mission.is_empty() and player != null:
 		_wave_hp.append("%d:%d" % [number, int(100.0 * player.hp / maxf(player.max_hp, 1.0))])
 	_last_marker.reset_hunt()
-	atmosphere.set_mood(mood)
+	atmosphere.set_mood(MapCards.mood() if not MapCards.mood().is_empty() and mood != "alarm" else mood)
 	_check_clean_sweep()
 	events.on_wave_started(is_boss)
 	if radio != null:

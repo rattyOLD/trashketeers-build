@@ -61,7 +61,7 @@ static func info(id: StringName) -> Dictionary:
 
 
 static func button_text() -> String:
-	return "С МОДИФИКАТОРОМ: ДА" if enabled() else "С МОДИФИКАТОРОМ: НЕТ"
+	return "МОДИФИКАТОР: ДА" if enabled() else "МОДИФИКАТОР: НЕТ"
 
 
 static func mult_of(id: StringName) -> float:
@@ -74,7 +74,7 @@ static func has(id: StringName) -> bool:
 
 
 static func reward(coins: int) -> int:
-	return int(round(coins * mult_of(active)))
+	return int(round(coins * mult_of(active) * MapCards.coin_mult()))
 
 
 static func only_shotguns(weapon: WeaponData) -> bool:

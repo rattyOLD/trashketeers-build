@@ -243,7 +243,7 @@ func _start_wave(number: int) -> void:
 	if not OS.get_environment("TRK_DEBUG").is_empty():
 		print("ADAPT wave %d power %.1f x%.2f" % [number, run_stats.power() if run_stats != null else 0.0, adapt])
 	_dmg_mult *= 1.0 + (adapt - 1.0) * 0.5
-	_hp_mult *= phase_hp
+	_hp_mult *= phase_hp * MapCards.hp_mult()
 	_dmg_mult *= phase_damage
 	var count_adapt := 1.0 + (adapt - 1.0) * 0.35
 	var early_count := float(d.get("early_count", 1.0)) if loop == 0 and chapter_wave() <= int(d.get("early_waves", 0)) else 1.0
@@ -275,7 +275,11 @@ func _tick_spawns(delta: float) -> void:
 	for i in int(_wave["batch"]):
 		if remaining_to_spawn - batch.size() <= 0 or _enemies.get_active_count() + batch.size() >= _cap():
 			break
-		var data := ContentDB.get_enemy(_pick_weighted(weights))
+		var pick := _pick_weighted(weights)
+		# Карта с редкостью: часть спавна — её «фирменный» враг.
+		if MapCards.featured_share() > 0.0 and randf() < MapCards.featured_share():
+			pick = MapCards.featured_enemy()
+		var data := ContentDB.get_enemy(pick)
 		if data != null:
 			batch.append(data)
 	if batch.is_empty():

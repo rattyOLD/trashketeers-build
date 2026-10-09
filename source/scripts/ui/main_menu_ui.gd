@@ -44,6 +44,8 @@ var _currency: CurrencyPopup
 var _vip: VipPopup
 var _mode_intro: ModeIntroPopup
 var _mod_chip: Button
+var _map_chip: Button
+var _chips_row: HBoxContainer
 var _pass: BattlePassPopup
 var _season_pill: Button
 var _odds: OddsPopup
@@ -686,8 +688,16 @@ func _build_mod_chip() -> Control:
 		_mod_chip.add_theme_stylebox_override(state, style)
 	_mod_chip.add_theme_color_override("font_color", Color("#ffb066"))
 	_mod_chip.pressed.connect(_on_mod_pressed)
+	_mod_chip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	# Рядом — выбор карты Выживания (выбитые из сундуков карты с редкостью, MapCards).
+	_map_chip = _mod_chip.duplicate(Node.DUPLICATE_GROUPS | Node.DUPLICATE_SCRIPTS) as Button
+	_map_chip.pressed.connect(_on_map_pressed)
+	_chips_row = HBoxContainer.new()
+	_chips_row.add_theme_constant_override("separation", 8)
+	_chips_row.add_child(_mod_chip)
+	_chips_row.add_child(_map_chip)
 	_refresh_mod_chip()
-	return _mod_chip
+	return _chips_row
 
 
 func _on_mod_pressed() -> void:
@@ -703,6 +713,27 @@ func _on_mod_pressed() -> void:
 func _refresh_mod_chip() -> void:
 	_mod_chip.text = RunMods.button_text()
 	_mod_chip.visible = _mode == Mode.SURVIVAL
+	if _map_chip != null:
+		_map_chip.text = MapCards.button_text()
+		var id := MapCards.chosen()
+		_map_chip.add_theme_color_override("font_color", MapCards.color_of(id) if not id.is_empty() else Color("#ffb066"))
+		_map_chip.visible = _mode == Mode.SURVIVAL
+	if _chips_row != null:
+		_chips_row.visible = _mode == Mode.SURVIVAL
+
+
+func _on_map_pressed() -> void:
+	SoundManager.play(&"ui_click", -4.0)
+	var id := MapCards.cycle()
+	_refresh_mod_chip()
+	if _mode_hint == null:
+		_mode_hint = HintBubble.new()
+		add_child(_mode_hint)
+	var text := "Карты с редкостью выпадают из сундуков: своё небо, свои враги и больше монет."
+	if not id.is_empty():
+		var card := MapCards.info(id)
+		text = "%s · %s. Монеты ×%.2f" % [card["title"], card["desc"], float(card["coins"])]
+	_mode_hint.show_for(_map_chip, text)
 
 
 func _on_mode_pressed(mode: int) -> void:
