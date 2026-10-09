@@ -41,6 +41,7 @@ const PLATE_BAND := Rect2(0, 4, 640, 32)
 const PLATE_CAP := 40.0
 ## Толщина планок рамки относительно файла: в исходнике они втрое выше шкалы.
 const BORDER_K := 0.55
+const TITLE_SIZE := 28
 
 
 func _init() -> void:
@@ -105,14 +106,10 @@ func _draw() -> void:
 		bar_rect = Rect2(side, size.y - bar_h - 6.0 - (14.0 if posture >= 0.0 else 0.0), size.x - side * 2.0, bar_h)
 	var title_pos := Vector2(0, bar_rect.position.y - 8.0)
 	if _frame_tex != null and not winged:
-		title_pos.y = bar_rect.position.y - FRAME_INNER.position.y * BORDER_K - 5.0
+		# Имя — над рамкой с зазором: череп и планки его не закрывают.
+		title_pos.y = bar_rect.position.y - FRAME_INNER.position.y * BORDER_K - 12.0
 	var title_color := FURY_PINK if _fury else (Color("#ffd6ac") if winged else Color("#ffd257"))
 	var shown_title := (title + " · ОГЛУШЁН") if compact and broken and posture >= 0.0 else title
-	if _plate_tex != null and not winged:
-		var tw := _font.get_string_size(shown_title, HORIZONTAL_ALIGNMENT_LEFT, -1, 26).x + 44.0
-		_draw_plate(Rect2((size.x - tw) * 0.5, title_pos.y - 25.0, tw, 30.0))
-	draw_string_outline(_font, title_pos, shown_title, HORIZONTAL_ALIGNMENT_CENTER, size.x, 26, 8, OUTLINE)
-	draw_string(_font, title_pos, shown_title, HORIZONTAL_ALIGNMENT_CENTER, size.x, 26, title_color)
 
 	if winged:
 		_draw_wing(bar_rect, -1.0)
@@ -149,6 +146,12 @@ func _draw() -> void:
 		if broken and not compact:
 			draw_string_outline(_font, Vector2(0, pr.end.y + 22.0), "ОГЛУШЁН", HORIZONTAL_ALIGNMENT_CENTER, size.x, 20, 6, OUTLINE)
 			draw_string(_font, Vector2(0, pr.end.y + 22.0), "ОГЛУШЁН", HORIZONTAL_ALIGNMENT_CENTER, size.x, 20, Color("#ffe27a"))
+	# Имя босса рисуется последним — поверх рамки и шкалы, всегда читается.
+	if _plate_tex != null and not winged:
+		var tw := _font.get_string_size(shown_title, HORIZONTAL_ALIGNMENT_LEFT, -1, TITLE_SIZE).x + 44.0
+		_draw_plate(Rect2((size.x - tw) * 0.5, title_pos.y - TITLE_SIZE - 2.0, tw, TITLE_SIZE + 10.0))
+	draw_string_outline(_font, title_pos, shown_title, HORIZONTAL_ALIGNMENT_CENTER, size.x, TITLE_SIZE, 9, OUTLINE)
+	draw_string(_font, title_pos, shown_title, HORIZONTAL_ALIGNMENT_CENTER, size.x, TITLE_SIZE, title_color)
 	if _flash > 0.0:
 		draw_rect(bar_rect.grow(6.0), Color(1, 1, 1, _flash / FLASH_TIME * 0.9))
 
