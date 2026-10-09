@@ -729,7 +729,7 @@
     {
       "upgrade_id": "dodge_recovery",
       "title": "Быстрые лапы",
-      "description": "Перезарядка −0,5 с. До 3 уровней; минимум 3,5 с.",
+      "description": "Перезарядка -0,5 с. До 3 уровней; минимум 3,5 с.",
       "stat": "dodge_cooldown",
       "value": 0.5,
       "max_stacks": 3,
