@@ -42,5 +42,67 @@
       "columns": 6,
       "frames": 6
     }
+  },
+  "inventory": [
+    {
+      "file": "vfx_v2/phase2/blink_cut.png",
+      "size": [
+        3072,
+        64
+      ],
+      "mode": "RGBA",
+      "sha256": "0f6dd92dd5392eef86ec65d65a2adbf107eab1d1d31ebee28a005ec7e219f936"
+    },
+    {
+      "file": "vfx_v2/phase2/echo_ring.png",
+      "size": [
+        1536,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "b297f21e5bb10e3e50cb1660453aa35dabb6e6d521591b78f7155796aa1fa519"
+    },
+    {
+      "file": "vfx_v2/phase2/flying_slash.png",
+      "size": [
+        1152,
+        96
+      ],
+      "mode": "RGBA",
+      "sha256": "58ba76e11ff70018d67a2decffcc8f98b29c8753b6de005639d1fbcd718c1df1"
+    },
+    {
+      "file": "vfx_v2/phase2/overheat.png",
+      "size": [
+        768,
+        128
+      ],
+      "mode": "RGBA",
+      "sha256": "6331868c575ea81e9d944941d06f2a475c221b2f6a8cedf569e8b33df60ea80b"
+    },
+    {
+      "file": "vfx_v2/phase2/phase2_badge.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "cb630e3947fe935916512aebefb5952c3e989a8ab027b5c288cf99e5a046efe5"
+    },
+    {
+      "file": "vfx_v2/phase2/split_shot.png",
+      "size": [
+        768,
+        64
+      ],
+      "mode": "RGBA",
+      "sha256": "f04d4396caacf53fd16aee76088d94d850378d5f47ba597c6abe9071e4001169"
+    }
+  ],
+  "phase2_badge": {
+    "size": [
+      256,
+      256
+    ]
   }
 }

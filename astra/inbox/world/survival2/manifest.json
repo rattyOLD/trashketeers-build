@@ -46,7 +46,17 @@
         260,
         260
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "de2f6c531fa5bf8b33ca6794e030121a9a8b118aeadfade2b0932986845471b1"
+    },
+    {
+      "file": "world/survival2/altar_active.png",
+      "size": [
+        1560,
+        260
+      ],
+      "mode": "RGBA",
+      "sha256": "6e1aa3db08185eb3ae786ed0a1cad29e8ec63dc039168e98454e2195f5d74814"
     },
     {
       "file": "world/survival2/charge_tower.png",
@@ -54,7 +64,8 @@
         200,
         360
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "a21260c29c477405d4add3f4ba4415de1af1ee6c7f181579cc847abe2885eca7"
     },
     {
       "file": "world/survival2/charge_tower_charge.png",
@@ -62,7 +73,8 @@
         1200,
         360
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "85b767934816f42a4c3b6ec4e159a4c6ec0fe29d18ddfb9281bed73ae3655e25"
     },
     {
       "file": "world/survival2/charge_tower_off.png",
@@ -70,7 +82,8 @@
         200,
         360
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "e1c66d9744e3f772c96714f94f844561a348bdd7bb539192b45b3bf4c682014a"
     },
     {
       "file": "world/survival2/fence_dealer/idle.png",
@@ -78,7 +91,8 @@
         1024,
         512
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "b72088ff525c2e6550bf1d2b5da4edaf3819f1379e162f0d0dbe876da63ff699"
     },
     {
       "file": "world/survival2/fence_dealer/offer.png",
@@ -86,7 +100,8 @@
         1024,
         256
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "5aaad0b7b75ff25cf03a08b01ec917b3ba17bae6fb5e328948cdc92b3abf5e3f"
     },
     {
       "file": "world/survival2/firmware_icons.png",
@@ -94,7 +109,8 @@
         1024,
         128
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "a4fff2435fec96d60312030809f7d5cb9e835a173fe84e451e6d9323e5661517"
     },
     {
       "file": "world/survival2/greed_register.png",
@@ -102,7 +118,17 @@
         160,
         180
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "3d7ffebb0c8d53c1645a922a82b89e8cf26f737a4fc0a8b5fd48aff4f7caa58c"
+    },
+    {
+      "file": "world/survival2/greed_ring.png",
+      "size": [
+        640,
+        180
+      ],
+      "mode": "RGBA",
+      "sha256": "97d895d879a9dcf59834211b9ac65cd8a61e2f5f9be58073b1680a410cb2cef2"
     },
     {
       "file": "world/survival2/junk_safe.png",
@@ -110,7 +136,8 @@
         140,
         150
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "b34a740b7e744bb4d3cdcc1968ee9b061c04cb71e4539fe0706e61b291024b64"
     },
     {
       "file": "world/survival2/junk_safe_open.png",
@@ -118,7 +145,71 @@
         180,
         150
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "b38c52ab2e41eadf25510d1abedca30d5366725b9b7e26c79a27f7f7ba1ed006"
+    },
+    {
+      "file": "world/survival2/minimap/altar.png",
+      "size": [
+        32,
+        32
+      ],
+      "mode": "RGBA",
+      "sha256": "7fac782840a757e0fdcce7d42e82fe92cfe3bfa717fe7948ee4ddf582b528b63"
+    },
+    {
+      "file": "world/survival2/minimap/dealer.png",
+      "size": [
+        32,
+        32
+      ],
+      "mode": "RGBA",
+      "sha256": "ca41f7146806df41db58447d5634da296266aae113513a9007277c0651d552e8"
+    },
+    {
+      "file": "world/survival2/minimap/greed.png",
+      "size": [
+        32,
+        32
+      ],
+      "mode": "RGBA",
+      "sha256": "eb1a21d2e5dba989697008b30e765c3d16038c5d16c410e0915cf1456b2c78c4"
+    },
+    {
+      "file": "world/survival2/minimap/ring.png",
+      "size": [
+        32,
+        32
+      ],
+      "mode": "RGBA",
+      "sha256": "0b2e3b2590a80d8e8114637adb133d55798e7a66c0b44c3d94ae5b857ff3b77e"
+    },
+    {
+      "file": "world/survival2/minimap/safe.png",
+      "size": [
+        32,
+        32
+      ],
+      "mode": "RGBA",
+      "sha256": "d590dee710199704b03526ec88efe0c401e9525a5c5212d6684fa274ead97c4a"
+    },
+    {
+      "file": "world/survival2/minimap/tower.png",
+      "size": [
+        32,
+        32
+      ],
+      "mode": "RGBA",
+      "sha256": "799c0895e8e1c07b1a180d376cfb37fb120e26ba300972858c7e00011dccebc8"
+    },
+    {
+      "file": "world/survival2/minimap/vacuum.png",
+      "size": [
+        32,
+        32
+      ],
+      "mode": "RGBA",
+      "sha256": "11adff999d6b704f98a644a15250abdb4274ef8c2206e8e98458a916de908c29"
     },
     {
       "file": "world/survival2/ring.png",
@@ -126,7 +217,8 @@
         420,
         300
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "62b5df98123048cf30048d008c05ff5c25021f9129fa7197c6fe8b87da59ac4c"
     },
     {
       "file": "world/survival2/siren.png",
@@ -134,7 +226,8 @@
         128,
         128
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "c9f757f092ad486061349e094bf3a0026a925ae4f0b76f116a923e847d9e9e0a"
     },
     {
       "file": "world/survival2/vacuum.png",
@@ -142,7 +235,17 @@
         200,
         200
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "a70c8242843b92e35bb3c2f938ac1476b8b4626d0e582feea8dfcd2cdaf712ed"
+    },
+    {
+      "file": "world/survival2/vacuum_on.png",
+      "size": [
+        800,
+        200
+      ],
+      "mode": "RGBA",
+      "sha256": "cadeabd47853e0a619c108b06ec78cdbc53b78dbebd377cbbfe29d09e96c6096"
     }
   ],
   "vacuum_on": {

@@ -10,7 +10,7 @@
       32,
       32
     ],
-    "particle_frames": 3
+    "particle_frames": 1
   },
   "shot": {
     "cell": [
@@ -26,7 +26,8 @@
         128,
         128
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "eb02846dbdb7abac4225f53b716b6b01023b262bad8c568cf1b2f9950ef84cc6"
     },
     {
       "file": "cosmetics/chest_cosmetic.png",
@@ -34,15 +35,17 @@
         768,
         384
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "e97438e5481df4afc6521e3fb2107136a0fe11193089da96aef97c486446c4f6"
     },
     {
       "file": "cosmetics/dash/cat/bit.png",
       "size": [
-        96,
+        32,
         32
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "62dc93ea3ba87c52625c2e179fbbe31c06ddbd6ed70035f198adf422f66e6335"
     },
     {
       "file": "cosmetics/dash/cat/burst.png",
@@ -50,7 +53,8 @@
         768,
         128
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "182d15a1690178d6c87583224b6ee7172e100ba7a1c4b3d02a07ffc95c4ca749"
     },
     {
       "file": "cosmetics/dash/cat/trail.png",
@@ -58,15 +62,17 @@
         256,
         64
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "bd68261e47251fd1343d746ffe57f01c3cd2903b7b2dbabaec4a93d411d6909e"
     },
     {
       "file": "cosmetics/dash/ember/bit.png",
       "size": [
-        96,
+        32,
         32
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "72fb7f4aa6df13e8a0f8df12847178f6036fa8e62164108f7af290d6b27db268"
     },
     {
       "file": "cosmetics/dash/ember/burst.png",
@@ -74,7 +80,8 @@
         768,
         128
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "b7e1b6b823e917c8f670aad24c47ec974e84d2012f83cb8d9e28445320a84405"
     },
     {
       "file": "cosmetics/dash/ember/trail.png",
@@ -82,15 +89,17 @@
         256,
         64
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "a68b5bfc2fbcb69374de8562fdd29e590e1e5a63b76b33a3dd94d6de9c2778ef"
     },
     {
       "file": "cosmetics/dash/gold/bit.png",
       "size": [
-        96,
+        32,
         32
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "5047c1a77f38e7ae43c06f55d927ee0aac6d2ba229b888c84191894531bad032"
     },
     {
       "file": "cosmetics/dash/gold/burst.png",
@@ -98,7 +107,8 @@
         768,
         128
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "b9acfcf79172de7cda837c2f8930be53cbc8bddaa37e313cbedcd38207e22c71"
     },
     {
       "file": "cosmetics/dash/gold/trail.png",
@@ -106,15 +116,17 @@
         256,
         64
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "55e2bd2dd3794ec7693d014111272bb849e0e5f9f6e7d5f01740f07bd30fe681"
     },
     {
       "file": "cosmetics/dash/neon/bit.png",
       "size": [
-        96,
+        32,
         32
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "d121fac25aad86aa11f354166ff455d0168d5d51c5c43866478ce4313b928b39"
     },
     {
       "file": "cosmetics/dash/neon/burst.png",
@@ -122,7 +134,8 @@
         768,
         128
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "badf82a522e9676c0e8574b0c40ea5e6e96635468bba3daf64fda0a18b2903f2"
     },
     {
       "file": "cosmetics/dash/neon/trail.png",
@@ -130,15 +143,17 @@
         256,
         64
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "a5401b9277f5b5334dc780e3be068474547099d12d6493daad9a370fd166355b"
     },
     {
       "file": "cosmetics/dash/toxic/bit.png",
       "size": [
-        96,
+        32,
         32
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "21b8e9fa58f89ec72a4094dc7445d1eecc4d86875c7b2a8f3dbc7a9ec4b9cb04"
     },
     {
       "file": "cosmetics/dash/toxic/burst.png",
@@ -146,7 +161,8 @@
         768,
         128
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "36a51cf46e4388c047f155f82c4b21f1bdf5274e70b715c9b2646a76bc6898a1"
     },
     {
       "file": "cosmetics/dash/toxic/trail.png",
@@ -154,15 +170,17 @@
         256,
         64
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "a47b909afdb32431d14813f37019e3998e909ef03a80345bd4cf641e6f7cc7cf"
     },
     {
       "file": "cosmetics/dash/void/bit.png",
       "size": [
-        96,
+        32,
         32
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "5a9f53b8fec741a8b0c0f7ff4ac31c146754e0dbaf3c64e1cca6f90e2c39e592"
     },
     {
       "file": "cosmetics/dash/void/burst.png",
@@ -170,7 +188,8 @@
         768,
         128
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "56aee91b5dd032940659fc2e93977c4b95f5622bd610f9073b0b703066281368"
     },
     {
       "file": "cosmetics/dash/void/trail.png",
@@ -178,7 +197,8 @@
         256,
         64
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "b53d9d8b3506abeab3b4f100ec7b99fd90352848fd75d03db31cb6a597c80351"
     },
     {
       "file": "cosmetics/icons/dash_cat.png",
@@ -186,7 +206,8 @@
         256,
         256
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "924be372a72265326e2870ab5782f48702cfd6ef4903ccac49adb15686e6feb6"
     },
     {
       "file": "cosmetics/icons/dash_ember.png",
@@ -194,7 +215,8 @@
         256,
         256
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "25c7ca79cbcc044e449f1f602503b4c31b255240917033f62967ed5ed83510b2"
     },
     {
       "file": "cosmetics/icons/dash_gold.png",
@@ -202,7 +224,8 @@
         256,
         256
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "508f619413bd235ab179b7721fb22bb4151c6eadcd03b1c3dc82d9bc4b6d045c"
     },
     {
       "file": "cosmetics/icons/dash_neon.png",
@@ -210,7 +233,8 @@
         256,
         256
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "a0ab7e5151eef534deaa3ece8f1e2408e8cf916959faee090b0ab8950d242030"
     },
     {
       "file": "cosmetics/icons/dash_toxic.png",
@@ -218,7 +242,8 @@
         256,
         256
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "14037ac8cca02fb89e5b78514a4d54bfc0fead86b47e1acac0aabeb3dfd8e125"
     },
     {
       "file": "cosmetics/icons/dash_void.png",
@@ -226,7 +251,8 @@
         256,
         256
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "c8590d16e415a9e85fff42bbcf7eeab5007d51b736070e013af75b135370c52e"
     },
     {
       "file": "cosmetics/icons/shot_candy.png",
@@ -234,7 +260,8 @@
         256,
         256
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "6e072a880d5e87417b02c212e0ee8492cdf275721c2c581f8d72e414d6d3d29c"
     },
     {
       "file": "cosmetics/icons/shot_crown.png",
@@ -242,7 +269,8 @@
         256,
         256
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "49a260f3f16126310ad6470898015b3615bd85042a1e962a00bf192365bf9260"
     },
     {
       "file": "cosmetics/icons/shot_inferno.png",
@@ -250,7 +278,8 @@
         256,
         256
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "d2dcb71a812c5e651a3925a11fb5264d9eaac361c64903877bf56fdbe3eea931"
     },
     {
       "file": "cosmetics/icons/shot_plasma.png",
@@ -258,7 +287,8 @@
         256,
         256
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "6502025f31f69872d201ce0cfea2cb0e4bf215f2ed0df4a2c81da39df3782d01"
     },
     {
       "file": "cosmetics/icons/shot_rainbow.png",
@@ -266,7 +296,8 @@
         256,
         256
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "c839c4f534f94879a70fd830e8ba12694c599258773f02df70ac327ffa9de90e"
     },
     {
       "file": "cosmetics/icons/shot_venom.png",
@@ -274,7 +305,8 @@
         256,
         256
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "636b907f85d73abd06ce1e892654dee074c3be6dd51d381a2afc74fd309cce6a"
     },
     {
       "file": "cosmetics/shot/candy/glow.png",
@@ -282,7 +314,8 @@
         64,
         64
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "2c5931177913a491b1a3f35b53214db43a956a3e84c0a9927b0109fbd536fa56"
     },
     {
       "file": "cosmetics/shot/candy/hit.png",
@@ -290,7 +323,8 @@
         384,
         96
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "afcead43fcfd547e54469ea20eba18ad85c77be3ce3ccc18490ed38cc1bf927b"
     },
     {
       "file": "cosmetics/shot/candy/tracer.png",
@@ -298,7 +332,8 @@
         96,
         24
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "254d7de4887c292e0f82d92ce859008182299c21292954fe1f69d325d5b75760"
     },
     {
       "file": "cosmetics/shot/crown/glow.png",
@@ -306,7 +341,8 @@
         64,
         64
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "19932351a4380ce30cfd3e9478c74cf441a4214bd3f86c39df6242c38ec8b7d1"
     },
     {
       "file": "cosmetics/shot/crown/hit.png",
@@ -314,7 +350,8 @@
         384,
         96
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "5ab0c4eff5832c45ce5ca0f90424a0ce9ddaba120e4210f2dbfaf3de840d815a"
     },
     {
       "file": "cosmetics/shot/crown/tracer.png",
@@ -322,7 +359,8 @@
         96,
         24
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "3744dd2f3b28c51467fb0f3d1243177533f434dd4c244a90bd890f0ef57554a5"
     },
     {
       "file": "cosmetics/shot/inferno/glow.png",
@@ -330,7 +368,8 @@
         64,
         64
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "ccdcad237218db4dd9bfdda8f49d384606f6ce7656e70d5da778be6e86745ec8"
     },
     {
       "file": "cosmetics/shot/inferno/hit.png",
@@ -338,7 +377,8 @@
         384,
         96
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "a63c6df1c114f5ff4c516429db9e2252bf854b0021f0e084cef35bbf9c8557e9"
     },
     {
       "file": "cosmetics/shot/inferno/tracer.png",
@@ -346,7 +386,8 @@
         96,
         24
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "e1006664b284076ddb5e609ccd964649bbb17af3ef234837daaac07416e092e3"
     },
     {
       "file": "cosmetics/shot/plasma/glow.png",
@@ -354,7 +395,8 @@
         64,
         64
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "cb5acde64b156284c5734150f6c1a7b5fb2ab55f2f860d9f6cbf56d897ea3ac8"
     },
     {
       "file": "cosmetics/shot/plasma/hit.png",
@@ -362,7 +404,8 @@
         384,
         96
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "f5b44e0b37140c7a91c600bbf0e7f6e0fa9f3f6839878f04122a9e2b4268aa8f"
     },
     {
       "file": "cosmetics/shot/plasma/tracer.png",
@@ -370,7 +413,8 @@
         96,
         24
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "7ea058af37bd11111cb02ba3b687eea3762539ac62853073b0786c7d9c28e00a"
     },
     {
       "file": "cosmetics/shot/rainbow/glow.png",
@@ -378,7 +422,8 @@
         64,
         64
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "bd37952840edc27cd44254a902a372327d0510b1880377f4d5132126f3c367c2"
     },
     {
       "file": "cosmetics/shot/rainbow/hit.png",
@@ -386,7 +431,8 @@
         384,
         96
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "3b8f96a725823388c4379db1cfa0875dbe7a44e40055f503c58f5a02555c20a2"
     },
     {
       "file": "cosmetics/shot/rainbow/tracer.png",
@@ -394,7 +440,8 @@
         96,
         24
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "44baff9d6c2791d80e96c6b403998a5dc2575fbc1fa2ed9e07f66422c899bab5"
     },
     {
       "file": "cosmetics/shot/venom/glow.png",
@@ -402,7 +449,8 @@
         64,
         64
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "af357c9bd945a4170e266707f908e7ef97be684dfdd90013e7a4aef4d0397178"
     },
     {
       "file": "cosmetics/shot/venom/hit.png",
@@ -410,7 +458,8 @@
         384,
         96
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "95231dabb232f442aafb8abacbb6cdff65ca8e36f730b1dcfff1f8f474463adf"
     },
     {
       "file": "cosmetics/shot/venom/tracer.png",
@@ -418,7 +467,8 @@
         96,
         24
       ],
-      "alpha": "RGBA"
+      "mode": "RGBA",
+      "sha256": "c69a45889af785e76cdc857516d59c6ccab85456e19580ce5113796b2b0fdb11"
     }
   ]
 }
