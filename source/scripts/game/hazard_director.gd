@@ -5,7 +5,7 @@ extends Node2D
 ## удары летят прямо в него и чаще, а крысы ускоряются. Все зоны — фиксированный пул,
 ## рисуются одним _draw; артобстрел идёт через LobPool.
 
-enum Kind { ACID, SHOCK, LASER }
+enum Kind { ACID, SHOCK, LASER, COLLAPSE }
 
 const CAPACITY := 20
 const CAMP_SAMPLE := 0.25
@@ -16,6 +16,13 @@ const ACID_LIFE := 7.0
 const ACID_RADIUS := 96.0
 const SHOCK_RADIUS := 118.0
 const LASER_WIDTH := 46.0
+## Обвал (Свалка): с неба падает куча хлама — красное кольцо-предупреждение, удар, облако пыли (арт Астры).
+const COLLAPSE_RADIUS := 92.0
+const COLLAPSE_HIT := 26.0
+const COLLAPSE_LIFE := 5.0
+const ZAP_TIME := 0.45
+const ART := "res://assets/vfx/hazard/"
+static var _art: Dictionary = {}
 const TELEGRAPH := Color("#ff2e4d")
 const COLOR_ACID := Color("#7cff3d")
 const COLOR_SHOCK := Color("#35e6ff")
@@ -125,6 +132,8 @@ func _spawn_event(wave: int) -> void:
 	var options: Array = ["shells"]
 	if wave >= 2:
 		options.append("shock")
+		if not bank:
+			options.append("collapse")
 	if wave >= 3:
 		options.append("laser" if bank else "acid")
 	if wave >= 5:
@@ -145,6 +154,10 @@ func _spawn_event(wave: int) -> void:
 			_add_zone(Kind.SHOCK, center, Vector2.ZERO, 1.35)
 			if wave >= 4:
 				_add_zone(Kind.SHOCK, _target_point(false), Vector2.ZERO, 1.6)
+		"collapse":
+			_add_zone(Kind.COLLAPSE, center, Vector2(randi() % 3, randi() % 3), 1.3)
+			if wave >= 5:
+				_add_zone(Kind.COLLAPSE, _target_point(false), Vector2(randi() % 3, randi() % 3), 1.6)
 		"laser":
 			var horizontal := randf() < 0.5
 			_add_zone(Kind.LASER, center, Vector2.RIGHT if horizontal else Vector2.DOWN, 1.55)
@@ -181,7 +194,7 @@ func _add_zone(kind: int, at: Vector2, direction: Vector2, warn: float) -> void:
 	_dir[k] = direction
 	_time[k] = 0.0
 	_warn[k] = warn
-	_life[k] = warn + (ACID_LIFE if kind == Kind.ACID else 0.45)
+	_life[k] = warn + (ACID_LIFE if kind == Kind.ACID else (COLLAPSE_LIFE if kind == Kind.COLLAPSE else ZAP_TIME))
 	_fired[k] = 0
 
 
@@ -220,6 +233,10 @@ func _tick_zones(delta: float) -> void:
 				if _fired[k] == 0:
 					_fired[k] = 1
 					_beam(k)
+			Kind.COLLAPSE:
+				if _fired[k] == 0:
+					_fired[k] = 1
+					_crash(k)
 	queue_redraw()
 	if not any:
 		queue_redraw()
@@ -242,6 +259,24 @@ func _zap(k: int) -> void:
 		Player.last_source = &"shock"
 		player.take_damage(SHOCK_HIT * _damage_mult())
 		player.snare(0.45)
+
+
+func _crash(k: int) -> void:
+	var at := _pos[k]
+	SoundManager.play(&"crate_break", -2.0, false)
+	SoundManager.play_pitched(&"explosion", 0.7, -6.0)
+	fx.burst(at, Color("#c9a77a"), 22, 300.0, 5.0)
+	if _inside_circle(at, COLLAPSE_RADIUS):
+		Player.last_source = &"collapse"
+		player.take_damage(COLLAPSE_HIT * _damage_mult())
+		player.snare(0.35)
+
+
+static func _tex(name: String) -> Texture2D:
+	if not _art.has(name):
+		var path := ART + name + ".png"
+		_art[name] = load(path) as Texture2D if ResourceLoader.exists(path) else null
+	return _art[name]
 
 
 func _beam(k: int) -> void:
@@ -275,8 +310,61 @@ func _draw() -> void:
 				_draw_acid(k, warming, t, clock)
 			Kind.SHOCK:
 				_draw_ring_zone(_pos[k], SHOCK_RADIUS, t if warming else 1.0, COLOR_SHOCK, warming, clock)
+				_draw_shock_art(k, warming, clock)
+			Kind.COLLAPSE:
+				_draw_collapse(k, warming, t)
 			Kind.LASER:
 				_draw_laser(k, warming, t, clock)
+
+
+## Ловушка Короля: магнитная установка с мерцающими катушками, в момент удара — разряд (8 кадров Астры).
+func _draw_shock_art(k: int, warming: bool, clock: float) -> void:
+	var at := _pos[k]
+	if warming:
+		var drum := _tex("king_magnet_%02d" % (1 + int(clock * 8.0) % 4))
+		if drum != null:
+			var w := 120.0
+			draw_texture_rect(drum, Rect2(at - Vector2(w * 0.5, w * 0.7), Vector2(w, w)), false)
+		return
+	var frame := clampi(int((_time[k] - _warn[k]) / ZAP_TIME * 8.0), 0, 7)
+	var spark := _tex("king_electric_%02d" % (frame + 1))
+	if spark != null:
+		var size := SHOCK_RADIUS * 2.3
+		draw_texture_rect(spark, Rect2(at - Vector2(size, size) * 0.5, Vector2(size, size)), false)
+
+
+## Обвал: кольцо-предупреждение сжимается, куча хлама падает сверху, пыль клубится и тает, обломки лежат и гаснут.
+func _draw_collapse(k: int, warming: bool, t: float) -> void:
+	var at := _pos[k]
+	if warming:
+		var ring := _tex("collapse_warning")
+		if ring != null:
+			var r := COLLAPSE_RADIUS * (1.6 - 0.6 * t)
+			draw_texture_rect(ring, Rect2(at - Vector2(r, r * 0.62), Vector2(r * 2.0, r * 1.24)), false, Color(1, 1, 1, 0.4 + 0.6 * t))
+		# Тень падающей кучи растёт.
+		SoftGlow.pool(self, at, COLLAPSE_RADIUS * t, 0.6, Color(0, 0, 0, 0.35 * t))
+		if t > 0.55:
+			_draw_debris(k, at - Vector2(0, (1.0 - t) / 0.45 * 420.0), 1.0)
+		return
+	var since := _time[k] - _warn[k]
+	var fade := clampf(_life[k] / 1.0, 0.0, 1.0)
+	_draw_debris(k, at, fade)
+	var frame := int(since / 0.09)
+	if frame < 8:
+		var dust := _tex("collapse_dust_%02d" % (frame + 1))
+		if dust != null:
+			var size := COLLAPSE_RADIUS * 2.8
+			draw_texture_rect(dust, Rect2(at - Vector2(size * 0.5, size * 0.72), Vector2(size, size)), false)
+
+
+func _draw_debris(k: int, at: Vector2, alpha: float) -> void:
+	var sizes := ["small", "medium", "large"]
+	var pick := _dir[k]
+	var tex := _tex("collapse_%s_%02d" % [sizes[int(pick.x) % 3], 1 + int(pick.y) % 3])
+	if tex == null:
+		return
+	var w := COLLAPSE_RADIUS * (1.3 + 0.35 * float(int(pick.x) % 3))
+	draw_texture_rect(tex, Rect2(at - Vector2(w * 0.5, w * 0.78), Vector2(w, w)), false, Color(1, 1, 1, alpha))
 
 
 func _draw_acid(k: int, warming: bool, t: float, clock: float) -> void:
