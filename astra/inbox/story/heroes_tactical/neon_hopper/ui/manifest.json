@@ -1,0 +1,207 @@
+{
+  "hero": "neon_hopper",
+  "cellSize": [
+    512,
+    512
+  ],
+  "framesPerFile": 1,
+  "order": [
+    "face_angry.png",
+    "face_grin.png",
+    "face_hit.png",
+    "face_proud.png",
+    "face_scared.png",
+    "face_tired.png",
+    "hud_neon_hopper_0.png",
+    "hud_neon_hopper_1.png",
+    "hud_neon_hopper_2.png",
+    "hud_neon_hopper_3.png",
+    "lose_0.png",
+    "lose_1.png",
+    "neon_hopper.png",
+    "win_0.png",
+    "win_1.png"
+  ],
+  "assets": [
+    {
+      "path": "face_angry.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "face_angry"
+      ],
+      "sha256": "69a56cb27963a56377d791710b311b0277be6d5bea851cb1e018d78fe0faffb8"
+    },
+    {
+      "path": "face_grin.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "face_grin"
+      ],
+      "sha256": "6cdf2b1cc1401a20a25d1215a8e0ecc84d3ef32b49ebf484249dfdfc8aa925d9"
+    },
+    {
+      "path": "face_hit.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "face_hit"
+      ],
+      "sha256": "2e015893e610c3be94f09d72983a643b16ae0f8330f833e8a6e0a0a74bae4bfe"
+    },
+    {
+      "path": "face_proud.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "face_proud"
+      ],
+      "sha256": "908570c6b37f83841d3f656154da1d8833ba3a05b7ce538086a69694abb8b8b0"
+    },
+    {
+      "path": "face_scared.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "face_scared"
+      ],
+      "sha256": "ead59f9008650c7f57efde9aead3f57428166f23dcc28c519c97cbfae42a06ea"
+    },
+    {
+      "path": "face_tired.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "face_tired"
+      ],
+      "sha256": "8d7c2ff6f2be290cd439328c46e75d22ba5a9f282173a44c9cdfd551987d28d0"
+    },
+    {
+      "path": "hud_neon_hopper_0.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "hud_neon_hopper_0"
+      ],
+      "sha256": "43008cf4c5fd65b0104e23a0f0e0e7950c99cb85175f1659969f2b8f04f883d2"
+    },
+    {
+      "path": "hud_neon_hopper_1.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "hud_neon_hopper_1"
+      ],
+      "sha256": "bb8de8fc999105e2fa74b549c3b84dcbbccff10533ed57e1e5ff2e6a2fc08771"
+    },
+    {
+      "path": "hud_neon_hopper_2.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "hud_neon_hopper_2"
+      ],
+      "sha256": "f72ff05978fd1983de29064c484224b14c9ff061a4ad32981a3f755c848b02dd"
+    },
+    {
+      "path": "hud_neon_hopper_3.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "hud_neon_hopper_3"
+      ],
+      "sha256": "0174d1cbfb20dbd06e432028a711b271b9edc3e9adaadb54755655029f199ca4"
+    },
+    {
+      "path": "lose_0.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "lose_0"
+      ],
+      "sha256": "6e2ca6826b6b48654134ac079fa074c489c91bb09ca7a476ee5a9ab3808e7571"
+    },
+    {
+      "path": "lose_1.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "lose_1"
+      ],
+      "sha256": "e6c51000ece222ba733f1b914448424d3bbe23fc929567f5fd499fc13bc68828"
+    },
+    {
+      "path": "neon_hopper.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "neon_hopper"
+      ],
+      "sha256": "c0a8128441a74d602a55ebdfe3c3777b235b05a4a27ed47a8ab641ddc972f87f"
+    },
+    {
+      "path": "win_0.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "win_0"
+      ],
+      "sha256": "eb5b827841eb58e4312917f6c0a8ade12e4b6b85e2ed590c44094289d8f56f49"
+    },
+    {
+      "path": "win_1.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "win_1"
+      ],
+      "sha256": "2a8c2d6509c27753e42e70d3be0ff4164cb8f5f9c10d401773f4f7ad2e81141d"
+    }
+  ]
+}

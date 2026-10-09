@@ -1,0 +1,207 @@
+{
+  "hero": "fluffy_chemist",
+  "cellSize": [
+    512,
+    512
+  ],
+  "framesPerFile": 1,
+  "order": [
+    "face_angry.png",
+    "face_grin.png",
+    "face_hit.png",
+    "face_proud.png",
+    "face_scared.png",
+    "face_tired.png",
+    "fluffy_chemist.png",
+    "hud_fluffy_chemist_0.png",
+    "hud_fluffy_chemist_1.png",
+    "hud_fluffy_chemist_2.png",
+    "hud_fluffy_chemist_3.png",
+    "lose_0.png",
+    "lose_1.png",
+    "win_0.png",
+    "win_1.png"
+  ],
+  "assets": [
+    {
+      "path": "face_angry.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "face_angry"
+      ],
+      "sha256": "3d7b4065caa02f3f944de72c3aca6aa5cd78ab03a03abab5d031ffbec237215a"
+    },
+    {
+      "path": "face_grin.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "face_grin"
+      ],
+      "sha256": "1ac0030bcdfb0ab702f7692fabed5209438dbe1fb213b26861ea8006e4bcdf26"
+    },
+    {
+      "path": "face_hit.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "face_hit"
+      ],
+      "sha256": "e0ee54311e4075035f0892efa17cd257cc3edec54e6776e09604f514cd06422a"
+    },
+    {
+      "path": "face_proud.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "face_proud"
+      ],
+      "sha256": "1515a595348449771385d5d72d68a74ef7917852298ffe7d7c6d9df8d969d03c"
+    },
+    {
+      "path": "face_scared.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "face_scared"
+      ],
+      "sha256": "b8dc005365b8bcc9d757911a52a1987a4e6ab5157eb6eb97f1e420a8437bb0d8"
+    },
+    {
+      "path": "face_tired.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "face_tired"
+      ],
+      "sha256": "4491bc0709e92eca3dac9ea2ee424197cdd1fa49c5204f62290f8ac85d346cf8"
+    },
+    {
+      "path": "fluffy_chemist.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "fluffy_chemist"
+      ],
+      "sha256": "8a6a430458334502e3fe6632785ac1e0c5cb6f914e723c90c770cb3ed6da20e4"
+    },
+    {
+      "path": "hud_fluffy_chemist_0.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "hud_fluffy_chemist_0"
+      ],
+      "sha256": "22db5286562d63ab4e6eeed0bd404d38946dfa2b1aa8d2eb929aba9a95a87c88"
+    },
+    {
+      "path": "hud_fluffy_chemist_1.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "hud_fluffy_chemist_1"
+      ],
+      "sha256": "f193743ba6d543e85aadd0b07c4a5b8b832ed339cd1e0ef439b787174b100ca3"
+    },
+    {
+      "path": "hud_fluffy_chemist_2.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "hud_fluffy_chemist_2"
+      ],
+      "sha256": "9ab9534753a5d7677146bd4d50d0331079fd00d9ef02881e931357c5ac246e15"
+    },
+    {
+      "path": "hud_fluffy_chemist_3.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "hud_fluffy_chemist_3"
+      ],
+      "sha256": "48acf063fc08ee362d77add5d715b663f232b0ade72b4ae7deba35027b9fcee0"
+    },
+    {
+      "path": "lose_0.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "lose_0"
+      ],
+      "sha256": "8ec09543d5611366df11282d193e26b1461a99ffa3e2bd0c2a6c5bcd2bb58b1c"
+    },
+    {
+      "path": "lose_1.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "lose_1"
+      ],
+      "sha256": "b5fbe6b928119aeea6ae9bba6b9d45de8ffcda24af58a1e2e0f854e7f3e66248"
+    },
+    {
+      "path": "win_0.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "win_0"
+      ],
+      "sha256": "1856a5628de559cd6aa8784964a8562efbebfb06fd88cc5ad9a71b4d730fa605"
+    },
+    {
+      "path": "win_1.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "win_1"
+      ],
+      "sha256": "d2000f220f0608869e8f0b48c85b7989826d579038111568f37809bb68be8c6d"
+    }
+  ]
+}

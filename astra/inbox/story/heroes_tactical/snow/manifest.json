@@ -1,0 +1,246 @@
+{
+  "hero": "snow",
+  "cellWidth": 480,
+  "cellHeight": 320,
+  "columns": 4,
+  "frameOrder": "left-to-right top-to-bottom",
+  "assets": [
+    {
+      "path": "snow_body_nohands_idle.png",
+      "width": 1920,
+      "height": 640,
+      "sha256": "da8be85ddacea7cc397d2fb6a99b272e107125408d964a2b7154e316a3c64c82"
+    },
+    {
+      "path": "snow_body_nohands_run.png",
+      "width": 1920,
+      "height": 640,
+      "sha256": "83f40ded4611e186d7dd78586f67e520d73c7ad600d6c79fa97022650163fba8"
+    },
+    {
+      "path": "snow_body_nohands_shoot.png",
+      "width": 1920,
+      "height": 320,
+      "sha256": "2e00abce44ab8f54fffa6ca61b659904ce780c5ea0551e84c59d4b0c13154029"
+    },
+    {
+      "path": "snow_dash.png",
+      "width": 1920,
+      "height": 640,
+      "sha256": "9f32a87d9e9da66bdea1e5504c5682985a861905dea03d3375382d26890db1e2"
+    },
+    {
+      "path": "snow_death.png",
+      "width": 1920,
+      "height": 640,
+      "sha256": "804903fc4a06af581b70d00cd65190665bbfb8d5e6e48aeb7bcded0ec32b80a0"
+    },
+    {
+      "path": "snow_fronthand_idle.png",
+      "width": 1920,
+      "height": 640,
+      "sha256": "8f9842a5cb2c6b196dede2036d737c4334882eb485adf6a73d5019f29101f48e"
+    },
+    {
+      "path": "snow_fronthand_run.png",
+      "width": 1920,
+      "height": 640,
+      "sha256": "e2d6b1abfbc4d65b767b906d3d3a683f2a1214115ecb6183f295ee0a139cb188"
+    },
+    {
+      "path": "snow_fronthand_shoot.png",
+      "width": 1920,
+      "height": 320,
+      "sha256": "834d04dca5b19d65106f05e6e378c46733d36f92249623d04e9db88ce139f866"
+    },
+    {
+      "path": "snow_hit.png",
+      "width": 1920,
+      "height": 320,
+      "sha256": "6653e5c9084c1d489677328f1407f9471e1fa57056453d307d22a722d137daf5"
+    },
+    {
+      "path": "snow_idle.png",
+      "width": 1920,
+      "height": 640,
+      "sha256": "e5b090a669d4572d6029562eefa70b4f666e66a4fd8a2cec5f9b35ecaeddbaff"
+    },
+    {
+      "path": "snow_idle_fidget.png",
+      "width": 1920,
+      "height": 640,
+      "sha256": "1c5c709e79198f6c852863b23197d96df3d0176c26fc7d28dc2ac872cf1840e2"
+    },
+    {
+      "path": "snow_rearhand_idle.png",
+      "width": 1920,
+      "height": 640,
+      "sha256": "79aab7b42d807cd13231ed0f44bc7683c9504d4452270b2372c984abea0ea42e"
+    },
+    {
+      "path": "snow_rearhand_run.png",
+      "width": 1920,
+      "height": 640,
+      "sha256": "f4c55a43d149755d06ceb65216323405f98b5fd930b3e040a8222efd1760b662"
+    },
+    {
+      "path": "snow_rearhand_shoot.png",
+      "width": 1920,
+      "height": 320,
+      "sha256": "153bd79d256508ae1311b3f46bca2c37464c2eda9d176c96a14efec7a34a46af"
+    },
+    {
+      "path": "snow_revive.png",
+      "width": 1920,
+      "height": 640,
+      "sha256": "050acf0fadb15dbc6c1e22aea5ae7b7dd54188fcec03697aaa21b56ba0883225"
+    },
+    {
+      "path": "snow_run.png",
+      "width": 1920,
+      "height": 640,
+      "sha256": "80b7075d23013d50b1d3033de0a674748a063bdb1465ce82a78ab6d09fa77eb9"
+    },
+    {
+      "path": "snow_shoot.png",
+      "width": 1920,
+      "height": 320,
+      "sha256": "518c0b1b6e842b8c446876a24d473d388d2f3ba8ba669c4c7004b17cb486d436"
+    },
+    {
+      "path": "snow_walk.png",
+      "width": 1920,
+      "height": 640,
+      "sha256": "30f0a4379edb3f0d3e0a32e9934f086d730a64b24e1b54755a5b032db8321904"
+    },
+    {
+      "path": "ui/avatar_snow.png",
+      "width": 256,
+      "height": 256,
+      "sha256": "c8c94b0a8c57a16605521a7b1e63704c4bb36765cbd21f8a4b05566b1f7df702"
+    },
+    {
+      "path": "ui/face_angry.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "4eed9c51629e53029e88c51d6dc4763fa8357e3b129c49c0d1cdc8ce7b17273c"
+    },
+    {
+      "path": "ui/face_grin.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "ce24afbd5277af2e7e767b6252907792b16de235e7bdebdd5e9542eac6cf743d"
+    },
+    {
+      "path": "ui/face_hit.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "3950899eb7cb58b70a2c70c023f1bd35736b3191c4a67e803dc129f75478a9f9"
+    },
+    {
+      "path": "ui/face_proud.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "5b0986825efb2a9fad9084e9f3d79c3a62a5224ea99fcf062f51dd575e0dd5ca"
+    },
+    {
+      "path": "ui/face_scared.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "10aaed6f87a7fd01c2a91aeb72f0163ee9c1149da38b26843a56d1f0ff4ea487"
+    },
+    {
+      "path": "ui/face_tired.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "56025f03386ee85e5731f71661f02354edf2e2fdeb8e66b392f13165f867e33c"
+    },
+    {
+      "path": "ui/friend_snow.png",
+      "width": 256,
+      "height": 256,
+      "sha256": "c8c94b0a8c57a16605521a7b1e63704c4bb36765cbd21f8a4b05566b1f7df702"
+    },
+    {
+      "path": "ui/hero_snow.png",
+      "width": 96,
+      "height": 96,
+      "sha256": "63cc67655a7e414a4315e4e4c58a285a738650c9d2c1ca292406bbca6297f400"
+    },
+    {
+      "path": "ui/hud_snow_0.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "8a295956b6923a5dc7f24200ba2d5b3d11dbdc921a038f2949ae8e3937efe31a"
+    },
+    {
+      "path": "ui/hud_snow_1.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "341f1f948bb782185fb2e141c8740ab788efdbcea8b8780330abd1f35497dc0c"
+    },
+    {
+      "path": "ui/hud_snow_2.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "a704c86871c5d00643919b6b1a9dc38b9213e9964bc5845f5dbf42619d40854e"
+    },
+    {
+      "path": "ui/hud_snow_3.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "ff7094d840347a10dca7c1d4f050ed3b7390222c4d3ba400f1989a89f0f351d5"
+    },
+    {
+      "path": "ui/lose_0.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "691b691a1d93dcea1b85d9253477bef2bcde7da960029fd8d7bcf2dca0b3e518"
+    },
+    {
+      "path": "ui/lose_1.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "ef883810de43bbc7014e30a438e7a9077a135c36dff3c4a07c8bd1077308b729"
+    },
+    {
+      "path": "ui/portrait_snow_alt.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "2ccec2e822693b4b4f5b1bfad110e1fc10d7e0eccf772a159d09fef5821aff5f"
+    },
+    {
+      "path": "ui/portrait_snow_angry.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "93ed930c2a7306619b0df9c4a1e7f607568334fb416b5f9c309fde65130d399d"
+    },
+    {
+      "path": "ui/portrait_snow_normal.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "64104945c44ec0b8c3e2aca15b6d5f40c95ff2ada639ef14f2346d7e293b27af"
+    },
+    {
+      "path": "ui/win_0.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "07650f1206266c3227af50b5fb4e71afbf7152bfdcf51125df54c5e2fb04214e"
+    },
+    {
+      "path": "ui/win_1.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "baff8c116cc10d659fe05c397933dca1be5ff2ccd899eaffa6b2582b4ff3bf24"
+    }
+  ],
+  "hands": "Anatomical right trigger hand (rearhand), anatomical left palm-up support hand (fronthand). Separate shoulder/elbow joints; fixed bone lengths; thumb laterality drawn separately.",
+  "jointGuides": "joint_guides.json",
+  "layerOrder": [
+    "fronthand",
+    "body_nohands",
+    "rearhand"
+  ],
+  "farForearmInFront": true,
+  "composition": "Far/left upper arm behind body; far/left forearm in front of body; near/right arm in front. Importer separates upper/fore at the elbow using joint_guides.json."
+}

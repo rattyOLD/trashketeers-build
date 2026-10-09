@@ -1,0 +1,338 @@
+{
+  "hero": "neon_hopper",
+  "brief": "v32 section 2 / v21",
+  "frameOrder": "left-to-right top-to-bottom",
+  "cellWidth": 480,
+  "cellHeight": 320,
+  "columns": 4,
+  "clips": {
+    "idle": 8,
+    "run": 8,
+    "shoot": 4,
+    "hit": 4,
+    "dash": 6,
+    "death": 8,
+    "revive": 6,
+    "idle_fidget": 8
+  },
+  "layerOrder": [
+    "fronthand",
+    "body_nohands",
+    "rearhand"
+  ],
+  "assets": [
+    {
+      "path": "neon_hopper_body_nohands_idle.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "538db1f42703843198ebeb3edc97eaaad2f047acd59aedfff9fcbc914fce55c0",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "neon_hopper_body_nohands_run.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "466bcaa3217ff70f69f18a96f23bfb2763a3ad144b9f0f2a3671afd3af002863",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "neon_hopper_body_nohands_shoot.png",
+      "width": 1920,
+      "height": 320,
+      "background": "transparent",
+      "sha256": "1b451977d3a386d7e7f272514b92ac602c3cdbb4828e8937c91c8c2c0bc20735",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 4,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "neon_hopper_dash.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "44eb5612b050bf39f5839145f66bbd323b517e581f37f88645210e72ac1ba68b",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 6,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "neon_hopper_death.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "f5024f9fdfd6f6e1a2f22e029054087fcb31a730048e4ed67b07f8ace1b00bed",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "neon_hopper_fronthand_idle.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "db0869d7530d48d68cf4e7f53e84d91358a6df3dd6763b423bcd53819edcf162",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "neon_hopper_fronthand_run.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "16312d1ee0c2492a5632d0ad7a6187185ed3d569fd7dd15cdacaadd0d895f8c2",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "neon_hopper_fronthand_shoot.png",
+      "width": 1920,
+      "height": 320,
+      "background": "transparent",
+      "sha256": "53fe6796a2ebc7cca69259831f803a21b52a8210b5fb7f227570d92f792fcb56",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 4,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "neon_hopper_hit.png",
+      "width": 1920,
+      "height": 320,
+      "background": "transparent",
+      "sha256": "b975b60d30be7479c45143e39cdadd1a7807f9b614b62d51570a47884599faab",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 4,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "neon_hopper_idle.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "f6c5658430524655a891471330048ae788eddb7c7c75333e8e28725a481298b1",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "neon_hopper_idle_fidget.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "158f45527e168d469b0ae840bf047667654d75cc07b6377c307f47a810b06818",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "neon_hopper_rearhand_idle.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "7b2ae43ca62f4cb8cf3c04bef8a2d888d9b368f6303cbc1c60ecd12589633ca0",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "neon_hopper_rearhand_run.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "dd4ef205d9242750c42e6816c4a2c399c991a29761b8ebe1df51a7bf92d246b3",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "neon_hopper_rearhand_shoot.png",
+      "width": 1920,
+      "height": 320,
+      "background": "transparent",
+      "sha256": "aa4e308319d31f589b9f5bb77964dd2a776802435d44c9d4621b1b732114bffd",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 4,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "neon_hopper_revive.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "4a7e6d5dc2b786dbe310852e44aaec55ca0c727c696ee782873e1c3bcf21ecf9",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 6,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "neon_hopper_run.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "f5da96e368a9b1e109e6e075605466fd7b9e9e8351ff15e0ac1f3b5a1aba0c31",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "neon_hopper_shoot.png",
+      "width": 1920,
+      "height": 320,
+      "background": "transparent",
+      "sha256": "dcf56a8561e66fe99cb5b46fd3e11f350b8d0a36092787bd94414b1672200894",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 4,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "ui/face_angry.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "69a56cb27963a56377d791710b311b0277be6d5bea851cb1e018d78fe0faffb8"
+    },
+    {
+      "path": "ui/face_grin.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "6cdf2b1cc1401a20a25d1215a8e0ecc84d3ef32b49ebf484249dfdfc8aa925d9"
+    },
+    {
+      "path": "ui/face_hit.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "2e015893e610c3be94f09d72983a643b16ae0f8330f833e8a6e0a0a74bae4bfe"
+    },
+    {
+      "path": "ui/face_proud.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "908570c6b37f83841d3f656154da1d8833ba3a05b7ce538086a69694abb8b8b0"
+    },
+    {
+      "path": "ui/face_scared.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "ead59f9008650c7f57efde9aead3f57428166f23dcc28c519c97cbfae42a06ea"
+    },
+    {
+      "path": "ui/face_tired.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "8d7c2ff6f2be290cd439328c46e75d22ba5a9f282173a44c9cdfd551987d28d0"
+    },
+    {
+      "path": "ui/hud_neon_hopper_0.png",
+      "width": 512,
+      "height": 512,
+      "background": "#FF00FF",
+      "sha256": "43008cf4c5fd65b0104e23a0f0e0e7950c99cb85175f1659969f2b8f04f883d2"
+    },
+    {
+      "path": "ui/hud_neon_hopper_1.png",
+      "width": 512,
+      "height": 512,
+      "background": "#FF00FF",
+      "sha256": "bb8de8fc999105e2fa74b549c3b84dcbbccff10533ed57e1e5ff2e6a2fc08771"
+    },
+    {
+      "path": "ui/hud_neon_hopper_2.png",
+      "width": 512,
+      "height": 512,
+      "background": "#FF00FF",
+      "sha256": "f72ff05978fd1983de29064c484224b14c9ff061a4ad32981a3f755c848b02dd"
+    },
+    {
+      "path": "ui/hud_neon_hopper_3.png",
+      "width": 512,
+      "height": 512,
+      "background": "#FF00FF",
+      "sha256": "0174d1cbfb20dbd06e432028a711b271b9edc3e9adaadb54755655029f199ca4"
+    },
+    {
+      "path": "ui/lose_0.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "6e2ca6826b6b48654134ac079fa074c489c91bb09ca7a476ee5a9ab3808e7571"
+    },
+    {
+      "path": "ui/lose_1.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "e6c51000ece222ba733f1b914448424d3bbe23fc929567f5fd499fc13bc68828"
+    },
+    {
+      "path": "ui/neon_hopper.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "c0a8128441a74d602a55ebdfe3c3777b235b05a4a27ed47a8ab641ddc972f87f"
+    },
+    {
+      "path": "ui/win_0.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "eb5b827841eb58e4312917f6c0a8ade12e4b6b85e2ed590c44094289d8f56f49"
+    },
+    {
+      "path": "ui/win_1.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "2a8c2d6509c27753e42e70d3be0ff4164cb8f5f9c10d401773f4f7ad2e81141d"
+    }
+  ],
+  "hands": "Anatomical right trigger hand (rearhand), anatomical left palm-up support hand (fronthand). Separate shoulder/elbow joints; fixed bone lengths; thumb laterality drawn separately.",
+  "jointGuides": "joint_guides.json",
+  "farForearmInFront": true,
+  "composition": "Far/left upper arm behind body; far/left forearm in front of body; near/right arm in front. Importer separates upper/fore at the elbow using joint_guides.json."
+}

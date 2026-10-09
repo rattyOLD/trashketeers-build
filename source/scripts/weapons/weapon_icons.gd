@@ -85,6 +85,17 @@ static func grip(kind: StringName) -> Vector2:
 	return Vector2(-11.0, 5.0)
 
 
+## Off-hand contact stays behind the muzzle and close to the trigger on short guns.
+static func support(kind: StringName, sidearm: bool = false) -> Vector2:
+	var handle := grip(kind)
+	if sidearm:
+		return handle + Vector2(3.0, 2.0)
+	var tip := muzzle(kind)
+	# The shotgun's wooden fore-end starts farther forward than the rifle receiver.
+	var fraction := 0.58 if kind == &"shotgun" else 0.35
+	return Vector2(lerpf(handle.x, tip.x, fraction), lerpf(handle.y, tip.y, 0.25))
+
+
 ## Рисует ствол kind с центром в center. flip_y — зеркалить по вертикали (ствол смотрит влево,
 ## а рукоять должна остаться снизу).
 static func draw(canvas: CanvasItem, kind: StringName, center: Vector2, size_scale: float, angle: float, accent: Color, flip_y: bool = false) -> void:

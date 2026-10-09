@@ -1,0 +1,338 @@
+{
+  "hero": "fluffy_chemist",
+  "brief": "v32 section 2 / v21",
+  "frameOrder": "left-to-right top-to-bottom",
+  "cellWidth": 480,
+  "cellHeight": 320,
+  "columns": 4,
+  "clips": {
+    "idle": 8,
+    "run": 8,
+    "shoot": 4,
+    "hit": 4,
+    "dash": 6,
+    "death": 8,
+    "revive": 6,
+    "idle_fidget": 8
+  },
+  "layerOrder": [
+    "fronthand",
+    "body_nohands",
+    "rearhand"
+  ],
+  "assets": [
+    {
+      "path": "fluffy_chemist_body_nohands_idle.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "f7586c100fb804ddf6210856c7438b228259336d739eb0927855113bd733760f",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "fluffy_chemist_body_nohands_run.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "5b01ecdaec33da6ad21eb93c78335ffddccb96c90be8af17a0b3a2d6b221676a",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "fluffy_chemist_body_nohands_shoot.png",
+      "width": 1920,
+      "height": 320,
+      "background": "transparent",
+      "sha256": "bc36126b2f4dd7a4b9a04cbe2b7795fc7779d8d0d965b2bd8659eeadf0eed6f7",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 4,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "fluffy_chemist_dash.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "090c1e57d6f2720a72a58fe6cfe803da081cbca387664af7db13954d46a99e15",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 6,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "fluffy_chemist_death.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "c599bd81082e553f5a2c2a296af4f60e89c5a20eeae3dd5ec3f4930cbac77cf7",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "fluffy_chemist_fronthand_idle.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "ffc80703cc200be8de4bae807295e14e25f284c5f7cdf70dd5160e49055b8497",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "fluffy_chemist_fronthand_run.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "3dd507e5b8224ed8b5006f2ad1af687dcc369e900728f14bcfdb5d5b34be0131",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "fluffy_chemist_fronthand_shoot.png",
+      "width": 1920,
+      "height": 320,
+      "background": "transparent",
+      "sha256": "ffab31b481c2999ef2f8d7e724125eefa6ed971eaaeeb40f007835080d8a0f3c",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 4,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "fluffy_chemist_hit.png",
+      "width": 1920,
+      "height": 320,
+      "background": "transparent",
+      "sha256": "2d5fc10bd1233bcb0ba1595df15a2c73f2223fe9c1834e84ad2d2f7529d6e296",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 4,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "fluffy_chemist_idle.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "98d817c68bf58c7916b0eba6bf66a43b69236d442cba06e032e718103f2a6a97",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "fluffy_chemist_idle_fidget.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "70acc5ca0577c88ba977709e4fba9019fd2fa0458e7f9adf03f226cd90de46d9",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "fluffy_chemist_rearhand_idle.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "c3d43de250bef82bc903df84edfc181b8e83962ef8225f74b4680dc4449db3df",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "fluffy_chemist_rearhand_run.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "f57395e48b0b2be5e4aeb7ad1f0bcf8f58ba48a1ea24b2d7e8b62383ee3bd2e1",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "fluffy_chemist_rearhand_shoot.png",
+      "width": 1920,
+      "height": 320,
+      "background": "transparent",
+      "sha256": "e86dc47dcad390b3b2f12c5c924a1abd4114a6c9ebae2b546ae69b12ca6e9323",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 4,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "fluffy_chemist_revive.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "cfc714db722dc41db17cf2e3106b0547b0da45622f1b6e9b6c6e8d420a52b534",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 6,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "fluffy_chemist_run.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "012639476253cfe33d29b22a3d628cd59d8ee5f61c91fa9caee206729debebfd",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "fluffy_chemist_shoot.png",
+      "width": 1920,
+      "height": 320,
+      "background": "transparent",
+      "sha256": "50ae918724c27e91f51a9771143b2672ac766c8058b27dd41ee3cad73ac5cb75",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 4,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "ui/face_angry.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "3d7b4065caa02f3f944de72c3aca6aa5cd78ab03a03abab5d031ffbec237215a"
+    },
+    {
+      "path": "ui/face_grin.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "1ac0030bcdfb0ab702f7692fabed5209438dbe1fb213b26861ea8006e4bcdf26"
+    },
+    {
+      "path": "ui/face_hit.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "e0ee54311e4075035f0892efa17cd257cc3edec54e6776e09604f514cd06422a"
+    },
+    {
+      "path": "ui/face_proud.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "1515a595348449771385d5d72d68a74ef7917852298ffe7d7c6d9df8d969d03c"
+    },
+    {
+      "path": "ui/face_scared.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "b8dc005365b8bcc9d757911a52a1987a4e6ab5157eb6eb97f1e420a8437bb0d8"
+    },
+    {
+      "path": "ui/face_tired.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "4491bc0709e92eca3dac9ea2ee424197cdd1fa49c5204f62290f8ac85d346cf8"
+    },
+    {
+      "path": "ui/fluffy_chemist.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "8a6a430458334502e3fe6632785ac1e0c5cb6f914e723c90c770cb3ed6da20e4"
+    },
+    {
+      "path": "ui/hud_fluffy_chemist_0.png",
+      "width": 512,
+      "height": 512,
+      "background": "#FF00FF",
+      "sha256": "22db5286562d63ab4e6eeed0bd404d38946dfa2b1aa8d2eb929aba9a95a87c88"
+    },
+    {
+      "path": "ui/hud_fluffy_chemist_1.png",
+      "width": 512,
+      "height": 512,
+      "background": "#FF00FF",
+      "sha256": "f193743ba6d543e85aadd0b07c4a5b8b832ed339cd1e0ef439b787174b100ca3"
+    },
+    {
+      "path": "ui/hud_fluffy_chemist_2.png",
+      "width": 512,
+      "height": 512,
+      "background": "#FF00FF",
+      "sha256": "9ab9534753a5d7677146bd4d50d0331079fd00d9ef02881e931357c5ac246e15"
+    },
+    {
+      "path": "ui/hud_fluffy_chemist_3.png",
+      "width": 512,
+      "height": 512,
+      "background": "#FF00FF",
+      "sha256": "48acf063fc08ee362d77add5d715b663f232b0ade72b4ae7deba35027b9fcee0"
+    },
+    {
+      "path": "ui/lose_0.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "8ec09543d5611366df11282d193e26b1461a99ffa3e2bd0c2a6c5bcd2bb58b1c"
+    },
+    {
+      "path": "ui/lose_1.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "b5fbe6b928119aeea6ae9bba6b9d45de8ffcda24af58a1e2e0f854e7f3e66248"
+    },
+    {
+      "path": "ui/win_0.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "1856a5628de559cd6aa8784964a8562efbebfb06fd88cc5ad9a71b4d730fa605"
+    },
+    {
+      "path": "ui/win_1.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "d2000f220f0608869e8f0b48c85b7989826d579038111568f37809bb68be8c6d"
+    }
+  ],
+  "hands": "Anatomical right trigger hand (rearhand), anatomical left palm-up support hand (fronthand). Separate shoulder/elbow joints; fixed bone lengths; thumb laterality drawn separately.",
+  "jointGuides": "joint_guides.json",
+  "farForearmInFront": true,
+  "composition": "Far/left upper arm behind body; far/left forearm in front of body; near/right arm in front. Importer separates upper/fore at the elbow using joint_guides.json."
+}

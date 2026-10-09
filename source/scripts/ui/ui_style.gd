@@ -65,6 +65,43 @@ static func fit_button_font(button: Button, base: int, max_width: float) -> void
 	button.add_theme_font_size_override("font_size", size)
 
 
+static func fit_label_font(label_node: Label, base: int, max_width: float) -> void:
+	var font := label_node.get_theme_font("font")
+	var font_size := base
+	while font_size > 11 and font.get_string_size(label_node.text, HORIZONTAL_ALIGNMENT_LEFT, -1.0, font_size).x > max_width:
+		font_size -= 1
+	label_node.add_theme_font_size_override("font_size", font_size)
+
+
+## Resize-safe fitting includes plate padding and the text outline.
+static func fit_plate_label(label_node: Label, base: int) -> void:
+	label_node.clip_text = true
+	var fit := func() -> void:
+		if label_node.size.x <= 0.0:
+			return
+		var style := label_node.get_theme_stylebox("normal")
+		var padding := style.get_content_margin(SIDE_LEFT) + style.get_content_margin(SIDE_RIGHT)
+		fit_label_font(label_node, base, maxf(1.0, label_node.size.x - padding - label_node.get_theme_constant("outline_size") * 2.0))
+	label_node.resized.connect(fit)
+	label_node.tree_entered.connect(fit.call_deferred)
+	fit.call_deferred()
+
+
+static func _fit_button_contents(button_node: Button, base: int) -> void:
+	if button_node.size.x <= 0.0 or button_node.text.is_empty():
+		return
+	var style := button_node.get_theme_stylebox("normal")
+	var available := button_node.size.x - style.get_content_margin(SIDE_LEFT) - style.get_content_margin(SIDE_RIGHT)
+	available -= button_node.get_theme_constant("outline_size") * 2.0
+	if button_node.icon != null:
+		available -= minf(button_node.icon.get_width(), button_node.get_theme_constant("icon_max_width")) + button_node.get_theme_constant("h_separation")
+	var signature := [button_node.text, available, base]
+	if button_node.get_meta(&"fit_signature", []) == signature:
+		return
+	button_node.set_meta(&"fit_signature", signature)
+	fit_button_font(button_node, base, maxf(1.0, available))
+
+
 ## Текстура из набора интерфейса Астры (assets/ui/kit/<имя>) или null, если набор выключен или файла нет.
 static func kit_texture(file: String) -> Texture2D:
 	if not KIT_ON:
@@ -78,7 +115,7 @@ static func kit_texture(file: String) -> Texture2D:
 ## Какой из четырёх нарисованных цветов кнопки ближе к заказанному оттенку. Серые и тёмные кнопки: фиолетовая «стальная».
 static func _kit_family(color: Color) -> String:
 	if color.s < 0.3 or color.v < 0.4:
-		return "teal"
+		return "gold"
 	var h := color.h
 	if h < 0.04 or h > 0.93:
 		return "red"
@@ -153,35 +190,19 @@ static func button(text: String, color: Color, font_size: int = 30, min_size: Ve
 		b.add_theme_stylebox_override("disabled", button_box(color.darkened(0.45).lerp(Color("#4a4742"), 0.5), false))
 	b.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 	b.pressed.connect(func() -> void: SoundManager.play(&"ui_click"))
+	b.clip_text = true
+	if min_size.x > 0.0 and min_size.x < 80.0:
+		b.add_theme_constant_override("outline_size", 3)
+		for state: String in ["normal", "hover", "pressed", "hover_pressed", "disabled"]:
+			var small_box := b.get_theme_stylebox(state).duplicate() as StyleBox
+			small_box.content_margin_left = 12.0
+			small_box.content_margin_right = 12.0
+			b.add_theme_stylebox_override(state, small_box)
+	b.resized.connect(_fit_button_contents.bind(b, font_size))
+	b.tree_entered.connect(_fit_button_contents.bind(b, font_size).call_deferred)
+	b.draw.connect(_fit_button_contents.bind(b, font_size))
 	press_feedback(b)
-	# Надпись всегда внутри плашки: при смене размера или текста шрифт ужимается под ширину без болтов и иконки.
-	var fit := func() -> void: _fit_inside(b, font_size)
-	b.resized.connect(fit)
-	b.ready.connect(fit)
 	return b
-
-
-static func _fit_inside(b: Button, base: int) -> void:
-	if not is_instance_valid(b) or b.size.x < 8.0 or b.text.is_empty() or b.autowrap_mode != TextServer.AUTOWRAP_OFF:
-		return
-	var sb := b.get_theme_stylebox("normal")
-	# Ровно то место, что Godot отдаёт тексту: без запаса, иначе кнопка, подстроенная под текст, ужималась по кругу.
-	var avail := b.size.x - (sb.get_margin(SIDE_LEFT) + sb.get_margin(SIDE_RIGHT) if sb != null else 0.0)
-	if b.icon != null:
-		var icon_w := float(b.get_theme_constant("icon_max_width")) if b.get_theme_constant("icon_max_width") > 0 else float(b.icon.get_width())
-		avail -= icon_w + float(b.get_theme_constant("h_separation"))
-	var font := b.get_theme_font("font")
-	var size := base
-	var widest := 0.0
-	for line in b.text.split("\n"):
-		widest = maxf(widest, font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x)
-	while size > 11 and widest > avail + 0.5:
-		size -= 1
-		widest = 0.0
-		for line in b.text.split("\n"):
-			widest = maxf(widest, font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x)
-	if size != b.get_theme_font_size("font_size"):
-		b.add_theme_font_size_override("font_size", size)
 
 
 ## Кнопка «прожимается»: под пальцем чуть утапливается, отпустил — пружинит обратно, плюс короткий отклик вибрацией.

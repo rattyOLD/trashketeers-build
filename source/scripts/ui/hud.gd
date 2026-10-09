@@ -1142,7 +1142,7 @@ func _next_toast() -> void:
 	var half := minf(240.0, (_root.size.x - 36.0) * 0.5)
 	var shift := 0.0
 	if _band != null:
-		half = 350.0
+		half = minf(350.0, (_root.size.x - 36.0) * 0.5)
 	elif Orient.portrait and _story_bar == null:
 		half = 250.0
 		shift = -50.0  # правый край левее колонки слотов оружия
@@ -1152,6 +1152,7 @@ func _next_toast() -> void:
 	_toast_text.custom_minimum_size.x = half * 2.0 - 40.0
 	_toast.custom_minimum_size = Vector2(half * 2.0, 0.0)
 	_toast_title.text = item[0]
+	_toast_title.clip_text = true
 	_toast_text.text = item[1]
 	_fit_font(_toast_title, _band_font(18) if _band != null else 20, half * 2.0 - 48.0)
 	_fit_font(_toast_text, _band_font(13) if _band != null else 16, half * 2.0 - 48.0)
@@ -1268,8 +1269,7 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	_xp_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	bars.add_child(_xp_row)
 	var xp_gap := Control.new()
-	# Отступ из-под круга портрета: «УР N» целиком видно.
-	xp_gap.custom_minimum_size = Vector2(16, 0)
+	xp_gap.custom_minimum_size = Vector2(24 if Orient.portrait else 20, 0)
 	xp_gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_xp_row.add_child(xp_gap)
 	# Уровень — крупно перед полосой опыта (медаль у портрета перекрывали плашки).
@@ -1554,7 +1554,7 @@ class SkillButton:
 		var r := size.x * 0.46 * (1.0 - 0.08 * _press)
 		var ready := cooldown <= 0.001
 		var pulse := 0.5 + 0.5 * sin(_time * 5.0)
-		_batch.circle(c, r, Color(0.06, 0.03, 0.12, 0.5))
+		_batch.circle(c, r, Color(UiStyle.PANEL, 0.5))
 		_batch.arc(c, r, 0.0, TAU, 48, Color(accent, (0.65 + 0.3 * pulse) if ready else 0.3), 5.0, true)
 		if not ready:
 			var sweep := PackedVector2Array([c])
@@ -1568,7 +1568,7 @@ class SkillButton:
 		var cap_size := int(size.x * 0.2)
 		while cap_size > 10 and font.get_string_size(caption, HORIZONTAL_ALIGNMENT_LEFT, -1, cap_size).x > size.x * 0.68:
 			cap_size -= 1
-		draw_string_outline(font, Vector2(0, c.y - 4.0), caption, HORIZONTAL_ALIGNMENT_CENTER, size.x, cap_size, 6, Color(0.06, 0.03, 0.1))
+		draw_string_outline(font, Vector2(0, c.y - 4.0), caption, HORIZONTAL_ALIGNMENT_CENTER, size.x, cap_size, 6, UiStyle.OUTLINE)
 		draw_string(font, Vector2(0, c.y - 4.0), caption, HORIZONTAL_ALIGNMENT_CENTER, size.x, cap_size, Color(accent, alpha))
 		var words := title.split(" ")
 		var lines: Array[String] = [""]

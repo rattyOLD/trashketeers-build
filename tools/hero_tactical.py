@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """Герои Астры в тактическом стиле (бриф v21): astra/inbox/story/heroes_tactical/<id>/ -> assets/heroes/tactical/<id>_<clip>.png.
 Исходник: ячейка 480x320, 4 в ряд; в игре ячейка 300x200 (как у прежнего енота, экономия видеопамяти).
-Фон #FF00FF у листов без прозрачности вырезается astra_key. По слоям рук считаются точки хвата на каждый кадр:
-grip — кулак задней руки (rearhand, у пояса), support — ладонь передней (fronthand), на неё ложится ствол.
-Кулак вырезается в hand_<clip>.png и рисуется поверх ствола. Итог: data/grip_<id>.json [grip_x, grip_y, support_x, support_y].
+Фон #FF00FF у листов без прозрачности вырезается astra_key. Анатомическая правая рука (rearhand)
+держит рукоять, левая (fronthand) поддерживает цевьё. joint_guides.json задаёт плечо, локоть
+и кисть отдельно для каждой руки. Импорт сохраняет суставы и порядок слоёв для двухзвенной анимации.
+data/grip_<id>.json содержит прежние точки хвата и rig schema 2 с суставами всех кадров.
 Запуск из корня репозитория: python3 tools/hero_tactical.py"""
 import argparse, json, os, sys, tempfile
+from pathlib import Path
 import numpy as np
 from PIL import Image
 sys.path.insert(0, os.path.dirname(__file__))
@@ -13,14 +15,13 @@ from astra_key import key
 
 SRC = "astra/inbox/story/heroes_tactical"
 DST = "source/assets/heroes/tactical"
-HEROES = ("raccoon", "red_panda", "snow", "night")
+HEROES = ("raccoon", "red_panda", "snow", "night", "neon_hopper", "fluffy_chemist", "pigeon_mafioso")
+# Аргументы — только эти герои (python3 tools/hero_tactical.py night), иначе все.
+HANDS_ONLY = False
 COUNTS = {"idle": 8, "run": 8, "shoot": 4, "hit": 4, "dash": 6, "death": 8, "revive": 6}
 HANDS = ("idle", "run", "shoot")
 CW, CH = 480, 320
 K = 300 / 480
-FIST_R = 30.0     # радиус вырезаемого кулака в исходных пикселях
-FIST_SOFT = 8.0
-
 
 def rgba(path):
     im = Image.open(path)
@@ -93,52 +94,92 @@ def main(heroes=HEROES):
     for hero in heroes:
         base = f"{SRC}/{hero}/{hero}_"
         for clip in COUNTS:
-            if clip not in HANDS:
+            if clip not in HANDS and not HANDS_ONLY:
                 shrink(rgba(base + clip + ".png")).save(f"{DST}/{hero}_{clip}.png", optimize=True)
-        rear = cells(rgba(base + "rearhand_shoot.png"), 1)[0]
-        front = cells(rgba(base + "fronthand_shoot.png"), 1)[0]
-        ref = anchor(cells(rgba(base + "body_nohands_shoot.png"), 1)[0])
-        g0 = tip(rear, 22)
-        s0 = tip(front, 18)
-        yy, xx = np.mgrid[0:CH, 0:CW]
-        fade = np.clip((FIST_R + FIST_SOFT - np.sqrt((xx - g0[0]) ** 2 + (yy - g0[1]) ** 2)) / FIST_SOFT, 0.0, 1.0)
-        fist_arr = np.array(rear).astype(np.float32)
-        fist_arr[..., 3] *= fade
-        fist = Image.fromarray(fist_arr.clip(0, 255).astype(np.uint8), "RGBA")
+        guides = json.loads(Path(f"{SRC}/{hero}/joint_guides.json").read_text())
+        full_arms = {
+            name: cells(rgba(base + layer + "_shoot.png"), 1)[0]
+            for name, layer in [('right', 'rearhand'), ('left', 'fronthand')]
+        }
+        rig = {'schema': 2, 'arms': {}, 'frames': {}, 'bakedUpper': guides.get('bakedUpper', [])}
+        rig['gripRestOffset'] = [round(v*K, 3) for v in guides.get('gripRestOffset', [0,0])]
         grip = {}
-        # Среднее положение корпуса в стойке: бег и стрельба сдвигаются к нему целиком (по X), иначе при смене
-        # позы тело прыгало на 10–20 px. Движение внутри клипа сохраняется.
+        yy, xx = np.mgrid[0:CH, 0:CW]
+        fist_layers = {}
+        fore_layers = {}
+        for name, image in full_arms.items():
+            joints = guides['arms'][name]
+            source = np.array([joints[key] for key in ('shoulder', 'elbow', 'palm')])
+            # Source shoot layers are already registered to their first frame sockets.
+            source += np.round(np.array(guides['frames']['shoot'][0][name]) - source[0])
+            rig['arms'][name] = {key: [round(v*K, 3) for v in point]
+                                  for key, point in zip(('shoulder', 'elbow', 'palm'), source)}
+            shoulder, elbow, palm = source
+            up = (elbow-shoulder)/np.linalg.norm(elbow-shoulder)
+            fore = (palm-elbow)/np.linalg.norm(palm-elbow)
+            normal = up+fore; normal /= np.linalg.norm(normal)
+            plane = (xx-elbow[0])*normal[0]+(yy-elbow[1])*normal[1]
+            for part, fade in [('upper', np.clip((5-plane)/3, 0, 1)),
+                               ('fore', np.clip((plane+5)/3, 0, 1)),
+                               ('fist', np.clip((19-np.hypot(xx-palm[0],yy-palm[1]))/3, 0, 1))]:
+                arr = np.array(image); arr[..., 3] = (arr[..., 3]*fade).astype(np.uint8)
+                isolated = Image.fromarray(arr)
+                shrink(isolated).save(f'{DST}/{hero}_{name}_{part}.png', optimize=True)
+                if part == 'fist': fist_layers[name] = isolated
+                if part == 'fore': fore_layers[name] = isolated
         idle_x = np.mean([anchor(b)[0] for b in cells(rgba(base + "body_nohands_idle.png"), COUNTS["idle"])])
         for clip in HANDS:
-            bodies = cells(rgba(base + "body_nohands_" + clip + ".png"), COUNTS[clip])
+            originals = cells(rgba(base + "body_nohands_" + clip + ".png"), COUNTS[clip])
+            bodies = originals[:]
             order = smooth_order(bodies) if clip == "idle" else list(range(len(bodies)))
             shift = idle_x - np.mean([anchor(b)[0] for b in bodies])
             bodies = [shifted(b, shift, 0) for b in bodies]
             if clip == "idle":
-                # Стойка: раскачку корпуса гасим на 60% — кадров мало, крупные шаги смотрелись рывками.
                 mean_x = np.mean([anchor(b)[0] for b in bodies])
-                bodies = [shifted(b, (mean_x - anchor(b)[0]) * 0.6, 0) for b in bodies]
-            frames, hands, points = [], [], []
+                bodies = [shifted(b, (mean_x-anchor(b)[0])*0.6, 0) for b in bodies]
+            frames, hands, points, frame_sockets = [], [], [], []
             for i in order:
-                ax, ay = anchor(bodies[i])
-                dx, dy = ax - ref[0], ay - ref[1]
-                cell = shifted(rear, dx, dy)
+                translation = np.array(anchor(bodies[i])) - np.array(anchor(originals[i]))
+                sockets = {name: np.array(guides['frames'][clip][i][name])+translation
+                           for name in ('right', 'left')}
+                layer_images = {}
+                palms = {}
+                for name in ('right', 'left'):
+                    source = rig['arms'][name]
+                    shoulder = np.array(source['shoulder']) / K
+                    delta = sockets[name]-shoulder
+                    layer_images[name] = shifted(full_arms[name], *delta)
+                    palms[name] = np.array(source['palm']) / K + delta
+                cell = layer_images['left'].copy()
                 cell.alpha_composite(bodies[i])
-                cell.alpha_composite(shifted(front, dx, dy))
+                # The far upper arm stays behind the torso; its forearm comes forward.
+                cell.alpha_composite(shifted(fore_layers['left'], *(sockets['left']-np.array(rig['arms']['left']['shoulder'])/K)))
+                if 'right' in rig['bakedUpper']:
+                    cell.alpha_composite(shifted(fore_layers['right'], *(sockets['right']-np.array(rig['arms']['right']['shoulder'])/K)))
+                else:
+                    cell.alpha_composite(layer_images['right'])
                 frames.append(cell)
-                hands.append(shifted(fist, dx, dy))
-                points.append([round((g0[0] + dx) * K, 1), round((g0[1] + dy) * K, 1), round((s0[0] + dx) * K, 1), round((s0[1] + dy) * K, 1)])
+                hands.append(shifted(fist_layers['right'], *(sockets['right']-np.array(rig['arms']['right']['shoulder'])/K)))
+                points.append([round(v*K, 1) for v in (*palms['right'], *palms['left'])])
+                frame_sockets.append({name: [round(v*K, 3) for v in point] for name, point in sockets.items()})
+                for name in rig['bakedUpper']:
+                    elbow = np.array(guides['frames'][clip][i][name+'_elbow'])+translation
+                    frame_sockets[-1][name+'_elbow'] = [round(v*K, 3) for v in elbow]
             shrink(sheet_of(frames)).save(f"{DST}/{hero}_{clip}.png", optimize=True)
+            shrink(sheet_of([bodies[i] for i in order])).save(f'{DST}/{hero}_body_nohands_{clip}.png', optimize=True)
             shrink(sheet_of(hands)).save(f"{DST}/{hero}_hand_{clip}.png", optimize=True)
             grip[clip] = points
+            rig['frames'][clip] = frame_sockets
         fidget = base + "idle_fidget.png"
-        if os.path.exists(fidget):
+        if os.path.exists(fidget) and not HANDS_ONLY:
             # «Тик» в покое: целые кадры (руки нарисованы), по корпусу — к средней стойке.
             fr = cells(rgba(fidget), 8)
             shift = idle_x - np.mean([anchor(b)[0] for b in fr])
             shrink(sheet_of([shifted(b, shift, 0) for b in fr])).save(f"{DST}/{hero}_fidget.png", optimize=True)
-        json.dump(grip, open(f"source/data/grip_{hero}.json", "w"))
-        print(hero, {c: len(v) for c, v in grip.items()})
+        grip['rig'] = rig
+        with open(f'source/data/grip_{hero}.json', 'w') as target:
+            json.dump(grip, target)
+        print(hero, {c: len(grip[c]) for c in HANDS})
 
 
 # Портреты: карточка героя (assets/ui/portraits/<файл>, до 300 px), лицо в бою по урону (hud/<id>_0..3, 256 px).
@@ -147,6 +188,9 @@ UI = {
     "red_panda": {"card": ("ui/red_panda.png", "red_panda.png")},
     "snow": {"card": ("ui/portrait_snow_normal.png", "snow.png")},
     "night": {"card": ("ui/hud_night_0.png", "night.png")},
+    "neon_hopper": {"card": ("ui/neon_hopper.png", "neon_hopper.png")},
+    "fluffy_chemist": {"card": ("ui/fluffy_chemist.png", "fluffy_chemist.png")},
+    "pigeon_mafioso": {"card": ("ui/pigeon_mafioso.png", "pigeon_mafioso.png")},
 }
 PORTRAITS = "source/assets/ui/portraits"
 
@@ -201,7 +245,12 @@ def ui(heroes=HEROES):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument("heroes", nargs="*", choices=HEROES)
     parser.add_argument("--hero", action="append", choices=HEROES)
-    selected = parser.parse_args().hero or HEROES
+    parser.add_argument("--hands-only", action="store_true")
+    args = parser.parse_args()
+    selected = args.hero or args.heroes or HEROES
+    HANDS_ONLY = args.hands_only
     main(selected)
-    ui(selected)
+    if not HANDS_ONLY:
+        ui(selected)

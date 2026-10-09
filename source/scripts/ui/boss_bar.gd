@@ -147,11 +147,20 @@ func _draw() -> void:
 			draw_string_outline(_font, Vector2(0, pr.end.y + 22.0), "ОГЛУШЁН", HORIZONTAL_ALIGNMENT_CENTER, size.x, 20, 6, OUTLINE)
 			draw_string(_font, Vector2(0, pr.end.y + 22.0), "ОГЛУШЁН", HORIZONTAL_ALIGNMENT_CENTER, size.x, 20, Color("#ffe27a"))
 	# Имя босса рисуется последним — поверх рамки и шкалы, всегда читается.
+	var title_size := TITLE_SIZE
+	var title_width := maxf(1.0, size.x - (132.0 if _plate_tex != null and not winged else 24.0))
+	while title_size > 11 and _font.get_string_size(shown_title, HORIZONTAL_ALIGNMENT_LEFT, -1, title_size).x > title_width:
+		title_size -= 1
 	if _plate_tex != null and not winged:
-		var tw := _font.get_string_size(shown_title, HORIZONTAL_ALIGNMENT_LEFT, -1, TITLE_SIZE).x + 44.0
-		_draw_plate(Rect2((size.x - tw) * 0.5, title_pos.y - TITLE_SIZE - 2.0, tw, TITLE_SIZE + 10.0))
-	draw_string_outline(_font, title_pos, shown_title, HORIZONTAL_ALIGNMENT_CENTER, size.x, TITLE_SIZE, 9, OUTLINE)
-	draw_string(_font, title_pos, shown_title, HORIZONTAL_ALIGNMENT_CENTER, size.x, TITLE_SIZE, title_color)
+		var tw := minf(size.x - 24.0, _font.get_string_size(shown_title, HORIZONTAL_ALIGNMENT_LEFT, -1, title_size).x + 108.0)
+		var plate := Rect2((size.x - tw) * 0.5, title_pos.y - TITLE_SIZE - 2.0, tw, TITLE_SIZE + 10.0)
+		_draw_plate(plate)
+		title_pos = Vector2(plate.position.x + 54.0, plate.position.y + (plate.size.y - _font.get_height(title_size)) * 0.5 + _font.get_ascent(title_size))
+		title_width = tw - 108.0
+	else:
+		title_pos.x = 12.0
+	draw_string_outline(_font, title_pos, shown_title, HORIZONTAL_ALIGNMENT_CENTER, title_width, title_size, 6, OUTLINE)
+	draw_string(_font, title_pos, shown_title, HORIZONTAL_ALIGNMENT_CENTER, title_width, title_size, title_color)
 	if _flash > 0.0:
 		draw_rect(bar_rect.grow(6.0), Color(1, 1, 1, _flash / FLASH_TIME * 0.9))
 

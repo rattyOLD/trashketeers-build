@@ -16,14 +16,14 @@ func _init(title: String, coins: int, gems: int, tier: int, state: State, big: b
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	custom_minimum_size = Vector2(0, 176 if big else 168)
 	var accent := [Color("#ffba72"), Color("#c98bff"), UiStyle.GOLD][clampi(tier, 0, 2)] as Color
-	var bg := Color("#4f4c47")
-	var border := UiStyle.OUTLINE
+	var bg := UiStyle.PANEL_LIGHT
+	var border := UiStyle.CARD_BORDER
 	match state:
 		State.CURRENT:
 			bg = Color(0.28, 0.21, 0.07, 0.98)
 			border = UiStyle.GOLD
 		State.DONE:
-			bg = Color("#353330")
+			bg = UiStyle.PANEL
 			border = Color("#2fae5f")
 		_:
 			border = accent.darkened(0.45)
@@ -78,7 +78,7 @@ func _icon(path: String, left: float, right: float, top: float, bottom: float) -
 func _amount_row(icon_path: String, text: String, color: Color) -> Control:
 	var pill := PanelContainer.new()
 	pill.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	pill.add_theme_stylebox_override("panel", UiStyle.box(Color(0.07, 0.04, 0.12, 0.75), Color(0, 0, 0, 0), 0, 12))
+	pill.add_theme_stylebox_override("panel", UiStyle.box(Color(UiStyle.PANEL, 0.9), Color(0, 0, 0, 0), 0, 12))
 	var hbox := HBoxContainer.new()
 	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	hbox.add_theme_constant_override("separation", 6)

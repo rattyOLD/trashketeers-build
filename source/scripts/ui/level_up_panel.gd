@@ -114,7 +114,7 @@ func _make_card(upgrade: UpgradeData, index: int, stats: RunStats) -> Button:
 	var card_w := _card_width()
 	var text_width := 444.0 if Orient.portrait else card_w - 48.0
 	var card := UiStyle.button("", UiStyle.PANEL_LIGHT, 28, Vector2(520, 148) if Orient.portrait else Vector2(card_w, 280))
-	var border := 6 if upgrade.rarity_rank > 0 else 4
+	var border := 3
 	card.add_theme_stylebox_override("normal", UiStyle.box(UiStyle.PANEL_LIGHT.darkened(0.15), accent, border, 22))
 	card.add_theme_stylebox_override("hover", UiStyle.box(UiStyle.PANEL_LIGHT.lightened(0.08), accent.lightened(0.25), border, 22))
 	card.add_theme_stylebox_override("pressed", UiStyle.box(UiStyle.PANEL_LIGHT.lightened(0.15), Color.WHITE, border, 22))
@@ -126,7 +126,7 @@ func _make_card(upgrade: UpgradeData, index: int, stats: RunStats) -> Button:
 			tex.texture = load(frame_path) as Texture2D
 			# Уменьшенная рамка (×0.55): тонкая и одинаковой толщины на всех карточках.
 			tex.set_texture_margin_all(17.0)
-			tex.set_content_margin_all(14.0)
+			tex.set_content_margin_all(18.0)
 			tex.modulate_color = {"normal": Color.WHITE, "hover": Color(1.12, 1.12, 1.12), "pressed": Color(1.25, 1.25, 1.25), "focus": Color.WHITE}[state]
 			card.add_theme_stylebox_override(state, tex)
 	card.action_mode = BaseButton.ACTION_MODE_BUTTON_PRESS
@@ -137,7 +137,9 @@ func _make_card(upgrade: UpgradeData, index: int, stats: RunStats) -> Button:
 	column.offset_left = 22
 	column.offset_right = -22
 	column.alignment = BoxContainer.ALIGNMENT_BEGIN
-	column.offset_top = 16 if Orient.portrait else 20
+	column.offset_top = 26 if Orient.portrait else 30
+	var bottom_space := 142.0 if upgrade.icon != null and not Orient.portrait else 22.0
+	column.offset_bottom = -bottom_space
 	column.add_theme_constant_override("separation", 3)
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	card.add_child(column)
@@ -154,11 +156,11 @@ func _make_card(upgrade: UpgradeData, index: int, stats: RunStats) -> Button:
 			var side := 84.0
 			art.set_anchors_preset(Control.PRESET_CENTER_RIGHT)
 			art.offset_left = -side - 14.0
-			art.offset_right = -14.0
+			art.offset_right = -24.0
 			art.offset_top = -side * 0.5
 			art.offset_bottom = side * 0.5
-			column.offset_right = -side - 26.0
-			text_width -= side + 8.0
+			column.offset_right = -side - 38.0
+			text_width -= side + 20.0
 		else:
 			var side := 92.0
 			art.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
@@ -216,14 +218,14 @@ func _make_card(upgrade: UpgradeData, index: int, stats: RunStats) -> Button:
 		branch_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		branch_label.custom_minimum_size = Vector2(text_width, 0)
 		column.add_child(branch_label)
-	if not Orient.portrait:
-		var card_ref: WeakRef = weakref(card)
-		var column_ref: WeakRef = weakref(column)
-		column.minimum_size_changed.connect(func() -> void:
-			var target := card_ref.get_ref() as Button
-			var contents := column_ref.get_ref() as VBoxContainer
-			if is_instance_valid(target) and is_instance_valid(contents):
-				target.custom_minimum_size.y = maxf(280.0, contents.get_combined_minimum_size().y + contents.offset_top + 24.0))
+	var card_ref: WeakRef = weakref(card)
+	var column_ref: WeakRef = weakref(column)
+	var base_height := 148.0 if Orient.portrait else 280.0
+	column.minimum_size_changed.connect(func() -> void:
+		var target := card_ref.get_ref() as Button
+		var contents := column_ref.get_ref() as VBoxContainer
+		if is_instance_valid(target) and is_instance_valid(contents):
+			target.custom_minimum_size.y = maxf(base_height, contents.get_combined_minimum_size().y + contents.offset_top + bottom_space))
 	return card
 
 

@@ -5,7 +5,7 @@ shader_type canvas_item;
 // поэтому выборки делаются вручную — 9 чтений на пиксель, только на площади окна.
 uniform sampler2D screen_texture : hint_screen_texture, filter_linear;
 uniform float blur_radius = 4.0;
-uniform vec4 tint : source_color = vec4(0.06, 0.04, 0.12, 0.72);
+uniform vec4 tint : source_color = vec4(0.133, 0.114, 0.098, 0.82);
 uniform vec2 rect_size = vec2(600.0, 800.0);
 uniform float corner_radius = 28.0;
 

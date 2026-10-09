@@ -216,10 +216,14 @@ static var _skin_tex := {}
 
 
 static func skin_texture(kind: String, part: String) -> Texture2D:
-	var key := worn(kind)
+	return texture_for(worn(kind), part)
+
+
+## Explicit key lets previews show locked skins without changing the loadout.
+static func texture_for(key: String, part: String) -> Texture2D:
 	if key.is_empty():
 		return null
-	var path := "res://assets/cosmetics/%s/%s/%s.png" % [kind, key.get_slice(":", 1), part]
+	var path := "res://assets/cosmetics/%s/%s/%s.png" % [kind_of(key), key.get_slice(":", 1), part]
 	if not _skin_tex.has(path):
 		_skin_tex[path] = load(path) as Texture2D if ResourceLoader.exists(path) else null
 	return _skin_tex[path]

@@ -1,0 +1,55 @@
+{
+  "purpose": "Generated full-body anatomy references used for arm extraction. Only approved_night is owner-approved. No owner screenshots stored.",
+  "order": [
+    "approved_night",
+    "connected_rico_panda",
+    "connected_snow_nell_fuzzy_don"
+  ],
+  "assets": [
+    {
+      "path": "approved_night.png",
+      "cellSize": [
+        1536,
+        1024
+      ],
+      "frames": 1,
+      "order": [
+        "full_body_reference"
+      ],
+      "width": 1536,
+      "height": 1024,
+      "sha256": "d9eea6bec5d9c1e37197ae62943eae0146d7e305ce70cd4af0942c9f4b20a5a7",
+      "ownerApproved": true
+    },
+    {
+      "path": "connected_rico_panda.png",
+      "cellSize": [
+        1774,
+        887
+      ],
+      "frames": 1,
+      "order": [
+        "full_body_reference"
+      ],
+      "width": 1774,
+      "height": 887,
+      "sha256": "7e4e35a6500d49489e71d436b3a1e7514cb5da5a645cbe3cdbc4724f7a36f4df",
+      "ownerApproved": false
+    },
+    {
+      "path": "connected_snow_nell_fuzzy_don.png",
+      "cellSize": [
+        1536,
+        1024
+      ],
+      "frames": 1,
+      "order": [
+        "full_body_reference"
+      ],
+      "width": 1536,
+      "height": 1024,
+      "sha256": "f1bb04ea588618c2e230871d42f44a84427b64499c614b96cf70d32c0f96a4f9",
+      "ownerApproved": false
+    }
+  ]
+}

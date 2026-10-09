@@ -103,7 +103,7 @@ func _build_hero(level: int) -> void:
 ## Задания сезона: три строки с полосой и кнопкой награды в очках пропуска.
 func _quests_card() -> Control:
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#21201e"), Color("#ff8200"), 3, 18))
+	panel.add_theme_stylebox_override("panel", UiStyle.box(UiStyle.PANEL_LIGHT, Color("#ff8200"), 3, 18))
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 6)
 	panel.add_child(column)
@@ -461,7 +461,7 @@ class Road:
 				var c2 := finish - Vector2(0.0, step * 0.5)
 				points.append(q * q * q * node + 3.0 * q * q * t * c1 + 3.0 * q * t * t * c2 + t * t * t * finish)
 			var passed := tier + 1 <= level
-			draw_polyline(points, Color("#ffb020") if passed else Color("#4f4c47"), 40.0, true)
+			draw_polyline(points, Color("#ffb020") if passed else UiStyle.PANEL_LIGHT, 40.0, true)
 			draw_polyline(points, Color("#32302d"), 32.0, true)
 			for i in range(0, 20, 2):
 				draw_line(points[i], points[i + 1], Color("#ffd23f") if passed else Color("#7f7a72"), 3.0, true)
@@ -472,7 +472,7 @@ class Road:
 			draw_rect(Rect2(base + Vector2(-14, 0), Vector2(28, 5)), Color("#32302d"))
 		var current := tier == level + 1
 		var radius := 25.0 + (2.0 * sin(_time * 5.0) if current else 0.0)
-		var fill := Color("#5a3d0a") if lit else (Color("#44413d") if not current else Color("#7a5200"))
+		var fill := Color("#5a3d0a") if lit else (UiStyle.PANEL_LIGHT if not current else Color("#7a5200"))
 		var ring := Color("#ffd23f") if (lit or current) else Color("#7f7a72")
 		if current:
 			draw_circle(node, radius + 9.0, Color(ring, 0.25 + 0.15 * sin(_time * 5.0)))
@@ -487,10 +487,10 @@ class Road:
 			var nfont := get_theme_default_font()
 			var ntext := str(tier)
 			var nw := nfont.get_string_size(ntext, HORIZONTAL_ALIGNMENT_LEFT, -1, 24).x
-			draw_string_outline(nfont, node + Vector2(-nw * 0.5, 8.0), ntext, HORIZONTAL_ALIGNMENT_LEFT, -1, 24, 6, Color("#21201e"))
+			draw_string_outline(nfont, node + Vector2(-nw * 0.5, 8.0), ntext, HORIZONTAL_ALIGNMENT_LEFT, -1, 24, 6, UiStyle.PANEL_LIGHT)
 			draw_string(nfont, node + Vector2(-nw * 0.5, 8.0), ntext, HORIZONTAL_ALIGNMENT_LEFT, -1, 24, Color.WHITE)
 			return
-		draw_circle(node, radius + 3.0, Color("#21201e"))
+		draw_circle(node, radius + 3.0, UiStyle.PANEL_LIGHT)
 		draw_circle(node, radius, fill)
 		draw_arc(node, radius - 1.0, 0.0, TAU, 32, ring, 3.0, true)
 		if all_claimed:
@@ -554,7 +554,7 @@ class CosmeticArt:
 				draw_line(c, b - Vector2(r * 0.1, 0), Color.WHITE, r * 0.1, true)
 			"frame":
 				var tint := Cosmetics.color_of(key)
-				draw_circle(c, r, Color("#4f4c47"))
+				draw_circle(c, r, UiStyle.PANEL_LIGHT)
 				draw_arc(c, r - 2.0, 0.0, TAU, 32, Color(tint, 0.35), 9.0, true)
 				draw_arc(c, r - 2.0, 0.0, TAU, 32, tint, 5.0, true)
 			"color":
@@ -565,7 +565,7 @@ class CosmeticArt:
 				draw_line(Vector2(c.x - w * 0.5, c.y + 14.0), Vector2(c.x + w * 0.5, c.y + 14.0), Color(tint, 0.6), 3.0)
 			"title":
 				var plate := Rect2(c - Vector2(36, 12), Vector2(72, 24))
-				draw_rect(plate.grow(2.0), Color("#21201e"))
+				draw_rect(plate.grow(2.0), UiStyle.PANEL_LIGHT)
 				draw_rect(plate, Color(rarity, 0.25))
 				draw_rect(plate, rarity, false, 2.0)
 				for i in 3:

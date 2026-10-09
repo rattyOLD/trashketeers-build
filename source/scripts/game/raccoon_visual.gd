@@ -101,6 +101,7 @@ var _reviving := false
 var _clip_frames: Dictionary = {}
 var _clip_grip: Dictionary = {}
 var _clip_hands: Dictionary = {}
+var _clip_arms: Dictionary = {}
 var _clip_cur := "idle"
 var _clip_idx := 0
 var _clip_grip_px := Vector2(187.5, 125)
@@ -109,6 +110,7 @@ var _shoot_t := 0.0
 var arm: Sprite2D
 var _arm_material: ShaderMaterial
 var _gun_layer: Node2D
+var _rear_layer: Node2D
 var _front_layer: Node2D
 var _rig_ok := false
 var _b: Dictionary = {}
@@ -130,6 +132,7 @@ var _cheer := 0.0
 var _kick := 0.0
 var _climb := 0.0
 var show_aim_line := false
+var show_held_weapon := true
 var _flash_t := 0.0
 var _body_kick := Vector2.ZERO
 var _dead := false
@@ -167,6 +170,9 @@ var _twitch_r := SpringValue.new(260.0, 12.0)
 func _init() -> void:
 	body = RigSprite.new()
 	add_child(body)
+	_rear_layer = Node2D.new()
+	_rear_layer.draw.connect(_draw_clip_rear)
+	add_child(_rear_layer)
 	hero = Sprite2D.new()
 	hero.centered = false
 	hero.visible = false
@@ -290,6 +296,7 @@ func _load_clips(prefix: String) -> bool:
 		_clip_frames = cached["frames"]
 		_clip_grip = cached["grip"]
 		_clip_hands = cached["hands"]
+		_clip_arms = cached.get("arms", {})
 		return true
 	var frames: Dictionary = {}
 	for clip: String in CLIP_COUNTS:
@@ -298,7 +305,8 @@ func _load_clips(prefix: String) -> bool:
 			return false
 		if LAZY_CLIPS.has(clip):
 			continue
-		var tex: Texture2D = load(path)
+		var body_path := "%sbody_nohands_%s.png" % [prefix, clip]
+		var tex: Texture2D = load(body_path if ResourceLoader.exists(body_path) else path)
 		var list: Array[AtlasTexture] = []
 		for i in int(CLIP_COUNTS[clip]):
 			var atlas := AtlasTexture.new()
@@ -325,10 +333,17 @@ func _load_clips(prefix: String) -> bool:
 			hand_list.append(hand_atlas)
 		hands[clip] = hand_list
 	# Кэш по префиксу: у каждого героя свои листы (в видеопамяти держим только выбранных).
-	_clip_cache[prefix] = {"frames": frames, "grip": grip, "hands": hands}
+	var arms: Dictionary = {}
+	if grip.has("rig"):
+		for part: String in ["right_upper", "right_fore", "right_fist", "left_upper", "left_fore", "left_fist"]:
+			var path := "%s%s.png" % [prefix, part]
+			if ResourceLoader.exists(path):
+				arms[part] = load(path)
+	_clip_cache[prefix] = {"frames": frames, "grip": grip, "hands": hands, "arms": arms}
 	_clip_frames = frames
 	_clip_grip = grip
 	_clip_hands = hands
+	_clip_arms = arms
 	return true
 
 
@@ -419,6 +434,7 @@ func _leave_hero() -> void:
 	if not _hero_mode:
 		return
 	_clip_mode = false
+	_rear_layer.queue_redraw()
 	_hero_mode = false
 	hero.visible = false
 	body.visible = true
@@ -435,6 +451,8 @@ func _hero_frame_index() -> int:
 
 func _paw_at(local_angle: float) -> Vector2:
 	if _clip_mode:
+		if _clip_has_arm_rig():
+			return _clip_grip_target(_held_direction())
 		return _sprite_xform() * (_clip_grip_px + hero.offset)
 	if _hero_mode:
 		var reach := float(_hero_cfg.get("arm_len", 66))
@@ -812,6 +830,7 @@ func _apply_hero() -> void:
 	var lit := Color(clampf(0.95 + _env.r * 0.35, 0.95, 1.3), clampf(0.95 + _env.g * 0.35, 0.95, 1.3), clampf(0.95 + _env.b * 0.35, 0.95, 1.3))
 	hero.modulate = Color(tint.r * lit.r, tint.g * lit.g, tint.b * lit.b, tint.a)
 	hero.self_modulate = Color(3.0, 3.0, 3.0) if _flash > 0.0 else Color.WHITE
+	_rear_layer.queue_redraw()
 
 
 func _set_bone(bone_name: String, angle: float) -> void:
@@ -884,8 +903,8 @@ func _gun_direction(local_angle: float) -> Vector2:
 func _gun_center(paw: Vector2, dir: Vector2, kick_amount: float) -> Vector2:
 	var g := WeaponIcons.grip(weapon_icon)
 	var grip := Vector2(g.x, g.y * (-1.0 if dir.x < 0.0 else 1.0)).rotated(dir.angle()) * _weapon_scale()
-	var lift := Vector2(0.0, -CLIP_GRIP_LIFT) if _clip_mode else Vector2.ZERO
-	return paw - grip - dir * kick_amount + lift
+	var lift := Vector2(0.0, -CLIP_GRIP_LIFT) if _clip_mode and _clip_arms.is_empty() else Vector2.ZERO
+	return paw - grip - dir * (0.0 if _clip_has_arm_rig() else kick_amount) + lift
 
 
 ## Размер оружия в руке: лесенка по длине рисунка (пистолет < ПП < автомат < пулемёт < снайперка < рельсотрон)
@@ -985,21 +1004,28 @@ func _draw_gun_layer() -> void:
 		return
 	if _hero_mode and bool(_hero_cfg.get("baked_gun", false)):
 		return
+	if _clip_mode and _clip_cur not in ["idle", "run", "shoot"]:
+		return
 	var dir := _gun_direction(_gun_angle)
 	if melee_active:
 		dir = dir.rotated(melee_offset)
 	else:
 		dir = dir.rotated(-_climb * _facing)
 	var paw := _paw_at(_gun_angle)
-	if _clip_mode and not melee_active:
-		# Ствол лежит на двух нарисованных лапах: линия хват → опора, прицел отклоняет его не больше чем на ~23°.
+	if _clip_mode and _clip_arms.is_empty() and not melee_active:
+		# Compatibility with old clip packs without separate arm layers.
 		var support := _sprite_xform() * (_clip_support_px + hero.offset)
 		var base := support - paw
 		if base.length() > 4.0:
 			var diff := clampf(angle_difference(base.angle(), dir.angle()), -CLIP_AIM_LIMIT, CLIP_AIM_LIMIT)
 			dir = base.normalized().rotated(diff)
 	var center := _gun_center(paw, dir, _kick)
-	WeaponIcons.draw(_gun_layer, weapon_icon, center, _weapon_scale(), dir.angle(), weapon_color, dir.x < 0.0)
+	if _clip_has_arm_rig():
+		_draw_clip_part(_gun_layer, "left", "fore", _clip_hand_target("left", center, dir))
+		_gun_layer.draw_set_transform_matrix(Transform2D.IDENTITY)
+		_draw_clip_arm(_gun_layer, "right", _clip_hand_target("right", center, dir), dir, false)
+	if show_held_weapon:
+		WeaponIcons.draw(_gun_layer, weapon_icon, center, _weapon_scale(), dir.angle(), weapon_color, dir.x < 0.0)
 	if _hero_mode and not _clip_mode:
 		# В покадровом режиме руки уже нарисованы в кадрах, старую руку поверх не рисуем.
 		var shoulder := _sprite_xform() * _hero_shoulder
@@ -1014,7 +1040,12 @@ func _draw_gun_layer() -> void:
 			_gun_layer.draw_circle(paw, 6.5, OUTLINE)
 			_gun_layer.draw_circle(paw, 4.5, sleeve.lightened(0.15))
 	if _clip_mode and not _dead:
-		_draw_grip_hand()
+		if _clip_has_arm_rig():
+			_draw_clip_arm(_gun_layer, "right", _clip_hand_target("right", center, dir), dir, true)
+			# The supporting palm stays beneath/behind the fore-end. Its fore texture already
+			# contains the hand; painting its cuff/fingers over the receiver creates a false wrist.
+		else:
+			_draw_grip_hand()
 	if show_aim_line and aiming and not melee_active:
 		var from := center + _muzzle_offset(dir)
 		var line_dir := _gun_direction(_gun_angle)
@@ -1034,7 +1065,160 @@ func _draw_gun_layer() -> void:
 		_gun_layer.draw_line(shine - dir.orthogonal() * 6.0 * strength, shine + dir.orthogonal() * 6.0 * strength, Color(1, 1, 1, 0.8 * strength), 2.0)
 
 
-## Рука-хват поверх ствола: заранее вырезанный кулак (assets/heroes/raccoon_hand_*.png) с мягким краем. Вторая рука остаётся под стволом.
+func _clip_has_arm_rig() -> bool:
+	return _clip_mode and _clip_cur in ["idle", "run", "shoot"] and _clip_arms.size() == 6
+
+
+func _held_direction() -> Vector2:
+	var dir := _gun_direction(_gun_angle)
+	return dir.rotated(melee_offset if melee_active else -_climb * _facing)
+
+
+## Anatomical right is the near trigger hand; left is the far support hand.
+func _clip_support_point() -> Vector2:
+	var point := WeaponIcons.support(weapon_icon)
+	if _clip_baked_upper("right"):
+		# Keep the support palm on the inner fore-end when the existing sleeve fixes the elbow.
+		point = WeaponIcons.grip(weapon_icon).lerp(point, 0.9)
+	return point
+
+
+func _clip_hand_target(which: String, center: Vector2, dir: Vector2) -> Vector2:
+	var point := WeaponIcons.grip(weapon_icon)
+	if which == "left":
+		if melee_active or weapon_icon in SIDEARMS:
+			var grip := WeaponIcons.grip(weapon_icon)
+			grip.y *= -1.0 if dir.x < 0.0 else 1.0
+			var paw := center+grip.rotated(dir.angle())*_weapon_scale()
+			var shoulder := _clip_shoulder("left")
+			return _clip_reachable(Vector2(shoulder.x+_clip_arm_reach("left")*0.6*_facing,paw.y),shoulder,_clip_arm_lengths("left"))
+		point = _clip_support_point()
+	point.y *= -1.0 if dir.x < 0.0 else 1.0
+	return center + point.rotated(dir.angle()) * _weapon_scale()
+
+
+func _clip_shoulder(which: String) -> Vector2:
+	var point: Array = _clip_grip["rig"]["frames"][_clip_cur][_clip_idx][which]
+	return _sprite_xform() * (Vector2(float(point[0]),float(point[1])) + hero.offset)
+
+
+func _clip_source_joint(which: String, joint: String) -> Vector2:
+	var point: Array = _clip_grip["rig"]["arms"][which][joint]
+	return Vector2(float(point[0]),float(point[1]))
+
+
+func _clip_arm_lengths(which: String) -> Vector2:
+	var basis := _sprite_xform()
+	var shoulder := _clip_source_joint(which,"shoulder")
+	var elbow := _clip_source_joint(which,"elbow")
+	var palm := _clip_source_joint(which,"palm")
+	return Vector2(basis.basis_xform(elbow-shoulder).length(),basis.basis_xform(palm-elbow).length())
+
+
+func _clip_arm_reach(which: String) -> float:
+	var lengths := _clip_arm_lengths(which)
+	return lengths.x+lengths.y-0.02
+
+
+func _clip_baked_upper(which: String) -> bool:
+	return which in _clip_grip["rig"].get("bakedUpper", [])
+
+
+func _clip_body_elbow(which: String) -> Vector2:
+	var point: Array = _clip_grip["rig"]["frames"][_clip_cur][_clip_idx][which+"_elbow"]
+	return _sprite_xform() * (Vector2(float(point[0]),float(point[1])) + hero.offset)
+
+
+func _clip_reachable(point: Vector2, shoulder: Vector2, lengths: Vector2) -> Vector2:
+	var offset := point-shoulder
+	var direction := offset.normalized() if offset.length() > 0.001 else Vector2.DOWN
+	if lengths.x < 0.001:
+		return shoulder+direction*lengths.y
+	return shoulder+direction*clampf(offset.length(),absf(lengths.x-lengths.y)+0.02,lengths.x+lengths.y-0.02)
+
+
+func _clip_grip_target(dir: Vector2) -> Vector2:
+	var right := _clip_shoulder("right")
+	var left := _clip_shoulder("left")
+	var right_lengths := _clip_arm_lengths("right")
+	var target := right+Vector2.from_angle(dir.angle()+0.9*_facing)*_clip_arm_reach("right")*0.82
+	var rest: Array = _clip_grip["rig"].get("gripRestOffset", [0.0,0.0])
+	target += _sprite_xform().basis_xform(Vector2(float(rest[0]),float(rest[1])))
+	if _clip_baked_upper("right"):
+		right = _clip_body_elbow("right")
+		right_lengths = Vector2(0.0,right_lengths.y)
+		target = right+Vector2.from_angle(dir.angle()+0.1*_facing)*right_lengths.y
+	if melee_active or weapon_icon in SIDEARMS:
+		return _clip_reachable(target,right,right_lengths)
+	var span := _clip_support_point()-WeaponIcons.grip(weapon_icon)
+	span.y *= -1.0 if dir.x < 0.0 else 1.0
+	span = span.rotated(dir.angle())*_weapon_scale()
+	var left_lengths := _clip_arm_lengths("left")
+	# Move the firearm inside both natural reach areas. Never enlarge either arm.
+	for iteration in 32:
+		target = _clip_reachable(target,right,right_lengths)
+		target = _clip_reachable(target,left-span,left_lengths)
+	return target
+
+
+func _clip_joint_pose(which: String, target: Vector2) -> PackedVector2Array:
+	var shoulder := _clip_shoulder(which)
+	var lengths := _clip_arm_lengths(which)
+	if _clip_baked_upper(which):
+		var elbow := _clip_body_elbow(which)
+		return PackedVector2Array([shoulder,elbow,elbow+(target-elbow).normalized()*lengths.y])
+	var palm := _clip_reachable(target,shoulder,lengths)
+	var offset := palm-shoulder
+	var distance := offset.length()
+	var direction := offset/distance
+	var along := (distance*distance+lengths.x*lengths.x-lengths.y*lengths.y)/(2.0*distance)
+	var height := sqrt(maxf(0.0,lengths.x*lengths.x-along*along))
+	var midpoint := shoulder+direction*along
+	var first := midpoint+direction.orthogonal()*height
+	var second := midpoint-direction.orthogonal()*height
+	# Elbows bend below the arm; at vertical aim the near elbow stays outside the torso.
+	var outward := -_facing if which == "right" else _facing
+	var elbow := first if first.y+first.x*outward*0.1 > second.y+second.x*outward*0.1 else second
+	return PackedVector2Array([shoulder,elbow,palm])
+
+
+func _clip_segment_transform(which: String, segment: String, target: Vector2) -> Transform2D:
+	var pose := _clip_joint_pose(which,target)
+	var source_from := _clip_source_joint(which,"shoulder" if segment == "upper" else "elbow")
+	var source_to := _clip_source_joint(which,"elbow" if segment == "upper" else "palm")
+	var start := pose[0] if segment == "upper" else pose[1]
+	var end := pose[1] if segment == "upper" else pose[2]
+	var body_basis := _sprite_xform()
+	var turn := angle_difference(body_basis.basis_xform(source_to-source_from).angle(),(end-start).angle())
+	var result := Transform2D(turn,Vector2.ZERO)*Transform2D(body_basis.x,body_basis.y,Vector2.ZERO)
+	result.origin = start-result.basis_xform(source_from)
+	return result
+
+
+func _draw_clip_part(canvas: Node2D, which: String, part: String, target: Vector2) -> void:
+	canvas.draw_set_transform_matrix(_clip_segment_transform(which,"fore" if part == "fist" else part,target))
+	canvas.draw_texture(_clip_arms[which+"_"+part],Vector2.ZERO,hero.modulate*hero.self_modulate)
+
+
+func _draw_clip_arm(canvas: Node2D, which: String, target: Vector2, _dir: Vector2, fist: bool) -> void:
+	for part: String in (["fist"] if fist else ["upper","fore"]):
+		if part == "upper" and _clip_baked_upper(which):
+			continue
+		_draw_clip_part(canvas,which,part,target)
+	canvas.draw_set_transform_matrix(Transform2D.IDENTITY)
+
+
+func _draw_clip_rear() -> void:
+	if not _clip_has_arm_rig() or _dead or _fidget_t > 0.0:
+		return
+	var dir := _held_direction()
+	var center := _gun_center(_paw_at(_gun_angle), dir, _kick)
+	# The far upper arm begins behind the torso; its forearm crosses in FRONT of the vest.
+	_draw_clip_part(_rear_layer, "left", "upper", _clip_hand_target("left", center, dir))
+	_rear_layer.draw_set_transform_matrix(Transform2D.IDENTITY)
+
+
+## Legacy packs use the pre-cut grip hand overlay.
 func _draw_grip_hand() -> void:
 	var tex := _hand_frame()
 	if tex == null:

@@ -1,0 +1,207 @@
+{
+  "hero": "pigeon_mafioso",
+  "cellSize": [
+    512,
+    512
+  ],
+  "framesPerFile": 1,
+  "order": [
+    "face_angry.png",
+    "face_grin.png",
+    "face_hit.png",
+    "face_proud.png",
+    "face_scared.png",
+    "face_tired.png",
+    "hud_pigeon_mafioso_0.png",
+    "hud_pigeon_mafioso_1.png",
+    "hud_pigeon_mafioso_2.png",
+    "hud_pigeon_mafioso_3.png",
+    "lose_0.png",
+    "lose_1.png",
+    "pigeon_mafioso.png",
+    "win_0.png",
+    "win_1.png"
+  ],
+  "assets": [
+    {
+      "path": "face_angry.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "face_angry"
+      ],
+      "sha256": "0ad1e5550d9b6acb849f1f86e02e2b6c579dd46f3695d19dc308feb4bce14705"
+    },
+    {
+      "path": "face_grin.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "face_grin"
+      ],
+      "sha256": "51101858d4b63a0a0471efbea79cc03b7f019514e9fe0adce7972948b43fa2e7"
+    },
+    {
+      "path": "face_hit.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "face_hit"
+      ],
+      "sha256": "8b748b43c3833f46d205391fcdd9e2bccc432ea62259a70e0d91a801247a62bf"
+    },
+    {
+      "path": "face_proud.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "face_proud"
+      ],
+      "sha256": "80682aa833424b90fb3b3b28e417882c77631d5aa4a6c85d81538325c2553c4f"
+    },
+    {
+      "path": "face_scared.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "face_scared"
+      ],
+      "sha256": "c19dfa11b70c1a8824ce354d86b723c7d2be2f4f4f174ced9866115a9b4d086b"
+    },
+    {
+      "path": "face_tired.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "face_tired"
+      ],
+      "sha256": "fb44e0a14d15a774d01db61ed4acf1d4223612be0962b902bcf8bae075f8772b"
+    },
+    {
+      "path": "hud_pigeon_mafioso_0.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "hud_pigeon_mafioso_0"
+      ],
+      "sha256": "2903754e2c86c0cb2517ab9e6721bc8bf62cc6827ed8571ab255c52d3794330e"
+    },
+    {
+      "path": "hud_pigeon_mafioso_1.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "hud_pigeon_mafioso_1"
+      ],
+      "sha256": "f062efd073d8369b43ff3b5cc774e3c05bf3188034d16f949b5eb6e49f345027"
+    },
+    {
+      "path": "hud_pigeon_mafioso_2.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "hud_pigeon_mafioso_2"
+      ],
+      "sha256": "985a828152365ee939015b05829c39c9a475d473de1777ebba375456301ac441"
+    },
+    {
+      "path": "hud_pigeon_mafioso_3.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "hud_pigeon_mafioso_3"
+      ],
+      "sha256": "e2dca2267adbdcd681f1433de5ff08951d44eac2df42f556dee1f3b479f4dbaa"
+    },
+    {
+      "path": "lose_0.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "lose_0"
+      ],
+      "sha256": "746e3441e65447a9203d1946b7860fb1a81ad8ee2c4109645a63477586e5f1f4"
+    },
+    {
+      "path": "lose_1.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "lose_1"
+      ],
+      "sha256": "4aea03eba168c6a534249c5b04dd0de67299202b25f061528fd76b55b103b8c5"
+    },
+    {
+      "path": "pigeon_mafioso.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "pigeon_mafioso"
+      ],
+      "sha256": "f47cf5f071fa8e21b7bd7fbe1f5d8f2362b12a041c22513c0c9125c6612b83b2"
+    },
+    {
+      "path": "win_0.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "win_0"
+      ],
+      "sha256": "a99563ef9f0a7dba1fb754eecd755bd18a0b7aca44f2caa5f0ec2da6dcf97140"
+    },
+    {
+      "path": "win_1.png",
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": [
+        "win_1"
+      ],
+      "sha256": "b5ef0ec7b3c06f9bfcbd38abab53a154f86006e97cee51d01bfda902bd44d63c"
+    }
+  ]
+}

@@ -414,19 +414,37 @@ class Shop:
 			art.key = key
 			art.custom_minimum_size = Vector2(84, 84)
 			art.dim = not owned
+			art.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			col.add_child(art)
 		var title := UiStyle.label("Стандарт" if key.is_empty() else Cosmetics.title_of(key).replace("Рывок ", "").replace("Трассер ", ""), 17, UiStyle.TEXT if owned else UiStyle.TEXT_DIM, 4)
 		title.clip_text = true
 		col.add_child(title)
+		UiStyle.fit_plate_label(title, 17)
 		if not key.is_empty():
 			col.add_child(UiStyle.label(Economy.rarity_name(Cosmetics.rarity_of(key)), 14, rarity_color, 3))
-		var button := UiStyle.button("НАДЕТ" if worn else ("НАДЕТЬ" if owned else "В СУНДУКАХ"), UiStyle.GOLD.darkened(0.3) if worn else (UiStyle.NEON.darkened(0.4) if owned else UiStyle.PANEL), 16, Vector2(0, 44))
-		button.disabled = worn or not owned
-		button.pressed.connect(func() -> void:
-			Cosmetics.wear(key, kind)
-			_refresh())
+		var button := UiStyle.button("СМОТРЕТЬ", UiStyle.PANEL_LIGHT, 16, Vector2(0, 44))
+		button.pressed.connect(_show_cosmetic_preview.bind(key, kind))
 		col.add_child(button)
+		panel.gui_input.connect(func(event: InputEvent) -> void:
+			if UiStyle.is_tap(event):
+				_show_cosmetic_preview(key, kind))
 		return panel
+
+	func _show_cosmetic_preview(key: String, kind: String) -> void:
+		var popup := GlassPopup.new("СТАНДАРТНЫЙ СКИН" if key.is_empty() else Cosmetics.title_of(key).to_upper())
+		popup.content.add_child(CosmeticPreview.new(key, kind))
+		var owned := key.is_empty() or Cosmetics.owns(key)
+		var worn := Cosmetics.worn(kind) == key
+		var equip := UiStyle.button("НАДЕТ" if worn else ("НАДЕТЬ" if owned else "В СУНДУКАХ"), UiStyle.GOLD if owned else UiStyle.PANEL, 24, Vector2(0, 64))
+		equip.disabled = worn or not owned
+		equip.pressed.connect(func() -> void:
+			Cosmetics.wear(key, kind)
+			popup.close()
+			_refresh())
+		popup.content.add_child(equip)
+		popup.closed.connect(popup.queue_free)
+		get_parent().add_child(popup)
+		popup.open()
 
 	func _section(title: String) -> Control:
 		var label := UiStyle.label(title, 26, UiStyle.NEON, 6)
@@ -1501,7 +1519,7 @@ class Profile:
 	func _build_header() -> Control:
 		var level := SaveService.get_account_level()
 		var panel := PanelContainer.new()
-		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#3b3935"), Color("#c9722b"), 5, 24))
+		panel.add_theme_stylebox_override("panel", UiStyle.box(UiStyle.PANEL_LIGHT, Color("#c9722b"), 5, 24))
 		var head := HBoxContainer.new()
 		head.add_theme_constant_override("separation", 18)
 		panel.add_child(head)
@@ -1697,7 +1715,7 @@ class Profile:
 	func _tile(title: String, value: String, icon: String, accent: Color, big: bool) -> Control:
 		var panel := PanelContainer.new()
 		panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var box := UiStyle.box(Color("#4a4742"), Color(accent, 0.75), 3, 16)
+		var box := UiStyle.box(UiStyle.PANEL_LIGHT, Color(accent, 0.75), 3, 16)
 		panel.add_theme_stylebox_override("panel", box)
 		var body: BoxContainer = VBoxContainer.new() if big else HBoxContainer.new()
 		body.add_theme_constant_override("separation", 8 if not big else 2)
@@ -1736,7 +1754,7 @@ class Profile:
 			if tapped:
 				SoundManager.play(&"ui_click")
 				chronicle_requested.emit())
-		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#4a4742"), Color(UiStyle.NEON, 0.7), 3, 16))
+		panel.add_theme_stylebox_override("panel", UiStyle.box(UiStyle.PANEL_LIGHT, Color(UiStyle.NEON, 0.7), 3, 16))
 		var head := HBoxContainer.new()
 		head.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		var title := UiStyle.label("Летопись - читать", 24, UiStyle.TEXT, 6)
@@ -1791,7 +1809,7 @@ class Profile:
 			if tapped:
 				SoundManager.play(&"ui_click")
 				achievements_requested.emit())
-		panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#4a4742"), Color(UiStyle.GOLD, 0.7), 3, 16))
+		panel.add_theme_stylebox_override("panel", UiStyle.box(UiStyle.PANEL_LIGHT, Color(UiStyle.GOLD, 0.7), 3, 16))
 		var column := VBoxContainer.new()
 		column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		column.add_theme_constant_override("separation", 6)

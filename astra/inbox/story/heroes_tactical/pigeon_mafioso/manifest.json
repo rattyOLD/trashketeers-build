@@ -1,0 +1,338 @@
+{
+  "hero": "pigeon_mafioso",
+  "brief": "v32 section 2 / v21",
+  "frameOrder": "left-to-right top-to-bottom",
+  "cellWidth": 480,
+  "cellHeight": 320,
+  "columns": 4,
+  "clips": {
+    "idle": 8,
+    "run": 8,
+    "shoot": 4,
+    "hit": 4,
+    "dash": 6,
+    "death": 8,
+    "revive": 6,
+    "idle_fidget": 8
+  },
+  "layerOrder": [
+    "fronthand",
+    "body_nohands",
+    "rearhand"
+  ],
+  "assets": [
+    {
+      "path": "pigeon_mafioso_body_nohands_idle.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "48a49e4e2ebc7709a164ad8b24d6048cd39424656089cdef4a8e702763ebfb7a",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "pigeon_mafioso_body_nohands_run.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "bb23ff5d91164ffb9894b600a047f6394ad93edee10324ab51b95cf355d8e593",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "pigeon_mafioso_body_nohands_shoot.png",
+      "width": 1920,
+      "height": 320,
+      "background": "transparent",
+      "sha256": "5a6ef70b67bd2bd18554006d0b2bcb709e83f1b1a1783d06018b4ac483428232",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 4,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "pigeon_mafioso_dash.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "f65e70ac0761c8cc107335286ffc21ac7210f2f6851a44a04cb5c566fe41c086",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 6,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "pigeon_mafioso_death.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "a9d4b584d3af32c7404387de6e2ffdccd6d2aa363c4c586a3e0004a4d8764ae2",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "pigeon_mafioso_fronthand_idle.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "7582467ccf48ae6b673c86320069382e922b0ba1fa996613bd9c6e7f3cac3adf",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "pigeon_mafioso_fronthand_run.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "a28b837bf0056381433973fe09c756a360976441b7644668b8dc7e63ae32947d",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "pigeon_mafioso_fronthand_shoot.png",
+      "width": 1920,
+      "height": 320,
+      "background": "transparent",
+      "sha256": "47a741e8f080c835135ec86cd718fdfb4110d1731c1d81a6b24a61dd20c7351c",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 4,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "pigeon_mafioso_hit.png",
+      "width": 1920,
+      "height": 320,
+      "background": "transparent",
+      "sha256": "4a3645061b78ac6fa38ac6bd89de2a57ede9ad434476263f1cd4aa2ff4e9debf",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 4,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "pigeon_mafioso_idle.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "f6cca736adc7d338fe45b26efb04c1f059b3bcb805ad624744a106cf83636b09",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "pigeon_mafioso_idle_fidget.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "79b2441e01d095ab28b1fd7216bef11e8c545d0effbd82536ca892ab5924c2d4",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "pigeon_mafioso_rearhand_idle.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "74d81e1ac785fe9e46b7a1f4a44c64e1079b7a7ae98396a959324b8e7ae93950",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "pigeon_mafioso_rearhand_run.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "18905f069d303677c4e00741816f5e592d2b301fcf6ba7f8d9449eb1193306c9",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "pigeon_mafioso_rearhand_shoot.png",
+      "width": 1920,
+      "height": 320,
+      "background": "transparent",
+      "sha256": "b0a31acdaa88804bb408e4b637b0d55818bc2784507dd3e37561c394f1c8591d",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 4,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "pigeon_mafioso_revive.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "3f0cce6f03b78198c959912f7e5ca1252e8e5a347abc21dcaf576878ce8f6104",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 6,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "pigeon_mafioso_run.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "b2577eeb1b79c85a8b95ba509d5bbeadb58b43c2fdd2078699697bc9c7acd21d",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "pigeon_mafioso_shoot.png",
+      "width": 1920,
+      "height": 320,
+      "background": "transparent",
+      "sha256": "c2bd8cf4713c95d3fcd6299c00402769f62f93ade285422cd4463154532db043",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 4,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "ui/face_angry.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "0ad1e5550d9b6acb849f1f86e02e2b6c579dd46f3695d19dc308feb4bce14705"
+    },
+    {
+      "path": "ui/face_grin.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "51101858d4b63a0a0471efbea79cc03b7f019514e9fe0adce7972948b43fa2e7"
+    },
+    {
+      "path": "ui/face_hit.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "8b748b43c3833f46d205391fcdd9e2bccc432ea62259a70e0d91a801247a62bf"
+    },
+    {
+      "path": "ui/face_proud.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "80682aa833424b90fb3b3b28e417882c77631d5aa4a6c85d81538325c2553c4f"
+    },
+    {
+      "path": "ui/face_scared.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "c19dfa11b70c1a8824ce354d86b723c7d2be2f4f4f174ced9866115a9b4d086b"
+    },
+    {
+      "path": "ui/face_tired.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "fb44e0a14d15a774d01db61ed4acf1d4223612be0962b902bcf8bae075f8772b"
+    },
+    {
+      "path": "ui/hud_pigeon_mafioso_0.png",
+      "width": 512,
+      "height": 512,
+      "background": "#FF00FF",
+      "sha256": "2903754e2c86c0cb2517ab9e6721bc8bf62cc6827ed8571ab255c52d3794330e"
+    },
+    {
+      "path": "ui/hud_pigeon_mafioso_1.png",
+      "width": 512,
+      "height": 512,
+      "background": "#FF00FF",
+      "sha256": "f062efd073d8369b43ff3b5cc774e3c05bf3188034d16f949b5eb6e49f345027"
+    },
+    {
+      "path": "ui/hud_pigeon_mafioso_2.png",
+      "width": 512,
+      "height": 512,
+      "background": "#FF00FF",
+      "sha256": "985a828152365ee939015b05829c39c9a475d473de1777ebba375456301ac441"
+    },
+    {
+      "path": "ui/hud_pigeon_mafioso_3.png",
+      "width": 512,
+      "height": 512,
+      "background": "#FF00FF",
+      "sha256": "e2dca2267adbdcd681f1433de5ff08951d44eac2df42f556dee1f3b479f4dbaa"
+    },
+    {
+      "path": "ui/lose_0.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "746e3441e65447a9203d1946b7860fb1a81ad8ee2c4109645a63477586e5f1f4"
+    },
+    {
+      "path": "ui/lose_1.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "4aea03eba168c6a534249c5b04dd0de67299202b25f061528fd76b55b103b8c5"
+    },
+    {
+      "path": "ui/pigeon_mafioso.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "f47cf5f071fa8e21b7bd7fbe1f5d8f2362b12a041c22513c0c9125c6612b83b2"
+    },
+    {
+      "path": "ui/win_0.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "a99563ef9f0a7dba1fb754eecd755bd18a0b7aca44f2caa5f0ec2da6dcf97140"
+    },
+    {
+      "path": "ui/win_1.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "b5ef0ec7b3c06f9bfcbd38abab53a154f86006e97cee51d01bfda902bd44d63c"
+    }
+  ],
+  "hands": "Anatomical right trigger hand (rearhand), anatomical left palm-up support hand (fronthand). Separate shoulder/elbow joints; fixed bone lengths; thumb laterality drawn separately.",
+  "jointGuides": "joint_guides.json",
+  "farForearmInFront": true,
+  "composition": "Far/left upper arm behind body; far/left forearm in front of body; near/right arm in front. Importer separates upper/fore at the elbow using joint_guides.json."
+}

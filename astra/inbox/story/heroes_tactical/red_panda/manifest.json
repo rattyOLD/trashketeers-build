@@ -1,0 +1,228 @@
+{
+  "hero": "red_panda",
+  "cellWidth": 480,
+  "cellHeight": 320,
+  "columns": 4,
+  "frameOrder": "left-to-right top-to-bottom",
+  "assets": [
+    {
+      "path": "red_panda_body_nohands_idle.png",
+      "width": 1920,
+      "height": 640,
+      "sha256": "eef9817b8f6c3a208706109410d64bcb54a7a2de84a5fdd33de6d4b2c64b027d"
+    },
+    {
+      "path": "red_panda_body_nohands_run.png",
+      "width": 1920,
+      "height": 640,
+      "sha256": "9bac58a437b4ff0a6ac3947e6de933b1648508e2230b519e30dd173f8b66374e"
+    },
+    {
+      "path": "red_panda_body_nohands_shoot.png",
+      "width": 1920,
+      "height": 320,
+      "sha256": "feacf3f045121ad2ce945aed1c7657940cd1c4e0e52539baafe2dddbe166e9d1"
+    },
+    {
+      "path": "red_panda_dash.png",
+      "width": 1920,
+      "height": 640,
+      "sha256": "836ccd041d431f1da16ae69cfe6a107bd563f6f2902ca21ce5e2abd76ccf026c"
+    },
+    {
+      "path": "red_panda_death.png",
+      "width": 1920,
+      "height": 640,
+      "sha256": "319bfd668d50c63fa59252c3c548a111cfb309342dbd908bbea803d0cb4f6745"
+    },
+    {
+      "path": "red_panda_fronthand_idle.png",
+      "width": 1920,
+      "height": 640,
+      "sha256": "4aa75c0c6a524b36c2d90162c7a25e77649ac3a347472bae7c5455dc5af23a45"
+    },
+    {
+      "path": "red_panda_fronthand_run.png",
+      "width": 1920,
+      "height": 640,
+      "sha256": "31a0ad20f8ead26b999ade026baf5cec40b0712e4434e33df1ff67693cdc3561"
+    },
+    {
+      "path": "red_panda_fronthand_shoot.png",
+      "width": 1920,
+      "height": 320,
+      "sha256": "b11183356b460400a83408658b89dc1d21089aed256dea6b810e087e30c61c85"
+    },
+    {
+      "path": "red_panda_hit.png",
+      "width": 1920,
+      "height": 320,
+      "sha256": "f8df1708410fbe9965f2546d0a2f4b419bbdc94d80fc602e10cf859775a67e3f"
+    },
+    {
+      "path": "red_panda_idle.png",
+      "width": 1920,
+      "height": 640,
+      "sha256": "ab2bd7d7cfae9d861c4232cbe60c4ba024b5a0e837a0499027614bacd7fe41a8"
+    },
+    {
+      "path": "red_panda_idle_fidget.png",
+      "width": 1920,
+      "height": 640,
+      "sha256": "78bba9efe7f621528104a6de5e98035b1cde51ac01c8d4d3ed6fbe11a9316e00"
+    },
+    {
+      "path": "red_panda_rearhand_idle.png",
+      "width": 1920,
+      "height": 640,
+      "sha256": "988271e6c25930fdd299efc0cef02fd86179cacdf8cdbba178c50e91c24f9be5"
+    },
+    {
+      "path": "red_panda_rearhand_run.png",
+      "width": 1920,
+      "height": 640,
+      "sha256": "5016e694fa1dbcebf6bf4f3b253f98f9a72fbf04001cd31ee94482da430c013a"
+    },
+    {
+      "path": "red_panda_rearhand_shoot.png",
+      "width": 1920,
+      "height": 320,
+      "sha256": "bfc6a3b0d3e1f6da32ffef531b9c36f9b11d82d29f5fe7878ffd1911dc501094"
+    },
+    {
+      "path": "red_panda_revive.png",
+      "width": 1920,
+      "height": 640,
+      "sha256": "235de328de71ed1ee6d3223b2b051602b5732af7b4e26c86d522c5b088a9c3dc"
+    },
+    {
+      "path": "red_panda_run.png",
+      "width": 1920,
+      "height": 640,
+      "sha256": "aeff4b6dd51486c54d1db6e17f7ccd3b560b8192ecb6538d1fde5ab6f3995db2"
+    },
+    {
+      "path": "red_panda_shoot.png",
+      "width": 1920,
+      "height": 320,
+      "sha256": "297b837aed4b50ec1c5959a355afed95232752263d27fb02266d0e9ee26bbe35"
+    },
+    {
+      "path": "ui/avatar_red_panda.png",
+      "width": 256,
+      "height": 256,
+      "sha256": "16a688179306d87f2c58e143e06eddcba054b74c41e02ba87223b1d3069cef29"
+    },
+    {
+      "path": "ui/face_angry.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "ef4827f8714a5ded10a9abf7b197e3206928e44a85b594d231da6edfbfb16148"
+    },
+    {
+      "path": "ui/face_grin.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "ec9f9af33d0f9b14da90bc62f27655173b08663d0fdf5b24e167f5d490806a34"
+    },
+    {
+      "path": "ui/face_hit.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "49d08c5ede8bcae8bdb86ac739abcc87c2b36874ddc833372c2a04dd5425de8b"
+    },
+    {
+      "path": "ui/face_proud.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "bd6a50558b404a72ecee3ebea4cb6a8f3eeb5390a7121ae887ea0382d3c2f1e7"
+    },
+    {
+      "path": "ui/face_scared.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "850cdec823cb34d75e28786c66baf6ac1e80aec3021e4fefd0eb24bedd96c863"
+    },
+    {
+      "path": "ui/face_tired.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "3383cbd08381c79d6959904f7f523b9748eae4984084e761482417fae4b95d84"
+    },
+    {
+      "path": "ui/friend_red_panda.png",
+      "width": 160,
+      "height": 160,
+      "sha256": "5fe301699216617ab3d358f9b5c8d1f32744b86841f1248473bbb64124f60a0b"
+    },
+    {
+      "path": "ui/hero_red_panda.png",
+      "width": 128,
+      "height": 128,
+      "sha256": "5da55d92e0a49300c5e6e4c8706210b7214ccfda5dd694d0083db0aaf291735a"
+    },
+    {
+      "path": "ui/hud_red_panda_0.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "190a5e37d6a876858b5788b14dcd511e30326e2b1d1554559e2a526ac79ab057"
+    },
+    {
+      "path": "ui/hud_red_panda_1.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "25c9a2cea7ca2a2a84ce5075060c0a6984c9683b0b3c71cad3b48f89e9b6a255"
+    },
+    {
+      "path": "ui/hud_red_panda_2.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "d640e53e9cd10ac04fb672c21c2a278c91fc803968a1d493e40d5119b67d274e"
+    },
+    {
+      "path": "ui/hud_red_panda_3.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "a82744ad46a4c6c09587856b10d1969af7926ff1a39d665a0d79270053de753e"
+    },
+    {
+      "path": "ui/lose_0.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "86ff3281b7dd227902349599882eb30d3fe0aaf650c8f1b2c8a47efb42dd90e7"
+    },
+    {
+      "path": "ui/lose_1.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "826ac77970f4fa479a396ce941747a6515fc6da8218d2e9e7718c74a2f932342"
+    },
+    {
+      "path": "ui/red_panda.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "190a5e37d6a876858b5788b14dcd511e30326e2b1d1554559e2a526ac79ab057"
+    },
+    {
+      "path": "ui/win_0.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "48bf728fe1ece0b69696a8431724ae499e9fc6e8970c85eba7c6f92fb39c01d0"
+    },
+    {
+      "path": "ui/win_1.png",
+      "width": 512,
+      "height": 512,
+      "sha256": "7beaadc7e73d012743a5654a215f1bd5347ead936065418d14ac6bf5f17722ec"
+    }
+  ],
+  "hands": "Anatomical right trigger hand (rearhand), anatomical left palm-up support hand (fronthand). Separate shoulder/elbow joints; fixed bone lengths; thumb laterality drawn separately.",
+  "jointGuides": "joint_guides.json",
+  "layerOrder": [
+    "fronthand",
+    "body_nohands",
+    "rearhand"
+  ],
+  "farForearmInFront": true,
+  "composition": "Far/left upper arm behind body; far/left forearm in front of body; near/right arm in front. Importer separates upper/fore at the elbow using joint_guides.json."
+}

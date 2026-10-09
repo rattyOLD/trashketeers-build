@@ -364,7 +364,7 @@
       "description": "Самая быстрая на свалке.",
       "currency": "nuts",
       "price": 9000,
-      "portrait": "res://assets/ui/heroes/neon_hopper.png",
+      "portrait": "res://assets/ui/portraits/neon_hopper.png",
       "recolor": {},
       "proportions": {},
       "stats": {
@@ -395,7 +395,9 @@
         "arm_color": "#5a2a38",
         "arm": "res://assets/heroes/neon_hopper_arm.png",
         "arm_scale": 0.26,
-        "arm_pivot_y": 54
+        "arm_pivot_y": 54,
+        "clips": "res://assets/heroes/tactical/neon_hopper_",
+        "clips_grip": "res://data/grip_neon_hopper.json"
       },
       "role": "Спидстер",
       "lore": "Позывной «Турбо». Трижды выиграла подпольные гонки на ховер-рельсе и из боя выбегает раньше, чем в неё попадут. В «Особой Семёрке» Нэлл возила отряд на дело и с дела, ни разу не опоздала и ни разу не припарковалась нормально. Теперь сидит у Рико на связи и пьёт чай, но за руль возвращается, когда совсем жарко.",
@@ -415,7 +417,7 @@
       "description": "Яд, облака и наука.",
       "currency": "nuts",
       "price": 9000,
-      "portrait": "res://assets/ui/heroes/fluffy_chemist.png",
+      "portrait": "res://assets/ui/portraits/fluffy_chemist.png",
       "recolor": {},
       "proportions": {},
       "stats": {
@@ -446,7 +448,9 @@
         "arm_color": "#f2ede4",
         "arm": "res://assets/heroes/fluffy_chemist_arm.png",
         "arm_scale": 0.26,
-        "arm_pivot_y": 48.5
+        "arm_pivot_y": 48.5,
+        "clips": "res://assets/heroes/tactical/fluffy_chemist_",
+        "clips_grip": "res://data/grip_fluffy_chemist.json"
       },
       "role": "Поддержка",
       "lore": "Кот-учёный, выгнанный из лаборатории за слишком яркие опыты. Уверен, что яд это лекарство. В большой дозе. В «Особой Семёрке» был полевым химиком: половину операций спас, вторую половину просто взорвал красиво.",
@@ -467,7 +471,7 @@
       "description": "Томми-ган, шляпа, бомбовый дрон.",
       "currency": "nuts",
       "price": 9000,
-      "portrait": "res://assets/ui/heroes/pigeon_mafioso.png",
+      "portrait": "res://assets/ui/portraits/pigeon_mafioso.png",
       "recolor": {},
       "proportions": {},
       "stats": {
@@ -498,7 +502,9 @@
         "arm_color": "#34385a",
         "arm": "res://assets/heroes/pigeon_mafioso_arm.png",
         "arm_scale": 0.26,
-        "arm_pivot_y": 46.5
+        "arm_pivot_y": 46.5,
+        "clips": "res://assets/heroes/tactical/pigeon_mafioso_",
+        "clips_grip": "res://data/grip_pigeon_mafioso.json"
       },
       "role": "Стрелок",
       "lore": "Небесный босс пригородных крыш. Устал от крысиных налётов и вышел на дело лично. В «Особой Семёрке» вёл переговоры: договорился с таможней «Золотой Утки» там, где не помогали пули.",

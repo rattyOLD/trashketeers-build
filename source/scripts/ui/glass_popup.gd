@@ -105,7 +105,7 @@ func _init(title_text: String) -> void:
 	var header := HBoxContainer.new()
 	content.add_child(header)
 	_title = UiStyle.label(title_text, 34, UiStyle.TEXT, 9)
-	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	# Табличка заголовка из набора интерфейса Астры (assets/ui/kit/header_plate.png).
 	if UiStyle.KIT_ON and ResourceLoader.exists(UiStyle.KIT_DIR + "header_plate.png"):
@@ -126,6 +126,7 @@ func _init(title_text: String) -> void:
 		_title.add_theme_stylebox_override("normal", plate)
 		_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	header.add_child(_title)
+	UiStyle.fit_plate_label(_title, 26)
 	# Место под крестик в заголовке; сам крестик — один, закреплён в углу окна и не уезжает при прокрутке.
 	var close_slot := Control.new()
 	close_slot.custom_minimum_size = Vector2(56, 56)
