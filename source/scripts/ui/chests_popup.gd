@@ -21,11 +21,12 @@ func _init() -> void:
 	_balance = UiStyle.label("", 24, UiStyle.GOLD, 6)
 	content.add_child(_balance)
 	var pity_card := PanelContainer.new()
-	pity_card.add_theme_stylebox_override("panel", UiStyle.box(Color("#2c2a28"), Color("#35c8ff"), 3, 16))
+	pity_card.add_theme_stylebox_override("panel", UiStyle.card_box())
 	var pity_box := VBoxContainer.new()
 	pity_box.add_theme_constant_override("separation", 4)
 	pity_card.add_child(pity_box)
-	_pity = UiStyle.label("", 19, UiStyle.TEXT, 4)
+	_pity = UiStyle.label("", 18, UiStyle.TEXT, 4)
+	_pity.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_pity.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_pity.custom_minimum_size = Vector2(10, 0)
 	pity_box.add_child(_pity)
@@ -33,8 +34,8 @@ func _init() -> void:
 	_pity_bar.max_value = 1.0
 	_pity_bar.show_percentage = false
 	_pity_bar.custom_minimum_size = Vector2(0, 16)
-	_pity_bar.add_theme_stylebox_override("background", UiStyle.box(Color("#1c1a19"), Color("#4f4c47"), 2, 8))
-	_pity_bar.add_theme_stylebox_override("fill", UiStyle.box(Color("#35c8ff"), Color("#35c8ff"), 0, 8))
+	_pity_bar.add_theme_stylebox_override("background", UiStyle.box(Color("#15120f"), Color("#5a4630"), 2, 8))
+	_pity_bar.add_theme_stylebox_override("fill", UiStyle.box(UiStyle.GOLD, UiStyle.GOLD, 0, 8))
 	pity_box.add_child(_pity_bar)
 	content.add_child(pity_card)
 	_list = MenuPopups.scroll_list(content)
@@ -69,7 +70,7 @@ func _refresh() -> void:
 	MenuPopups.clear(_list)
 	_list.add_child(_make_ad_chest())
 	_list.add_child(_make_ads())
-	_list.add_child(UiStyle.label("СУНДУКИ ЗА МОНЕТЫ", 22, UiStyle.NEON, 6))
+	_list.add_child(UiStyle.label("СУНДУКИ ЗА МОНЕТЫ", 22, UiStyle.GOLD, 6))
 	for chest_id in Economy.CHEST_ORDER:
 		_list.add_child(_make_chest(chest_id))
 
@@ -78,14 +79,16 @@ func _make_chest(chest_id: String) -> Control:
 	var chest: Dictionary = Economy.CHESTS[chest_id]
 	var color: Color = chest["color"]
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", UiStyle.box(UiStyle.PANEL_LIGHT, color, 4, 20))
+	# Рамка — общая янтарная с оттенком редкости; цвет редкости — в названии.
+	panel.add_theme_stylebox_override("panel", UiStyle.card_box(color.lerp(UiStyle.CARD_BORDER, 0.45)))
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 6)
 	panel.add_child(column)
 	var head := HBoxContainer.new()
 	head.add_theme_constant_override("separation", 12)
 	var icon := TextureRect.new()
-	icon.texture = ArenaProp.texture_of("res://assets/ui/chests/chest_%s.png" % chest_id)
+	# Сундуки из одного рисованного набора с бесплатным (assets/ui/chests/<редкость>.png).
+	icon.texture = ArenaProp.texture_of("res://assets/ui/chests/%s.png" % chest_id)
 	icon.custom_minimum_size = Vector2(96, 72)
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -128,7 +131,7 @@ func _make_chest(chest_id: String) -> Control:
 	row.add_child(coin_button)
 	if int(chest["gems"]) > 0:
 		var gems_ok := Economy.can_afford(chest_id, true)
-		var gem_button := UiStyle.button(Economy.format_gems(Economy.chest_price(chest_id, true)), Color("#35c8ff") if gems_ok else UiStyle.PANEL, 21, Vector2(0, 58))
+		var gem_button := UiStyle.button(Economy.format_gems(Economy.chest_price(chest_id, true)), Color("#9b5cff") if gems_ok else UiStyle.PANEL, 21, Vector2(0, 58))
 		gem_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		gem_button.disabled = not gems_ok
 		gem_button.pressed.connect(func() -> void: _open(chest_id, true))
@@ -150,7 +153,7 @@ func _make_chest(chest_id: String) -> Control:
 func _make_ad_chest() -> Control:
 	var wait := Economy.ad_chest_wait()
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#12301f"), Color("#2fae5f"), 3, 18))
+	panel.add_theme_stylebox_override("panel", UiStyle.card_box(Color("#4fbf6a")))
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 12)
 	panel.add_child(row)
@@ -165,7 +168,7 @@ func _make_ad_chest() -> Control:
 	texts.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	texts.add_theme_constant_override("separation", 3)
 	row.add_child(texts)
-	var head := UiStyle.label("БЕСПЛАТНЫЙ СУНДУК", 19, UiStyle.TEXT, 4)
+	var head := UiStyle.label("БЕСПЛАТНЫЙ СУНДУК", 20, UiStyle.GOLD, 5)
 	head.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	texts.add_child(head)
 	_timer_label = UiStyle.label("", 16, Color("#9be8b4"), 4)
@@ -175,8 +178,8 @@ func _make_ad_chest() -> Control:
 	_timer_bar.max_value = 1.0
 	_timer_bar.show_percentage = false
 	_timer_bar.custom_minimum_size = Vector2(0, 10)
-	_timer_bar.add_theme_stylebox_override("background", UiStyle.box(Color("#0a1a10"), Color("#1f6b3c"), 2, 5))
-	_timer_bar.add_theme_stylebox_override("fill", UiStyle.box(Color("#2fae5f"), Color("#2fae5f"), 0, 5))
+	_timer_bar.add_theme_stylebox_override("background", UiStyle.box(Color("#15120f"), Color("#5a4630"), 2, 5))
+	_timer_bar.add_theme_stylebox_override("fill", UiStyle.box(Color("#4fbf6a"), Color("#4fbf6a"), 0, 5))
 	texts.add_child(_timer_bar)
 	_update_timer()
 	var take := UiStyle.button("ЗАБРАТЬ", Color("#2fae5f") if wait <= 0 else UiStyle.PANEL, 17, Vector2(104, 54))
@@ -200,11 +203,16 @@ func _make_ads() -> Control:
 	row.add_theme_constant_override("separation", 10)
 	for kind in ["coins", "gems"]:
 		var left := Economy.ads_left(kind)
-		var color := Color("#e0a020") if kind == "coins" else Color("#35c8ff")
-		var title := "+%s" % SaveService.format_coins(Economy.AD_COINS) if kind == "coins" else "НЕОНИТ 1-5"
-		var button := UiStyle.button("%s\n%s" % [title, ("реклама · ещё %d" % left) if left > 0 else "завтра снова"], color.darkened(0.45) if left > 0 else UiStyle.PANEL, 16, Vector2(0, 70))
+		var color := Color("#e0a020") if kind == "coins" else Color("#9b5cff")
+		var title := "+%s" % SaveService.format_coins(Economy.AD_COINS) if kind == "coins" else "+1-5 НЕОНИТА"
+		# Одна строка по центру: что даёт и сколько осталось; шрифт ужимается по ширине.
+		var button := UiStyle.button("%s · %s" % [title, ("ещё %d" % left) if left > 0 else "завтра"], color if left > 0 else UiStyle.PANEL, 19, Vector2(0, 56))
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.disabled = left <= 0
+		button.icon = BattlePanels.icon("ad")
+		button.expand_icon = true
+		button.add_theme_constant_override("icon_max_width", 30)
+		button.resized.connect(func() -> void: UiStyle.fit_button_font(button, 19, button.size.x - 90.0))
 		button.pressed.connect(func() -> void:
 			Platform.show_rewarded_ad(func(ok: bool) -> void:
 				if not ok:

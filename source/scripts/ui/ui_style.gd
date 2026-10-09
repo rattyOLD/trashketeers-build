@@ -4,8 +4,8 @@ extends RefCounted
 ## Всё строится кодом, чтобы UI не зависел от .tres-тем и легко правился в одном месте.
 
 const OUTLINE := Color("#0d0f0e")
-const PANEL := Color("#23272a")
-const PANEL_LIGHT := Color("#363b3e")
+const PANEL := Color("#221d19")
+const PANEL_LIGHT := Color("#302823")
 const NEON := Color("#ff8a1f")
 const HOT := Color("#ff5a1f")
 const GOLD := Color("#f5c04a")
@@ -46,6 +46,16 @@ const KIT_DIR := "res://assets/ui/kit/"
 static var _kit_cache: Dictionary = {}
 
 
+## Единая палитра карточек окон (под набор Астры: ржавчина, золото, бирюза): тёмная тёплая плашка, янтарная рамка.
+const CARD_BG := Color("#25201c")
+const CARD_BORDER := Color("#b07a30")
+const CARD_TEAL := Color("#3fc8d8")
+
+
+static func card_box(accent: Color = CARD_BORDER, width: int = 3) -> StyleBoxFlat:
+	return box(CARD_BG, accent, width, 14)
+
+
 ## Шрифт кнопки уменьшается (не меньше 11), пока надпись не влезет в max_width: текст не вылезает из плашки.
 static func fit_button_font(button: Button, base: int, max_width: float) -> void:
 	var font := button.get_theme_font("font")
@@ -76,6 +86,9 @@ static func _kit_family(color: Color) -> String:
 		return "gold"
 	if h < 0.46:
 		return "green"
+	# Фиолетовые (премиум, неонит) — своя плашка, а не серая нейтральная.
+	if h > 0.68 and h < 0.93:
+		return "purple"
 	return "teal"
 
 

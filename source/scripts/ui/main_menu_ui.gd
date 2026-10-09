@@ -420,7 +420,6 @@ func _make_side_button(key: String, icon_path: String, caption_text: String, rig
 	dot.visible = false
 	button.add_child(dot)
 	if key == "news":
-		caption.add_theme_font_size_override("font_size", 13 if px >= 90.0 else 9)
 		caption.visible = true
 	_side_buttons[key] = {"caption": caption, "dot": dot, "icon": icon}
 	return button
