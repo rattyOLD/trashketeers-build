@@ -49,6 +49,8 @@ var skill_cooldown_mult := 1.0
 var fx: FxManager
 ## Внешняя тяга (магнитные мины) — выставляется каждый кадр, сама не затухает.
 var external_pull := Vector2.ZERO
+## Моргенштерн: натяжение цепи тянет героя к шару (FlailRig.pull).
+var flail_pull := Vector2.ZERO
 ## Замедление от мин (1 — нет).
 var move_slow := 1.0
 ## Вброд по протоке/каналу (AcidRiver): замедление, отдельно от ловушек, которые пишут move_slow.
@@ -159,7 +161,7 @@ func _physics_process(delta: float) -> void:
 	if move_input.length_squared() > 0.04:
 		_last_move_direction = move_input.normalized()
 	var speed := move_speed * (1.0 + _speed_buff + rush_buff) * move_slow * terrain_slow * (0.15 if _snare > 0.0 else 1.0)
-	velocity = (Vector2.ZERO if _stun > 0.0 else move_input.limit_length(1.0) * speed) + _knockback + external_pull
+	velocity = (Vector2.ZERO if _stun > 0.0 else move_input.limit_length(1.0) * speed) + _knockback + external_pull + flail_pull
 	var dashing := _dash_left > 0.0 and _stun <= 0.0
 	if dashing:
 		velocity = _dash_direction * DASH_SPEED * _dash_distance_mult * minf(_dash_left / maxf(delta, 0.001), 1.0)

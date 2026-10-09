@@ -565,7 +565,7 @@ class Armory:
 	var _detail: StringName = &""
 	var _dtier := 1
 
-	const CLASS_NAMES := {"dagger": "Кинжал", "sword": "Меч", "katana": "Катана", "axe": "Топор", "spear": "Копьё", "hammer": "Молот", "shield": "Щит", "club": "Дубина"}
+	const CLASS_NAMES := {"dagger": "Кинжал", "sword": "Меч", "katana": "Катана", "axe": "Топор", "spear": "Копьё", "hammer": "Молот", "shield": "Щит", "club": "Дубина", "flail": "Моргенштерн"}
 	const RARITY_ORDER := {"common": 0, "rare": 1, "epic": 2, "legendary": 3}
 	const SORTS := [["rarity", "СОРТ: РЕДКОСТЬ"], ["dps", "СОРТ: DPS"], ["damage", "СОРТ: УРОН"], ["price", "СОРТ: ЦЕНА"]]
 

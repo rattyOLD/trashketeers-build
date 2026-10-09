@@ -1096,6 +1096,28 @@
       "knockback": 1.6,
       "explosion_radius": 70,
       "explosion_damage": 22
+    },
+    {
+      "weapon_id": "morning_star_v1",
+      "display_name": "Моргенштерн «Цепной пёс»",
+      "short_name": "Моргенштерн",
+      "icon": "melee_crowbar",
+      "rarity": "epic",
+      "kind": "melee",
+      "melee_class": "flail",
+      "damage": 70,
+      "crit_chance": 0.12,
+      "windup": 0.2,
+      "swing": 0.2,
+      "recovery": 0.2,
+      "arc_deg": 360,
+      "reach": 140,
+      "lunge": 0,
+      "stagger": 14,
+      "weight": 4,
+      "knockback": 1.6,
+      "effect_color": "#FF7A3D",
+      "loot_weight": 0.6
     }
   ]
 }

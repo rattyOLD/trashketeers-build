@@ -154,6 +154,10 @@ func _physics_process(delta: float) -> void:
 		_retarget_timer = RETARGET_INTERVAL
 		_target = _target_finder.call(global_position, weapon.max_distance)
 
+	if weapon.melee_class == "flail":
+		_flail_step(delta)
+		return
+	_hide_flail()
 	if weapon.is_melee():
 		_melee_step(delta)
 		return
@@ -238,6 +242,42 @@ func _on_swing_for_wave(w: WeaponData, origin: Vector2, direction: Vector2, _com
 	var bullet := BulletPool.spawn(_wave_weapon, origin + direction * 30.0, direction, Bullet.Team.PLAYER)
 	if bullet != null:
 		bullet.damage_scale = 1.0
+
+
+## Моргенштерн: шар на цепи (FlailRig). Стик прицела раскручивает шар, в авторежиме он крутится сам;
+## попадания идут через melee.hit_resolved — работают хитстоп, тряска и «Кровопийца».
+var flail: FlailRig
+
+
+func _flail_step(delta: float) -> void:
+	if flail == null:
+		flail = FlailRig.new()
+		add_child(flail)
+		flail.ball_hit.connect(func(at: Vector2, count: int, strong: bool) -> void:
+			melee.hit_resolved.emit(weapon, at, count, false, strong))
+	flail.visible = true
+	var player := get_parent() as Player
+	var at := global_position
+	if player != null and player.visual != null:
+		at = player.visual.get_muzzle_global(aim_direction)
+	var control := manual_aim if not auto_mode and trigger else Vector2.ZERO
+	flail.tick(delta, at, control, auto_mode, weapon)
+	has_target = true
+	var to_ball := flail.ball - global_position
+	if to_ball.length_squared() > 1.0:
+		aim_direction = to_ball.normalized()
+	if player != null:
+		player.flail_pull = flail.pull
+
+
+func _hide_flail() -> void:
+	if flail == null or not flail.visible:
+		return
+	flail.visible = false
+	flail._ready_ball = false
+	var player := get_parent() as Player
+	if player != null:
+		player.flail_pull = Vector2.ZERO
 
 
 func _melee_step(delta: float) -> void:
