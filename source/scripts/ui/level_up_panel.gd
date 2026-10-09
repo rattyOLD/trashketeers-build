@@ -106,21 +106,31 @@ func _card_width() -> float:
 func _make_card(upgrade: UpgradeData, index: int, stats: RunStats) -> Button:
 	var accent := upgrade.rarity_color() if upgrade.category != "evolution" else Color("#ff5cf0")
 	var card_w := _card_width()
-	var text_width := 540.0 if Orient.portrait else card_w - 40.0
-	var card := UiStyle.button("", UiStyle.PANEL_LIGHT, 28, Vector2(600, 122) if Orient.portrait else Vector2(card_w, 280))
+	var text_width := 524.0 if Orient.portrait else card_w - 68.0
+	var card := UiStyle.button("", UiStyle.PANEL_LIGHT, 28, Vector2(600, 148) if Orient.portrait else Vector2(card_w, 280))
 	var border := 6 if upgrade.rarity_rank > 0 else 4
 	card.add_theme_stylebox_override("normal", UiStyle.box(UiStyle.PANEL_LIGHT.darkened(0.15), accent, border, 22))
 	card.add_theme_stylebox_override("hover", UiStyle.box(UiStyle.PANEL_LIGHT.lightened(0.08), accent.lightened(0.25), border, 22))
 	card.add_theme_stylebox_override("pressed", UiStyle.box(UiStyle.PANEL_LIGHT.lightened(0.15), Color.WHITE, border, 22))
+	# Рамки карточек наград Астры по редкости (assets/ui/kit/reward_card_*): ржавая, бирюзовая, золотая с короной.
+	var frame_path := UiStyle.KIT_DIR + "reward_card_%s.png" % ["common", "rare", "legendary"][clampi(upgrade.rarity_rank, 0, 2)]
+	if UiStyle.KIT_ON and upgrade.category != "evolution" and ResourceLoader.exists(frame_path):
+		for state: String in ["normal", "hover", "pressed", "focus"]:
+			var tex := StyleBoxTexture.new()
+			tex.texture = load(frame_path) as Texture2D
+			tex.set_texture_margin_all(30.0)
+			tex.set_content_margin_all(14.0)
+			tex.modulate_color = {"normal": Color.WHITE, "hover": Color(1.12, 1.12, 1.12), "pressed": Color(1.25, 1.25, 1.25), "focus": Color.WHITE}[state]
+			card.add_theme_stylebox_override(state, tex)
 	card.action_mode = BaseButton.ACTION_MODE_BUTTON_PRESS
 	card.pressed.connect(_pick.bind(index))
 
 	var column := VBoxContainer.new()
 	column.set_anchors_preset(Control.PRESET_FULL_RECT)
-	column.offset_left = 18
-	column.offset_right = -18
+	column.offset_left = 32
+	column.offset_right = -32
 	column.alignment = BoxContainer.ALIGNMENT_BEGIN
-	column.offset_top = 8
+	column.offset_top = 26 if Orient.portrait else 30
 	column.add_theme_constant_override("separation", 3)
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	card.add_child(column)
@@ -143,12 +153,12 @@ func _make_card(upgrade: UpgradeData, index: int, stats: RunStats) -> Button:
 			column.offset_right = -side - 26.0
 			text_width -= side + 8.0
 		else:
-			var side := 120.0
+			var side := 92.0
 			art.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 			art.offset_left = -side * 0.5
 			art.offset_right = side * 0.5
-			art.offset_top = -side - 16.0
-			art.offset_bottom = -16.0
+			art.offset_top = -side - 30.0
+			art.offset_bottom = -30.0
 		card.add_child(art)
 	var stacks := stats.get_stacks(upgrade.id)
 	var tag := "%s  •  %s" % [upgrade.rarity_title() if upgrade.category != "evolution" else "ЭВОЛЮЦИЯ", upgrade.category_title() if upgrade.category != "evolution" else "СИНЕРГИЯ"]

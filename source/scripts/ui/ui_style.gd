@@ -46,6 +46,16 @@ const KIT_DIR := "res://assets/ui/kit/"
 static var _kit_cache: Dictionary = {}
 
 
+## Текстура из набора интерфейса Астры (assets/ui/kit/<имя>) или null, если набор выключен или файла нет.
+static func kit_texture(file: String) -> Texture2D:
+	if not KIT_ON:
+		return null
+	var key := "tex:" + file
+	if not _kit_cache.has(key):
+		_kit_cache[key] = load(KIT_DIR + file) if ResourceLoader.exists(KIT_DIR + file) else null
+	return _kit_cache[key]
+
+
 ## Какой из четырёх нарисованных цветов кнопки ближе к заказанному оттенку. Серые и тёмные кнопки: фиолетовая «стальная».
 static func _kit_family(color: Color) -> String:
 	if color.s < 0.3 or color.v < 0.4:

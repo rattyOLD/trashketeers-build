@@ -17,6 +17,7 @@ var _busy := false
 
 func _init() -> void:
 	super("СУНДУКИ")
+	set_frame("window_neon_gold_s")
 	_balance = UiStyle.label("", 24, UiStyle.GOLD, 6)
 	content.add_child(_balance)
 	var pity_card := PanelContainer.new()

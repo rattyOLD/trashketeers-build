@@ -20,6 +20,7 @@ const FEATURE_TEXT := "Пробивает всех на линии. Навык �
 
 func _init() -> void:
 	super("БОЕВОЙ ПРОПУСК")
+	set_frame("window_neon_gold_s")
 	_scroll_box = MenuPopups.scroll_list(content)
 	_hero = VBoxContainer.new()
 	_hero.add_theme_constant_override("separation", 8)
@@ -39,6 +40,27 @@ func _init() -> void:
 ## Шапка: сезон, огромный уровень, дни и толстая полоса с подсказкой «до следующего уровня».
 func _build_hero(level: int) -> void:
 	MenuPopups.clear(_hero)
+	# Баннер сезона Астры (assets/ui/kit/season_railgun_banner.png): главная награда сезона — Рельсотрон.
+	var banner_tex := UiStyle.kit_texture("season_railgun_banner.png")
+	if banner_tex != null:
+		var banner := TextureRect.new()
+		banner.texture = banner_tex
+		banner.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		banner.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		banner.custom_minimum_size = Vector2(0, 200)
+		banner.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var caption := UiStyle.label("СЕЗОН %d" % BattlePass.season(), 34, UiStyle.GOLD, 8)
+		caption.set_anchors_preset(Control.PRESET_CENTER_LEFT)
+		caption.position = Vector2(0, -16)
+		caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		banner.add_child(caption)
+		banner.resized.connect(func() -> void:
+			# Подпись — на тёмной левой части баннера (где нет пушки).
+			var shown := minf(banner.size.x, banner.size.y * 640.0 / 240.0)
+			var left := (banner.size.x - shown) * 0.5
+			caption.position = Vector2(left + shown * 0.05, banner.size.y * 0.5 - 22.0)
+			caption.size = Vector2(shown * 0.36, 44.0))
+		_hero.add_child(banner)
 	var panel := PanelContainer.new()
 	var box := UiStyle.box(Color("#2c2a28"), Color("#35c8ff"), 4, 22)
 	box.shadow_color = Color(0.7, 0.3, 1.0, 0.35)
@@ -443,7 +465,7 @@ class Road:
 			draw_polyline(points, Color("#32302d"), 32.0, true)
 			for i in range(0, 20, 2):
 				draw_line(points[i], points[i + 1], Color("#ffd23f") if passed else Color("#7f7a72"), 3.0, true)
-		if tier % 5 == 0:
+		if tier % 5 == 0 and UiStyle.kit_texture("pass_node_premium.png") == null:
 			var side := 1.0 if tier % 2 == 1 else -1.0
 			var base := node + Vector2(side * 40.0, 22.0)
 			draw_colored_polygon(PackedVector2Array([base + Vector2(0, -22), base + Vector2(-11, 0), base + Vector2(11, 0)]), Color("#ff7a3d"))
@@ -454,6 +476,20 @@ class Road:
 		var ring := Color("#ffd23f") if (lit or current) else Color("#7f7a72")
 		if current:
 			draw_circle(node, radius + 9.0, Color(ring, 0.25 + 0.15 * sin(_time * 5.0)))
+		# Узлы Астры (assets/ui/kit/pass_node_*): забран — с галочкой, открыт — бирюзовый, каждый 5-й — с короной.
+		var kind := "complete" if all_claimed else ("premium" if tier % 5 == 0 else ("current" if lit else "empty"))
+		var node_tex := UiStyle.kit_texture("pass_node_%s.png" % kind)
+		if node_tex != null:
+			var side := (radius + 7.0) * 2.0
+			draw_texture_rect(node_tex, Rect2(node - Vector2(side, side) * 0.5, Vector2(side, side)), false, Color.WHITE if (lit or current or all_claimed) else Color(0.7, 0.7, 0.72))
+			if kind == "complete" or kind == "premium":
+				return
+			var nfont := get_theme_default_font()
+			var ntext := str(tier)
+			var nw := nfont.get_string_size(ntext, HORIZONTAL_ALIGNMENT_LEFT, -1, 24).x
+			draw_string_outline(nfont, node + Vector2(-nw * 0.5, 8.0), ntext, HORIZONTAL_ALIGNMENT_LEFT, -1, 24, 6, Color("#21201e"))
+			draw_string(nfont, node + Vector2(-nw * 0.5, 8.0), ntext, HORIZONTAL_ALIGNMENT_LEFT, -1, 24, Color.WHITE)
+			return
 		draw_circle(node, radius + 3.0, Color("#21201e"))
 		draw_circle(node, radius, fill)
 		draw_arc(node, radius - 1.0, 0.0, TAU, 32, ring, 3.0, true)

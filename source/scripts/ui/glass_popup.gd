@@ -107,6 +107,19 @@ func _init(title_text: String) -> void:
 	_title = UiStyle.label(title_text, 34, UiStyle.TEXT, 9)
 	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	# Табличка заголовка из набора интерфейса Астры (assets/ui/kit/header_plate.png).
+	if UiStyle.KIT_ON and ResourceLoader.exists(UiStyle.KIT_DIR + "header_plate.png"):
+		var plate := StyleBoxTexture.new()
+		plate.texture = load(UiStyle.KIT_DIR + "header_plate.png") as Texture2D
+		plate.set_texture_margin(SIDE_LEFT, 34.0)
+		plate.set_texture_margin(SIDE_RIGHT, 34.0)
+		plate.set_texture_margin(SIDE_TOP, 14.0)
+		plate.set_texture_margin(SIDE_BOTTOM, 14.0)
+		plate.set_content_margin(SIDE_LEFT, 46.0)
+		plate.set_content_margin(SIDE_RIGHT, 20.0)
+		plate.set_content_margin(SIDE_TOP, 6.0)
+		plate.set_content_margin(SIDE_BOTTOM, 8.0)
+		_title.add_theme_stylebox_override("normal", plate)
 	header.add_child(_title)
 	# Место под крестик в заголовке; сам крестик — один, закреплён в углу окна и не уезжает при прокрутке.
 	var close_slot := Control.new()
@@ -153,6 +166,18 @@ static func is_on_top(node: Node) -> bool:
 	if popup == null:
 		return _open_stack.is_empty()
 	return not _open_stack.is_empty() and _open_stack.back() == popup and popup._panel.scale.is_equal_approx(Vector2.ONE) and not popup._closing and popup.overlays == 0
+
+
+## Рамка окна из набора Астры (assets/ui/kit/<имя>.png, 96×96, поля 22): золотая — для окон наград.
+func set_frame(file: String) -> void:
+	var tex := UiStyle.kit_texture(file + ".png")
+	if tex == null or _frame == null:
+		return
+	var sb := StyleBoxTexture.new()
+	sb.texture = tex
+	sb.draw_center = false
+	sb.set_texture_margin_all(22.0)
+	_frame.add_theme_stylebox_override("panel", sb)
 
 
 func open() -> void:
