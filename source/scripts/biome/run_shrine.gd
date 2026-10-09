@@ -12,7 +12,8 @@ enum Kind { ALTAR, VACUUM, GREED, RING, DEALER }
 
 const NAMES := {Kind.ALTAR: "altar", Kind.VACUUM: "vacuum", Kind.GREED: "greed_register", Kind.RING: "ring", Kind.DEALER: "fence_dealer"}
 const TITLES := {Kind.ALTAR: "Алтарь", Kind.VACUUM: "Пылесос", Kind.GREED: "Касса", Kind.RING: "Ринг", Kind.DEALER: "Барыга"}
-const HOLD := {Kind.ALTAR: 3.0, Kind.VACUUM: 1.2, Kind.GREED: 2.0, Kind.RING: 2.0, Kind.DEALER: 0.8}
+## Дольше держать — не сработает случайно, если просто пробежал мимо (особенно Касса, Ринг и Алтарь).
+const HOLD := {Kind.ALTAR: 4.0, Kind.VACUUM: 2.0, Kind.GREED: 3.5, Kind.RING: 3.5, Kind.DEALER: 1.2}
 const COLORS := {Kind.ALTAR: "#ff4d4d", Kind.VACUUM: "#6adcff", Kind.GREED: "#ffd23f", Kind.RING: "#ff7a3d", Kind.DEALER: "#b96bff"}
 const RADIUS := 95.0
 ## Высота подписи над объектом (выше рисунка Астры).

@@ -7,7 +7,8 @@ extends Node2D
 signal open_requested(safe: JunkSafe)
 
 const RADIUS := 85.0
-const HOLD := 0.6
+## Сейф тратит гайки — открывается только если постоять, а не пробегая мимо.
+const HOLD := 1.5
 const ART := "res://assets/world/junk_safe.png"
 const ART_OPEN := "res://assets/world/junk_safe_open.png"
 
