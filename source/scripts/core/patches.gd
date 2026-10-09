@@ -9,21 +9,22 @@ extends RefCounted
 const MAX_LEVEL := 3
 const SLOTS := 4
 const FREE_SLOTS := 2
-const SLOT_PRICES := [0, 0, 5000, 12000]
+## Нашивки дают большой буст — дорогое занятие на долгую игру.
+const SLOT_PRICES := [0, 0, 25000, 60000]
 ## id: название, описание (%s — значение уровня), эффекты [[стат, за уровень]], цена 1-го уровня, цвет, значок.
 const CATALOG := {
-	"fist": {"title": "Кулак", "desc": "+%s%% урона", "fx": [[&"damage_mult", 0.08]], "price": 500, "color": "#ff4d6d"},
-	"bullet": {"title": "Пуля", "desc": "+%s%% скорострельности", "fx": [[&"fire_rate_mult", 0.06]], "price": 500, "color": "#ffb02e"},
-	"boot": {"title": "Сапог", "desc": "+%s%% скорости бега", "fx": [[&"move_speed_mult", 0.05]], "price": 400, "color": "#6adcff"},
-	"heart": {"title": "Сердце", "desc": "+%s к здоровью", "fx": [[&"max_hp_add", 15.0]], "price": 400, "color": "#7dff9a"},
-	"magnet": {"title": "Магнит", "desc": "+%s%% радиуса подбора", "fx": [[&"magnet_mult", 0.2]], "price": 300, "color": "#b96bff"},
-	"clover": {"title": "Клевер", "desc": "+%s%% Удачи", "fx": [[&"luck", 0.05]], "price": 600, "color": "#7dff3a"},
-	"rat": {"title": "Крыса", "desc": "+%s%% шанс двойной добычи", "fx": [[&"double_drop", 0.05]], "price": 600, "color": "#c9c3d9"},
-	"bolt": {"title": "Молния", "desc": "+%s%% шанс разряда", "fx": [[&"shock_chance", 0.06]], "price": 700, "color": "#6adcff"},
-	"gear": {"title": "Шестерня", "desc": "+%s%% силы эффектов", "fx": [[&"status_power", 0.1]], "price": 700, "color": "#ff8a3d"},
-	"mug": {"title": "Кружка", "desc": "+%s здоровья в секунду", "fx": [[&"regen", 0.4]], "price": 500, "color": "#ffd23f"},
-	"star": {"title": "Звезда Семёрки", "desc": "+%s%% шанса крита", "fx": [[&"crit_chance_add", 0.04]], "price": 900, "color": "#ffd23f"},
-	"skull": {"title": "Череп", "desc": "+%s%% урона, но -%s к здоровью", "fx": [[&"damage_mult", 0.2], [&"max_hp_add", -10.0]], "price": 900, "color": "#ff3b3b"},
+	"fist": {"title": "Кулак", "desc": "+%s%% урона", "fx": [[&"damage_mult", 0.08]], "price": 3000, "color": "#ff4d6d"},
+	"bullet": {"title": "Пуля", "desc": "+%s%% скорострельности", "fx": [[&"fire_rate_mult", 0.06]], "price": 3000, "color": "#ffb02e"},
+	"boot": {"title": "Сапог", "desc": "+%s%% скорости бега", "fx": [[&"move_speed_mult", 0.05]], "price": 2500, "color": "#6adcff"},
+	"heart": {"title": "Сердце", "desc": "+%s к здоровью", "fx": [[&"max_hp_add", 15.0]], "price": 2500, "color": "#7dff9a"},
+	"magnet": {"title": "Магнит", "desc": "+%s%% радиуса подбора", "fx": [[&"magnet_mult", 0.2]], "price": 2000, "color": "#b96bff"},
+	"clover": {"title": "Клевер", "desc": "+%s%% Удачи", "fx": [[&"luck", 0.05]], "price": 3500, "color": "#7dff3a"},
+	"rat": {"title": "Крыса", "desc": "+%s%% шанс двойной добычи", "fx": [[&"double_drop", 0.05]], "price": 3500, "color": "#c9c3d9"},
+	"bolt": {"title": "Молния", "desc": "+%s%% шанс разряда", "fx": [[&"shock_chance", 0.06]], "price": 4000, "color": "#6adcff"},
+	"gear": {"title": "Шестерня", "desc": "+%s%% силы эффектов", "fx": [[&"status_power", 0.1]], "price": 4000, "color": "#ff8a3d"},
+	"mug": {"title": "Кружка", "desc": "+%s здоровья в секунду", "fx": [[&"regen", 0.4]], "price": 3000, "color": "#ffd23f"},
+	"star": {"title": "Звезда Семёрки", "desc": "+%s%% шанса крита", "fx": [[&"crit_chance_add", 0.04]], "price": 5000, "color": "#ffd23f"},
+	"skull": {"title": "Череп", "desc": "+%s%% урона, но -%s к здоровью", "fx": [[&"damage_mult", 0.2], [&"max_hp_add", -10.0]], "price": 5000, "color": "#ff3b3b"},
 }
 const ORDER := ["fist", "bullet", "boot", "heart", "magnet", "clover", "rat", "bolt", "gear", "mug", "star", "skull"]
 
@@ -33,8 +34,8 @@ static func level(id: String) -> int:
 
 
 static func price(id: String) -> int:
-	# Следующий уровень: 1×, 3×, 7× базовой цены.
-	return int(CATALOG[id]["price"]) * [1, 3, 7][clampi(level(id), 0, MAX_LEVEL - 1)]
+	# Следующий уровень: 1×, 3×, 8× базовой цены (полная нашивка — 12× базовой).
+	return int(CATALOG[id]["price"]) * [1, 3, 8][clampi(level(id), 0, MAX_LEVEL - 1)]
 
 
 static func buy(id: String) -> bool:
