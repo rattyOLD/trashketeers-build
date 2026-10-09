@@ -1846,21 +1846,35 @@ func _build_ground_detail() -> void:
 ## Выживание 2.0: расставляет вышки-ретрансляторы и сейфы хлама по открытой земле, вдали от старта,
 ## площади и босса, не ближе 650 px друг к другу — карта зовёт исследовать её, как в аналогах.
 func _build_run_shrines(area: Rect2, center: Vector2) -> void:
+	# Как в аналогах: карта делится на зоны 3×4, в каждой зоне — самое просторное место (больше всего
+	# свободного пространства вокруг), объекты не ближе 480 px друг к другу. Так они равномерно разнесены
+	# по карте, у каждого есть «воздух», они видны издалека и не тонут среди хлама.
 	var placed: Array[Vector2] = []
 	var want := TOWER_COUNT + SAFE_COUNT + SHRINE_KINDS.size()
-	for attempt in 1500:
-		if placed.size() >= want:
-			break
-		var p := Vector2(randf_range(area.position.x, area.end.x), randf_range(area.position.y, area.end.y)).snapped(Vector2(16, 16))
-		if p.distance_to(center) < 420.0 or p.distance_to(player_start) < 500.0 or boss_rect.grow(260.0).has_point(p):
-			continue
-		if not is_walkable(p) or not is_area_clear(p, CELL * 2.5) or not _cover_allowed(p, 220.0):
-			continue
-		if not _river_points.is_empty() and absf(p.x - AcidRiver._x_at(_river_points, p.y)) < RIVER_WIDTH * 0.5 + 160.0:
-			continue
-		if placed.any(func(o: Vector2) -> bool: return o.distance_to(p) < 480.0):
-			continue
-		placed.append(p)
+	var cols := 3
+	var rows := 4
+	var zone := Vector2(area.size.x / cols, area.size.y / rows)
+	var cells: Array[Rect2] = []
+	for r in rows:
+		for c in cols:
+			cells.append(Rect2(area.position + zone * Vector2(c, r), zone))
+	cells.shuffle()
+	for round_i in 2:
+		for cell in cells:
+			if placed.size() >= want:
+				break
+			var best := Vector2.INF
+			var best_room := 0.0
+			for attempt in 40:
+				var p := Vector2(randf_range(cell.position.x, cell.end.x), randf_range(cell.position.y, cell.end.y)).snapped(Vector2(16, 16))
+				if not _shrine_spot_ok(p, center, placed):
+					continue
+				var room := _room_at(p)
+				if room > best_room:
+					best_room = room
+					best = p
+			if best != Vector2.INF:
+				placed.append(best)
 	placed.shuffle()
 	# Сначала особые объекты (их по одному), потом вышки, остаток — сейфы: если места мало, теряем сейф, а не Барыгу.
 	var order: Array = []
@@ -1890,56 +1904,92 @@ func _build_run_shrines(area: Rect2, center: Vector2) -> void:
 			shrines.append(shrine)
 
 
+func _shrine_spot_ok(p: Vector2, center: Vector2, placed: Array[Vector2]) -> bool:
+	if p.distance_to(center) < 420.0 or p.distance_to(player_start) < 500.0 or boss_rect.grow(260.0).has_point(p):
+		return false
+	if not is_walkable(p) or not is_area_clear(p, CELL * 2.0) or not _cover_allowed(p, 200.0):
+		return false
+	if not _river_points.is_empty() and absf(p.x - AcidRiver._x_at(_river_points, p.y)) < RIVER_WIDTH * 0.5 + 160.0:
+		return false
+	return not placed.any(func(o: Vector2) -> bool: return o.distance_to(p) < 480.0)
+
+
+## Простор вокруг точки: самый большой свободный радиус (в клетках) из проверенных.
+func _room_at(p: Vector2) -> float:
+	var room := 0.0
+	for r in [2.0, 3.0, 4.0, 5.0]:
+		if not is_area_clear(p, CELL * r):
+			break
+		room = r
+	return room + randf() * 0.5
+
+
 ## Карта с редкостью: её пропы (декор без столкновений, на свободных клетках) и декали пола.
-const MAP_PROPS := 10
-const MAP_DECALS := 14
+const MAP_CLUSTERS := 3
 
 
 func _build_map_card_art(area: Rect2, center: Vector2) -> void:
 	var id := str(chapter.get("map_card", ""))
 	if id.is_empty():
 		return
-	var props: Array[Texture2D] = []
-	var decals: Array[Texture2D] = []
-	for dir in ["props", "decals"]:
-		var path := "res://assets/maps/%s/%s/" % [id, dir]
-		var listing := DirAccess.get_files_at(path)
-		for f in listing:
-			var name := f.trim_suffix(".import")
-			if name.ends_with(".png") and not (dir == "props" and props.any(func(t: Texture2D) -> bool: return t.resource_path.ends_with(name))) \
-					and not (dir == "decals" and decals.any(func(t: Texture2D) -> bool: return t.resource_path.ends_with(name))):
-				var t := load(path + name) as Texture2D
-				if t != null:
-					(props if dir == "props" else decals).append(t)
-	var placed := 0
-	for attempt in 600:
-		if placed >= MAP_PROPS + MAP_DECALS or (props.is_empty() and decals.is_empty()):
+	var props := _map_textures(id, "props")
+	var decals := _map_textures(id, "decals")
+	if props.is_empty():
+		return
+	# Группы, а не россыпь: 3 «уголка» карты (бочки с костром, ларёк с тележкой…) по 3 предмета дугой
+	# и 2 декали рядом — читается как место, а не как мусор по всему полю.
+	var anchors: Array[Vector2] = []
+	for attempt in 300:
+		if anchors.size() >= MAP_CLUSTERS:
 			break
 		var p := Vector2(randf_range(area.position.x, area.end.x), randf_range(area.position.y, area.end.y)).snapped(Vector2(16, 16))
-		if p.distance_to(center) < 300.0 or boss_rect.grow(200.0).has_point(p) or not is_walkable(p):
+		if p.distance_to(center) < 360.0 or boss_rect.grow(220.0).has_point(p) or not is_walkable(p) or not is_area_clear(p, CELL * 2.5):
 			continue
-		var as_prop := placed < MAP_PROPS and not props.is_empty()
-		if as_prop and not is_area_clear(p, CELL * 1.2):
+		if anchors.any(func(o: Vector2) -> bool: return o.distance_to(p) < 900.0):
 			continue
-		var sprite := Sprite2D.new()
-		if as_prop:
-			sprite.texture = props.pick_random()
+		if towers.any(func(o: Node2D) -> bool: return o.global_position.distance_to(p) < 320.0) or safes.any(func(o: Node2D) -> bool: return o.global_position.distance_to(p) < 320.0) \
+				or shrines.any(func(o: Node2D) -> bool: return o.global_position.distance_to(p) < 320.0):
+			continue
+		anchors.append(p)
+	for anchor in anchors:
+		var base_angle := randf() * TAU
+		for k in 3:
+			var at := (anchor + Vector2.from_angle(base_angle + k * 0.9) * randf_range(70.0, 130.0)).snapped(Vector2(8, 8))
+			if not is_walkable(at):
+				continue
+			var sprite := Sprite2D.new()
+			sprite.texture = props[(k + anchors.find(anchor)) % props.size()]
 			sprite.centered = false
 			sprite.offset = Vector2(-128, -244)
-			sprite.scale = Vector2.ONE * randf_range(0.5, 0.62) * Vector2(-1.0 if randf() < 0.5 else 1.0, 1.0)
-			sprite.position = p
+			sprite.scale = Vector2.ONE * randf_range(0.5, 0.6) * Vector2(-1.0 if randf() < 0.5 else 1.0, 1.0)
+			sprite.position = at
 			_own(sprite, _layers.world)
-		else:
+		for k in 2:
 			if decals.is_empty():
-				continue
-			sprite.texture = decals.pick_random()
-			sprite.position = p
-			sprite.rotation = randf_range(-0.4, 0.4)
-			sprite.scale = Vector2.ONE * randf_range(0.5, 0.75)
-			sprite.modulate = Color(1, 1, 1, 0.9)
-			sprite.light_mask = BiomeLayers.LIGHT_MASK_FLOOR
-			_own(sprite, _layers.decals)
-		placed += 1
+				break
+			var mark := Sprite2D.new()
+			mark.texture = decals.pick_random()
+			mark.position = anchor + Vector2.from_angle(randf() * TAU) * randf_range(20.0, 90.0)
+			mark.rotation = randf_range(-0.4, 0.4)
+			mark.scale = Vector2.ONE * randf_range(0.55, 0.75)
+			mark.modulate = Color(1, 1, 1, 0.85)
+			mark.light_mask = BiomeLayers.LIGHT_MASK_FLOOR
+			_own(mark, _layers.decals)
+
+
+func _map_textures(id: String, dir: String) -> Array[Texture2D]:
+	var out: Array[Texture2D] = []
+	var path := "res://assets/maps/%s/%s/" % [id, dir]
+	var seen := {}
+	for f in DirAccess.get_files_at(path):
+		var name := f.trim_suffix(".import").trim_suffix(".remap")
+		if not name.ends_with(".png") or seen.has(name):
+			continue
+		seen[name] = true
+		var t := load(path + name) as Texture2D
+		if t != null:
+			out.append(t)
+	return out
 
 
 ## Прохожие: жители ходят по улицам кварталов (Свалка) или аллеям парка (Банк) туда-обратно,
@@ -2056,6 +2106,9 @@ func _build_poi(items: Array, at: Vector2) -> bool:
 ## Между точками интереса: одиночные укрытия (бочка, ящик, шина, мешки) и плоские обломки — по сетке
 ## с дрожанием, только в захламлённых зонах и не вплотную к сценам.
 func _scatter_singles(area: Rect2, center: Vector2) -> void:
+	# На карте с редкостью одиночный хлам заменяют её тематические группы (_build_map_card_art).
+	if not str(chapter.get("map_card", "")).is_empty():
+		return
 	var singles := ["m1_tire", "m1_crate", "m1_garbage", "d_rust_barrel", "d_barrel", "tire_stack"]
 	if layout == "bank":
 		singles = ["planter", "column", "umbrella", "crystals", "cash_pile", "lamp_banner"]
