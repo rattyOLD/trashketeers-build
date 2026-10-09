@@ -1,0 +1,148 @@
+{
+  "brief": 29,
+  "charge_tower_charge": {
+    "cell": [
+      200,
+      360
+    ],
+    "columns": 6,
+    "frames": 6,
+    "fps": 10,
+    "origin": "bottom_center"
+  },
+  "firmware_icons": {
+    "cell": [
+      128,
+      128
+    ],
+    "columns": 8,
+    "frames": 8,
+    "order": [
+      "damage",
+      "tempo",
+      "move",
+      "crit",
+      "armor",
+      "magnet",
+      "luck",
+      "heal"
+    ]
+  },
+  "fence_dealer": {
+    "cell": [
+      256,
+      256
+    ],
+    "columns": 4,
+    "idle_frames": 6,
+    "offer_frames": 4,
+    "fps": 8,
+    "origin": "bottom_center"
+  },
+  "files": [
+    {
+      "file": "world/survival2/altar.png",
+      "size": [
+        260,
+        260
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "world/survival2/charge_tower.png",
+      "size": [
+        200,
+        360
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "world/survival2/charge_tower_charge.png",
+      "size": [
+        1200,
+        360
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "world/survival2/charge_tower_off.png",
+      "size": [
+        200,
+        360
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "world/survival2/fence_dealer/idle.png",
+      "size": [
+        1024,
+        512
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "world/survival2/fence_dealer/offer.png",
+      "size": [
+        1024,
+        256
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "world/survival2/firmware_icons.png",
+      "size": [
+        1024,
+        128
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "world/survival2/greed_register.png",
+      "size": [
+        160,
+        180
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "world/survival2/junk_safe.png",
+      "size": [
+        140,
+        150
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "world/survival2/junk_safe_open.png",
+      "size": [
+        180,
+        150
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "world/survival2/ring.png",
+      "size": [
+        420,
+        300
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "world/survival2/siren.png",
+      "size": [
+        128,
+        128
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "world/survival2/vacuum.png",
+      "size": [
+        200,
+        200
+      ],
+      "alpha": "RGBA"
+    }
+  ]
+}

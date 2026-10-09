@@ -1,0 +1,424 @@
+{
+  "brief": 28,
+  "dash": {
+    "cell": [
+      128,
+      128
+    ],
+    "burst_frames": 6,
+    "particle_cell": [
+      32,
+      32
+    ],
+    "particle_frames": 3
+  },
+  "shot": {
+    "cell": [
+      96,
+      96
+    ],
+    "hit_frames": 4
+  },
+  "files": [
+    {
+      "file": "cosmetics/ad_gift.png",
+      "size": [
+        128,
+        128
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/chest_cosmetic.png",
+      "size": [
+        768,
+        384
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/dash/cat/bit.png",
+      "size": [
+        96,
+        32
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/dash/cat/burst.png",
+      "size": [
+        768,
+        128
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/dash/cat/trail.png",
+      "size": [
+        256,
+        64
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/dash/ember/bit.png",
+      "size": [
+        96,
+        32
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/dash/ember/burst.png",
+      "size": [
+        768,
+        128
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/dash/ember/trail.png",
+      "size": [
+        256,
+        64
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/dash/gold/bit.png",
+      "size": [
+        96,
+        32
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/dash/gold/burst.png",
+      "size": [
+        768,
+        128
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/dash/gold/trail.png",
+      "size": [
+        256,
+        64
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/dash/neon/bit.png",
+      "size": [
+        96,
+        32
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/dash/neon/burst.png",
+      "size": [
+        768,
+        128
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/dash/neon/trail.png",
+      "size": [
+        256,
+        64
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/dash/toxic/bit.png",
+      "size": [
+        96,
+        32
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/dash/toxic/burst.png",
+      "size": [
+        768,
+        128
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/dash/toxic/trail.png",
+      "size": [
+        256,
+        64
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/dash/void/bit.png",
+      "size": [
+        96,
+        32
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/dash/void/burst.png",
+      "size": [
+        768,
+        128
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/dash/void/trail.png",
+      "size": [
+        256,
+        64
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/icons/dash_cat.png",
+      "size": [
+        256,
+        256
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/icons/dash_ember.png",
+      "size": [
+        256,
+        256
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/icons/dash_gold.png",
+      "size": [
+        256,
+        256
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/icons/dash_neon.png",
+      "size": [
+        256,
+        256
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/icons/dash_toxic.png",
+      "size": [
+        256,
+        256
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/icons/dash_void.png",
+      "size": [
+        256,
+        256
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/icons/shot_candy.png",
+      "size": [
+        256,
+        256
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/icons/shot_crown.png",
+      "size": [
+        256,
+        256
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/icons/shot_inferno.png",
+      "size": [
+        256,
+        256
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/icons/shot_plasma.png",
+      "size": [
+        256,
+        256
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/icons/shot_rainbow.png",
+      "size": [
+        256,
+        256
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/icons/shot_venom.png",
+      "size": [
+        256,
+        256
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/shot/candy/glow.png",
+      "size": [
+        64,
+        64
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/shot/candy/hit.png",
+      "size": [
+        384,
+        96
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/shot/candy/tracer.png",
+      "size": [
+        96,
+        24
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/shot/crown/glow.png",
+      "size": [
+        64,
+        64
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/shot/crown/hit.png",
+      "size": [
+        384,
+        96
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/shot/crown/tracer.png",
+      "size": [
+        96,
+        24
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/shot/inferno/glow.png",
+      "size": [
+        64,
+        64
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/shot/inferno/hit.png",
+      "size": [
+        384,
+        96
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/shot/inferno/tracer.png",
+      "size": [
+        96,
+        24
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/shot/plasma/glow.png",
+      "size": [
+        64,
+        64
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/shot/plasma/hit.png",
+      "size": [
+        384,
+        96
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/shot/plasma/tracer.png",
+      "size": [
+        96,
+        24
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/shot/rainbow/glow.png",
+      "size": [
+        64,
+        64
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/shot/rainbow/hit.png",
+      "size": [
+        384,
+        96
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/shot/rainbow/tracer.png",
+      "size": [
+        96,
+        24
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/shot/venom/glow.png",
+      "size": [
+        64,
+        64
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/shot/venom/hit.png",
+      "size": [
+        384,
+        96
+      ],
+      "alpha": "RGBA"
+    },
+    {
+      "file": "cosmetics/shot/venom/tracer.png",
+      "size": [
+        96,
+        24
+      ],
+      "alpha": "RGBA"
+    }
+  ]
+}
