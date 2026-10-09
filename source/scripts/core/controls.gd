@@ -60,6 +60,7 @@ static func default_config(left_handed: bool = false) -> Dictionary:
 		"left_handed": left_handed,
 		"joystick_scale": 1.0,
 		"joystick_fixed": false,
+		"stick_zones": "half",
 		"opacity": 1.0,
 		"swipe_switch": true,
 		"auto_pick": false,
@@ -188,6 +189,24 @@ static func stick_home(id: String, area: Vector2) -> Vector2:
 	return Vector2(float(e["x"]) * area.x, float(e["y"]) * area.y)
 
 
+## Режим «четверти»: экран делится на 4 части, каждый стик ловит касания только в своей четверти
+## (той, где стоит его «дом»), остальные две свободны — нажатия там не двигают героя и не стреляют.
+## Если оба стика в одной четверти — работает обычное деление пополам.
+static func quarter_of(point: Vector2, area: Vector2) -> int:
+	return (1 if point.x >= area.x * 0.5 else 0) + (2 if point.y >= area.y * 0.5 else 0)
+
+
+## Кому касание: 1 — ходьба, 2 — стрельба, 0 — никому (свободная четверть).
+static func touch_owner(point: Vector2, area: Vector2) -> int:
+	if str(config().get("stick_zones", "half")) == "quarter":
+		var mq := quarter_of(stick_home("move", area), area)
+		var aq := quarter_of(stick_home("aim", area), area)
+		if mq != aq:
+			var q := quarter_of(point, area)
+			return 1 if q == mq else (2 if q == aq else 0)
+	return 1 if touch_is_move(point, area) else 2
+
+
 ## Чей палец: касание достаётся стику, на чьей стороне экрана его «дом» (если оба на одной стороне —
 ## граница посередине между ними). true — ходьба, false — стрельба.
 static func touch_is_move(point: Vector2, area: Vector2) -> bool:
@@ -311,7 +330,7 @@ static func apply_preset(left_handed: bool) -> void:
 	var keep_presets: Dictionary = config()["presets"]
 	var keep_keys: Dictionary = config()["keys"]
 	var fresh := default_config(left_handed)
-	for key in ["joystick_scale", "joystick_fixed", "opacity", "swipe_switch", "auto_pick", "auto_fire", "weapon_slots"]:
+	for key in ["joystick_scale", "joystick_fixed", "stick_zones", "opacity", "swipe_switch", "auto_pick", "auto_fire", "weapon_slots"]:
 		fresh[key] = config()[key]
 	fresh["presets"] = keep_presets
 	fresh["keys"] = keep_keys

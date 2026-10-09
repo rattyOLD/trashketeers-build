@@ -139,6 +139,7 @@ const MUSIC := {
 	&"win": -11.0,
 	&"boss": -12.0,
 }
+const LITE_MUSIC: Array[StringName] = [&"battle", &"raid"]
 
 var unlocked := false
 
@@ -422,8 +423,14 @@ func _preload_streams() -> void:
 		if stream is AudioStreamOggVorbis:
 			(stream as AudioStreamOggVorbis).loop = LOOPED_SFX.has(id)
 		_streams[id] = stream
+	# Веб на телефоне держит каждый сыгранный трек целиком в памяти (несжатым): длинные петли боя и рейда
+	# там заменены укороченными версиями (−30 МБ на iPhone). APK и ПК играют полные треки потоком.
+	var lite := Platform.is_web and Platform.is_touch()
 	for id in MUSIC:
-		var stream := _load_stream(MUSIC_DIR + String(id) + ".ogg")
+		var path := MUSIC_DIR + String(id) + ".ogg"
+		if lite and LITE_MUSIC.has(id):
+			path = MUSIC_DIR + String(id) + "_lite.ogg"
+		var stream := _load_stream(path)
 		if stream == null:
 			continue
 		if stream is AudioStreamOggVorbis:
