@@ -12,7 +12,7 @@ signal restart_requested
 const CAMERA_SMOOTHING := 9.0
 const PORTRAIT_CAMERA_DROP := 70.0
 ## Телефон (портрет): камера чуть отдалена — шапка занимает верх экрана, а поля боя видно больше.
-const PORTRAIT_ZOOM := 0.82
+const PORTRAIT_ZOOM := 0.78
 const HIST_STEP := 5.0
 const HIST_MAX := 24
 const SHOT_STEP := 30.0
@@ -57,7 +57,7 @@ var _perf_resume_guard := 0
 var _context_timer := 0.0
 var _spikes_sent := 0
 static var _perfs_sent := 0
-const LANDSCAPE_ZOOM := 0.84
+const LANDSCAPE_ZOOM := 0.79
 var _camera_lead := Vector2.ZERO
 var _hist_timer := 0.0
 var _shot_timer := 20.0

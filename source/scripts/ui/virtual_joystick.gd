@@ -87,7 +87,7 @@ func _in_zone(point: Vector2) -> bool:
 		return false
 	if blocker.is_valid() and bool(blocker.call(get_global_transform() * point)):
 		return false
-	return Controls.touch_is_move(point, size)
+	return Controls.touch_owner(point, size) == 1
 
 
 ## «Дом» джойстика — двигается в редакторе управления.

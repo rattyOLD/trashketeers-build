@@ -23,6 +23,7 @@ var _title: Label
 var _size_slider: HSlider
 var _alpha_slider: HSlider
 var _joystick_slider: HSlider
+var _zones_toggle: Button
 var _fixed_toggle: Button
 var _preset_buttons: Array[Button] = []
 
@@ -124,6 +125,10 @@ func _build() -> void:
 		Controls.set_value("joystick_fixed", not bool(Controls.get_value("joystick_fixed")))
 		_sync())
 	toggles.add_child(_fixed_toggle)
+	_zones_toggle = _button("", 17, func() -> void:
+		Controls.set_value("stick_zones", "half" if str(Controls.get_value("stick_zones")) == "quarter" else "quarter")
+		_sync())
+	toggles.add_child(_zones_toggle)
 	_summary.add_child(toggles)
 
 	var hands := HBoxContainer.new()
@@ -264,6 +269,7 @@ func _sync() -> void:
 		_alpha_slider.set_value_no_signal(Controls.opacity_of(_selected))
 	_joystick_slider.set_value_no_signal(float(Controls.get_value("joystick_scale")))
 	_fixed_toggle.text = "Джойстик: %s" % ("фикс." if bool(Controls.get_value("joystick_fixed")) else "плавающий")
+	_zones_toggle.text = "Зоны: %s" % ("четверти" if str(Controls.get_value("stick_zones")) == "quarter" else "половины")
 	for i in _preset_buttons.size():
 		_preset_buttons[i].disabled = not Controls.has_preset(i)
 	queue_redraw()
@@ -277,6 +283,15 @@ func _process(_delta: float) -> void:
 func _draw() -> void:
 	if hud == null:
 		return
+	if str(Controls.get_value("stick_zones")) == "quarter":
+		# Четверти стиков: подсвечиваем, где ловит ходьба и где стрельба (пустые четверти — свободны).
+		var half := size * 0.5
+		for id in ["move", "aim"]:
+			var q := Controls.quarter_of(Controls.stick_home(id, size), size)
+			var zone := Rect2(Vector2(half.x * (q % 2), half.y * (q >> 1)), half)
+			var tint := UiStyle.NEON if id == "move" else Color("#ff6a3d")
+			draw_rect(zone, Color(tint, 0.06))
+			draw_rect(zone.grow(-4.0), Color(tint, 0.35), false, 3.0)
 	for id in hud.editable_ids():
 		var rect := _rect(id)
 		if rect.size.x < 1.0:

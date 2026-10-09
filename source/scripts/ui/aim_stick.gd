@@ -85,7 +85,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func _in_zone(point: Vector2) -> bool:
 	if point.y <= ZONE_TOP:
 		return false
-	return not Controls.touch_is_move(point, size)
+	return Controls.touch_owner(point, size) == 2
 
 
 func _reset() -> void:
