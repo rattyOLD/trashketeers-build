@@ -521,6 +521,22 @@ class RunResultPanel:
 			_total.text = "На счету: %s · %s" % [SaveService.format_coins(SaveService.get_coins()), Economy.format_gems(SaveService.get_gems())]
 			_double_button.visible = false)
 
+	## Ближайший не купленный герой за монеты: «До Малого — ещё 340 монет» (или «хватает!»).
+	func _next_hero_goal(coins: int) -> String:
+		var best: Dictionary = {}
+		for character: Dictionary in CharacterDB.all():
+			if str(character.get("currency", "")) != "nuts" or int(character.get("price", 0)) <= 0 or bool(character.get("coming_soon", false)):
+				continue
+			if SaveService.owns_character(str(character["id"])):
+				continue
+			if best.is_empty() or int(character["price"]) < int(best["price"]):
+				best = character
+		if best.is_empty():
+			return ""
+		var name := str(best["title"]).get_slice(" ", 0)
+		var left := int(best["price"]) - coins
+		return ("Хватает на героя: %s! Загляни в «Отряд»" % name) if left <= 0 else ("До героя %s — ещё %s" % [name, SaveService.format_coins(left)])
+
 	func open(summary: Dictionary) -> void:
 		_reward_coins = int(summary.get("coins", 0))
 		_reward_gems = int(summary.get("gems", 0))
@@ -533,7 +549,17 @@ class RunResultPanel:
 		if bosses > 0:
 			line += " · боссов: %d" % bosses
 		var friend_line := str(summary.get("friend", ""))
-		_subtitle.text = line if friend_line.is_empty() else line + "\n" + friend_line
+		# Крючки «ещё одна попытка»: рекорд был близко; ближайший герой, на которого почти хватает.
+		var hooks := PackedStringArray()
+		var gap := int(summary.get("best_wave", 0)) - int(summary.get("wave", 0))
+		if not record and gap > 0 and gap <= 3:
+			hooks.append("До рекорда всего %d %s — ещё попытка?" % [gap, "волна" if gap == 1 else "волны"])
+		var goal := _next_hero_goal(int(summary.get("total_coins", 0)))
+		if not goal.is_empty():
+			hooks.append(goal)
+		if not friend_line.is_empty():
+			hooks.append(friend_line)
+		_subtitle.text = line + ("" if hooks.is_empty() else "\n" + "\n".join(hooks))
 		for old in _mood_slot.get_children():
 			old.queue_free()
 		_mood_slot.add_child(HeroMoodCard.new(SaveService.get_character(), bosses > 0 or record, HeroMoodCard.summary_line(summary)))

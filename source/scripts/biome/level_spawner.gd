@@ -1507,6 +1507,7 @@ func _build_organic() -> void:
 			_cover_spots.append(p)
 	_scatter_singles(area, center)
 	_spawn_walkers()
+	_build_ground_detail()
 	_build_world_life(center)
 
 
@@ -1627,6 +1628,14 @@ func _build_quarters(root: Dictionary, defs: Dictionary, area: Rect2) -> int:
 		_own(_streets, _layers.floor_layer)
 		_streets.z_index = 1
 		_streets.build_trail(Color(0.02, 0.0, 0.05, 0.22))
+		# Столбы с фонарями вдоль улиц: пятна тёплого света ведут взгляд от кварталов к площади.
+		for line in _streets.paths:
+			for t in [0.35, 0.75]:
+				var i := int(t * (line.size() - 1))
+				var along := (line[mini(i + 1, line.size() - 1)] - line[maxi(i - 1, 0)]).normalized()
+				var spot := (line[i] + along.orthogonal() * 120.0 * (1.0 if randf() < 0.5 else -1.0)).snapped(Vector2(8, 8))
+				if _cover_allowed(spot, 30.0) and is_walkable(spot) and _place_prop(spot, "z_wire_pole", false) != null:
+					_windows.append([spot + Vector2(0, -60), Color("#ffb45a")])
 	return placed
 
 
@@ -1763,6 +1772,31 @@ func _build_world_life(center: Vector2, extra: Array[Vector2] = []) -> void:
 	_world_life = life
 	if _player != null and is_instance_valid(_player):
 		life.attach(_player)
+
+
+## Мелочь на земле (трещины, пятна, лужи, люки — Свалка; лепестки, камешки, монетки — Банк): пол не читается
+## плиткой. Четыре узла по четвертям карты — экранная отбраковка отсекает невидимые.
+func _build_ground_detail() -> void:
+	var area := _interior_rect()
+	var quads: Array = [[], [], [], []]
+	for attempt in 600:
+		var p := Vector2(randf_range(area.position.x, area.end.x), randf_range(area.position.y, area.end.y))
+		if not is_walkable(p) or boss_rect.grow(80.0).has_point(p):
+			continue
+		if not _river_points.is_empty() and absf(p.x - AcidRiver._x_at(_river_points, p.y)) < RIVER_WIDTH * 0.5 + 60.0:
+			continue
+		var q := (1 if p.x > area.get_center().x else 0) + (2 if p.y > area.get_center().y else 0)
+		(quads[q] as Array).append(p)
+		if quads.reduce(func(acc: int, a: Array) -> int: return acc + a.size(), 0) >= 140:
+			break
+	for i in 4:
+		var spots: Array[Vector2] = []
+		spots.assign(quads[i])
+		var detail := GroundDetail.new()
+		detail.light_mask = BiomeLayers.LIGHT_MASK_FLOOR
+		detail.z_index = 1
+		_own(detail, _layers.floor_layer)
+		detail.build(spots, randi(), layout == "bank")
 
 
 ## Прохожие: жители ходят по улицам кварталов (Свалка) или аллеям парка (Банк) туда-обратно,

@@ -490,7 +490,7 @@ func _on_wave_started(number: int, title: String, mood: String, is_boss: bool) -
 		get_tree().create_timer(2.8, false).timeout.connect(func() -> void: hud.show_wave_intro(maxi(director.wave_number, 1), title, is_boss, director.chapter_index + 1))
 	else:
 		hud.show_wave_intro(maxi(director.wave_number, 1), title, is_boss, director.chapter_index + 1)
-	SoundManager.play(&"boss_spawn" if is_boss else &"ui_confirm", -2.0, false)
+	SoundManager.play(&"boss_spawn" if is_boss else &"wave_horn", -2.0, false)
 	if director.chapter_wave() >= 2 and not is_boss:
 		map.airdrop(player.global_position)
 
@@ -790,6 +790,10 @@ func _on_boss_phase(boss: Enemy, phase: int) -> void:
 			text = "ГРОЗА НАБИРАЕТ СИЛУ! ШАМАН В ЯРОСТИ"
 	hud.show_banner(text, UiStyle.DANGER, 2.4)
 	SoundManager.play(&"boss_spawn", 0.0, false)
+	if not director.is_mini_wave():
+		# Вторая фаза: босс ревёт, тема босса продолжается (если вдруг не шла — включается).
+		SoundManager.play(&"boss_roar", 0.0, false)
+		SoundManager.play_music(&"boss")
 	Platform.haptic("heavy")
 
 
@@ -898,7 +902,7 @@ func _on_enemy_died(enemy: Enemy) -> void:
 	if data.is_boss():
 		_on_boss_killed(enemy, at)
 		return
-	SoundManager.play(&"enemy_death")
+	SoundManager.play_enemy_death()
 	add_shake(0.1)
 	hitstop(KILL_HITSTOP)
 
@@ -956,6 +960,9 @@ func _on_boss_spawned(boss: Enemy) -> void:
 	fx.ring(boss.global_position, UiStyle.DANGER, 180.0)
 	fx.dust(boss.global_position + Vector2(0, 30), 16, 140.0)
 	SoundManager.play(&"boss_spawn", 0.0, false)
+	if not director.is_mini_wave():
+		SoundManager.play(&"boss_roar", 0.0, false)
+		SoundManager.play_music(&"boss")
 	Platform.haptic("heavy")
 
 
@@ -1060,6 +1067,10 @@ func _show_looted(boss_id: String) -> void:
 
 
 func _on_boss_killed(boss: Enemy, at: Vector2) -> void:
+	# Босс пал — возвращается музыка главы.
+	get_tree().create_timer(2.5, false).timeout.connect(func() -> void:
+		if not finished:
+			SoundManager.play_music(StringName(str(map.chapter.get("music", "battle")))))
 	# Узел босса вернётся в пул и достанется обычному врагу — ссылку снимаем сразу,
 	# иначе эскорт, стрелка и мини-карта «увидят босса» в случайной крысе.
 	var mini := director.is_mini_wave()

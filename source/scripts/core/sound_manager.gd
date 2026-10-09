@@ -106,6 +106,11 @@ const SFX := {
 	&"amb_acid": [-14.0, 0.5],
 	&"amb_water": [-16.0, 0.5],
 	&"amb_music": [-13.0, 0.5],
+	&"boss_roar": [-3.0, 1.0],
+	&"wave_horn": [-8.0, 0.8],
+	&"enemy_death_1": [-14.0, 0.06],
+	&"enemy_death_2": [-12.0, 0.06],
+	&"enemy_death_3": [-13.0, 0.06],
 	&"k_perfect": [-7.0, 0.6],
 	&"weapon_pickup": [-6.0, 0.1],
 	&"crate_break": [-6.0, 0.08],
@@ -132,6 +137,7 @@ const MUSIC := {
 	&"raid": -11.0,
 	&"knife": -12.0,
 	&"win": -11.0,
+	&"boss": -12.0,
 }
 
 var unlocked := false
@@ -166,6 +172,12 @@ func play(id: StringName, volume_offset_db: float = 0.0, randomize_pitch: bool =
 
 
 ## Звук с заданным питчем: серия подборов гаек «поднимается» по нотам.
+## Смерть врага: один из четырёх звуков (писк, хлопок, хруст), чтобы толпа не «пилила» одним сэмплом.
+func play_enemy_death() -> void:
+	var pick := randi() % 4
+	play(&"enemy_death" if pick == 0 else StringName("enemy_death_%d" % pick))
+
+
 func play_pitched(id: StringName, pitch: float, volume_offset_db: float = 0.0) -> void:
 	_play(id, volume_offset_db, pitch)
 
