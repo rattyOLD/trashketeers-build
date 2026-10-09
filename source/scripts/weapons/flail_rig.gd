@@ -23,7 +23,9 @@ signal ball_hit(at: Vector2, count: int, strong: bool)
 
 const ART_DIR := "res://assets/weapons/flail/"
 const BALL_DRAW := 76.0
-const LINK_DRAW := 15.0
+const LINK_DRAW := 16.0
+## Шаг между центрами звеньев: меньше длины звена — соседние заходят друг в друга.
+const LINK_STEP := 9.0
 const FAST_FPS := 14.0
 const HIT_FPS := 16.0
 const HIT_DRAW := 120.0
@@ -150,17 +152,21 @@ func _draw() -> void:
 		_draw_placeholder()
 		return
 	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-	# Цепь: звенья вдоль цепи с лёгким провисом, каждое повёрнуто по направлению цепи.
+	# Цепь: звенья цепляются друг за друга — шаг меньше длины звена (перекрытие), каждое второе повёрнуто
+	# ребром (узкое), как в настоящей цепи. Число звеньев — по длине цепи, с лёгким провисом.
 	var rel := ball - anchor
 	var slack := maxf(length - rel.length(), 0.0) * 0.5
 	var sag := rel.orthogonal().normalized() * slack
+	var count := maxi(int(ceil(rel.length() / LINK_STEP)), 2)
+	var k := LINK_DRAW / link.get_width()
 	var prev := anchor
-	for i in LINKS:
-		var t := (float(i) + 0.5) / LINKS
+	for i in count + 1:
+		var t := float(i) / count
 		var p := anchor.lerp(ball, t) + sag * sin(t * PI)
 		var dir := (p - prev).angle() if i > 0 else rel.angle()
-		draw_set_transform(p, dir + (PI * 0.5 if i % 2 == 1 else 0.0), Vector2.ONE * (LINK_DRAW / link.get_width()))
-		draw_texture(link, -link.get_size() * 0.5)
+		var flat := i % 2 == 0
+		draw_set_transform(p, dir, Vector2(k, k * (1.0 if flat else 0.42)))
+		draw_texture(link, -link.get_size() * 0.5, Color.WHITE if flat else Color(0.8, 0.8, 0.85))
 		prev = p
 	draw_set_transform(Vector2.ZERO)
 	# Шар: разогнанный — кадры со следом движения, повёрнутые по скорости; иначе — обычный.
