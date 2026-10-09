@@ -1,0 +1,640 @@
+{
+  "brief": 28,
+  "files": [
+    {
+      "file": "maps/acid_rain/card.png",
+      "size": [
+        512,
+        720
+      ],
+      "mode": "RGB",
+      "sha256": "43495deead153849ab4750ac5d0cfd5a0420366b02f6046d6426508b21d37946"
+    },
+    {
+      "file": "maps/acid_rain/decals/acid_pool.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "4afdadc9837cf55500ba79d465b295c4762fc80762fb64ef426f7952950522de"
+    },
+    {
+      "file": "maps/acid_rain/decals/acid_splatter.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "7ffcfd49ab904314f59a225eae53c48ab6f953a0e24cc548ba8a8041982fa167"
+    },
+    {
+      "file": "maps/acid_rain/decals/ripples.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "6fcbfcc612154fdf2789f28c2b1f5c4af312f2c943490b1bb20033b33b7a0aa6"
+    },
+    {
+      "file": "maps/acid_rain/enemy_acid_rain/death.png",
+      "size": [
+        1536,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "c1e0d2daffce484aec7b6dd4348b92c163060ec05a28022dc406d19f75c0cefd"
+    },
+    {
+      "file": "maps/acid_rain/enemy_acid_rain/idle.png",
+      "size": [
+        1024,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "402f36ddb98dc7669a75632560e67c4e7cb1748e15dc334e290b0498dd163124"
+    },
+    {
+      "file": "maps/acid_rain/enemy_acid_rain/run.png",
+      "size": [
+        1536,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "a91beab1e1c178f47edca191e25a9cf8b356306ebbb5a45d7396b203b6e31cae"
+    },
+    {
+      "file": "maps/acid_rain/enemy_acid_rain/strike.png",
+      "size": [
+        1024,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "d72785a257002e461e1a047f06eb0b23feecb893861fd917dcd133a2e4906ff2"
+    },
+    {
+      "file": "maps/acid_rain/floor.png",
+      "size": [
+        512,
+        512
+      ],
+      "mode": "RGB",
+      "sha256": "7e6631e4614652fd7b8765d264b3f6fb96f45bedff37540ac691e16ff5907757"
+    },
+    {
+      "file": "maps/acid_rain/props/chemical_pump.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "73ed9a25521d7d57844d8c1181d81a60e5e68b7977d8ea06d887d03ee57fc2bd"
+    },
+    {
+      "file": "maps/acid_rain/props/pipes.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "9d52bfd35eb94979a63c4ee5fb309eec8ac015c353623b359c3c426e69184096"
+    },
+    {
+      "file": "maps/acid_rain/props/storage_crate.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "cd1b4821843807e14cfc58da16fd1fb1d81319fcd3332edf79ae3ce84c8e2d6d"
+    },
+    {
+      "file": "maps/acid_rain/props/toxic_barrels.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "7a22e970897edea6bf5bc82fc874f3a73b787917a172302e1d02984575367ba4"
+    },
+    {
+      "file": "maps/gold_vault/card.png",
+      "size": [
+        512,
+        720
+      ],
+      "mode": "RGB",
+      "sha256": "42e28e23cea389ef4e9cb09abbd59e82819c829ac72752a0539dee10f4cc9da0"
+    },
+    {
+      "file": "maps/gold_vault/decals/bottle_caps.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "709cf243ce7c6d6684eaa8778c2afd37940a316cb6613a70247f35a9aa150757"
+    },
+    {
+      "file": "maps/gold_vault/decals/coins.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "409f662969b876f54a56fa4847d7b8a3d6f1082fefedbfb8b43698e42acec7e6"
+    },
+    {
+      "file": "maps/gold_vault/decals/scratches.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "50038320634435118db31dd6d1b26f8804c2bb1c0fe819254e23644659932fb2"
+    },
+    {
+      "file": "maps/gold_vault/enemy_gold_vault/death.png",
+      "size": [
+        1536,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "8edafbc5f342c7c7d3c7b986eea6d807b1669be0b86410d2f45b7500ef7a17ce"
+    },
+    {
+      "file": "maps/gold_vault/enemy_gold_vault/idle.png",
+      "size": [
+        1024,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "08e4b83e891a37a7b05ac072a43aa33cc8a7dbddccba38e9e3e20b0707ceef5a"
+    },
+    {
+      "file": "maps/gold_vault/enemy_gold_vault/run.png",
+      "size": [
+        1536,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "8c16c137a7805d68104b8f4c7bcc43363fc267abb6cc77f50832d7dd2a8c2691"
+    },
+    {
+      "file": "maps/gold_vault/enemy_gold_vault/strike.png",
+      "size": [
+        1024,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "496288e6019baee192efa28d6638ecd82e17393dbdcb710654ddaec8c6f20e56"
+    },
+    {
+      "file": "maps/gold_vault/floor.png",
+      "size": [
+        512,
+        512
+      ],
+      "mode": "RGB",
+      "sha256": "f06f8e779ebd9e6fea1ace4458e0907a1c271b04c056a67a484076d0017130e0"
+    },
+    {
+      "file": "maps/gold_vault/props/armored_crate.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "33e5e56ea2869db7eba9f733fa4258a23cc1f5236fe4b51a4ca16076cca377e7"
+    },
+    {
+      "file": "maps/gold_vault/props/gold_ingots.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "389635a505d0e5aafd4b70ec32a6edcb27110b913c5ef2040587c0b5b5b2d315"
+    },
+    {
+      "file": "maps/gold_vault/props/safe.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "7656a93e2c7145ab9fac800de532b40c34e2282e80cbf4e67ed9cbbac6d1a672"
+    },
+    {
+      "file": "maps/gold_vault/props/vault_column.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "07c783f7d125eacc39b22f3f6dccf830c553ef4a91fd5aacc019568b2b0fd300"
+    },
+    {
+      "file": "maps/neon_market/card.png",
+      "size": [
+        512,
+        720
+      ],
+      "mode": "RGB",
+      "sha256": "2447e172991e91f4f446f26da5405a58eb63f83ebff6bba33aa5fe3d2bb99c86"
+    },
+    {
+      "file": "maps/neon_market/decals/confetti.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "2f0656d692d521c27e3d7333bd680ef71ea2dd902865ced8cf76e85b3303dc9f"
+    },
+    {
+      "file": "maps/neon_market/decals/neon_puddle.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "0457f7fb57c934a3d55cb893d2a37ef9e2587742fc4b6a10b991061560d412ba"
+    },
+    {
+      "file": "maps/neon_market/decals/paper.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "b303e6c9fbea13b285b5fbf1010482c161594453af285003695be8d7cf162af4"
+    },
+    {
+      "file": "maps/neon_market/enemy_neon_market/death.png",
+      "size": [
+        1536,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "ffc0b95a88b921b704b9bddc10e070a81c983160ea82ee7e91b82c00e658d826"
+    },
+    {
+      "file": "maps/neon_market/enemy_neon_market/idle.png",
+      "size": [
+        1024,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "2291ebea8b73b4086459c31ed66091e76f3bee9d9014b961d8aa8d2f159e10a5"
+    },
+    {
+      "file": "maps/neon_market/enemy_neon_market/run.png",
+      "size": [
+        1536,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "ed221ffff87fead59c620bd28fef32ef22c5491b8376dac33c825fbf6e1f5366"
+    },
+    {
+      "file": "maps/neon_market/enemy_neon_market/strike.png",
+      "size": [
+        1024,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "1bc80f2823857a28b90d57ea89c0e0f94cb38446904a9d99050fb501a3ef29c7"
+    },
+    {
+      "file": "maps/neon_market/floor.png",
+      "size": [
+        512,
+        512
+      ],
+      "mode": "RGB",
+      "sha256": "298454fbab4f54a5a972579f6952685a483c3070c9165ad0216b9ca6880ca7ec"
+    },
+    {
+      "file": "maps/neon_market/props/bottles.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "9729c9e92fb2582d9d521c9db8c613a3e4e17d06530c4bad96a2d868dff16863"
+    },
+    {
+      "file": "maps/neon_market/props/junk_crate.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "bd4bea985520abb2d954e9fed3974c07ea02a1791a34ee1221c6509ad1c2c554"
+    },
+    {
+      "file": "maps/neon_market/props/market_cart.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "694c6c630046aeb63f3afa58edd37409b5e3ccc811fa1a3b13b8eb50d4953740"
+    },
+    {
+      "file": "maps/neon_market/props/neon_lamp.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "841d1972d812ee9dc0301006daa952435b2b0e41c7ebe4a7e262c1ad18bcde16"
+    },
+    {
+      "file": "maps/night_dump/card.png",
+      "size": [
+        512,
+        720
+      ],
+      "mode": "RGB",
+      "sha256": "77224a018131bca850d4067dcfa3e0fff05245f4ed1420bed04347fd7f47a84e"
+    },
+    {
+      "file": "maps/night_dump/decals/ashes.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "d33a73a59ca82455d8c03359c9b3ef018e619041b4a78413b0c1d806a6272473"
+    },
+    {
+      "file": "maps/night_dump/decals/cracks.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "194a5f29c3badaf9243d621b3db8c0cdff0091324f5ff73b09af13cd24647726"
+    },
+    {
+      "file": "maps/night_dump/decals/oil.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "c5cf831b3f71530c2217af5da4a6bfe7f0ab8e068571d9460ed581fd36616729"
+    },
+    {
+      "file": "maps/night_dump/enemy_night_dump/death.png",
+      "size": [
+        1536,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "8dd27c383d9e1a142cdb0c953150493b270db78d08f659ced72f6f8983f8f9a9"
+    },
+    {
+      "file": "maps/night_dump/enemy_night_dump/idle.png",
+      "size": [
+        1024,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "492d4f1a7093735507cf80fa53928b16e150d34bfb37826ed82e3f7ffccbd1d7"
+    },
+    {
+      "file": "maps/night_dump/enemy_night_dump/run.png",
+      "size": [
+        1536,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "64bb1725e10b2884a204ade42bdddedd4259b03c39d5e8bff068c7004bd3ba6e"
+    },
+    {
+      "file": "maps/night_dump/enemy_night_dump/strike.png",
+      "size": [
+        1024,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "274bdfdde5993d13293b2926771c98f9828bb32f22cf779bb37be881f0ec04c9"
+    },
+    {
+      "file": "maps/night_dump/floor.png",
+      "size": [
+        512,
+        512
+      ],
+      "mode": "RGB",
+      "sha256": "d5f27eadd7bf8d895530d207bcb6fcf9e5a399c0c5fa9b8e1230f549ea2f1bbc"
+    },
+    {
+      "file": "maps/night_dump/props/barricade.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "22498d9f6b7acf311441dfbb988d95b72a54491d1243220508eea14dbfe226f6"
+    },
+    {
+      "file": "maps/night_dump/props/fire_barrel.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "7ea49f6c9a21e51c271fa8ebc6eac4b20ad3ce6d0c886e1d361e63193b4cc0ce"
+    },
+    {
+      "file": "maps/night_dump/props/street_lamp.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "221c19a30ca4a0acca2966a4117c8ea731b1da6abdaf139ad79ecfdcb6d2eb60"
+    },
+    {
+      "file": "maps/night_dump/props/tires.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "1ae12b82cb7ebcc574e72b9568aef07f14914ebfaf865a0657999c4a105a13df"
+    },
+    {
+      "file": "maps/pigeon_roofs/card.png",
+      "size": [
+        512,
+        720
+      ],
+      "mode": "RGB",
+      "sha256": "c47e992131b29c78088201d9ea0068bd385997f98ae168ac6865096eefd2613a"
+    },
+    {
+      "file": "maps/pigeon_roofs/decals/feathers.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "a2354885a897e19856768578b52e29485603a9cf2b80975db319e2aaed8ca300"
+    },
+    {
+      "file": "maps/pigeon_roofs/decals/gravel.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "69c60b454285e681369c9f7a58ff758e45bc835319fb32c5ef6de6a27df82ad4"
+    },
+    {
+      "file": "maps/pigeon_roofs/decals/slate_chips.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "385b6be2d79e2ededf927bc3d22572f430a994cdfdbf171862a44f34d9f7eec0"
+    },
+    {
+      "file": "maps/pigeon_roofs/enemy_pigeon_roofs/death.png",
+      "size": [
+        1536,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "4500daab1d9677066e5c463af4f7ca93bdf1db09507625cd76a6b5a939817800"
+    },
+    {
+      "file": "maps/pigeon_roofs/enemy_pigeon_roofs/idle.png",
+      "size": [
+        1024,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "68f4c76b6945fb6eb74c549f302e5f09621b4899933e735d2181901b22e1c4f6"
+    },
+    {
+      "file": "maps/pigeon_roofs/enemy_pigeon_roofs/run.png",
+      "size": [
+        1536,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "48d13878fe5c7cb3c573d9cc98036e66146b13ac9d08d005f92811ef13fcb4ae"
+    },
+    {
+      "file": "maps/pigeon_roofs/enemy_pigeon_roofs/strike.png",
+      "size": [
+        1024,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "d07928ea95e7a57322cacc9eca8e34ab906ee1d315ce248d197f3134c594c86d"
+    },
+    {
+      "file": "maps/pigeon_roofs/floor.png",
+      "size": [
+        512,
+        512
+      ],
+      "mode": "RGB",
+      "sha256": "a84010ffaff5e09f9571945410bc5b713eb9899917b409616fe5cc2aec374bcb"
+    },
+    {
+      "file": "maps/pigeon_roofs/props/antenna.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "9f13c905d4a149517e9d38c5c08e1cf10f38f12e5ef1e180a6281f0e07fe4abd"
+    },
+    {
+      "file": "maps/pigeon_roofs/props/chimney.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "526c3d4271bef491987b4b822f57c71facbb2ab9b4b8b9fb94d27c3439718ada"
+    },
+    {
+      "file": "maps/pigeon_roofs/props/ventilation.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "65cd9976a1b32547e1c01a4496e7ba16a9af402936a376e991782e170d866a91"
+    },
+    {
+      "file": "maps/pigeon_roofs/props/water_tank.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA",
+      "sha256": "d6309ec9a815a1aa08ce60b1fa9f1cea02ccdaab5082dd70dec99d26c63b4c80"
+    }
+  ],
+  "map_ids": [
+    "night_dump",
+    "acid_rain",
+    "neon_market",
+    "gold_vault",
+    "pigeon_roofs"
+  ],
+  "card_size": [
+    512,
+    720
+  ],
+  "floor_size": [
+    512,
+    512
+  ],
+  "props_per_map": 4,
+  "decals_per_map": 3,
+  "enemy": {
+    "cell": [
+      256,
+      256
+    ],
+    "layout": "horizontal_strip",
+    "animations": {
+      "idle": {
+        "frames": 4,
+        "fps": 6,
+        "loop": true
+      },
+      "run": {
+        "frames": 6,
+        "fps": 10,
+        "loop": true
+      },
+      "strike": {
+        "frames": 4,
+        "fps": 10,
+        "loop": false
+      },
+      "death": {
+        "frames": 6,
+        "fps": 8,
+        "loop": false
+      }
+    },
+    "origin_px": [
+      128,
+      244
+    ]
+  }
+}
