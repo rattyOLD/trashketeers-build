@@ -57,23 +57,54 @@
 
 // Видимая область окна. Safari на iOS 26 в альбомной ориентации отдаёт в innerHeight всю высоту экрана,
 // хотя сверху её занимает панель браузера: холст Godot (он берёт innerWidth × innerHeight) и экран загрузки
-// уезжали низом за край. Берём высоту и сдвиг из visualViewport, если она заметно меньше.
+// уезжали низом за край. Высоту сверяем с несколькими замерами (см. ниже).
 // Пока печатают в поле ввода — как раньше (клавиатуру обрабатывает код в странице).
 (function () {
 	'use strict';
+	// Невидимые замерщики: fixed-блок на весь экран и блок высотой 100dvh. На iOS 26 они, в отличие от
+	// innerHeight и visualViewport, знают про панель браузера; берём самую маленькую из разумных высот,
+	// чтобы низ игры никогда не уходил за край (в худшем случае снизу останется тонкая полоска фона).
+	var probes = null;
+	var makeProbes = function () {
+		if (probes || !document.body) { return probes; }
+		var a = document.createElement('div');
+		a.style.cssText = 'position:fixed;left:0;top:0;right:0;bottom:0;visibility:hidden;pointer-events:none;z-index:-1';
+		var b = document.createElement('div');
+		b.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:100vh;height:100dvh;visibility:hidden;pointer-events:none;z-index:-1';
+		document.body.appendChild(a);
+		document.body.appendChild(b);
+		probes = [a, b];
+		return probes;
+	};
 	window.__trashViewport = function () {
 		var w = window.innerWidth;
 		var h = window.innerHeight;
-		var top = 0;
-		var vv = window.visualViewport;
 		var el = document.activeElement;
 		var typing = !!el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA');
-		if (vv && !typing && Math.abs(vv.scale - 1) < 0.01 && vv.height > 120 && vv.height < h - 2) {
-			h = Math.round(vv.height);
-			top = Math.max(0, Math.round(vv.offsetTop));
+		if (typing) {
+			return [w, h, 0];
 		}
-		return [w, h, top];
+		var cands = [];
+		var vv = window.visualViewport;
+		if (vv && Math.abs(vv.scale - 1) < 0.01) { cands.push(vv.height); }
+		if (document.documentElement) { cands.push(document.documentElement.clientHeight); }
+		var pr = makeProbes();
+		if (pr) {
+			cands.push(pr[0].getBoundingClientRect().height);
+			cands.push(pr[1].getBoundingClientRect().height);
+		}
+		for (var i = 0; i < cands.length; i++) {
+			var c = cands[i];
+			if (c > 120 && c < h - 2) { h = c; }
+		}
+		return [w, Math.round(h), 0];
 	};
+	// Safari после поворота иногда оставляет страницу прокрученной: возвращаем в начало.
+	var unscroll = function () {
+		if (window.scrollY || window.scrollX) { window.scrollTo(0, 0); }
+	};
+	window.addEventListener('orientationchange', function () { setTimeout(unscroll, 250); });
+	window.addEventListener('scroll', unscroll, { passive: true });
 	var fitBoot = function () {
 		var boot = document.getElementById('boot');
 		if (!boot) { return; }
