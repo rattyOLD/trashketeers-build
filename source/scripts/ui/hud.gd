@@ -118,6 +118,7 @@ var _top_bar: Control
 var _event_top := EVENT_TOP
 var _minimal := false
 var _wanted_label: Label
+var _wanted_stars: HBoxContainer
 var _low_hp := false
 var _pulse := 0.0
 
@@ -934,8 +935,29 @@ func set_wanted(level: int) -> void:
 		_wanted_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_left_column.add_child(_wanted_label)
 		_dock_barks()
-	_wanted_label.text = ("РОЗЫСК %s" % "★".repeat(level)) if level > 0 else ""
 	_wanted_label.visible = level > 0
+	# Звёзды Розыска — арт Астры (assets/ui/hud/wanted_star_full/empty.png); без файлов — звёздочки текстом.
+	if not ResourceLoader.exists("res://assets/ui/hud/wanted_star_full.png"):
+		_wanted_label.text = ("РОЗЫСК %s" % "★".repeat(level)) if level > 0 else ""
+		return
+	_wanted_label.text = "РОЗЫСК" if level > 0 else ""
+	if _wanted_stars == null:
+		_wanted_stars = HBoxContainer.new()
+		_wanted_stars.add_theme_constant_override("separation", 1)
+		_wanted_stars.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		for i in 5:
+			var star := TextureRect.new()
+			star.custom_minimum_size = Vector2(22, 22)
+			star.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			star.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			_wanted_stars.add_child(star)
+		_wanted_label.add_child(_wanted_stars)
+	var font := _wanted_label.get_theme_font("font")
+	_wanted_stars.position = Vector2(font.get_string_size("РОЗЫСК", HORIZONTAL_ALIGNMENT_LEFT, -1, _wanted_label.get_theme_font_size("font_size")).x + 8.0, 0.0)
+	var full: Texture2D = load("res://assets/ui/hud/wanted_star_full.png")
+	var empty: Texture2D = load("res://assets/ui/hud/wanted_star_empty.png")
+	for i in 5:
+		(_wanted_stars.get_child(i) as TextureRect).texture = full if i < level else empty
 
 
 func show_mod_badge(title: String) -> void:

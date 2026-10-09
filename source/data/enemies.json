@@ -863,13 +863,8 @@
       "move_speed": 122,
       "contact_damage": 8,
       "radius": 23,
-      "rig": "pig_default",
-      "rig_variants": [
-        "pig_redtie",
-        "pig_security"
-      ],
-      "sprite": "res://assets/enemies/pig_default.png",
-      "sprite_scale": 0.46,
+      "sprite": "res://assets/enemies/fed_bagel.png",
+      "sprite_scale": 1.0,
       "sprite_faces_right": true,
       "shield": false,
       "size_variance": 0.08,
@@ -879,7 +874,8 @@
       "nut_drop_chance": 1.0,
       "knockback_resist": 0.15,
       "fx_color": "#FF8FA3",
-      "flank_chance": 0.5
+      "flank_chance": 0.5,
+      "frames": "fed_bagel"
     },
     {
       "enemy_id": "fed_agent",
@@ -889,9 +885,8 @@
       "move_speed": 72,
       "contact_damage": 16,
       "radius": 32,
-      "rig": "pig_heavy",
-      "sprite": "res://assets/enemies/pig_heavy.png",
-      "sprite_scale": 0.64,
+      "sprite": "res://assets/enemies/fed_agent.png",
+      "sprite_scale": 1.0,
       "sprite_faces_right": true,
       "shield": true,
       "shield_arc": 70,
@@ -904,7 +899,8 @@
       "nut_drop_chance": 1.0,
       "knockback_resist": 0.8,
       "fx_color": "#FF5A5A",
-      "flank_chance": 0.1
+      "flank_chance": 0.1,
+      "frames": "fed_agent"
     },
     {
       "enemy_id": "fed_chief",
@@ -914,9 +910,8 @@
       "move_speed": 100,
       "contact_damage": 22,
       "radius": 38,
-      "rig": "pig_royal",
-      "sprite": "res://assets/enemies/pig_royal.png",
-      "sprite_scale": 0.82,
+      "sprite": "res://assets/enemies/fed_chief.png",
+      "sprite_scale": 1.0,
       "sprite_faces_right": true,
       "shield": true,
       "shield_arc": 64,
@@ -929,7 +924,8 @@
       "nut_drop_chance": 1.0,
       "knockback_resist": 0.9,
       "fx_color": "#FF2E4D",
-      "flank_chance": 0.3
+      "flank_chance": 0.3,
+      "frames": "fed_chief"
     },
     {
       "enemy_id": "fed_hitman",
