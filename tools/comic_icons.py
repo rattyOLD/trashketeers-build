@@ -1,4 +1,4 @@
-"""Запуск: python3 tools/comic_icons.py <лист> <выход> <ячейка> (пример: firmware_icons из astra/inbox/world/survival2).
+"""Запуск: python3 tools/comic_icons.py <лист> <выход> <ячейка> [ячейка=радиус чистки ...] (для firmware_icons: 3=0.24; пример: firmware_icons из astra/inbox/world/survival2).
 Иконки в стиле ретро-комикса: плоские тона, чернильный контур, растровые точки в тенях, газетная плашка."""
 import sys
 import numpy as np
@@ -34,11 +34,12 @@ def halftone(size, step, radius_of):
     return d < radius_of
 
 
-def comic_icon(im, out_size=128, scale=4):
+def comic_icon(im, out_size=128, scale=4, clean_r=0.0):
     big = im.resize((im.width * scale, im.height * scale), Image.LANCZOS)
     a = np.array(big).astype(np.uint8)
     alpha = a[..., 3]
-    mask = alpha > 110
+    # Полупрозрачные тёмные ореолы исходника (тень у звезды прицела и т.п.) — не рисунок: не превращаем в чернила.
+    mask = (alpha > 110) & ~((alpha < 220) & (a[..., :3].mean(axis=2) < 40))
     # Обрезки соседних иконок по краям ячейки: оставляем только крупные куски.
     from scipy import ndimage
     lab, n = ndimage.label(mask)
@@ -51,6 +52,25 @@ def comic_icon(im, out_size=128, scale=4):
                 if s >= sizes.max() * 0.3 or (objs[i][1].start > w * 0.12 and objs[i][1].stop < w * 0.88)]
         mask = np.isin(lab, keep)
     rgb, lum = flat(a[..., :3])
+    # Тёмные пятна внутри дырок рисунка (между кольцом и звездой прицела): внутри замкнутых светлых контуров
+    # оставляем только тёмное у самого светлого (его контур), остальное убираем.
+    from scipy import ndimage
+    src_lum = a[..., :3].mean(axis=2) / 255.0
+    mx = a[..., :3].max(axis=2) / 255.0
+    sat = np.where(mx > 0, (mx - a[..., :3].min(axis=2) / 255.0) / np.maximum(mx, 1e-3), 0)
+    # «Цветное» — насыщенное или почти белое; серые тени внутри дырок к нему не относятся.
+    bright = mask & ((sat > 0.35) & (src_lum > 0.16) | (src_lum > 0.75))
+    lab_b, _ = ndimage.label(~bright)
+    edge_ids = set(np.unique(np.concatenate([lab_b[0], lab_b[-1], lab_b[:, 0], lab_b[:, -1]]))) - {0}
+    inside = (lab_b > 0) & ~np.isin(lab_b, list(edge_ids))
+    near = ndimage.binary_dilation(bright, iterations=scale)
+    mask = mask & ~(inside & ~near)
+    if clean_r > 0.0:
+        # Точечная чистка (прицел): внутри круга радиусом clean_r от центра — только цветное (звезда), без серых теней.
+        yy, xx = np.mgrid[0:mask.shape[0], 0:mask.shape[1]]
+        circle = (xx - mask.shape[1] / 2) ** 2 + (yy - mask.shape[0] / 2) ** 2 < (clean_r * mask.shape[1]) ** 2
+        keep = ndimage.binary_dilation(bright, iterations=scale // 2)
+        mask = mask & ~(circle & ~keep)
     # Тени — точками: чем темнее, тем крупнее точка.
     dots = halftone(mask.shape, 9.0 * scale / 4, np.clip((0.75 - lum) * 6.0, 0, 3.6) * scale / 4)
     shade = mask & dots & (lum < 0.7)
@@ -61,7 +81,14 @@ def comic_icon(im, out_size=128, scale=4):
     rgb[edges] = INK
     # Толстый внешний контур.
     m = Image.fromarray((mask * 255).astype(np.uint8))
-    outer = np.array(m.filter(ImageFilter.MaxFilter(5 * scale + 1))) > 0
+    thick = np.array(m.filter(ImageFilter.MaxFilter(5 * scale + 1))) > 0
+    thin = np.array(m.filter(ImageFilter.MaxFilter(scale + 1))) > 0
+    # Дырки внутри рисунка (между кольцом прицела и звездой и т.п.) — только тонкий контур, иначе их заливает чернилом.
+    from scipy import ndimage
+    lab, _ = ndimage.label(~mask)
+    border = set(np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]))) - {0}
+    exterior = np.isin(lab, list(border))
+    outer = (thick & exterior) | thin
     canvas = np.zeros((*mask.shape, 4), np.uint8)
     canvas[outer] = (*INK, 255)
     canvas[mask, :3] = rgb[mask]
@@ -91,6 +118,8 @@ if __name__ == "__main__":
     sheet = Image.open(src).convert("RGBA")
     n = sheet.width // cell
     out = Image.new("RGBA", sheet.size, (0, 0, 0, 0))
+    # Ячейки, где внутри серые тени исходника (firmware_icons: 3 — прицел «Крит»).
+    clean = {int(k): float(v) for k, v in (s.split("=") for s in sys.argv[4:])}
     for i in range(n):
-        out.alpha_composite(comic_icon(sheet.crop((i * cell, 0, (i + 1) * cell, cell)), cell), (i * cell, 0))
+        out.alpha_composite(comic_icon(sheet.crop((i * cell, 0, (i + 1) * cell, cell)), cell, clean_r=clean.get(i, 0.0)), (i * cell, 0))
     out.save(dst, optimize=True)
