@@ -66,7 +66,8 @@ class OutlineBar:
 	extends Control
 
 	const HP_COLORS: Array[Color] = [Color("#3fdc55"), Color("#ffb020"), Color("#ff3b3b")]
-	const XP_COLORS: Array[Color] = [Color("#ff9930")]
+	# Опыт — голубой: с первого взгляда не путается с зелёным здоровьем.
+	const XP_COLORS: Array[Color] = [Color("#3fb8ff")]
 
 	var colors: Array[Color] = HP_COLORS
 	var max_value := 1.0:

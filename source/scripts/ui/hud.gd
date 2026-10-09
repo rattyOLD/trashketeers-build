@@ -1270,9 +1270,10 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	xp_gap.custom_minimum_size = Vector2(0, 0)
 	xp_gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_xp_row.add_child(xp_gap)
-	_xp_title = UiStyle.label("УР 1", 20, UiStyle.NEON, 5)
+	# Уровень — крупно перед полосой опыта (медаль у портрета перекрывали плашки).
+	_xp_title = UiStyle.label("УР 1", 19, UiStyle.GOLD, 6)
 	_xp_title.custom_minimum_size = Vector2(0, 0)
-	_xp_title.visible = false
+	_xp_title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_xp_row.add_child(_xp_title)
 	var xp_stack := Control.new()
 	xp_stack.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -1311,6 +1312,7 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	if Orient.portrait:
 		_level_badge.scale = Vector2.ONE * PORTRAIT_SCALE
 	_level_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_level_badge.visible = false
 	head.add_child(_level_badge)
 	_level_label = UiStyle.label("1", 20, UiStyle.GOLD, 4)
 	_level_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
