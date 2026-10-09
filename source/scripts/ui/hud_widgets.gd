@@ -84,6 +84,7 @@ class OutlineBar:
 			queue_redraw()
 	var _back := StyleBoxFlat.new()
 	var _fill := StyleBoxFlat.new()
+	var _art: StyleBoxTexture
 
 	func _init(palette: Array[Color] = HP_COLORS) -> void:
 		colors = palette
@@ -93,11 +94,21 @@ class OutlineBar:
 		_back.set_border_width_all(3)
 		_back.set_corner_radius_all(9)
 		_fill.set_corner_radius_all(6)
+		var path := HudWidgets.DIR + ("xp_frame.png" if palette == XP_COLORS else "hp_frame.png")
+		if ResourceLoader.exists(path):
+			_art = StyleBoxTexture.new()
+			_art.texture = load(path) as Texture2D
+			_art.texture_margin_left = 24
+			_art.texture_margin_right = 24
+			_art.texture_margin_top = 6
+			_art.texture_margin_bottom = 6
 
 	func _draw() -> void:
 		draw_style_box(_back, Rect2(Vector2.ZERO, size))
 		var frac := clampf(value / max_value, 0.0, 1.0)
 		if frac <= 0.0:
+			if _art != null:
+				draw_style_box(_art, Rect2(Vector2.ZERO, size))
 			return
 		var inner := Rect2(Vector2(4, 4), size - Vector2(8, 8))
 		var width := maxf(inner.size.x * frac, 12.0)
@@ -106,6 +117,8 @@ class OutlineBar:
 		draw_style_box(_fill, Rect2(inner.position, Vector2(width, inner.size.y)))
 		# Светлая полоска сверху даёт объём без текстур.
 		draw_rect(Rect2(inner.position + Vector2(6, 2), Vector2(maxf(width - 12.0, 0.0), inner.size.y * 0.28)), Color(1, 1, 1, 0.22), true)
+		if _art != null:
+			draw_style_box(_art, Rect2(Vector2.ZERO, size))
 
 
 ## Портрет в круглой оправе. Лицо — нарисованный портрет того героя, за которого играют; по мере потери
@@ -260,6 +273,14 @@ class Over:
 		owner_portrait = p
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
 		set_anchors_preset(Control.PRESET_FULL_RECT)
+		var path := "res://assets/ui/hud/portrait_frame.png"
+		if ResourceLoader.exists(path):
+			var frame := TextureRect.new()
+			frame.texture = load(path) as Texture2D
+			frame.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			frame.set_anchors_preset(Control.PRESET_FULL_RECT)
+			frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			add_child(frame)
 		set_process(true)
 
 	func _process(_delta: float) -> void:

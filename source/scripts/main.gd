@@ -355,9 +355,10 @@ func _start_game(weapon_id: StringName) -> void:
 
 func _start_story(weapon_id: StringName) -> void:
 	Orient.refresh(get_window())
+	var mission := _debug_hash.get_slice(":", 1) if _debug_hash in ["story:m1", "story:m2"] else StoryRun.next_mission_id()
 	_with_loading(BATTLE_RESOURCES, func() -> void:
 		var game := Game.new()
-		game.story_mission = _debug_hash.get_slice(":", 1) if _debug_hash in ["story:m1", "story:m2"] else StoryRun.next_mission_id()
+		game.story_mission = mission
 		game.exit_requested.connect(_show_menu, CONNECT_DEFERRED)
 		game.restart_requested.connect(_start_story.bind(weapon_id), CONNECT_DEFERRED)
 		_swap_screen(game)
@@ -373,7 +374,7 @@ func _start_story(weapon_id: StringName) -> void:
 			game.story.tip_weapon(game._roll_weapon("legendary"))
 		if _debug_hash.begins_with("story:jump"):
 			game.story.debug_jump(float(_debug_hash.get_slice("=", 1)))
-		_debug_hash = "")
+		_debug_hash = "", mission)
 
 
 func _start_raid(weapon_id: StringName) -> void:
@@ -390,12 +391,13 @@ func _start_raid(weapon_id: StringName) -> void:
 
 
 ## Загрузочный экран поверх текущего; новая сцена собирается в пике белой вспышки.
-func _with_loading(resources: Array, build: Callable) -> void:
+func _with_loading(resources: Array, build: Callable, mission := "") -> void:
 	if _loading != null:
 		return
 	get_tree().paused = false
 	_loading = LoadingScreen.new()
 	add_child(_loading)
+	_loading.show_chapter(mission)
 	_loading.transition_point.connect(build, CONNECT_ONE_SHOT)
 	_loading.finished.connect(func() -> void: _loading = null, CONNECT_ONE_SHOT)
 	_loading.track_resources(PackedStringArray(resources))

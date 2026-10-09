@@ -830,7 +830,8 @@ func _fill_quick() -> void:
 			ids.append(id)
 	for id in ids.slice(0, 5):
 		var b := TextureButton.new()
-		b.texture_normal = _sticker_texture(str(id))
+		var quick_path := "res://assets/ui/quick/%s.png" % str(id)
+		b.texture_normal = load(quick_path) as Texture2D if ResourceLoader.exists(quick_path) else _sticker_texture(str(id))
 		b.ignore_texture_size = true
 		b.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
 		b.custom_minimum_size = Vector2(64, 64)

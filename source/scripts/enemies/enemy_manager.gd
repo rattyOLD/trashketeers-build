@@ -57,6 +57,9 @@ func spawn(data: EnemyData, at: Vector2, hp_mult: float = 1.0, dmg_mult: float =
 			enemy.elite_speed = Ascension.boss_speed_mult()
 		elif randf() < Ascension.elite_chance():
 			enemy.make_elite(Ascension.ELITE_KINDS.pick_random())
+	var seen_key := "seen_" + String(data.id)
+	if SaveService.get_stat(seen_key) == 0:
+		SaveService.add_stat(seen_key, 1, false)
 	return enemy
 
 

@@ -5,7 +5,7 @@
 grip — кулак задней руки (rearhand, у пояса), support — ладонь передней (fronthand), на неё ложится ствол.
 Кулак вырезается в hand_<clip>.png и рисуется поверх ствола. Итог: data/grip_<id>.json [grip_x, grip_y, support_x, support_y].
 Запуск из корня репозитория: python3 tools/hero_tactical.py"""
-import json, os, sys, tempfile
+import argparse, json, os, sys, tempfile
 import numpy as np
 from PIL import Image
 sys.path.insert(0, os.path.dirname(__file__))
@@ -14,8 +14,6 @@ from astra_key import key
 SRC = "astra/inbox/story/heroes_tactical"
 DST = "source/assets/heroes/tactical"
 HEROES = ("raccoon", "red_panda", "snow", "night")
-# Аргументы — только эти герои (python3 tools/hero_tactical.py night), иначе все.
-ONLY = sys.argv[1:]
 COUNTS = {"idle": 8, "run": 8, "shoot": 4, "hit": 4, "dash": 6, "death": 8, "revive": 6}
 HANDS = ("idle", "run", "shoot")
 CW, CH = 480, 320
@@ -26,6 +24,8 @@ FIST_SOFT = 8.0
 
 def rgba(path):
     im = Image.open(path)
+    if im.convert("RGBA").getchannel("A").getbbox() is None:
+        raise ValueError(f"Empty transparent asset: {path}")
     if im.mode != "RGBA" or im.getchannel("A").getextrema()[0] == 255:
         tmp = tempfile.mktemp(suffix=".png")
         key(path, tmp)
@@ -86,11 +86,11 @@ def smooth_order(frames):
     return list(range(half)) + list(range(half - 1, -1, -1))
 
 
-def main():
+def main(heroes=HEROES):
     """Клипы с оружием (idle/run/shoot) собираются из слоёв: тело без рук + руки в позе удержания из первого кадра
     стрельбы, сдвинутые за корпусом. В нарисованных кадрах руки размахивают (бег), и ствол прыгал от кадра к кадру."""
     os.makedirs(DST, exist_ok=True)
-    for hero in [h for h in HEROES if not ONLY or h in ONLY]:
+    for hero in heroes:
         base = f"{SRC}/{hero}/{hero}_"
         for clip in COUNTS:
             if clip not in HANDS:
@@ -146,7 +146,7 @@ UI = {
     "raccoon": {"card": ("ui/rico.png", "vagabond.png"), "talk": ("ui/hud_raccoon_0.png", "rico.png", 192)},
     "red_panda": {"card": ("ui/red_panda.png", "red_panda.png")},
     "snow": {"card": ("ui/portrait_snow_normal.png", "snow.png")},
-    "night": {"card": ("ui/night.png", "night.png")},
+    "night": {"card": ("ui/hud_night_0.png", "night.png")},
 }
 PORTRAITS = "source/assets/ui/portraits"
 
@@ -158,8 +158,9 @@ def fit(im, side):
     return im.resize((max(1, round(im.width * k)), max(1, round(im.height * k))), Image.LANCZOS)
 
 
-def ui():
-    for hero, cfg in [(h, c) for h, c in UI.items() if not ONLY or h in ONLY]:
+def ui(heroes=HEROES):
+    for hero in heroes:
+        cfg = UI[hero]
         base = f"{SRC}/{hero}/"
         src, dst = cfg["card"]
         fit(rgba(base + src), 300).save(f"{PORTRAITS}/{dst}", optimize=True)
@@ -178,24 +179,29 @@ def ui():
                     rgba(base + src).resize((256, 256), Image.LANCZOS).save(f"{PORTRAITS}/pose/{hero}_{kind}_{n}.png", optimize=True)
     # Лица-реакции боя (face_<вид>): попадание, ухмылка, гордость за серию, испуг.
     os.makedirs(f"{PORTRAITS}/face", exist_ok=True)
-    for hero in [h for h in UI if not ONLY or h in ONLY]:
+    for hero in heroes:
         for kind in ("hit", "angry", "grin", "proud", "scared", "tired"):
             src = f"{SRC}/{hero}/ui/face_{kind}.png"
             if os.path.exists(src):
+                if Image.open(src).convert("RGBA").getchannel("A").getbbox() is None:
+                    src = f"{SRC}/{hero}/ui/hud_{hero}_2.png"
+                    print(f"{hero} face_{kind}: empty source, using drawn tired HUD face")
                 rgba(src).resize((256, 256), Image.LANCZOS).save(f"{PORTRAITS}/face/{hero}_{kind}.png", optimize=True)
-    if ONLY:
-        print("ui ok")
-        return
     # Новый Рико в диалогах сюжета (старые портреты — теперь Малой: story/portraits/maloy*.png).
-    rgba(f"{SRC}/raccoon/ui/face_neutral.png").resize((256, 256), Image.LANCZOS).save("source/assets/story/portraits/rico.png", optimize=True)
-    rgba(f"{SRC}/raccoon/ui/face_angry.png").resize((256, 256), Image.LANCZOS).save("source/assets/story/portraits/rico_alt.png", optimize=True)
+    if "raccoon" in heroes:
+        rgba(f"{SRC}/raccoon/ui/face_neutral.png").resize((256, 256), Image.LANCZOS).save("source/assets/story/portraits/rico.png", optimize=True)
+        rgba(f"{SRC}/raccoon/ui/face_angry.png").resize((256, 256), Image.LANCZOS).save("source/assets/story/portraits/rico_alt.png", optimize=True)
     # Малой (сын Рико, прежняя модель енота): карточка и лица боя.
-    fit(rgba(f"{SRC}/maloy/ui/maloy.png"), 300).save(f"{PORTRAITS}/maloy.png", optimize=True)
-    for i in range(4):
-        rgba(f"{SRC}/maloy/ui/hud_maloy_{i}.png").resize((256, 256), Image.LANCZOS).save(f"{PORTRAITS}/hud/maloy_{i}.png", optimize=True)
+    if "raccoon" in heroes:
+        fit(rgba(f"{SRC}/maloy/ui/maloy.png"), 300).save(f"{PORTRAITS}/maloy.png", optimize=True)
+        for i in range(4):
+            rgba(f"{SRC}/maloy/ui/hud_maloy_{i}.png").resize((256, 256), Image.LANCZOS).save(f"{PORTRAITS}/hud/maloy_{i}.png", optimize=True)
     print("ui ok")
 
 
 if __name__ == "__main__":
-    main()
-    ui()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--hero", action="append", choices=HEROES)
+    selected = parser.parse_args().hero or HEROES
+    main(selected)
+    ui(selected)

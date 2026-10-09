@@ -9,6 +9,11 @@ const TILE := 150.0
 ## path, название, тип условия, значение, подсказка
 const ENTRIES := [
 	["", "Герой", "open", 0, ""],
+	["res://assets/ui/portraits/avatar/raccoon.png", "Капитан Рико", "open", 0, ""],
+	["res://assets/ui/portraits/avatar/red_panda.png", "Фитиль", "hero:red_panda", 0, "Открой Фитиля"],
+	["res://assets/ui/portraits/avatar/snow.png", "Фрост", "hero:snow", 0, "Открой Фроста"],
+	["res://assets/ui/portraits/avatar/night.png", "Шэдоу", "hero:night", 0, "Открой Шэдоу"],
+	["res://assets/ui/portraits/avatar/maloy.png", "Малой: аватар", "hero:maloy", 0, "Открой Малого"],
 	["res://assets/story/portraits/rico.png", "Рико", "open", 0, ""],
 	["res://assets/story/portraits/rico_alt.png", "Рико злой", "story", 1, "Пройди миссию 1"],
 	["res://assets/story/portraits/maloy.png", "Малой", "open", 0, ""],
@@ -162,6 +167,8 @@ func _state(entry: Array) -> int:
 		return 0
 	if kind == "never":
 		return 2
+	if kind.begins_with("hero:"):
+		return 0 if SaveService.owns_character(kind.substr(5)) else 1
 	if kind == "story":
 		return 0 if SaveService.get_stat("story_missions") >= value else 1
 	if kind == "shards":

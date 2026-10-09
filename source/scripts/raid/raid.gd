@@ -79,6 +79,8 @@ func start(_weapon_id: StringName = &"") -> void:
 	gauge = ChillGauge.new()
 	player.add_child(gauge)
 	dragon = WhiteDragon.new()
+	if SaveService.get_stat("seen_white_dragon") == 0:
+		SaveService.add_stat("seen_white_dragon", 1, false)
 	entities.add_child(dragon)
 	laser = WhiteDragonLaser.new()
 	layers.fx.add_child(laser)
@@ -384,6 +386,8 @@ func _win(dragon_killed: bool) -> void:
 	if _ending or finished:
 		return
 	_ending = true
+	if dragon_killed:
+		SaveService.add_stat("k_white_dragon", 1, false)
 	BulletPool.release_all()
 	comets.release_all()
 	laser.hide_beam()

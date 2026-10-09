@@ -42,9 +42,9 @@ func _run() -> void:
 		armory._buy(weapon, Economy.shop_price(weapon) <= 0)
 		_check(SaveService.owns_weapon(weapon.id), "purchase " + String(weapon.id))
 		_select_other(weapon.id)
-		var card := armory._make_card(weapon)
+		var card: Control = armory._make_tile(weapon)
 		var prefix := "ВЗЯТЬ В РУКИ"
-		var equip := _button(card, prefix)
+		var equip := _button(card, "В РУКИ")
 		_check(equip != null, "card equip " + String(weapon.id))
 		if equip != null:
 			_check(not equip.disabled, "owned card equip enabled " + String(weapon.id))
