@@ -198,7 +198,27 @@ func _fit_popup_height() -> void:
 	else:
 		ScreenSafeArea.fit(_center, get_viewport_rect().size, 12.0)
 	_panel.custom_minimum_size.x = minf(panel_width(), safe.size.x - 48.0)
+	_fit_inner_list(available)
 	_content_scroll_view.custom_minimum_size.y = minf(content.get_combined_minimum_size().y, available)
+
+
+## Список внутри окна (MenuPopups.scroll_list) получает ровно оставшуюся высоту: тогда листается только он,
+## а у окна второй полосы прокрутки нет (раньше в горизонтали крутились обе).
+func _fit_inner_list(available: float) -> void:
+	var lists := content.find_children("*", "ScrollContainer", true, false).filter(func(n: Node) -> bool: return n.has_meta("fit_list") and (n as Control).is_visible_in_tree())
+	if lists.size() != 1:
+		return
+	var list := lists[0] as ScrollContainer
+	var natural := 0.0
+	if list.get_child_count() > 0:
+		var inner_box := list.get_child(0) as Control
+		natural = inner_box.get_combined_minimum_size().y
+		if not inner_box.minimum_size_changed.is_connected(_fit_popup_height):
+			inner_box.minimum_size_changed.connect(_fit_popup_height, CONNECT_DEFERRED)
+	var others := content.get_combined_minimum_size().y - list.custom_minimum_size.y
+	var want := clampf(available - others, 140.0, maxf(natural, 140.0))
+	if absf(list.custom_minimum_size.y - want) > 1.0:
+		list.custom_minimum_size.y = want
 
 
 func _watch_inputs(node: Node) -> void:

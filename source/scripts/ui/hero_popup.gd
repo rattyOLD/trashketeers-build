@@ -17,16 +17,38 @@ var _preview: MenuWidgets.RaccoonPreview
 var _flash: ColorRect
 var _burst: HeroBurst
 var _reveal: UnlockReveal
+var _side: VBoxContainer
 
 
 func _init() -> void:
 	super("ОТРЯД")
 	_balance = UiStyle.label("", 24, UiStyle.GOLD, 6)
 	content.add_child(_balance)
-	_list = MenuPopups.scroll_list(content)
+	if Orient.portrait:
+		_list = MenuPopups.scroll_list(content)
+	else:
+		# Горизонталь: витрина героя слева (не листается), описание справа — листается только оно.
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 16)
+		content.add_child(row)
+		var left := VBoxContainer.new()
+		left.custom_minimum_size = Vector2(430, 0)
+		left.add_theme_constant_override("separation", 8)
+		row.add_child(left)
+		_side = VBoxContainer.new()
+		_side.add_theme_constant_override("separation", 8)
+		left.add_child(_side)
+		var right := VBoxContainer.new()
+		right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(right)
+		_list = MenuPopups.scroll_list(right)
 	_action_box = VBoxContainer.new()
 	_action_box.add_theme_constant_override("separation", 10)
-	content.add_child(_action_box)
+	# Горизонталь: кнопки под витриной слева, всегда на виду.
+	if _side != null:
+		_side.get_parent().add_child(_action_box)
+	else:
+		content.add_child(_action_box)
 	_reveal = UnlockReveal.new()
 	add_child(_reveal)
 
@@ -65,19 +87,23 @@ func _refresh() -> void:
 	_balance.text = "%s · %s" % [SaveService.format_coins(SaveService.get_coins()), Economy.format_gems(SaveService.get_gems())]
 	MenuPopups.clear(_list)
 	MenuPopups.clear(_action_box)
-	_list.add_child(_build_stage(character, accent, owned))
-	_list.add_child(_build_dots(all.size(), accent))
+	var stage_box: VBoxContainer = _side if _side != null else _list
+	if _side != null:
+		MenuPopups.clear(_side)
+	stage_box.add_child(_build_stage(character, accent, owned))
+	if _side == null:
+		stage_box.add_child(_build_dots(all.size(), accent))
 	_list.add_child(_build_header(character, rarity, accent))
 	var lore := UiStyle.label(str(character.get("lore", character.get("description", ""))), 19, UiStyle.TEXT, 4)
 	lore.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	lore.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	lore.custom_minimum_size = Vector2(520, 0)
+	lore.custom_minimum_size = Vector2(520 if Orient.portrait else 420, 0)
 	_list.add_child(lore)
 	if character.has("quote"):
 		var quote := UiStyle.label("«%s»" % str(character["quote"]), 20, accent.lightened(0.35), 5)
 		quote.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 		quote.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		quote.custom_minimum_size = Vector2(520, 0)
+		quote.custom_minimum_size = Vector2(520 if Orient.portrait else 420, 0)
 		_list.add_child(quote)
 	_list.add_child(_build_passive(character, accent))
 	_list.add_child(_build_stats(character, level, owned))
@@ -90,9 +116,11 @@ func _build_stage(character: Dictionary, accent: Color, owned: bool) -> Control:
 	var panel := PanelContainer.new()
 	var style := UiStyle.box(Color("#1d2022").lerp(accent, 0.06), accent.darkened(0.15), 4, 16)
 	panel.add_theme_stylebox_override("panel", style)
-	panel.custom_minimum_size = Vector2(0, 300)
+	# Горизонталь: витрина ниже, чтобы колонка с кнопкой влезала на низкий экран телефона без второй прокрутки.
+	var stage_h := 290.0 if Orient.portrait else 200.0
+	panel.custom_minimum_size = Vector2(0, stage_h + 10.0)
 	_stage = Control.new()
-	_stage.custom_minimum_size = Vector2(0, 290)
+	_stage.custom_minimum_size = Vector2(0, stage_h)
 	panel.add_child(_stage)
 	var skin: Dictionary = SaveService.get_skin()
 	_preview = null
@@ -110,7 +138,7 @@ func _build_stage(character: Dictionary, accent: Color, owned: bool) -> Control:
 		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_stage.add_child(icon)
 	else:
-		_preview = MenuWidgets.RaccoonPreview.new(skin, 1.55, character)
+		_preview = MenuWidgets.RaccoonPreview.new(skin, 1.55 if Orient.portrait else 1.15, character)
 		_preview.set_anchors_preset(Control.PRESET_FULL_RECT)
 		_preview.modulate = Color.WHITE if owned else Color(0.414, 0.397, 0.373, 1.0)
 		_stage.add_child(_preview)

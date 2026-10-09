@@ -16,6 +16,8 @@ static func list_height() -> float:
 static func scroll_list(parent: Control) -> VBoxContainer:
 	var scroll := DragScroll.new()
 	scroll.custom_minimum_size = Vector2(0, list_height())
+	# GlassPopup подгоняет высоту такого списка под остаток окна: прокрутка одна, без второй у самого окна.
+	scroll.set_meta("fit_list", true)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.scroll_deadzone = 16
 	scroll.follow_focus = true
