@@ -63,10 +63,8 @@ func _draw() -> void:
 		var pulse := 0.5 + 0.5 * sin(_time * 3.0)
 		draw_circle(Vector2.ZERO, 70.0, Color(1.0, 0.82, 0.25, 0.10 + 0.08 * pulse))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE * 1.25)
-	var path := ART_OPEN if opened else ART
-	if ResourceLoader.exists(path):
-		var tex := load(path) as Texture2D
-		draw_texture(tex, Vector2(-tex.get_width() * 0.5, -tex.get_height() + 4.0))
+	if WorldArt.draw(self, "junk_safe_open" if opened else "junk_safe", 0.8):
+		pass
 	else:
 		var body := Rect2(-34, -62, 68, 62)
 		draw_rect(body.grow(4.0), Color("#120d1c"))
@@ -86,11 +84,11 @@ func _draw() -> void:
 	# Цена и кольцо удержания.
 	var text := "%d" % price
 	var w := _font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 22).x + 30.0
-	var plate := Rect2(-w * 0.5, -98, w, 28)
+	var plate := Rect2(-w * 0.5, -124, w, 28)
 	draw_rect(plate.grow(2.0), Color("#120d1c"))
 	draw_rect(plate, Color("#2a2140"))
-	draw_circle(Vector2(plate.position.x + 14, -84), 8.0, Color("#ffd23f"))
-	draw_string_outline(_font, Vector2(plate.position.x + 26, -77), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 22, 4, Color("#120d1c"))
-	draw_string(_font, Vector2(plate.position.x + 26, -77), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Color("#ffd23f"))
+	draw_circle(Vector2(plate.position.x + 14, -110), 8.0, Color("#ffd23f"))
+	draw_string_outline(_font, Vector2(plate.position.x + 26, -103), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 22, 4, Color("#120d1c"))
+	draw_string(_font, Vector2(plate.position.x + 26, -103), text, HORIZONTAL_ALIGNMENT_LEFT, -1, 22, Color("#ffd23f"))
 	if _hold > 0.0:
 		draw_arc(Vector2(0, -32), 46.0, -PI * 0.5, -PI * 0.5 + TAU * _hold / HOLD, 32, Color("#ffd23f"), 6.0)

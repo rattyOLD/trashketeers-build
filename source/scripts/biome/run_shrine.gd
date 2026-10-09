@@ -15,6 +15,8 @@ const TITLES := {Kind.ALTAR: "Алтарь", Kind.VACUUM: "Пылесос", Kind
 const HOLD := {Kind.ALTAR: 3.0, Kind.VACUUM: 1.2, Kind.GREED: 2.0, Kind.RING: 2.0, Kind.DEALER: 0.8}
 const COLORS := {Kind.ALTAR: "#ff4d4d", Kind.VACUUM: "#6adcff", Kind.GREED: "#ffd23f", Kind.RING: "#ff7a3d", Kind.DEALER: "#b96bff"}
 const RADIUS := 95.0
+## Высота подписи над объектом (выше рисунка Астры).
+const TITLE_Y := {Kind.ALTAR: -150.0, Kind.VACUUM: -100.0, Kind.GREED: -120.0, Kind.RING: -125.0, Kind.DEALER: -165.0}
 
 var kind: Kind = Kind.VACUUM
 var player: Node2D
@@ -23,14 +25,10 @@ var _hold := 0.0
 var _cooldown := 0.0
 var _time := randf() * 10.0
 var _font: Font
-var _art: Texture2D
 
 
 func setup(new_kind: Kind) -> void:
 	kind = new_kind
-	var path := "res://assets/world/%s.png" % NAMES[kind]
-	if ResourceLoader.exists(path):
-		_art = load(path) as Texture2D
 
 
 func _ready() -> void:
@@ -74,18 +72,43 @@ func _draw() -> void:
 		draw_circle(Vector2.ZERO, RADIUS, Color(tint, 0.07 + 0.05 * pulse))
 		draw_arc(Vector2.ZERO, RADIUS, 0.0, TAU, 40, Color(tint, 0.55), 3.0)
 	draw_set_transform(Vector2.ZERO)
-	if _art != null:
-		draw_texture(_art, Vector2(-_art.get_width() * 0.5, -_art.get_height() + 6.0), Color.WHITE if not used else Color(0.55, 0.55, 0.6))
-	else:
+	if not _draw_art():
 		_draw_placeholder(tint)
 	if used:
 		return
 	var title: String = TITLES[kind]
 	var w := _font.get_string_size(title, HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
-	draw_string_outline(_font, Vector2(-w * 0.5, -122), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, 5, Color("#120d1c"))
-	draw_string(_font, Vector2(-w * 0.5, -122), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, tint)
+	var ty: float = TITLE_Y[kind]
+	draw_string_outline(_font, Vector2(-w * 0.5, ty), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, 5, Color("#120d1c"))
+	draw_string(_font, Vector2(-w * 0.5, ty), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, tint)
 	if _hold > 0.0:
 		draw_arc(Vector2(0, -50), 60.0, -PI * 0.5, -PI * 0.5 + TAU * _hold / float(HOLD[kind]), 36, tint, 6.0)
+
+
+## Арт Астры (assets/world/): в покое — статичный рисунок, пока стоишь рядом (или Барыга) — анимация.
+func _draw_art() -> bool:
+	var dim := Color.WHITE if not used else Color(0.55, 0.55, 0.6)
+	var active := _hold > 0.0 and not used
+	match kind:
+		Kind.ALTAR:
+			if active:
+				return WorldArt.draw(self, "altar_active", 0.55, int(_time * 8.0) % 6, Vector2(260, 260), 6, dim)
+			return WorldArt.draw(self, "altar", 0.55, 0, Vector2.ZERO, 1, dim)
+		Kind.VACUUM:
+			if active:
+				return WorldArt.draw(self, "vacuum_on", 0.8, int(_time * 8.0) % 4, Vector2(200, 200), 4, dim)
+			return WorldArt.draw(self, "vacuum", 0.8, 0, Vector2.ZERO, 1, dim)
+		Kind.GREED:
+			if active:
+				return WorldArt.draw(self, "greed_ring", 0.8, int(_time * 8.0) % 4, Vector2(160, 180), 4, dim)
+			return WorldArt.draw(self, "greed_register", 0.8, 0, Vector2.ZERO, 1, dim)
+		Kind.RING:
+			return WorldArt.draw(self, "ring", 0.75, 0, Vector2.ZERO, 1, dim, true)
+		Kind.DEALER:
+			if active:
+				return WorldArt.draw(self, "fence_dealer/offer", 0.58, int(_time * 8.0) % 4, Vector2(256, 256), 4, dim)
+			return WorldArt.draw(self, "fence_dealer/idle", 0.58, int(_time * 8.0) % 6, Vector2(256, 256), 4, dim)
+	return false
 
 
 func _draw_placeholder(tint: Color) -> void:

@@ -189,20 +189,26 @@ func _draw() -> void:
 				_batch.arc(ep, 5.5 + sin(_time * 7.0), 0.0, TAU, 14, Color("#ffd23f"), 1.5, true)
 	if _director.boss != null and _director.boss.is_alive():
 		_diamond(origin, scale, _director.boss.global_position, 7.0 + sin(_time * 6.0), Color("#ffd23f"))
-	# Выживание 2.0: вышки (голубые, пока не заряжены) и закрытые сейфы (золотые квадраты).
+	# Выживание 2.0: значки Астры (assets/world/minimap/) у ещё не использованных объектов.
+	_icons.clear()
 	for tower in _level.towers:
 		if is_instance_valid(tower) and not tower.used:
-			_dot(origin, scale, tower.global_position, 3.5, Color("#6adcff"), true)
+			_icons.append(["minimap/tower", _to_map(origin, scale, tower.global_position)])
 	for safe in _level.safes:
 		if is_instance_valid(safe) and not safe.opened:
-			var sp := _to_map(origin, scale, safe.global_position)
-			_batch.rect(Rect2(sp - Vector2(3, 3), Vector2(6, 6)), Color("#ffd23f"))
+			_icons.append(["minimap/safe", _to_map(origin, scale, safe.global_position)])
+	for shrine in _level.shrines:
+		if is_instance_valid(shrine) and not shrine.used:
+			_icons.append([ICON_OF[shrine.kind], _to_map(origin, scale, shrine.global_position)])
 	var portal := _level.get_portal()
 	if portal != null and portal.visible:
 		var pp := _to_map(origin, scale, portal.global_position)
 		var pr := 6.0 + sin(_time * 8.0) * 1.5
 		_batch.arc(pp, pr + 3.0, 0.0, TAU, 24, Color(PORTAL, 0.6), 2.0, true)
 		_batch.circle(pp, pr, PORTAL)
+	if not _icons.is_empty():
+		_batch.flush(self)
+		_draw_icons()
 	var me := _to_map(origin, scale, _player.global_position)
 	var aim := _player.visual.aim_direction.normalized() if _player.visual.aim_direction.length_squared() > 0.0 else Vector2.UP
 	_batch.arc(me, 9.0 + sin(_time * 5.0) * 1.2, 0.0, TAU, 20, Color(FRAME, 0.55), 1.5, true)
@@ -217,6 +223,20 @@ func _draw() -> void:
 		_batch.circle(corner, 3.5, RUST_DARK)
 		_batch.circle(corner, 2.2, Color("#f0b060"))
 	_batch.flush(self)
+
+
+const ICON_OF := {RunShrine.Kind.ALTAR: "minimap/altar", RunShrine.Kind.VACUUM: "minimap/vacuum", RunShrine.Kind.GREED: "minimap/greed",
+	RunShrine.Kind.RING: "minimap/ring", RunShrine.Kind.DEALER: "minimap/dealer"}
+const ICON_SIZE := 14.0
+var _icons: Array = []
+
+
+## Значки объектов рисуются поверх пакета точек (после flush), чтобы не ломать пакет.
+func _draw_icons() -> void:
+	for item: Array in _icons:
+		var t := WorldArt.tex(str(item[0]))
+		if t != null:
+			draw_texture_rect(t, Rect2(item[1] - Vector2.ONE * ICON_SIZE * 0.5, Vector2.ONE * ICON_SIZE), false)
 
 
 func _to_map(origin: Vector2, scale: float, world: Vector2) -> Vector2:

@@ -10,17 +10,16 @@ const RADIUS := 130.0
 const CHARGE_TIME := 5.0
 const DECAY := 0.25
 const ART := "res://assets/world/charge_tower.png"
+const ART_SCALE := 0.62
 
 var player: Node2D
 var used := false
 var _charge := 0.0
 var _time := randf() * 10.0
-var _art: Texture2D
 
 
 func _ready() -> void:
-	if ResourceLoader.exists(ART):
-		_art = load(ART) as Texture2D
+	pass
 
 
 func _process(delta: float) -> void:
@@ -59,8 +58,12 @@ func _draw() -> void:
 		if _charge > 0.0:
 			draw_arc(Vector2.ZERO, RADIUS + 10.0, -PI * 0.5, -PI * 0.5 + TAU * _charge, 48, Color("#ffd23f"), 7.0)
 	draw_set_transform(Vector2.ZERO)
-	if _art != null:
-		draw_texture(_art, Vector2(-_art.get_width() * 0.5, -_art.get_height() + 6.0), Color.WHITE if not used else Color(0.6, 0.6, 0.65))
+	# Арт Астры: погасшая вышка после заряда, искры по мачте во время заряда, иначе — обычная.
+	if used and WorldArt.draw(self, "charge_tower_off", ART_SCALE):
+		return
+	if not used and _charge > 0.0 and WorldArt.draw(self, "charge_tower_charge", ART_SCALE, int(_time * 10.0) % 6, Vector2(200, 360), 6):
+		return
+	if WorldArt.draw(self, "charge_tower", ART_SCALE):
 		return
 	# Мачта: тень, ферма, тарелка, огонь.
 	draw_set_transform(Vector2(0, 4), 0.0, Vector2(1.0, 0.4))
