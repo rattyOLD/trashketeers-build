@@ -13,7 +13,9 @@ from astra_key import key
 
 SRC = "astra/inbox/story/heroes_tactical"
 DST = "source/assets/heroes/tactical"
-HEROES = ("raccoon", "red_panda", "snow")
+HEROES = ("raccoon", "red_panda", "snow", "night")
+# Аргументы — только эти герои (python3 tools/hero_tactical.py night), иначе все.
+ONLY = sys.argv[1:]
 COUNTS = {"idle": 8, "run": 8, "shoot": 4, "hit": 4, "dash": 6, "death": 8, "revive": 6}
 HANDS = ("idle", "run", "shoot")
 CW, CH = 480, 320
@@ -88,7 +90,7 @@ def main():
     """Клипы с оружием (idle/run/shoot) собираются из слоёв: тело без рук + руки в позе удержания из первого кадра
     стрельбы, сдвинутые за корпусом. В нарисованных кадрах руки размахивают (бег), и ствол прыгал от кадра к кадру."""
     os.makedirs(DST, exist_ok=True)
-    for hero in HEROES:
+    for hero in [h for h in HEROES if not ONLY or h in ONLY]:
         base = f"{SRC}/{hero}/{hero}_"
         for clip in COUNTS:
             if clip not in HANDS:
@@ -144,6 +146,7 @@ UI = {
     "raccoon": {"card": ("ui/rico.png", "vagabond.png"), "talk": ("ui/hud_raccoon_0.png", "rico.png", 192)},
     "red_panda": {"card": ("ui/red_panda.png", "red_panda.png")},
     "snow": {"card": ("ui/portrait_snow_normal.png", "snow.png")},
+    "night": {"card": ("ui/night.png", "night.png")},
 }
 PORTRAITS = "source/assets/ui/portraits"
 
@@ -156,7 +159,7 @@ def fit(im, side):
 
 
 def ui():
-    for hero, cfg in UI.items():
+    for hero, cfg in [(h, c) for h, c in UI.items() if not ONLY or h in ONLY]:
         base = f"{SRC}/{hero}/"
         src, dst = cfg["card"]
         fit(rgba(base + src), 300).save(f"{PORTRAITS}/{dst}", optimize=True)
@@ -175,11 +178,14 @@ def ui():
                     rgba(base + src).resize((256, 256), Image.LANCZOS).save(f"{PORTRAITS}/pose/{hero}_{kind}_{n}.png", optimize=True)
     # Лица-реакции боя (face_<вид>): попадание, ухмылка, гордость за серию, испуг.
     os.makedirs(f"{PORTRAITS}/face", exist_ok=True)
-    for hero in UI:
+    for hero in [h for h in UI if not ONLY or h in ONLY]:
         for kind in ("hit", "angry", "grin", "proud", "scared", "tired"):
             src = f"{SRC}/{hero}/ui/face_{kind}.png"
             if os.path.exists(src):
                 rgba(src).resize((256, 256), Image.LANCZOS).save(f"{PORTRAITS}/face/{hero}_{kind}.png", optimize=True)
+    if ONLY:
+        print("ui ok")
+        return
     # Новый Рико в диалогах сюжета (старые портреты — теперь Малой: story/portraits/maloy*.png).
     rgba(f"{SRC}/raccoon/ui/face_neutral.png").resize((256, 256), Image.LANCZOS).save("source/assets/story/portraits/rico.png", optimize=True)
     rgba(f"{SRC}/raccoon/ui/face_angry.png").resize((256, 256), Image.LANCZOS).save("source/assets/story/portraits/rico_alt.png", optimize=True)

@@ -320,6 +320,8 @@
       "portrait": "res://assets/ui/portraits/night.png",
       "sprite": {
         "path": "res://assets/heroes/night.png",
+        "clips": "res://assets/heroes/tactical/night_",
+        "clips_grip": "res://data/grip_night.json",
         "cells": 4,
         "cell_w": 384,
         "cell_h": 288,
