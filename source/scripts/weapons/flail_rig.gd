@@ -16,7 +16,7 @@ const MIN_HIT_SPEED := 140.0
 const HIT_COOLDOWN := 0.28
 const PULL_K := 0.22
 const PULL_MAX := 110.0
-const LINKS := 9
+const LINKS := 6
 const TRAIL := 6
 
 signal ball_hit(at: Vector2, count: int, strong: bool)
@@ -78,7 +78,7 @@ func tick(delta: float, at: Vector2, control: Vector2, auto: bool, weapon: Weapo
 		h[1] = float(h[1]) + delta
 	_hits = _hits.filter(func(h: Array) -> bool: return float(h[1]) < 4.0 / HIT_FPS)
 	anchor = at
-	length = clampf(weapon.melee_reach * 0.85, 90.0, 220.0)
+	length = clampf(weapon.melee_reach * 0.56, 70.0, 150.0)
 	var rel := ball - anchor
 	if control.length_squared() > 0.01:
 		var desired := anchor + control.normalized() * length
