@@ -201,6 +201,21 @@ func _make_card(upgrade: UpgradeData, index: int, stats: RunStats) -> Button:
 	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	desc.custom_minimum_size = Vector2(text_width, 0)
 	column.add_child(desc)
+	# Ветка: ступень и что откроется дальше — игрок видит, куда ведёт выбор.
+	var branch := RunStats.branch_info(upgrade, ContentDB.get_upgrades())
+	if not branch.is_empty():
+		var steps := ""
+		for i in int(branch["total"]):
+			steps += "●" if i < int(branch["tier"]) else "○"
+		var next: UpgradeData = branch["next"]
+		var line := "ВЕТКА «%s» %s" % [(branch["root"] as UpgradeData).title, steps]
+		if next != null:
+			line += "\nдальше: %s" % next.title
+		var branch_label := UiStyle.label(line, 14, UiStyle.GOLD, 4)
+		branch_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		branch_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		branch_label.custom_minimum_size = Vector2(text_width, 0)
+		column.add_child(branch_label)
 	if not Orient.portrait:
 		var card_ref: WeakRef = weakref(card)
 		var column_ref: WeakRef = weakref(column)

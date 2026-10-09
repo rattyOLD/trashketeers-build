@@ -919,6 +919,291 @@
       "category": "melee",
       "rarity": "common",
       "style": "melee"
+    },
+    {
+      "upgrade_id": "razor",
+      "title": "Бритва",
+      "description": "+30% урона",
+      "stat": "damage_mult",
+      "value": 0.3,
+      "max_stacks": 2,
+      "color": "#FF4D6D",
+      "category": "weapon",
+      "rarity": "epic",
+      "requires": [
+        "sharpen_pro"
+      ]
+    },
+    {
+      "upgrade_id": "lead_storm",
+      "title": "Шквал свинца",
+      "description": "+25% скорострельности",
+      "stat": "fire_rate_mult",
+      "value": 0.25,
+      "max_stacks": 2,
+      "color": "#FFB02E",
+      "category": "weapon",
+      "rarity": "epic",
+      "requires": [
+        "hair_trigger"
+      ],
+      "style": "ranged"
+    },
+    {
+      "upgrade_id": "death_eye",
+      "title": "Смертельный глаз",
+      "description": "+12% шанса крита",
+      "stat": "crit_chance_add",
+      "value": 0.12,
+      "max_stacks": 1,
+      "color": "#FF7A3D",
+      "category": "weapon",
+      "rarity": "epic",
+      "requires": [
+        "crit_pro"
+      ]
+    },
+    {
+      "upgrade_id": "long_barrel",
+      "title": "Длинный ствол",
+      "description": "+30% дальности",
+      "stat": "range_mult",
+      "value": 0.3,
+      "max_stacks": 2,
+      "color": "#9BE7FF",
+      "category": "weapon",
+      "rarity": "rare",
+      "requires": [
+        "reach"
+      ],
+      "style": "ranged"
+    },
+    {
+      "upgrade_id": "through_shot",
+      "title": "Сквозная пуля",
+      "description": "Пули пробивают ещё одну цель",
+      "stat": "piercing",
+      "value": 1,
+      "max_stacks": 2,
+      "color": "#C9C3D9",
+      "category": "weapon",
+      "rarity": "epic",
+      "requires": [
+        "piercing"
+      ],
+      "style": "ranged"
+    },
+    {
+      "upgrade_id": "plague_vat",
+      "title": "Чумной чан",
+      "description": "+30% шанс отравить",
+      "stat": "poison_chance",
+      "value": 0.3,
+      "max_stacks": 2,
+      "color": "#7DFF3A",
+      "category": "weapon",
+      "rarity": "epic",
+      "requires": [
+        "poison_power"
+      ]
+    },
+    {
+      "upgrade_id": "carpet_bomb",
+      "title": "Ковровая бомбёжка",
+      "description": "+25% шанс взрыва",
+      "stat": "explosive_chance",
+      "value": 0.25,
+      "max_stacks": 2,
+      "color": "#FF8A3D",
+      "category": "weapon",
+      "rarity": "epic",
+      "requires": [
+        "blast_radius"
+      ]
+    },
+    {
+      "upgrade_id": "storm_node",
+      "title": "Грозовой узел",
+      "description": "+20% шанс разряда",
+      "stat": "shock_chance",
+      "value": 0.2,
+      "max_stacks": 2,
+      "color": "#6ADCFF",
+      "category": "weapon",
+      "rarity": "epic",
+      "requires": [
+        "tesla_coil"
+      ]
+    },
+    {
+      "upgrade_id": "torn_wounds",
+      "title": "Рваные раны",
+      "description": "+20% шанс кровотечения",
+      "stat": "bleed_chance",
+      "value": 0.2,
+      "max_stacks": 2,
+      "color": "#FF3B5C",
+      "category": "weapon",
+      "rarity": "rare",
+      "requires": [
+        "bleed"
+      ]
+    },
+    {
+      "upgrade_id": "deep_cold",
+      "title": "Глубокий холод",
+      "description": "+25% шанс замедлить",
+      "stat": "slow_chance",
+      "value": 0.25,
+      "max_stacks": 2,
+      "color": "#9BE7FF",
+      "category": "weapon",
+      "rarity": "rare",
+      "requires": [
+        "frost"
+      ]
+    },
+    {
+      "upgrade_id": "bear_hide",
+      "title": "Медвежья шкура",
+      "description": "+50 к здоровью",
+      "stat": "max_hp_add",
+      "value": 50,
+      "max_stacks": 2,
+      "color": "#7CFFCB",
+      "category": "hero",
+      "rarity": "rare",
+      "requires": [
+        "max_hp"
+      ]
+    },
+    {
+      "upgrade_id": "jet_sneakers",
+      "title": "Реактивные кеды",
+      "description": "+20% скорости бега",
+      "stat": "move_speed_mult",
+      "value": 0.2,
+      "max_stacks": 1,
+      "color": "#6ADCFF",
+      "category": "hero",
+      "rarity": "epic",
+      "requires": [
+        "speed_tires"
+      ]
+    },
+    {
+      "upgrade_id": "dump_vitality",
+      "title": "Свалочная живучесть",
+      "description": "+1.5 HP в секунду",
+      "stat": "regen",
+      "value": 1.5,
+      "max_stacks": 2,
+      "color": "#7CFFCB",
+      "category": "hero",
+      "rarity": "rare",
+      "requires": [
+        "regen"
+      ]
+    },
+    {
+      "upgrade_id": "tire_plates",
+      "title": "Бронепокрышки",
+      "description": "-10% входящего урона",
+      "stat": "damage_resist",
+      "value": 0.1,
+      "max_stacks": 2,
+      "color": "#C9C3D9",
+      "category": "hero",
+      "rarity": "rare",
+      "requires": [
+        "resist"
+      ]
+    },
+    {
+      "upgrade_id": "double_shield",
+      "title": "Двойной щит",
+      "description": "+1 заряд щита",
+      "stat": "shield_max",
+      "value": 1,
+      "max_stacks": 2,
+      "color": "#4DE1FF",
+      "category": "hero",
+      "rarity": "epic",
+      "requires": [
+        "shield"
+      ]
+    },
+    {
+      "upgrade_id": "black_hole",
+      "title": "Чёрная дыра",
+      "description": "+100% радиус сбора",
+      "stat": "magnet_mult",
+      "value": 1.0,
+      "max_stacks": 1,
+      "color": "#FFD740",
+      "category": "utility",
+      "rarity": "rare",
+      "requires": [
+        "magnet"
+      ]
+    },
+    {
+      "upgrade_id": "greedy_pockets",
+      "title": "Жадные карманы",
+      "description": "+20% шанс двойной добычи",
+      "stat": "double_drop",
+      "value": 0.2,
+      "max_stacks": 2,
+      "color": "#FFD740",
+      "category": "utility",
+      "rarity": "rare",
+      "requires": [
+        "double_drop"
+      ]
+    },
+    {
+      "upgrade_id": "mutant_clover",
+      "title": "Клевер-мутант",
+      "description": "+20% Удачи",
+      "stat": "luck",
+      "value": 0.2,
+      "max_stacks": 2,
+      "color": "#7DFF9A",
+      "category": "utility",
+      "rarity": "rare",
+      "requires": [
+        "lucky_cap"
+      ]
+    },
+    {
+      "upgrade_id": "whirl_strikes",
+      "title": "Вихрь ударов",
+      "description": "+30% скорости ударов ближним",
+      "stat": "melee_speed",
+      "value": 0.3,
+      "max_stacks": 2,
+      "color": "#FF8A3D",
+      "category": "melee",
+      "rarity": "epic",
+      "requires": [
+        "melee_fast_swing"
+      ],
+      "style": "melee"
+    },
+    {
+      "upgrade_id": "two_hand_grip",
+      "title": "Двуручный хват",
+      "description": "+25% дальности ближнего",
+      "stat": "melee_reach",
+      "value": 0.25,
+      "max_stacks": 2,
+      "color": "#FF8A3D",
+      "category": "melee",
+      "rarity": "rare",
+      "requires": [
+        "melee_long_grip"
+      ],
+      "style": "melee"
     }
   ]
 }

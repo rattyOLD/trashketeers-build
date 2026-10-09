@@ -279,6 +279,10 @@ func roll_choices(pool: Array[UpgradeData], count: int, luck: float = 0.0, guara
 			if not shares.is_empty():
 				w *= 1.0 + ARCHETYPE_BIAS * float(shares.get(archetype_of(u), 0.0))
 			w *= weapon_affinity(u)
+			# Ветки (как в 20 Minutes Till Dawn): открывшаяся следующая ступень выпадает заметно чаще —
+			# игрок собирает сборку по веткам, а не случайный набор.
+			if not u.requires.is_empty() and u.category != "evolution":
+				w *= BRANCH_BOOST
 			if avoid.has(u.id):
 				w *= 0.08
 			if need_rarity and u.rarity_rank < guarantee_rarity:
@@ -300,6 +304,45 @@ func roll_choices(pool: Array[UpgradeData], count: int, luck: float = 0.0, guara
 		categories[chosen.category] = true
 		candidates.erase(chosen)
 	return picked
+
+
+## Насколько чаще выпадает открывшаяся ступень ветки.
+const BRANCH_BOOST := 2.4
+
+
+## Ветка карточки: корень (первая ступень), номер ступени и всего ступеней. Эволюции (две ветки сразу) — не ветка.
+static func branch_info(upgrade: UpgradeData, pool: Array[UpgradeData]) -> Dictionary:
+	if upgrade.category == "evolution":
+		return {}
+	var by_id := {}
+	for u in pool:
+		by_id[u.id] = u
+	var root := upgrade
+	var tier := 1
+	while root.requires.size() == 1 and by_id.has(root.requires[0]) and tier < 8:
+		root = by_id[root.requires[0]]
+		tier += 1
+	var total := tier
+	var tip := upgrade
+	var guard := 0
+	while guard < 8:
+		guard += 1
+		var next := next_in_branch(tip, pool)
+		if next == null:
+			break
+		tip = next
+		total += 1
+	if total <= 1:
+		return {}
+	return {"root": root, "tier": tier, "total": total, "next": next_in_branch(upgrade, pool)}
+
+
+## Следующая ступень той же ветки (карточка, которой нужна только эта).
+static func next_in_branch(upgrade: UpgradeData, pool: Array[UpgradeData]) -> UpgradeData:
+	for u in pool:
+		if u.category != "evolution" and u.requires.size() == 1 and u.requires[0] == upgrade.id:
+			return u
+	return null
 
 
 func _has_rarity(list: Array[UpgradeData], rank: int) -> bool:

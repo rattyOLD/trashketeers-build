@@ -105,6 +105,9 @@ func _spawn_player(at: Vector2, weapon: WeaponData, target_finder: Callable) -> 
 	stats.add_flat(&"move_speed_mult", SaveService.get_perk_bonus("boots") * meta)
 	stats.add_flat(&"magnet_mult", SaveService.get_perk_bonus("magnet") * meta)
 	stats.add_flat(&"drone_count", SaveService.get_perk_bonus("drone") * meta)
+	# Нашивки на куртке (мета, 4 слота) — там же, где постоянная прокачка.
+	if meta_enabled:
+		Patches.apply(stats)
 	stats.add_flat(&"move_speed_mult", CharacterDB.get_stat(hero, "speed"))
 	stats.add_flat(&"crit_chance_add", CharacterDB.get_stat(hero, "crit"))
 	match hero:

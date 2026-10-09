@@ -1126,18 +1126,28 @@ class Upgrades:
 	var _list: VBoxContainer
 	var _balance: Label
 
+	signal patches_requested
+
 	func _init() -> void:
 		super("ПРОКАЧКА")
 		_balance = UiStyle.label("", 26, UiStyle.GOLD, 6)
 		content.add_child(_balance)
+		# Нашивки — вторая половина прокачки: 4 слота на куртке, выбор под стиль игры.
+		var patches := UiStyle.button("НАШИВКИ · %d/%d СЛОТА" % [Patches.worn().size(), Patches.open_slots()], Color("#9b5cff"), 22, Vector2(0, 58))
+		patches.pressed.connect(func() -> void: patches_requested.emit())
+		content.add_child(patches)
+		_patches_button = patches
 		var note := UiStyle.label("Действует только в режиме выживания. В сюжете все начинают с нуля, как в старых аркадах.", 18, UiStyle.TEXT_DIM, 4)
 		note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		note.custom_minimum_size = Vector2(520, 0)
 		content.add_child(note)
 		_list = MenuPopups.scroll_list(content)
 
+	var _patches_button: Button
+
 	func _refresh() -> void:
 		_balance.text = "Баланс: " + SaveService.format_coins(SaveService.get_nuts())
+		_patches_button.text = "НАШИВКИ · надето %d из %d" % [Patches.worn().size(), Patches.open_slots()]
 		MenuPopups.clear(_list)
 		var spent := 0
 		for perk_id in SaveService.PERKS:

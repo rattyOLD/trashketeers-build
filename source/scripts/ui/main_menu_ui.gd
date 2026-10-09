@@ -65,6 +65,7 @@ var _bestiary: BestiaryPopup
 var _changelog: ChangelogPopup
 var _armory: MenuPopups.Armory
 var _upgrades: MenuPopups.Upgrades
+var _patches: PatchesPopup
 var _camp: CampPopup
 var _account: AccountPopup
 var _achievements: MenuPopups.Achievements
@@ -114,6 +115,11 @@ func _build() -> void:
 	_armory = MenuPopups.Armory.new()
 	_armory.weapon_changed.connect(_on_weapon_changed)
 	_upgrades = MenuPopups.Upgrades.new()
+	_patches = PatchesPopup.new()
+	_upgrades.patches_requested.connect(func() -> void:
+		_upgrades.close()
+		_patches.open())
+	_patches.purchased.connect(_refresh)
 	_account = AccountPopup.new()
 	_camp = CampPopup.new()
 	_camp.departed.connect(func() -> void: story_requested.emit(SaveService.get_selected_weapon()))
@@ -164,7 +170,7 @@ func _build() -> void:
 	_settings.editor_requested.connect(func() -> void: _editor.open())
 	for popup in [_achievements, _chronicle, _friends, _bestiary]:
 		popup.closed.connect(_back_to_profile.bind(popup))
-	for popup in [_settings, _shop, _skins, _armory, _upgrades, _camp, _account, _achievements, _profile, _chronicle, _friends, _tester, _chests, _changelog, _daily, _currency, _vip, _pass, _odds, _mode_intro, _bestiary]:
+	for popup in [_settings, _shop, _skins, _armory, _upgrades, _camp, _account, _achievements, _profile, _chronicle, _friends, _tester, _chests, _changelog, _daily, _currency, _vip, _pass, _odds, _mode_intro, _bestiary, _patches]:
 		add_child(popup)
 		popup.closed.connect(_refresh)
 	# Покупки внутри окон списывают монеты сразу — цифры в шапке меню за окном обновляем тут же, а не после закрытия.
