@@ -335,7 +335,9 @@
         "arm_scale": 0.26,
         "arm_len": 100,
         "arm_pivot_y": 60,
-        "arm_color": "#403048"
+        "arm_color": "#403048",
+        "clips": "res://assets/heroes/tactical/night_",
+        "clips_grip": "res://data/grip_night.json"
       },
       "passive": {
         "title": "Метка",

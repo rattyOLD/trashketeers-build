@@ -1251,6 +1251,7 @@ class Achievements:
 class Profile:
 	extends GlassPopup
 
+	signal bestiary_requested
 	signal achievements_requested
 	signal chronicle_requested
 	signal friends_requested
@@ -1291,6 +1292,12 @@ class Profile:
 			list.add_child(_account_bar())
 		list.add_child(_recovery_bar())
 		list.add_child(_rank_button())
+		var bestiary := UiStyle.button("БЕСТИАРИЙ · ВРАГИ И БОССЫ", UiStyle.PANEL_LIGHT, 22, Vector2(0, 62))
+		bestiary.icon = load("res://assets/ui/bestiary/bestiary_menu.png") as Texture2D
+		bestiary.expand_icon = true
+		bestiary.add_theme_constant_override("icon_max_width", 36)
+		bestiary.pressed.connect(func() -> void: bestiary_requested.emit())
+		list.add_child(bestiary)
 		list.add_child(_section("РЕКОРДЫ"))
 		var records := GridContainer.new()
 		records.columns = 3

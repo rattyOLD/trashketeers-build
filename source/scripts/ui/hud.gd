@@ -388,6 +388,7 @@ func set_xp(xp: int, needed: int, level: int) -> void:
 		_barks.say("level", true)
 	_level_last = level
 	_level_label.text = str(level)
+	_apply_level_medal(level)
 	# Медаль растёт влево, правый нижний угол остаётся приваренным к рамке: влезает до 999.
 	var wide := 54.0 if level >= 100 else 38.0
 	_level_label.add_theme_font_size_override("font_size", 17 if level >= 100 else 20)
@@ -1265,6 +1266,7 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	_level_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_level_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_level_badge.add_child(_level_label)
+	_apply_level_medal(1)
 
 	var chips := HBoxContainer.new()
 	_chips_row = chips
@@ -1740,3 +1742,16 @@ class VolumeSlider:
 				if d <= 17.0:
 					image.set_pixel(x, y, UiStyle.OUTLINE if d > 13.0 else color)
 		return ImageTexture.create_from_image(image)
+
+func _apply_level_medal(level: int) -> void:
+	var gold := level >= 10
+	if _level_badge.has_meta("gold_medal") and bool(_level_badge.get_meta("gold_medal")) == gold:
+		return
+	_level_badge.set_meta("gold_medal", gold)
+	var path := "res://assets/ui/hud/level_medal%s.png" % ("_gold" if level >= 10 else "")
+	if not ResourceLoader.exists(path):
+		return
+	var medal := StyleBoxTexture.new()
+	medal.texture = load(path) as Texture2D
+	medal.set_content_margin_all(0)
+	(_level_badge as PanelContainer).add_theme_stylebox_override("panel", medal)

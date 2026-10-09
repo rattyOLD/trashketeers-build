@@ -44,6 +44,9 @@ func spawn(data: EnemyData, at: Vector2, hp_mult: float = 1.0, dmg_mult: float =
 	enemy.pool_index = _active.size()
 	_active.append(enemy)
 	enemy.activate(data, at, hp_mult, dmg_mult)
+	var seen_key := "seen_" + String(data.id)
+	if SaveService.get_stat(seen_key) == 0:
+		SaveService.add_stat(seen_key, 1, false)
 	return enemy
 
 

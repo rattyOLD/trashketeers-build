@@ -226,6 +226,8 @@ class Avatar:
 			Avatar.draw_round(self, tex, c, r - 5.0)
 		var frame := Cosmetics.frame_color()
 		var frame_art := Cosmetics.frame_art()
+		if frame_art == null and frame.a == 0.0:
+			frame_art = AvatarPicker.portrait_texture("res://assets/ui/hud/portrait_frame.png")
 		if frame_art == null:
 			if frame.a > 0.0:
 				draw_arc(c, r - 2.0, 0.0, TAU, 40, Color(frame, 0.35), 9.0, true)
@@ -270,6 +272,11 @@ class Avatar:
 		var key := "%s:%s" % [character.get("id", ""), skin_id]
 		if _cache.has(key):
 			return _cache[key]
+		var avatar_path := "res://assets/ui/portraits/avatar/%s.png" % str(character.get("id", ""))
+		if ResourceLoader.exists(avatar_path):
+			var avatar := AvatarPicker.portrait_texture(avatar_path)
+			_cache[key] = avatar
+			return avatar
 		if character.has("portrait") and character.has("sprite"):
 			var portrait := str(character["portrait"])
 			var loaded: Texture2D = load(portrait) as Texture2D if ResourceLoader.exists(portrait) else null

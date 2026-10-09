@@ -500,6 +500,21 @@ func _draw_fx() -> void:
 
 
 ## 100%: кувырок вперёд → белая вспышка → в её пике transition_point → вспышка гаснет.
+## Titles already contain the chapter name; no duplicate label on top.
+func show_chapter(mission: String) -> void:
+	if mission not in ["m1", "m2"] or _title == null:
+		return
+	var card := TextureRect.new()
+	card.texture = load("res://assets/story/chapter_cards/chapter_%s.png" % mission.trim_prefix("m")) as Texture2D
+	card.custom_minimum_size = Vector2(0, 150)
+	card.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	card.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_title.get_parent().add_child(card)
+	_title.get_parent().move_child(card, 0)
+	_title.hide()
+
+
 func _finish() -> void:
 	_finishing = true
 	var tween := create_tween()

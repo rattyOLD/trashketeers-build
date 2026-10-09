@@ -8,6 +8,10 @@ mkdir -p "$LOG"
 "$GODOT" --headless --path $P --import > "$LOG/import.log" 2>&1
 "$GODOT" --headless --path $P res://test/check_scripts.tscn 2>&1 | grep "CHECK checked"
 fail=0
+XDG_DATA_HOME="$LOG/brief-user" "$GODOT" --headless --path $P res://test/brief_completion_test.tscn > "$LOG/brief.log" 2>&1
+if ! grep -q 'BRIEF_COMPLETION failures=0' "$LOG/brief.log" || grep -q 'SCRIPT ERROR' "$LOG/brief.log"; then
+  fail=1
+fi
 XDG_DATA_HOME="$LOG/dash-user" "$GODOT" --headless --path $P res://test/dash_regression.tscn > "$LOG/dash.log" 2>&1
 if ! grep -q 'DASH_REGRESSION failures=0' "$LOG/dash.log" || grep -q 'SCRIPT ERROR' "$LOG/dash.log"; then
   fail=1

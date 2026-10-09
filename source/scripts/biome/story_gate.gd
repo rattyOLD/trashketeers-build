@@ -11,6 +11,7 @@ const COLOR_LAMP_LOCKED := Color("#ff3b5c")
 const COLOR_LAMP_OPEN := Color("#7cff6b")
 
 static var _frames: Array[Texture2D] = []
+static var _sign: Texture2D
 var rect := Rect2()
 var is_open := false
 
@@ -70,12 +71,15 @@ static func _load_frames() -> void:
 
 func _draw() -> void:
 	_load_frames()
+	if _sign == null:
+		_sign = load("res://assets/story/gates/aquilon_sign.png") as Texture2D
 	if not _frames.is_empty():
 		var index := clampi(roundi(_lift * float(_frames.size() - 1)), 0, _frames.size() - 1)
 		var pad := Vector2(24.0, 18.0)
 		draw_texture_rect(_frames[index], Rect2(rect.position - pad, rect.size + pad * 2.0), false)
 		var glow := COLOR_LAMP_OPEN if is_open else Color(COLOR_LAMP_LOCKED, 0.6 + 0.4 * sin(_time * 6.0))
 		draw_circle(rect.position + Vector2(-6.0, -4.0), 7.0, Color(glow, 0.55))
+		_draw_sign()
 		return
 	var r := rect
 	var plate_h := r.size.y * (1.0 - _lift)
@@ -102,3 +106,12 @@ func _draw() -> void:
 		var lx: float = r.get_center().x + side * (r.size.x * 0.5 + 9.0)
 		draw_circle(Vector2(lx, r.position.y - 14.0), 9.0, lamp)
 		draw_circle(Vector2(lx, r.position.y - 14.0), 16.0, Color(lamp, 0.25))
+	_draw_sign()
+
+
+func _draw_sign() -> void:
+	if _sign == null:
+		return
+	var width := minf(rect.size.x * 0.7, 116.0)
+	var height := width * float(_sign.get_height()) / float(_sign.get_width())
+	draw_texture_rect(_sign, Rect2(Vector2(rect.get_center().x - width * 0.5, rect.position.y - height - 8.0), Vector2(width, height)), false)
