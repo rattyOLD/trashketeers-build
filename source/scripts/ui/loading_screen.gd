@@ -194,6 +194,22 @@ func _init() -> void:
 	_scenery.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(_scenery)
 
+	# Логотип TRASH SQUAD (Астра, assets/ui/loading/logo.png) над надписью «ЗАГРУЗКА».
+	if ResourceLoader.exists("res://assets/ui/loading/logo.png"):
+		var logo := TextureRect.new()
+		logo.texture = load("res://assets/ui/loading/logo.png")
+		logo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		logo.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		logo.anchor_left = 0.5
+		logo.anchor_right = 0.5
+		logo.anchor_top = 0.16
+		logo.anchor_bottom = 0.16
+		logo.offset_left = -170.0
+		logo.offset_right = 170.0
+		logo.offset_top = -108.0
+		logo.offset_bottom = -8.0
+		_root.add_child(logo)
 	var head := UiStyle.label("ЗАГРУЗКА", 20, Color("#ffb347"), 4)
 	head.anchor_left = 0.0
 	head.anchor_right = 1.0
@@ -725,9 +741,22 @@ class Scenery:
 	func _hash(n: float) -> float:
 		return fposmod(sin(n * 12.9898) * 43758.5453, 1.0)
 
+	## Ночная улица баров Астры (assets/ui/loading/bg_*.jpg): кадр «cover», чуть плывёт и притемнён — на нём бежит Енот.
+	var _bg: Texture2D
+
 	func _draw() -> void:
 		var w := size.x
 		var h := size.y
+		if _bg == null:
+			var path := "res://assets/ui/loading/bg_%s.jpg" % ("portrait" if h > w else "landscape")
+			_bg = load(path) if ResourceLoader.exists(path) else null
+		if _bg != null:
+			var k := maxf(w / _bg.get_width(), h / _bg.get_height()) * 1.06
+			var shown := _bg.get_size() * k
+			var drift := sin(_t * 0.15) * (shown.x - w) * 0.45
+			draw_texture_rect(_bg, Rect2(Vector2((w - shown.x) * 0.5 + drift, (h - shown.y) * 0.5), shown), false, Color(0.62, 0.6, 0.66))
+			draw_rect(Rect2(0, h * 0.66, w, h * 0.34), Color("#1d1b1a", 0.45))
+			return
 		draw_rect(Rect2(0, 0, w, h * 0.45), Color("#23221f"))
 		draw_rect(Rect2(0, h * 0.45, w, h * 0.2), Color("#32302d"))
 		for i in 26:
