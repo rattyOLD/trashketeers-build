@@ -88,8 +88,10 @@ var _story: Dictionary = {}
 ## Выживание 2.0: вышки-ретрансляторы и сейфы хлама на карте (Game подписывается на их сигналы).
 var towers: Array[ChargeTower] = []
 var safes: Array[JunkSafe] = []
-const TOWER_COUNT := 4
-const SAFE_COUNT := 6
+var shrines: Array[RunShrine] = []
+const SHRINE_KINDS: Array[RunShrine.Kind] = [RunShrine.Kind.ALTAR, RunShrine.Kind.VACUUM, RunShrine.Kind.GREED, RunShrine.Kind.RING, RunShrine.Kind.DEALER]
+const TOWER_COUNT := 3
+const SAFE_COUNT := 5
 var _boss_cells := Vector2i(16, 8)
 var _area_scale := 1.0
 var _story_clear: Array[Rect2] = []
@@ -180,6 +182,7 @@ func clear() -> void:
 	story_gates.clear()
 	towers.clear()
 	safes.clear()
+	shrines.clear()
 	story_cells.clear()
 	_story_clear.clear()
 	_portal = null
@@ -194,6 +197,9 @@ func attach_player(player: Player) -> void:
 	for safe in safes:
 		if is_instance_valid(safe):
 			safe.player = player
+	for shrine in shrines:
+		if is_instance_valid(shrine):
+			shrine.player = player
 	_player = player
 	if _world_life != null and is_instance_valid(_world_life):
 		_world_life.attach(player)
@@ -1834,7 +1840,7 @@ func _build_ground_detail() -> void:
 ## площади и босса, не ближе 650 px друг к другу — карта зовёт исследовать её, как в аналогах.
 func _build_run_shrines(area: Rect2, center: Vector2) -> void:
 	var placed: Array[Vector2] = []
-	var want := TOWER_COUNT + SAFE_COUNT
+	var want := TOWER_COUNT + SAFE_COUNT + SHRINE_KINDS.size()
 	for attempt in 1500:
 		if placed.size() >= want:
 			break
@@ -1845,21 +1851,36 @@ func _build_run_shrines(area: Rect2, center: Vector2) -> void:
 			continue
 		if not _river_points.is_empty() and absf(p.x - AcidRiver._x_at(_river_points, p.y)) < RIVER_WIDTH * 0.5 + 160.0:
 			continue
-		if placed.any(func(o: Vector2) -> bool: return o.distance_to(p) < 650.0):
+		if placed.any(func(o: Vector2) -> bool: return o.distance_to(p) < 480.0):
 			continue
 		placed.append(p)
 	placed.shuffle()
-	for i in placed.size():
-		if i < TOWER_COUNT:
+	# Сначала особые объекты (их по одному), потом вышки, остаток — сейфы: если места мало, теряем сейф, а не Барыгу.
+	var order: Array = []
+	for kind in SHRINE_KINDS:
+		order.append(kind)
+	for i in TOWER_COUNT:
+		order.append("tower")
+	for i in SAFE_COUNT:
+		order.append("safe")
+	for i in mini(placed.size(), order.size()):
+		var what: Variant = order[i]
+		if what is String and what == "tower":
 			var tower := ChargeTower.new()
 			tower.position = placed[i]
 			_own(tower, _layers.world)
 			towers.append(tower)
-		else:
+		elif what is String:
 			var safe := JunkSafe.new()
 			safe.position = placed[i]
 			_own(safe, _layers.world)
 			safes.append(safe)
+		else:
+			var shrine := RunShrine.new()
+			shrine.setup(int(what))
+			shrine.position = placed[i]
+			_own(shrine, _layers.world)
+			shrines.append(shrine)
 
 
 ## Прохожие: жители ходят по улицам кварталов (Свалка) или аллеям парка (Банк) туда-обратно,

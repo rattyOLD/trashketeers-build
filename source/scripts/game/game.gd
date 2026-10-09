@@ -241,6 +241,7 @@ func start(_weapon_id: StringName = &"") -> void:
 	map.crate_landed.connect(_on_crate_landed)
 	director.boss_spawned.connect(_on_boss_spawned)
 	director.wave_started.connect(_on_wave_started)
+	director.siren.connect(_on_siren)
 	director.wave_cleared.connect(_on_wave_cleared)
 	director.chapter_cleared.connect(_on_chapter_cleared)
 	director.intermission_tick.connect(func(seconds: int) -> void: hud.show_countdown(seconds))
@@ -379,7 +380,12 @@ func _physics_process(delta: float) -> void:
 
 
 func _update_hud_timer() -> void:
-	hud.set_time(director.elapsed)
+	if story == null and story_mission.is_empty() and not director.is_boss_wave() and director.shift_left > 0.0:
+		# Таймер смены: сколько осталось до Сирены (босс выйдет сам).
+		var left := director.shift_left
+		hud.set_time_text("СМЕНА %s" % BattleBase.format_time(left), UiStyle.DANGER if left < 60.0 else UiStyle.TEXT)
+	else:
+		hud.set_time_text(BattleBase.format_time(director.elapsed), UiStyle.TEXT)
 	if story != null:
 		hud.set_story_status(story.score, story.lives, story.zone_number(), story.zone_count(), story.zone_name(), -1, SaveService.nell_order(), story.goal_rows())
 		_tick_order()
@@ -840,6 +846,7 @@ func _count_multikill() -> void:
 
 
 func _on_enemy_died(enemy: Enemy) -> void:
+	_ring_enemy_died(enemy)
 	var data := enemy.data
 	if player != null and player.weapon_controller.weapon != null:
 		stats.note_kill(player.weapon_controller.weapon.is_melee())
@@ -1106,6 +1113,12 @@ func _hook_run_objects() -> void:
 	for safe in map.safes:
 		if not safe.open_requested.is_connected(_on_safe_requested):
 			safe.open_requested.connect(_on_safe_requested)
+	for shrine in map.shrines:
+		if not shrine.activated.is_connected(_on_shrine_activated):
+			shrine.activated.connect(_on_shrine_activated)
+	if director != null and not director.siren.is_connected(_on_siren):
+		director.siren.connect(_on_siren)
+	_greed_mult = 1.0
 	_update_safe_prices()
 
 
@@ -1180,6 +1193,131 @@ func _on_safe_requested(safe: JunkSafe) -> void:
 		_queue_bonus(choices, "СЕЙФ ВСКРЫТ!")
 
 
+# --- Этап 2: Сирена, алтарь, пылесос, касса жадности, ринг, Барыга ---------------------------------
+
+const GREED_COINS := 0.3
+const GREED_HP := 1.15
+const RING_ELITES := 6
+const RING_HP := 2.6
+const DEALER_PRICES := [90, 160, 260]
+
+var _greed_mult := 1.0
+var _altar_bonus := false
+var _ring_elites: Array[Enemy] = []
+var _ring_at := Vector2.ZERO
+var _dealer_open := false
+var _dealer_prices := {}
+var _dealer_choices: Array[UpgradeData] = []
+
+
+func _on_siren() -> void:
+	hud.show_banner("СИРЕНА! БОСС ИДЁТ САМ", UiStyle.DANGER, 2.6)
+	SoundManager.play(&"wave_horn", 0.0, false)
+	atmosphere.flash(Color(1.0, 0.1, 0.1), 0.35, 0.6)
+
+
+func _on_shrine_activated(shrine: RunShrine) -> void:
+	match shrine.kind:
+		RunShrine.Kind.ALTAR:
+			if not director.force_boss():
+				shrine.refuse()
+				hud.toast("АЛТАРЬ МОЛЧИТ", "Босс уже на арене.", Color("#ff4d4d"))
+				return
+			_altar_bonus = true
+			hud.show_banner("АЛТАРЬ: БОСС ВЫЗВАН — НАГРАДА ВЫШЕ", Color("#ff4d4d"), 2.6)
+			SoundManager.play(&"boss_roar", -2.0, false)
+		RunShrine.Kind.VACUUM:
+			pickups.vacuum()
+			hud.toast("ПЫЛЕСОС", "Весь опыт и гайки на карте летят к тебе.", Color("#6adcff"))
+			SoundManager.play(&"star_dust", -2.0, false)
+		RunShrine.Kind.GREED:
+			_greed_mult += GREED_COINS
+			director.phase_hp *= GREED_HP
+			hud.toast("КАССА ЖАДНОСТИ", "+30% гаек до конца главы, враги крепче на 15%.", Color("#ffd23f"))
+			SoundManager.play(&"crate_break", 0.0, false)
+		RunShrine.Kind.RING:
+			_start_ring(shrine.global_position)
+		RunShrine.Kind.DEALER:
+			if not _open_dealer():
+				shrine.refuse()
+				return
+	shrine.finish()
+	fx.ring(shrine.global_position, Color(str(RunShrine.COLORS[shrine.kind])), 140.0)
+
+
+## Ринг: волна элиты главы вокруг ринга; всех положил — выбор с редкостью не ниже редкой.
+func _start_ring(at: Vector2) -> void:
+	_ring_at = at
+	_ring_elites.clear()
+	var weights: Dictionary = director._wave.get("weights", {})
+	var ids := weights.keys()
+	if ids.is_empty():
+		return
+	for i in RING_ELITES:
+		var data := ContentDB.get_enemy(StringName(ids[i % ids.size()]))
+		if data == null:
+			continue
+		var p := at + Vector2.from_angle(TAU * i / RING_ELITES) * 260.0
+		var e := enemies.spawn(data, p, director.get_hp_mult() * RING_HP, director.get_damage_mult())
+		if e != null:
+			_ring_elites.append(e)
+	hud.show_banner("РИНГ: ПОЛОЖИ ЭЛИТУ!", Color("#ff7a3d"), 2.2)
+	SoundManager.play(&"wave_horn", -3.0, false)
+
+
+## Смерть врага: если это элита ринга и она последняя — награда.
+func _ring_enemy_died(enemy: Enemy) -> void:
+	if _ring_elites.is_empty() or not _ring_elites.has(enemy):
+		return
+	_ring_elites.erase(enemy)
+	if not _ring_elites.is_empty():
+		return
+	hud.toast("РИНГ ВЗЯТ!", "Элита повержена — награда.", Color("#ff7a3d"))
+	pickups.spawn(_ring_at, 25)
+	_queue_bonus(stats.roll_choices(ContentDB.get_upgrades(), 3, 0.5 + stats.get_stat(&"luck"), maxi(_roll_rarity(0.2), 1)), "НАГРАДА РИНГА!")
+
+
+## Барыга Шнырь: 3 карточки по цене редкости; кнопка переброса — «Уйти».
+func _open_dealer() -> bool:
+	var chapter_k := 1.0 + 0.3 * float(director.chapter_index)
+	var offer := stats.roll_choices(ContentDB.get_upgrades(), 3, 0.3 + stats.get_stat(&"luck"), 1)
+	_dealer_prices.clear()
+	_dealer_choices.clear()
+	var cheapest := 1 << 30
+	for u in offer:
+		var price := int(round(DEALER_PRICES[clampi(u.rarity_rank, 0, 2)] * chapter_k / 5.0)) * 5
+		var copy := _priced(u, price)
+		_dealer_prices[copy] = price
+		_dealer_choices.append(copy)
+		cheapest = mini(cheapest, price)
+	if _dealer_choices.is_empty() or nuts < cheapest:
+		hud.toast("БАРЫГА ШНЫРЬ", "«Без гаек не разговариваю». Нужно от %d." % cheapest, Color("#b96bff"))
+		return false
+	_show_dealer()
+	return true
+
+
+func _show_dealer() -> void:
+	_dealer_open = true
+	_bonus_open = true
+	get_tree().paused = true
+	hud.show_level_up(_dealer_choices, level, stats, true, "УЙТИ, НИЧЕГО НЕ БРАТЬ", true, "БАРЫГА ШНЫРЬ · у тебя %d гаек" % nuts)
+
+
+func _priced(u: UpgradeData, price: int) -> UpgradeData:
+	var c := UpgradeData.new()
+	for prop in ["id", "description", "stat", "value", "max_stacks", "color", "category", "rarity_rank", "requires", "weight", "close_only", "rail_only", "phase2", "style"]:
+		c.set(prop, u.get(prop))
+	c.title = "%s · %d гаек" % [u.title, price]
+	return c
+
+
+func _close_dealer() -> void:
+	_dealer_open = false
+	_dealer_prices.clear()
+	_dealer_choices.clear()
+
+
 func _queue_bonus(choices: Array[UpgradeData], title: String) -> void:
 	if choices.is_empty() or finished or player.is_dead:
 		return
@@ -1233,6 +1371,11 @@ func _on_boss_killed(boss: Enemy, at: Vector2) -> void:
 		story.on_king_killed()
 	bosses_killed += 1
 	SaveService.add_boss_kill()
+	if _altar_bonus:
+		# Босс вызван алтарём раньше времени: эпический выбор и мешок гаек.
+		_altar_bonus = false
+		pickups.spawn(at, 40)
+		_queue_bonus(stats.roll_choices(ContentDB.get_upgrades(), 3, 0.6 + stats.get_stat(&"luck"), 2), "ДАР АЛТАРЯ!")
 	if story == null and stats.phase < 2:
 		_start_phase_two()
 	add_shake(1.0)
@@ -1632,7 +1775,8 @@ func _apply_run_start_perks() -> void:
 func _on_nuts_collected(amount: int) -> void:
 	if SaveService.get_character_id() == "pigeon_mafioso":
 		amount = int(amount * 1.2 + randf())
-	nuts += int(amount * events.coin_mult + randf()) if events.coin_mult > 1.0 else amount
+	var mult := events.coin_mult * _greed_mult
+	nuts += int(amount * mult + randf()) if mult > 1.0 else amount
 	hud.set_nuts(nuts)
 	hud.punch_nuts()
 	fx.burst(player.global_position + Vector2(0, -10), Color("#ffd257"), 3, 150.0, 2.4)
@@ -1738,6 +1882,18 @@ func _show_choices(choices: Array[UpgradeData], bonus: bool) -> void:
 
 
 func _on_reroll_requested() -> void:
+	if _dealer_open:
+		# «Уйти» у Барыги: окно закрывается без покупки.
+		_close_dealer()
+		hud._level_up.visible = false
+		_bonus_open = false
+		if _pending_levelups > 0:
+			_level_up_open = true
+			_open_level_up()
+		else:
+			get_tree().paused = false
+			_open_next_bonus()
+		return
 	if not _level_up_open:
 		return
 	if _rerolls_free > 0:
@@ -1759,6 +1915,15 @@ func _on_reroll_requested() -> void:
 
 
 func _on_upgrade_chosen(upgrade: UpgradeData) -> void:
+	if _dealer_open:
+		var price := int(_dealer_prices.get(upgrade, 0))
+		if nuts < price:
+			hud.toast("НЕ ХВАТАЕТ ГАЕК", "Нужно %d — у тебя %d." % [price, nuts], Color("#b96bff"))
+			_show_dealer()
+			return
+		nuts -= price
+		hud.set_nuts(nuts)
+		_close_dealer()
 	SaveService.add_stat("picks", 1, false)
 	SoundManager.play(&"ui_confirm")
 	stats.apply(upgrade)

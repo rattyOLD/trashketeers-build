@@ -13,6 +13,8 @@ signal wave_started(number: int, title: String, mood: String, is_boss: bool)
 signal wave_cleared(number: int)
 signal intermission_tick(seconds_left: int)
 signal chapter_cleared(chapter_index: int)
+## Таймер смены вышел до босса — «Сирена»: босс главы выходит сам (Выживание 2.0).
+signal siren
 
 enum Phase { WAITING, INTRO, FIGHT, INTERMISSION, PORTAL }
 
@@ -46,6 +48,9 @@ const STALL_ALIVE := 3
 const STALL_TIME := 9.0
 
 var elapsed := 0.0
+## Выживание 2.0: время смены на главу; до босса не дошёл — Сирена, босс выходит сам.
+const SHIFT_TIME := 540.0
+var shift_left := SHIFT_TIME
 var story_mode := false
 var story_mini := false
 var wave_number := 0
@@ -176,6 +181,10 @@ func _physics_process(delta: float) -> void:
 		return
 	if phase != Phase.PORTAL:
 		elapsed += delta
+		if not is_boss_wave() and shift_left > 0.0:
+			shift_left -= delta
+			if shift_left <= 0.0 and force_boss():
+				siren.emit()
 	match phase:
 		Phase.WAITING:
 			_phase_time -= delta
@@ -216,7 +225,19 @@ func _physics_process(delta: float) -> void:
 				_start_wave(wave_number + 1)
 
 
+## Вызвать босса главы сейчас (Сирена или Мусорный алтарь). false — уже идёт волна босса или портал.
+func force_boss() -> bool:
+	if is_boss_wave() or phase == Phase.PORTAL or story_mode:
+		return false
+	var chapter_number := (maxi(wave_number, 1) - 1) / WAVES_PER_CHAPTER
+	remaining_to_spawn = 0
+	_start_wave(chapter_number * WAVES_PER_CHAPTER + WAVES_PER_CHAPTER)
+	return true
+
+
 func _start_wave(number: int) -> void:
+	if (number - 1) % WAVES_PER_CHAPTER == 0:
+		shift_left = SHIFT_TIME
 	wave_number = number
 	var chapters := ContentDB.get_chapters().size()
 	var chapter_number := (number - 1) / WAVES_PER_CHAPTER
