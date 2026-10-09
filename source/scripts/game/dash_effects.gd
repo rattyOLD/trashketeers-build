@@ -43,6 +43,11 @@ func setup(player: Player, stats: RunStats, fx: FxManager) -> void:
 	_player.dash_moved.connect(_katana_cut)
 	_player.dash_ended.connect(_hammer_slam)
 	_player.dash_ended.connect(func(at: Vector2) -> void:
+		# Катана/кинжал: световой разрез вдоль всего рывка (арт фазы 2, 6×512×64).
+		var cut := PhaseFx.tex("blink_cut")
+		if _fx != null and cut != null and _melee_style(_player.weapon_controller.weapon) == "katana" and at.distance_to(_dash_from) > 30.0:
+			_fx.flipbook(cut, (at + _dash_from) * 0.5 + Vector2(0, -26), 6, 24.0, at.distance_to(_dash_from) + 60.0, (at - _dash_from).angle()))
+	_player.dash_ended.connect(func(at: Vector2) -> void:
 		if _fx != null and _trail_tex != null and at.distance_to(_dash_from) > 30.0:
 			# Шлейф: хвост-рисунок от старта до конца рывка, яркий край — у героя.
 			_fx.sprite_flash(_trail_tex, (at + _dash_from) * 0.5 + Vector2(0, -24), at.distance_to(_dash_from) + 40.0, 0.3, (at - _dash_from).angle())
@@ -219,7 +224,11 @@ func _hammer_slam(at: Vector2) -> void:
 		if is_instance_valid(enemy) and enemy.is_alive():
 			enemy.add_stagger(2.0)
 	if _fx != null:
-		_fx.ring(at, weapon.effect_color, HAMMER_RADIUS)
+		var wave := PhaseFx.tex("echo_ring")
+		if wave != null:
+			_fx.flipbook(wave, at, 6, 20.0, HAMMER_RADIUS * 2.2)
+		else:
+			_fx.ring(at, weapon.effect_color, HAMMER_RADIUS)
 		_fx.dust(at + Vector2(0, 8), 10, 90.0)
 		_fx.burst(at, weapon.effect_color, 16, 300.0, 4.0)
 	hammer_slammed.emit(at)

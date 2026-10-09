@@ -1352,6 +1352,8 @@ func _start_phase_two() -> void:
 	get_tree().create_timer(3.0, false).timeout.connect(func() -> void:
 		if not finished:
 			hud.show_banner("ФАЗА 2: ОРУЖИЕ РАСКРЫВАЕТСЯ", Color("#ff7a3d"), 2.6)
+			if PhaseFx.tex("phase2_badge") != null:
+				fx.sprite_flash(PhaseFx.tex("phase2_badge"), player.global_position + Vector2(0, -150), 150.0, 1.6, 0.0)
 			hud.toast("ФАЗА 2", "Новые карточки под твоё оружие. Враги крепче и злее.", Color("#ff7a3d")))
 
 

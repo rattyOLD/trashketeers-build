@@ -700,7 +700,19 @@ func _on_melee_hit(weapon: WeaponData, at: Vector2, count: int, finisher: bool, 
 		fx.ring(at, weapon.effect_color, 70.0 + 14.0 * weapon.weight)
 
 
+var _p2_fx_cd := 0.0
+
+
 func _on_player_fired(weapon: WeaponData, origin: Vector2, direction: Vector2) -> void:
+	# Фаза 2: «Третий ствол» — пуля на вылете распадается на три; «Перегрев» — пар и раскалённый ствол.
+	_p2_fx_cd -= 0.1
+	if _p2_fx_cd <= 0.0 and stats != null:
+		if stats.has_upgrade(&"p2_third_barrel") and PhaseFx.tex("split_shot") != null:
+			_p2_fx_cd = 0.5
+			fx.flipbook(PhaseFx.tex("split_shot"), origin + direction * 30.0, 6, 24.0, 80.0, direction.angle())
+		elif stats.has_upgrade(&"p2_overheat") and PhaseFx.tex("overheat") != null:
+			_p2_fx_cd = 0.9
+			fx.flipbook(PhaseFx.tex("overheat"), origin, 6, 14.0, 70.0)
 	if _flash_cd <= 0.0:
 		_flash_cd = MUZZLE_FLASH_GAP / _fx_scale
 		var flash_tex := WeaponVfx.muzzle_for(weapon)
