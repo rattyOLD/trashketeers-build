@@ -43,6 +43,7 @@ var _daily: DailyPopup
 var _currency: CurrencyPopup
 var _vip: VipPopup
 var _mode_intro: ModeIntroPopup
+var _objects_intro: ObjectsIntroPopup
 var _mod_chip: Button
 var _map_chip: Button
 var _chips_row: HBoxContainer
@@ -149,6 +150,8 @@ func _build() -> void:
 	_changelog = ChangelogPopup.new()
 	_changelog.changed.connect(_refresh)
 	_mode_intro = ModeIntroPopup.new()
+	_objects_intro = ObjectsIntroPopup.new()
+	_objects_intro.finished.connect(func() -> void: start_requested.emit(SaveService.get_selected_weapon()))
 	_vip = VipPopup.new()
 	_vip.changed.connect(_refresh)
 	_pass = BattlePassPopup.new()
@@ -170,7 +173,7 @@ func _build() -> void:
 	_settings.editor_requested.connect(func() -> void: _editor.open())
 	for popup in [_achievements, _chronicle, _friends, _bestiary]:
 		popup.closed.connect(_back_to_profile.bind(popup))
-	for popup in [_settings, _shop, _skins, _armory, _upgrades, _camp, _account, _achievements, _profile, _chronicle, _friends, _tester, _chests, _changelog, _daily, _currency, _vip, _pass, _odds, _mode_intro, _bestiary, _patches]:
+	for popup in [_settings, _shop, _skins, _armory, _upgrades, _camp, _account, _achievements, _profile, _chronicle, _friends, _tester, _chests, _changelog, _daily, _currency, _vip, _pass, _odds, _mode_intro, _bestiary, _patches, _objects_intro]:
 		add_child(popup)
 		popup.closed.connect(_refresh)
 	# Покупки внутри окон списывают монеты сразу — цифры в шапке меню за окном обновляем тут же, а не после закрытия.
@@ -930,6 +933,9 @@ func _on_play() -> void:
 		_camp.open()
 	elif _mode == Mode.RAID:
 		raid_requested.emit(SaveService.get_selected_weapon())
+	elif ObjectsIntroPopup.should_show():
+		# Перед первыми двумя забегами Выживания — что делают вышки, сейфы, касса, пылесос и прочее.
+		_objects_intro.open()
 	else:
 		start_requested.emit(SaveService.get_selected_weapon())
 

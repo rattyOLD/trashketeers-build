@@ -52,7 +52,8 @@ func _ready() -> void:
 	z_index = 3
 	_shape.radius = BALL_RADIUS + 6.0
 	_query.shape = _shape
-	_query.collision_mask = PhysicsLayers.ENEMY
+	# Враги и ломаемые объекты (ящики с оружием, бочки): шар бьёт и их.
+	_query.collision_mask = PhysicsLayers.ENEMY | PhysicsLayers.OBSTACLE
 	_query.collide_with_areas = false
 
 
@@ -122,6 +123,14 @@ func _hit_enemies(delta: float, weapon: WeaponData) -> void:
 	var count := 0
 	var mult := clampf(speed / REF_SPEED, 0.2, 2.2)
 	for hit in get_world_2d().direct_space_state.intersect_shape(_query, 12):
+		var box := hit["collider"] as DestructibleObject
+		if box != null and is_instance_valid(box):
+			var box_id := box.get_instance_id()
+			if not _cooldown.has(box_id):
+				_cooldown[box_id] = HIT_COOLDOWN
+				box.take_damage(weapon.damage * mult, velocity.normalized())
+				count += 1
+			continue
 		var enemy := hit["collider"] as Enemy
 		if enemy == null or not is_instance_valid(enemy) or not enemy.is_alive():
 			continue
