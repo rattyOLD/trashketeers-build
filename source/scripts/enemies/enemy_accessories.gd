@@ -37,7 +37,9 @@ func setup(anchor_point: Vector2, pool: PackedStringArray, forced: bool) -> void
 
 func _process(delta: float) -> void:
 	_time += delta
-	queue_redraw()
+	# Враг в пуле или за кадром невидим — перерисовка не нужна.
+	if is_visible_in_tree():
+		queue_redraw()
 
 
 func _draw() -> void:

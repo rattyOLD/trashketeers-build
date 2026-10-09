@@ -40,7 +40,7 @@ const COVER_SPOTS := 7
 const PROP_DENSITY := 0.55
 const SCENE_SPACING := 380.0
 const RIPPLE_INTERVAL := 0.3
-const PUDDLE_COUNT := 9
+const PUDDLE_COUNT := 6
 const BASE_AREA := 2000.0
 const DOOR_GAP := 6
 const DOOR_LEAD := 0.03
@@ -1483,7 +1483,7 @@ func _build_organic() -> void:
 	if names.is_empty():
 		return
 	var area := _interior_rect()
-	var target := int(round(7.5 * _area_scale))
+	var target := int(round(5.5 * _area_scale))
 	var bag: Array = []
 	var center := Vector2(0, _origin.y + grid_size.y * 0.5 * CELL)
 	if _build_quarters(root, defs, area) < 3:
@@ -1634,12 +1634,17 @@ func _build_quarters(root: Dictionary, defs: Dictionary, area: Rect2) -> int:
 		_streets.z_index = 1
 		_streets.build_trail(Color(0.02, 0.0, 0.05, 0.22))
 		# Столбы с фонарями вдоль улиц: пятна тёплого света ведут взгляд от кварталов к площади.
+		# Один столб на улицу и не ближе 700 px к соседнему: свет ведёт к площади, а не загромождает поле.
+		var poles: Array[Vector2] = []
 		for line in _streets.paths:
-			for t in [0.35, 0.75]:
+			for t in [0.55]:
 				var i := int(t * (line.size() - 1))
 				var along := (line[mini(i + 1, line.size() - 1)] - line[maxi(i - 1, 0)]).normalized()
 				var spot := (line[i] + along.orthogonal() * 120.0 * (1.0 if randf() < 0.5 else -1.0)).snapped(Vector2(8, 8))
+				if poles.any(func(o: Vector2) -> bool: return o.distance_to(spot) < 700.0):
+					continue
 				if _cover_allowed(spot, 30.0) and is_walkable(spot) and _place_prop(spot, "z_wire_pole", false) != null:
+					poles.append(spot)
 					_windows.append([spot + Vector2(0, -60), Color("#ffb45a")])
 	return placed
 
@@ -1795,7 +1800,7 @@ func _build_ground_detail() -> void:
 			continue
 		var q := (1 if p.x > area.get_center().x else 0) + (2 if p.y > area.get_center().y else 0)
 		(quads[q] as Array).append(p)
-		if quads.reduce(func(acc: int, a: Array) -> int: return acc + a.size(), 0) >= 140:
+		if quads.reduce(func(acc: int, a: Array) -> int: return acc + a.size(), 0) >= 56:
 			break
 	for i in 4:
 		var spots: Array[Vector2] = []
@@ -1826,7 +1831,7 @@ func _spawn_walkers() -> void:
 		_life.setup(is_walkable)
 		_own(_life, self)
 	lines.shuffle()
-	for i in mini(lines.size(), 6 if quality > 1 else 3):
+	for i in mini(lines.size(), 3 if quality > 1 else 2):
 		var side := (lines[i][-1] - lines[i][0]).orthogonal().normalized() * randf_range(-40.0, 40.0)
 		var route := PackedVector2Array()
 		for point in lines[i]:
@@ -1925,7 +1930,7 @@ func _scatter_singles(area: Rect2, center: Vector2) -> void:
 	if layout == "bank":
 		singles = ["planter", "column", "umbrella", "crystals", "cash_pile", "lamp_banner"]
 	var flats: Array = chapter.get("flat", [])
-	var step := 430.0
+	var step := 560.0
 	var y := area.position.y + step * 0.5
 	while y < area.end.y:
 		var x := area.position.x + step * 0.5

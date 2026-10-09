@@ -137,6 +137,10 @@ class Actor:
 			_fixed = true
 			mode = "prop"
 		scale = Vector2.ONE * base_scale
+		# Жители — фон, а не цель: приглушены в холодный тон пола, чтобы в бою глаз не путал их с врагами
+		# (тестеры: «НПС отвлекают»). Огонь в бочке и прочие «loop»-пропы остаются яркими.
+		if new_mode != "loop" and new_mode != "prop":
+			self_modulate = Color(0.55, 0.53, 0.7, 0.85)
 		_shadow_node = Sprite2D.new()
 		_shadow_node.texture = AmbientLife.shadow_texture()
 		_shadow_node.show_behind_parent = true

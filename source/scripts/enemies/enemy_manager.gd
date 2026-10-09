@@ -140,37 +140,73 @@ func _physics_process(delta: float) -> void:
 		i -= 1
 
 
-## O(n²) по живым врагам (их одновременно ≤ ~60): отталкивание пропорционально перекрытию.
+## Расталкивание через сетку ячеек: пара проверяется, только если враги в соседних клетках (раньше —
+## все пары, O(n²): при 30+ врагах это заметная доля кадра на слабом телефоне). Крупные враги (боссы,
+## танки) с радиусом больше клетки проверяются со всеми, как раньше. Итог тот же, что у полного перебора.
+const SEP_CELL := 110.0
+var _sep_grid := {}
+
+
 func _compute_separation() -> void:
 	var count := _active.size()
 	var positions := PackedVector2Array()
 	var radii := PackedFloat32Array()
 	positions.resize(count)
 	radii.resize(count)
+	_sep_grid.clear()
+	var big := PackedInt32Array()
 	for i in count:
 		var e := _active[i]
 		e.separation = Vector2.ZERO
 		positions[i] = e.global_position
 		radii[i] = e.get_radius()
+		if radii[i] * 2.3 > SEP_CELL:
+			big.append(i)
+		var key := Vector2i(floori(positions[i].x / SEP_CELL), floori(positions[i].y / SEP_CELL))
+		if _sep_grid.has(key):
+			(_sep_grid[key] as PackedInt32Array).append(i)
+		else:
+			_sep_grid[key] = PackedInt32Array([i])
 	var player_pos := _player.global_position
 	for i in count:
 		var push := Vector2.ZERO
-		for j in range(i + 1, count):
-			var d := positions[j] - positions[i]
-			var reach := (radii[i] + radii[j]) * 1.15
-			var dist_sq := d.length_squared()
-			if dist_sq >= reach * reach or dist_sq < 0.01:
-				continue
-			var dist := sqrt(dist_sq)
-			var force := d / dist * (1.0 - dist / reach) * SEPARATION_SPEED
-			push -= force
-			_active[j].separation += force
-		var to_player := positions[i] - player_pos
-		var near := radii[i] + Player.RADIUS
+		var pi := positions[i]
+		var ri := radii[i]
+		var is_big := ri * 2.3 > SEP_CELL
+		var cell := Vector2i(floori(pi.x / SEP_CELL), floori(pi.y / SEP_CELL))
+		for dy in range(-1, 2):
+			for dx in range(-1, 2):
+				var bucket: Variant = _sep_grid.get(cell + Vector2i(dx, dy))
+				if bucket == null:
+					continue
+				for j: int in bucket:
+					# Пару считает младший индекс; пары с крупным врагом — отдельным проходом ниже.
+					if j <= i or (radii[j] * 2.3 > SEP_CELL) or is_big:
+						continue
+					push += _sep_pair(i, j, positions, radii)
+		if is_big:
+			for j in count:
+				if j != i and (j > i or radii[j] * 2.3 <= SEP_CELL):
+					push += _sep_pair(i, j, positions, radii)
+		var to_player := pi - player_pos
+		var near := ri + Player.RADIUS
 		var pd := to_player.length()
 		if pd < near and pd > 0.01 and not _active[i].data.is_boss():
 			push += to_player / pd * (1.0 - pd / near) * PLAYER_PUSH
 		_active[i].separation += push
+
+
+## Толчок пары: возвращает силу на i, на j добавляет противоположную.
+func _sep_pair(i: int, j: int, positions: PackedVector2Array, radii: PackedFloat32Array) -> Vector2:
+	var d := positions[j] - positions[i]
+	var reach := (radii[i] + radii[j]) * 1.15
+	var dist_sq := d.length_squared()
+	if dist_sq >= reach * reach or dist_sq < 0.01:
+		return Vector2.ZERO
+	var dist := sqrt(dist_sq)
+	var force := d / dist * (1.0 - dist / reach) * SEPARATION_SPEED
+	_active[j].separation += force
+	return -force
 
 
 func get_active() -> Array[Enemy]:

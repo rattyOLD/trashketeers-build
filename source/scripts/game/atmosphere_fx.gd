@@ -253,7 +253,8 @@ class WeatherDraw:
 		for i in int(RAIN_COUNT * _rain):
 			var p := _rain_pos[i] + fall
 			if p.y > h + 40.0:
-				p = Vector2(randf() * (w + 200.0), -40.0)
+				# Перенос наверх с сохранением разброса: после подвисания кадра капли не собираются в одну «стену».
+				p = Vector2(randf() * (w + 200.0), fposmod(p.y + 40.0, h + 80.0) - 40.0)
 			if p.x < -40.0:
 				p.x += w + 80.0
 			_rain_pos[i] = p

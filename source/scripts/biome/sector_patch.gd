@@ -65,10 +65,15 @@ func build(at: Vector2, radius: float, texture: Texture2D, tint: Color, curb: Co
 	if deco.has("garland"):
 		_add_garland_lights()
 	# Детали — отдельным слоем поверх покрытия (собственный _draw узла оказался бы под дочерними полигонами).
-	var layer := FxManager.DrawLayer.new()
-	layer.painter = _paint
-	add_child(layer)
-	layer.queue_redraw()
+	# Всё одной сеткой FlatMesh: один вызов отрисовки вместо десятков линий и кружков.
+	var m := FlatMesh.new()
+	_paint(m)
+	var mesh := m.commit()
+	if mesh != null:
+		var layer := FxManager.DrawLayer.new()
+		layer.painter = func(ci: CanvasItem) -> void: ci.draw_mesh(mesh, null)
+		add_child(layer)
+		layer.queue_redraw()
 
 
 func _blob(radius: float) -> PackedVector2Array:
@@ -156,7 +161,7 @@ func _add_garland_lights() -> void:
 		x += half.x * 0.4
 
 
-func _paint(ci: CanvasItem) -> void:
+func _paint(ci: FlatMesh) -> void:
 	if deco.has("stripes"):
 		# Стриженый газон: широкие полосы светлее/темнее, как на поле для гольфа.
 		var band := 70.0
@@ -166,7 +171,7 @@ func _paint(ci: CanvasItem) -> void:
 			if light:
 				var w := minf(band, center.x + half.x - x)
 				var top := center.y - half.y * sqrt(maxf(0.0, 1.0 - pow((x + w * 0.5 - center.x) / half.x, 2.0))) * 0.9
-				ci.draw_rect(Rect2(x, top, w, (center.y - top) * 2.0), Color(1, 1, 1, 0.07))
+				ci.rect(Rect2(x, top, w, (center.y - top) * 2.0), Color(1, 1, 1, 0.07))
 			light = not light
 			x += band
 	if deco.has("bays"):
@@ -174,9 +179,9 @@ func _paint(ci: CanvasItem) -> void:
 		var bay := 120.0
 		var x0 := center.x - half.x + 50.0
 		while x0 < center.x + half.x - 40.0:
-			ci.draw_line(Vector2(x0, center.y - half.y + 26.0), Vector2(x0, center.y - 6.0), Color(1, 1, 1, 0.55), 4.0)
+			ci.line(Vector2(x0, center.y - half.y + 26.0), Vector2(x0, center.y - 6.0), Color(1, 1, 1, 0.55), 4.0)
 			x0 += bay
-		ci.draw_line(Vector2(center.x - half.x + 50.0, center.y - 6.0), Vector2(center.x + half.x - 50.0, center.y - 6.0), Color(1, 0.86, 0.3, 0.6), 4.0)
+		ci.line(Vector2(center.x - half.x + 50.0, center.y - 6.0), Vector2(center.x + half.x - 50.0, center.y - 6.0), Color(1, 0.86, 0.3, 0.6), 4.0)
 	if deco.has("hazard"):
 		# Сигнальная жёлто-чёрная кайма по краю площадки энергобудки.
 		var r := Rect2(center - half + Vector2(18, 18), half * 2.0 - Vector2(36, 36))
@@ -184,21 +189,21 @@ func _paint(ci: CanvasItem) -> void:
 		var t := 0.0
 		while t < r.size.x:
 			var c := Color("#e8b41a") if int(t / step) % 2 == 0 else Color(0.08, 0.08, 0.1)
-			ci.draw_line(Vector2(r.position.x + t, r.position.y), Vector2(minf(r.position.x + t + step, r.end.x), r.position.y), c, 8.0)
-			ci.draw_line(Vector2(r.position.x + t, r.end.y), Vector2(minf(r.position.x + t + step, r.end.x), r.end.y), c, 8.0)
+			ci.line(Vector2(r.position.x + t, r.position.y), Vector2(minf(r.position.x + t + step, r.end.x), r.position.y), c, 8.0)
+			ci.line(Vector2(r.position.x + t, r.end.y), Vector2(minf(r.position.x + t + step, r.end.x), r.end.y), c, 8.0)
 			t += step
 	for dot: Array in _dots:
 		var p: Vector2 = dot[0]
 		var c: Color = dot[1]
 		var s: float = dot[2]
 		if deco.has("flowers"):
-			ci.draw_circle(p + Vector2(0, 2), s, Color(0, 0, 0, 0.25))
-			ci.draw_circle(p, s, c)
-			ci.draw_circle(p, s * 0.4, Color("#ffd23f"))
+			ci.circle(p + Vector2(0, 2), s, Color(0, 0, 0, 0.25))
+			ci.circle(p, s, c)
+			ci.circle(p, s * 0.4, Color("#ffd23f"))
 		else:
-			ci.draw_line(p, p + Vector2(-3, -7), c, 2.0)
-			ci.draw_line(p, p + Vector2(0, -9), c, 2.0)
-			ci.draw_line(p, p + Vector2(3, -7), c, 2.0)
+			ci.line(p, p + Vector2(-3, -7), c, 2.0)
+			ci.line(p, p + Vector2(0, -9), c, 2.0)
+			ci.line(p, p + Vector2(3, -7), c, 2.0)
 	if deco.has("garland"):
 		# Гирлянда над столиками: провисающий провод между столбиками, лампочки светятся.
 		var y := center.y - half.y * 0.55
@@ -208,13 +213,13 @@ func _paint(ci: CanvasItem) -> void:
 		for i in range(1, 25):
 			var t := float(i) / 24.0
 			var p := Vector2(lerpf(x0, x1, t), y + sin(t * PI * 2.0) * 0.0 + 18.0 * sin(fmod(t * 2.0, 1.0) * PI))
-			ci.draw_line(prev, p, Color(0.1, 0.08, 0.06, 0.8), 2.0)
+			ci.line(prev, p, Color(0.1, 0.08, 0.06, 0.8), 2.0)
 			if i % 2 == 0:
-				ci.draw_circle(p + Vector2(0, 5), 5.0, Color("#ffd27a"))
-				ci.draw_circle(p + Vector2(0, 5), 9.0, Color(1.0, 0.82, 0.45, 0.25))
+				ci.circle(p + Vector2(0, 5), 5.0, Color("#ffd27a"))
+				ci.circle(p + Vector2(0, 5), 9.0, Color(1.0, 0.82, 0.45, 0.25))
 			prev = p
 		for px in [x0, x1]:
-			ci.draw_line(Vector2(px, y + 40.0), Vector2(px, y - 6.0), Color(0.15, 0.12, 0.1), 5.0)
+			ci.line(Vector2(px, y + 40.0), Vector2(px, y - 6.0), Color(0.15, 0.12, 0.1), 5.0)
 
 
 func _exit_tree() -> void:
