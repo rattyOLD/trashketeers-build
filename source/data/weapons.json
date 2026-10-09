@@ -1101,7 +1101,7 @@
       "weapon_id": "morning_star_v1",
       "display_name": "Моргенштерн «Цепной пёс»",
       "short_name": "Моргенштерн",
-      "icon": "melee_crowbar",
+      "icon": "melee_flail",
       "rarity": "epic",
       "kind": "melee",
       "melee_class": "flail",

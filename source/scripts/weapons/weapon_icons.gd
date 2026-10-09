@@ -47,7 +47,16 @@ static func _sprite(kind: StringName) -> Dictionary:
 				"grip": (Vector2(float(grip[0]), float(grip[1])) - center) * unit,
 				"muzzle": (Vector2(float(muzzle_px[0]), float(muzzle_px[1])) - center) * unit,
 			}
+			# Отдельная картинка для меню (моргенштерн: в руке только рукоять, в меню — с цепью и шаром).
+			var menu_path := str(raw.get("menu", ""))
+			if not menu_path.is_empty() and ResourceLoader.exists(menu_path):
+				_sprites[StringName(str(raw["icon"]))]["menu"] = _smooth_texture(load(menu_path) as Texture2D)
 	return _sprites.get(kind, {})
+
+
+## Картинка оружия для меню, если она отличается от того, что в руке; null — рисуем как в руке.
+static func menu_texture(kind: StringName) -> Texture2D:
+	return _sprite(kind).get("menu", null)
 
 
 ## Длина нарисованного оружия (для размера в руке), 74 если рисунка нет.
@@ -315,8 +324,16 @@ class IconRect:
 		queue_redraw()
 
 	func _draw() -> void:
-		var fit := minf(size.x / 84.0, size.y / 32.0) * icon_scale
-		WeaponIcons.draw(self, kind, size * 0.5 + Vector2(-2, -1) * fit, fit, 0.0, accent)
+		var menu := WeaponIcons.menu_texture(kind)
+		if menu != null:
+			texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+			var box := size * icon_scale
+			var k := minf(box.x / menu.get_width(), box.y / menu.get_height())
+			var drawn := menu.get_size() * k
+			draw_texture_rect(menu, Rect2((size - drawn) * 0.5, drawn), false)
+		else:
+			var fit := minf(size.x / 84.0, size.y / 32.0) * icon_scale
+			WeaponIcons.draw(self, kind, size * 0.5 + Vector2(-2, -1) * fit, fit, 0.0, accent)
 		for i in tier:
 			var pip := Rect2(Vector2(4.0 + i * 9.0, size.y - 9.0), Vector2(7.0, 5.0))
 			draw_rect(pip.grow(1.5), Color(0, 0, 0, 0.7))

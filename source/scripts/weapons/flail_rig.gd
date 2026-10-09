@@ -4,7 +4,7 @@ extends Node2D
 ## шар сохраняет инерцию, стик прицела тянет его к своей точке — раскручиваешь пальцем по кругу; в автоматическом
 ## режиме шар крутится сам. Урон — по скорости шара (медленный почти не бьёт, разогнанный ломает толпу).
 ## Натяжение цепи тянет героя к шару: скорость зависит от направления и раскрутки (идея тестеров).
-## Рисунок временный (код); арт Астры — бриф v30 (assets/weapons/flail_ball.png, flail_link.png).
+## Арт Астры (бриф v30): assets/weapons/flail/ — шар, 4 кадра шара в движении, звено цепи, вспышка удара.
 
 const BALL_RADIUS := 24.0
 const CONTROL_SPRING := 26.0
@@ -20,6 +20,17 @@ const LINKS := 9
 const TRAIL := 6
 
 signal ball_hit(at: Vector2, count: int, strong: bool)
+
+const ART_DIR := "res://assets/weapons/flail/"
+const BALL_DRAW := 76.0
+const LINK_DRAW := 15.0
+const FAST_FPS := 14.0
+const HIT_FPS := 16.0
+const HIT_DRAW := 120.0
+static var _tex := {}
+var _time := 0.0
+## Вспышки удара: [позиция, возраст].
+var _hits: Array = []
 
 var ball := Vector2.ZERO
 var velocity := Vector2.ZERO
@@ -43,6 +54,13 @@ func _ready() -> void:
 	_query.collide_with_areas = false
 
 
+static func _art(name: String) -> Texture2D:
+	if not _tex.has(name):
+		var path := ART_DIR + name + ".png"
+		_tex[name] = load(path) as Texture2D if ResourceLoader.exists(path) else null
+	return _tex[name]
+
+
 func reset(at: Vector2) -> void:
 	anchor = at
 	ball = at + Vector2(length * 0.8, 0)
@@ -55,6 +73,10 @@ func reset(at: Vector2) -> void:
 func tick(delta: float, at: Vector2, control: Vector2, auto: bool, weapon: WeaponData) -> void:
 	if not _ready_ball:
 		reset(at)
+	_time += delta
+	for h: Array in _hits:
+		h[1] = float(h[1]) + delta
+	_hits = _hits.filter(func(h: Array) -> bool: return float(h[1]) < 4.0 / HIT_FPS)
 	anchor = at
 	length = clampf(weapon.melee_reach * 0.85, 90.0, 220.0)
 	var rel := ball - anchor
@@ -114,10 +136,56 @@ func _hit_enemies(delta: float, weapon: WeaponData) -> void:
 	if count > 0:
 		# Отдача: шар теряет часть скорости о толпу.
 		velocity *= 0.82
+		if _hits.size() < 4:
+			_hits.append([ball, 0.0])
 		ball_hit.emit(ball, count, mult > 1.5)
 
 
 func _draw() -> void:
+	var link := _art("flail_link")
+	var ball_tex := _art("flail_ball")
+	var fast := _art("flail_ball_fast")
+	var hit := _art("flail_hit")
+	if link == null or ball_tex == null:
+		_draw_placeholder()
+		return
+	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	# Цепь: звенья вдоль цепи с лёгким провисом, каждое повёрнуто по направлению цепи.
+	var rel := ball - anchor
+	var slack := maxf(length - rel.length(), 0.0) * 0.5
+	var sag := rel.orthogonal().normalized() * slack
+	var prev := anchor
+	for i in LINKS:
+		var t := (float(i) + 0.5) / LINKS
+		var p := anchor.lerp(ball, t) + sag * sin(t * PI)
+		var dir := (p - prev).angle() if i > 0 else rel.angle()
+		draw_set_transform(p, dir + (PI * 0.5 if i % 2 == 1 else 0.0), Vector2.ONE * (LINK_DRAW / link.get_width()))
+		draw_texture(link, -link.get_size() * 0.5)
+		prev = p
+	draw_set_transform(Vector2.ZERO)
+	# Шар: разогнанный — кадры со следом движения, повёрнутые по скорости; иначе — обычный.
+	var speed := velocity.length()
+	if fast != null and speed > REF_SPEED * 0.6:
+		var cell := fast.get_height()
+		var frame := int(_time * FAST_FPS) % 4
+		draw_set_transform(ball, velocity.angle(), Vector2.ONE * (BALL_DRAW / cell))
+		draw_texture_rect_region(fast, Rect2(-cell * 0.5, -cell * 0.5, cell, cell), Rect2(frame * cell, 0, cell, cell))
+	else:
+		draw_set_transform(ball, _time * speed * 0.01, Vector2.ONE * (BALL_DRAW / ball_tex.get_width()))
+		draw_texture(ball_tex, -ball_tex.get_size() * 0.5)
+	draw_set_transform(Vector2.ZERO)
+	# Вспышки удара.
+	if hit != null:
+		var cell := hit.get_height()
+		for h: Array in _hits:
+			var frame := mini(int(float(h[1]) * HIT_FPS), 3)
+			draw_set_transform(h[0], 0.0, Vector2.ONE * (HIT_DRAW / cell))
+			draw_texture_rect_region(hit, Rect2(-cell * 0.5, -cell * 0.5, cell, cell), Rect2(frame * cell, 0, cell, cell))
+		draw_set_transform(Vector2.ZERO)
+
+
+## Запасной рисунок кодом (если файлов арта нет).
+func _draw_placeholder() -> void:
 	var dark := Color("#120d1c")
 	# Цепь: звенья от руки к шару с лёгким провисом, если цепь не натянута.
 	var rel := ball - anchor

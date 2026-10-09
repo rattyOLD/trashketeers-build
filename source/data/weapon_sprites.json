@@ -646,6 +646,24 @@
     49.0
    ],
    "length": 92
+  },
+  {
+   "icon": "melee_flail",
+   "texture": "res://assets/weapons/flail/flail_handle.png",
+   "menu": "res://assets/weapons/flail/flail_icon.png",
+   "size": [
+    150,
+    60
+   ],
+   "grip": [
+    30.0,
+    30.0
+   ],
+   "muzzle": [
+    141.0,
+    29.0
+   ],
+   "length": 64
   }
  ]
 }
