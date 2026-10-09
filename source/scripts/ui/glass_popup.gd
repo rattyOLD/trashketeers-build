@@ -111,15 +111,18 @@ func _init(title_text: String) -> void:
 	if UiStyle.KIT_ON and ResourceLoader.exists(UiStyle.KIT_DIR + "header_plate.png"):
 		var plate := StyleBoxTexture.new()
 		plate.texture = load(UiStyle.KIT_DIR + "header_plate.png") as Texture2D
+		# Табличка обрезана по рисунку: сверху рельс 16 px, тёмная полоса, снизу рельс 10 px. Текст — строго
+		# в тёмной полосе: поля больше рельсов, по бокам — шире болтов, шрифт ужимается под ширину.
 		plate.set_texture_margin(SIDE_LEFT, 34.0)
 		plate.set_texture_margin(SIDE_RIGHT, 34.0)
-		plate.set_texture_margin(SIDE_TOP, 14.0)
-		plate.set_texture_margin(SIDE_BOTTOM, 14.0)
-		# Текст по центру таблички, с отступом от болтов с обеих сторон.
+		plate.set_texture_margin(SIDE_TOP, 16.0)
+		plate.set_texture_margin(SIDE_BOTTOM, 10.0)
 		plate.set_content_margin(SIDE_LEFT, 56.0)
 		plate.set_content_margin(SIDE_RIGHT, 56.0)
-		plate.set_content_margin(SIDE_TOP, 6.0)
-		plate.set_content_margin(SIDE_BOTTOM, 8.0)
+		plate.set_content_margin(SIDE_TOP, 18.0)
+		plate.set_content_margin(SIDE_BOTTOM, 12.0)
+		_title.add_theme_font_size_override("font_size", 26)
+		_title.add_theme_constant_override("outline_size", 7)
 		_title.add_theme_stylebox_override("normal", plate)
 		_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	header.add_child(_title)

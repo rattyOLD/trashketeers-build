@@ -154,7 +154,34 @@ static func button(text: String, color: Color, font_size: int = 30, min_size: Ve
 	b.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 	b.pressed.connect(func() -> void: SoundManager.play(&"ui_click"))
 	press_feedback(b)
+	# Надпись всегда внутри плашки: при смене размера или текста шрифт ужимается под ширину без болтов и иконки.
+	var fit := func() -> void: _fit_inside(b, font_size)
+	b.resized.connect(fit)
+	b.ready.connect(fit)
 	return b
+
+
+static func _fit_inside(b: Button, base: int) -> void:
+	if not is_instance_valid(b) or b.size.x < 8.0 or b.text.is_empty() or b.autowrap_mode != TextServer.AUTOWRAP_OFF:
+		return
+	var sb := b.get_theme_stylebox("normal")
+	# Ровно то место, что Godot отдаёт тексту: без запаса, иначе кнопка, подстроенная под текст, ужималась по кругу.
+	var avail := b.size.x - (sb.get_margin(SIDE_LEFT) + sb.get_margin(SIDE_RIGHT) if sb != null else 0.0)
+	if b.icon != null:
+		var icon_w := float(b.get_theme_constant("icon_max_width")) if b.get_theme_constant("icon_max_width") > 0 else float(b.icon.get_width())
+		avail -= icon_w + float(b.get_theme_constant("h_separation"))
+	var font := b.get_theme_font("font")
+	var size := base
+	var widest := 0.0
+	for line in b.text.split("\n"):
+		widest = maxf(widest, font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x)
+	while size > 11 and widest > avail + 0.5:
+		size -= 1
+		widest = 0.0
+		for line in b.text.split("\n"):
+			widest = maxf(widest, font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x)
+	if size != b.get_theme_font_size("font_size"):
+		b.add_theme_font_size_override("font_size", size)
 
 
 ## Кнопка «прожимается»: под пальцем чуть утапливается, отпустил — пружинит обратно, плюс короткий отклик вибрацией.

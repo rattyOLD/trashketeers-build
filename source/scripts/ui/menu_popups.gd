@@ -487,23 +487,23 @@ class Shop:
 		_info(row, character["title"], str(character.get("description", "")), extra)
 		var action: Button
 		if bool(character.get("coming_soon", false)):
-			action = UiStyle.button("Скоро", UiStyle.PANEL, 22, Vector2(124, 64))
+			action = UiStyle.button("Скоро", UiStyle.PANEL, 22, Vector2(156, 64))
 			action.disabled = true
 		elif selected:
-			action = UiStyle.button("Выбран", UiStyle.PANEL, 22, Vector2(124, 64))
+			action = UiStyle.button("Выбран", UiStyle.PANEL, 22, Vector2(156, 64))
 			action.disabled = true
 		elif SaveService.hero_fallen(id):
-			action = UiStyle.button("Погиб (оп. %s)" % SaveService.hero_fallen_mission(id).trim_prefix("m"), UiStyle.PANEL, 18, Vector2(124, 64))
+			action = UiStyle.button("Погиб (оп. %s)" % SaveService.hero_fallen_mission(id).trim_prefix("m"), UiStyle.PANEL, 18, Vector2(156, 64))
 			action.disabled = true
 		elif SaveService.owns_character(id):
-			action = UiStyle.button("Выбрать", UiStyle.NEON.darkened(0.3), 22, Vector2(124, 64))
+			action = UiStyle.button("Выбрать", UiStyle.NEON.darkened(0.3), 22, Vector2(156, 64))
 			action.pressed.connect(func() -> void:
 				SaveService.select_character(id)
 				SoundManager.play(&"ui_confirm")
 				skin_changed.emit()
 				_refresh())
 		else:
-			action = UiStyle.button(_price_text(int(character["price"]), character["currency"]), UiStyle.HOT, 20, Vector2(124, 64))
+			action = UiStyle.button(_price_text(int(character["price"]), character["currency"]), UiStyle.HOT, 20, Vector2(156, 64))
 			action.disabled = int(SaveService.data[character["currency"]]) < int(character["price"])
 			action.pressed.connect(func() -> void:
 				if SaveService.buy_character(id):
