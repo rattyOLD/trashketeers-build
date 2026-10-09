@@ -320,16 +320,7 @@ class Shop:
 		_balance.text = "%s · %s" % [SaveService.format_coins(SaveService.get_coins()), Economy.format_gems(SaveService.get_gems())]
 		MenuPopups.clear(_list)
 		if _skins_mode:
-			var soon := UiStyle.label("СКОРО", 64, UiStyle.GOLD, 10)
-			soon.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-			soon.custom_minimum_size = Vector2(520, 160)
-			soon.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-			_list.add_child(soon)
-			var note := UiStyle.label("Наряды и скины для героев вернутся в новом арте.", 22, UiStyle.TEXT_DIM, 4)
-			note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-			note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			note.custom_minimum_size = Vector2(520, 0)
-			_list.add_child(note)
+			_fill_cosmetics()
 			return
 		if not _skins_mode:
 			for character in CharacterDB.all():
@@ -349,6 +340,74 @@ class Shop:
 			var skin: Dictionary = SaveService.SKINS[skin_id]
 			if SearchBar.matches(_query, "%s %s" % [skin["title"], skin["description"]]):
 				grid.add_child(_make_skin_card(skin_id))
+
+	## Скины рывка и трассеры (Cosmetics «dash»/«shot»): надеть/снять, невыбитые — «из сундуков»,
+	## раз в сутки — случайный скин за рекламу.
+	func _fill_cosmetics() -> void:
+		var hint := UiStyle.label("Скины рывка и трассеры пуль выпадают из сундуков. Надетый скин работает в каждом бою.", 18, UiStyle.TEXT_DIM, 4)
+		hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		hint.custom_minimum_size = Vector2(520, 0)
+		_list.add_child(hint)
+		var ad_ready := SaveService.today() != int(SaveService.data.get("skin_ad_day", -1)) and not Cosmetics.roll_ad_skin().is_empty()
+		var ad := UiStyle.button("СЛУЧАЙНЫЙ СКИН ЗА РЕКЛАМУ" if ad_ready else "СКИН ЗА РЕКЛАМУ — ЗАВТРА", Color("#2fae5f") if ad_ready else UiStyle.PANEL, 20, Vector2(0, 58))
+		ad.disabled = not ad_ready
+		ad.pressed.connect(func() -> void:
+			Platform.show_rewarded_ad(func(ok: bool) -> void:
+				if not ok:
+					return
+				var key := Cosmetics.roll_ad_skin()
+				if key.is_empty():
+					return
+				SaveService.data["skin_ad_day"] = SaveService.today()
+				Cosmetics.give(key)
+				SaveService.save_data()
+				SoundManager.play(&"star_dust")
+				_refresh()))
+		_list.add_child(ad)
+		for kind in Cosmetics.WEARABLE:
+			_list.add_child(_section("РЫВОК" if kind == "dash" else "ТРАССЕРЫ"))
+			var grid := GridContainer.new()
+			grid.columns = 3 if Orient.portrait else 5
+			grid.add_theme_constant_override("h_separation", 10)
+			grid.add_theme_constant_override("v_separation", 10)
+			_list.add_child(grid)
+			grid.add_child(_cosmetic_card("", kind))
+			for key in Cosmetics.keys_of(kind):
+				grid.add_child(_cosmetic_card(key, kind))
+
+	func _cosmetic_card(key: String, kind: String) -> Control:
+		var worn := Cosmetics.worn(kind) == key
+		var owned := key.is_empty() or Cosmetics.owns(key)
+		var rarity_color := Economy.rarity_color(Cosmetics.rarity_of(key)) if not key.is_empty() else UiStyle.TEXT_DIM
+		var panel := PanelContainer.new()
+		panel.custom_minimum_size = Vector2(168, 0)
+		panel.add_theme_stylebox_override("panel", UiStyle.box(UiStyle.PANEL_LIGHT, UiStyle.GOLD if worn else rarity_color.darkened(0.2 if owned else 0.5), 4 if worn else 3, 16))
+		var col := VBoxContainer.new()
+		col.add_theme_constant_override("separation", 4)
+		panel.add_child(col)
+		if key.is_empty():
+			var none := UiStyle.label("—", 40, UiStyle.TEXT_DIM, 4)
+			none.custom_minimum_size = Vector2(0, 84)
+			none.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+			col.add_child(none)
+		else:
+			var art := BattlePassPopup.CosmeticArt.new()
+			art.key = key
+			art.custom_minimum_size = Vector2(84, 84)
+			art.modulate = Color.WHITE if owned else Color(1, 1, 1, 0.35)
+			col.add_child(art)
+		var title := UiStyle.label("Стандарт" if key.is_empty() else Cosmetics.title_of(key).replace("Рывок ", "").replace("Трассер ", ""), 17, UiStyle.TEXT if owned else UiStyle.TEXT_DIM, 4)
+		title.clip_text = true
+		col.add_child(title)
+		if not key.is_empty():
+			col.add_child(UiStyle.label(Economy.rarity_name(Cosmetics.rarity_of(key)), 14, rarity_color, 3))
+		var button := UiStyle.button("НАДЕТ" if worn else ("НАДЕТЬ" if owned else "В СУНДУКАХ"), UiStyle.GOLD.darkened(0.3) if worn else (UiStyle.NEON.darkened(0.4) if owned else UiStyle.PANEL), 16, Vector2(0, 44))
+		button.disabled = worn or not owned
+		button.pressed.connect(func() -> void:
+			Cosmetics.wear(key, kind)
+			_refresh())
+		col.add_child(button)
+		return panel
 
 	func _section(title: String) -> Control:
 		var label := UiStyle.label(title, 26, UiStyle.NEON, 6)

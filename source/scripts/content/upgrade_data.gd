@@ -16,13 +16,15 @@ const DEFAULTS := {
 	"weight": 1.0,
 	"close_only": false,
 	"rail_only": false,
+	"phase2": false,
+	"style": "",
 }
 
 const RARITY_RANK := {"common": 0, "rare": 1, "epic": 2}
 const RARITY_WEIGHT := [60.0, 28.0, 9.0]
 const RARITY_COLORS := [Color("#b9c2d9"), Color("#4dc3ff"), Color("#d05cff")]
 const RARITY_TITLES := ["ОБЫЧНОЕ", "РЕДКОЕ", "ЭПИЧЕСКОЕ"]
-const CATEGORY_TITLES := {"weapon": "ОРУЖИЕ", "hero": "ПЕРСОНАЖ", "utility": "УТИЛИТА", "evolution": "ЭВОЛЮЦИЯ", "close": "БЛИЖНИЙ БОЙ", "endless": "ХЛАМ", "rail": "РЕЛЬСОТРОН", "dash": "РЫВОК", "dash_element": "СТИХИЯ РЫВКА"}
+const CATEGORY_TITLES := {"weapon": "ОРУЖИЕ", "hero": "ПЕРСОНАЖ", "utility": "УТИЛИТА", "evolution": "ЭВОЛЮЦИЯ", "close": "БЛИЖНИЙ БОЙ", "endless": "ХЛАМ", "rail": "РЕЛЬСОТРОН", "dash": "РЫВОК", "dash_element": "СТИХИЯ РЫВКА", "phase2": "ФАЗА 2"}
 
 var id: StringName
 var title: String
@@ -37,6 +39,10 @@ var requires: Array[StringName] = []
 var weight: float
 var close_only: bool
 var rail_only: bool
+## Карточка второй фазы: в выдаче только после первого босса Выживания.
+var phase2: bool
+## "melee" — только при ближнем оружии в слотах, "ranged" — только при стрелковом; "" — всем.
+var style: String
 
 
 static func from_dict(raw: Dictionary) -> UpgradeData:
@@ -64,6 +70,8 @@ static func from_dict(raw: Dictionary) -> UpgradeData:
 	u.weight = maxf(float(d["weight"]), 0.0)
 	u.close_only = bool(d["close_only"])
 	u.rail_only = bool(d["rail_only"])
+	u.phase2 = bool(d["phase2"])
+	u.style = String(d["style"])
 	for req in d["requires"]:
 		u.requires.append(StringName(req))
 	return u

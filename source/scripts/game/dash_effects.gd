@@ -45,6 +45,9 @@ func setup(player: Player, stats: RunStats, fx: FxManager) -> void:
 		_seen.clear()
 		_element_used = false
 		_ghost_step = 0
+		_skin = Cosmetics.dash_colors()
+		if _fx != null and _skin[1].a > 0.0:
+			_fx.burst(_player.global_position + Vector2(0, -20), _skin[0], 10, 200.0, 3.6)
 		if _fx != null:
 			_fx.dust(_player.global_position + Vector2(0, 8), 5, 40.0))
 	_player.dash_moved.connect(_on_moved)
@@ -53,6 +56,8 @@ func setup(player: Player, stats: RunStats, fx: FxManager) -> void:
 
 ## Послеобразы рывка: голубые полупрозрачные копии героя по пути (каждый второй кадр — шлейф без каши).
 var _ghost_step := 0
+## Скин рывка (Cosmetics): [цвет послеобраза, цвет искр — прозрачный у стандартного].
+var _skin: Array[Color] = [Color(0.45, 0.85, 1.0), Color(0, 0, 0, 0)]
 
 
 func _leave_ghost(from: Vector2, _to: Vector2) -> void:
@@ -60,7 +65,9 @@ func _leave_ghost(from: Vector2, _to: Vector2) -> void:
 	if _ghost_step % 2 == 0 or _fx == null or _player.visual == null:
 		return
 	var visual := _player.visual
-	_fx.ghost(visual.get_ghost_texture(), from + visual.get_ghost_offset(), visual.get_ghost_scale(), Color(0.45, 0.85, 1.0))
+	_fx.ghost(visual.get_ghost_texture(), from + visual.get_ghost_offset(), visual.get_ghost_scale(), _skin[0])
+	if _skin[1].a > 0.0 and _ghost_step % 4 == 1:
+		_fx.burst(from + Vector2(0, -20), _skin[1], 3, 90.0, 3.0)
 
 
 func _on_moved(from: Vector2, to: Vector2) -> void:

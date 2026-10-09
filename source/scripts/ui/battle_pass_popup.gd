@@ -481,7 +481,28 @@ class CosmeticArt:
 		var c := size * 0.5
 		var r := minf(size.x, size.y) * 0.5 - 2.0
 		var rarity := Economy.rarity_color(Cosmetics.rarity_of(key))
+		var icon := Cosmetics.icon_of(key)
+		if icon != null:
+			var side := minf(size.x, size.y)
+			draw_texture_rect(icon, Rect2(c - Vector2(side, side) * 0.5, Vector2(side, side)), false)
+			return
 		match Cosmetics.kind_of(key):
+			"dash":
+				# Шлейф рывка: три тающих силуэта и искры цвета скина.
+				var tint := Cosmetics.color_of(key)
+				for i in 3:
+					draw_circle(c + Vector2(-r * 0.55 + i * r * 0.45, 0), r * (0.28 + 0.06 * i), Color(tint, 0.25 + 0.25 * i))
+				var bits := Color(str((Cosmetics.CATALOG.get(key, {}) as Dictionary).get("bits", "#ffffff")))
+				for i in 5:
+					draw_circle(c + Vector2.from_angle(i * 1.3) * r * 0.75, 2.5, bits)
+			"shot":
+				# Трассер: капсула с белым ядром и ореолом.
+				var tint := Cosmetics.color_of(key) if not bool((Cosmetics.CATALOG.get(key, {}) as Dictionary).get("rainbow", false)) else Color("#ff66cc")
+				var a := c - Vector2(r * 0.8, 0)
+				var b := c + Vector2(r * 0.8, 0)
+				draw_line(a, b, Color(tint, 0.25), r * 0.5, true)
+				draw_line(a + Vector2(r * 0.3, 0), b, tint, r * 0.28, true)
+				draw_line(c, b - Vector2(r * 0.1, 0), Color.WHITE, r * 0.1, true)
 			"frame":
 				var tint := Cosmetics.color_of(key)
 				draw_circle(c, r, Color("#4f4c47"))

@@ -64,6 +64,7 @@ var melee: MeleeFighter
 func _init() -> void:
 	auto_mode = force_auto
 	melee = MeleeFighter.new()
+	melee.swing_started.connect(_on_swing_for_wave)
 	add_child(melee)
 
 
@@ -199,6 +200,44 @@ func _physics_process(delta: float) -> void:
 	scale *= _trait_scale(target_distance)
 	BulletPool.fire(weapon, spawn, direction, Bullet.Team.PLAYER, scale)
 	fired.emit(weapon, muzzle, direction)
+
+
+## Фаза 2, «Летящий слайс»: каждый 3-й взмах выпускает серп (рисунок дуги оружия) — 60% урона за ранг,
+## пробивает толпу, летит на ~3 дальности удара.
+var _wave_count := 0
+var _wave_weapon: WeaponData
+var _wave_source: WeaponData
+
+
+func _on_swing_for_wave(w: WeaponData, origin: Vector2, direction: Vector2, _combo: int, _heavy: bool, _side: float) -> void:
+	var rank := _stats.get_stat(&"melee_wave") if _stats != null else 0.0
+	if rank <= 0.0:
+		return
+	_wave_count += 1
+	if _wave_count % 3 != 0:
+		return
+	if _wave_source != w or _wave_weapon == null:
+		_wave_source = w
+		_wave_weapon = w.duplicate_data()
+		_wave_weapon.bullet_texture = WeaponVfx.slash_for(w)
+		_wave_weapon.bullet_speed = 640.0
+		_wave_weapon.bullet_radius = 30.0
+		_wave_weapon.bullet_lifetime = 1.2
+		_wave_weapon.piercing = true
+		_wave_weapon.ricochet_count = 0
+		_wave_weapon.projectiles_per_shot = 1
+		_wave_weapon.explosion_radius = 0.0
+		_wave_weapon.trail_points = 0
+		_wave_weapon.bullet_modulate = Color.WHITE
+		_wave_weapon.fire_sound = &""
+		var tex_w := float(_wave_weapon.bullet_texture.get_width()) if _wave_weapon.bullet_texture != null else 160.0
+		# Рисунок дуги смотрит «назад» (-x): отражаем, чтобы серп летел выпуклостью вперёд.
+		_wave_weapon.sprite_scale = Vector2(-1.0, 1.0) * (90.0 / maxf(tex_w, 1.0))
+	_wave_weapon.damage = w.damage * 0.6 * rank
+	_wave_weapon.max_distance = w.melee_reach * 3.0
+	var bullet := BulletPool.spawn(_wave_weapon, origin + direction * 30.0, direction, Bullet.Team.PLAYER)
+	if bullet != null:
+		bullet.damage_scale = 1.0
 
 
 func _melee_step(delta: float) -> void:

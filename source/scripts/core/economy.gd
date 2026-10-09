@@ -59,6 +59,7 @@ const CHESTS := {
 	},
 }
 const CHEST_ORDER := ["common", "rare", "epic"]
+const COSMETIC_RARITIES := {"common": ["common", "common", "rare"], "rare": ["rare", "rare", "epic"], "epic": ["epic", "legendary"]}
 ## «Сундук дня»: один из трёх со скидкой (меняется каждые сутки), и бесплатный за рекламу раз в несколько часов.
 const DAILY_DISCOUNT := 0.3
 const AD_CHEST_COOLDOWN := 4 * 3600
@@ -211,6 +212,16 @@ static func featured(chest_id: String) -> Array[String]:
 				key = alt[rng.randi() % alt.size()]
 		used[key] = true
 		out.append(key)
+	# Косметика: один скин рывка или трассер на витрине (редкость по сундуку, невыбитый — в приоритете).
+	var cosm_rarities: Array = COSMETIC_RARITIES.get(chest_id, ["common"])
+	var cosm: Array[String] = []
+	for kind in Cosmetics.WEARABLE:
+		cosm.append_array(Cosmetics.keys_of(kind, str(cosm_rarities[rng.randi() % cosm_rarities.size()])))
+	var fresh := cosm.filter(func(k: String) -> bool: return not Cosmetics.owns(k))
+	if not fresh.is_empty():
+		cosm.assign(fresh)
+	if not cosm.is_empty():
+		out.append(cosm[rng.randi() % cosm.size()])
 	return out
 
 

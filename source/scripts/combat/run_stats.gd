@@ -45,6 +45,7 @@ const STAT_KEYS: Array[StringName] = [
 	&"rail_overdrive",
 	&"rail_boom",
 	&"rail_rate",
+	&"melee_wave",
 ]
 
 ## Мгновенные эффекты: применяются игрой в момент выбора и не накапливаются.
@@ -58,6 +59,10 @@ var melee_kills := 0
 var ranged_kills := 0
 ## Есть ли в слотах оружие ближнего боя (до первых убийств выдача ориентируется на него).
 var melee_context := false
+## Есть ли в слотах стрелковое оружие.
+var ranged_context := true
+## Фаза забега: 2 — после первого босса Выживания (открываются карточки «ФАЗА 2», враги злее).
+var phase := 1
 var _values: Dictionary = {}
 var _stacks: Dictionary = {}
 
@@ -146,6 +151,12 @@ func is_available(upgrade: UpgradeData) -> bool:
 	if upgrade.close_only and not close_context:
 		return false
 	if upgrade.rail_only and not rail_context:
+		return false
+	if upgrade.phase2 and phase < 2:
+		return false
+	if upgrade.style == "melee" and not melee_context:
+		return false
+	if upgrade.style == "ranged" and not ranged_context:
 		return false
 	for req in upgrade.requires:
 		if not has_upgrade(req):

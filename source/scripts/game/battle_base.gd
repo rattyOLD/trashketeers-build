@@ -181,6 +181,7 @@ func _setup_common(camera_bounds: Rect2, currency_icon: Texture2D) -> void:
 	add_child(dash_effects)
 	dash_effects.setup(player, stats, fx)
 	dash_effects.katana_rage.connect(_on_katana_rage)
+	BulletPool.set_player_skin(Cosmetics.shot_color(), Cosmetics.shot_rainbow())
 	hero_skills = HeroSkills.new()
 	add_child(hero_skills)
 	hero_skills.setup(SaveService.get_character_id(), player, fx, stats, add_shake)

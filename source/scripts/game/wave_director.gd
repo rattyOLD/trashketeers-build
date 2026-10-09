@@ -75,6 +75,9 @@ var _boss_dead_time := -1.0
 var run_stats: RunStats
 var adapt := 1.0
 var _hp_mult := 1.0
+## Фаза 2 Выживания (после первого босса): множители врагов поверх волны.
+var phase_hp := 1.0
+var phase_damage := 1.0
 var _dmg_mult := 1.0
 var _interval := 1.0
 var _max_alive := 10
@@ -240,6 +243,8 @@ func _start_wave(number: int) -> void:
 	if not OS.get_environment("TRK_DEBUG").is_empty():
 		print("ADAPT wave %d power %.1f x%.2f" % [number, run_stats.power() if run_stats != null else 0.0, adapt])
 	_dmg_mult *= 1.0 + (adapt - 1.0) * 0.5
+	_hp_mult *= phase_hp
+	_dmg_mult *= phase_damage
 	var count_adapt := 1.0 + (adapt - 1.0) * 0.35
 	var early_count := float(d.get("early_count", 1.0)) if loop == 0 and chapter_wave() <= int(d.get("early_waves", 0)) else 1.0
 	remaining_to_spawn = int(ceil(float(_wave["count"]) * pow(float(d["loop_count"]), loop) * float(_chapter.get("count_mult", 1.0)) * count_adapt * early_count * float(d.get("count_mult", 1.0))))

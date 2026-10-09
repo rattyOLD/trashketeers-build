@@ -1068,6 +1068,22 @@ func _show_looted(boss_id: String) -> void:
 	tween.tween_callback(layer.queue_free)
 
 
+## Контрольная точка (первый босс Выживания): оружие «раскрывается» — в выдаче карточки «ФАЗА 2»
+## под твой стиль (летящий слайс, третий ствол…), а враги дальше крепче и злее.
+const PHASE_TWO_HP := 1.25
+const PHASE_TWO_DAMAGE := 1.12
+
+
+func _start_phase_two() -> void:
+	stats.phase = 2
+	director.phase_hp = PHASE_TWO_HP
+	director.phase_damage = PHASE_TWO_DAMAGE
+	get_tree().create_timer(3.0, false).timeout.connect(func() -> void:
+		if not finished:
+			hud.show_banner("ФАЗА 2: ОРУЖИЕ РАСКРЫВАЕТСЯ", Color("#ff7a3d"), 2.6)
+			hud.toast("ФАЗА 2", "Новые карточки под твоё оружие. Враги крепче и злее.", Color("#ff7a3d")))
+
+
 func _on_boss_killed(boss: Enemy, at: Vector2) -> void:
 	# Босс пал — возвращается музыка главы.
 	get_tree().create_timer(2.5, false).timeout.connect(func() -> void:
@@ -1087,6 +1103,8 @@ func _on_boss_killed(boss: Enemy, at: Vector2) -> void:
 		story.on_king_killed()
 	bosses_killed += 1
 	SaveService.add_boss_kill()
+	if story == null and stats.phase < 2:
+		_start_phase_two()
 	add_shake(1.0)
 	hitstop(BOSS_HITSTOP)
 	atmosphere.flash(Color.WHITE, 0.6, 0.6)
@@ -1260,9 +1278,12 @@ func _refresh_slots() -> void:
 	stats.close_context = close
 	stats.rail_context = rail
 	var melee := false
+	var ranged := false
 	for i in wc.slot_count:
 		melee = melee or (wc.slots[i] != null and wc.slots[i].is_melee())
+		ranged = ranged or (wc.slots[i] != null and not wc.slots[i].is_melee())
 	stats.melee_context = melee
+	stats.ranged_context = ranged
 	hud.set_slots(wc.slots.slice(0, wc.slot_count), wc.active_slot, wc.slot_count)
 
 

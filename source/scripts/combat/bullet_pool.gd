@@ -35,6 +35,10 @@ var _blast_queue: Array = []
 var _exhausted_warned := false
 ## Окраска всех вражеских снарядов (фаза ярости Сириуса). Альфа 0 — окраски нет.
 var _enemy_tint := Color(0, 0, 0, 0)
+## Трассер-скин игрока (Cosmetics «shot»): красит только пули-трассеры огнестрела, не огонь и не жидкости.
+var _player_tint := Color(0, 0, 0, 0)
+var _player_rainbow := false
+var _rainbow_hue := 0.0
 ## Кого догоняют самонаводящиеся вражеские снаряды (фишки Крупье); ставит режим боя.
 var homing_target: Node2D
 var _blast_query: PhysicsShapeQueryParameters2D
@@ -73,7 +77,18 @@ func spawn(weapon: WeaponData, origin: Vector2, direction: Vector2, team: Bullet
 	bullet.activate(weapon, origin, direction, team, _lod)
 	if team == Bullet.Team.ENEMY and _enemy_tint.a > 0.0:
 		bullet.apply_tint(_enemy_tint)
+	elif team == Bullet.Team.PLAYER and _player_tint.a > 0.0 and weapon.bullet_texture == ConfigLoader.get_tracer_texture():
+		if _player_rainbow:
+			_rainbow_hue = fposmod(_rainbow_hue + 0.07, 1.0)
+			bullet.apply_tint(Color.from_hsv(_rainbow_hue, 0.75, 1.0))
+		else:
+			bullet.apply_tint(_player_tint)
 	return bullet
+
+
+func set_player_skin(color: Color, rainbow: bool) -> void:
+	_player_tint = color
+	_player_rainbow = rainbow
 
 
 ## Перекрашивает все летящие и будущие вражеские снаряды.
