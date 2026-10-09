@@ -47,6 +47,11 @@ const STAT_KEYS: Array[StringName] = [
 	&"rail_rate",
 	&"melee_wave",
 	&"luck",
+	&"melee_reach",
+	&"melee_vamp",
+	&"melee_dash_refund",
+	&"melee_rush",
+	&"melee_speed",
 ]
 
 ## Мгновенные эффекты: применяются игрой в момент выбора и не накапливаются.
@@ -80,7 +85,7 @@ const CAPS := {
 	&"damage_mult": 3.0, &"fire_rate_mult": 1.5, &"extra_projectiles": 7.0, &"extra_ricochets": 6.0, &"range_mult": 1.0,
 	&"crit_chance_add": 0.6, &"move_speed_mult": 0.8, &"max_hp_add": 300.0, &"damage_resist": 0.5, &"regen": 4.0,
 	&"vampirism": 0.005, &"kill_heal": 3.0, &"magnet_mult": 3.0, &"close_damage": 1.5, &"rail_rate": 1.0,
-	&"poison_power": 2.0, &"status_power": 1.5, &"blast_power": 2.0, &"double_drop": 0.5, &"drone_count": 4.0, &"luck": 1.0,
+	&"poison_power": 2.0, &"status_power": 1.5, &"blast_power": 2.0, &"double_drop": 0.5, &"drone_count": 4.0, &"luck": 1.0, &"melee_reach": 0.6, &"melee_vamp": 0.06, &"melee_dash_refund": 1.2, &"melee_rush": 5.0, &"melee_speed": 0.8,
 }
 const DASH_CAPS := {&"dodge_damage": 3.0, &"dodge_blast": 2.0, &"dodge_poison": 2.0, &"dodge_shock": 2.0, &"dodge_cooldown": 1.5, &"dodge_distance": 0.2}
 const KNEE := 0.7
@@ -169,7 +174,8 @@ func is_available(upgrade: UpgradeData) -> bool:
 const PROJECTILE_ONLY: Array[StringName] = [&"extra_projectiles", &"extra_ricochets", &"piercing"]
 ## Карточки, что раскрывают ближний бой: урон, скорость ударов, криты, дальность взмаха, рывки, бег, лечение.
 const MELEE_FRIENDLY: Array[StringName] = [&"damage_mult", &"fire_rate_mult", &"crit_chance_add", &"range_mult",
-	&"move_speed_mult", &"dodge_damage", &"dodge_cooldown", &"dodge_distance", &"bleed_chance", &"vampirism", &"kill_heal"]
+	&"move_speed_mult", &"dodge_damage", &"dodge_cooldown", &"dodge_distance", &"bleed_chance", &"vampirism", &"kill_heal",
+	&"melee_reach", &"melee_vamp", &"melee_dash_refund", &"melee_rush", &"melee_speed"]
 
 
 func note_kill(melee: bool) -> void:

@@ -859,6 +859,66 @@
       "color": "#7dff9a",
       "category": "utility",
       "rarity": "common"
+    },
+    {
+      "upgrade_id": "melee_long_grip",
+      "title": "Длинная рукоять",
+      "description": "+15% к дальности удара ближнего оружия",
+      "stat": "melee_reach",
+      "value": 0.15,
+      "max_stacks": 4,
+      "color": "#ff7a3d",
+      "category": "melee",
+      "rarity": "common",
+      "style": "melee"
+    },
+    {
+      "upgrade_id": "melee_bloodsucker",
+      "title": "Кровопийца",
+      "description": "Удары ближнего оружия лечат на 1.5% нанесённого урона",
+      "stat": "melee_vamp",
+      "value": 0.015,
+      "max_stacks": 4,
+      "color": "#ff4d6d",
+      "category": "melee",
+      "rarity": "rare",
+      "style": "melee"
+    },
+    {
+      "upgrade_id": "melee_dash_refund",
+      "title": "Рывок за голову",
+      "description": "Убийство ближним оружием сокращает откат рывка на 0.3 с",
+      "stat": "melee_dash_refund",
+      "value": 0.3,
+      "max_stacks": 4,
+      "color": "#6adcff",
+      "category": "melee",
+      "rarity": "rare",
+      "style": "melee"
+    },
+    {
+      "upgrade_id": "melee_rush",
+      "title": "Кураж",
+      "description": "Убийство ближним оружием: +5% скорости бега на 3 с, копится до 5 раз",
+      "stat": "melee_rush",
+      "value": 1,
+      "max_stacks": 5,
+      "color": "#7dff9a",
+      "category": "melee",
+      "rarity": "common",
+      "style": "melee"
+    },
+    {
+      "upgrade_id": "melee_fast_swing",
+      "title": "Лёгкая рука",
+      "description": "+15% к скорости ударов ближнего оружия",
+      "stat": "melee_speed",
+      "value": 0.15,
+      "max_stacks": 4,
+      "color": "#ffb02e",
+      "category": "melee",
+      "rarity": "common",
+      "style": "melee"
     }
   ]
 }

@@ -12,6 +12,8 @@ const CUT_RADIUS := Player.RADIUS + 26.0
 
 ## Сколько врагов срезано насмерть этим рывком (катана).
 signal katana_rage(kills: int)
+## Удар молота в конце рывка (Game трясёт камеру).
+signal hammer_slammed(at: Vector2)
 
 var _player: Player
 var _stats: RunStats
@@ -39,6 +41,7 @@ func setup(player: Player, stats: RunStats, fx: FxManager) -> void:
 	_cut_query.collision_mask = PhysicsLayers.ENEMY
 	_cut_query.collide_with_areas = false
 	_player.dash_moved.connect(_katana_cut)
+	_player.dash_ended.connect(_hammer_slam)
 	_player.dash_started.connect(func() -> void:
 		_cut_seen.clear()
 		_cut_kills = 0
@@ -108,9 +111,33 @@ func _on_moved(from: Vector2, to: Vector2) -> void:
 			_shock(at, id, 12.0 + shock * 6.0)
 
 
+## Рывок с оружием ближнего боя режет по-своему (тестеры): топор/меч — один сильный разрез по всем на пути,
+## катана/кинжал — серия мелких разрезов, молот/щит — удар по площади в конце рывка. Катана «Срез» вдобавок
+## всегда критует по раненым и даёт «раж» за три убийства одним рывком.
+const AXE_CUT := 1.2
+const KATANA_CUTS := 3
+const KATANA_CUT := 0.45
+const HAMMER_SLAM := 1.3
+const HAMMER_RADIUS := 150.0
+
+
+func _melee_style(weapon: WeaponData) -> String:
+	if weapon == null or not weapon.is_melee():
+		return ""
+	match weapon.melee_class:
+		"axe", "sword":
+			return "axe"
+		"katana", "dagger":
+			return "katana"
+		"hammer", "shield":
+			return "hammer"
+	return "axe"
+
+
 func _katana_cut(from: Vector2, to: Vector2) -> void:
 	var weapon := _player.weapon_controller.weapon
-	if weapon == null or weapon.trait_id != &"dash_cut" or _cut_seen.size() >= MAX_TARGETS:
+	var style := _melee_style(weapon)
+	if style == "" or style == "hammer" or _cut_seen.size() >= MAX_TARGETS:
 		return
 	var travel := to - from
 	_cut_shape.height = CUT_RADIUS * 2.0 + travel.length()
@@ -123,18 +150,60 @@ func _katana_cut(from: Vector2, to: Vector2) -> void:
 		if _cut_seen.has(id) or _cut_seen.size() >= MAX_TARGETS:
 			continue
 		_cut_seen[id] = true
-		var low := enemy.hp / maxf(enemy.max_hp, 1.0) < LOW_HP
-		var crit := low or randf() < weapon.crit_chance
 		var at := enemy.global_position
-		Enemy.next_kind = &"dash"
-		enemy.take_damage(weapon.damage * (weapon.crit_mult if crit else 1.0), travel.normalized(), crit)
-		Enemy.next_kind = &""
-		if _fx != null:
-			_fx.burst_dir(at, travel.normalized(), weapon.effect_color, 6 if crit else 3, 0.5, 300.0, 3.0)
+		var dir := travel.normalized()
+		if style == "axe":
+			# Один тяжёлый разрез: крупная вспышка поперёк пути.
+			_cut(enemy, weapon, weapon.damage * AXE_CUT, randf() < weapon.crit_chance, dir)
+			if _fx != null:
+				_fx.burst_dir(at, dir, weapon.effect_color, 10, 0.35, 380.0, 4.0)
+				_fx.ring(at, weapon.effect_color, 46.0)
+		else:
+			# Серия мелких разрезов с небольшим разбросом во времени.
+			var low := weapon.trait_id == &"dash_cut" and enemy.hp / maxf(enemy.max_hp, 1.0) < LOW_HP
+			for k in KATANA_CUTS:
+				if not is_instance_valid(enemy) or not enemy.is_alive():
+					break
+				var crit := low or randf() < weapon.crit_chance
+				_cut(enemy, weapon, weapon.damage * KATANA_CUT, crit, dir.rotated(randf_range(-0.6, 0.6)))
+				if _fx != null:
+					_fx.burst_dir(at + Vector2(randf_range(-14, 14), randf_range(-14, 6)), dir.rotated(randf_range(-1.0, 1.0)), weapon.effect_color, 3, 0.4, 260.0, 2.4)
 		if not enemy.is_alive():
 			_cut_kills += 1
-			if _cut_kills == CUT_STREAK:
+			if weapon.trait_id == &"dash_cut" and _cut_kills == CUT_STREAK:
 				katana_rage.emit(_cut_kills)
+
+
+func _cut(enemy: Enemy, weapon: WeaponData, amount: float, crit: bool, dir: Vector2) -> void:
+	Enemy.next_kind = &"dash"
+	enemy.take_damage(amount * (weapon.crit_mult if crit else 1.0), dir, crit)
+	Enemy.next_kind = &""
+
+
+## Молот/щит: в конце рывка — удар по площади с оглушением.
+func _hammer_slam(at: Vector2) -> void:
+	var weapon := _player.weapon_controller.weapon
+	if _melee_style(weapon) != "hammer":
+		return
+	var circle := CircleShape2D.new()
+	circle.radius = HAMMER_RADIUS
+	var query := PhysicsShapeQueryParameters2D.new()
+	query.shape = circle
+	query.transform = Transform2D(0.0, at)
+	query.collision_mask = PhysicsLayers.ENEMY
+	query.collide_with_areas = false
+	for hit in _player.get_world_2d().direct_space_state.intersect_shape(query, QUERY_LIMIT):
+		var enemy := hit["collider"] as Enemy
+		if enemy == null or not is_instance_valid(enemy) or not enemy.is_alive():
+			continue
+		_cut(enemy, weapon, weapon.damage * HAMMER_SLAM, randf() < weapon.crit_chance, (enemy.global_position - at).normalized())
+		if is_instance_valid(enemy) and enemy.is_alive():
+			enemy.add_stagger(2.0)
+	if _fx != null:
+		_fx.ring(at, weapon.effect_color, HAMMER_RADIUS)
+		_fx.dust(at + Vector2(0, 8), 10, 90.0)
+		_fx.burst(at, weapon.effect_color, 16, 300.0, 4.0)
+	hammer_slammed.emit(at)
 
 
 func _shock(at: Vector2, source_id: int, damage: float) -> void:

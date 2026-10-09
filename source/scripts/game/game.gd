@@ -849,7 +849,10 @@ func _on_enemy_died(enemy: Enemy) -> void:
 	_ring_enemy_died(enemy)
 	var data := enemy.data
 	if player != null and player.weapon_controller.weapon != null:
-		stats.note_kill(player.weapon_controller.weapon.is_melee())
+		var melee := player.weapon_controller.weapon.is_melee()
+		stats.note_kill(melee)
+		if melee:
+			on_melee_kill()
 	if data.is_boss():
 		player.external_pull = Vector2.ZERO
 	var at := enemy.global_position

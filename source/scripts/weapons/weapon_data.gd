@@ -79,7 +79,7 @@ const TRAITS := {
 	"focus": "Прицел: стоя на месте 1 с — выстрел ×2, в движении ×0.75. Играй от позиции",
 	"ice_wave": "Каждый 3-й удар обрушивает ледяной разлом перед тобой: урон по площади и замедление",
 	"junk_grow": "Собирает мусор: клинок растёт на 10% за каждые 10 убийств (до +100%)",
-	"dash_cut": "Срез: рывок режет всех на пути уроном катаны, раненых — всегда критом; трое за рывок — раж (+30% к скорости ударов на 5 с)",
+	"dash_cut": "Срез: рывок — серия разрезов по всем на пути, раненых — всегда критом; трое за рывок — раж (+30% к скорости ударов на 5 с)",
 	"gravity": "Удар стягивает врагов в точку, следующий удар взрывает их",
 	"echo": "Каждый удар повторяет второй клинок: ещё 60% урона через 0.09 с",
 	"quake": "Финишер комбо бьёт ударной волной по площади",
@@ -432,6 +432,8 @@ func with_run_stats(stats: RunStats) -> WeaponData:
 			w.finisher_radius = maxf(finisher_radius, 60.0 + 14.0 * finisher)
 			w.finisher_chance = clampf(maxf(finisher_chance, 0.0) + 0.05 * finisher, 0.0, 0.5)
 	if is_melee():
+		reach *= 1.0 + stats.get_stat(&"melee_reach")
+		w.fire_interval = maxf(w.fire_interval / (1.0 + stats.get_stat(&"melee_speed")), 0.005)
 		w.melee_reach = melee_reach * reach
 		w.max_distance = w.melee_reach + lunge * 0.9 + 26.0
 	else:

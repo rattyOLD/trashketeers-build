@@ -181,6 +181,9 @@ func _setup_common(camera_bounds: Rect2, currency_icon: Texture2D) -> void:
 	add_child(dash_effects)
 	dash_effects.setup(player, stats, fx)
 	dash_effects.katana_rage.connect(_on_katana_rage)
+	dash_effects.hammer_slammed.connect(func(_at: Vector2) -> void:
+		add_shake(0.35)
+		hitstop(0.04))
 	BulletPool.set_player_skin(Cosmetics.shot_color(), Cosmetics.shot_rainbow())
 	hero_skills = HeroSkills.new()
 	add_child(hero_skills)
@@ -446,6 +449,11 @@ func _physics_process(delta: float) -> void:
 	hud.set_skill_cooldown(hero_skills.fraction())
 	hud.set_dash_cooldown(player.dash_remaining, player.dash_cooldown)
 
+	if _rush_left > 0.0:
+		_rush_left -= delta
+		if _rush_left <= 0.0:
+			_rush_stacks = 0
+			player.rush_buff = 0.0
 	if _rage_left > 0.0:
 		_rage_left -= delta
 		if _rage_left <= 0.0:
@@ -456,6 +464,25 @@ func _physics_process(delta: float) -> void:
 		_hud_timer = 0.1
 		_update_hud_timer()
 	_update_shake(delta)
+
+
+## Ближний бой: убийство сокращает откат рывка («Рывок за голову») и копит «Кураж» — +5% скорости
+## за стак на RUSH_TIME (не постоянный бонус: перестал убивать — скорость уходит).
+const RUSH_TIME := 3.0
+const RUSH_STEP := 0.05
+var _rush_left := 0.0
+var _rush_stacks := 0
+
+
+func on_melee_kill() -> void:
+	var refund := stats.get_stat(&"melee_dash_refund")
+	if refund > 0.0:
+		player.dash_remaining = maxf(player.dash_remaining - refund, 0.0)
+	var cap := int(stats.get_stat(&"melee_rush"))
+	if cap > 0:
+		_rush_stacks = mini(_rush_stacks + 1, cap)
+		_rush_left = RUSH_TIME
+		player.rush_buff = RUSH_STEP * _rush_stacks
 
 
 ## Катана: три и больше убийств одним рывком — «раж»: удары быстрее на RAGE_TIME (повтор продлевает).
@@ -655,6 +682,10 @@ func _on_melee_swing(weapon: WeaponData, origin: Vector2, direction: Vector2, _c
 
 
 func _on_melee_hit(weapon: WeaponData, at: Vector2, count: int, finisher: bool, heavy: bool) -> void:
+	# «Кровопийца»: лечение долей урона ближнего удара (не больше 4% здоровья за удар).
+	var vamp := stats.get_stat(&"melee_vamp")
+	if vamp > 0.0 and count > 0 and not player.is_dead:
+		player.heal(minf(weapon.damage * count * vamp, player.max_hp * 0.04))
 	var strong := finisher or heavy
 	hitstop(0.025 + 0.012 * weapon.weight + (0.04 if strong else 0.0))
 	add_shake(0.05 * weapon.weight + (0.15 if strong else 0.0) + 0.02 * mini(count, 4))

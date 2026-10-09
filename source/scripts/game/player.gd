@@ -8,6 +8,8 @@ signal health_changed(hp: float, max_hp: float)
 signal damaged(amount: float)
 signal dash_started
 signal dash_moved(from: Vector2, to: Vector2)
+## Рывок закончился (точка остановки): молот бьёт по площади здесь.
+signal dash_ended(at: Vector2)
 
 ## Кто нанёс последний урон Еноту: уходит в отчёт о забеге.
 static var last_source: StringName = &"?"
@@ -61,6 +63,8 @@ var _invuln := 0.0
 var _knockback := Vector2.ZERO
 var _step_timer := 0.0
 var _speed_buff := 0.0
+## «Кураж» ближнего боя: временная прибавка скорости за убийства (BattleBase ведёт стаки).
+var rush_buff := 0.0
 var _snare := 0.0
 var _stun := 0.0
 var shield := 0
@@ -154,7 +158,7 @@ func _physics_process(delta: float) -> void:
 	dash_remaining = maxf(dash_remaining - delta, 0.0)
 	if move_input.length_squared() > 0.04:
 		_last_move_direction = move_input.normalized()
-	var speed := move_speed * (1.0 + _speed_buff) * move_slow * terrain_slow * (0.15 if _snare > 0.0 else 1.0)
+	var speed := move_speed * (1.0 + _speed_buff + rush_buff) * move_slow * terrain_slow * (0.15 if _snare > 0.0 else 1.0)
 	velocity = (Vector2.ZERO if _stun > 0.0 else move_input.limit_length(1.0) * speed) + _knockback + external_pull
 	var dashing := _dash_left > 0.0 and _stun <= 0.0
 	if dashing:
@@ -165,6 +169,8 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	if dashing:
 		dash_moved.emit(before, global_position)
+		if _dash_left <= 0.0:
+			dash_ended.emit(global_position)
 	_invuln = maxf(_invuln - delta, 0.0)
 	_tick_steps(delta)
 	_tick_shield(delta)
