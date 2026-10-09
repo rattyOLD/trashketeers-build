@@ -66,7 +66,12 @@ func _run() -> void:
 		bosses += int(ContentDB.get_enemy(id).is_boss())
 	_check(popup._grid.get_child_count() == bosses, "boss filter includes all bosses")
 	popup._select_filter("bomber")
-	_check(popup._grid.get_child_count() == 3, "bomb filter includes explosive rat and bombers")
+	var bombers := 0
+	for id in ContentDB.get_enemy_ids():
+		var kind := EnemyData.Behavior.keys()[ContentDB.get_enemy(id).behavior].to_lower()
+		bombers += int(kind == "bomber" or kind == "exploder")
+	# Считаем по данным: с картами Выживания у голубей-бомбардиров появился фирменный собрат.
+	_check(bombers >= 3 and popup._grid.get_child_count() == bombers, "bomb filter includes explosive rat and bombers")
 	popup._select_filter("")
 	await get_tree().create_timer(0.8).timeout
 	if DisplayServer.get_name() != "headless":

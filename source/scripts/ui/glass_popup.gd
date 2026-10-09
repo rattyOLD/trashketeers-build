@@ -115,11 +115,13 @@ func _init(title_text: String) -> void:
 		plate.set_texture_margin(SIDE_RIGHT, 34.0)
 		plate.set_texture_margin(SIDE_TOP, 14.0)
 		plate.set_texture_margin(SIDE_BOTTOM, 14.0)
-		plate.set_content_margin(SIDE_LEFT, 46.0)
-		plate.set_content_margin(SIDE_RIGHT, 20.0)
+		# Текст по центру таблички, с отступом от болтов с обеих сторон.
+		plate.set_content_margin(SIDE_LEFT, 56.0)
+		plate.set_content_margin(SIDE_RIGHT, 56.0)
 		plate.set_content_margin(SIDE_TOP, 6.0)
 		plate.set_content_margin(SIDE_BOTTOM, 8.0)
 		_title.add_theme_stylebox_override("normal", plate)
+		_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	header.add_child(_title)
 	# Место под крестик в заголовке; сам крестик — один, закреплён в углу окна и не уезжает при прокрутке.
 	var close_slot := Control.new()

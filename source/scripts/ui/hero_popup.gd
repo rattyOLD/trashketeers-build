@@ -114,7 +114,7 @@ func _refresh() -> void:
 
 func _build_stage(character: Dictionary, accent: Color, owned: bool) -> Control:
 	var panel := PanelContainer.new()
-	var style := UiStyle.box(Color("#1d2022").lerp(accent, 0.06), accent.darkened(0.15), 4, 16)
+	var style := UiStyle.box(UiStyle.CARD_BG.lerp(accent, 0.06), accent.darkened(0.15), 4, 16)
 	panel.add_theme_stylebox_override("panel", style)
 	# Горизонталь: витрина ниже, чтобы колонка с кнопкой влезала на низкий экран телефона без второй прокрутки.
 	var stage_h := 290.0 if Orient.portrait else 200.0
@@ -208,7 +208,7 @@ func _build_header(character: Dictionary, rarity: String, accent: Color) -> Cont
 	row.add_child(name_box)
 	var tag := PanelContainer.new()
 	tag.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	tag.add_theme_stylebox_override("panel", UiStyle.box(Color("#1d2022").lerp(accent, 0.25), accent, 3, 8))
+	tag.add_theme_stylebox_override("panel", UiStyle.box(UiStyle.CARD_BG.lerp(accent, 0.25), accent, 3, 8))
 	tag.add_child(UiStyle.label(RARITY_TITLES.get(rarity, "ОБЫЧНЫЙ"), 18, UiStyle.TEXT, 4))
 	row.add_child(tag)
 	return row
@@ -216,7 +216,7 @@ func _build_header(character: Dictionary, rarity: String, accent: Color) -> Cont
 
 func _build_passive(character: Dictionary, accent: Color) -> Control:
 	var panel := PanelContainer.new()
-	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#1f2325").lerp(accent, 0.05), accent.darkened(0.2), 4, 12))
+	panel.add_theme_stylebox_override("panel", UiStyle.box(UiStyle.CARD_BG.lerp(accent, 0.05), accent.darkened(0.2), 4, 12))
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 4)
 	panel.add_child(column)

@@ -62,8 +62,8 @@ func _build_hero(level: int) -> void:
 			caption.size = Vector2(shown * 0.36, 44.0))
 		_hero.add_child(banner)
 	var panel := PanelContainer.new()
-	var box := UiStyle.box(Color("#2c2a28"), Color("#35c8ff"), 4, 22)
-	box.shadow_color = Color(0.7, 0.3, 1.0, 0.35)
+	var box := UiStyle.box(UiStyle.CARD_BG, UiStyle.GOLD.darkened(0.15), 4, 22)
+	box.shadow_color = Color(1.0, 0.6, 0.2, 0.25)
 	box.shadow_size = 10
 	panel.add_theme_stylebox_override("panel", box)
 	var column := VBoxContainer.new()
