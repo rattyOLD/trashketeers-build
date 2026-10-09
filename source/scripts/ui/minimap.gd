@@ -189,6 +189,14 @@ func _draw() -> void:
 				_batch.arc(ep, 5.5 + sin(_time * 7.0), 0.0, TAU, 14, Color("#ffd23f"), 1.5, true)
 	if _director.boss != null and _director.boss.is_alive():
 		_diamond(origin, scale, _director.boss.global_position, 7.0 + sin(_time * 6.0), Color("#ffd23f"))
+	# Выживание 2.0: вышки (голубые, пока не заряжены) и закрытые сейфы (золотые квадраты).
+	for tower in _level.towers:
+		if is_instance_valid(tower) and not tower.used:
+			_dot(origin, scale, tower.global_position, 3.5, Color("#6adcff"), true)
+	for safe in _level.safes:
+		if is_instance_valid(safe) and not safe.opened:
+			var sp := _to_map(origin, scale, safe.global_position)
+			_batch.rect(Rect2(sp - Vector2(3, 3), Vector2(6, 6)), Color("#ffd23f"))
 	var portal := _level.get_portal()
 	if portal != null and portal.visible:
 		var pp := _to_map(origin, scale, portal.global_position)

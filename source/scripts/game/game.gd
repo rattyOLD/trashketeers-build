@@ -172,6 +172,7 @@ func start(_weapon_id: StringName = &"") -> void:
 		loadout = WeaponDB.get_weapon(RunMods.SHOTGUN_IDS[0]).with_tier(1)
 	_spawn_player(map.player_start, loadout, _find_target)
 	map.attach_player(player)
+	_hook_run_objects()
 	player.surface_query = map.surface_at
 	enemies = EnemyManager.new()
 	add_child(enemies)
@@ -585,6 +586,7 @@ func _switch_chapter(index: int = -1) -> void:
 	map.build(layers, chapter)
 	player.terrain_slow = 1.0
 	map.attach_player(player)
+	_hook_run_objects()
 	SoundManager.start_ambient(map.layout)
 	hazards.attach_level(map)
 	light_map.set_layout(map.layout)
@@ -1072,6 +1074,128 @@ func _show_looted(boss_id: String) -> void:
 	tween.tween_interval(1.6)
 	tween.tween_property(picture, "modulate:a", 0.0, 0.4)
 	tween.tween_callback(layer.queue_free)
+
+
+# --- Выживание 2.0: вышки-ретрансляторы, сейфы хлама, Удача ------------------------------------------
+
+## Прошивки вышек: стат, базовое значение, название, описание (%s — значение), цвет.
+const FIRMWARE := [
+	[&"damage_mult", 0.08, "Прошивка «Урон»", "+%d%% урона", "#ff4d6d"],
+	[&"fire_rate_mult", 0.07, "Прошивка «Темп»", "+%d%% скорострельности", "#ffb02e"],
+	[&"move_speed_mult", 0.05, "Прошивка «Ноги»", "+%d%% скорости бега", "#6adcff"],
+	[&"crit_chance_add", 0.03, "Прошивка «Крит»", "+%d%% шанса крита", "#ff7a3d"],
+	[&"max_hp_add", 12.0, "Прошивка «Броня»", "+%d к здоровью", "#7dff9a"],
+	[&"magnet_mult", 0.15, "Прошивка «Магнит»", "+%d%% радиуса подбора", "#b96bff"],
+	[&"luck", 0.06, "Прошивка «Удача»", "+%d%% Удачи", "#7dff9a"],
+	[&"regen", 0.25, "Прошивка «Пластырь»", "+%s здоровья в секунду", "#7dff9a"],
+]
+## Множители значения по редкости (обычная, редкая, эпическая) и шанс выше обычной без Удачи.
+const FIRMWARE_RARITY := [1.0, 1.7, 2.8]
+const SAFE_BASE := 120.0
+const SAFE_GROWTH := 1.45
+
+var _bonus_open := false
+var _bonus_queue: Array = []
+var _safes_opened := 0
+
+
+func _hook_run_objects() -> void:
+	for tower in map.towers:
+		if not tower.charged.is_connected(_on_tower_charged):
+			tower.charged.connect(_on_tower_charged)
+	for safe in map.safes:
+		if not safe.open_requested.is_connected(_on_safe_requested):
+			safe.open_requested.connect(_on_safe_requested)
+	_update_safe_prices()
+
+
+func _safe_price() -> int:
+	var chapter_k := 1.0 + 0.35 * float(director.chapter_index if director != null else 0)
+	return maxi(int(round(SAFE_BASE * pow(SAFE_GROWTH, _safes_opened) * chapter_k / 5.0)) * 5, 5)
+
+
+func _update_safe_prices() -> void:
+	for safe in map.safes:
+		if is_instance_valid(safe) and not safe.opened:
+			safe.set_price(_safe_price())
+
+
+## Редкость по Удаче: 0 — обычная, 1 — редкая, 2 — эпическая.
+func _roll_rarity(bonus: float = 0.0) -> int:
+	var luck := stats.get_stat(&"luck") + bonus
+	var r := randf()
+	if r < 0.08 + luck * 0.25:
+		return 2
+	if r < 0.36 + luck * 0.45:
+		return 1
+	return 0
+
+
+func _on_tower_charged(tower: ChargeTower) -> void:
+	SoundManager.play(&"level_up", -6.0, false)
+	fx.burst(tower.global_position + Vector2(0, -150), Color("#6adcff"), 26, 320.0, 4.0)
+	fx.ring(tower.global_position, Color("#6adcff"), 160.0)
+	var choices: Array[UpgradeData] = []
+	var pool := FIRMWARE.duplicate()
+	pool.shuffle()
+	for i in 3:
+		var row: Array = pool[i]
+		var rank := _roll_rarity()
+		var value: float = float(row[1]) * FIRMWARE_RARITY[rank]
+		var u := UpgradeData.new()
+		u.id = StringName("fw_%s_%d" % [row[0], rank])
+		u.stat = row[0]
+		u.value = value
+		u.max_stacks = 0
+		u.title = str(row[2])
+		var shown: Variant = int(round(value * 100.0)) if value < 1.0 and row[0] != &"regen" else (snappedf(value, 0.01) if row[0] == &"regen" else int(value))
+		u.description = str(row[3]) % shown
+		u.color = Color(str(row[4]))
+		u.category = "utility"
+		u.rarity_rank = rank
+		choices.append(u)
+	_queue_bonus(choices, "ВЫШКА ЗАРЯЖЕНА!")
+
+
+func _on_safe_requested(safe: JunkSafe) -> void:
+	if safe.opened:
+		return
+	var price := _safe_price()
+	if nuts < price:
+		safe.refuse()
+		hud.toast("СЕЙФ ЗАКРЫТ", "Нужно %d гаек — у тебя %d" % [price, nuts], Color("#ffd23f"))
+		SoundManager.play(&"ui_click", -4.0)
+		return
+	nuts -= price
+	hud.set_nuts(nuts)
+	_safes_opened += 1
+	safe.open()
+	_update_safe_prices()
+	SoundManager.play(&"crate_break", 0.0, false)
+	SoundManager.play(&"star_dust", -4.0, false)
+	fx.confetti(safe.global_position + Vector2(0, -40), 24)
+	var rank := _roll_rarity(0.1)
+	var choices := stats.roll_choices(ContentDB.get_upgrades(), 3, 0.35 + stats.get_stat(&"luck"), rank)
+	if not choices.is_empty():
+		_queue_bonus(choices, "СЕЙФ ВСКРЫТ!")
+
+
+func _queue_bonus(choices: Array[UpgradeData], title: String) -> void:
+	if choices.is_empty() or finished or player.is_dead:
+		return
+	_bonus_queue.append([choices, title])
+	if not _bonus_open and not _level_up_open:
+		_open_next_bonus()
+
+
+func _open_next_bonus() -> void:
+	if _bonus_queue.is_empty() or _bonus_open or _level_up_open:
+		return
+	var item: Array = _bonus_queue.pop_front()
+	var choices: Array[UpgradeData] = item[0]
+	_bonus_open = true
+	get_tree().paused = true
+	hud.show_level_up(choices, level, stats, true, "", false, str(item[1]))
 
 
 ## Контрольная точка (первый босс Выживания): оружие «раскрывается» — в выдаче карточки «ФАЗА 2»
@@ -1572,15 +1696,20 @@ func _xp_needed(for_level: int) -> int:
 
 
 func _open_level_up() -> void:
+	# Открыт выбор вышки/сейфа: уровень откроется сразу после него (см. _on_upgrade_chosen).
+	if _bonus_open:
+		return
 	if finished or _pending_levelups <= 0 or player.is_dead:
 		_level_up_open = false
 		return
 	var bonus := _bonus_choices > 0
-	var luck := clampf(float(level) * 0.015, 0.0, 0.35) + (0.3 if bonus else 0.0)
+	var luck := clampf(float(level) * 0.015, 0.0, 0.35) + (0.3 if bonus else 0.0) + stats.get_stat(&"luck")
 	var choices := stats.roll_choices(ContentDB.get_upgrades(), 3, luck, 1 if bonus else 0)
 	if choices.is_empty():
 		_pending_levelups = 0
 		_level_up_open = false
+		get_tree().paused = false
+		_open_next_bonus()
 		return
 	get_tree().paused = true
 	_show_choices(choices, bonus)
@@ -1637,12 +1766,24 @@ func _on_upgrade_chosen(upgrade: UpgradeData) -> void:
 		player.heal(player.max_hp * upgrade.value)
 	player.apply_run_stats(stats)
 	_sync_drones()
+	if _bonus_open:
+		# Выбор из вышки или сейфа: уровни не тратятся; если ждут повышения уровня — открываем их.
+		_bonus_open = false
+		if _pending_levelups > 0:
+			_level_up_open = true
+			_open_level_up()
+		else:
+			_level_up_open = false
+			get_tree().paused = false
+			_open_next_bonus()
+		return
 	_pending_levelups -= 1
 	if _pending_levelups > 0:
 		_open_level_up()
 	else:
 		_level_up_open = false
 		get_tree().paused = false
+		_open_next_bonus()
 
 
 func _sync_drones() -> void:

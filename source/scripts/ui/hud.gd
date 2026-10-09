@@ -930,11 +930,11 @@ func toast(title: String, text: String, color: Color = UiStyle.GOLD) -> void:
 		_next_toast()
 
 
-func show_level_up(choices: Array[UpgradeData], level: int, stats: RunStats, bonus: bool = false, reroll_text: String = "", reroll_ok: bool = false) -> void:
+func show_level_up(choices: Array[UpgradeData], level: int, stats: RunStats, bonus: bool = false, reroll_text: String = "", reroll_ok: bool = false, title: String = "") -> void:
 	_clear_wave_titles()
 	if _portrait != null:
 		_portrait.react("grin", 1.6)
-	_level_up.open(choices, level, stats, bonus, reroll_text, reroll_ok)
+	_level_up.open(choices, level, stats, bonus, reroll_text, reroll_ok, title)
 
 
 func show_result(victory: bool, lines: PackedStringArray, title: String = "", can_upgrade: bool = true) -> void:

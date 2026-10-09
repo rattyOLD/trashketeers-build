@@ -848,6 +848,17 @@
       "rarity": "rare",
       "phase2": true,
       "weight": 2.0
+    },
+    {
+      "upgrade_id": "lucky_cap",
+      "title": "Счастливая крышка",
+      "description": "+10% Удачи: редкие карточки, сейфы и прошивки выпадают чаще",
+      "stat": "luck",
+      "value": 0.1,
+      "max_stacks": 5,
+      "color": "#7dff9a",
+      "category": "utility",
+      "rarity": "common"
     }
   ]
 }

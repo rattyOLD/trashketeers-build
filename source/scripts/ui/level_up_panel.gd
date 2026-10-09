@@ -56,9 +56,9 @@ func _init() -> void:
 	_box.add_child(_reroll)
 
 
-func open(choices: Array[UpgradeData], level: int, stats: RunStats, bonus: bool = false, reroll_text: String = "", reroll_ok: bool = false) -> void:
+func open(choices: Array[UpgradeData], level: int, stats: RunStats, bonus: bool = false, reroll_text: String = "", reroll_ok: bool = false, title: String = "") -> void:
 	_choices = choices
-	_title.text = "НАГРАДА БОССА!" if bonus else "УРОВЕНЬ %d!" % level
+	_title.text = title if not title.is_empty() else ("НАГРАДА БОССА!" if bonus else "УРОВЕНЬ %d!" % level)
 	_title.add_theme_color_override("font_color", Color("#ff7ae0") if bonus else UiStyle.GOLD)
 	_cards.vertical = Orient.portrait
 	_reroll.custom_minimum_size = Vector2(minf(600.0, _card_width() * 3.0), 64 if Orient.portrait else 54)

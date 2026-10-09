@@ -85,6 +85,11 @@ var _puddles: Array = []
 var _ripple_timer := 0.0
 var _portal: Portal
 var _story: Dictionary = {}
+## Выживание 2.0: вышки-ретрансляторы и сейфы хлама на карте (Game подписывается на их сигналы).
+var towers: Array[ChargeTower] = []
+var safes: Array[JunkSafe] = []
+const TOWER_COUNT := 4
+const SAFE_COUNT := 6
 var _boss_cells := Vector2i(16, 8)
 var _area_scale := 1.0
 var _story_clear: Array[Rect2] = []
@@ -173,6 +178,8 @@ func clear() -> void:
 	_life_lights.clear()
 	gate_rects.clear()
 	story_gates.clear()
+	towers.clear()
+	safes.clear()
 	story_cells.clear()
 	_story_clear.clear()
 	_portal = null
@@ -181,6 +188,12 @@ func clear() -> void:
 func attach_player(player: Player) -> void:
 	if river != null:
 		river.attach(player)
+	for tower in towers:
+		if is_instance_valid(tower):
+			tower.player = player
+	for safe in safes:
+		if is_instance_valid(safe):
+			safe.player = player
 	_player = player
 	if _world_life != null and is_instance_valid(_world_life):
 		_world_life.attach(player)
@@ -1510,6 +1523,7 @@ func _build_organic() -> void:
 		if not poi.is_empty() and _build_poi(poi, p):
 			_cover_spots.append(p)
 	_scatter_singles(area, center)
+	_build_run_shrines(area, center)
 	_spawn_walkers()
 	_build_ground_detail()
 	_build_world_life(center)
@@ -1814,6 +1828,38 @@ func _build_ground_detail() -> void:
 		detail.z_index = 1
 		_own(detail, _layers.floor_layer)
 		detail.build(spots, randi(), layout == "bank")
+
+
+## Выживание 2.0: расставляет вышки-ретрансляторы и сейфы хлама по открытой земле, вдали от старта,
+## площади и босса, не ближе 650 px друг к другу — карта зовёт исследовать её, как в аналогах.
+func _build_run_shrines(area: Rect2, center: Vector2) -> void:
+	var placed: Array[Vector2] = []
+	var want := TOWER_COUNT + SAFE_COUNT
+	for attempt in 1500:
+		if placed.size() >= want:
+			break
+		var p := Vector2(randf_range(area.position.x, area.end.x), randf_range(area.position.y, area.end.y)).snapped(Vector2(16, 16))
+		if p.distance_to(center) < 420.0 or p.distance_to(player_start) < 500.0 or boss_rect.grow(260.0).has_point(p):
+			continue
+		if not is_walkable(p) or not is_area_clear(p, CELL * 2.5) or not _cover_allowed(p, 220.0):
+			continue
+		if not _river_points.is_empty() and absf(p.x - AcidRiver._x_at(_river_points, p.y)) < RIVER_WIDTH * 0.5 + 160.0:
+			continue
+		if placed.any(func(o: Vector2) -> bool: return o.distance_to(p) < 650.0):
+			continue
+		placed.append(p)
+	placed.shuffle()
+	for i in placed.size():
+		if i < TOWER_COUNT:
+			var tower := ChargeTower.new()
+			tower.position = placed[i]
+			_own(tower, _layers.world)
+			towers.append(tower)
+		else:
+			var safe := JunkSafe.new()
+			safe.position = placed[i]
+			_own(safe, _layers.world)
+			safes.append(safe)
 
 
 ## Прохожие: жители ходят по улицам кварталов (Свалка) или аллеям парка (Банк) туда-обратно,
