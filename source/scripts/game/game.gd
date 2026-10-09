@@ -913,6 +913,20 @@ func _on_enemy_died(enemy: Enemy) -> void:
 			pickups.spawn(at + Vector2(0, -8), bounty)
 			fx.popup(at + Vector2(0, -60), "РОЗЫСК +%d" % bounty, Color("#ff7a7a"), 26.0)
 	status.on_enemy_died(enemy, at)
+	# Миньоны и подкрепления, пока жив главный босс главы, — без опыта и монет: бой с боссом не ферма.
+	var boss_fight := not data.is_boss() and director.boss != null and is_instance_valid(director.boss) \
+		and director.boss.is_alive() and not director.is_mini_wave()
+	if not boss_fight:
+		_drop_enemy_loot(enemy, data, at)
+	if data.is_boss():
+		_on_boss_killed(enemy, at)
+		return
+	SoundManager.play_enemy_death()
+	add_shake(0.1)
+	hitstop(KILL_HITSTOP)
+
+
+func _drop_enemy_loot(enemy: Enemy, data: EnemyData, at: Vector2) -> void:
 	pickups.spawn_xp(at, data.xp)
 	if enemy.loot > 0:
 		pickups.spawn(at, enemy.loot)
@@ -923,12 +937,6 @@ func _on_enemy_died(enemy: Enemy) -> void:
 	# Врагов в волнах больше (difficulty.count_mult) — монеты с каждого реже, иначе экономика раздувается.
 	if randf() < data.nut_drop_chance * COIN_DROP_SCALE and data.nut_drop > 0:
 		pickups.spawn(at, data.nut_drop * (2 if randf() < stats.get_stat(&"double_drop") else 1))
-	if data.is_boss():
-		_on_boss_killed(enemy, at)
-		return
-	SoundManager.play_enemy_death()
-	add_shake(0.1)
-	hitstop(KILL_HITSTOP)
 
 
 func _on_wanted_level(level: int) -> void:
@@ -1428,12 +1436,12 @@ func _after_boss_ad() -> void:
 		_open_level_up())
 
 
-## Смерть босса гасит эскорт и миньонов: рассыпаются в опыт без урона игроку.
+## Смерть босса гасит эскорт и миньонов: рассыпаются без урона игроку (и без опыта — награда с босса).
 func _clear_remaining_enemies() -> void:
 	for e in enemies.get_active().duplicate():
 		if e == null or e.data == null or e.data.is_boss():
 			continue
-		pickups.spawn_xp(e.global_position, e.data.xp)
+		# Миньоны босса рассыпаются без опыта: награда — с самого босса.
 		fx.burst(e.global_position, e.data.fx_color, 8, 220.0, 3.5)
 		enemies.release(e)
 
