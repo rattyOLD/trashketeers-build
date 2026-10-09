@@ -1267,7 +1267,8 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	_xp_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	bars.add_child(_xp_row)
 	var xp_gap := Control.new()
-	xp_gap.custom_minimum_size = Vector2(0, 0)
+	# Отступ из-под круга портрета: «УР N» целиком видно.
+	xp_gap.custom_minimum_size = Vector2(16, 0)
 	xp_gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_xp_row.add_child(xp_gap)
 	# Уровень — крупно перед полосой опыта (медаль у портрета перекрывали плашки).
@@ -1282,7 +1283,7 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	_xp_bar = HudWidgets.OutlineBar.new(HudWidgets.OutlineBar.XP_COLORS)
 	_xp_bar.set_anchors_preset(Control.PRESET_FULL_RECT)
 	xp_stack.add_child(_xp_bar)
-	_xp_label = UiStyle.label("0/10", 15, UiStyle.TEXT, 4)
+	_xp_label = UiStyle.label("0/10", 15, Color("#bfe8ff"), 4)
 	_xp_label.set_anchors_preset(Control.PRESET_FULL_RECT)
 	xp_stack.add_child(_xp_label)
 
