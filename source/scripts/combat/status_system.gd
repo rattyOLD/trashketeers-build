@@ -95,7 +95,7 @@ func _physics_process(delta: float) -> void:
 	_shock_cd -= delta
 	_number_budget = minf(_number_budget + NUMBER_BUDGET * delta, NUMBER_BUDGET)
 	_heal_budget = minf(_heal_budget + (3.0 + player.max_hp * 0.04) * delta, 12.0 + player.max_hp * 0.1)
-	var regen := stats.get_stat(&"regen") + extra_regen
+	var regen := (stats.get_stat(&"regen") + extra_regen) * (0.0 if Ascension.no_regen() else 1.0)
 	if regen > 0.0 and player.hp < player.max_hp:
 		_regen_acc += regen * delta
 		if _regen_acc >= 0.5:

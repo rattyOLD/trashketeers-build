@@ -101,6 +101,11 @@ var max_hp := 0.0
 var pool_index := -1
 ## Множитель урона атак от сложности волны.
 var damage_mult := 1.0
+## Возвышения: элита с особенностью ("fast", "armored", "explosive"; "" — обычный враг).
+var elite := ""
+var elite_speed := 1.0
+var elite_armor := 0.0
+var _elite_ring: Sprite2D
 ## true — взорвался сам (Бомбо-Крыса у Енота): награды за такую смерть не даются.
 var self_destructed := false
 ## Мародёр (событие карты): убегает от Енота, несёт добычу; при смерти из него сыплется loot монет.
@@ -255,6 +260,11 @@ func activate(enemy_data: EnemyData, at: Vector2, hp_mult: float = 1.0, dmg_mult
 	max_hp = data.max_hp * hp_mult
 	hp = max_hp
 	damage_mult = dmg_mult
+	elite = ""
+	elite_speed = 1.0
+	elite_armor = 0.0
+	if _elite_ring != null:
+		_elite_ring.visible = false
 	self_destructed = false
 	fleeing = false
 	loot = 0
@@ -570,7 +580,7 @@ func tick(delta: float, player: Player, nav: Callable = Callable()) -> void:
 	if stun_left > 0.0 and not data.is_boss():
 		desired = Vector2.ZERO
 	if not data.is_boss():
-		desired *= global_speed_mult * mod_speed_mult
+		desired *= global_speed_mult * mod_speed_mult * elite_speed
 	if data.shield and dir != Vector2.ZERO and _shield_up():
 		var turned := rotate_toward(_shield_dir.angle(), dir.angle(), data.shield_turn * delta)
 		_shield_dir = Vector2.from_angle(turned)
@@ -628,6 +638,31 @@ func take_bullet(amount: float, direction: Vector2, knockback: float, is_crit: b
 	take_damage(amount, direction * knockback, is_crit)
 
 
+## Элита (Возвышения): крепче втрое, крупнее, цветное кольцо под ногами и особенность.
+func make_elite(kind: String) -> void:
+	elite = kind
+	max_hp *= 2.6
+	hp = max_hp
+	_size_mult *= 1.22
+	_shape.radius = data.radius * _size_mult
+	# Светящееся кольцо цвета особенности под ногами — элиту видно в толпе.
+	if _elite_ring == null:
+		_elite_ring = Sprite2D.new()
+		_elite_ring.texture = NeonSign.get_light_texture()
+		_elite_ring.show_behind_parent = true
+		add_child(_elite_ring)
+		move_child(_elite_ring, 0)
+	_elite_ring.visible = true
+	_elite_ring.position = Vector2(0, data.radius * 0.75 * _size_mult)
+	_elite_ring.scale = Vector2(data.radius / 19.0, data.radius / 45.0) * _size_mult
+	_elite_ring.modulate = Color(Ascension.ELITE_COLORS.get(kind, Color.WHITE), 1.0)
+	match kind:
+		"fast":
+			elite_speed = 1.45
+		"armored":
+			elite_armor = 0.4
+
+
 func take_damage(amount: float, direction: Vector2 = Vector2.ZERO, is_crit: bool = false) -> void:
 	var kind := next_kind
 	next_kind = &""
@@ -637,7 +672,7 @@ func take_damage(amount: float, direction: Vector2 = Vector2.ZERO, is_crit: bool
 		return
 	if data.id == &"throne_speaker" and not BossBrain.speakers_open():
 		return
-	amount *= 1.0 - data.armor
+	amount *= (1.0 - data.armor) * (1.0 - elite_armor)
 	if stun_left > 0.0 or posture_stun > 0.0:
 		amount *= STUN_DAMAGE_MULT
 	if _brain != null:

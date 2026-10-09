@@ -127,7 +127,7 @@ func setup(target_finder: Callable, start_weapon: WeaponData, stats: RunStats) -
 
 
 func apply_run_stats(stats: RunStats) -> void:
-	dash_cooldown = maxf(DASH_MIN_COOLDOWN, DASH_COOLDOWN - clampf(stats.get_stat(&"dodge_cooldown"), 0.0, 1.5))
+	dash_cooldown = maxf(DASH_MIN_COOLDOWN, DASH_COOLDOWN - clampf(stats.get_stat(&"dodge_cooldown"), 0.0, 1.5)) * Ascension.dash_mult()
 	_dash_distance_mult = 1.0 + clampf(stats.get_stat(&"dodge_distance"), 0.0, 0.2)
 	var new_max := BASE_MAX_HP + bonus_max_hp + stats.get_stat(&"max_hp_add")
 	if new_max > max_hp:
@@ -347,7 +347,7 @@ func revive(hp_fraction: float, invulnerability: float) -> void:
 func heal(amount: float) -> void:
 	if is_dead:
 		return
-	hp = minf(hp + amount, max_hp)
+	hp = minf(hp + amount * Ascension.heal_mult(), max_hp)
 	health_changed.emit(hp, max_hp)
 
 

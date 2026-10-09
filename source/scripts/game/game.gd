@@ -139,9 +139,11 @@ func start(_weapon_id: StringName = &"") -> void:
 	randomize()
 	RunMods.clear()
 	MapCards.clear()
+	Ascension.clear()
 	if story_mission.is_empty():
 		RunMods.resolve()
 		MapCards.resolve()
+		Ascension.resolve()
 		Enemy.mod_speed_mult = RunMods.ENEMY_SPEED if RunMods.has(&"fast_enemies") else 1.0
 	for id in ContentDB.get_enemy_ids():
 		var enemy_data := ContentDB.get_enemy(id)
@@ -288,6 +290,9 @@ func start(_weapon_id: StringName = &"") -> void:
 			hud.show_mod_badge(str(RunMods.info(RunMods.active)["title"]))
 			get_tree().create_timer(3.0, false).timeout.connect(func() -> void: hud.toast("МОДИФИКАТОР: %s" % str(RunMods.info(RunMods.active)["title"]).to_upper(), "%s. Монеты ×%.1f" % [RunMods.info(RunMods.active)["desc"], RunMods.mult_of(RunMods.active)], Color("#ff9a3d")))
 			SaveService.add_stat("mod_runs", 1, false)
+		if Ascension.active > 0:
+			get_tree().create_timer(2.2, false).timeout.connect(func() -> void:
+				hud.toast("ВОЗВЫШЕНИЕ %s" % Ascension.title_of(Ascension.active).to_upper(), "Испытания включены. Монеты ×%.2f" % Ascension.coin_mult(), Color("#ff4d6d")))
 		if not MapCards.active.is_empty():
 			var card := MapCards.info(MapCards.active)
 			get_tree().create_timer(1.2, false).timeout.connect(func() -> void:
@@ -913,6 +918,9 @@ func _on_enemy_died(enemy: Enemy) -> void:
 			pickups.spawn(at + Vector2(0, -8), bounty)
 			fx.popup(at + Vector2(0, -60), "РОЗЫСК +%d" % bounty, Color("#ff7a7a"), 26.0)
 	status.on_enemy_died(enemy, at)
+	# Взрывная элита (Возвышения): рвётся при смерти — не стой вплотную.
+	if enemy.elite == "explosive":
+		BulletPool.explode(at, 110.0, 10.0 * director.get_damage_mult(), Bullet.Team.ENEMY, Color("#ff7a3d"), 1.2)
 	# Миньоны и подкрепления, пока жив главный босс главы, — без опыта и монет: бой с боссом не ферма.
 	var boss_fight := not data.is_boss() and director.boss != null and is_instance_valid(director.boss) \
 		and director.boss.is_alive() and not director.is_mini_wave()
@@ -1138,7 +1146,7 @@ func _hook_run_objects() -> void:
 
 
 func _safe_price() -> int:
-	var chapter_k := 1.0 + 0.35 * float(director.chapter_index if director != null else 0)
+	var chapter_k := (1.0 + 0.35 * float(director.chapter_index if director != null else 0)) * Ascension.price_mult()
 	return maxi(int(round(SAFE_BASE * pow(SAFE_GROWTH, _safes_opened) * chapter_k / 5.0)) * 5, 5)
 
 
@@ -1294,7 +1302,7 @@ func _ring_enemy_died(enemy: Enemy) -> void:
 
 ## Барыга Шнырь: 3 карточки по цене редкости; кнопка переброса — «Уйти».
 func _open_dealer() -> bool:
-	var chapter_k := 1.0 + 0.3 * float(director.chapter_index)
+	var chapter_k := (1.0 + 0.3 * float(director.chapter_index)) * Ascension.price_mult()
 	var offer := stats.roll_choices(ContentDB.get_upgrades(), 3, 0.3 + stats.get_stat(&"luck"), 1)
 	_dealer_prices.clear()
 	_dealer_choices.clear()
@@ -1395,6 +1403,10 @@ func _on_boss_killed(boss: Enemy, at: Vector2) -> void:
 		_queue_bonus(stats.roll_choices(ContentDB.get_upgrades(), 3, 0.6 + stats.get_stat(&"luck"), 2), "ДАР АЛТАРЯ!")
 	if story == null and stats.phase < 2:
 		_start_phase_two()
+	if story == null and story_mission.is_empty() and bosses_killed == 1 and Ascension.on_boss_beaten(Ascension.active):
+		var next := Ascension.unlocked()
+		get_tree().create_timer(4.0, false).timeout.connect(func() -> void:
+			hud.toast("ОТКРЫТО ВОЗВЫШЕНИЕ %s" % Ascension.roman(next), "«%s» — выбери в меню перед Выживанием." % Ascension.LEVELS[next - 1]["title"], Color("#ff4d6d")))
 	add_shake(1.0)
 	hitstop(BOSS_HITSTOP)
 	atmosphere.flash(Color.WHITE, 0.6, 0.6)
@@ -2003,6 +2015,10 @@ func _on_player_died() -> void:
 ## Окно второго шанса: 10 секунд, реклама (раз за забег) или неонит (цена растёт).
 func _offer_revive() -> void:
 	if finished:
+		return
+	# Возвышение X: возрождение только одно.
+	if revives_used >= Ascension.max_revives():
+		_finish()
 		return
 	get_tree().paused = true
 	hud.show_revive(Economy.revive_cost(revives_used), SaveService.get_gems(), revives_used == 0, _run_summary())

@@ -74,7 +74,7 @@ static func has(id: StringName) -> bool:
 
 
 static func reward(coins: int) -> int:
-	return int(round(coins * mult_of(active) * MapCards.coin_mult()))
+	return int(round(coins * mult_of(active) * MapCards.coin_mult() * Ascension.coin_mult()))
 
 
 static func only_shotguns(weapon: WeaponData) -> bool:

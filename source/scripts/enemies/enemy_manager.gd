@@ -44,6 +44,13 @@ func spawn(data: EnemyData, at: Vector2, hp_mult: float = 1.0, dmg_mult: float =
 	enemy.pool_index = _active.size()
 	_active.append(enemy)
 	enemy.activate(data, at, hp_mult, dmg_mult)
+	if Ascension.active > 0:
+		if data.is_boss():
+			enemy.max_hp *= Ascension.boss_hp_mult()
+			enemy.hp = enemy.max_hp
+			enemy.elite_speed = Ascension.boss_speed_mult()
+		elif randf() < Ascension.elite_chance():
+			enemy.make_elite(Ascension.ELITE_KINDS.pick_random())
 	return enemy
 
 

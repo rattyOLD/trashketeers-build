@@ -46,6 +46,8 @@ var _mode_intro: ModeIntroPopup
 var _mod_chip: Button
 var _map_chip: Button
 var _chips_row: HBoxContainer
+var _asc_chip: Button
+var _chips_box: VBoxContainer
 var _pass: BattlePassPopup
 var _season_pill: Button
 var _odds: OddsPopup
@@ -696,8 +698,15 @@ func _build_mod_chip() -> Control:
 	_chips_row.add_theme_constant_override("separation", 8)
 	_chips_row.add_child(_mod_chip)
 	_chips_row.add_child(_map_chip)
+	# Возвышения (престиж): видно, когда открыта хотя бы первая ступень.
+	_asc_chip = _mod_chip.duplicate(Node.DUPLICATE_GROUPS | Node.DUPLICATE_SCRIPTS) as Button
+	_asc_chip.pressed.connect(_on_asc_pressed)
+	_chips_box = VBoxContainer.new()
+	_chips_box.add_theme_constant_override("separation", 6)
+	_chips_box.add_child(_chips_row)
+	_chips_box.add_child(_asc_chip)
 	_refresh_mod_chip()
-	return _chips_row
+	return _chips_box
 
 
 func _on_mod_pressed() -> void:
@@ -720,6 +729,20 @@ func _refresh_mod_chip() -> void:
 		_map_chip.visible = _mode == Mode.SURVIVAL
 	if _chips_row != null:
 		_chips_row.visible = _mode == Mode.SURVIVAL
+	if _asc_chip != null:
+		_asc_chip.text = Ascension.button_text()
+		_asc_chip.add_theme_color_override("font_color", Color("#ff4d6d") if Ascension.chosen() > 0 else Color("#ffb066"))
+		_asc_chip.visible = _mode == Mode.SURVIVAL and Ascension.unlocked() > 0
+
+
+func _on_asc_pressed() -> void:
+	SoundManager.play(&"ui_click", -4.0)
+	var level := Ascension.cycle()
+	_refresh_mod_chip()
+	if _mode_hint == null:
+		_mode_hint = HintBubble.new()
+		add_child(_mode_hint)
+	_mode_hint.show_for(_asc_chip, ("ВОЗВЫШЕНИЕ %s\n" % Ascension.title_of(level) if level > 0 else "") + Ascension.describe(level))
 
 
 func _on_map_pressed() -> void:
