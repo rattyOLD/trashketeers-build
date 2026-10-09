@@ -1,0 +1,131 @@
+{
+  "brief": "astra/from_claude/BRIEF_v30_flail.md",
+  "format": "PNG RGBA",
+  "status": "High-resolution art sources; normalize with prepare_assets.py before engine import.",
+  "files": [
+    {
+      "name": "flail_handle.png",
+      "native": [
+        1983,
+        793
+      ],
+      "target": [
+        150,
+        60
+      ],
+      "frames": 1
+    },
+    {
+      "name": "flail_ball.png",
+      "native": [
+        1254,
+        1254
+      ],
+      "target": [
+        64,
+        64
+      ],
+      "frames": 1
+    },
+    {
+      "name": "flail_link.png",
+      "native": [
+        1254,
+        1254
+      ],
+      "target": [
+        16,
+        16
+      ],
+      "frames": 1
+    },
+    {
+      "name": "flail_icon.png",
+      "native": [
+        1774,
+        887
+      ],
+      "target": [
+        256,
+        128
+      ],
+      "frames": 1
+    },
+    {
+      "name": "flail_ball_fast.png",
+      "native": [
+        2172,
+        724
+      ],
+      "target": [
+        384,
+        64
+      ],
+      "frames": 4,
+      "regions": [
+        [
+          0,
+          0,
+          543,
+          724
+        ],
+        [
+          543,
+          0,
+          1086,
+          724
+        ],
+        [
+          1086,
+          0,
+          1629,
+          724
+        ],
+        [
+          1629,
+          0,
+          2172,
+          724
+        ]
+      ]
+    },
+    {
+      "name": "flail_hit.png",
+      "native": [
+        2172,
+        724
+      ],
+      "target": [
+        512,
+        128
+      ],
+      "frames": 4,
+      "regions": [
+        [
+          0,
+          0,
+          520,
+          724
+        ],
+        [
+          520,
+          0,
+          1090,
+          724
+        ],
+        [
+          1090,
+          0,
+          1650,
+          724
+        ],
+        [
+          1650,
+          0,
+          2172,
+          724
+        ]
+      ]
+    }
+  ]
+}
