@@ -105,7 +105,7 @@ const SFX := {
 	&"enter_acid": [-5.0, 0.6],
 	&"amb_acid": [-14.0, 0.5],
 	&"amb_water": [-16.0, 0.5],
-	&"amb_music": [-13.0, 0.5],
+	&"amb_music": [-8.0, 0.5],
 	&"boss_roar": [-3.0, 1.0],
 	&"wave_horn": [-8.0, 0.8],
 	&"enemy_death_1": [-14.0, 0.06],

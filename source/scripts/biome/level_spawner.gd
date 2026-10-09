@@ -1598,6 +1598,11 @@ func _build_quarters(root: Dictionary, defs: Dictionary, area: Rect2) -> int:
 	if list.is_empty():
 		return 0
 	list.shuffle()
+	# Бар с музыкой есть в каждом забеге: игрок слышит его издалека и идёт посмотреть.
+	for i in list.size():
+		if _is_music_quarter(str((list[i] as Dictionary).get("name", ""))):
+			list.push_front(list.pop_at(i))
+			break
 	var yards := {}
 	var all: Dictionary = root.get("sectors", {})
 	for key: String in [chapter_id, layout] + all.keys():
@@ -1639,6 +1644,10 @@ func _build_quarters(root: Dictionary, defs: Dictionary, area: Rect2) -> int:
 	return placed
 
 
+func _is_music_quarter(qname: String) -> bool:
+	return qname.contains("Бар") or qname.contains("Пивн") or qname.contains("Шаурм") or qname.contains("Ресторан") or qname.contains("Бутик")
+
+
 func _place_quarter(q: Dictionary, r: Rect2, yards: Dictionary, defs: Dictionary) -> bool:
 	var ids: Array = []
 	var widths: Array[float] = []
@@ -1674,8 +1683,7 @@ func _place_quarter(q: Dictionary, r: Rect2, yards: Dictionary, defs: Dictionary
 		_cover_spots.append(base)
 		# Свет из окон и над дверью (им управляет WorldLife: иногда гаснет и загорается).
 		_windows.append([base + Vector2(0, -ArenaProp.visual_size(str(ids[i])).y * 0.3), Color("#ffc46b") if layout != "bank" else Color("#fff0c8")])
-		var qname := str(q.get("name", ""))
-		if qname.contains("Бар") or qname.contains("Пивн") or qname.contains("Шаурм") or qname.contains("Ресторан") or qname.contains("Бутик"):
+		if _is_music_quarter(str(q.get("name", ""))):
 			_music_spots.append(base)
 	if built == 0:
 		return false

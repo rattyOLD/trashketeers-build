@@ -69,7 +69,7 @@ var _music_loop := -1
 var _music_check := 0.0
 var _dust: Array = []
 var _last_step := Vector2.INF
-const MUSIC_RANGE := 760.0
+const MUSIC_RANGE := 1100.0
 
 
 func build(ground_parent: Node2D, air_parent: Node2D) -> void:
@@ -330,7 +330,7 @@ func _update_music(delta: float) -> void:
 		_music_loop = SoundManager.play_loop(&"amb_music")
 	if _music_loop != -1:
 		var base: float = SoundManager.SFX[&"amb_music"][0]
-		SoundManager.set_loop_volume(_music_loop, base - 24.0 * clampf(dist / MUSIC_RANGE, 0.0, 1.0) - (40.0 if dist >= MUSIC_RANGE else 0.0))
+		SoundManager.set_loop_volume(_music_loop, base - 20.0 * pow(clampf(dist / MUSIC_RANGE, 0.0, 1.0), 1.6) - (40.0 if dist >= MUSIC_RANGE else 0.0))
 
 
 ## Пыль, травинки и брызги из-под ног героя: по траве — зелёные, по асфальту и камню — серая пыль.
