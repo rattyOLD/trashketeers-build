@@ -43,12 +43,16 @@
       "name": "ДИРЕКТОР",
       "color": "#e8412f",
       "glyph": "Ш",
-      "radio": true
+      "radio": true,
+      "portrait": "res://assets/story/portraits/chief.png",
+      "portrait_alt": "res://assets/story/portraits/chief_alt.png"
     },
     "ded": {
       "name": "ДВУСТВОЛКА «ДЕД»",
       "color": "#ff9e3d",
-      "glyph": "Д"
+      "glyph": "Д",
+      "portrait": "res://assets/story/portraits/ded.png",
+      "portrait_alt": "res://assets/story/portraits/ded_alt.png"
     },
     "agent": {
       "name": "БЮРО ЛИКВИДАЦИИ",
@@ -58,7 +62,9 @@
     "chief": {
       "name": "ДИРЕКТОР",
       "color": "#ff2e4d",
-      "glyph": "Ш"
+      "glyph": "Ш",
+      "portrait": "res://assets/story/portraits/chief.png",
+      "portrait_alt": "res://assets/story/portraits/chief_alt.png"
     },
     "goatee": {
       "name": "БОРОДА",
@@ -100,13 +106,15 @@
       "name": "ФРЭНК «ФАЗЗИ»",
       "color": "#c9e87a",
       "glyph": "Ф",
-      "radio": true
+      "radio": true,
+      "portrait": "res://assets/ui/portraits/hud/fluffy_chemist_0.png"
     },
     "don": {
       "name": "ТОНИ «ДОН»",
       "color": "#e8c36a",
       "glyph": "Д",
-      "radio": true
+      "radio": true,
+      "portrait": "res://assets/ui/portraits/hud/pigeon_mafioso_0.png"
     },
     "snyr": {
       "name": "ШНЫРЬ",

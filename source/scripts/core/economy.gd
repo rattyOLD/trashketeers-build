@@ -224,7 +224,8 @@ static func featured(chest_id: String) -> Array[String]:
 	# Косметика: один скин рывка или трассер на витрине (редкость по сундуку, невыбитый — в приоритете).
 	var cosm_rarities: Array = COSMETIC_RARITIES.get(chest_id, ["common"])
 	var cosm: Array[String] = []
-	for kind in Cosmetics.WEARABLE:
+	# Рамки аватара (Астра: ржавая, ледяная, золотая, Крысиная корона) тоже выпадают из сундуков.
+	for kind in Cosmetics.WEARABLE + ["frame"]:
 		cosm.append_array(Cosmetics.keys_of(kind, str(cosm_rarities[rng.randi() % cosm_rarities.size()])))
 	var fresh := cosm.filter(func(k: String) -> bool: return not Cosmetics.owns(k))
 	if not fresh.is_empty():
