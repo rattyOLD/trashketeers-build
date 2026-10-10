@@ -2,7 +2,6 @@
   "brief": "astra/from_claude/BRIEF_v6_story.md",
   "addendum": "astra/from_claude/BRIEF_v6_addendum.md",
   "style": "Neon Trash Cartoon",
-  "generator": "built-in imagegen",
   "background": "#FF00FF except wall/floor textures and RGBA graffiti",
   "frameOrder": "left-to-right, top-to-bottom",
   "groups": {
