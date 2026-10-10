@@ -91,6 +91,7 @@ var _multi := 0
 ## Для отчёта о забеге (баланс): здоровье в % на старте каждой волны и полученный урон по источникам.
 var _wave_hp := PackedStringArray()
 var _damage_by := {}
+var _combat_report := CombatReport.new()
 var _multi_left := 0.0
 var _combo_timer := 0.0
 var _recorded := false
@@ -256,8 +257,9 @@ func start(_weapon_id: StringName = &"") -> void:
 	for pickup in _weapon_pickups:
 		pickup.expired.connect(_on_pickup_expired)
 	player.weapon_controller.slots_changed.connect(_refresh_slots)
-	player.damaged.connect(func(amount: float) -> void:
-		_damage_by[Player.last_source] = float(_damage_by.get(Player.last_source, 0.0)) + amount)
+	player.damaged.connect(func(_amount: float) -> void:
+		_damage_by[Player.last_source] = float(_damage_by.get(Player.last_source, 0.0)) + player.last_damage_taken
+		_combat_report.record_received(player.last_damage_taken, Player.last_source))
 	hero_skills.used.connect(func(_id: String) -> void: player.weapon_controller.charge_overdrive())
 	player.weapon_controller.overdrive_changed.connect(_on_overdrive_changed)
 	player.weapon_controller.overdrive_fired.connect(_on_overdrive_fired)
@@ -426,6 +428,7 @@ func _run_summary() -> Dictionary:
 		"weapon": player.weapon_controller.base_weapon.get_title(),
 		"loot": run_loot,
 		"blueprints": run_blueprints,
+		"combat_report": _combat_report.lines(player.is_dead),
 	}
 
 
@@ -439,7 +442,9 @@ func _death_tip() -> String:
 		return ""
 	var boss := director.boss
 	var text: String
-	if boss != null and boss.is_alive() and boss.hp > boss.max_hp * 0.55:
+	if _combat_report.last_source in [&"blast", &"projectile", &"acid", &"trap", &"shock", &"collapse", &"laser"]:
+		text = _combat_report.avoidance_tip()
+	elif boss != null and boss.is_alive() and boss.hp > boss.max_hp * 0.55:
 		text = ["Босс слишком жирный для твоего урона. Прокачай урон или скорость атаки.",
 			"Босс почти не поцарапан. Ты точно в него стрелял, а не рядом?",
 			"Босс сказал, что ему было щекотно. Прокачай урон."].pick_random()
@@ -639,6 +644,7 @@ func _on_bullet_hit(bullet: Bullet, target: Node2D) -> void:
 
 
 func _on_enemy_status(enemy: Enemy, amount: float, kind: String) -> void:
+	_combat_report.record_enemy(amount, enemy.hp, StringName(kind))
 	status.on_status_damage(enemy, amount, kind)
 	if enemy.data.is_boss():
 		hud.update_boss(maxf(enemy.hp, 0.0), enemy.max_hp)
@@ -664,6 +670,7 @@ func _flush_damage_numbers(delta: float, force: bool = false) -> void:
 
 
 func _on_enemy_damaged(enemy: Enemy, amount: float, is_crit: bool, kind: StringName) -> void:
+	_combat_report.record_enemy(amount, enemy.hp, kind)
 	if kind == &"melee":
 		var spread := enemy.data.radius * 0.6
 		fx.number(enemy.get_aim_point() + Vector2(randf_range(-spread, spread), -enemy.data.radius * 1.6), amount, FxManager.kind_color(kind), is_crit, FxManager.kind_scale(kind))

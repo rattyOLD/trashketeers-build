@@ -309,13 +309,17 @@ class StatTile:
 		column.add_theme_constant_override("separation", 0)
 		column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		add_child(column)
+		var row := HBoxContainer.new()
+		row.alignment = BoxContainer.ALIGNMENT_CENTER
+		row.add_theme_constant_override("separation", 8)
+		row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		column.add_child(row)
 		if texture != null:
-			var holder := CenterContainer.new()
-			holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			holder.add_child(BattlePanels.icon_rect(texture, 40))
-			column.add_child(holder)
-		value_label = UiStyle.label("0", 38, color, 9)
-		column.add_child(value_label)
+			var icon := BattlePanels.icon_rect(texture, 28)
+			icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			row.add_child(icon)
+		value_label = UiStyle.label("0", 34, color, 8)
+		row.add_child(value_label)
 		column.add_child(UiStyle.label(caption, 17, UiStyle.TEXT_DIM, 5))
 
 	func set_text(text: String) -> void:
@@ -389,6 +393,7 @@ class RunResultPanel:
 	var _reward_coins := 0
 	var _reward_gems := 0
 	var _mood_slot: VBoxContainer
+	var _center: Control
 
 	func _init(coin_icon: Texture2D) -> void:
 		_coin_icon = coin_icon
@@ -396,14 +401,20 @@ class RunResultPanel:
 		mouse_filter = Control.MOUSE_FILTER_STOP
 		visible = false
 		add_child(BattlePanels.dim())
-		var center := CenterContainer.new()
-		center.set_anchors_preset(Control.PRESET_FULL_RECT)
-		add_child(center)
+		_center = Control.new()
+		_center.set_anchors_preset(Control.PRESET_FULL_RECT)
+		_center.offset_left = 16.0
+		_center.offset_top = 16.0
+		_center.offset_right = -16.0
+		_center.offset_bottom = -16.0
+		add_child(_center)
+		_center.resized.connect(_fit_result.call_deferred)
 		_panel = PanelContainer.new()
 		var style := UiStyle.box(UiStyle.PANEL, UiStyle.OUTLINE, 6, 32)
 		style.set_content_margin_all(26)
 		_panel.add_theme_stylebox_override("panel", style)
-		center.add_child(_panel)
+		_center.add_child(_panel)
+		_panel.minimum_size_changed.connect(_fit_result.call_deferred)
 		var page := BoxContainer.new()
 		page.vertical = Orient.portrait
 		page.add_theme_constant_override("separation", 26)
@@ -459,7 +470,7 @@ class RunResultPanel:
 		_trophies.add_theme_constant_override("h_separation", 10)
 		_trophies.add_theme_constant_override("v_separation", 8)
 		box.add_child(_trophies)
-		_no_trophies = UiStyle.label("Пока пусто — стволы из ящиков и чертежи с боссов попадут сюда", 19, UiStyle.TEXT_DIM, 4)
+		_no_trophies = UiStyle.label("Трофеев пока нет", 19, UiStyle.TEXT_DIM, 4)
 		_no_trophies.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		box.add_child(_no_trophies)
 		_total = UiStyle.label("", 22, UiStyle.TEXT_DIM, 5)
@@ -503,6 +514,24 @@ class RunResultPanel:
 		button.add_child(icon)
 		button.pressed.connect(_on_double)
 		return button
+
+	func _fit_result() -> void:
+		if not is_inside_tree() or _panel == null:
+			return
+		# Родитель HUD уже учитывает вырезы экрана; _center оставляет внутренний отступ.
+		var minimum := _panel.get_combined_minimum_size()
+		if minimum.x <= 0.0 or minimum.y <= 0.0:
+			return
+		var factor := minf(1.0, minf(_center.size.x / minimum.x, _center.size.y / minimum.y))
+		_panel.size = minimum
+		_panel.position = (_center.size - minimum) * 0.5
+		_panel.pivot_offset = minimum * 0.5
+		_panel.set_meta("ui_scale", factor)
+		_panel.scale = Vector2.ONE * factor
+
+	func _appear() -> void:
+		_fit_result()
+		UiStyle.pop_in(_panel, 0.6)
 
 	func _padded(button: Button, state: String) -> StyleBox:
 		var box := button.get_theme_stylebox(state).duplicate() as StyleBox
@@ -562,7 +591,7 @@ class RunResultPanel:
 		_subtitle.text = line + ("" if hooks.is_empty() else "\n" + "\n".join(hooks))
 		for old in _mood_slot.get_children():
 			old.queue_free()
-		_mood_slot.add_child(HeroMoodCard.new(SaveService.get_character(), bosses > 0 or record, HeroMoodCard.summary_line(summary)))
+		_mood_slot.add_child(HeroMoodCard.new(SaveService.get_character(), bosses > 0 or record, "", 128.0))
 		(_tiles["wave"] as StatTile).count_to(int(summary.get("wave", 0)), 0.15)
 		(_tiles["kills"] as StatTile).count_to(int(summary.get("kills", 0)), 0.25)
 		(_tiles["level"] as StatTile).count_to(int(summary.get("level", 1)), 0.35)
@@ -580,8 +609,9 @@ class RunResultPanel:
 		_trophies.visible = not _no_trophies.visible
 		_total.text = "На счету: %s · %s" % [SaveService.format_coins(int(summary.get("total_coins", 0))), Economy.format_gems(SaveService.get_gems())]
 		var tip := str(summary.get("tip", ""))
-		_tip_box.visible = not tip.is_empty()
+		var report := str(summary.get("combat_report", ""))
+		_tip_box.visible = not tip.is_empty() or not report.is_empty()
 		_upgrade_button.visible = not tip.is_empty()
-		_tip_label.text = tip
+		_tip_label.text = report + ("\n\n" if not report.is_empty() and not tip.is_empty() else "") + tip
 		visible = true
-		UiStyle.pop_in(_panel, 0.6)
+		_appear.call_deferred()

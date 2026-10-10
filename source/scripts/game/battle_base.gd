@@ -545,7 +545,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func add_shake(amount: float) -> void:
-	_shake = minf(_shake + amount, 1.0)
+	if bool(SaveService.data.get("camera_shake", true)):
+		_shake = maxf(_shake, clampf(amount, 0.0, 1.0))
 
 
 ## Микропауза (hitstop) 30–60 мс: мир почти замирает, таймер идёт по реальному времени.
@@ -591,7 +592,7 @@ func _show_result(victory: bool, lines: PackedStringArray, title: String = "", c
 
 
 func _update_shake(delta: float) -> void:
-	_kick = _kick.lerp(Vector2.ZERO, clampf(CAMERA_KICK_DECAY * delta, 0.0, 1.0))
+	_kick = _kick.lerp(Vector2.ZERO, 1.0 - exp(-CAMERA_KICK_DECAY * delta))
 	## В вертикали шапка закрывает верх, а пальцы на кнопках — низ: енот чуть ниже центра, посередине свободной зоны.
 	# Упреждение: по ходу движения и, пока стреляешь, — в сторону прицела (видно, куда бьёшь).
 	var lead_target := player.move_input.limit_length(1.0) * 36.0
@@ -600,6 +601,11 @@ func _update_shake(delta: float) -> void:
 		lead_target += wc.aim_direction.normalized() * 54.0
 	_camera_lead = _camera_lead.lerp(lead_target.limit_length(72.0), minf(delta * 4.0, 1.0))
 	var base := Vector2(0.0, -PORTRAIT_CAMERA_DROP) if Orient.portrait else Vector2(0.0, 18.0 / LANDSCAPE_ZOOM) + _camera_lead
+	if not bool(SaveService.data.get("camera_shake", true)):
+		_shake = 0.0
+		_kick = Vector2.ZERO
+		camera.offset = base
+		return
 	if _shake <= 0.0:
 		camera.offset = base + _kick
 		return
@@ -643,9 +649,6 @@ var _shot_hit: Texture2D
 func _on_bullet_hit(bullet: Bullet, target: Node2D) -> void:
 	if bullet.weapon == null:
 		return
-	# Трассер-скин: своя вспышка попадания (4 кадра Астры).
-	if _shot_hit != null and bullet.team == Bullet.Team.PLAYER and bullet.weapon.bullet_texture == ConfigLoader.get_tracer_texture():
-		fx.flipbook(_shot_hit, bullet.global_position, 4, 20.0, 54.0, randf() * TAU)
 	var color := bullet.weapon.effect_color
 	var crit := bullet.last_hit_crit
 	if bullet.team == Bullet.Team.PLAYER:
@@ -656,13 +659,16 @@ func _on_bullet_hit(bullet: Bullet, target: Node2D) -> void:
 			_mark_cd = MARK_GAP
 			fx.hitmarker((target as Enemy).get_aim_point(), 1 if crit else 0, target)
 		if crit:
-			fx.ring(bullet.global_position, Color("#ffb347"), 26.0)
 			hitstop(0.035)
 	# При плотном огне частицы попаданий идут по бюджету в секунду: 100 пуль/с не должны рождать 100 вспышек.
-	if _hit_fx_budget < 1.0 and not crit:
+	if _hit_fx_budget < 1.0:
 		return
 	_hit_fx_budget -= 1.0
 	var dense := BulletPool.get_lod() > 0
+	if _shot_hit != null and bullet.team == Bullet.Team.PLAYER and bullet.weapon.bullet_texture == ConfigLoader.get_tracer_texture():
+		fx.flipbook(_shot_hit, bullet.global_position, 4, 20.0, 54.0, randf() * TAU)
+	if crit and bullet.team == Bullet.Team.PLAYER:
+		fx.ring(bullet.global_position, Color("#ffb347"), 26.0)
 	if bullet.team == Bullet.Team.PLAYER:
 		var impact_tex := WeaponVfx.impact_for(bullet.weapon)
 		if impact_tex != null:
@@ -729,7 +735,8 @@ func _on_player_fired(weapon: WeaponData, origin: Vector2, direction: Vector2) -
 		else:
 			fx.muzzle_flash(origin + direction * 4.0, direction.angle(), weapon.effect_color, 0.7 + 0.25 * weapon.recoil)
 	_eject_casing(weapon, origin, direction)
-	_kick -= direction * 2.2 * weapon.recoil
+	if bool(SaveService.data.get("camera_shake", true)):
+		_kick = (_kick - direction.normalized() * 2.2 * weapon.recoil).limit_length(12.0)
 	if weapon.recoil >= 1.8:
 		add_shake(0.08 * weapon.recoil)
 

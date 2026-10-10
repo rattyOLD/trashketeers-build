@@ -69,6 +69,7 @@ const DEFAULTS := {
 	"fx_lite": false,
 	"eco_fps": false,
 	"haptics": true,
+	"camera_shake": true,
 	"minimap": true,
 	"show_fps": false,
 	"min_hud": false,

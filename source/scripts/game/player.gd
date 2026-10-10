@@ -42,6 +42,7 @@ var is_dead := false
 var is_falling := false
 ## Доля поглощаемого урона (перк «Броня»), 0..0.6.
 var armor := 0.0
+var last_damage_taken := 0.0
 ## Бонус к максимуму HP из постоянной прокачки («Выносливость»).
 var bonus_max_hp := 0.0
 ## Множитель перезарядки навыка от героя (CharacterDB, stats.dash).
@@ -273,7 +274,9 @@ func take_damage(amount: float, _direction: Vector2 = Vector2.ZERO, _is_crit: bo
 			fx.ring(global_position, Color("#ffb347"), 70.0)
 			fx.burst(global_position + Vector2(0, -8), Color("#ffb347"), 14, 260.0, 3.5)
 		return
+	var hp_before := hp
 	hp = maxf(hp - amount * (1.0 - armor) * (1.0 - _resist), 0.0)
+	last_damage_taken = hp_before - hp
 	_invuln = INVULN_TIME
 	visual.flash()
 	damaged.emit(amount)

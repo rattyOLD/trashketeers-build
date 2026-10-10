@@ -57,6 +57,7 @@ const SHAMAN_PHASE := 0.5
 const GRID_RADIUS := 100.0
 const GRID_TIME := 1.15
 const ARC_RADIUS := 200.0
+const STOMP_RADIUS := 200.0
 const SHAMAN_TELEGRAPH := Color("#5be7ff")
 const MAGNATE_PHASE := 0.4
 const ENRAGE_TIME := 75.0
@@ -474,7 +475,7 @@ func tick(player: Player, dir: Vector2, path_dir: Vector2, dist: float, delta: f
 			windup = clampf(state_time / 0.75, 0.0, 1.0)
 			enemy.queue_redraw()
 			if state_time >= 0.75:
-				_land(200.0, 38.0)
+				_land(STOMP_RADIUS, 38.0)
 				_fire_ring(20)
 				_rest()
 			return Vector2.ZERO
@@ -1127,21 +1128,9 @@ func _draw_cone(canvas: Node2D, from_world: Vector2, dir: Vector2, half_angle: f
 	canvas.draw_line(a, a + dir.rotated(half_angle) * length, Color(TELEGRAPH, 0.7), 3.0, true)
 
 
-## Единый вид опасной зоны: тёмная подложка, нарастающая заливка, бегущий пунктир, прицел.
+## Круг совпадает с проверкой урона; внутренняя дуга показывает время до удара.
 func _draw_zone(canvas: Node2D, at: Vector2, radius: float, t: float) -> void:
-	var clock := Time.get_ticks_msec() * 0.001
-	var hot := t > 0.75 and int(clock * 18.0) % 2 == 0
-	var ring := Color(1.0, 0.92, 0.35, 0.95) if hot else Color(TELEGRAPH, 0.95)
-	canvas.draw_set_transform(at, 0.0, Vector2(1.0, 0.58))
-	canvas.draw_circle(Vector2.ZERO, radius, Color(0.08, 0.0, 0.04, 0.2 + 0.14 * t))
-	canvas.draw_circle(Vector2.ZERO, radius * t, Color(TELEGRAPH, 0.3 + 0.22 * (0.5 + 0.5 * sin(clock * 20.0))))
-	for d in 16:
-		var a0 := clock * 1.6 + TAU * float(d) / 16.0
-		canvas.draw_arc(Vector2.ZERO, radius, a0, a0 + TAU / 16.0 * 0.6, 4, ring, 5.0, true)
-	var cr := radius * 0.28
-	canvas.draw_line(Vector2(-cr, 0), Vector2(cr, 0), ring, 3.0)
-	canvas.draw_line(Vector2(0, -cr), Vector2(0, cr), ring, 3.0)
-	canvas.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	AttackTelegraph.circle(canvas, at, radius, t, TELEGRAPH)
 
 
 ## Золотые нити от Короля к колонкам: видно, что именно даёт ему защиту.
@@ -1204,7 +1193,7 @@ func draw(canvas: Node2D) -> void:
 			_draw_lane(canvas, _leap_from, _leap_dir, _leap_from.distance_to(_leap_to), 1.0, true, 170.0, fade)
 		State.STOMP_WINDUP:
 			var t := clampf(state_time / 0.75, 0.0, 1.0)
-			_draw_zone(canvas, Vector2.ZERO, 190.0, t)
+			_draw_zone(canvas, Vector2.ZERO, STOMP_RADIUS, t)
 		State.GATLING_SPIN:
 			var t := clampf(state_time / 0.55, 0.0, 1.0)
 			for index in [1, 2]:

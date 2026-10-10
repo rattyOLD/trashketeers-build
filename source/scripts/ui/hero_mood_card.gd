@@ -54,7 +54,7 @@ static func summary_line(summary: Dictionary) -> String:
 	return " · ".join(parts)
 
 
-func _init(character: Dictionary, win: bool, extra_line: String = "") -> void:
+func _init(character: Dictionary, win: bool, extra_line: String = "", portrait_side: float = SIDE) -> void:
 	_character = character
 	_win = win
 	var id := str(character.get("id", "raccoon"))
@@ -66,7 +66,7 @@ func _init(character: Dictionary, win: bool, extra_line: String = "") -> void:
 	add_child(row)
 
 	var frame := Control.new()
-	frame.custom_minimum_size = Vector2(SIDE, SIDE)
+	frame.custom_minimum_size = Vector2(portrait_side, portrait_side)
 	frame.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	frame.clip_contents = true
 	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -79,14 +79,14 @@ func _init(character: Dictionary, win: bool, extra_line: String = "") -> void:
 	_face = TextureRect.new()
 	_face.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_face.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	_face.size = Vector2(SIDE - 8.0, SIDE - 8.0)
+	_face.size = Vector2(portrait_side - 8.0, portrait_side - 8.0)
 	_face.position = Vector2(4, 4)
 	_face.pivot_offset = _face.size * 0.5
 	_face.texture = _pick_texture(id, win)
 	_face.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	frame.add_child(_face)
 	_over = MoodOver.new(win, str(_style.get("mood", "sad")), str(id).hash())
-	_over.size = Vector2(SIDE, SIDE)
+	_over.size = Vector2(portrait_side, portrait_side)
 	_over.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	# На нарисованной позе эмоция уже есть — рисованные поверх слёзы и ссадины только мешают.
 	_over.visible = not _posed

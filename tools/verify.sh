@@ -9,8 +9,9 @@ mkdir -p "$LOG"
 export XDG_DATA_HOME=${XDG_DATA_HOME:-$LOG/user}
 export XDG_CACHE_HOME=${XDG_CACHE_HOME:-$LOG/cache}
 fail=0
-if ! "$GODOT" --headless --path "$P" --import > "$LOG/import.log" 2>&1 || grep -q 'SCRIPT ERROR' "$LOG/import.log"; then
-  fail=1
+if ! timeout 300 "$GODOT" --headless --path "$P" --import > "$LOG/import.log" 2>&1 || grep -q 'SCRIPT ERROR' "$LOG/import.log"; then
+  echo "VERIFY FAILED — импорт ресурсов: $LOG/import.log"
+  exit 1
 fi
 if ! "$GODOT" --headless --path "$P" res://test/check_scripts.tscn > "$LOG/scripts.log" 2>&1 || ! grep -q 'CHECK checked .*failed 0' "$LOG/scripts.log" || grep -q 'SCRIPT ERROR' "$LOG/scripts.log"; then
   fail=1
@@ -75,6 +76,14 @@ if ! grep -q 'HAND_GRIP failures=0' "$LOG/hand-grip.log" || grep -q 'SCRIPT ERRO
 fi
 XDG_DATA_HOME="$LOG/menu-motion-user" timeout 90 "$GODOT" --headless --path "$P" res://test/menu_preview_motion_test.tscn > "$LOG/menu-motion.log" 2>&1
 if ! grep -q 'MENU_PREVIEW_MOTION failures=0' "$LOG/menu-motion.log" || grep -q 'SCRIPT ERROR' "$LOG/menu-motion.log"; then
+  fail=1
+fi
+XDG_DATA_HOME="$LOG/combat-polish-user" timeout 90 "$GODOT" --headless --path "$P" res://test/combat_polish_test.tscn > "$LOG/combat-polish.log" 2>&1
+if ! grep -q 'COMBAT_POLISH failures=0' "$LOG/combat-polish.log" || grep -q 'SCRIPT ERROR' "$LOG/combat-polish.log"; then
+  fail=1
+fi
+XDG_DATA_HOME="$LOG/combat-polish-layout-user" timeout 90 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/combat_polish_layout_test.tscn > "$LOG/combat-polish-layout.log" 2>&1
+if ! grep -q 'COMBAT_POLISH_LAYOUT failures=0' "$LOG/combat-polish-layout.log" || grep -q 'SCRIPT ERROR' "$LOG/combat-polish-layout.log"; then
   fail=1
 fi
 for m in survival story raid mod:blast; do

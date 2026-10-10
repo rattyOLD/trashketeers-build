@@ -110,6 +110,7 @@ var _clip_idx := 0
 var _clip_grip_px := Vector2(187.5, 125)
 var _clip_support_px := Vector2(237.5, 125)
 var _shoot_t := 0.0
+var _shoot_phase := 0.0
 var arm: Sprite2D
 var _arm_material: ShaderMaterial
 var _gun_layer: Node2D
@@ -420,7 +421,7 @@ func _clip_pick() -> void:
 		idx = clampi(int((HURT_TIME - _hurt) / HIT_CLIP_TIME * 4.0), 0, 3)
 	elif _shoot_t > 0.0 and _run < 0.3 and not preview_mode:
 		clip = "shoot"
-		idx = clampi(int((1.0 - _shoot_t / SHOOT_ANIM_TIME) * 4.0), 0, 3)
+		idx = int(_shoot_phase / SHOOT_ANIM_TIME * 4.0) % 4
 	elif _run > 0.12:
 		clip = "run"
 		idx = int(fposmod(_gait / TAU, 1.0) * 8.0) % 8
@@ -516,6 +517,8 @@ func update_motion(velocity: Vector2, aim: Vector2, delta: float) -> void:
 		_tail_spring.kick(-3.0)
 		_ear_spring.kick(-2.5)
 		_scarf_spring.kick(3.0)
+	if _shoot_t > 0.0:
+		_shoot_phase = fmod(_shoot_phase + delta, SHOOT_ANIM_TIME)
 	_shoot_t = maxf(_shoot_t - delta, 0.0)
 	_flash = maxf(_flash - delta, 0.0)
 	_hurt = maxf(_hurt - delta, 0.0)
@@ -525,7 +528,7 @@ func update_motion(velocity: Vector2, aim: Vector2, delta: float) -> void:
 	_kick = lerpf(_kick, 0.0, clampf(KICK_DECAY * delta, 0.0, 1.0))
 	_climb = lerpf(_climb, 0.0, clampf(10.0 * delta, 0.0, 1.0))
 	_flash_t = maxf(_flash_t - delta, 0.0)
-	_body_kick = _body_kick.lerp(Vector2.ZERO, clampf(KICK_DECAY * delta, 0.0, 1.0))
+	_body_kick = _body_kick.lerp(Vector2.ZERO, 1.0 - exp(-KICK_DECAY * delta))
 	var local_accel := accel.x * _facing
 	var lean_target := clampf(velocity.x / 260.0, -1.0, 1.0) * 0.07 + clampf(accel.x * 0.00004, -0.05, 0.05)
 	_lean = lerpf(_lean, lean_target * (1.0 - _dash_blend), clampf(10.0 * delta, 0.0, 1.0))
@@ -575,11 +578,13 @@ func flash() -> void:
 
 ## Отдача: ствол уходит назад, тело — чуть против выстрела, голова кивает.
 func kick(direction: Vector2, strength: float) -> void:
+	if _shoot_t <= 0.0:
+		_shoot_phase = 0.0
 	_shoot_t = SHOOT_ANIM_TIME
 	_kick = minf(_kick + 8.0 * strength, 18.0)
 	_climb = minf(_climb + 0.07 * strength, 0.22)
 	_flash_t = 0.07
-	_body_kick -= direction.normalized() * 2.5 * strength
+	_body_kick = (_body_kick - direction.normalized() * 2.5 * strength).limit_length(6.0)
 	_shot_squash = minf(_shot_squash + 0.035 * strength, 0.07)
 	_head_spring.kick(-0.8 * strength)
 	_ear_spring.kick(-0.6 * strength)

@@ -1366,28 +1366,24 @@ func _draw() -> void:
 		Act.SLAM:
 			var t := clampf(1.0 - _act_time / _act_total, 0.0, 1.0)
 			var at := _act_dir * data.slam_radius * 0.45
-			draw_set_transform(at, 0.0, Vector2(1.0, 0.6))
-			draw_circle(Vector2.ZERO, data.slam_radius * t, Color(TELEGRAPH, 0.16))
-			draw_arc(Vector2.ZERO, data.slam_radius, 0.0, TAU, 48, Color(TELEGRAPH, 0.7), 4.0, true)
-			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			AttackTelegraph.circle(self, at, data.slam_radius, t, TELEGRAPH)
 			for k in data.slam_line:
 				var p := at + _act_dir * 88.0 * (k + 1)
-				draw_set_transform(p, 0.0, Vector2(1.0, 0.6))
-				draw_arc(Vector2.ZERO, 64.0, 0.0, TAU, 32, Color(TELEGRAPH, 0.25 + 0.35 * t), 3.0, true)
-				draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+				AttackTelegraph.circle(self, p, 64.0, t, TELEGRAPH)
 			_draw_alert()
 		Act.FUSE:
 			var t := clampf(1.0 - _act_time / FUSE_TIME, 0.0, 1.0)
-			draw_circle(Vector2.ZERO, data.explode_radius * t, Color(TELEGRAPH, 0.16))
-			draw_arc(Vector2.ZERO, data.explode_radius, 0.0, TAU, 48, Color(TELEGRAPH, 0.75), 3.0, true)
+			AttackTelegraph.circle(self, Vector2.ZERO, data.explode_radius, t, TELEGRAPH)
 
 
 func _draw_dash_lane() -> void:
-	var t := clampf(1.0 - _act_time / DASH_WINDUP, 0.0, 1.0)
-	var length := (data.dash_speed if data.dash_speed > 0.0 else data.charge_speed) * DASH_TIME * 0.9
+	var t := clampf(1.0 - _act_time / _act_total, 0.0, 1.0)
+	var length := (data.dash_speed if data.dash_speed > 0.0 else data.charge_speed) * DASH_TIME
 	var side := _act_dir.orthogonal() * _shape.radius
 	var end := _act_dir * length
 	draw_colored_polygon(PackedVector2Array([side, end + side, end - side, -side]), Color(TELEGRAPH, 0.12 + 0.18 * t))
+	draw_line(side, end + side, Color(TELEGRAPH, 0.85), 3.0, true)
+	draw_line(-side, end - side, Color(TELEGRAPH, 0.85), 3.0, true)
 	draw_line(Vector2.ZERO, end * t, Color(TELEGRAPH, 0.8), 4.0)
 	draw_colored_polygon(PackedVector2Array([end + _act_dir * 26.0, end + side * 0.9, end - side * 0.9]), Color(TELEGRAPH, 0.55 + 0.4 * t))
 

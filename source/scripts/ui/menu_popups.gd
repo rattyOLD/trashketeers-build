@@ -88,6 +88,7 @@ class Settings:
 	var _nearest: MenuWidgets.PawToggle
 	var _fps: MenuWidgets.PawToggle
 	var _lite: MenuWidgets.PawToggle
+	var _camera_shake: MenuWidgets.PawToggle
 	var _mini: MenuWidgets.PawToggle
 	var _fullscreen: MenuWidgets.PawToggle
 	var _auto_pick: MenuWidgets.PawToggle
@@ -125,6 +126,9 @@ class Settings:
 		_lite = MenuWidgets.PawToggle.new("Упрощённые эффекты", SaveService.is_fx_lite())
 		_lite.toggled.connect(func(on: bool) -> void: SaveService.set_flag("fx_lite", on))
 		graphics.add_child(_lite)
+		_camera_shake = MenuWidgets.PawToggle.new("Тряска камеры", bool(SaveService.data.get("camera_shake", true)))
+		_camera_shake.toggled.connect(func(on: bool) -> void: SaveService.set_flag("camera_shake", on))
+		graphics.add_child(_camera_shake)
 		graphics.add_child(UiStyle.label("Кадров в секунду", 22, UiStyle.TEXT_DIM, 4))
 		var fps_row := HBoxContainer.new()
 		fps_row.add_theme_constant_override("separation", 10)
@@ -271,6 +275,7 @@ class Settings:
 			_quality_hint.text += "\nGalaxy A13: по умолчанию 30 кадров/с для меньшего нагрева. Можно выбрать 60 вручную."
 		_fps.set_pressed_no_signal(bool(SaveService.data["show_fps"]))
 		_lite.set_pressed_no_signal(SaveService.is_fx_lite())
+		_camera_shake.set_pressed_no_signal(bool(SaveService.data.get("camera_shake", true)))
 		_mini.set_pressed_no_signal(SaveService.is_minimap_enabled())
 		_min_hud.set_pressed_no_signal(bool(SaveService.data.get("min_hud", false)))
 		_nearest.set_pressed_no_signal(bool(SaveService.data.get("target_nearest", false)))

@@ -109,18 +109,11 @@ func _draw() -> void:
 		var t := _time[k] / _total[k]
 		var to := _to[k]
 		var r := _radius[k]
-		var pulse := 0.5 + 0.5 * sin(_time[k] * (10.0 + 14.0 * t))
-		var hot := t > 0.72 and int(_time[k] * 14.0) % 2 == 0
-		var tint := TELEGRAPH.lerp(Color(1.0, 0.92, 0.5), 0.55 if hot else 0.0)
-		SoftGlow.pool(self, to, r * 1.08, 0.58, Color(0.06, 0.0, 0.05, 0.14 + 0.1 * t))
-		SoftGlow.pool(self, to, r * maxf(t, 0.2), 0.58, Color(tint, 0.16 + 0.16 * pulse))
-		SoftGlow.rim(self, to, r * 1.1, 0.58, Color(tint, 0.5 + 0.25 * t))
+		AttackTelegraph.circle(self, to, r, t, TELEGRAPH)
 		var cr := r * 0.24
-		var cc := Color(tint.lightened(0.2), 0.45 + 0.2 * t)
-		draw_set_transform(to, 0.0, Vector2(1.0, 0.58))
-		draw_line(Vector2(-cr, 0), Vector2(cr, 0), cc, 2.0, true)
-		draw_line(Vector2(0, -cr), Vector2(0, cr), cc, 2.0, true)
-		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		var cc := Color(TELEGRAPH.lightened(0.2), 0.65)
+		draw_line(to + Vector2(-cr, 0), to + Vector2(cr, 0), cc, 2.0, true)
+		draw_line(to + Vector2(0, -cr), to + Vector2(0, cr), cc, 2.0, true)
 		var ground := _from[k].lerp(to, t)
 		var lift := sin(t * PI) * _height[k]
 		var pos := ground + Vector2(0, -lift)

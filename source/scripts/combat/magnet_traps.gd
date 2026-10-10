@@ -119,10 +119,7 @@ func _draw() -> void:
 		var left := FLIGHT + LIFETIME - age
 		var fade := clampf(left / 0.35, 0.0, 1.0)
 		var pulse := 0.5 + 0.5 * sin(_time * 7.0 + k)
-		SoftGlow.pool(self, _to[k], PULL_RADIUS * 1.05, 0.5, Color(COLOR, 0.13 * armed * fade))
-		SoftGlow.rim(self, _to[k], PULL_RADIUS * 1.1, 0.5, Color(COLOR, (0.25 + 0.2 * pulse) * armed * fade))
-		var wave := fmod(_time * 0.9 + k * 0.3, 1.0)
-		SoftGlow.rim(self, _to[k], PULL_RADIUS * (1.0 - wave), 0.5, Color(COLOR, 0.28 * wave * armed * fade))
+		AttackTelegraph.circle(self, _to[k], PULL_RADIUS, armed, Color(COLOR, fade))
 		if player != null and not player.is_dead and armed >= 1.0 and _to[k].distance_to(player.global_position) < PULL_RADIUS:
 			_draw_arc_bolt(_to[k] + Vector2(0, -12), player.global_position + Vector2(0, -10))
 		_draw_mine(_to[k], fade, armed * pulse, 0.0)
