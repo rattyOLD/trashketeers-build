@@ -10,8 +10,11 @@ extends Node
 signal announced(title: String, text: String, color: Color)
 signal event_started(kind: int)
 signal loot_count(count: int)
+signal activity_reward(coins: int)
+signal encounter_requested(who: String)
 
-enum Kind { COIN_RAIN, LEAK, SUPPLY, JACKPOT, MARAUDER }
+enum Kind { COIN_RAIN, LEAK, SUPPLY, JACKPOT, MARAUDER, CARGO, VALVE, DEFENSE, MEETING }
+var activity: WaveActivity
 
 ## [вид, вес, минимальная волна главы]
 const TABLE := [
@@ -82,6 +85,14 @@ func setup(target: Player, wave_director: WaveDirector, enemy_manager: EnemyMana
 	fx = effects
 	status = status_system
 	atmosphere = atmo
+	activity = WaveActivity.new()
+	activity.player = player
+	activity.enemies = enemies
+	activity.map = map
+	decals.add_child(activity)
+	activity.announced.connect(func(title: String, text: String, color: Color) -> void: announced.emit(title, text, color))
+	activity.completed.connect(func(coins: int) -> void: activity_reward.emit(coins))
+	activity.encounter_requested.connect(func(who: String) -> void: encounter_requested.emit(who))
 	for i in LEAK_POOLS:
 		var pool := AcidPool.new()
 		decals.add_child(pool)
@@ -90,6 +101,8 @@ func setup(target: Player, wave_director: WaveDirector, enemy_manager: EnemyMana
 
 func reset() -> void:
 	_pending = -1
+	if is_instance_valid(activity):
+		activity.reset()
 	_rain_left = 0.0
 	marauder = null
 	for pool in pools:
@@ -103,6 +116,8 @@ func reset() -> void:
 func on_wave_started(is_boss: bool) -> void:
 	_rain_left = 0.0
 	_pending = -1
+	if is_instance_valid(activity):
+		activity.reset()
 	if is_boss:
 		_apply_weather("")
 		return
@@ -110,6 +125,12 @@ func on_wave_started(is_boss: bool) -> void:
 		_apply_weather(_roll_weather())
 	else:
 		_apply_weather("")
+	# Один активный интерактив на волне; обычные случайные события остаются на остальных.
+	var scheduled := scheduled_kind(director.wave_number, director.is_mini_wave()) if not director.story_mode else -1
+	if scheduled >= 0:
+		_pending = scheduled
+		_delay = 5.0
+		return
 	var chance := EVENT_CHANCE + DRY_BONUS * _dry_waves
 	if randf() < chance:
 		var picked := _roll_event()
@@ -122,6 +143,18 @@ func on_wave_started(is_boss: bool) -> void:
 
 func on_wave_cleared() -> void:
 	_pending = -1
+	if is_instance_valid(activity):
+		activity.reset()
+
+
+static func scheduled_kind(wave: int, mini_boss: bool) -> int:
+	if mini_boss:
+		return -1
+	return {3: Kind.CARGO, 4: Kind.VALVE, 7: Kind.DEFENSE, 9: Kind.MEETING}.get((wave - 1) % WaveDirector.WAVES_PER_CHAPTER + 1, -1)
+
+
+func goal_rows() -> Array:
+	return activity.rows() if is_instance_valid(activity) else []
 
 
 func _roll_weather() -> String:
@@ -223,6 +256,8 @@ func _start(kind: int) -> void:
 			_supply(true)
 		Kind.MARAUDER:
 			_spawn_marauder()
+		Kind.CARGO, Kind.VALVE, Kind.DEFENSE, Kind.MEETING:
+			activity.start([WaveActivity.Kind.CARGO, WaveActivity.Kind.VALVE, WaveActivity.Kind.DEFENSE, WaveActivity.Kind.MEETING][kind - Kind.CARGO], director.chapter_index)
 
 
 func _drop_coins() -> void:

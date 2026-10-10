@@ -18,6 +18,7 @@ var _tick_left := 0.0
 var _collision: CollisionShape2D
 var _light_id := -1
 var _seed := randi() % 24
+var _age := 0.0
 
 
 func _init() -> void:
@@ -39,6 +40,7 @@ func activate(at: Vector2, size: float = 1.0, life: float = LIFETIME) -> void:
 	_size = size
 	_life = life
 	_time_left = life
+	_age = 0.0
 	_tick_left = TICK
 	scale = Vector2.ONE * size
 	visible = true
@@ -51,6 +53,7 @@ func activate(at: Vector2, size: float = 1.0, life: float = LIFETIME) -> void:
 
 
 func _process(delta: float) -> void:
+	_age += delta
 	_time_left -= delta
 	if _time_left <= 0.0:
 		visible = false
@@ -77,4 +80,4 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	var fade := clampf(_time_left / 0.8, 0.0, 1.0)
-	LiquidDraw.puddle(self, Vector2.ZERO, RADIUS, TOXIC.darkened(0.15), _seed, Time.get_ticks_msec() * 0.001, fade)
+	LiquidDraw.puddle(self, Vector2.ZERO, RADIUS, TOXIC.darkened(0.15), _seed, _age, fade)

@@ -19,6 +19,7 @@ extends CharacterBody2D
 
 signal died(enemy: Enemy)
 signal damaged(enemy: Enemy, amount: float, is_crit: bool, kind: StringName)
+signal armor_cracked(enemy: Enemy)
 signal exploded(enemy: Enemy, at: Vector2, radius: float, damage: float)
 signal blocked(enemy: Enemy, at: Vector2)
 signal blinked(enemy: Enemy, from: Vector2, to: Vector2)
@@ -95,6 +96,10 @@ const FUR_VARIANTS := [
 	[15.0, {"fur": ["#08080d", "#35323f", "#9a94a8", 0.9]}],
 	[15.0, {"fur": ["#3a2a14", "#a88a5c", "#f2e2c4", 0.9]}],
 ]
+
+var armor_broken := false
+var _armor_wear := 0.0
+var last_damage_kind: StringName = &""
 
 var data: EnemyData
 var hp := 0.0
@@ -285,6 +290,9 @@ func activate(enemy_data: EnemyData, at: Vector2, hp_mult: float = 1.0, dmg_mult
 	_knockback = Vector2.ZERO
 	_flash = -1.0
 	_pop = 0.0
+	armor_broken = false
+	_armor_wear = 0.0
+	last_damage_kind = &""
 	_emerge = 0.0 if data.is_boss() else EMERGE_TIME
 	_recoil = 0.0
 	_alt_time = 0.0
@@ -684,7 +692,9 @@ func take_damage(amount: float, direction: Vector2 = Vector2.ZERO, is_crit: bool
 		return
 	if data.id == &"throne_speaker" and not BossBrain.speakers_open():
 		return
-	amount *= (1.0 - data.armor) * (1.0 - elite_armor)
+	var armor := 1.0 - (1.0 - data.armor) * (1.0 - elite_armor)
+	var raw := amount
+	amount *= 1.0 - armor * (0.5 if armor_broken else 1.0)
 	if stun_left > 0.0 or posture_stun > 0.0:
 		amount *= STUN_DAMAGE_MULT
 	if _brain != null:
@@ -697,11 +707,18 @@ func take_damage(amount: float, direction: Vector2 = Vector2.ZERO, is_crit: bool
 		_blink_cd = BLINK_COOLDOWN
 	# Под непрерывным огнём вспышка не перезапускается каждую пулю: у босса пауза между
 	# вспышками, иначе он весь бой выглядит белым силуэтом.
-	if _flash <= (-FLASH_GAP_BOSS if data.is_boss() else 0.0):
+	if _flash <= (-FLASH_GAP_BOSS if data.is_boss() else -0.1):
 		_flash = FLASH_TIME
-	_pop = HIT_POP
-	if _framed:
-		_hit_variant = randi() % maxi(FrameDB.clip_length(_sprite.frame_sheet, "hit"), 1)
+	if _pop <= 0.0:
+		_pop = HIT_POP
+		if _framed:
+			_hit_variant = randi() % maxi(FrameDB.clip_length(_sprite.frame_sheet, "hit"), 1)
+	last_damage_kind = kind
+	if not data.is_boss() and armor >= 0.2 and not armor_broken and kind in [&"", &"projectile", &"melee", &"blast", &"dash"]:
+		_armor_wear += maxf(raw, 0.0)
+		if _armor_wear >= max_hp * 0.6 and hp > 0.0:
+			armor_broken = true
+			armor_cracked.emit(self)
 	_knockback += direction * KNOCKBACK_FORCE * (1.0 - data.knockback_resist)
 	damaged.emit(self, amount, is_crit, kind)
 	if hp <= 0.0:
@@ -843,6 +860,7 @@ func _take_dot(amount: float, kind: String) -> void:
 	if data.is_boss():
 		amount = minf(amount * BOSS_DOT_SCALE, max_hp * BOSS_DOT_CAP)
 	hp -= amount
+	last_damage_kind = StringName(kind)
 	if status_sink.is_valid():
 		status_sink.call(self, amount, kind)
 	if hp <= 0.0:
@@ -1162,7 +1180,7 @@ func _animate(delta: float, desired: Vector2) -> void:
 		_boss_footstep(step_wave)
 	_pop = maxf(_pop - delta, 0.0)
 	var hurt := _pop / HIT_POP
-	var pop := 1.0 + hurt * 0.2
+	var pop := 1.0 + hurt * 0.08
 	var rise := 0.0
 	if _emerge > 0.0:
 		_emerge = maxf(_emerge - delta, 0.0)
@@ -1390,6 +1408,12 @@ class WarningDraw extends Node2D:
 func _draw_warnings(canvas: Node2D) -> void:
 	if data == null:
 		return
+	if armor_broken and is_alive():
+		var at := Vector2(data.radius * 0.9, -data.radius * 2.8)
+		var shield := PackedVector2Array([at + Vector2(-8, -8), at + Vector2(8, -8), at + Vector2(7, 2), at + Vector2(0, 9), at + Vector2(-7, 2), at + Vector2(-8, -8)])
+		canvas.draw_polyline(shield, UiStyle.OUTLINE, 6, true)
+		canvas.draw_polyline(shield, Color("#d8e3ea"), 2, true)
+		canvas.draw_polyline(PackedVector2Array([at + Vector2(2, -7), at + Vector2(-3, -1), at + Vector2(2, 1), at + Vector2(-2, 7)]), UiStyle.OUTLINE, 3, true)
 	if _brain != null:
 		_brain.draw(canvas)
 		return

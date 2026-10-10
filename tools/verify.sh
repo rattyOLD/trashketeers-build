@@ -49,7 +49,7 @@ XDG_DATA_HOME="$LOG/manual-fire-user" "$GODOT" --headless --path "$P" res://test
 if ! grep -q 'MANUAL_FIRE failures=0' "$LOG/manual-fire.log" || grep -q 'SCRIPT ERROR' "$LOG/manual-fire.log"; then
   fail=1
 fi
-XDG_DATA_HOME="$LOG/melee-user" "$GODOT" --headless --path "$P" res://test/melee_probe.tscn > "$LOG/melee.log" 2>&1
+XDG_DATA_HOME="$LOG/melee-user" timeout 90 "$GODOT" --headless --path "$P" res://test/melee_probe.tscn > "$LOG/melee.log" 2>&1
 if ! grep -q 'MELEE_PROBE failures=0' "$LOG/melee.log" || grep -q 'SCRIPT ERROR' "$LOG/melee.log"; then
   fail=1
 fi
@@ -92,6 +92,10 @@ if ! grep -q 'BATTLE_TACTICS failures=0' "$LOG/battle-tactics.log" || grep -qE '
 fi
 XDG_DATA_HOME="$LOG/navigation-choices-user" timeout 90 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/navigation_choices_test.tscn > "$LOG/navigation-choices.log" 2>&1
 if ! grep -q 'NAVIGATION_CHOICES failures=0' "$LOG/navigation-choices.log" || grep -qE 'SCRIPT ERROR|Lambda capture' "$LOG/navigation-choices.log"; then
+  fail=1
+fi
+XDG_DATA_HOME="$LOG/run-improvements-user" timeout 120 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/run_improvements_test.tscn > "$LOG/run-improvements.log" 2>&1
+if ! grep -q 'RUN_IMPROVEMENTS failures=0' "$LOG/run-improvements.log" || grep -qE 'SCRIPT ERROR|Lambda capture' "$LOG/run-improvements.log"; then
   fail=1
 fi
 XDG_DATA_HOME="$LOG/combat-polish-layout-user" timeout 90 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/combat_polish_layout_test.tscn > "$LOG/combat-polish-layout.log" 2>&1

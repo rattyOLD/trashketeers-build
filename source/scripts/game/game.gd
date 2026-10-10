@@ -237,8 +237,11 @@ func start(_weapon_id: StringName = &"") -> void:
 	minimap.pickups = pickups
 	events.loot_count.connect(hud.set_loot_left)
 	events.event_started.connect(func(_kind: int) -> void: _reroll_deal = true)
+	events.activity_reward.connect(_on_activity_reward)
+	events.encounter_requested.connect(_open_run_encounter)
 	enemies.enemy_died.connect(_on_enemy_died)
 	enemies.enemy_damaged.connect(_on_enemy_damaged)
+	enemies.enemy_armor_cracked.connect(func(enemy: Enemy) -> void: fx.armor_feedback(enemy.get_aim_point()))
 	enemies.enemy_exploded.connect(_on_enemy_exploded)
 	enemies.enemy_blocked.connect(_on_enemy_blocked)
 	enemies.enemy_blinked.connect(_on_enemy_blinked)
@@ -385,6 +388,8 @@ func _physics_process(delta: float) -> void:
 		hud.set_boss_posture((target as Enemy).posture_fraction(), (target as Enemy).posture_stun > 0.0)
 	if target == null and not finished and is_instance_valid(_task_nav_target) and _wave_task.accepts_target(_task_nav_target):
 		_arrow.track(camera.get_screen_center_position(), get_viewport_rect().size / camera.zoom, _task_nav_target, true)
+	elif target == null and not finished and events != null and is_instance_valid(events.activity) and events.activity.active:
+		_arrow.track(camera.get_screen_center_position(), get_viewport_rect().size / camera.zoom, events.activity, true)
 	else:
 		_arrow.track(camera.get_screen_center_position(), get_viewport_rect().size / camera.zoom, target)
 	_combo_timer -= delta
@@ -430,7 +435,7 @@ func _update_hud_timer() -> void:
 		_tick_order()
 		return
 	hud.set_wave(maxi(director.wave_number, 1), director.get_enemies_left(), director.chapter_index + 1, director.get_alive_count())
-	hud.set_survival_order(SaveService.nell_order(), _wave_task.rows())
+	hud.set_survival_order(SaveService.nell_order(), _optional_goal_rows())
 	_tick_order()
 
 
@@ -459,6 +464,7 @@ func _run_summary() -> Dictionary:
 		"loot": run_loot,
 		"blueprints": run_blueprints,
 		"combat_report": _combat_report.lines(player.is_dead),
+		"build_report": _build_report(),
 	}
 
 
@@ -574,6 +580,8 @@ func _on_wave_started(number: int, title: String, mood: String, is_boss: bool) -
 func _on_wave_cleared(number: int) -> void:
 	Platform.note_event("wave %d cleared" % number)
 	events.on_wave_cleared()
+	if is_instance_valid(_arrow) and _arrow._objective:
+		_arrow.hide()
 	_loot_at_clear = pickups.get_count()
 	if player != null and not player.is_dead:
 		player.visual.cheer()
@@ -924,16 +932,18 @@ func _on_enemy_died(enemy: Enemy) -> void:
 		player.external_pull = Vector2.ZERO
 	var at := enemy.global_position
 	var fall_dir := 1.0 if randf() < 0.5 else -1.0
+	var style := 1 if enemy.last_damage_kind == &"ice" or enemy.slow_left > 0.0 and enemy.slow_amount >= 0.9 else (2 if enemy.last_damage_kind == &"shock" else (3 if enemy.last_damage_kind in [&"fire", &"burn"] or enemy.bleed_is_burn and enemy.bleed_left > 0.0 else 0))
 	if enemy.is_framed():
-		fx.frame_corpse(enemy.get_sprite(), at + enemy.get_sprite_offset(), enemy.get_sprite_scale())
+		fx.frame_corpse(enemy.get_sprite(), at + enemy.get_sprite_offset(), enemy.get_sprite_scale(), style)
 	else:
-		fx.corpse(enemy.get_texture(), enemy.get_corpse_origin(), enemy.get_sprite_scale(), fall_dir, enemy.get_corpse_tint())
+		fx.corpse(enemy.get_texture(), enemy.get_corpse_origin(), enemy.get_sprite_scale(), fall_dir, enemy.get_corpse_tint(), style)
 	var body := enemy.get_aim_point()
-	fx.burst(body, data.fx_color, 16 if not data.is_boss() else 70, 340.0, 4.5)
-	fx.chunks(body, data.fx_color, 7 if not data.is_boss() else 30, 240.0, 5.0)
-	fx.chunks(body, Color("#8e8aa6"), 4, 180.0, 4.0)
-	fx.splat(at + Vector2(0, 6), data.fx_color.darkened(0.2), data.radius * 1.3)
-	fx.ring(at, data.fx_color, data.radius * 2.2)
+	if fx.allow_defeat_fx(data.is_boss()):
+		fx.burst(body, data.fx_color, 5 if not data.is_boss() else 70, 240.0, 3.5)
+		fx.chunks(body, data.fx_color, 2 if not data.is_boss() else 30, 180.0, 4.0)
+		fx.splat(at + Vector2(0, 6), data.fx_color.darkened(0.2), data.radius)
+		if data.is_boss():
+			fx.ring(at, data.fx_color, data.radius * 2.2)
 	_split_enemy(enemy, at)
 	if enemy.self_destructed:
 		return
@@ -1640,7 +1650,69 @@ func _open_orders() -> void:
 		return
 	var screen := OrdersScreen.new()
 	add_child(screen)
-	screen.open(SaveService.nell_order(), story.goal_rows() if story != null else _wave_task.rows(), stats if stats.patch_context else null)
+	screen.open(SaveService.nell_order(), story.goal_rows() if story != null else _optional_goal_rows(), stats if stats.patch_context else null)
+
+
+func _optional_goal_rows() -> Array:
+	var rows := _wave_task.rows()
+	if events != null:
+		rows.append_array(events.goal_rows())
+	return rows
+
+
+func _on_activity_reward(coins: int) -> void:
+	if finished:
+		return
+	nuts += coins
+	hud.set_nuts(nuts)
+	hud.toast("СОБЫТИЕ ВЫПОЛНЕНО", "+%d монет" % coins, UiStyle.GOLD)
+	if is_instance_valid(_arrow) and _arrow._objective:
+		_arrow.hide()
+
+
+func _open_run_encounter(who: String) -> void:
+	if finished or player.is_dead or get_tree().paused:
+		events.activity.reset()
+		return
+	_clear_encounter_input()
+	var window := RunEncounter.new(who, events.activity.reward + 30)
+	var layer := CanvasLayer.new()
+	layer.layer = 72
+	layer.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(layer)
+	layer.add_child(window)
+	window.tree_exited.connect(layer.queue_free)
+	window.chosen.connect(_resolve_run_encounter)
+	window.begin()
+
+
+func _resolve_run_encounter(risky: bool) -> void:
+	if finished or not is_instance_valid(events.activity):
+		return
+	_clear_encounter_input()
+	events.activity.choose_risk(risky)
+
+
+func _clear_encounter_input() -> void:
+	_mouse_fire = false
+	player.move_input = Vector2.ZERO
+	player.weapon_controller.trigger = false
+	hud.joystick._reset()
+	hud.aim_stick._reset()
+
+
+func _build_report() -> String:
+	var lines: PackedStringArray = []
+	for combo: Dictionary in Patches.SETS:
+		if stats.patch_set_titles().has(combo["title"]):
+			lines.append("%s · %s" % [combo["title"], combo["desc"]])
+	var next := Patches.next_unlock()
+	if not next.is_empty():
+		var need := Patches.ORDER_UNLOCKS.find(next) + 1 - int(SaveService.data.get("nell_orders_completed", 0))
+		lines.append("До нашивки «%s» — ещё %d %s Нэлл" % [Patches.CATALOG[next]["title"], maxi(need, 1), SaveService.plural(maxi(need, 1), "заказ", "заказа", "заказов")])
+	else:
+		lines.append("Все нашивки открыты")
+	return "\n".join(lines)
 
 
 func _refresh_slots() -> void:

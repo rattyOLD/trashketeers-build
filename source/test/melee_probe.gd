@@ -19,10 +19,21 @@ func _wait(sec: float) -> void:
 
 
 func _run() -> void:
-	await _wait(0.6)
+	for i in 300:
+		if main._screen != null and main._loading == null:
+			break
+		await _wait(0.1)
 	main._start_game(SaveService.get_selected_weapon())
-	await _wait(2.5)
+	for i in 300:
+		if main._screen is Game and main._screen.player != null and main._screen.director != null:
+			break
+		await _wait(0.1)
 	var game := main._screen as Game
+	if game == null or game.player == null or game.director == null:
+		push_error("MELEE_PROBE FAIL: battle did not finish loading")
+		print("MELEE_PROBE failures=1")
+		get_tree().quit(1)
+		return
 	game.director.set_physics_process(false)
 	var wc := game.player.weapon_controller
 	var shots := [0]

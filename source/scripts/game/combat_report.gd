@@ -7,6 +7,7 @@ const KIND_NAMES := {
 	&"blast": "взрывы", &"fire": "огонь", &"poison": "яд",
 	&"shock": "электричество", &"bleed": "кровотечение",
 	&"ice": "холод", &"dash": "рывок",
+	&"acid": "кислота на карте",
 }
 var enemy_damage := 0.0
 var damage_by_kind := {}
@@ -63,16 +64,21 @@ func avoidance_tip() -> String:
 func lines(dead: bool) -> String:
 	if enemy_damage <= 0.0 and received <= 0.0:
 		return ""
-	var top: StringName = &"other"
-	var largest := 0.0
-	for kind: StringName in damage_by_kind:
-		if float(damage_by_kind[kind]) > largest:
-			top = kind
-			largest = float(damage_by_kind[kind])
 	var result := "Урон по врагам: %d" % roundi(enemy_damage)
-	if largest > 0.0:
-		result += "\nОсновной тип: %s · %d%%" % [str(KIND_NAMES.get(top, "эффекты")), roundi(largest / enemy_damage * 100.0)]
+	var breakdown := damage_breakdown()
+	for row: Dictionary in breakdown:
+		result += "\n%s: %d · %d%%" % [row["title"], roundi(row["amount"]), roundi(row["amount"] / maxf(enemy_damage, 1.0) * 100.0)]
 	result += "\nПотеряно HP: %d" % roundi(received)
 	if dead and received > 0.0:
 		result += " · последний удар: " + source_title()
 	return result
+
+
+func damage_breakdown() -> Array[Dictionary]:
+	var rows: Array[Dictionary] = []
+	for kind: StringName in damage_by_kind:
+		rows.append({"title": KIND_NAMES.get(kind, "эффекты"), "amount": float(damage_by_kind[kind])})
+	rows.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["amount"] > b["amount"])
+	if rows.size() > 3:
+		rows.resize(3)
+	return rows

@@ -85,6 +85,16 @@ var melee_offset := 0.0
 var melee_scale := 1.0
 var skin_effect := ""
 var dashing := false
+var _action := ""
+var _action_left := 0.0
+var _burst_shots := 0
+var _hero_id := "raccoon"
+const ACTION_TIME := 0.42
+const GESTURES := {
+	"raccoon": [14.0, 0.025], "red_panda": [20.0, -0.035], "snow": [6.0, 0.015],
+	"night": [7.0, -0.02], "neon_hopper": [24.0, 0.04], "fluffy_chemist": [10.0, -0.035],
+	"pigeon_mafioso": [5.0, 0.025], "sniper_f": [7.0, -0.02], "medic_f": [10.0, 0.02],
+}
 ## 0..1 — положение бегущего блика по стволу (Idle-анимация меню).
 var glint := 0.0
 
@@ -233,6 +243,7 @@ func apply_skin(skin: Dictionary) -> void:
 
 ## Герой + наряд → параметры шейдера. Регионы наряда перекрывают регионы героя.
 func apply_look(character: Dictionary, skin: Dictionary) -> void:
+	_hero_id = str(character.get("id", "raccoon"))
 	skin_effect = str(skin.get("effect", ""))
 	if not _rig_ok:
 		return
@@ -538,6 +549,10 @@ func update_motion(velocity: Vector2, aim: Vector2, delta: float) -> void:
 	if _shoot_t > 0.0:
 		_shoot_phase = fmod(_shoot_phase + delta, SHOOT_ANIM_TIME)
 	_shoot_t = maxf(_shoot_t - delta, 0.0)
+	_action_left = maxf(_action_left - delta, 0.0)
+	if not preview_mode and not melee_active and not aiming and not dashing and not _dead and _shoot_t <= 0.0 and _burst_shots >= (1 if weapon_icon in [&"shotgun", &"double", &"revolver"] else 6):
+		play_action("ready")
+		_burst_shots = 0
 	_flash = maxf(_flash - delta, 0.0)
 	_hurt = maxf(_hurt - delta, 0.0)
 	_pickup = maxf(_pickup - delta, 0.0)
@@ -566,6 +581,8 @@ func update_motion(velocity: Vector2, aim: Vector2, delta: float) -> void:
 	_update_face(delta)
 	_update_pose()
 	var target := _carry_angle()
+	if _action == "ready" and _action_left > 0.0 and not aiming and not dashing:
+		target += sin(_action_left / ACTION_TIME * PI) * 0.12
 	if aiming and aim.length_squared() > 0.0001:
 		target = _local_angle(aim) + sin(_gait) * 0.012 * _run
 	_carry_lag = lerpf(_carry_lag, clampf(-local_accel * 0.00022, -0.14, 0.14), clampf(9.0 * delta, 0.0, 1.0))
@@ -596,6 +613,10 @@ func flash() -> void:
 
 ## Отдача: ствол уходит назад, тело — чуть против выстрела, голова кивает.
 func kick(direction: Vector2, strength: float) -> void:
+	if not melee_active:
+		_burst_shots = mini(_burst_shots + 1, 6)
+	if _action == "ready":
+		_action_left = 0.0
 	if _shoot_t <= 0.0:
 		_shoot_phase = 0.0
 	_shoot_t = SHOOT_ANIM_TIME
@@ -618,6 +639,16 @@ func cheer() -> void:
 	_cheer = CHEER_TIME
 	_tail_spring.kick(4.0)
 	_ear_spring.kick(4.0)
+
+
+## Короткая подготовка оружия/навыка движет целую позу, не отдельные слои кистей.
+func play_action(action: String) -> void:
+	if _dead or preview_mode:
+		return
+	_action = action
+	if action == "ready":
+		_burst_shots = 0
+	_action_left = ACTION_TIME
 
 
 func play_death() -> void:
@@ -761,7 +792,9 @@ func _update_pose() -> void:
 	_hop = 0.0
 	if _cheer > 0.0:
 		var c := 1.0 - _cheer / CHEER_TIME
-		_hop = sin(clampf(c / 0.55, 0.0, 1.0) * PI) * 22.0
+		var gesture: Array = GESTURES.get(_hero_id, GESTURES["raccoon"])
+		_hop = sin(clampf(c / 0.55, 0.0, 1.0) * PI) * float(gesture[0])
+		_sway += sin(c * PI) * float(gesture[1])
 		if c < 0.1:
 			_squash -= 0.12 * (1.0 - c / 0.1)
 	if _dead and not _clip_mode:
@@ -784,6 +817,11 @@ func _update_pose() -> void:
 		if _dead:
 			_squash = 1.0
 			_sway = 0.0
+	if not _dead and _action_left > 0.0 and _action == "skill":
+		var action_amount := sin(_action_left / ACTION_TIME * PI)
+		var gesture: Array = GESTURES.get(_hero_id, GESTURES["raccoon"])
+		_bob += action_amount * float(gesture[0]) * 0.15
+		_sway += action_amount * float(gesture[1])
 
 
 ## Трансформ «пиксели текстуры относительно точки опоры → локальные координаты узла».

@@ -90,6 +90,7 @@ func try_use() -> bool:
 	if _shake.is_valid():
 		_shake.call(0.35)
 	SoundManager.play(&"shield_up")
+	_player.visual.play_action("skill")
 	used.emit(str(skill["id"]))
 	return true
 

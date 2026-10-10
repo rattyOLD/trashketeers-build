@@ -137,6 +137,27 @@ var _bo_seed := PackedFloat32Array()
 var _bo_next := 0
 
 var _font: Font
+var _defeat_budget := 6.0
+var _armor_budget := 2.0
+var _co_style := PackedInt32Array()
+var _fc_style := PackedInt32Array()
+
+
+func allow_defeat_fx(boss: bool = false) -> bool:
+	if boss:
+		return true
+	if _defeat_budget < 1.0:
+		return false
+	_defeat_budget -= 1.0
+	return true
+
+
+func armor_feedback(at: Vector2) -> void:
+	if _armor_budget < 1.0:
+		return
+	_armor_budget -= 1.0
+	burst(at, Color("#b6bdc5"), 4, 170.0, 3.0)
+	popup(at + Vector2(0, -40), "БРОНЯ ПРОБИТА", Color("#d8e3ea"), 20)
 
 
 class DrawLayer:
@@ -304,7 +325,7 @@ func attach_ground(decals_layer: Node2D) -> void:
 
 
 ## Смерть покадрового врага: кадры клипа death поверх земли, окрас и обводка — как у живой особи.
-func frame_corpse(source: RigSprite, at: Vector2, sprite_scale: Vector2) -> void:
+func frame_corpse(source: RigSprite, at: Vector2, sprite_scale: Vector2, style: int = 0) -> void:
 	if not source.is_framed() or not FrameDB.has_clip(source.frame_sheet, "death"):
 		return
 	var k := _fc_next
@@ -323,6 +344,7 @@ func frame_corpse(source: RigSprite, at: Vector2, sprite_scale: Vector2) -> void
 	node.set_param("alpha", 1.0)
 	node.visible = true
 	_fc_life[k] = FRAME_CORPSE_LIFE
+	_fc_style[k] = style
 
 
 ## Вспышка-картинка (взрыв с концепт-листа): width — ширина в мире, растёт на 25% и гаснет.
@@ -546,7 +568,7 @@ func splat(at: Vector2, color: Color, radius: float, life: float = SPLAT_LIFE) -
 
 
 ## Короткая анимация падения вместо исчезновения: спрайт заваливается набок, плющится и гаснет.
-func corpse(texture: Texture2D, at: Vector2, sprite_scale: Vector2, knock_dir: float, tint: Color = Color.WHITE) -> void:
+func corpse(texture: Texture2D, at: Vector2, sprite_scale: Vector2, knock_dir: float, tint: Color = Color.WHITE, style: int = 0) -> void:
 	if texture == null:
 		return
 	var k := _co_next
@@ -557,6 +579,7 @@ func corpse(texture: Texture2D, at: Vector2, sprite_scale: Vector2, knock_dir: f
 	_co_life[k] = CORPSE_LIFE
 	_co_dir[k] = knock_dir
 	_co_color[k] = tint
+	_co_style[k] = style
 
 
 ## Послеобраз рывка.
@@ -630,6 +653,12 @@ func _tick_frame_corpses(delta: float) -> void:
 		node.set_param("flash", maxf(0.7 - age * 5.0, 0.0))
 		node.set_param("alpha", clampf(_fc_life[i] / FRAME_CORPSE_FADE, 0.0, 1.0))
 		var base: Color = _fc_tint[i]
+		if _fc_style[i] == 1:
+			base = base.lerp(Color("#a7dce9"), 0.45)
+		elif _fc_style[i] == 2:
+			node.rotation = sin(age * 60.0) * 0.035 * maxf(1.0 - age * 3.0, 0.0)
+		elif _fc_style[i] == 3:
+			base = base.darkened(0.35)
 		node.set_param("tint", base.darkened(0.3 * clampf(age / 0.8, 0.0, 1.0)))
 
 
@@ -657,6 +686,8 @@ func _text(at: Vector2, text: String, color: Color, font_size: float) -> void:
 
 
 func _process(delta: float) -> void:
+	_defeat_budget = minf(_defeat_budget + delta * 10.0 * BattleQuality.particle_scale, 6.0)
+	_armor_budget = minf(_armor_budget + delta * 3.0, 2.0)
 	for i in FLIPBOOK_POOL:
 		var book := _fb_nodes[i]
 		if not book.visible:
@@ -1042,10 +1073,19 @@ func _draw_ground(canvas: CanvasItem) -> void:
 		var angle := _co_dir[i] * (PI * 0.5) * (1.0 - pow(1.0 - fall, 3.0))
 		var squash := 1.0 - 0.25 * fall
 		var scale := _co_scale[i] * Vector2(1.0 + 0.1 * fall, squash)
+		if _co_style[i] == 1:
+			angle *= 0.15
+			scale *= 1.0 - 0.15 * fall
+		elif _co_style[i] == 2:
+			angle += sin(t * 70.0) * 0.08 * (1.0 - fall)
 		var alpha := clampf((1.0 - t) / 0.45, 0.0, 1.0)
 		var tex := _co_tex[i]
 		canvas.draw_set_transform(_co_pos[i] + Vector2(0, -8.0 * (1.0 - fall)), angle, scale)
 		var tint := _co_color[i].darkened(0.35 * fall)
+		if _co_style[i] == 1:
+			tint = tint.lerp(Color("#a7dce9"), 0.45)
+		elif _co_style[i] == 3:
+			tint = tint.darkened(fall * 0.4)
 		tint.a = alpha
 		canvas.draw_texture(tex, -tex.get_size() * 0.5, tint)
 	canvas.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
@@ -1076,6 +1116,8 @@ func _draw_chunk(i: int, alpha: float) -> void:
 
 
 func _resize_all() -> void:
+	_co_style.resize(CORPSE_CAPACITY)
+	_fc_style.resize(FRAME_CORPSE_POOL)
 	# Новые Packed-массивы заполняются нулями: life = 0 означает «частица мертва».
 	_mk_pos = PackedVector2Array(); _mk_pos.resize(MARK_CAPACITY)
 	_mk_life = PackedFloat32Array(); _mk_life.resize(MARK_CAPACITY)

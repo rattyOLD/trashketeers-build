@@ -348,6 +348,7 @@ func _on_weapon_changed(weapon: WeaponData) -> void:
 	visual.weapon_color = weapon.effect_color
 	visual.weapon_icon = weapon.icon
 	visual.recoil_recovery = WeaponFeel.recovery(weapon)
+	visual.play_action("ready")
 
 
 func _on_melee_swing(weapon: WeaponData, _origin: Vector2, direction: Vector2, _combo: int, heavy: bool, _side: float) -> void:

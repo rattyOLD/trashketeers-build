@@ -18,6 +18,9 @@ extends Node2D
 signal object_destroyed(object: DestructibleObject)
 signal crate_landed(crate: DestructibleObject)
 
+var passages: Array[MapPassage] = []
+var _passage_clear: Array[Rect2] = []
+
 enum CellType { EMPTY, WALL, COVER, DESTRUCTIBLE }
 enum Zone { EDGE, FLOOR, LANE, LAWN, BOSS, GATE }
 
@@ -148,6 +151,7 @@ func build(layers: BiomeLayers, chapter_def: Dictionary) -> void:
 	_build_gates()
 	_build_lamps()
 	_build_spotlights()
+	_build_route_features()
 	_build_cover()
 	_build_destructibles()
 	_build_decor()
@@ -183,6 +187,8 @@ func clear() -> void:
 	towers.clear()
 	safes.clear()
 	shrines.clear()
+	passages.clear()
+	_passage_clear.clear()
 	story_cells.clear()
 	_story_clear.clear()
 	_portal = null
@@ -201,6 +207,8 @@ func attach_player(player: Player) -> void:
 		if is_instance_valid(shrine):
 			shrine.player = player
 	_player = player
+	for passage in passages:
+		passage.player = player
 	if _world_life != null and is_instance_valid(_world_life):
 		_world_life.attach(player)
 
@@ -1175,6 +1183,9 @@ func _interior_rect() -> Rect2:
 
 ## Точка допустима для укрытия: не на дорожках, не у центра, старта, помоста и ворот.
 func _cover_allowed(p: Vector2, margin: float) -> bool:
+	for area in _passage_clear:
+		if area.grow(maxf(margin, 0.0)).has_point(p):
+			return false
 	# Берега протоки и съезды с мостов свободны: ничего не загораживает переправу.
 	if not _river_points.is_empty() and absf(p.x - AcidRiver._x_at(_river_points, p.y)) < RIVER_WIDTH * 0.5 + 190.0 + margin * 0.5:
 		return false
@@ -1849,8 +1860,47 @@ func _build_ground_detail() -> void:
 		detail.build(spots, randi(), layout == "bank")
 
 
-## Выживание 2.0: расставляет вышки-ретрансляторы и сейфы хлама по открытой земле, вдали от старта,
-## площади и босса, не ближе 650 px друг к другу — карта зовёт исследовать её, как в аналогах.
+## Два коротких обхода: закрытый хламом проход, дверной шлюз или сужение на крышах.
+## Ставятся до проверки связности; разрушение использует обычный _on_object_destroyed.
+func _build_route_features() -> void:
+	if not _story.is_empty():
+		return
+	var map_id := str(chapter.get("map_card", ""))
+	var theme := "roof" if map_id == "pigeon_roofs" else ("vault" if map_id == "gold_vault" or layout == "bank" else "junk")
+	var anchors: Array[Vector2] = []
+	for attempt in 500:
+		if anchors.size() >= 2:
+			break
+		var area := _interior_rect().grow(-240.0)
+		var at := Vector2(randf_range(area.position.x, area.end.x), randf_range(area.position.y, area.end.y))
+		at = _origin + ((at - _origin) / CELL).round() * CELL
+		if layout == "bank" and surface_at(at) != &"stone":
+			continue
+		if not _shrine_spot_ok(at, player_start, anchors) or not is_area_clear(at, 260.0):
+			continue
+		if towers.any(func(n: Node2D) -> bool: return n.position.distance_to(at) < 350.0) or safes.any(func(n: Node2D) -> bool: return n.position.distance_to(at) < 350.0) or shrines.any(func(n: Node2D) -> bool: return n.position.distance_to(at) < 350.0):
+			continue
+		anchors.append(at)
+		var passage := MapPassage.new()
+		passage.theme = theme
+		passage.position = at
+		_own(passage, _layers.decals)
+		passages.append(passage)
+		for x in [-90, 90] if theme == "vault" else ([-145, 145] if theme == "roof" else [-185, 185]):
+			for y in [-65, 65]:
+				_place_prop(at + Vector2(x, y), "column" if theme == "vault" else ("z_water_tank" if theme == "roof" else "container"), false)
+		if theme != "roof":
+			passage.door = _place_destructible(at, "vault_door" if theme == "vault" else "d_dumpster")
+			if passage.door != null:
+				passage.door.destroyed.connect(passage.on_opened)
+			if passage.door != null and theme == "vault":
+				passage.door.max_hp = 120.0
+				passage.door.hp = 120.0
+				passage.door.nut_reward = 12
+		_passage_clear.append(Rect2(at - Vector2(240, 260), Vector2(480, 520)))
+
+
+## Вышки, сейфы и особые объекты вдали от старта, площади и босса.
 func _build_run_shrines(area: Rect2, center: Vector2) -> void:
 	# Как в аналогах: карта делится на зоны 3×4, в каждой зоне — самое просторное место (больше всего
 	# свободного пространства вокруг), объекты не ближе 480 px друг к другу. Так они равномерно разнесены
@@ -2493,6 +2543,11 @@ func _place_crate(base: Vector2) -> DestructibleObject:
 ## 1) все клетки под формой пусты; 2) Shape2D.collide с уже поставленными формами в соседних
 ## клетках (с запасом OVERLAP_MARGIN).
 func _can_place(shape: Shape2D, center: Vector2) -> bool:
+	var footprint := shape.get_rect()
+	footprint.position += center
+	for area in _passage_clear:
+		if area.intersects(footprint):
+			return false
 	var covered := _covered_cells(shape, center)
 	for cell in covered:
 		if not _inside(cell) or cells[_index(cell)] != CellType.EMPTY:

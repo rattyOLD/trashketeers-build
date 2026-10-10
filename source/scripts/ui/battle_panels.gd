@@ -381,6 +381,7 @@ class RunResultPanel:
 	var _panel: PanelContainer
 	var _title: Label
 	var _subtitle: Label
+	var _report_scroll: DragScroll
 	var _tip_box: PanelContainer
 	var _tip_label: Label
 	var _upgrade_button: Button
@@ -482,7 +483,13 @@ class RunResultPanel:
 		_tip_box.add_theme_stylebox_override("panel", UiStyle.box(Color(0.16, 0.1, 0.05, 0.95), Color("#ff9a3d"), 4, 18))
 		_tip_label = UiStyle.label("", 20, Color("#ffe2b8"), 5)
 		_tip_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		_tip_box.add_child(_tip_label)
+		_report_scroll = DragScroll.new()
+		_report_scroll.custom_minimum_size = Vector2(0, 210)
+		_report_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		_tip_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		_tip_label.custom_minimum_size.x = (640.0 if Orient.portrait else 380.0) - 72.0
+		_report_scroll.add_child(_tip_label)
+		_tip_box.add_child(_report_scroll)
 		_tip_box.visible = false
 		right.add_child(_tip_box)
 		_upgrade_button = UiStyle.button("ПРОКАЧАТЬСЯ", Color("#2fae5f"), 34, Vector2(0, 92))
@@ -610,8 +617,12 @@ class RunResultPanel:
 		_total.text = "На счету: %s · %s" % [SaveService.format_coins(int(summary.get("total_coins", 0))), Economy.format_gems(SaveService.get_gems())]
 		var tip := str(summary.get("tip", ""))
 		var report := str(summary.get("combat_report", ""))
+		var build := str(summary.get("build_report", ""))
+		if not build.is_empty():
+			report += ("\n" if not report.is_empty() else "") + build
 		_tip_box.visible = not tip.is_empty() or not report.is_empty()
 		_upgrade_button.visible = not tip.is_empty()
+		_report_scroll.scroll_vertical = 0
 		_tip_label.text = report + ("\n\n" if not report.is_empty() and not tip.is_empty() else "") + tip
 		visible = true
 		_appear.call_deferred()
