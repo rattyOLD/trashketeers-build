@@ -54,6 +54,19 @@ func _ready() -> void:
 		battle_actor.kick(Vector2.RIGHT, 1.0)
 		battle_actor.update_motion(Vector2.ZERO, Vector2.RIGHT, 1.0 / 60.0)
 		_check(battle_actor._clip_cur == "shoot", id + " battle retains shoot animation")
+		battle_actor._run = 0.19
+		battle_actor._clip_pick()
+		_check(battle_actor._clip_cur == "run", id + " firing while walking keeps running legs")
+		battle_actor._run = 0.14
+		battle_actor._clip_pick()
+		_check(battle_actor._clip_cur == "run", id + " small speed drop keeps run")
+		battle_actor._run = 0.07
+		battle_actor._shoot_t = 0.0
+		battle_actor._clip_pick()
+		_check(battle_actor._clip_cur == "idle", id + " stop returns to stance")
+		battle_actor._run = 0.14
+		battle_actor._clip_pick()
+		_check(battle_actor._clip_cur == "idle", id + " small speed rise keeps idle")
 		battle_actor.free()
 	print("MENU_PREVIEW_MOTION failures=", failures)
 	get_tree().quit(0 if failures == 0 else 1)

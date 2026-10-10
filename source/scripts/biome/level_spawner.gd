@@ -583,8 +583,8 @@ void fragment() {
 	vec4 c = texture(TEXTURE, UV);
 	float l = dot(c.rgb, vec3(0.3, 0.55, 0.15));
 	vec3 grey = vec3(l);
-	vec3 rgb = mix(grey, c.rgb, 0.55);
-	rgb = mix(vec3(0.22, 0.2, 0.3), rgb, 0.72);
+	vec3 rgb = mix(grey, c.rgb, 0.42);
+	rgb = mix(vec3(0.22, 0.2, 0.3), rgb, 0.65);
 	COLOR = vec4(rgb * vec3(0.92, 0.9, 1.0), c.a);
 }
 """

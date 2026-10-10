@@ -73,6 +73,7 @@ const MUSIC_RANGE := 1100.0
 
 
 func build(ground_parent: Node2D, air_parent: Node2D) -> void:
+	add_to_group(&"battle_ambience")
 	quality = SaveService.get_quality()
 	_ground = FxManager.DrawLayer.new()
 	_ground.painter = _paint_ground
@@ -403,6 +404,7 @@ func _process(delta: float) -> void:
 	_time += delta
 	var vp := get_viewport()
 	_view = vp.get_canvas_transform().affine_inverse() * vp.get_visible_rect()
+	_ground.visible = quality > 0
 	if quality > 0:
 		_update_flocks(delta)
 		_update_bits(delta)
@@ -415,6 +417,8 @@ func _process(delta: float) -> void:
 
 
 func _paint_ground(ci: CanvasItem) -> void:
+	if quality == 0:
+		return
 	for c: Vector3 in _clouds:
 		var at := Vector2(c.x, c.y)
 		if not _view.grow(c.z).has_point(at):
@@ -465,6 +469,8 @@ func _paint_air(ci: CanvasItem) -> void:
 		if not _view.grow(200.0).intersects(Rect2(a, Vector2.ZERO).expand(b)):
 			continue
 		_draw_rope(ci, a, b, r[2])
+	if quality == 0:
+		return
 	for flock: Dictionary in _flocks:
 		if int(flock["state"]) == 0 or int(flock["state"]) == 2:
 			continue

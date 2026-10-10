@@ -404,14 +404,14 @@ func eject_casing(at: Vector2, aim: Vector2, kind: String) -> void:
 
 
 func burst(at: Vector2, color: Color, count: int, speed: float = 240.0, size: float = 3.5) -> void:
-	for i in count:
+	for i in BattleQuality.particles(count):
 		_spark(at, Vector2.from_angle(randf() * TAU) * speed * randf_range(0.35, 1.0), color, size)
 
 
 ## Искры конусом по направлению удара (попадание пули, выстрел).
 func burst_dir(at: Vector2, direction: Vector2, color: Color, count: int, spread: float = 0.7, speed: float = 320.0, size: float = 3.0) -> void:
 	var base := direction.angle()
-	for i in count:
+	for i in BattleQuality.particles(count):
 		var angle := base + randf_range(-spread, spread)
 		_spark(at, Vector2.from_angle(angle) * speed * randf_range(0.4, 1.0), color, size)
 
@@ -508,7 +508,7 @@ func callout(at: Vector2, text: String, color: Color, font_size: float) -> void:
 
 ## Разлёт обломков (мех, слизь, осколки) с гравитацией и отскоком от земли.
 func chunks(at: Vector2, color: Color, count: int, speed: float = 220.0, size: float = 5.0) -> void:
-	for i in count:
+	for i in BattleQuality.particles(count):
 		var k := _ch_next
 		_ch_next = (_ch_next + 1) % CHUNK_CAPACITY
 		_ch_pos[k] = at
@@ -522,7 +522,7 @@ func chunks(at: Vector2, color: Color, count: int, speed: float = 220.0, size: f
 
 
 func confetti(at: Vector2, count: int = 60) -> void:
-	for i in count:
+	for i in BattleQuality.particles(count):
 		var k := _ch_next
 		_ch_next = (_ch_next + 1) % CHUNK_CAPACITY
 		_ch_pos[k] = at + Vector2(randf_range(-40, 40), randf_range(-20, 20))

@@ -248,12 +248,13 @@ func _draw() -> void:
 			b.reset_transform()
 		elif _kind[i] == Kind.XP:
 			var bob := sin(_time * 5.0 + i) * 3.0
-			var big := 1.0 + 0.25 * (_value[i] - 1)
+			var big := minf(1.8, 1.0 + 0.25 * (_value[i] - 1))
 			b.circle(_pos[i] + Vector2(0, 8), 7.0 * big, Color(0, 0, 0, 0.25))
 			b.set_transform(_pos[i] + Vector2(0, bob - 4), 0.0, Vector2.ONE * big)
 			b.texture_rect(Rect2(-xp_half, xp_size), _atlas_uv[ATLAS_XP])
 			b.reset_transform()
 		else:
+			b.circle(_pos[i], nut_half.x + 2.0, Color("#14120f"))
 			b.texture_rect(Rect2(_pos[i] - nut_half, nut_size), _atlas_uv[ATLAS_NUT])
 	b.flush(self)
 

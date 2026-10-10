@@ -100,6 +100,7 @@ var story_mission := ""
 var story: StoryRun
 var radio: SurvivalRadio
 var wanted: Wanted
+var _wave_task := WaveTask.new()
 var liquids: LiquidFx
 var story_target: Node2D
 var _switching := false
@@ -137,6 +138,7 @@ static func warm_chapter(chapter: Dictionary) -> void:
 
 
 func start(_weapon_id: StringName = &"") -> void:
+	stats.patch_context = story_mission.is_empty()
 	randomize()
 	RunMods.clear()
 	MapCards.clear()
@@ -402,7 +404,7 @@ func _update_hud_timer() -> void:
 		_tick_order()
 		return
 	hud.set_wave(maxi(director.wave_number, 1), director.get_enemies_left(), director.chapter_index + 1, director.get_alive_count())
-	hud.set_survival_order(SaveService.nell_order())
+	hud.set_survival_order(SaveService.nell_order(), _wave_task.rows())
 	_tick_order()
 
 
@@ -411,6 +413,8 @@ func _tick_order() -> void:
 	if not done.is_empty():
 		hud.order_completed(done)
 		hud.toast("ЗАКАЗ НЭЛЛ ВЫПОЛНЕН", "%s. Награда: +%d монет, +%d неонита" % [done["title"], done["nuts"], done["dust"]], Color("#5ff2ff"))
+		if done.has("patch_unlock"):
+			hud.toast("НОВАЯ НАШИВКА", str(done["patch_unlock"]) + " — теперь выпадает в Выживании.", UiStyle.GOLD)
 		SoundManager.play(&"level_up", -4.0, false)
 
 
@@ -488,6 +492,7 @@ func _run_summary_lines() -> PackedStringArray:
 # --- Главы и волны --------------------------------------------------------------------------------
 
 func _apply_chapter_look(chapter: Dictionary) -> void:
+	_apply_visual_budget()
 	var grade: Dictionary = chapter.get("grade", {})
 	if not grade.is_empty():
 		var sh: Array = grade.get("shadow", [0.1, 0.02, 0.16])
@@ -497,6 +502,7 @@ func _apply_chapter_look(chapter: Dictionary) -> void:
 
 func _on_wave_started(number: int, title: String, mood: String, is_boss: bool) -> void:
 	Platform.note_event("wave %d %s boss=%s" % [number, title, is_boss])
+	_wave_task.start(director._wave.get("task", {}) if story_mission.is_empty() and not is_boss and not director.is_mini_wave() else {})
 	if story_mission.is_empty() and player != null:
 		_wave_hp.append("%d:%d" % [number, int(100.0 * player.hp / maxf(player.max_hp, 1.0))])
 	_last_marker.reset_hunt()
@@ -934,6 +940,10 @@ func _on_enemy_died(enemy: Enemy) -> void:
 	# бой с боссом не ферма. Остальные враги дают лут как обычно, в том числе убитые во время боя.
 	if not enemy.boss_minion:
 		_drop_enemy_loot(enemy, data, at)
+		if _wave_task.kill(data.id, false):
+			nuts += _wave_task.reward
+			hud.set_nuts(nuts)
+			hud.toast("ЦЕЛЬ ВОЛНЫ", "%s · +%d монет" % [_wave_task.title, _wave_task.reward], UiStyle.GOLD)
 	if data.is_boss():
 		_on_boss_killed(enemy, at)
 		return
@@ -1231,7 +1241,7 @@ func _on_safe_requested(safe: JunkSafe) -> void:
 	SoundManager.play(&"star_dust", -4.0, false)
 	fx.confetti(safe.global_position + Vector2(0, -40), 24)
 	var rank := _roll_rarity(0.1)
-	var choices := stats.roll_choices(ContentDB.get_upgrades(), 3, 0.35 + stats.get_stat(&"luck"), rank)
+	var choices := stats.roll_choices(_upgrade_pool(), 3, 0.35 + stats.get_stat(&"luck"), rank)
 	if not choices.is_empty():
 		_queue_bonus(choices, "СЕЙФ ВСКРЫТ!")
 
@@ -1317,13 +1327,13 @@ func _ring_enemy_died(enemy: Enemy) -> void:
 		return
 	hud.toast("РИНГ ВЗЯТ!", "Элита повержена — награда.", Color("#ff7a3d"))
 	pickups.spawn(_ring_at, 25)
-	_queue_bonus(stats.roll_choices(ContentDB.get_upgrades(), 3, 0.5 + stats.get_stat(&"luck"), maxi(_roll_rarity(0.2), 1)), "НАГРАДА РИНГА!")
+	_queue_bonus(stats.roll_choices(_upgrade_pool(), 3, 0.5 + stats.get_stat(&"luck"), maxi(_roll_rarity(0.2), 1)), "НАГРАДА РИНГА!")
 
 
 ## Барыга Шнырь: 3 карточки по цене редкости; кнопка переброса — «Уйти».
 func _open_dealer() -> bool:
 	var chapter_k := (1.0 + 0.3 * float(director.chapter_index)) * Ascension.price_mult()
-	var offer := stats.roll_choices(ContentDB.get_upgrades(), 3, 0.3 + stats.get_stat(&"luck"), 1)
+	var offer := stats.roll_choices(_upgrade_pool(), 3, 0.3 + stats.get_stat(&"luck"), 1)
 	_dealer_prices.clear()
 	_dealer_choices.clear()
 	var cheapest := 1 << 30
@@ -1420,7 +1430,7 @@ func _on_boss_killed(boss: Enemy, at: Vector2) -> void:
 		# Босс вызван алтарём раньше времени: эпический выбор и мешок гаек.
 		_altar_bonus = false
 		pickups.spawn(at, 40)
-		_queue_bonus(stats.roll_choices(ContentDB.get_upgrades(), 3, 0.6 + stats.get_stat(&"luck"), 2), "ДАР АЛТАРЯ!")
+		_queue_bonus(stats.roll_choices(_upgrade_pool(), 3, 0.6 + stats.get_stat(&"luck"), 2), "ДАР АЛТАРЯ!")
 	if story == null and stats.phase < 2:
 		_start_phase_two()
 	if story == null and story_mission.is_empty() and bosses_killed == 1 and Ascension.on_boss_beaten(Ascension.active):
@@ -1586,7 +1596,7 @@ func _open_orders() -> void:
 		return
 	var screen := OrdersScreen.new()
 	add_child(screen)
-	screen.open(SaveService.nell_order(), story.goal_rows() if story != null else [])
+	screen.open(SaveService.nell_order(), story.goal_rows() if story != null else _wave_task.rows(), stats if stats.patch_context else null)
 
 
 func _refresh_slots() -> void:
@@ -1881,7 +1891,7 @@ func _celebrate_level_up() -> void:
 func _extra_context() -> String:
 	if director == null or player == null:
 		return ""
-	return "wave=%d enemies=%d lvl=%d hp=%d/%d pos=(%d,%d) mission=%s tester_start=%d:%d" % [director.wave_number, enemies.get_active_count(), level, int(player.hp), int(player.max_hp), int(player.global_position.x), int(player.global_position.y), story_mission if not story_mission.is_empty() else "survival", Tester.start_chapter(), Tester.start_wave()]
+	return "wave=%d enemies=%d boss=%s lvl=%d hp=%d/%d pos=(%d,%d) mission=%s tester_start=%d:%d" % [director.wave_number, enemies.get_active_count(), director.is_boss_wave(), level, int(player.hp), int(player.max_hp), int(player.global_position.x), int(player.global_position.y), story_mission if not story_mission.is_empty() else "survival", Tester.start_chapter(), Tester.start_wave()]
 
 
 func _xp_needed(for_level: int) -> int:
@@ -1897,7 +1907,7 @@ func _open_level_up() -> void:
 		return
 	var bonus := _bonus_choices > 0
 	var luck := clampf(float(level) * 0.015, 0.0, 0.35) + (0.3 if bonus else 0.0) + stats.get_stat(&"luck")
-	var choices := stats.roll_choices(ContentDB.get_upgrades(), 3, luck, 1 if bonus else 0)
+	var choices := stats.roll_choices(_upgrade_pool(), 3, luck, 1 if bonus else 0)
 	if choices.is_empty():
 		_pending_levelups = 0
 		_level_up_open = false
@@ -1958,7 +1968,7 @@ func _on_reroll_requested() -> void:
 		hud.set_nuts(nuts)
 	SoundManager.play(&"merge", -4.0, false)
 	var luck := clampf(float(level) * 0.015, 0.0, 0.35) + (0.3 if _current_bonus else 0.0)
-	var choices := stats.roll_choices(ContentDB.get_upgrades(), 3, luck, 1 if _current_bonus else 0, _last_choices)
+	var choices := stats.roll_choices(_upgrade_pool(), 3, luck, 1 if _current_bonus else 0, _last_choices)
 	if not choices.is_empty():
 		_show_choices(choices, _current_bonus)
 
@@ -2177,3 +2187,10 @@ class TargetArrow:
 		draw_colored_polygon(tip, Color(COLOR, 0.35))
 		draw_polyline(PackedVector2Array([tip[0], tip[1], tip[2], tip[3], tip[0]]), COLOR, 4.0, true)
 		draw_circle(Vector2(-26, 0), 7.0, Color(COLOR, 0.8))
+
+
+func _upgrade_pool() -> Array[UpgradeData]:
+	var pool: Array[UpgradeData] = ContentDB.get_upgrades().duplicate()
+	if stats.patch_context:
+		pool.append_array(Patches.cards())
+	return pool

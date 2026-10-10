@@ -333,7 +333,7 @@ func order_completed(info: Dictionary) -> void:
 		_order_card.celebrate(str(info.get("title", "")), int(info.get("goal", 1)))
 
 
-func set_survival_order(order: Dictionary) -> void:
+func set_survival_order(order: Dictionary, goals: Array = []) -> void:
 	if _order_card == null:
 		if not Orient.portrait:
 			var spacer := Control.new()
@@ -345,6 +345,7 @@ func set_survival_order(order: Dictionary) -> void:
 		_order_card.pressed.connect(func() -> void: orders_requested.emit())
 		_left_column.add_child(_order_card)
 		_dock_barks()
+	_order_card.set_goals(goals)
 	_order_card.set_order(str(order.get("title", "")), int(order.get("progress", 0)), int(order.get("goal", 1)), bool(order.get("done", false)))
 
 

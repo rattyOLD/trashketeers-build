@@ -18,6 +18,7 @@ const WAVE_DEFAULTS := {
 	"batch": 1,
 	"max_alive": 30,
 	"weights": {},
+	"task": {},
 	"mood": "clear",
 	"boss": "",
 	"miniboss": "",

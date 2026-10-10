@@ -14,6 +14,7 @@ var _title: Label
 var _cards: BoxContainer
 var _choices: Array[UpgradeData] = []
 var _reroll: Button
+var _patch_strip: Control
 var _armed_at := 0
 const ARCHETYPE_NAMES := {&"dps": "БИЛД: УРОН", &"debuff": "БИЛД: ЭФФЕКТЫ", &"mobility": "БИЛД: СКОРОСТЬ"}
 
@@ -58,6 +59,14 @@ func _init() -> void:
 
 func open(choices: Array[UpgradeData], level: int, stats: RunStats, bonus: bool = false, reroll_text: String = "", reroll_ok: bool = false, title: String = "") -> void:
 	_choices = choices
+	if is_instance_valid(_patch_strip):
+		_box.remove_child(_patch_strip)
+		_patch_strip.queue_free()
+		_patch_strip = null
+	if stats.patch_context:
+		_patch_strip = OrdersScreen.patch_strip(stats, true)
+		_box.add_child(_patch_strip)
+		_box.move_child(_patch_strip, 2)
 	_title.text = title if not title.is_empty() else ("НАГРАДА БОССА!" if bonus else "УРОВЕНЬ %d!" % level)
 	_title.add_theme_color_override("font_color", Color("#ff7ae0") if bonus else UiStyle.GOLD)
 	_cards.vertical = Orient.portrait
@@ -138,7 +147,7 @@ func _make_card(upgrade: UpgradeData, index: int, stats: RunStats) -> Button:
 	column.offset_right = -22
 	column.alignment = BoxContainer.ALIGNMENT_BEGIN
 	column.offset_top = 26 if Orient.portrait else 30
-	var bottom_space := 142.0 if upgrade.icon != null and not Orient.portrait else 22.0
+	var bottom_space := (82.0 if upgrade.category == "patch" else 142.0) if upgrade.icon != null and not Orient.portrait else 22.0
 	column.offset_bottom = -bottom_space
 	column.add_theme_constant_override("separation", 3)
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -162,7 +171,7 @@ func _make_card(upgrade: UpgradeData, index: int, stats: RunStats) -> Button:
 			column.offset_right = -side - 38.0
 			text_width -= side + 20.0
 		else:
-			var side := 92.0
+			var side := 54.0 if upgrade.category == "patch" else 92.0
 			art.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 			art.offset_left = -side * 0.5
 			art.offset_right = side * 0.5
@@ -171,9 +180,9 @@ func _make_card(upgrade: UpgradeData, index: int, stats: RunStats) -> Button:
 		card.add_child(art)
 	var stacks := stats.get_stacks(upgrade.id)
 	var tag := "%s  •  %s" % [upgrade.rarity_title() if upgrade.category != "evolution" else "ЭВОЛЮЦИЯ", upgrade.category_title() if upgrade.category != "evolution" else "СИНЕРГИЯ"]
-	var archetype: String = ARCHETYPE_NAMES.get(RunStats.archetype_of(upgrade), "")
-	if not archetype.is_empty():
-		tag += "  •  " + archetype
+	if upgrade.category == "patch":
+		var id := String(upgrade.id).trim_prefix("patch_")
+		tag = "НАШИВКА · " + ("УЛУЧШИТЬ" if stats.patch_ids.has(id) else "ЗАНЯТЬ СЛОТ")
 	var tag_label := UiStyle.label(tag, 14, accent, 4)
 	tag_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	tag_label.custom_minimum_size = Vector2(text_width, 0)

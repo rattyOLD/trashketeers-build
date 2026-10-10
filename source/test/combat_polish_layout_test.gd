@@ -65,8 +65,14 @@ func _run() -> void:
 	enemy._act_total = 1.0
 	enemy._act_dir = Vector2.RIGHT
 	enemy.queue_redraw()
+	# Сплошная толпа закрывает мир; предупреждение должно остаться поверх неё.
+	var crowd := ColorRect.new()
+	crowd.color = Color("#181818")
+	crowd.size = Vector2(view.size)
+	view.add_child(crowd)
 	await _ring_pixels(view, enemy.position + enemy._act_dir * enemy.data.slam_radius * 0.45, enemy.data.slam_radius, "slam")
 	enemy.free()
+	crowd.free()
 	var boss := BossZone.new()
 	view.add_child(boss)
 	await _ring_pixels(view, Vector2(260, 240), BossBrain.STOMP_RADIUS, "boss_stomp")

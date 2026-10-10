@@ -6,7 +6,7 @@ extends CharacterBody2D
 ## обработки попадания пули, где прямое изменение коллизий запрещено.
 ##
 ## Атаки идут через маленький автомат Act: у каждой есть телеграф (замах, прицельная линия,
-## фитиль, круг удара), который рисуется в _draw() под спрайтом — игрок успевает среагировать.
+## фитиль, круг удара), который рисуется отдельным слоем поверх толпы — игрок успевает среагировать.
 ##
 ## Визуал — RigSprite (shaders/rig2d.gdshader) в одном из режимов:
 ##   кадры (data/frames.json) — Scrappy Rat: клипы idle/run/windup/strike/hit/death с листа;
@@ -121,6 +121,7 @@ var _alt: Sprite2D
 var _alt_material: ShaderMaterial
 var _parts: EnemyParts
 var _shadow: Sprite2D
+var _warning: WarningDraw
 var _accessories: EnemyAccessories
 var _shape: CircleShape2D
 var _collision: CollisionShape2D
@@ -211,6 +212,12 @@ func _init() -> void:
 	collision_mask = 0
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	visible = false
+
+	_warning = WarningDraw.new()
+	_warning.enemy = self
+	_warning.z_as_relative = false
+	_warning.z_index = 25
+	add_child(_warning)
 
 	_shadow = Sprite2D.new()
 	_shadow.texture = _get_shadow_texture()
@@ -321,7 +328,7 @@ func activate(enemy_data: EnemyData, at: Vector2, hp_mult: float = 1.0, dmg_mult
 		collision_mask |= PhysicsLayers.OBSTACLE | PhysicsLayers.TERRAIN
 	visible = true
 	_collision.set_deferred("disabled", false)
-	queue_redraw()
+	_redraw_warning()
 
 
 ## Пулированный враг наследует прозрачность прошлого жильца слота (Искро-Заточка): без сброса обычные враги и боссы выходили полупрозрачными.
@@ -848,7 +855,7 @@ func _shield_up() -> bool:
 func _run_act(player: Player, dir: Vector2, path_dir: Vector2, dist: float) -> Vector2:
 	match _act:
 		Act.WINDUP:
-			queue_redraw()
+			_redraw_warning()
 			if _windup_to_dash:
 				if _act_time <= 0.0:
 					_enter(Act.DASH, DASH_TIME)
@@ -882,14 +889,14 @@ func _run_act(player: Player, dir: Vector2, path_dir: Vector2, dist: float) -> V
 			return _act_dir * (data.dash_speed if data.dash_speed > 0.0 else data.charge_speed)
 		Act.AIM:
 			_aim_target = player.global_position
-			queue_redraw()
+			_redraw_warning()
 			if _act_time <= 0.0:
 				_fire(dir)
 				_enter(Act.MOVE, 0.0)
 			return dir.orthogonal() * _strafe_sign * data.move_speed * 0.25
 		Act.THROW:
 			_aim_target = player.global_position + player.velocity * 0.5
-			queue_redraw()
+			_redraw_warning()
 			if _act_time <= 0.0:
 				if data.behavior == EnemyData.Behavior.TRAPPER:
 					_deploy_trap(player)
@@ -898,7 +905,7 @@ func _run_act(player: Player, dir: Vector2, path_dir: Vector2, dist: float) -> V
 				_enter(Act.RECOVER, RECOVER_TIME * 0.6)
 			return Vector2.ZERO
 		Act.SLAM:
-			queue_redraw()
+			_redraw_warning()
 			if _act_time <= 0.0:
 				_slam()
 				if data == null:
@@ -911,7 +918,7 @@ func _run_act(player: Player, dir: Vector2, path_dir: Vector2, dist: float) -> V
 				_enter(Act.MOVE, 0.0)
 			return path_dir * data.move_speed * 0.35
 		Act.FUSE:
-			queue_redraw()
+			_redraw_warning()
 			if _act_time <= 0.0 and is_alive():
 				self_destructed = true
 				hp = 0.0
@@ -1094,7 +1101,7 @@ func _enter(act: Act, duration: float) -> void:
 	_act = act
 	_act_time = duration
 	_act_total = maxf(duration, 0.001)
-	queue_redraw()
+	_redraw_warning()
 
 
 # --- Анимация -----------------------------------------------------------------------------------
@@ -1349,61 +1356,76 @@ func part_kick(index: int) -> void:
 # --- Телеграфы ----------------------------------------------------------------------------------
 
 func _draw() -> void:
+	_redraw_warning()
+
+
+func _redraw_warning() -> void:
+	_warning.queue_redraw()
+
+
+class WarningDraw extends Node2D:
+	var enemy: Enemy
+
+	func _draw() -> void:
+		enemy._draw_warnings(self)
+
+
+func _draw_warnings(canvas: Node2D) -> void:
 	if data == null:
 		return
 	if _brain != null:
-		_brain.draw(self)
+		_brain.draw(canvas)
 		return
 	match _act:
 		Act.WINDUP:
 			if _windup_to_dash:
-				_draw_dash_lane()
-			_draw_alert()
+				_draw_dash_lane(canvas)
+			_draw_alert(canvas)
 		Act.AIM:
-			_draw_aim()
+			_draw_aim(canvas)
 		Act.THROW:
-			_draw_alert()
+			_draw_alert(canvas)
 		Act.SLAM:
 			var t := clampf(1.0 - _act_time / _act_total, 0.0, 1.0)
 			var at := _act_dir * data.slam_radius * 0.45
-			AttackTelegraph.circle(self, at, data.slam_radius, t, TELEGRAPH)
+			AttackTelegraph.circle(canvas, at, data.slam_radius, t, TELEGRAPH)
 			for k in data.slam_line:
 				var p := at + _act_dir * 88.0 * (k + 1)
-				AttackTelegraph.circle(self, p, 64.0, t, TELEGRAPH)
-			_draw_alert()
+				AttackTelegraph.circle(canvas, p, 64.0, t, TELEGRAPH)
+			_draw_alert(canvas)
 		Act.FUSE:
 			var t := clampf(1.0 - _act_time / FUSE_TIME, 0.0, 1.0)
-			AttackTelegraph.circle(self, Vector2.ZERO, data.explode_radius, t, TELEGRAPH)
+			AttackTelegraph.circle(canvas, Vector2.ZERO, data.explode_radius, t, TELEGRAPH)
 
 
-func _draw_dash_lane() -> void:
+func _draw_dash_lane(canvas: Node2D) -> void:
 	var t := clampf(1.0 - _act_time / _act_total, 0.0, 1.0)
 	var length := (data.dash_speed if data.dash_speed > 0.0 else data.charge_speed) * DASH_TIME
 	var side := _act_dir.orthogonal() * _shape.radius
 	var end := _act_dir * length
-	draw_colored_polygon(PackedVector2Array([side, end + side, end - side, -side]), Color(TELEGRAPH, 0.12 + 0.18 * t))
-	draw_line(side, end + side, Color(TELEGRAPH, 0.85), 3.0, true)
-	draw_line(-side, end - side, Color(TELEGRAPH, 0.85), 3.0, true)
-	draw_line(Vector2.ZERO, end * t, Color(TELEGRAPH, 0.8), 4.0)
-	draw_colored_polygon(PackedVector2Array([end + _act_dir * 26.0, end + side * 0.9, end - side * 0.9]), Color(TELEGRAPH, 0.55 + 0.4 * t))
+	canvas.draw_colored_polygon(PackedVector2Array([side, end + side, end - side, -side]), Color(TELEGRAPH, 0.12 + 0.18 * t))
+	canvas.draw_line(side, end + side, Color(TELEGRAPH, 0.85), 3.0, true)
+	canvas.draw_line(-side, end - side, Color(TELEGRAPH, 0.85), 3.0, true)
+	canvas.draw_line(Vector2.ZERO, end * t, Color(TELEGRAPH, 0.8), 4.0)
+	canvas.draw_colored_polygon(PackedVector2Array([end + _act_dir * 26.0, end + side * 0.9, end - side * 0.9]), Color(TELEGRAPH, 0.55 + 0.4 * t))
 
 
-func _draw_aim() -> void:
+func _draw_aim(canvas: Node2D) -> void:
 	var t := clampf(1.0 - _act_time / AIM_TIME, 0.0, 1.0)
 	var from := Vector2(0, -data.radius * 0.8)
 	var to := _aim_target - global_position
 	var segments := maxi(int(from.distance_to(to) / 22.0), 1)
 	for i in range(0, segments, 2):
-		draw_line(from.lerp(to, float(i) / segments), from.lerp(to, float(i + 1) / segments), Color(TELEGRAPH, 0.35 + 0.55 * t), 2.5)
-	draw_circle(from + (to - from).normalized() * data.radius, 5.0 + 5.0 * t, Color(0.5, 0.95, 1.0, 0.85))
+		canvas.draw_line(from.lerp(to, float(i) / segments), from.lerp(to, float(i + 1) / segments), Color(TELEGRAPH, 0.35 + 0.55 * t), 2.5)
+	canvas.draw_circle(from + (to - from).normalized() * data.radius, 5.0 + 5.0 * t, Color(0.5, 0.95, 1.0, 0.85))
 
 
 ## Восклицательный знак над головой на замахе.
-func _draw_alert() -> void:
+func _draw_alert(canvas: Node2D) -> void:
 	var top := Vector2(0, -data.radius * 3.0 * _size_mult - 22.0 - (data.hover if data.flying else 0.0))
 	var font := ThemeDB.fallback_font
-	draw_string_outline(font, top + Vector2(-20, 0), "!", HORIZONTAL_ALIGNMENT_CENTER, 40, 40, 10, Color("#08151d"))
-	draw_string(font, top + Vector2(-20, 0), "!", HORIZONTAL_ALIGNMENT_CENTER, 40, 40, Color("#ffe14d"))
+	canvas.draw_string_outline(font, top + Vector2(-20, 0), "!", HORIZONTAL_ALIGNMENT_CENTER, 40, 40, 10, Color("#08151d"))
+	canvas.draw_string(font, top + Vector2(-20, 0), "!", HORIZONTAL_ALIGNMENT_CENTER, 40, 40, Color("#ffe14d"))
 
 
 static func _get_shadow_texture() -> GradientTexture2D:

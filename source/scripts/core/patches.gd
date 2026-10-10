@@ -39,7 +39,7 @@ static func price(id: String) -> int:
 
 
 static func buy(id: String) -> bool:
-	if not CATALOG.has(id) or level(id) >= MAX_LEVEL or not SaveService.spend_coins(price(id)):
+	if not unlocked(id) or not CATALOG.has(id) or level(id) >= MAX_LEVEL or not SaveService.spend_coins(price(id)):
 		return false
 	var owned: Dictionary = SaveService.data.get("patches", {})
 	owned[id] = level(id) + 1
@@ -67,7 +67,7 @@ static func buy_slot() -> bool:
 static func worn() -> Array[String]:
 	var out: Array[String] = []
 	for id in SaveService.data.get("patch_worn", []):
-		if CATALOG.has(str(id)) and level(str(id)) > 0 and out.size() < open_slots():
+		if CATALOG.has(str(id)) and level(str(id)) > 0 and not out.has(str(id)) and out.size() < open_slots():
 			out.append(str(id))
 	return out
 
@@ -103,10 +103,92 @@ static func describe(id: String, lvl: int) -> String:
 ## Бонусы надетых нашивок в статы забега.
 static func apply(stats: RunStats) -> void:
 	for id in worn():
+		stats.equip_patch(id)
 		for fx: Array in CATALOG[id]["fx"]:
 			stats.add_flat(fx[0], float(fx[1]) * level(id))
 
 
+static var _art: Dictionary = {}
+
+
 static func art(id: String) -> Texture2D:
-	var path := "res://assets/ui/patches/%s.png" % id
-	return load(path) as Texture2D if ResourceLoader.exists(path) else null
+	if not _art.has(id):
+		var path := "res://assets/ui/patches/%s.png" % id
+		# draw_texture_rect хранит RID, а не ресурс: текстура должна жить до отрисовки кадра.
+		_art[id] = load(path) as Texture2D if ResourceLoader.exists(path) else null
+	return _art[id] as Texture2D
+
+
+## Постоянные покупки сохраняются; новые нашивки открываются заказами Нэлл.
+const RUN_LEVELS := 5
+const STARTER := ["fist", "bullet", "boot", "heart"]
+const ORDER_UNLOCKS := ["magnet", "clover", "rat", "bolt", "gear", "mug", "star", "skull"]
+const RUN_FX := {
+	"fist": [[&"damage_mult", 0.06]],
+	"bullet": [[&"fire_rate_mult", 0.04]],
+	"boot": [[&"move_speed_mult", 0.035]],
+	"heart": [[&"max_hp_add", 6.0]],
+	"magnet": [[&"magnet_mult", 0.12]],
+	"clover": [[&"luck", 0.025]],
+	"rat": [[&"double_drop", 0.025]],
+	"bolt": [[&"shock_chance", 0.03]],
+	"gear": [[&"status_power", 0.06]],
+	"mug": [[&"regen", 0.2]],
+	"star": [[&"crit_chance_add", 0.02]],
+	"skull": [[&"damage_mult", 0.12], [&"max_hp_add", -5.0]],
+}
+const SETS := [
+	{"ids": ["fist", "bullet"], "title": "Залп", "desc": "+10% урона", "stat": &"damage_mult", "value": 0.1},
+	{"ids": ["boot", "bolt"], "title": "Налёт", "desc": "+15% к восстановлению рывка", "stat": &"dodge_cooldown", "value": 0.15},
+	{"ids": ["heart", "mug"], "title": "Живучесть", "desc": "+15 здоровья", "stat": &"max_hp_add", "value": 15.0},
+	{"ids": ["magnet", "rat"], "title": "Сборщик", "desc": "+5% двойной добычи", "stat": &"double_drop", "value": 0.05},
+]
+
+
+static func unlocked(id: String) -> bool:
+	if not CATALOG.has(id):
+		return false
+	if STARTER.has(id) or level(id) > 0:
+		return true
+	return ORDER_UNLOCKS.find(id) < clampi(int(SaveService.data.get("nell_orders_completed", 0)), 0, ORDER_UNLOCKS.size())
+
+
+static func next_unlock() -> String:
+	for id: String in ORDER_UNLOCKS:
+		if not unlocked(id):
+			return id
+	return ""
+
+
+static func cards() -> Array[UpgradeData]:
+	var out: Array[UpgradeData] = []
+	for id: String in ORDER:
+		if not unlocked(id):
+			continue
+		var u := UpgradeData.new()
+		u.id = StringName("patch_" + id)
+		u.title = str(CATALOG[id]["title"])
+		u.category = "patch"
+		u.stat = RUN_FX[id][0][0]
+		u.value = float(RUN_FX[id][0][1])
+		u.max_stacks = RUN_LEVELS
+		u.color = Color(str(CATALOG[id]["color"]))
+		u.weight = 0.65
+		u.rarity_rank = 0
+		u.description = run_description(id)
+		u.icon = art(id)
+		out.append(u)
+	return out
+
+
+static func run_description(id: String) -> String:
+	var values: Array = []
+	for fx: Array in RUN_FX[id]:
+		var v: float = absf(float(fx[1]))
+		values.append(str(snappedf(v, 0.1)) if fx[0] == &"regen" else str(snappedf(v * (100.0 if v < 1.0 else 1.0), 0.1)))
+	var text := str(CATALOG[id]["desc"]) % values
+	for combo: Dictionary in SETS:
+		if combo["ids"].has(id):
+			var partner: String = combo["ids"][1] if combo["ids"][0] == id else combo["ids"][0]
+			text += "\nС «%s»: %s." % [CATALOG[partner]["title"], combo["desc"]]
+	return text

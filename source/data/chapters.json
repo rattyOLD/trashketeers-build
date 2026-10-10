@@ -111,11 +111,17 @@
      "batch": 2,
      "max_alive": 12,
      "weights": {
-      "rat_punk": 0.85,
+      "rat_punk": 0.697,
       "bomb_rat": 0.15,
-      "courier_rat": 0.12
+      "courier_rat": 0.23
      },
-     "mood": "clear"
+     "mood": "clear",
+     "task": {
+      "enemy": "courier_rat",
+      "title": "Перехвати курьеров",
+      "count": 3,
+      "reward": 20
+     }
     },
     {
      "title": "Искрящие",
@@ -139,14 +145,20 @@
      "batch": 3,
      "max_alive": 17,
      "weights": {
-      "rat_punk": 0.5,
+      "rat_punk": 0.41,
       "spark_rat": 0.2,
       "bomb_rat": 0.1,
-      "spark_shank": 0.2,
+      "spark_shank": 0.33,
       "toxic_rat": 0.11,
       "courier_rat": 0.12
      },
-     "mood": "toxic"
+     "mood": "toxic",
+     "task": {
+      "enemy": "spark_shank",
+      "title": "Раскрой засаду",
+      "count": 3,
+      "reward": 20
+     }
     },
     {
      "title": "Пивной Барон",
@@ -172,16 +184,22 @@
      "batch": 4,
      "max_alive": 22,
      "weights": {
-      "rat_punk": 0.36,
+      "rat_punk": 0.295,
       "spark_rat": 0.16,
       "spark_shank": 0.14,
       "magnet_trapper": 0.12,
-      "dash_rat": 0.14,
+      "dash_rat": 0.231,
       "bomb_rat": 0.08,
       "toxic_rat": 0.13,
       "courier_rat": 0.18
      },
-     "mood": "pink_haze"
+     "mood": "pink_haze",
+     "task": {
+      "enemy": "dash_rat",
+      "title": "Останови налёт",
+      "count": 3,
+      "reward": 20
+     }
     },
     {
      "title": "Банда",
@@ -209,17 +227,23 @@
      "batch": 5,
      "max_alive": 28,
      "weights": {
-      "rat_punk": 0.26,
+      "rat_punk": 0.213,
       "spark_rat": 0.18,
       "spark_shank": 0.16,
-      "magnet_trapper": 0.14,
+      "magnet_trapper": 0.231,
       "dash_rat": 0.1,
       "gang_rat": 0.16,
       "toxic_rat": 0.15,
       "courier_rat": 0.18,
       "trash_tank": 0.04
      },
-     "mood": "storm"
+     "mood": "storm",
+     "task": {
+      "enemy": "magnet_trapper",
+      "title": "Разбей ловушки",
+      "count": 3,
+      "reward": 20
+     }
     },
     {
      "title": "Последний рубеж",
@@ -410,11 +434,17 @@
      "batch": 2,
      "max_alive": 12,
      "weights": {
-      "rat_punk": 0.85,
+      "rat_punk": 0.697,
       "bomb_rat": 0.15,
-      "courier_rat": 0.12
+      "courier_rat": 0.23
      },
-     "mood": "clear"
+     "mood": "clear",
+     "task": {
+      "enemy": "courier_rat",
+      "title": "Перехвати курьеров",
+      "count": 3,
+      "reward": 20
+     }
     },
     {
      "title": "Искрящие",
@@ -438,15 +468,21 @@
      "batch": 3,
      "max_alive": 17,
      "weights": {
-      "rat_punk": 0.5,
+      "rat_punk": 0.41,
       "spark_rat": 0.2,
       "bomb_rat": 0.1,
-      "spark_shank": 0.26,
+      "spark_shank": 0.429,
       "toxic_rat": 0.176,
       "courier_rat": 0.12,
       "pigeon_bomber": 0.1
      },
-     "mood": "toxic"
+     "mood": "toxic",
+     "task": {
+      "enemy": "spark_shank",
+      "title": "Раскрой засаду",
+      "count": 3,
+      "reward": 20
+     }
     },
     {
      "title": "Шаман-Электрик",
@@ -472,18 +508,24 @@
      "batch": 4,
      "max_alive": 22,
      "weights": {
-      "rat_punk": 0.36,
+      "rat_punk": 0.295,
       "spark_rat": 0.16,
       "spark_shank": 0.182,
       "magnet_trapper": 0.156,
-      "dash_rat": 0.14,
+      "dash_rat": 0.231,
       "bomb_rat": 0.08,
       "toxic_rat": 0.208,
       "courier_rat": 0.18,
       "pigeon_bomber": 0.1,
       "trash_tank": 0.08
      },
-     "mood": "pink_haze"
+     "mood": "pink_haze",
+     "task": {
+      "enemy": "dash_rat",
+      "title": "Останови налёт",
+      "count": 3,
+      "reward": 20
+     }
     },
     {
      "title": "Банда",
@@ -512,10 +554,10 @@
      "batch": 5,
      "max_alive": 28,
      "weights": {
-      "rat_punk": 0.26,
+      "rat_punk": 0.213,
       "spark_rat": 0.18,
       "spark_shank": 0.208,
-      "magnet_trapper": 0.182,
+      "magnet_trapper": 0.3,
       "dash_rat": 0.1,
       "gang_rat": 0.208,
       "toxic_rat": 0.24,
@@ -523,7 +565,13 @@
       "pigeon_bomber": 0.1,
       "trash_tank": 0.12
      },
-     "mood": "storm"
+     "mood": "storm",
+     "task": {
+      "enemy": "magnet_trapper",
+      "title": "Разбей ловушки",
+      "count": 3,
+      "reward": 20
+     }
     },
     {
      "title": "Последний рубеж",
@@ -720,11 +768,17 @@
      "batch": 2,
      "max_alive": 12,
      "weights": {
-      "rat_punk": 0.85,
+      "rat_punk": 0.697,
       "bomb_rat": 0.15,
-      "courier_rat": 0.12
+      "courier_rat": 0.23
      },
-     "mood": "clear"
+     "mood": "clear",
+     "task": {
+      "enemy": "courier_rat",
+      "title": "Перехвати курьеров",
+      "count": 3,
+      "reward": 20
+     }
     },
     {
      "title": "Искрящие",
@@ -748,15 +802,21 @@
      "batch": 3,
      "max_alive": 17,
      "weights": {
-      "rat_punk": 0.5,
+      "rat_punk": 0.41,
       "spark_rat": 0.2,
       "bomb_rat": 0.1,
-      "spark_shank": 0.32,
+      "spark_shank": 0.528,
       "toxic_rat": 0.242,
       "courier_rat": 0.12,
       "pigeon_bomber": 0.1
      },
-     "mood": "toxic"
+     "mood": "toxic",
+     "task": {
+      "enemy": "spark_shank",
+      "title": "Раскрой засаду",
+      "count": 3,
+      "reward": 20
+     }
     },
     {
      "title": "Пивной Барон · ФИНАЛ",
@@ -782,18 +842,24 @@
      "batch": 4,
      "max_alive": 22,
      "weights": {
-      "rat_punk": 0.36,
+      "rat_punk": 0.295,
       "spark_rat": 0.16,
       "spark_shank": 0.224,
       "magnet_trapper": 0.192,
-      "dash_rat": 0.14,
+      "dash_rat": 0.231,
       "bomb_rat": 0.08,
       "toxic_rat": 0.286,
       "courier_rat": 0.18,
       "pigeon_bomber": 0.1,
       "trash_tank": 0.08
      },
-     "mood": "pink_haze"
+     "mood": "pink_haze",
+     "task": {
+      "enemy": "dash_rat",
+      "title": "Останови налёт",
+      "count": 3,
+      "reward": 20
+     }
     },
     {
      "title": "Банда",
@@ -822,10 +888,10 @@
      "batch": 5,
      "max_alive": 28,
      "weights": {
-      "rat_punk": 0.26,
+      "rat_punk": 0.213,
       "spark_rat": 0.18,
       "spark_shank": 0.256,
-      "magnet_trapper": 0.224,
+      "magnet_trapper": 0.37,
       "dash_rat": 0.1,
       "gang_rat": 0.256,
       "toxic_rat": 0.33,
@@ -833,7 +899,13 @@
       "pigeon_bomber": 0.1,
       "trash_tank": 0.12
      },
-     "mood": "storm"
+     "mood": "storm",
+     "task": {
+      "enemy": "magnet_trapper",
+      "title": "Разбей ловушки",
+      "count": 3,
+      "reward": 20
+     }
     },
     {
      "title": "Последний рубеж",
@@ -1010,12 +1082,18 @@
      "batch": 2,
      "max_alive": 13,
      "weights": {
-      "pig_guard": 0.75,
+      "pig_guard": 0.615,
       "croupier": 0.25,
       "pig_mechanic": 0.066,
-      "courier_rat": 0.12
+      "courier_rat": 0.23
      },
-     "mood": "sunny"
+     "mood": "sunny",
+     "task": {
+      "enemy": "courier_rat",
+      "title": "Перехвати курьеров",
+      "count": 3,
+      "reward": 20
+     }
     },
     {
      "title": "Дивиденды",
@@ -1041,17 +1119,23 @@
      "batch": 3,
      "max_alive": 17,
      "weights": {
-      "pig_guard": 0.45,
+      "pig_guard": 0.369,
       "croupier": 0.2,
       "dropper": 0.2,
       "pig_angry": 0.15,
-      "pig_sniper": 0.094,
+      "pig_sniper": 0.23,
       "pig_mechanic": 0.078,
       "courier_rat": 0.12,
       "pigeon_bomber": 0.1,
       "cash_collector": 0.14
      },
-     "mood": "golden"
+     "mood": "golden",
+     "task": {
+      "enemy": "pig_sniper",
+      "title": "Убери снайперов",
+      "count": 3,
+      "reward": 20
+     }
     },
     {
      "title": "Свинья-Магнат",
@@ -1078,11 +1162,11 @@
      "batch": 4,
      "max_alive": 22,
      "weights": {
-      "pig_guard": 0.32,
+      "pig_guard": 0.262,
       "croupier": 0.18,
       "dropper": 0.18,
       "pig_heavy": 0.12,
-      "bruiser": 0.1,
+      "bruiser": 0.23,
       "vault_pig": 0.1,
       "pig_sniper": 0.11,
       "pig_mechanic": 0.09,
@@ -1091,7 +1175,13 @@
       "trash_tank": 0.08,
       "cash_collector": 0.14
      },
-     "mood": "party"
+     "mood": "party",
+     "task": {
+      "enemy": "bruiser",
+      "title": "Останови громил",
+      "count": 3,
+      "reward": 20
+     }
     },
     {
      "title": "Инкассация",
@@ -1122,20 +1212,26 @@
      "batch": 5,
      "max_alive": 28,
      "weights": {
-      "pig_guard": 0.24,
+      "pig_guard": 0.197,
       "croupier": 0.2,
       "dropper": 0.2,
       "pig_angry": 0.1,
       "bruiser": 0.12,
       "vault_pig": 0.14,
       "pig_sniper": 0.126,
-      "pig_mechanic": 0.102,
+      "pig_mechanic": 0.23,
       "courier_rat": 0.18,
       "pigeon_bomber": 0.1,
       "trash_tank": 0.12,
       "cash_collector": 0.14
      },
-     "mood": "vault"
+     "mood": "vault",
+     "task": {
+      "enemy": "pig_mechanic",
+      "title": "Убери ремонтников",
+      "count": 3,
+      "reward": 20
+     }
     },
     {
      "title": "Хранилище",
@@ -1293,12 +1389,18 @@
      "batch": 2,
      "max_alive": 13,
      "weights": {
-      "pig_guard": 0.75,
+      "pig_guard": 0.615,
       "croupier": 0.325,
       "pig_mechanic": 0.106,
-      "courier_rat": 0.12
+      "courier_rat": 0.23
      },
-     "mood": "sunny"
+     "mood": "sunny",
+     "task": {
+      "enemy": "courier_rat",
+      "title": "Перехвати курьеров",
+      "count": 3,
+      "reward": 20
+     }
     },
     {
      "title": "Дивиденды",
@@ -1324,17 +1426,23 @@
      "batch": 3,
      "max_alive": 17,
      "weights": {
-      "pig_guard": 0.45,
+      "pig_guard": 0.369,
       "croupier": 0.26,
       "dropper": 0.2,
       "pig_angry": 0.15,
-      "pig_sniper": 0.15,
+      "pig_sniper": 0.247,
       "pig_mechanic": 0.125,
       "courier_rat": 0.12,
       "pigeon_bomber": 0.1,
       "cash_collector": 0.14
      },
-     "mood": "golden"
+     "mood": "golden",
+     "task": {
+      "enemy": "pig_sniper",
+      "title": "Убери снайперов",
+      "count": 3,
+      "reward": 20
+     }
     },
     {
      "title": "Свинья-Магнат II",
@@ -1361,11 +1469,11 @@
      "batch": 4,
      "max_alive": 22,
      "weights": {
-      "pig_guard": 0.32,
+      "pig_guard": 0.262,
       "croupier": 0.234,
       "dropper": 0.18,
       "pig_heavy": 0.12,
-      "bruiser": 0.13,
+      "bruiser": 0.23,
       "vault_pig": 0.13,
       "pig_sniper": 0.176,
       "pig_mechanic": 0.144,
@@ -1374,7 +1482,13 @@
       "trash_tank": 0.08,
       "cash_collector": 0.14
      },
-     "mood": "party"
+     "mood": "party",
+     "task": {
+      "enemy": "bruiser",
+      "title": "Останови громил",
+      "count": 3,
+      "reward": 20
+     }
     },
     {
      "title": "Инкассация",
@@ -1405,20 +1519,26 @@
      "batch": 5,
      "max_alive": 28,
      "weights": {
-      "pig_guard": 0.24,
+      "pig_guard": 0.197,
       "croupier": 0.26,
       "dropper": 0.2,
       "pig_angry": 0.1,
       "bruiser": 0.156,
       "vault_pig": 0.182,
       "pig_sniper": 0.202,
-      "pig_mechanic": 0.163,
+      "pig_mechanic": 0.269,
       "courier_rat": 0.18,
       "pigeon_bomber": 0.1,
       "trash_tank": 0.12,
       "cash_collector": 0.14
      },
-     "mood": "vault"
+     "mood": "vault",
+     "task": {
+      "enemy": "pig_mechanic",
+      "title": "Убери ремонтников",
+      "count": 3,
+      "reward": 20
+     }
     },
     {
      "title": "Хранилище",
@@ -1576,12 +1696,18 @@
      "batch": 2,
      "max_alive": 13,
      "weights": {
-      "pig_guard": 0.75,
+      "pig_guard": 0.615,
       "croupier": 0.4,
       "pig_mechanic": 0.145,
-      "courier_rat": 0.12
+      "courier_rat": 0.23
      },
-     "mood": "sunny"
+     "mood": "sunny",
+     "task": {
+      "enemy": "courier_rat",
+      "title": "Перехвати курьеров",
+      "count": 3,
+      "reward": 20
+     }
     },
     {
      "title": "Дивиденды",
@@ -1607,17 +1733,23 @@
      "batch": 3,
      "max_alive": 17,
      "weights": {
-      "pig_guard": 0.45,
+      "pig_guard": 0.369,
       "croupier": 0.32,
       "dropper": 0.2,
       "pig_angry": 0.15,
-      "pig_sniper": 0.207,
+      "pig_sniper": 0.342,
       "pig_mechanic": 0.172,
       "courier_rat": 0.12,
       "pigeon_bomber": 0.1,
       "cash_collector": 0.14
      },
-     "mood": "golden"
+     "mood": "golden",
+     "task": {
+      "enemy": "pig_sniper",
+      "title": "Убери снайперов",
+      "count": 3,
+      "reward": 20
+     }
     },
     {
      "title": "Свинья-Магнат · ФИНАЛ",
@@ -1644,11 +1776,11 @@
      "batch": 4,
      "max_alive": 22,
      "weights": {
-      "pig_guard": 0.32,
+      "pig_guard": 0.262,
       "croupier": 0.288,
       "dropper": 0.18,
       "pig_heavy": 0.12,
-      "bruiser": 0.16,
+      "bruiser": 0.264,
       "vault_pig": 0.16,
       "pig_sniper": 0.242,
       "pig_mechanic": 0.198,
@@ -1657,7 +1789,13 @@
       "trash_tank": 0.08,
       "cash_collector": 0.14
      },
-     "mood": "party"
+     "mood": "party",
+     "task": {
+      "enemy": "bruiser",
+      "title": "Останови громил",
+      "count": 3,
+      "reward": 20
+     }
     },
     {
      "title": "Инкассация",
@@ -1688,20 +1826,26 @@
      "batch": 5,
      "max_alive": 28,
      "weights": {
-      "pig_guard": 0.24,
+      "pig_guard": 0.197,
       "croupier": 0.32,
       "dropper": 0.2,
       "pig_angry": 0.1,
       "bruiser": 0.192,
       "vault_pig": 0.224,
       "pig_sniper": 0.277,
-      "pig_mechanic": 0.224,
+      "pig_mechanic": 0.37,
       "courier_rat": 0.18,
       "pigeon_bomber": 0.1,
       "trash_tank": 0.12,
       "cash_collector": 0.14
      },
-     "mood": "vault"
+     "mood": "vault",
+     "task": {
+      "enemy": "pig_mechanic",
+      "title": "Убери ремонтников",
+      "count": 3,
+      "reward": 20
+     }
     },
     {
      "title": "Хранилище",
@@ -1776,12 +1920,12 @@
   "late_start": 20.0,
   "late_hp": 0.04,
   "late_damage": 0.012,
-    "early_waves": 4,
-    "early_count": 1.25,
-    "early_damage": 1.15,
-    "mini_hp": 0.6,
-    "count_mult": 1.3,
-    "alive_mult": 1.25,
-    "interval_mult": 0.85
+  "early_waves": 4,
+  "early_count": 1.25,
+  "early_damage": 1.15,
+  "mini_hp": 0.6,
+  "count_mult": 1.3,
+  "alive_mult": 1.25,
+  "interval_mult": 0.85
  }
 }

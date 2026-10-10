@@ -111,6 +111,7 @@ var _clip_grip_px := Vector2(187.5, 125)
 var _clip_support_px := Vector2(237.5, 125)
 var _shoot_t := 0.0
 var _shoot_phase := 0.0
+var _walking_clip := false
 var arm: Sprite2D
 var _arm_material: ShaderMaterial
 var _gun_layer: Node2D
@@ -400,6 +401,11 @@ func _sc() -> float:
 
 ## Кадр по состоянию: стрельба стоя — shoot, ход — run по фазе шага, иначе idle. Заодно точка хвата кадра.
 func _clip_pick() -> void:
+	# Гистерезис: слабое колебание стика не переключает стойку и бег каждый кадр.
+	if _run >= 0.18:
+		_walking_clip = true
+	elif _run <= 0.08:
+		_walking_clip = false
 	var clip := "idle"
 	var idx := 0 if preview_mode else int(_time * IDLE_FPS) % 8
 	if _dead:
@@ -419,10 +425,10 @@ func _clip_pick() -> void:
 	elif _hurt > HURT_TIME - HIT_CLIP_TIME:
 		clip = "hit"
 		idx = clampi(int((HURT_TIME - _hurt) / HIT_CLIP_TIME * 4.0), 0, 3)
-	elif _shoot_t > 0.0 and _run < 0.3 and not preview_mode:
+	elif _shoot_t > 0.0 and not _walking_clip and not preview_mode:
 		clip = "shoot"
 		idx = int(_shoot_phase / SHOOT_ANIM_TIME * 4.0) % 4
-	elif _run > 0.12:
+	elif _walking_clip:
 		clip = "run"
 		idx = int(fposmod(_gait / TAU, 1.0) * 8.0) % 8
 	if not _clip_frames.has(clip):
@@ -505,6 +511,7 @@ func update_motion(velocity: Vector2, aim: Vector2, delta: float) -> void:
 	_velocity = velocity
 	var speed := velocity.length()
 	_run = move_toward(_run, clampf(speed / 200.0, 0.0, 1.0), delta * 6.0)
+
 	_gait += delta * (5.0 + 9.0 * _run) * (0.6 + 0.4 * clampf(speed / 240.0, 0.0, 1.4))
 	_breath += delta * (2.4 + 2.0 * _run)
 	_dash_blend = move_toward(_dash_blend, 1.0 if dashing else 0.0, delta * 12.0)

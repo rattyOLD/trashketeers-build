@@ -114,6 +114,14 @@ func build(parent: Node) -> void:
 	set_mood("clear", false)
 
 
+func set_density(factor: float) -> void:
+	if _grade != null:
+		_grade.visible = BattleQuality.level < 3
+	if _weather != null:
+		_weather.density = (1.0 if SaveService.get_quality() >= 1 else 0.3) * factor
+		_weather.configure(_mood)
+
+
 func set_mood(mood_name: String, animate: bool = true) -> void:
 	_mood_name = mood_name if MOODS.has(mood_name) else "clear"
 	_mood = MOODS[_mood_name]
@@ -265,7 +273,7 @@ class WeatherDraw:
 		for i in FOG_BLOBS:
 			_fog_pos[i] = Vector2(fposmod(_fog_pos[i].x + 14.0 * delta, w + 400.0), _fog_pos[i].y)
 		var gust := 1.0 + 0.8 * maxf(sin(_time * 0.4), 0.0) + _rain
-		for i in DEBRIS_COUNT:
+		for i in mini(DEBRIS_COUNT, int(ceil(DEBRIS_COUNT * density))):
 			var p := _debris_pos[i] + Vector2(90.0 * gust, 20.0 + sin(_time * 2.0 + i) * 40.0) * delta
 			if p.x > w + 40.0:
 				p = Vector2(-40.0, randf() * h)
@@ -285,7 +293,7 @@ class WeatherDraw:
 		for i in int(MOTE_COUNT * minf(_motes, 1.5) / 1.5):
 			var twinkle := 0.5 + 0.5 * sin(_time * 2.0 + _mote_phase[i])
 			draw_circle(_mote_pos[i], 2.0 + 1.5 * twinkle, Color(_mote_color, 0.25 + 0.35 * twinkle))
-		for i in DEBRIS_COUNT:
+		for i in mini(DEBRIS_COUNT, int(ceil(DEBRIS_COUNT * density))):
 			var c := _debris_pos[i]
 			var flip := cos(_debris_spin[i])
 			var axis := Vector2.from_angle(_debris_spin[i] * 0.5)

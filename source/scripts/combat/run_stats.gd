@@ -68,6 +68,9 @@ var melee_context := false
 ## Есть ли в слотах стрелковое оружие.
 var ranged_context := true
 ## Фаза забега: 2 — после первого босса Выживания (открываются карточки «ФАЗА 2», враги злее).
+var patch_context := false
+var patch_ids: Array[String] = []
+var _patch_sets: Dictionary = {}
 var phase := 1
 var _values: Dictionary = {}
 var _stacks: Dictionary = {}
@@ -131,9 +134,15 @@ func can_take(upgrade: UpgradeData) -> bool:
 
 
 func apply(upgrade: UpgradeData) -> void:
-	if upgrade.category in ["dash", "dash_element"] and not is_available(upgrade):
+	if upgrade.category in ["dash", "dash_element", "patch"] and not is_available(upgrade):
 		return
 	_stacks[upgrade.id] = get_stacks(upgrade.id) + 1
+	if upgrade.category == "patch":
+		var id := String(upgrade.id).trim_prefix("patch_")
+		for fx: Array in Patches.RUN_FX[id]:
+			add_flat(fx[0], float(fx[1]))
+		equip_patch(id)
+		return
 	if not INSTANT_STATS.has(upgrade.stat):
 		_values[upgrade.stat] = get_stat(upgrade.stat) + upgrade.value
 
@@ -148,6 +157,10 @@ func has_upgrade(upgrade_id: StringName) -> bool:
 
 
 func is_available(upgrade: UpgradeData) -> bool:
+	if upgrade.category == "patch":
+		var id := String(upgrade.id).trim_prefix("patch_")
+		if not patch_context or not Patches.unlocked(id) or (not patch_ids.has(id) and patch_ids.size() >= Patches.SLOTS):
+			return false
 	if not can_take(upgrade):
 		return false
 	if upgrade.category == "dash_element":
@@ -350,3 +363,18 @@ func _has_rarity(list: Array[UpgradeData], rank: int) -> bool:
 		if u.rarity_rank >= rank:
 			return true
 	return false
+
+
+func equip_patch(id: String) -> void:
+	if not Patches.CATALOG.has(id) or patch_ids.has(id) or patch_ids.size() >= Patches.SLOTS:
+		return
+	patch_ids.append(id)
+	for combo: Dictionary in Patches.SETS:
+		var key: String = combo["title"]
+		if not _patch_sets.has(key) and patch_ids.has(combo["ids"][0]) and patch_ids.has(combo["ids"][1]):
+			_patch_sets[key] = true
+			add_flat(combo["stat"], combo["value"])
+
+
+func patch_set_titles() -> PackedStringArray:
+	return PackedStringArray(_patch_sets.keys())

@@ -112,10 +112,10 @@ func _sync() -> void:
 	if not is_inside_tree():
 		return
 	var main := get_viewport()
-	var size := Vector2i((main.get_visible_rect().size / DIVIDER).ceil())
+	var size := Vector2i((main.get_visible_rect().size / BattleQuality.light_divider).ceil())
 	if _viewport.size != size:
 		_viewport.size = size
-	_viewport.canvas_transform = Transform2D.IDENTITY.scaled(Vector2.ONE / DIVIDER) * main.canvas_transform
+	_viewport.canvas_transform = Transform2D.IDENTITY.scaled(Vector2.ONE / BattleQuality.light_divider) * main.canvas_transform
 	_ambient.color = ambient
 	_lights.view = main.canvas_transform.affine_inverse() * main.get_visible_rect()
 	# Пятна лежат в мире (ползут медленно), покрывают видимую область с запасом.
@@ -187,6 +187,8 @@ class LightDraw:
 			_buffer.colors.append(LightMap.HERO_COLOR * LightMap.HERO_STRENGTH)
 			_buffer.radii.append(LightMap.HERO_RADIUS)
 		for i in _buffer.positions.size():
+			if i >= BattleQuality.light_limit and i != _buffer.positions.size() - 1:
+				continue
 			var r := _buffer.radii[i]
 			var c := _buffer.colors[i] * LightMap.LIGHT_GAIN
 			c.a = 1.0

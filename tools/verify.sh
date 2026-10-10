@@ -78,6 +78,10 @@ XDG_DATA_HOME="$LOG/menu-motion-user" timeout 90 "$GODOT" --headless --path "$P"
 if ! grep -q 'MENU_PREVIEW_MOTION failures=0' "$LOG/menu-motion.log" || grep -q 'SCRIPT ERROR' "$LOG/menu-motion.log"; then
   fail=1
 fi
+XDG_DATA_HOME="$LOG/quality-patches-user" timeout 90 "$GODOT" --headless --path "$P" res://test/quality_patches_test.tscn > "$LOG/quality-patches.log" 2>&1
+if ! grep -q 'QUALITY_PATCHES failures=0' "$LOG/quality-patches.log" || grep -q 'SCRIPT ERROR' "$LOG/quality-patches.log"; then
+  fail=1
+fi
 XDG_DATA_HOME="$LOG/combat-polish-user" timeout 90 "$GODOT" --headless --path "$P" res://test/combat_polish_test.tscn > "$LOG/combat-polish.log" 2>&1
 if ! grep -q 'COMBAT_POLISH failures=0' "$LOG/combat-polish.log" || grep -q 'SCRIPT ERROR' "$LOG/combat-polish.log"; then
   fail=1

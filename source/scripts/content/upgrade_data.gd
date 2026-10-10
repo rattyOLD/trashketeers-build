@@ -24,7 +24,7 @@ const RARITY_RANK := {"common": 0, "rare": 1, "epic": 2}
 const RARITY_WEIGHT := [60.0, 28.0, 9.0]
 const RARITY_COLORS := [Color("#b9c2d9"), Color("#4dc3ff"), Color("#d05cff")]
 const RARITY_TITLES := ["ОБЫЧНОЕ", "РЕДКОЕ", "ЭПИЧЕСКОЕ"]
-const CATEGORY_TITLES := {"weapon": "ОРУЖИЕ", "hero": "ПЕРСОНАЖ", "utility": "УТИЛИТА", "evolution": "ЭВОЛЮЦИЯ", "close": "БЛИЖНИЙ БОЙ", "endless": "ХЛАМ", "rail": "РЕЛЬСОТРОН", "dash": "РЫВОК", "dash_element": "СТИХИЯ РЫВКА", "phase2": "ФАЗА 2", "melee": "БЛИЖНИЙ БОЙ"}
+const CATEGORY_TITLES := {"patch": "НАШИВКА", "weapon": "ОРУЖИЕ", "hero": "ПЕРСОНАЖ", "utility": "УТИЛИТА", "evolution": "ЭВОЛЮЦИЯ", "close": "БЛИЖНИЙ БОЙ", "endless": "ХЛАМ", "rail": "РЕЛЬСОТРОН", "dash": "РЫВОК", "dash_element": "СТИХИЯ РЫВКА", "phase2": "ФАЗА 2", "melee": "БЛИЖНИЙ БОЙ"}
 
 var id: StringName
 var title: String

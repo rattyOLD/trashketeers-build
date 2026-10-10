@@ -230,6 +230,11 @@ func _tick_shield(delta: float) -> void:
 func _draw() -> void:
 	if is_dead:
 		return
+	# Тонкий неподвижный ободок отделяет героя от пола, без дополнительного света.
+	draw_set_transform(Vector2(0, 12), 0.0, Vector2(1.0, 0.42))
+	draw_arc(Vector2.ZERO, 29.0, 0.0, TAU, 24, Color("#161410"), 5.0, true)
+	draw_arc(Vector2.ZERO, 29.0, 0.0, TAU, 24, Color(1.0, 0.78, 0.34, 0.6), 2.0, true)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	if shield > 0:
 		var pulse := 0.5 + 0.5 * sin(Time.get_ticks_msec() * 0.008)
 		for i in shield:

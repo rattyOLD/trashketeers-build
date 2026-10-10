@@ -36,6 +36,11 @@ const DEFAULTS := {
 	"story": {},
 	"story_log": {},
 	"nell_order": {},
+	"nell_daily": {},
+	"nell_orders_completed": 0,
+	"patches": {},
+	"patch_worn": [],
+	"patch_slots_open": 2,
 	"story_best": {},
 	"story_choice": {},
 	"story_resume": {},
@@ -330,7 +335,7 @@ func _apply_text(text: String) -> void:
 		else:
 			push_warning("SaveService: сохранение повреждено, начат новый прогресс")
 	for key in ["nuts", "star_dust", "runs", "boss_kills", "raid_wins", "dragon_kills", "account_xp", "best_wave", "selected_tier",
-			"daily_day", "daily_streak", "quest_day", "invites_sent", "saved_at", "chest_pity", "chest_opens", "ads_day",
+			"nell_orders_completed", "patch_slots_open", "daily_day", "daily_streak", "quest_day", "invites_sent", "saved_at", "chest_pity", "chest_opens", "ads_day",
 			"ads_coins", "ads_gems", "gift_gem_day", "gift_gem_n", "vip_level", "vip_until", "insider_no"]:
 		data[key] = int(data[key])
 	_refund_retired_weapons()
@@ -1422,6 +1427,10 @@ func nell_order_tick() -> Dictionary:
 	if bool(info["done"]) or int(info["progress"]) < int(info["goal"]):
 		return {}
 	var daily: Dictionary = data["nell_daily"]
+	var before := Patches.next_unlock()
+	data["nell_orders_completed"] = maxi(0, int(data.get("nell_orders_completed", 0))) + 1
+	if not before.is_empty() and Patches.unlocked(before):
+		info["patch_unlock"] = str(Patches.CATALOG[before]["title"])
 	add_coins(int(info["nuts"]))
 	add_gems(int(info["dust"]), false)
 	# Выполненный заказ сразу заменяется новым (не больше NELL_ORDERS_PER_DAY в день, чтобы не раздувать награды).

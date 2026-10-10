@@ -13,6 +13,8 @@ var _m := FlatMesh.new()
 
 ## spots — точки, где можно рисовать (свободная земля); seed — повторяемость раскладки.
 func build(spots: Array[Vector2], seed_value: int, is_bank: bool) -> void:
+	add_to_group(&"battle_details")
+	modulate.a = 0.55
 	bank = is_bank
 	_rng.seed = seed_value
 	for p in spots:
@@ -102,7 +104,7 @@ func _draw_bank(p: Vector2, kind: int, rot: float, k: float) -> void:
 			_m.circle(Vector2(10, -4), 22.0, Color(0.6, 0.9, 0.4, 0.12))
 			_m.reset_transform()
 		_:
-			# Монетка в траве — у свиней деньги валяются.
-			_m.circle(p + Vector2(0, 1), 5.0, Color(0, 0, 0, 0.25))
-			_m.circle(p, 5.0, Color(1.0, 0.82, 0.3, 0.9))
-			_m.circle(p + Vector2(-1.5, -1.5), 1.6, Color(1, 1, 1, 0.8))
+			# Латунная пластинка не похожа на подбираемую монету.
+			_m.set_transform(p, rot, Vector2(1.0, 0.55) * k)
+			_m.rect(Rect2(-7, -3, 14, 6), Color(0.48, 0.37, 0.2, 0.6))
+			_m.line(Vector2(-5, -1), Vector2(5, -1), Color(0.72, 0.57, 0.32, 0.4), 1.0)

@@ -1158,7 +1158,7 @@ class Upgrades:
 		_balance = UiStyle.label("", 26, UiStyle.GOLD, 6)
 		content.add_child(_balance)
 		# Нашивки — вторая половина прокачки: 4 слота на куртке, выбор под стиль игры.
-		var patches := UiStyle.button("НАШИВКИ · %d/%d СЛОТА" % [Patches.worn().size(), Patches.open_slots()], Color("#9b5cff"), 22, Vector2(0, 58))
+		var patches := UiStyle.button("НАШИВКИ · %d/%d" % [Patches.worn().size(), Patches.open_slots()], UiStyle.GOLD, 22, Vector2(0, 58))
 		patches.pressed.connect(func() -> void: patches_requested.emit())
 		content.add_child(patches)
 		_patches_button = patches
@@ -1172,7 +1172,7 @@ class Upgrades:
 
 	func _refresh() -> void:
 		_balance.text = "Баланс: " + SaveService.format_coins(SaveService.get_nuts())
-		_patches_button.text = "НАШИВКИ · надето %d из %d" % [Patches.worn().size(), Patches.open_slots()]
+		_patches_button.text = "НАШИВКИ · %d/%d" % [Patches.worn().size(), Patches.open_slots()]
 		MenuPopups.clear(_list)
 		var spent := 0
 		for perk_id in SaveService.PERKS:

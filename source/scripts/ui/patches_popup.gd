@@ -14,7 +14,7 @@ func _init() -> void:
 	super("НАШИВКИ")
 	_balance = UiStyle.label("", 24, UiStyle.GOLD, 6)
 	content.add_child(_balance)
-	var note := UiStyle.label("Надень до 4 нашивок на куртку — действуют в каждом забеге Выживания. Подбирай под свой стиль.", 17, UiStyle.TEXT_DIM, 4)
+	var note := UiStyle.label("Постоянные бонусы для Выживания. В забеге — 4 места и 5 улучшений карточками. Новые виды открываются заказами Нэлл.", 17, UiStyle.TEXT_DIM, 4)
 	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	note.custom_minimum_size = Vector2(10, 0)
 	content.add_child(note)
@@ -80,6 +80,7 @@ func _card(id: String) -> Control:
 	var color := Color(str(info["color"]))
 	var lvl := Patches.level(id)
 	var worn := Patches.is_worn(id)
+	var unlocked := Patches.unlocked(id)
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(250, 0)
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -104,7 +105,7 @@ func _card(id: String) -> Control:
 	var dots := ""
 	for i in Patches.MAX_LEVEL:
 		dots += "●" if i < lvl else "○"
-	texts.add_child(UiStyle.label(("Уровень %d  " % lvl) + dots if lvl > 0 else "Не куплена", 14, UiStyle.GOLD if lvl > 0 else UiStyle.TEXT_DIM, 3))
+	texts.add_child(UiStyle.label(("Уровень %d  " % lvl) + dots if lvl > 0 else ("Не куплена" if unlocked else "За заказы Нэлл"), 14, UiStyle.GOLD if lvl > 0 else UiStyle.TEXT_DIM, 3))
 	(texts.get_child(1) as Label).horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	var desc := UiStyle.label(Patches.describe(id, maxi(lvl, 1)) + ("" if lvl == 0 or lvl >= Patches.MAX_LEVEL else "  →  " + Patches.describe(id, lvl + 1)), 16, UiStyle.TEXT, 4)
 	desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
@@ -114,7 +115,9 @@ func _card(id: String) -> Control:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
 	col.add_child(row)
-	if lvl < Patches.MAX_LEVEL:
+	if not unlocked:
+		row.add_child(UiStyle.label("ЗАКРЫТО · ЗАКАЗЫ НЭЛЛ", 14, UiStyle.TEXT_DIM, 3))
+	elif lvl < Patches.MAX_LEVEL:
 		var cost := Patches.price(id)
 		var buy := UiStyle.button(("КУПИТЬ · " if lvl == 0 else "УЛУЧШИТЬ · ") + SaveService.format_coins(cost), Color("#e0a020"), 16, Vector2(0, 46))
 		buy.size_flags_horizontal = Control.SIZE_EXPAND_FILL

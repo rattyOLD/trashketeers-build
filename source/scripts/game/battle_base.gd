@@ -52,6 +52,7 @@ var hero_skills: HeroSkills
 var _perf_last_usec := 0
 var _perf_frames: PackedFloat32Array = PackedFloat32Array()
 var _perf_age := 0.0
+var _perf_sample_time := 0.0
 var _adapt_strikes := 0
 var _perf_resume_guard := 0
 var _context_timer := 0.0
@@ -145,7 +146,8 @@ func _setup_common(camera_bounds: Rect2, currency_icon: Texture2D) -> void:
 	get_tree().create_timer(15.0, false).timeout.connect(Platform.mark_battle.bind(false))
 	SoftGlow.lite = SaveService.is_fx_lite()
 	_fx_scale = 0.5 if SoftGlow.lite else 1.0
-	WaveDirector.alive_scale = 0.7 if (Platform.is_touch() and SaveService.get_quality() == 0) else 1.0
+	WaveDirector.alive_scale = 1.0
+	BattleQuality.configure(0, SoftGlow.lite)
 	camera = Camera2D.new()
 	camera.position_smoothing_enabled = true
 	camera.position_smoothing_speed = CAMERA_SMOOTHING
@@ -165,6 +167,7 @@ func _setup_common(camera_bounds: Rect2, currency_icon: Texture2D) -> void:
 	light_map.player = player
 	add_child(light_map)
 	light_map.build(self, 1)
+	_apply_visual_budget()
 
 	Bullet.liquid_sink = fx.droplet
 	hud = Hud.new()
@@ -288,6 +291,7 @@ func _exit_tree() -> void:
 	if AppActivity.backgrounding.is_connected(_on_backgrounding):
 		AppActivity.backgrounding.disconnect(_on_backgrounding)
 	Platform.mark_battle(false)
+	BattleQuality.configure(0, SaveService.is_fx_lite())
 	if BulletPool.bullet_hit.is_connected(_on_bullet_hit):
 		BulletPool.bullet_hit.disconnect(_on_bullet_hit)
 	if BulletPool.exploded.is_connected(_on_explosion):
@@ -303,7 +307,7 @@ func _exit_tree() -> void:
 
 
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_APPLICATION_FOCUS_IN:
+	if what in [NOTIFICATION_PAUSED, NOTIFICATION_UNPAUSED, NOTIFICATION_APPLICATION_FOCUS_OUT, NOTIFICATION_APPLICATION_FOCUS_IN]:
 		_perf_last_usec = 0
 		_perf_resume_guard = 2
 	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
@@ -329,21 +333,24 @@ func _process(delta: float) -> void:
 		_perf_last_usec = 0
 		return
 	var now := Time.get_ticks_usec()
+	var wall_delta := delta
 	if _perf_last_usec > 0:
 		var ms := (now - _perf_last_usec) / 1000.0
+		wall_delta = ms / 1000.0
 		_perf_frames.append(ms)
 		if ms > SPIKE_MS and _spikes_sent < MAX_SPIKE_REPORTS and _perf_age > 5.0:
 			_spikes_sent += 1
 			Platform.send_report("spike", "%.0f ms | %s" % [ms, _perf_context()])
 	_perf_last_usec = now
-	_perf_age += delta
-	_adapt_quality(delta)
-	_history_tick(delta)
-	_context_timer -= delta
+	_perf_age += wall_delta
+	_perf_sample_time += wall_delta
+	_adapt_quality(wall_delta)
+	_history_tick(wall_delta)
+	_context_timer -= wall_delta
 	if _context_timer <= 0.0:
 		_context_timer = 4.0
 		Platform.set_context(_perf_context())
-	if _perf_frames.size() >= PERF_SAMPLE_FRAMES:
+	if _perf_frames.size() >= PERF_SAMPLE_FRAMES or (_perf_sample_time >= 20.0 and _perf_frames.size() >= 30):
 		_send_perf_report()
 
 
@@ -379,25 +386,29 @@ func _adapt_quality(delta: float) -> void:
 	if _adapt_strikes < (1 if fps < 15.0 else ADAPT_STRIKES):
 		return
 	_adapt_strikes = 0
+	if _perf_frames.size() >= 30:
+		_send_perf_report()
 	_adapt_level += 1
-	if SaveService.get_quality() >= 2 and _adapt_level != 1:
-		WaveDirector.alive_scale = maxf(0.4, 1.0 - 0.2 * _adapt_level)
-		return
-	# Врагов на экране урезаем при любом качестве: на слабых телефонах падение FPS идёт от CPU, а не от картинки.
-	WaveDirector.alive_scale = maxf(0.4, 1.0 - 0.2 * _adapt_level)
-	match _adapt_level:
-		1:
-			_fx_scale = 0.5
-			SoftGlow.lite = true
-		2:
-			Platform.set_render_cap(1.0)
-		3:
-			_fx_scale = 0.25
-			Engine.max_fps = 30
-		_:
-			Platform.set_render_cap(0.7)
+	BattleQuality.configure(_adapt_level, SaveService.is_fx_lite())
+	_apply_visual_budget()
+	_fx_scale = (0.5 if SaveService.is_fx_lite() else 1.0) * maxf(0.2, 1.0 - 0.2 * _adapt_level)
+	SoftGlow.lite = true
+	# Выбранное «Красиво» сохраняет разрешение; количество врагов не меняется.
+	if SaveService.get_quality() < 2:
+		if _adapt_level >= 2:
+			Platform.set_render_cap(0.7 if _adapt_level >= 4 else 1.0)
 	Platform.note_event("adapt level %d at fps %.0f" % [_adapt_level, fps])
 	Platform.send_report("adapt", "level %d fps %.0f | %s" % [_adapt_level, fps, _perf_context()])
+
+
+func _apply_visual_budget() -> void:
+	if atmosphere != null:
+		atmosphere.set_density(BattleQuality.particle_scale)
+	for detail in get_tree().get_nodes_in_group(&"battle_details"):
+		detail.visible = BattleQuality.level < 3
+		detail.modulate.a = 0.55
+	for life in get_tree().get_nodes_in_group(&"battle_ambience"):
+		life.quality = mini(SaveService.get_quality(), 0 if BattleQuality.level >= 2 else (1 if BattleQuality.level == 1 else 2))
 
 
 ## История FPS раз в 5 секунд и уменьшенный снимок экрана раз в 30: снимок лежит в localStorage и уходит в отчёт только после вылета.
@@ -429,6 +440,8 @@ func _extra_context() -> String:
 
 
 func _send_perf_report() -> void:
+	var sample_seconds := _perf_sample_time
+	_perf_sample_time = 0.0
 	var sorted := Array(_perf_frames)
 	_perf_frames.clear()
 	sorted.sort()
@@ -436,10 +449,15 @@ func _send_perf_report() -> void:
 	for ms: float in sorted:
 		total += ms
 	var avg_ms := total / sorted.size()
-	var worst_ms: float = sorted[int(sorted.size() * 0.99)]
+	var low_count := maxi(1, int(ceil(sorted.size() * 0.01)))
+	var worst_ms := 0.0
+	for i in range(sorted.size() - low_count, sorted.size()):
+		worst_ms += float(sorted[i])
+	worst_ms /= low_count
+	var p95_ms: float = sorted[int(sorted.size() * 0.95)]
 	if _perfs_sent < MAX_PERF_REPORTS:
 		_perfs_sent += 1
-		Platform.send_report("perf", "fps avg %.0f, 1%% low %.0f | %s | %s" % [1000.0 / avg_ms, 1000.0 / worst_ms, _perf_context(), Platform.device_info()])
+		Platform.send_report("perf", "%.1fs fps avg %.0f, 1%% low %.0f, p95 %.1fms, visual %d | %s | %s" % [sample_seconds, 1000.0 / avg_ms, 1000.0 / worst_ms, p95_ms, BattleQuality.level, _perf_context(), Platform.device_info()])
 
 
 func _physics_process(delta: float) -> void:

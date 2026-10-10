@@ -324,7 +324,7 @@ func tick(player: Player, dir: Vector2, path_dir: Vector2, dist: float, delta: f
 	state_time += delta
 	if opening > 0.0:
 		opening = maxf(opening - delta, 0.0)
-		enemy.queue_redraw()
+		enemy._redraw_warning()
 	_flash_clip = maxf(_flash_clip - delta, 0.0)
 	windup = move_toward(windup, 0.0, delta * 2.0)
 	strike = move_toward(strike, 0.0, delta * 3.0)
@@ -381,7 +381,7 @@ func tick(player: Player, dir: Vector2, path_dir: Vector2, dist: float, delta: f
 			return path_dir * speed() * 0.2
 		State.BASS_WINDUP:
 			windup = clampf(state_time / BASS_WINDUP_TIME, 0.0, 1.0)
-			enemy.queue_redraw()
+			enemy._redraw_warning()
 			if state_time >= BASS_WINDUP_TIME:
 				_fire_bass()
 				_enter(State.BASS)
@@ -392,7 +392,7 @@ func tick(player: Player, dir: Vector2, path_dir: Vector2, dist: float, delta: f
 			return Vector2.ZERO
 		State.CRANE_WINDUP:
 			windup = clampf(state_time / CRANE_WINDUP_TIME, 0.0, 1.0)
-			enemy.queue_redraw()
+			enemy._redraw_warning()
 			if state_time >= CRANE_WINDUP_TIME:
 				_enter(State.CRANE_PULL)
 				_pulled = player
@@ -401,7 +401,7 @@ func tick(player: Player, dir: Vector2, path_dir: Vector2, dist: float, delta: f
 		State.CRANE_PULL:
 			var to_boss := enemy.global_position - player.global_position
 			player.external_pull = to_boss.normalized() * CRANE_PULL_SPEED
-			enemy.queue_redraw()
+			enemy._redraw_warning()
 			if state_time >= CRANE_PULL_TIME or to_boss.length() < CRANE_SLAM_RANGE:
 				release()
 				_land(CRANE_SLAM_RADIUS, 32.0)
@@ -409,7 +409,7 @@ func tick(player: Player, dir: Vector2, path_dir: Vector2, dist: float, delta: f
 			return Vector2.ZERO
 		State.RING_CHARGE:
 			windup = clampf(state_time / 0.8, 0.0, 1.0)
-			enemy.queue_redraw()
+			enemy._redraw_warning()
 			if state_time >= 0.8:
 				_enter(State.RING_FIRE)
 				_shots_left = 3 if phase == 2 else 2
@@ -431,13 +431,13 @@ func tick(player: Player, dir: Vector2, path_dir: Vector2, dist: float, delta: f
 				_leap_dir = _leap_from.direction_to(player.global_position + player.velocity * 0.3)
 				var reach := clampf(_leap_from.distance_to(player.global_position), LEAP_MIN, LEAP_MAX)
 				_leap_to = _leap_from + _leap_dir * reach
-			enemy.queue_redraw()
+			enemy._redraw_warning()
 			if state_time >= LEAP_WINDUP_TIME:
 				_enter(State.LEAP)
 			return Vector2.ZERO
 		State.LEAP:
 			strike = 1.0
-			enemy.queue_redraw()
+			enemy._redraw_warning()
 			var total := clampf(_leap_from.distance_to(_leap_to) / 620.0, 0.25, 0.6)
 			if state_time >= total:
 				_land(170.0, 34.0)
@@ -447,7 +447,7 @@ func tick(player: Player, dir: Vector2, path_dir: Vector2, dist: float, delta: f
 			return _leap_dir * _leap_from.distance_to(_leap_to) / total
 		State.GATLING_SPIN:
 			windup = clampf(state_time / 0.55, 0.0, 1.0)
-			enemy.queue_redraw()
+			enemy._redraw_warning()
 			if state_time >= 0.55:
 				_enter(State.GATLING)
 				_shot_timer = 0.0
@@ -473,7 +473,7 @@ func tick(player: Player, dir: Vector2, path_dir: Vector2, dist: float, delta: f
 			return Vector2.ZERO if phase == 1 else dir.orthogonal() * speed() * 0.5
 		State.STOMP_WINDUP:
 			windup = clampf(state_time / 0.75, 0.0, 1.0)
-			enemy.queue_redraw()
+			enemy._redraw_warning()
 			if state_time >= 0.75:
 				_land(STOMP_RADIUS, 38.0)
 				_fire_ring(20)
@@ -484,7 +484,7 @@ func tick(player: Player, dir: Vector2, path_dir: Vector2, dist: float, delta: f
 			if state_time < DASH_LOCK_TIME:
 				_leap_dir = dir
 			_leap_from = enemy.global_position
-			enemy.queue_redraw()
+			enemy._redraw_warning()
 			if state_time >= DASH_WINDUP_TIME:
 				_enter(State.DASH)
 				SoundManager.play(&"wing_flap", -2.0)
@@ -508,7 +508,7 @@ func tick(player: Player, dir: Vector2, path_dir: Vector2, dist: float, delta: f
 			return Vector2.ZERO
 		State.SUMMON:
 			windup = clampf(state_time / 0.7, 0.0, 1.0)
-			enemy.queue_redraw()
+			enemy._redraw_warning()
 			if state_time >= 0.7:
 				enemy.request_fx("summon", 3.0 + (2.0 if phase == 2 else 0.0) + (2.0 if enraged else 0.0))
 				if pattern == "overlord":
@@ -519,7 +519,7 @@ func tick(player: Player, dir: Vector2, path_dir: Vector2, dist: float, delta: f
 			windup = clampf(state_time / 0.7, 0.0, 1.0)
 			if state_time < 0.45:
 				_aim_dir = enemy.part_muzzle(0).direction_to(player.global_position + player.velocity * 0.15)
-			enemy.queue_redraw()
+			enemy._redraw_warning()
 			if state_time >= 0.7:
 				_enter(State.BOLT)
 				_shots_left = 3
@@ -539,7 +539,7 @@ func tick(player: Player, dir: Vector2, path_dir: Vector2, dist: float, delta: f
 				_rest(0.3)
 			return Vector2.ZERO
 		State.GRID:
-			enemy.queue_redraw()
+			enemy._redraw_warning()
 			if state_time >= GRID_TIME * (1.0 if phase == 1 else 0.85):
 				for point in _grid_points:
 					BulletPool.explode(point, GRID_RADIUS, 24.0 * enemy.damage_mult, Bullet.Team.ENEMY, SHAMAN_TELEGRAPH, 1.4)
@@ -548,7 +548,7 @@ func tick(player: Player, dir: Vector2, path_dir: Vector2, dist: float, delta: f
 			return Vector2.ZERO
 		State.ARC_WINDUP:
 			windup = clampf(state_time / 0.55, 0.0, 1.0)
-			enemy.queue_redraw()
+			enemy._redraw_warning()
 			if state_time >= 0.55:
 				_shock_burst()
 				_rest(0.6)
@@ -569,7 +569,7 @@ func tick(player: Player, dir: Vector2, path_dir: Vector2, dist: float, delta: f
 				enemy.request_fx("beer_puke", 0.0, enemy.part_muzzle(0))
 			if state_time < BEAM_LOCK_TIME:
 				_aim_dir = enemy.part_muzzle(0).direction_to(player.global_position + player.velocity * 0.15)
-			enemy.queue_redraw()
+			enemy._redraw_warning()
 			if state_time >= BEAM_WINDUP_TIME:
 				_enter(State.BEAM)
 				_shot_timer = 0.0
@@ -587,7 +587,7 @@ func tick(player: Player, dir: Vector2, path_dir: Vector2, dist: float, delta: f
 			return -_aim_dir * (230.0 if phase == 2 else 180.0)
 		State.PRESS_WINDUP:
 			windup = clampf(state_time / 0.6, 0.0, 1.0)
-			enemy.queue_redraw()
+			enemy._redraw_warning()
 			if state_time >= 0.6:
 				_enter(State.PRESS)
 				_shot_timer = 0.0
@@ -609,7 +609,7 @@ func tick(player: Player, dir: Vector2, path_dir: Vector2, dist: float, delta: f
 			if state_time < 0.4:
 				_leap_dir = dir
 			_leap_from = enemy.global_position
-			enemy.queue_redraw()
+			enemy._redraw_warning()
 			if state_time >= 0.75:
 				_enter(State.SMASH_LUNGE)
 				_smash_hit = false
@@ -625,7 +625,7 @@ func tick(player: Player, dir: Vector2, path_dir: Vector2, dist: float, delta: f
 			if int(state_time * 9.0) != int((state_time - delta) * 9.0):
 				enemy.request_fx("beer_puke", 0.0, enemy.part_muzzle(0))
 			_aim_dir = enemy.global_position.direction_to(player.global_position)
-			enemy.queue_redraw()
+			enemy._redraw_warning()
 			if state_time >= 0.5:
 				_enter(State.VOMIT)
 				_shot_timer = 0.0
@@ -875,7 +875,7 @@ func _in_cone(point: Vector2, dir: Vector2, half_angle: float, length: float) ->
 func _enter(next: State) -> void:
 	state = next
 	state_time = 0.0
-	enemy.queue_redraw()
+	enemy._redraw_warning()
 
 
 func _rest(extra: float = 0.0) -> void:

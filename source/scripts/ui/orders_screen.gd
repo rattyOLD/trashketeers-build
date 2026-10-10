@@ -20,7 +20,7 @@ func _init() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
 
-func open(order: Dictionary, goals: Array) -> void:
+func open(order: Dictionary, goals: Array, stats: RunStats = null) -> void:
 	_paused_before = get_tree().paused
 	get_tree().paused = true
 	_opened_ms = Time.get_ticks_msec()
@@ -52,10 +52,12 @@ func open(order: Dictionary, goals: Array) -> void:
 	scroll.add_child(list)
 	if not order.is_empty() and not str(order.get("title", "")).is_empty():
 		var reward := "Награда: %d монет и %d неонита" % [int(order.get("nuts", 0)), int(order.get("dust", 0))]
-		list.add_child(_card("ЗАКАЗ НЭЛЛ", str(order.get("title", "")), "Каждый день новый. " + reward, int(order.get("progress", 0)), int(order.get("goal", 1)), bool(order.get("done", false)), Color("#ffac56")))
+		list.add_child(_card("ЗАКАЗ НЭЛЛ", str(order.get("title", "")), reward + _unlock_hint(), int(order.get("progress", 0)), int(order.get("goal", 1)), bool(order.get("done", false)), Color("#ffac56")))
+	if stats != null:
+		list.add_child(patch_strip(stats))
 	for goal: Dictionary in goals:
 		var title := str(goal.get("title", ""))
-		list.add_child(_card("ЦЕЛЬ МИССИИ", title, str(HINTS.get(title, "")), int(goal.get("progress", 0)), int(goal.get("goal", 1)), bool(goal.get("done", false)), Color("#ffd257")))
+		list.add_child(_card("ЦЕЛЬ ВОЛНЫ" if stats != null else "ЦЕЛЬ МИССИИ", title, str(HINTS.get(title, "")), int(goal.get("progress", 0)), int(goal.get("goal", 1)), bool(goal.get("done", false)), Color("#ffd257")))
 	var back := UiStyle.button("НАЗАД", UiStyle.PANEL_LIGHT, 32, Vector2(0, 88))
 	back.pressed.connect(_close)
 	column.add_child(back)
@@ -97,3 +99,43 @@ func _close() -> void:
 	get_tree().paused = _paused_before
 	closed.emit()
 	queue_free()
+
+
+static func _unlock_hint() -> String:
+	var next := Patches.next_unlock()
+	if next.is_empty():
+		return " Все нашивки открыты."
+	return " Следующая нашивка: «%s» — за заказы Нэлл." % Patches.CATALOG[next]["title"]
+
+
+static func patch_strip(stats: RunStats, compact: bool = false) -> Control:
+	var panel := PanelContainer.new()
+	var style := UiStyle.card_box(UiStyle.GOLD, 2)
+	if compact:
+		style.set_content_margin_all(6)
+	panel.add_theme_stylebox_override("panel", style)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 6)
+	panel.add_child(box)
+	box.add_child(UiStyle.label("НАШИВКИ · %d/4" % stats.patch_ids.size(), 18, UiStyle.GOLD, 3))
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	row.add_theme_constant_override("separation", 16)
+	box.add_child(row)
+	for i in Patches.SLOTS:
+		var cell := VBoxContainer.new()
+		cell.add_theme_constant_override("separation", 2)
+		row.add_child(cell)
+		var id: String = stats.patch_ids[i] if i < stats.patch_ids.size() else ""
+		var icon := TextureRect.new()
+		icon.texture = Patches.art("slot_empty" if id.is_empty() else id)
+		icon.custom_minimum_size = Vector2.ONE * (28.0 if compact else 48.0)
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		cell.add_child(icon)
+		var rank := stats.get_stacks(StringName("patch_" + id))
+		cell.add_child(UiStyle.label("—" if id.is_empty() else "%d/5" % rank, 14, UiStyle.TEXT, 2))
+	var sets := stats.patch_set_titles()
+	if not sets.is_empty():
+		box.add_child(UiStyle.label("Сочетания: " + ", ".join(sets), 16, UiStyle.GOLD, 2))
+	return panel

@@ -35,6 +35,22 @@ func _shot(name: String) -> void:
 	get_viewport().get_texture().get_image().save_png(output.path_join(name + ".png"))
 
 
+func _patch_slots_drawn(popup: PatchesPopup) -> void:
+	await RenderingServer.frame_post_draw
+	var frame := get_viewport().get_texture().get_image()
+	for slot in popup._slots.get_children():
+		var badge := slot.get_child(0) as Control
+		var rect := badge.get_global_rect()
+		var colors: Dictionary = {}
+		# Пустой и закрытый слот должны показывать ткань и стежки, а не одноцветный квадрат.
+		for y in range(2, 9):
+			for x in range(2, 9):
+				var point := rect.position + rect.size * Vector2(x, y) / 10.0
+				var color := frame.get_pixel(int(point.x), int(point.y))
+				colors[color.to_rgba32()] = true
+		_check(colors.size() > 8, "patch slot texture survives until rendering")
+
+
 func _run() -> void:
 	if OS.get_environment("UI_NATIVE_A13") == "1":
 		Platform.is_native_app = true
@@ -53,12 +69,14 @@ func _run() -> void:
 		get_window().size = get_window().content_scale_size
 		var suffix := "portrait" if portrait else "landscape"
 		await _settle()
-		var windows: Array[GlassPopup] = [MenuPopups.Settings.new(), MenuPopups.Shop.new(), MenuPopups.Shop.new(true), DailyPopup.new(), BattlePassPopup.new(), MenuPopups.Achievements.new(), FriendsPopup.new()]
+		var windows: Array[GlassPopup] = [PatchesPopup.new(), MenuPopups.Settings.new(), MenuPopups.Shop.new(), MenuPopups.Shop.new(true), DailyPopup.new(), BattlePassPopup.new(), MenuPopups.Achievements.new(), FriendsPopup.new()]
 		for index in windows.size():
 			var popup := windows[index]
 			add_child(popup)
 			popup.open()
 			await _settle()
+			if popup is PatchesPopup:
+				await _patch_slots_drawn(popup as PatchesPopup)
 			_label_fits(popup._title, suffix + " title " + popup._title.text)
 			_check(popup._title.horizontal_alignment == HORIZONTAL_ALIGNMENT_CENTER, "title centered")
 			var style := popup._title.get_theme_stylebox("normal")
