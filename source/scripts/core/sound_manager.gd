@@ -147,6 +147,8 @@ var _streams: Dictionary = {}
 var _players: Array[AudioStreamPlayer] = []
 var _started_ms: PackedInt64Array = PackedInt64Array()
 var _last_played_ms: Dictionary = {}
+var _step_variants: Dictionary = {}
+var _last_warning_ms := -100000
 var _budget := SFX_BUDGET_BURST
 var _budget_ms := 0
 var _loops: Array[AudioStreamPlayer] = []
@@ -183,22 +185,32 @@ func play_pitched(id: StringName, pitch: float, volume_offset_db: float = 0.0) -
 	_play(id, volume_offset_db, pitch)
 
 
-func _play(id: StringName, volume_offset_db: float, pitch: float) -> void:
+## Один канал существующего пула сохраняет сигнал опасности под непрерывным огнём.
+func play_warning(id: StringName, volume_offset_db: float = 0.0) -> void:
+	_play(id, volume_offset_db, 1.0, true)
+
+
+func _play(id: StringName, volume_offset_db: float, pitch: float, warning: bool = false) -> void:
 	if not unlocked or not _streams.has(id):
 		return
 	var now := Time.get_ticks_msec()
 	var cfg: Array = SFX[id]
-	if now - int(_last_played_ms.get(id, -100000)) < int(cfg[1] * 1000.0):
+	if warning and now - _last_warning_ms < 500:
+		return
+	if not warning and now - int(_last_played_ms.get(id, -100000)) < int(cfg[1] * 1000.0):
 		return
 	_budget = minf(_budget + float(now - _budget_ms) * 0.001 * SFX_BUDGET_PER_SEC, SFX_BUDGET_BURST)
 	_budget_ms = now
-	if not PRIORITY_SFX.has(id):
+	if not warning and not PRIORITY_SFX.has(id):
 		if _budget < 1.0:
 			return
 		_budget -= 1.0
-	_last_played_ms[id] = now
+	if warning:
+		_last_warning_ms = now
+	else:
+		_last_played_ms[id] = now
 
-	var index := _pick_player()
+	var index := SFX_POOL_SIZE - 1 if warning else _pick_player()
 	var player := _players[index]
 	player.stream = _streams[id]
 	player.volume_db = cfg[0] + volume_offset_db
@@ -215,7 +227,10 @@ func play_step(surface: StringName, volume_offset_db: float = 0.0) -> void:
 	_budget_ms = Time.get_ticks_msec()
 	if _budget < STEP_BUDGET_RESERVE:
 		return
-	_play(StringName("step_%s_%d" % [surface, randi() % 3]), volume_offset_db, randf_range(0.92, 1.08))
+	var previous := int(_step_variants.get(surface, -1))
+	var variant := (previous + 1 + randi() % 2) % 3 if previous >= 0 else randi() % 3
+	_step_variants[surface] = variant
+	_play(StringName("step_%s_%d" % [surface, variant]), volume_offset_db, randf_range(0.92, 1.08))
 
 
 ## Громкость петли (фон протоки зависит от расстояния до неё).
@@ -381,7 +396,7 @@ func set_backgrounded(value: bool) -> void:
 
 func _pick_player() -> int:
 	var oldest := 0
-	for i in _players.size():
+	for i in _players.size() - 1:
 		if not _players[i].playing:
 			return i
 		if _started_ms[i] < _started_ms[oldest]:

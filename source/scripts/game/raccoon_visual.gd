@@ -140,6 +140,10 @@ var show_aim_line := false
 var show_held_weapon := true
 var _flash_t := 0.0
 var _body_kick := Vector2.ZERO
+var recoil_recovery := KICK_DECAY
+var _brake_shift := Vector2.ZERO
+var _was_dashing := false
+var _landing := 0.0
 var _dead := false
 var _death_t := 0.0
 var _gun_angle := RELAXED_ANGLE
@@ -419,7 +423,7 @@ func _clip_pick() -> void:
 		clip = "fidget"
 		var count: int = (_clip_frames["fidget"] as Array).size()
 		idx = clampi(int((1.0 - _fidget_t / _fidget_duration()) * count), 0, count - 1)
-	elif dashing:
+	elif dashing and not aiming:
 		clip = "dash"
 		idx = clampi(int(_dash_t / DASH_CLIP_TIME * 6.0), 0, 5)
 	elif _hurt > HURT_TIME - HIT_CLIP_TIME:
@@ -507,6 +511,13 @@ func _set_overlay(material: ShaderMaterial, path: String) -> void:
 
 func update_motion(velocity: Vector2, aim: Vector2, delta: float) -> void:
 	_time += delta
+	if not preview_mode and _velocity.length() > 140.0 and velocity.length() < 50.0:
+		_brake_shift = _velocity.normalized() * 2.0
+	_brake_shift *= exp(-18.0 * delta)
+	if _was_dashing and not dashing:
+		_landing = 1.0
+	_was_dashing = dashing
+	_landing = move_toward(_landing, 0.0, delta * 6.0)
 	var accel := (velocity - _velocity) / maxf(delta, 0.001)
 	_velocity = velocity
 	var speed := velocity.length()
@@ -532,8 +543,8 @@ func update_motion(velocity: Vector2, aim: Vector2, delta: float) -> void:
 	_pickup = maxf(_pickup - delta, 0.0)
 	_cheer = maxf(_cheer - delta, 0.0)
 	_fidget_t = maxf(_fidget_t - delta, 0.0)
-	_kick = lerpf(_kick, 0.0, clampf(KICK_DECAY * delta, 0.0, 1.0))
-	_climb = lerpf(_climb, 0.0, clampf(10.0 * delta, 0.0, 1.0))
+	_kick *= exp(-recoil_recovery * delta)
+	_climb *= exp(-10.0 * delta)
 	_flash_t = maxf(_flash_t - delta, 0.0)
 	_body_kick = _body_kick.lerp(Vector2.ZERO, 1.0 - exp(-KICK_DECAY * delta))
 	var local_accel := accel.x * _facing
@@ -544,7 +555,7 @@ func update_motion(velocity: Vector2, aim: Vector2, delta: float) -> void:
 	var phase := floori(_gait / PI)
 	if phase != _step_phase:
 		_step_phase = phase
-		if _run > 0.55 and not dashing and not _dead:
+		if _run > 0.25 and speed > 60.0 and not dashing and not _dead:
 			footsteps += 1
 	_tail_spring.update(clampf(-local_accel * 0.0006, -0.35, 0.35), delta)
 	_scarf_spring.update(clampf(-local_accel * 0.0005, -0.3, 0.3), delta)
@@ -780,7 +791,8 @@ func _update_pose() -> void:
 func _sprite_xform() -> Transform2D:
 	var squash := _squash - _shot_squash
 	var scale_vec := Vector2(_facing * _sc() * (2.0 - squash) * _stretch * (1.0 - 0.2 * _turn), _sc() * squash)
-	return Transform2D(_sway + (0.0 if _dead else _lean), scale_vec, 0.0, Vector2(0, -_bob - _hop) + _body_kick)
+	# Тело и оба слоя рук получают один трансформ, включая остановку и выход из рывка.
+	return Transform2D(_sway + (0.0 if _dead else _lean), scale_vec, 0.0, Vector2(0, -_bob - _hop + 1.5 * sin(_landing * PI)) + _body_kick + _brake_shift)
 
 
 func _apply_rig() -> void:

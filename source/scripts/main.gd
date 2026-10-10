@@ -286,14 +286,19 @@ func _maybe_ask_returning(menu: MainMenuUI) -> void:
 		return
 	if not Cloud.waiting_choice or not _debug_hash.is_empty():
 		return
+	var menu_ref: WeakRef = weakref(menu)
 	get_tree().create_timer(1.0).timeout.connect(func() -> void:
-		if not is_instance_valid(menu) or not Cloud.waiting_choice or menu._account.visible:
+		var current := menu_ref.get_ref() as MainMenuUI
+		if current == null or not Cloud.waiting_choice or current._account.visible:
 			return
-		menu._account.intro = "Уже играл в Trash Squad? Введи логин и пароль и жми «ВОЙТИ», прогресс вернётся. Новенький? Закрывай окно и беги на помойку, аккаунт заведёшь потом."
-		menu._account.closed.connect(func() -> void:
-			menu._account.intro = ""
+		current._account.intro = "Уже играл в Trash Squad? Введи логин и пароль и жми «ВОЙТИ», прогресс вернётся. Новенький? Закрывай окно и беги на помойку, аккаунт заведёшь потом."
+		current._account.closed.connect(func() -> void:
+			var active := menu_ref.get_ref() as MainMenuUI
+			if active == null:
+				return
+			active._account.intro = ""
 			Cloud.start_guest(), CONNECT_ONE_SHOT)
-		menu._account.open())
+		current._account.open())
 
 
 ## Сессия аккаунта слетела (сервер её больше не принимает) или аккаунт переехал на другое устройство:
@@ -335,9 +340,11 @@ func _maybe_nag_account(menu: MainMenuUI) -> void:
 	if runs < 1 or shown >= 2 or (shown == 1 and runs < 5):
 		return
 	Platform.storage_set("trk_acct_nag", str(shown + 1))
+	var menu_ref: WeakRef = weakref(menu)
 	get_tree().create_timer(1.2).timeout.connect(func() -> void:
-		if is_instance_valid(menu):
-			menu.show_account_banner("Первый забег позади, енот! Заведи логин и пароль: прогресс не пропадёт, даже если телефон сойдёт с ума." if shown == 0 else "Пятый забег, а аккаунта всё нет. Енот волнуется: заведи логин, пока прогресс цел."))
+		var current := menu_ref.get_ref() as MainMenuUI
+		if current != null:
+			current.show_account_banner("Первый забег позади, енот! Заведи логин и пароль: прогресс не пропадёт, даже если телефон сойдёт с ума." if shown == 0 else "Пятый забег, а аккаунта всё нет. Енот волнуется: заведи логин, пока прогресс цел."))
 
 
 func _start_game(weapon_id: StringName) -> void:

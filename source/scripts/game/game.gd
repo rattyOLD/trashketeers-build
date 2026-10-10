@@ -503,6 +503,21 @@ func _apply_chapter_look(chapter: Dictionary) -> void:
 func _on_wave_started(number: int, title: String, mood: String, is_boss: bool) -> void:
 	Platform.note_event("wave %d %s boss=%s" % [number, title, is_boss])
 	_wave_task.start(director._wave.get("task", {}) if story_mission.is_empty() and not is_boss and not director.is_mini_wave() else {})
+	if _wave_task.kind == &"tower":
+		var available := false
+		for tower in map.towers:
+			available = available or not tower.used
+		if not available:
+			_wave_task.start(director._wave.get("task", {}).get("fallback", {}))
+	elif _wave_task.kind == &"break":
+		var intact := 0
+		for object in map.destructibles:
+			if object.kind == DestructibleObject.Kind.ART and object.is_intact():
+				intact += 1
+		if intact == 0:
+			_wave_task.start(director._wave.get("task", {}).get("fallback", {}))
+		else:
+			_wave_task.goal = mini(_wave_task.goal, intact)
 	if story_mission.is_empty() and player != null:
 		_wave_hp.append("%d:%d" % [number, int(100.0 * player.hp / maxf(player.max_hp, 1.0))])
 	_last_marker.reset_hunt()
@@ -941,9 +956,7 @@ func _on_enemy_died(enemy: Enemy) -> void:
 	if not enemy.boss_minion:
 		_drop_enemy_loot(enemy, data, at)
 		if _wave_task.kill(data.id, false):
-			nuts += _wave_task.reward
-			hud.set_nuts(nuts)
-			hud.toast("ЦЕЛЬ ВОЛНЫ", "%s · +%d монет" % [_wave_task.title, _wave_task.reward], UiStyle.GOLD)
+			_complete_wave_task()
 	if data.is_boss():
 		_on_boss_killed(enemy, at)
 		return
@@ -1186,6 +1199,7 @@ func _roll_rarity(bonus: float = 0.0) -> int:
 
 
 func _on_tower_charged(tower: ChargeTower) -> void:
+	_advance_wave_task(&"tower")
 	SoundManager.play(&"level_up", -6.0, false)
 	fx.burst(tower.global_position + Vector2(0, -150), Color("#6adcff"), 26, 320.0, 4.0)
 	fx.ring(tower.global_position, Color("#6adcff"), 160.0)
@@ -1491,6 +1505,8 @@ func _clear_remaining_enemies() -> void:
 # --- Лут -----------------------------------------------------------------------------------------
 
 func _on_object_destroyed(object: DestructibleObject) -> void:
+	if object.kind == DestructibleObject.Kind.ART:
+		_advance_wave_task(&"break")
 	pickups.spawn(object.global_position + Vector2(0, -10), object.nut_reward)
 	object.play_break_fx(fx)
 	SoundManager.play(object.get_sound())
@@ -1832,6 +1848,7 @@ func _apply_run_start_perks() -> void:
 
 
 func _on_nuts_collected(amount: int) -> void:
+	_advance_wave_task(&"collect", amount)
 	if SaveService.get_character_id() == "pigeon_mafioso":
 		amount = int(amount * 1.2 + randf())
 	var mult := events.coin_mult * _greed_mult
@@ -1843,6 +1860,19 @@ func _on_nuts_collected(amount: int) -> void:
 	_combo_timer = PICKUP_COMBO_WINDOW
 	SoundManager.play_pitched(&"nut_pickup", 1.0 + 0.045 * _combo)
 	player.visual.pickup_pop()
+
+
+func _advance_wave_task(kind: StringName, amount: int = 1) -> void:
+	if not finished and _wave_task.event(kind, amount):
+		_complete_wave_task()
+
+
+func _complete_wave_task() -> void:
+	nuts += _wave_task.reward
+	hud.set_nuts(nuts)
+	hud.toast("ЦЕЛЬ ВОЛНЫ", "%s · +%d монет" % [_wave_task.title, _wave_task.reward], UiStyle.GOLD)
+	if radio != null:
+		radio.on_task(_wave_task.kind)
 
 
 func _on_xp_collected(amount: int) -> void:

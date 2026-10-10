@@ -75,6 +75,8 @@ const DEFAULTS := {
 	"eco_fps": false,
 	"haptics": true,
 	"camera_shake": true,
+	"reduced_flashes": false,
+	"contrast_warnings": false,
 	"minimap": true,
 	"show_fps": false,
 	"min_hud": false,

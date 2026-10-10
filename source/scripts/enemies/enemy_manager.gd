@@ -18,6 +18,7 @@ var _active: Array[Enemy] = []
 var _player: Player
 ## Навигация по полю путей уровня (LevelSpawner.nav_direction); пустой Callable — бег напрямую.
 var _nav: Callable
+var _support_timer := 0.0
 
 
 func setup(player: Player, container: Node2D, capacity: int, nav: Callable = Callable()) -> void:
@@ -138,6 +139,10 @@ func _physics_process(delta: float) -> void:
 	if _player == null:
 		return
 	_frame += 1
+	_support_timer -= delta
+	if _support_timer <= 0.0:
+		_support_timer = 0.3
+		_update_support_positions()
 	var player_pos := _player.global_position
 	_compute_separation()
 	# Обход с конца по той же причине, что и в BulletPool: смерть врага внутри тика
@@ -166,6 +171,28 @@ var _sep_grid := {}
 var _sep_positions := PackedVector2Array()
 var _sep_radii := PackedFloat32Array()
 var _sep_next := PackedInt32Array()
+
+
+## Два линейных прохода раз в 0.3 с; ближайших соседей для каждого врага не перебираем.
+func _update_support_positions() -> void:
+	var front := Vector2.ZERO
+	var weight := 0.0
+	var at := _player.global_position
+	for enemy in _active:
+		if not enemy.is_alive() or enemy.data.heal_radius > 0.0 or enemy.data.is_boss():
+			continue
+		if enemy.data.behavior not in [EnemyData.Behavior.CHASER, EnemyData.Behavior.SLAMMER]:
+			continue
+		if enemy.global_position.distance_squared_to(at) > 600.0 * 600.0:
+			continue
+		var priority := 2.0 if enemy.hp < enemy.max_hp * 0.75 else 1.0
+		front += enemy.global_position * priority
+		weight += priority
+	if weight > 0.0:
+		front /= weight
+	for enemy in _active:
+		if enemy.data.heal_radius > 0.0:
+			enemy.support_anchor = front + at.direction_to(front) * minf(120.0, enemy.data.heal_radius * 0.55) if weight > 0.0 else Vector2.INF
 
 
 func _compute_separation() -> void:

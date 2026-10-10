@@ -154,10 +154,10 @@
      },
      "mood": "toxic",
      "task": {
-      "enemy": "spark_shank",
-      "title": "Раскрой засаду",
-      "count": 3,
-      "reward": 20
+      "kind": "collect",
+      "title": "Собери монеты",
+      "count": 20,
+      "reward": 25
      }
     },
     {
@@ -195,10 +195,16 @@
      },
      "mood": "pink_haze",
      "task": {
-      "enemy": "dash_rat",
-      "title": "Останови налёт",
-      "count": 3,
-      "reward": 20
+      "kind": "tower",
+      "title": "Заряди ретранслятор",
+      "count": 1,
+      "reward": 25,
+      "fallback": {
+       "enemy": "dash_rat",
+       "title": "Останови налёт",
+       "count": 3,
+       "reward": 20
+      }
      }
     },
     {
@@ -239,10 +245,16 @@
      },
      "mood": "storm",
      "task": {
-      "enemy": "magnet_trapper",
-      "title": "Разбей ловушки",
-      "count": 3,
-      "reward": 20
+      "kind": "break",
+      "title": "Разбей укрытия",
+      "count": 2,
+      "reward": 25,
+      "fallback": {
+       "enemy": "magnet_trapper",
+       "title": "Разбей ловушки",
+       "count": 3,
+       "reward": 20
+      }
      }
     },
     {
@@ -478,10 +490,10 @@
      },
      "mood": "toxic",
      "task": {
-      "enemy": "spark_shank",
-      "title": "Раскрой засаду",
-      "count": 3,
-      "reward": 20
+      "kind": "collect",
+      "title": "Собери монеты",
+      "count": 20,
+      "reward": 25
      }
     },
     {
@@ -521,10 +533,16 @@
      },
      "mood": "pink_haze",
      "task": {
-      "enemy": "dash_rat",
-      "title": "Останови налёт",
-      "count": 3,
-      "reward": 20
+      "kind": "tower",
+      "title": "Заряди ретранслятор",
+      "count": 1,
+      "reward": 25,
+      "fallback": {
+       "enemy": "dash_rat",
+       "title": "Останови налёт",
+       "count": 3,
+       "reward": 20
+      }
      }
     },
     {
@@ -567,10 +585,16 @@
      },
      "mood": "storm",
      "task": {
-      "enemy": "magnet_trapper",
-      "title": "Разбей ловушки",
-      "count": 3,
-      "reward": 20
+      "kind": "break",
+      "title": "Разбей укрытия",
+      "count": 2,
+      "reward": 25,
+      "fallback": {
+       "enemy": "magnet_trapper",
+       "title": "Разбей ловушки",
+       "count": 3,
+       "reward": 20
+      }
      }
     },
     {
@@ -812,10 +836,10 @@
      },
      "mood": "toxic",
      "task": {
-      "enemy": "spark_shank",
-      "title": "Раскрой засаду",
-      "count": 3,
-      "reward": 20
+      "kind": "collect",
+      "title": "Собери монеты",
+      "count": 20,
+      "reward": 25
      }
     },
     {
@@ -855,10 +879,16 @@
      },
      "mood": "pink_haze",
      "task": {
-      "enemy": "dash_rat",
-      "title": "Останови налёт",
-      "count": 3,
-      "reward": 20
+      "kind": "tower",
+      "title": "Заряди ретранслятор",
+      "count": 1,
+      "reward": 25,
+      "fallback": {
+       "enemy": "dash_rat",
+       "title": "Останови налёт",
+       "count": 3,
+       "reward": 20
+      }
      }
     },
     {
@@ -901,10 +931,16 @@
      },
      "mood": "storm",
      "task": {
-      "enemy": "magnet_trapper",
-      "title": "Разбей ловушки",
-      "count": 3,
-      "reward": 20
+      "kind": "break",
+      "title": "Разбей укрытия",
+      "count": 2,
+      "reward": 25,
+      "fallback": {
+       "enemy": "magnet_trapper",
+       "title": "Разбей ловушки",
+       "count": 3,
+       "reward": 20
+      }
      }
     },
     {
@@ -1131,10 +1167,10 @@
      },
      "mood": "golden",
      "task": {
-      "enemy": "pig_sniper",
-      "title": "Убери снайперов",
-      "count": 3,
-      "reward": 20
+      "kind": "collect",
+      "title": "Собери монеты",
+      "count": 20,
+      "reward": 25
      }
     },
     {
@@ -1177,10 +1213,16 @@
      },
      "mood": "party",
      "task": {
-      "enemy": "bruiser",
-      "title": "Останови громил",
-      "count": 3,
-      "reward": 20
+      "kind": "tower",
+      "title": "Заряди ретранслятор",
+      "count": 1,
+      "reward": 25,
+      "fallback": {
+       "enemy": "bruiser",
+       "title": "Останови громил",
+       "count": 3,
+       "reward": 20
+      }
      }
     },
     {
@@ -1227,10 +1269,16 @@
      },
      "mood": "vault",
      "task": {
-      "enemy": "pig_mechanic",
-      "title": "Убери ремонтников",
-      "count": 3,
-      "reward": 20
+      "kind": "break",
+      "title": "Разбей укрытия",
+      "count": 2,
+      "reward": 25,
+      "fallback": {
+       "enemy": "pig_mechanic",
+       "title": "Убери ремонтников",
+       "count": 3,
+       "reward": 20
+      }
      }
     },
     {
@@ -1438,10 +1486,10 @@
      },
      "mood": "golden",
      "task": {
-      "enemy": "pig_sniper",
-      "title": "Убери снайперов",
-      "count": 3,
-      "reward": 20
+      "kind": "collect",
+      "title": "Собери монеты",
+      "count": 20,
+      "reward": 25
      }
     },
     {
@@ -1484,10 +1532,16 @@
      },
      "mood": "party",
      "task": {
-      "enemy": "bruiser",
-      "title": "Останови громил",
-      "count": 3,
-      "reward": 20
+      "kind": "tower",
+      "title": "Заряди ретранслятор",
+      "count": 1,
+      "reward": 25,
+      "fallback": {
+       "enemy": "bruiser",
+       "title": "Останови громил",
+       "count": 3,
+       "reward": 20
+      }
      }
     },
     {
@@ -1534,10 +1588,16 @@
      },
      "mood": "vault",
      "task": {
-      "enemy": "pig_mechanic",
-      "title": "Убери ремонтников",
-      "count": 3,
-      "reward": 20
+      "kind": "break",
+      "title": "Разбей укрытия",
+      "count": 2,
+      "reward": 25,
+      "fallback": {
+       "enemy": "pig_mechanic",
+       "title": "Убери ремонтников",
+       "count": 3,
+       "reward": 20
+      }
      }
     },
     {
@@ -1745,10 +1805,10 @@
      },
      "mood": "golden",
      "task": {
-      "enemy": "pig_sniper",
-      "title": "Убери снайперов",
-      "count": 3,
-      "reward": 20
+      "kind": "collect",
+      "title": "Собери монеты",
+      "count": 20,
+      "reward": 25
      }
     },
     {
@@ -1791,10 +1851,16 @@
      },
      "mood": "party",
      "task": {
-      "enemy": "bruiser",
-      "title": "Останови громил",
-      "count": 3,
-      "reward": 20
+      "kind": "tower",
+      "title": "Заряди ретранслятор",
+      "count": 1,
+      "reward": 25,
+      "fallback": {
+       "enemy": "bruiser",
+       "title": "Останови громил",
+       "count": 3,
+       "reward": 20
+      }
      }
     },
     {
@@ -1841,10 +1907,16 @@
      },
      "mood": "vault",
      "task": {
-      "enemy": "pig_mechanic",
-      "title": "Убери ремонтников",
-      "count": 3,
-      "reward": 20
+      "kind": "break",
+      "title": "Разбей укрытия",
+      "count": 2,
+      "reward": 25,
+      "fallback": {
+       "enemy": "pig_mechanic",
+       "title": "Убери ремонтников",
+       "count": 3,
+       "reward": 20
+      }
      }
     },
     {

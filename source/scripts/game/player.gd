@@ -23,7 +23,6 @@ const BASE_MAGNET := 110.0
 const INVULN_TIME := 0.7
 const KNOCKBACK_DECAY := 5.0
 const FALL_TIME := 0.9
-const STEP_INTERVAL := 0.3
 const SHIELD_RECHARGE := 12.0
 const SHIELD_COLOR := Color(0.3, 0.9, 1.0)
 const MAX_RESIST := 0.6
@@ -64,7 +63,6 @@ var weapon_controller: WeaponController
 
 var _invuln := 0.0
 var _knockback := Vector2.ZERO
-var _step_timer := 0.0
 var _speed_buff := 0.0
 ## «Кураж» ближнего боя: временная прибавка скорости за убийства (BattleBase ведёт стаки).
 var rush_buff := 0.0
@@ -175,7 +173,6 @@ func _physics_process(delta: float) -> void:
 		if _dash_left <= 0.0:
 			dash_ended.emit(global_position)
 	_invuln = maxf(_invuln - delta, 0.0)
-	_tick_steps(delta)
 	_tick_shield(delta)
 	var aim := weapon_controller.aim_direction if weapon_controller.has_target else velocity
 	visual.aiming = weapon_controller.has_target
@@ -185,6 +182,7 @@ func _physics_process(delta: float) -> void:
 		visual.melee_offset = weapon_controller.melee.offset
 		visual.melee_scale = weapon_controller.melee.size_scale
 	var steps := visual.footsteps
+	visual.dashing = dashing
 	visual.update_motion(velocity, aim, delta)
 	if visual.footsteps != steps:
 		if fx != null:
@@ -243,19 +241,6 @@ func _draw() -> void:
 			draw_arc(Vector2.ZERO, radius, 0.0, TAU, 36, Color(SHIELD_COLOR, 0.35 + 0.3 * pulse), 4.0, true)
 			draw_arc(Vector2.ZERO, radius, 0.0, TAU, 36, Color(1, 1, 1, 0.5 * pulse), 1.5, true)
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-
-
-func _tick_steps(delta: float) -> void:
-	if velocity.length_squared() < 3600.0:
-		_step_timer = minf(_step_timer, 0.08)
-		return
-	_step_timer -= delta
-	if _step_timer > 0.0:
-		return
-	_step_timer = STEP_INTERVAL * BASE_SPEED / maxf(velocity.length(), 1.0)
-	SoundManager.play(&"step", -9.0)
-	if fx != null:
-		fx.dust(global_position + Vector2(randf_range(-8, 8), 20), 1, 14.0)
 
 
 func take_damage(amount: float, _direction: Vector2 = Vector2.ZERO, _is_crit: bool = false) -> void:
@@ -362,6 +347,7 @@ func heal(amount: float) -> void:
 func _on_weapon_changed(weapon: WeaponData) -> void:
 	visual.weapon_color = weapon.effect_color
 	visual.weapon_icon = weapon.icon
+	visual.recoil_recovery = WeaponFeel.recovery(weapon)
 
 
 func _on_melee_swing(weapon: WeaponData, _origin: Vector2, direction: Vector2, _combo: int, heavy: bool, _side: float) -> void:

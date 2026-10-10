@@ -341,7 +341,7 @@ func sprite_flash(texture: Texture2D, at: Vector2, width: float, life: float, an
 	_sf_base[k] = width / maxf(size.x, 1.0)
 	_sf_flip[k] = flip
 	node.scale = Vector2(1.0, flip) * _sf_base[k] * 0.7
-	node.modulate = Color.WHITE
+	node.modulate = Color(1, 1, 1, 0.45 if bool(SaveService.data.get("reduced_flashes", false)) else 1.0)
 	node.visible = true
 	_sf_life[k] = life
 	_sf_total[k] = life
@@ -584,6 +584,8 @@ func dust(at: Vector2, count: int = 3, spread: float = 30.0) -> void:
 
 ## Вспышка света: пол (пул PointLight2D) + персонажи рядом (EnvLights).
 func light_flash(at: Vector2, color: Color, energy: float, radius: float, life: float) -> void:
+	if bool(SaveService.data.get("reduced_flashes", false)):
+		return
 	var k := _light_next
 	_light_next = (_light_next + 1) % LIGHT_POOL
 	var light := _lights[k]
@@ -677,7 +679,7 @@ func _process(delta: float) -> void:
 			continue
 		var t := 1.0 - _sf_life[i] / _sf_total[i]
 		node.scale = Vector2(1.0, _sf_flip[i]) * _sf_base[i] * (0.7 + 0.55 * (1.0 - pow(1.0 - t, 3.0)))
-		node.modulate.a = clampf((1.0 - t) * 1.6, 0.0, 1.0)
+		node.modulate.a = clampf((1.0 - t) * 1.6, 0.0, 1.0) * (0.45 if bool(SaveService.data.get("reduced_flashes", false)) else 1.0)
 	for i in SWEEP_POOL:
 		if _sw_life[i] <= 0.0:
 			continue

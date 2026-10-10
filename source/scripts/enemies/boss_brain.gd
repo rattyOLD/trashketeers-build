@@ -104,6 +104,7 @@ var phase := 1
 
 var _cooldown := 2.2
 var _step := 0
+var _combo_attacks := 0
 var _shots_left := 0
 var _shot_timer := 0.0
 var _ring_offset := 0.0
@@ -164,6 +165,7 @@ func setup(owner: Enemy) -> void:
 	phase = 1
 	_cooldown = 2.4
 	_step = 0
+	_combo_attacks = 0
 	windup = 0.0
 	strike = 0.0
 	enraged = false
@@ -375,7 +377,7 @@ func tick(player: Player, dir: Vector2, path_dir: Vector2, dist: float, delta: f
 			if _shots_left <= 0 and _shot_timer <= 0.0:
 				if _step % 3 == 0:
 					_enter(State.RING_CHARGE)
-					SoundManager.play(&"beam_charge", -4.0)
+					SoundManager.play_warning(&"beam_charge", -4.0)
 				else:
 					_rest()
 			return path_dir * speed() * 0.2
@@ -573,7 +575,7 @@ func tick(player: Player, dir: Vector2, path_dir: Vector2, dist: float, delta: f
 			if state_time >= BEAM_WINDUP_TIME:
 				_enter(State.BEAM)
 				_shot_timer = 0.0
-				SoundManager.play(&"beam_charge", -2.0)
+				SoundManager.play_warning(&"beam_charge", -2.0)
 			return Vector2.ZERO
 		State.BEAM:
 			_shot_timer -= delta
@@ -591,7 +593,7 @@ func tick(player: Player, dir: Vector2, path_dir: Vector2, dist: float, delta: f
 			if state_time >= 0.6:
 				_enter(State.PRESS)
 				_shot_timer = 0.0
-				SoundManager.play(&"beam_charge", -2.0)
+				SoundManager.play_warning(&"beam_charge", -2.0)
 			return Vector2.ZERO
 		State.PRESS:
 			_shot_timer -= delta
@@ -696,7 +698,7 @@ func _next_attack(dist: float) -> void:
 	if pattern == "overlord" and phase == 1 and _speakers_alive > 0 and _bass_cd <= 0.0:
 		_bass_cd = BASS_INTERVAL * _tempo()
 		_enter(State.BASS_WINDUP)
-		SoundManager.play(&"beam_charge", -2.0)
+		SoundManager.play_warning(&"beam_charge", -2.0)
 		return
 	# Каждая пятая атака — общая «специальная»: призыв, спираль или ковёр по очереди.
 	if _step % 5 == 0:
@@ -707,7 +709,7 @@ func _next_attack(dist: float) -> void:
 			1:
 				_enter(State.SPIRAL)
 				_shot_timer = 0.0
-				SoundManager.play(&"beam_charge", -4.0)
+				SoundManager.play_warning(&"beam_charge", -4.0)
 			_:
 				_start_carpet()
 		return
@@ -715,14 +717,14 @@ func _next_attack(dist: float) -> void:
 		if phase == 1:
 			if dist < 230.0 and _step % 2 == 0:
 				_enter(State.STOMP_WINDUP)
-				SoundManager.play(&"beam_charge", -4.0)
+				SoundManager.play_warning(&"beam_charge", -4.0)
 			elif _step % 3 == 2:
 				_enter(State.RAIN)
 				_shots_left = 9
 				_shot_timer = 0.0
 			else:
 				_enter(State.GATLING_SPIN)
-				SoundManager.play(&"beam_charge", -6.0)
+				SoundManager.play_warning(&"beam_charge", -6.0)
 		else:
 			match _step % 3:
 				0:
@@ -737,14 +739,14 @@ func _next_attack(dist: float) -> void:
 	if phase == 1:
 		if _step % 3 == 2:
 			_enter(State.RING_CHARGE)
-			SoundManager.play(&"beam_charge", -4.0)
+			SoundManager.play_warning(&"beam_charge", -4.0)
 		else:
 			_enter(State.ROCKETS)
 			_shots_left = 5
 			_shot_timer = 0.0
 	elif story_phases and pattern == "overlord" and _step % 4 == 2:
 		_enter(State.CRANE_WINDUP)
-		SoundManager.play(&"beam_charge", -2.0)
+		SoundManager.play_warning(&"beam_charge", -2.0)
 	else:
 		match _step % 3:
 			0:
@@ -766,11 +768,11 @@ func _next_baron_attack() -> void:
 			_start_vomit()
 		0:
 			_enter(State.BEAM_WINDUP)
-			SoundManager.play(&"beam_charge", -4.0)
+			SoundManager.play_warning(&"beam_charge", -4.0)
 		1:
 			_enter(State.PRESS_WINDUP)
 			_aim_dir = enemy.global_position.direction_to(enemy.target_point())
-			SoundManager.play(&"beam_charge", -4.0)
+			SoundManager.play_warning(&"beam_charge", -4.0)
 		_:
 			_enter(State.SMASH_WINDUP)
 
@@ -790,11 +792,11 @@ func _next_shaman_attack(dist: float) -> void:
 		return
 	if dist < 240.0 and _step % 2 == 0:
 		_enter(State.ARC_WINDUP)
-		SoundManager.play(&"beam_charge", -4.0)
+		SoundManager.play_warning(&"beam_charge", -4.0)
 	elif _step % 2 == 1:
 		_enter(State.BOLT_WINDUP)
 		_aim_dir = enemy.part_muzzle(0).direction_to(enemy.target_point())
-		SoundManager.play(&"beam_charge", -4.0)
+		SoundManager.play_warning(&"beam_charge", -4.0)
 	else:
 		_start_grid()
 
@@ -807,7 +809,7 @@ func _start_grid() -> void:
 	var extra := 4 if phase == 1 else 8
 	for i in extra:
 		_grid_points.append(center + Vector2.from_angle(TAU * float(i) / extra + randf() * 0.6) * randf_range(120.0, 320.0))
-	SoundManager.play(&"beam_charge", -3.0)
+	SoundManager.play_warning(&"beam_charge", -3.0)
 
 
 func _shock_burst() -> void:
@@ -880,14 +882,16 @@ func _enter(next: State) -> void:
 
 func _rest(extra: float = 0.0) -> void:
 	_enter(State.WALK)
-	# Серия: со второй фазы босс часто продолжает комбо без передышки — расслабляться после одного удара нельзя.
+	# После третьей атаки окно ответа гарантировано даже в ярости.
+	_combo_attacks += 1
 	var chain := CHAIN_CHANCE_P3 if desperate else (CHAIN_CHANCE_P2 if phase == 2 else 0.0)
-	if randf() < chain:
+	if _combo_attacks < 3 and randf() < chain:
 		_cooldown = 0.12
 		return
+	_combo_attacks = 0
 	# Серия кончилась — окно наказания: босс выдохся и получает больше урона.
 	opening = OPENING_TIME
-	_cooldown = ((0.6 if phase == 2 else 1.0) + randf_range(0.0, 0.3) + extra) * _tempo()
+	_cooldown = maxf(OPENING_TIME, ((0.6 if phase == 2 else 1.0) + randf_range(0.0, 0.3) + extra) * _tempo())
 
 
 ## Ковёр: линия из восьми разрывов от босса через Енота — уходить поперёк линии.
@@ -897,7 +901,7 @@ func _start_carpet() -> void:
 	_carpet_dir = enemy.global_position.direction_to(enemy.target_point())
 	_shots_left = 8
 	_shot_timer = 0.35
-	SoundManager.play(&"beam_charge", -6.0)
+	SoundManager.play_warning(&"beam_charge", -6.0)
 
 
 ## Хлам (у Магната — мешки монет) падает с неба вокруг Енота: три круга, один — точно под ним.
@@ -1081,7 +1085,7 @@ func _draw_lane(canvas: Node2D, from_world: Vector2, dir: Vector2, length: float
 	var forward := (b - a).normalized()
 	var side := forward.orthogonal() * (enemy.data.radius * 0.95 + 8.0)
 	var hot := locked and t > 0.8 and int(clock * 16.0) % 2 == 0
-	var tint := Color(1.0, 0.92, 0.35) if hot else TELEGRAPH
+	var tint := Color(1.0, 0.92, 0.35) if hot else AttackTelegraph.ink(TELEGRAPH)
 	canvas.draw_colored_polygon(PackedVector2Array([a + side, b + side, b - side, a - side]), Color(0.08, 0.0, 0.04, (0.22 + 0.1 * t) * fade))
 	var reach := a.lerp(b, maxf(t, 0.05))
 	canvas.draw_colored_polygon(PackedVector2Array([a + side, reach + side, reach - side, a - side]), Color(tint, (0.16 + 0.2 * t) * fade))
@@ -1112,7 +1116,7 @@ func _draw_strip(canvas: Node2D, from_world: Vector2, dir: Vector2, length: floa
 	var side := dir.orthogonal() * half_width
 	var b := a + dir * length
 	var hot := locked and t > 0.8 and int(Time.get_ticks_msec() * 0.016) % 2 == 0
-	var tint := Color(1.0, 0.92, 0.35) if hot else TELEGRAPH
+	var tint := Color(1.0, 0.92, 0.35) if hot else AttackTelegraph.ink(TELEGRAPH)
 	canvas.draw_colored_polygon(PackedVector2Array([a + side, b + side, b - side, a - side]), Color(tint, 0.1 + 0.2 * t))
 	canvas.draw_line(a + side, b + side, Color(tint, 0.6), 3.0, true)
 	canvas.draw_line(a - side, b - side, Color(tint, 0.6), 3.0, true)
@@ -1123,9 +1127,9 @@ func _draw_cone(canvas: Node2D, from_world: Vector2, dir: Vector2, half_angle: f
 	var pts := PackedVector2Array([a])
 	for i in 9:
 		pts.append(a + dir.rotated(-half_angle + half_angle * 2.0 * float(i) / 8.0) * length)
-	canvas.draw_colored_polygon(pts, Color(TELEGRAPH, 0.08 + 0.2 * t))
-	canvas.draw_line(a, a + dir.rotated(-half_angle) * length, Color(TELEGRAPH, 0.7), 3.0, true)
-	canvas.draw_line(a, a + dir.rotated(half_angle) * length, Color(TELEGRAPH, 0.7), 3.0, true)
+	canvas.draw_colored_polygon(pts, Color(AttackTelegraph.ink(TELEGRAPH), 0.08 + 0.2 * t))
+	canvas.draw_line(a, a + dir.rotated(-half_angle) * length, Color(AttackTelegraph.ink(TELEGRAPH), 0.7), 3.0, true)
+	canvas.draw_line(a, a + dir.rotated(half_angle) * length, Color(AttackTelegraph.ink(TELEGRAPH), 0.7), 3.0, true)
 
 
 ## Круг совпадает с проверкой урона; внутренняя дуга показывает время до удара.

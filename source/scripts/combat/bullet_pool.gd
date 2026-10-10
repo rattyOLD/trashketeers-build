@@ -63,7 +63,10 @@ func fire(weapon: WeaponData, origin: Vector2, direction: Vector2, team: Bullet.
 		return
 
 	if weapon.fire_sound != &"":
-		SoundManager.play(weapon.fire_sound, -4.0 if team == Bullet.Team.ENEMY else 0.0)
+		if team == Bullet.Team.PLAYER:
+			SoundManager.play_pitched(weapon.fire_sound, WeaponFeel.sound_pitch(weapon))
+		else:
+			SoundManager.play(weapon.fire_sound, -4.0)
 	var base_angle := direction.angle()
 	var count := weapon.projectiles_per_shot
 	for i in count:

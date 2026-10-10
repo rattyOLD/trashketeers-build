@@ -115,8 +115,11 @@ func _test_tasks() -> void:
 			if not (wave["task"] as Dictionary).is_empty():
 				task_count += 1
 				var spec: Dictionary = wave["task"]
-				_check(ContentDB.get_enemy(StringName(spec["enemy"])) != null, "task enemy exists")
-				_check((wave["weights"] as Dictionary).has(spec["enemy"]), "task enemy spawns in wave")
+				var kill_spec: Dictionary = spec if str(spec.get("kind", "kill")) == "kill" else spec.get("fallback", {})
+				if not kill_spec.is_empty():
+					_check(ContentDB.get_enemy(StringName(kill_spec["enemy"])) != null, "task enemy exists")
+					_check((wave["weights"] as Dictionary).has(kill_spec["enemy"]), "task enemy spawns in wave")
+				_check(str(spec.get("kind", "kill")) in ["kill", "collect", "tower", "break"], "supported task kind")
 				_check(str(wave.get("boss", "")).is_empty() and str(wave.get("miniboss", "")).is_empty(), "no reward task during boss wave")
 	_check(task_count == 24, "four tasks in each of six chapters survive loading")
 

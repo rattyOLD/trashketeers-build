@@ -58,6 +58,7 @@ const LUNGE_TIME := 0.22
 const LUNGE_SPEED_MULT := 3.4
 const LUNGE_COOLDOWN := 1.3
 const AIM_TIME := 0.5
+const AIM_LOCK_TIME := 0.18
 const DASH_WINDUP := 0.6
 const DASH_TIME := 0.45
 const DASH_BAND := 110.0
@@ -171,6 +172,7 @@ var _act_time := 0.0
 var _act_total := 1.0
 var _act_dir := Vector2.RIGHT
 var _aim_target := Vector2.ZERO
+var support_anchor := Vector2.INF
 var _visual_id := ""
 var _framed := false
 var _auto := false
@@ -299,6 +301,7 @@ func activate(enemy_data: EnemyData, at: Vector2, hp_mult: float = 1.0, dmg_mult
 	_attack_timer = randf_range(0.6, data.attack_cooldown)
 	_strafe_sign = 1.0 if randf() < 0.5 else -1.0
 	_flank = (1.0 if randf() < 0.5 else -1.0) if randf() < data.flank_chance else 0.0
+	support_anchor = Vector2.INF
 	_size_mult = 1.0 + randf_range(-data.size_variance, data.size_variance)
 	_act = Act.MOVE
 	_act_time = 0.0
@@ -888,18 +891,20 @@ func _run_act(player: Player, dir: Vector2, path_dir: Vector2, dist: float) -> V
 					_attack_timer = data.attack_cooldown
 			return _act_dir * (data.dash_speed if data.dash_speed > 0.0 else data.charge_speed)
 		Act.AIM:
-			_aim_target = player.global_position
+			if _act_time > AIM_LOCK_TIME:
+				_aim_target = player.global_position
 			_redraw_warning()
 			if _act_time <= 0.0:
-				_fire(dir)
+				_fire(global_position.direction_to(_aim_target))
 				_enter(Act.MOVE, 0.0)
-			return dir.orthogonal() * _strafe_sign * data.move_speed * 0.25
+			return dir.orthogonal() * _strafe_sign * data.move_speed * 0.25 if _act_time > AIM_LOCK_TIME else Vector2.ZERO
 		Act.THROW:
-			_aim_target = player.global_position + player.velocity * 0.5
+			if _act_time > AIM_LOCK_TIME:
+				_aim_target = player.global_position + player.velocity * 0.5
 			_redraw_warning()
 			if _act_time <= 0.0:
 				if data.behavior == EnemyData.Behavior.TRAPPER:
-					_deploy_trap(player)
+					_deploy_trap()
 				else:
 					_throw_bomb(_aim_target)
 				_enter(Act.RECOVER, RECOVER_TIME * 0.6)
@@ -929,6 +934,15 @@ func _run_act(player: Player, dir: Vector2, path_dir: Vector2, dist: float) -> V
 
 
 func _move(player: Player, dir: Vector2, path_dir: Vector2, dist: float) -> Vector2:
+	# Ремонтник держится за линией бойцов: его можно обойти и лишить группу лечения.
+	if data.heal_radius > 0.0 and support_anchor.is_finite():
+		_try_aim(dist)
+		if dist < 170.0:
+			return -dir * data.move_speed
+		var to_support := support_anchor - global_position
+		if _detour_time > 0.0:
+			return (to_support.normalized() * 0.35 + _detour).normalized() * data.move_speed
+		return to_support.normalized() * data.move_speed if to_support.length_squared() > 70.0 * 70.0 else Vector2.ZERO
 	match data.behavior:
 		EnemyData.Behavior.RANGED:
 			_try_aim(dist)
@@ -944,7 +958,7 @@ func _move(player: Player, dir: Vector2, path_dir: Vector2, dist: float) -> Vect
 				_act_dir = dir
 				_enter(Act.SLAM, data.slam_windup)
 				_alt_time = data.slam_windup + 0.3
-				SoundManager.play(&"beam_charge", -8.0)
+				SoundManager.play_warning(&"beam_charge", -8.0)
 				return Vector2.ZERO
 			if data.charge_speed > 0.0 and _charge_cd <= 0.0 and dist > CHARGE_BAND.x and dist < CHARGE_BAND.y and not player.is_dead:
 				_charge_cd = CHARGE_COOLDOWN
@@ -957,7 +971,7 @@ func _move(player: Player, dir: Vector2, path_dir: Vector2, dist: float) -> Vect
 			if _attack_timer <= 0.0 and dist < LUNGE_TRIGGER + 50.0 and not player.is_dead:
 				_act_dir = dir
 				_enter(Act.WINDUP, ASSASSIN_WINDUP)
-				SoundManager.play(&"beam_charge", -10.0)
+				SoundManager.play_warning(&"beam_charge", -10.0)
 				return Vector2.ZERO
 			return (path_dir + path_dir.orthogonal() * sin(_time * 5.0 + pool_index) * 0.55).normalized() * data.move_speed
 		EnemyData.Behavior.TRAPPER:
@@ -980,7 +994,7 @@ func _move(player: Player, dir: Vector2, path_dir: Vector2, dist: float) -> Vect
 			if dist < FUSE_TRIGGER and not player.is_dead:
 				_enter(Act.FUSE, FUSE_TIME)
 				_accessories.fuse_lit = true
-				SoundManager.play(&"beam_charge", -6.0)
+				SoundManager.play_warning(&"beam_charge", -6.0)
 				return Vector2.ZERO
 			return path_dir * data.move_speed
 		EnemyData.Behavior.DASHER:
@@ -1070,11 +1084,10 @@ func _tick_slam_line(delta: float) -> void:
 	BulletPool.explode(_line_at, 64.0, data.slam_damage * 0.6 * damage_mult, Bullet.Team.ENEMY, Color("#ffcf5a"), 0.8)
 
 
-func _deploy_trap(player: Player) -> void:
+func _deploy_trap() -> void:
 	if MagnetTraps.active == null:
 		return
-	var target := player.global_position + player.velocity * 0.6 + Vector2.from_angle(randf() * TAU) * randf_range(20.0, 70.0)
-	MagnetTraps.active.deploy(global_position + Vector2(0, -data.radius), target, damage_mult)
+	MagnetTraps.active.deploy(global_position + Vector2(0, -data.radius), _aim_target, damage_mult)
 
 
 ## Трюк Крупье: исчезает в вихре карт и появляется сбоку от прежнего места.
@@ -1099,6 +1112,8 @@ func _show_attack_pose() -> void:
 
 func _enter(act: Act, duration: float) -> void:
 	_act = act
+	if act == Act.AIM or act == Act.THROW:
+		_aim_target = _target_pos
 	_act_time = duration
 	_act_total = maxf(duration, 0.001)
 	_redraw_warning()
@@ -1193,6 +1208,8 @@ func _animate(delta: float, desired: Vector2) -> void:
 			flash = (0.55 + 0.45 * _flash / FLASH_TIME) * (0.5 if data.is_boss() else 1.0)
 	if _act == Act.WINDUP or _act == Act.SLAM or (_act == Act.FUSE and int(_act_time * 16.0) % 2 == 0):
 		flash = maxf(flash, 0.35)
+	if bool(SaveService.data.get("reduced_flashes", false)):
+		flash *= 0.25
 	_sprite.set_param("flash", flash)
 	_parts.set_param("flash", flash)
 	if (Engine.get_physics_frames() + pool_index) % 6 == 0:
@@ -1403,11 +1420,11 @@ func _draw_dash_lane(canvas: Node2D) -> void:
 	var length := (data.dash_speed if data.dash_speed > 0.0 else data.charge_speed) * DASH_TIME
 	var side := _act_dir.orthogonal() * _shape.radius
 	var end := _act_dir * length
-	canvas.draw_colored_polygon(PackedVector2Array([side, end + side, end - side, -side]), Color(TELEGRAPH, 0.12 + 0.18 * t))
-	canvas.draw_line(side, end + side, Color(TELEGRAPH, 0.85), 3.0, true)
-	canvas.draw_line(-side, end - side, Color(TELEGRAPH, 0.85), 3.0, true)
-	canvas.draw_line(Vector2.ZERO, end * t, Color(TELEGRAPH, 0.8), 4.0)
-	canvas.draw_colored_polygon(PackedVector2Array([end + _act_dir * 26.0, end + side * 0.9, end - side * 0.9]), Color(TELEGRAPH, 0.55 + 0.4 * t))
+	canvas.draw_colored_polygon(PackedVector2Array([side, end + side, end - side, -side]), Color(AttackTelegraph.ink(TELEGRAPH), 0.12 + 0.18 * t))
+	canvas.draw_line(side, end + side, Color(AttackTelegraph.ink(TELEGRAPH), 0.85), 3.0, true)
+	canvas.draw_line(-side, end - side, Color(AttackTelegraph.ink(TELEGRAPH), 0.85), 3.0, true)
+	canvas.draw_line(Vector2.ZERO, end * t, Color(AttackTelegraph.ink(TELEGRAPH), 0.8), 4.0)
+	canvas.draw_colored_polygon(PackedVector2Array([end + _act_dir * 26.0, end + side * 0.9, end - side * 0.9]), Color(AttackTelegraph.ink(TELEGRAPH), 0.55 + 0.4 * t))
 
 
 func _draw_aim(canvas: Node2D) -> void:
@@ -1415,8 +1432,13 @@ func _draw_aim(canvas: Node2D) -> void:
 	var from := Vector2(0, -data.radius * 0.8)
 	var to := _aim_target - global_position
 	var segments := maxi(int(from.distance_to(to) / 22.0), 1)
-	for i in range(0, segments, 2):
-		canvas.draw_line(from.lerp(to, float(i) / segments), from.lerp(to, float(i + 1) / segments), Color(TELEGRAPH, 0.35 + 0.55 * t), 2.5)
+	var ink := Color("#fff0b8") if bool(SaveService.data.get("contrast_warnings", false)) else TELEGRAPH
+	if _act_time <= AIM_LOCK_TIME:
+		canvas.draw_line(from, to, Color("#17100b"), 6.0)
+		canvas.draw_line(from, to, ink, 3.0)
+	else:
+		for i in range(0, segments, 2):
+			canvas.draw_line(from.lerp(to, float(i) / segments), from.lerp(to, float(i + 1) / segments), Color(ink, 0.35 + 0.55 * t), 2.5)
 	canvas.draw_circle(from + (to - from).normalized() * data.radius, 5.0 + 5.0 * t, Color(0.5, 0.95, 1.0, 0.85))
 
 

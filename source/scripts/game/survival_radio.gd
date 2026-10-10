@@ -103,6 +103,10 @@ func on_elite() -> void:
 		_play("elite", true)
 
 
+func on_task(kind: StringName) -> void:
+	_play("task_" + String(kind), false)
+
+
 func on_boss_down(weapon_id: StringName) -> void:
 	if weapon_id == QUIP_WEAPON:
 		_play("ded_boss", true)

@@ -745,16 +745,17 @@ func _on_player_fired(weapon: WeaponData, origin: Vector2, direction: Vector2) -
 			_p2_fx_cd = 0.9
 			fx.flipbook(PhaseFx.tex("overheat"), origin, 6, 14.0, 70.0)
 	if _flash_cd <= 0.0:
-		_flash_cd = MUZZLE_FLASH_GAP / _fx_scale
+		var reduced := bool(SaveService.data.get("reduced_flashes", false))
+		_flash_cd = maxf(MUZZLE_FLASH_GAP / _fx_scale, 0.22 if reduced else 0.0)
 		var flash_tex := WeaponVfx.muzzle_for(weapon)
 		if flash_tex != null:
 			fx.light_flash(origin, weapon.effect_color.lerp(Color("#fff2c0"), 0.4), 0.9, 150.0, 0.08)
-			fx.sprite_flash(flash_tex, origin + direction * 2.0, WeaponVfx.muzzle_width(weapon), 0.09, direction.angle(), WeaponVfx.MUZZLE_PIVOT)
+			fx.sprite_flash(flash_tex, origin + direction * 2.0, WeaponVfx.muzzle_width(weapon) * WeaponFeel.flash_scale(weapon) * (0.6 if reduced else 1.0), WeaponFeel.flash_time(weapon), direction.angle(), WeaponVfx.MUZZLE_PIVOT)
 		else:
-			fx.muzzle_flash(origin + direction * 4.0, direction.angle(), weapon.effect_color, 0.7 + 0.25 * weapon.recoil)
+			fx.muzzle_flash(origin + direction * 4.0, direction.angle(), weapon.effect_color, (0.7 + 0.25 * weapon.recoil) * WeaponFeel.flash_scale(weapon) * (0.6 if reduced else 1.0))
 	_eject_casing(weapon, origin, direction)
 	if bool(SaveService.data.get("camera_shake", true)):
-		_kick = (_kick - direction.normalized() * 2.2 * weapon.recoil).limit_length(12.0)
+		_kick = (_kick - direction.normalized() * 2.2 * weapon.recoil * WeaponFeel.camera_scale(weapon)).limit_length(12.0)
 	if weapon.recoil >= 1.8:
 		add_shake(0.08 * weapon.recoil)
 
