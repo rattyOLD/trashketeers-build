@@ -38,6 +38,8 @@ const SFX := {
 	&"shot_railgun": [-7.0, 0.3],
 	&"enemy_shot": [-18.0, 0.12],
 	&"hit": [-17.0, 0.09],
+	&"k_mat_metal": [-15.0, 0.14],
+	&"k_stick_crystal": [-11.0, 0.4],
 	&"enemy_death": [-12.0, 0.07],
 	&"player_hurt": [-6.0, 0.15],
 	&"nut_pickup": [-23.0, 0.08],
@@ -160,6 +162,9 @@ var _page_hidden := false
 var _ambient: Array[AudioStreamPlayer] = []
 var _ambient_timers: Dictionary = {}
 var _ambient_on := false
+var _impact_ms := -100000
+var _combat_left := 0.0
+var _duck_db := 0.0
 
 
 func _ready() -> void:
@@ -183,6 +188,21 @@ func play_enemy_death() -> void:
 
 func play_pitched(id: StringName, pitch: float, volume_offset_db: float = 0.0) -> void:
 	_play(id, volume_offset_db, pitch)
+
+
+## Одно подтверждение попадания вместо двух наложенных звуков. Общий бюджет сохраняется.
+func play_impact(armored: bool, critical: bool = false) -> void:
+	var now := Time.get_ticks_msec()
+	if now - _impact_ms < 120:
+		return
+	_impact_ms = now
+	_combat_left = 0.35
+	play_pitched(&"k_mat_metal" if armored else &"hit", randf_range(0.86, 0.96) if armored else randf_range(1.05, 1.15), 2.0 if critical else 0.0)
+
+
+func play_armor_break() -> void:
+	_combat_left = 0.5
+	play_pitched(&"k_stick_crystal", 0.85)
 
 
 ## Один канал существующего пула сохраняет сигнал опасности под непрерывным огнём.
@@ -330,7 +350,7 @@ func apply_enabled() -> void:
 	AudioServer.set_bus_mute(sfx, not is_sfx_enabled())
 	AudioServer.set_bus_mute(music, not is_music_enabled())
 	AudioServer.set_bus_volume_db(sfx, linear_to_db(maxf(get_volume("sfx"), 0.001)))
-	AudioServer.set_bus_volume_db(music, linear_to_db(maxf(get_volume("music"), 0.001)))
+	AudioServer.set_bus_volume_db(music, linear_to_db(maxf(get_volume("music"), 0.001)) + _duck_db)
 
 
 ## Фон по стилю локации: Свалка — гул и ветер, сирена и треск неона; Банк — ветер в листве и птицы.
@@ -362,6 +382,18 @@ func stop_ambient() -> void:
 
 
 func _process(delta: float) -> void:
+	_combat_left = maxf(_combat_left - delta, 0.0)
+	var busy := _combat_left > 0.0 and not get_tree().paused and not _page_hidden and is_sfx_enabled()
+	var target := -2.5 if busy else 0.0
+	var next := move_toward(_duck_db, target, delta * (24.0 if busy else 7.0))
+	if not is_equal_approx(next, _duck_db):
+		_duck_db = next
+		AudioServer.set_bus_volume_db(AudioServer.get_bus_index(MUSIC_BUS), linear_to_db(maxf(get_volume("music"), 0.001)) + _duck_db)
+		for i in _ambient.size():
+			if _ambient[i].stream != null:
+				var ids: Array = BANK_AMBIENT_LOOPS if _ambient_events == BANK_AMBIENT_EVENTS else AMBIENT_LOOPS
+				if i < ids.size():
+					_ambient[i].volume_db = float(SFX[ids[i]][0]) + _duck_db * 1.6
 	if not _ambient_on or not unlocked:
 		return
 	for i in _ambient.size():

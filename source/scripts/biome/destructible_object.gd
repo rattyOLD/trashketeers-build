@@ -193,6 +193,10 @@ func get_sound() -> StringName:
 	return StringName(str(_destruct.get("sound", "obstacle_break")))
 
 
+func impact_is_metal() -> bool:
+	return kind == Kind.ART and str(_destruct.get("effect", "metal")) in ["metal", "sparks", "explode", "toxic", "cans"]
+
+
 func take_damage(amount: float, _direction: Vector2 = Vector2.ZERO, _is_crit: bool = false) -> void:
 	if hp <= 0.0 or drop_height > 0.0:
 		return
@@ -315,6 +319,13 @@ func play_break_fx(fx: FxManager) -> void:
 
 func _draw() -> void:
 	if kind != Kind.WEAPON_CRATE:
+		if hp > 0 and chain_kind() != "":
+			var at := Vector2(0, -ArenaProp.visual_size(prop_id).y * 0.6)
+			var color := Color("#b4e86b") if chain_kind() == "toxic" else Color("#ffbd69")
+			draw_circle(at, 12, UiStyle.OUTLINE)
+			draw_colored_polygon(PackedVector2Array([at + Vector2(0, -9), at + Vector2(8, 5), at + Vector2(-8, 5)]), color)
+			draw_line(at + Vector2(0, -4), at + Vector2(0, 0), UiStyle.OUTLINE, 2)
+			draw_circle(at + Vector2(0, 3), 1.3, UiStyle.OUTLINE)
 		return
 	var shadow_scale := 1.0 - clampf(drop_height / 900.0, 0.0, 0.7)
 	draw_set_transform(Vector2(0, -2), 0.0, Vector2(1.0, 0.34) * shadow_scale)

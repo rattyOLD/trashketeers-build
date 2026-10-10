@@ -13,6 +13,14 @@ var enemy_damage := 0.0
 var damage_by_kind := {}
 var received := 0.0
 var last_source: StringName = &""
+const RECENT_WINDOW := 4.0
+const RECENT_LIMIT := 16
+var _clock := 0.0
+var _recent: Array[Dictionary] = []
+
+
+func advance(delta: float) -> void:
+	_clock += delta
 
 
 func record_enemy(amount: float, hp_after: float, kind: StringName) -> void:
@@ -32,10 +40,17 @@ func record_received(actual: float, source: StringName) -> void:
 		return
 	received += actual
 	last_source = source
+	if _recent.size() >= RECENT_LIMIT:
+		_recent.pop_front()
+	_recent.append({"at": _clock, "amount": actual, "source": source})
 
 
 func source_title() -> String:
-	match last_source:
+	return title_for(last_source)
+
+
+static func title_for(source: StringName) -> String:
+	match source:
 		&"blast": return "взрыв"
 		&"projectile": return "пуля"
 		&"acid": return "кислота"
@@ -45,7 +60,7 @@ func source_title() -> String:
 		&"laser": return "лазер"
 		&"?", &"": return "опасность на карте"
 	for entry: Dictionary in ConfigLoader.load_json("res://data/enemies.json").get("enemies", []):
-		if str(entry.get("enemy_id", "")) == str(last_source):
+		if str(entry.get("enemy_id", "")) == str(source):
 			return str(entry.get("display_name", "враг"))
 	return "опасность на карте"
 
@@ -70,8 +85,27 @@ func lines(dead: bool) -> String:
 		result += "\n%s: %d · %d%%" % [row["title"], roundi(row["amount"]), roundi(row["amount"] / maxf(enemy_damage, 1.0) * 100.0)]
 	result += "\nПотеряно HP: %d" % roundi(received)
 	if dead and received > 0.0:
-		result += " · последний удар: " + source_title()
+		result += "\nПоследний удар: " + source_title()
+		var recent := recent_damage()
+		if not recent.is_empty():
+			result += "\nПеред гибелью (4 с):"
+			for row: Dictionary in recent:
+				result += "\n%s · −%d HP" % [row["title"], roundi(row["amount"])]
 	return result
+
+
+func recent_damage() -> Array[Dictionary]:
+	var totals := {}
+	for hit: Dictionary in _recent:
+		if _clock - float(hit["at"]) <= RECENT_WINDOW:
+			totals[hit["source"]] = float(totals.get(hit["source"], 0.0)) + float(hit["amount"])
+	var rows: Array[Dictionary] = []
+	for source: StringName in totals:
+		rows.append({"title": title_for(source), "amount": totals[source]})
+	rows.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["amount"] > b["amount"])
+	if rows.size() > 2:
+		rows.resize(2)
+	return rows
 
 
 func damage_breakdown() -> Array[Dictionary]:

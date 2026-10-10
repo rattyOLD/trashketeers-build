@@ -82,8 +82,6 @@ func can_pick() -> bool:
 func _draw() -> void:
 	if weapon == null:
 		return
-	if life < BLINK_TIME and int(life * 6.0) % 2 == 0:
-		return
 	var color := weapon.get_rarity_color()
 	var pulse := 0.6 + 0.4 * sin(_time * 3.0)
 	SoftGlow.pool(self, Vector2(0, 2), 44.0, 0.38, Color(color, 0.3 * pulse))
@@ -91,9 +89,18 @@ func _draw() -> void:
 	SoftGlow.pool(self, Vector2(0, -BEAM_HEIGHT * 0.5), 15.0, BEAM_HEIGHT * 0.5 / 15.0, Color(color, 0.08 + 0.05 * pulse))
 	if focused:
 		SoftGlow.rim(self, Vector2(0, 2), 58.0 + 4.0 * pulse, 0.38, Color(1, 1, 1, 0.7))
+	if life < BLINK_TIME:
+		draw_set_transform(Vector2(0, 2), 0, Vector2(1, 0.38))
+		draw_arc(Vector2.ZERO, 46, -PI / 2, -PI / 2 + TAU * life / BLINK_TIME, 24, Color("#ffe5a0"), 4, true)
+		draw_set_transform(Vector2.ZERO, 0, Vector2.ONE)
 	var bob := sin(_time * 2.4) * 5.0
 	var tilt := sin(_time * 1.3) * 0.18
 	WeaponIcons.draw(self, weapon.icon, Vector2(0, -34 + bob), 0.85, tilt, weapon.effect_color)
+	var rank := clampi(WeaponData.RARITIES.find(weapon.rarity), 0, 4)
+	for i in rank + 1:
+		var at := Vector2((i - rank * 0.5) * 10, -12 + bob)
+		draw_rect(Rect2(at - Vector2(3, 3), Vector2(6, 6)), UiStyle.OUTLINE)
+		draw_rect(Rect2(at - Vector2(2, 2), Vector2(4, 4)), color)
 	var font := ThemeDB.fallback_font
 	var label := weapon.get_title()
 	# Подпись крупно — только у ствола, к которому енот подошёл; остальные мелко и полупрозрачно, чтобы не засорять бой.

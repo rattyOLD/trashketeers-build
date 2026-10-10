@@ -52,6 +52,8 @@ var _tick := 0.0
 var _rocket: Texture2D
 var _blast: Texture2D
 var _batch := PolyBatch.new()
+var _suppressed: Array[Dictionary] = []
+var _clock := 0.0
 
 
 func setup(target: Player, wave_director: WaveDirector, level: LevelSpawner, effects: FxManager) -> void:
@@ -78,6 +80,8 @@ func attach_level(level: LevelSpawner) -> void:
 
 
 func clear() -> void:
+	_suppressed.clear()
+	_clock = 0.0
 	_life.fill(-1.0)
 	_timer = FIRST_DELAY
 	_history.clear()
@@ -89,6 +93,11 @@ func clear() -> void:
 func _physics_process(delta: float) -> void:
 	if player == null or director == null or player.is_dead:
 		return
+	_clock += delta
+	for i in range(_suppressed.size() - 1, -1, -1):
+		_suppressed[i]["left"] -= delta
+		if _suppressed[i]["left"] <= 0:
+			_suppressed.remove_at(i)
 	var fighting := director.phase == WaveDirector.Phase.FIGHT
 	_track_camping(delta)
 	_tick_zones(delta)
@@ -187,6 +196,8 @@ func _barrage(center: Vector2, count: int, exact: bool) -> void:
 
 
 func _add_zone(kind: int, at: Vector2, direction: Vector2, warn: float) -> void:
+	if _is_suppressed(kind, at, direction):
+		return
 	var k := _next
 	_next = (_next + 1) % CAPACITY
 	_kind[k] = kind
@@ -196,6 +207,30 @@ func _add_zone(kind: int, at: Vector2, direction: Vector2, warn: float) -> void:
 	_warn[k] = warn
 	_life[k] = warn + (ACID_LIFE if kind == Kind.ACID else (COLLAPSE_LIFE if kind == Kind.COLLAPSE else ZAP_TIME))
 	_fired[k] = 0
+
+
+## Щиток отключает кислотные/электрические зоны рядом. Обвал и артобстрел сохраняются.
+func suppress_area(at: Vector2, radius: float, seconds: float) -> void:
+	if _suppressed.size() >= 2:
+		_suppressed.pop_front()
+	_suppressed.append({"at": at, "radius": radius, "left": seconds})
+	for i in CAPACITY:
+		if _life[i] > 0 and _is_suppressed(_kind[i], _pos[i], _dir[i]):
+			_life[i] = -1
+	queue_redraw()
+
+
+func _is_suppressed(kind: int, at: Vector2, direction: Vector2) -> bool:
+	if kind == Kind.COLLAPSE:
+		return false
+	for area: Dictionary in _suppressed:
+		var offset: Vector2 = area["at"] - at
+		if kind == Kind.LASER:
+			if absf(offset.dot(direction.orthogonal())) < float(area["radius"]) + LASER_WIDTH * 0.5:
+				return true
+		elif offset.length_squared() < float(area["radius"]) * float(area["radius"]):
+			return true
+	return false
 
 
 func _tick_zones(delta: float) -> void:
@@ -299,7 +334,7 @@ func _beam(k: int) -> void:
 
 
 func _draw() -> void:
-	var clock := Time.get_ticks_msec() * 0.001
+	var clock := _clock
 	for k in CAPACITY:
 		if _life[k] < 0.0:
 			continue

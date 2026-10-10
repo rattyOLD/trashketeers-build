@@ -89,6 +89,7 @@ var _action := ""
 var _action_left := 0.0
 var _burst_shots := 0
 var _hero_id := "raccoon"
+var battle_marker := false
 const ACTION_TIME := 0.42
 const GESTURES := {
 	"raccoon": [14.0, 0.025], "red_panda": [20.0, -0.035], "snow": [6.0, 0.015],
@@ -1033,6 +1034,11 @@ func _draw() -> void:
 	draw_set_transform(Vector2(SHADOW_OFFSET.x * _facing, SHADOW_OFFSET.y), 0.0, Vector2(lift, 0.36 * lift))
 	draw_circle(Vector2.ZERO, SHADOW_RADIUS, Color(0, 0, 0, 0.35))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	if battle_marker and not _dead:
+		draw_set_transform(Vector2(0, SHADOW_OFFSET.y), 0.0, Vector2(1, 0.42))
+		draw_arc(Vector2.ZERO, SHADOW_RADIUS + 5, 0.12, PI - 0.12, 20, Color("#171914"), 6, true)
+		draw_arc(Vector2.ZERO, SHADOW_RADIUS + 5, 0.12, PI - 0.12, 20, Color("#fff0b0"), 2.5, true)
+		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	if skin_effect == "aura":
 		var pulse := 0.6 + 0.4 * sin(_time * 3.0)
 		draw_circle(Vector2(0, -24), 50.0, Color(0.0, 0.96, 1.0, 0.08 * pulse))

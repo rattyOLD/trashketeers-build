@@ -98,6 +98,10 @@ XDG_DATA_HOME="$LOG/run-improvements-user" timeout 120 xvfb-run -a -s "-screen 0
 if ! grep -q 'RUN_IMPROVEMENTS failures=0' "$LOG/run-improvements.log" || grep -qE 'SCRIPT ERROR|Lambda capture' "$LOG/run-improvements.log"; then
   fail=1
 fi
+XDG_DATA_HOME="$LOG/environment-polish-user" timeout 120 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/environment_polish_test.tscn > "$LOG/environment-polish.log" 2>&1
+if ! grep -q 'ENVIRONMENT_POLISH failures=0' "$LOG/environment-polish.log" || grep -qE 'SCRIPT ERROR|Lambda capture' "$LOG/environment-polish.log"; then
+  fail=1
+fi
 XDG_DATA_HOME="$LOG/combat-polish-layout-user" timeout 90 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/combat_polish_layout_test.tscn > "$LOG/combat-polish-layout.log" 2>&1
 if ! grep -q 'COMBAT_POLISH_LAYOUT failures=0' "$LOG/combat-polish-layout.log" || grep -q 'SCRIPT ERROR' "$LOG/combat-polish-layout.log"; then
   fail=1

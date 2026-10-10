@@ -136,6 +136,10 @@ func _spawn_player(at: Vector2, weapon: WeaponData, target_finder: Callable) -> 
 	entities.add_child(player)
 	player.setup(target_finder, weapon, stats)
 	player.visual.apply_look(SaveService.get_character(), SaveService.get_skin())
+	player.visual.battle_marker = true
+	var marker_material := CanvasItemMaterial.new()
+	marker_material.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
+	player.visual.material = marker_material
 	var tag := NameTag.new()
 	tag.text = SaveService.get_display_nickname()
 	player.add_child(tag)
@@ -670,9 +674,11 @@ func _on_bullet_hit(bullet: Bullet, target: Node2D) -> void:
 	var color := bullet.weapon.effect_color
 	var crit := bullet.last_hit_crit
 	if bullet.team == Bullet.Team.PLAYER:
-		SoundManager.play(&"hit")
+		var armored := target is DestructibleObject and (target as DestructibleObject).impact_is_metal()
 		if target is Enemy:
-			SoundManager.play_pitched(&"hitmarker", 1.35 if crit else randf_range(0.95, 1.08), -2.0 if crit else 0.0)
+			var enemy := target as Enemy
+			armored = enemy.data != null and not enemy.armor_broken and (enemy.data.armor >= 0.2 or enemy.elite_armor >= 0.2)
+		SoundManager.play_impact(armored, crit)
 		if target is Enemy and _mark_cd <= 0.0:
 			_mark_cd = MARK_GAP
 			fx.hitmarker((target as Enemy).get_aim_point(), 1 if crit else 0, target)

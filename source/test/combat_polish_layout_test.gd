@@ -99,7 +99,14 @@ func _run() -> void:
 		var panel := hud._run_result
 		var bounds := Rect2(Vector2.ZERO, Vector2(dimensions))
 		_check(bounds.encloses(_screen_rect(panel._panel)), "results stay on screen " + str(dimensions))
-		_check(_screen_rect(panel._tip_box).encloses(_screen_rect(panel._tip_label)), "report stays inside plate")
+		var plate := _screen_rect(panel._tip_box)
+		var scroll := _screen_rect(panel._report_scroll)
+		var text := _screen_rect(panel._tip_label)
+		_check(plate.encloses(scroll) and panel._report_scroll.clip_contents, "report viewport clips text inside plate")
+		_check(text.position.x >= plate.position.x and text.end.x <= plate.end.x, "report width stays inside plate")
+		panel._report_scroll.scroll_vertical = ceili(panel._tip_label.size.y)
+		await _settle()
+		_check(_screen_rect(panel._tip_label).end.y <= scroll.end.y + 2.0, "last report line is reachable by scrolling")
 		_check(panel._panel.scale.x >= (0.9 if dimensions.x == 1280 else 0.7), "readable result scale " + str(dimensions))
 		if not output.is_empty():
 			get_viewport().get_texture().get_image().save_png(output.path_join("result_%d.png" % dimensions.x))

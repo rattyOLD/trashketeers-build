@@ -51,9 +51,6 @@ var lobs: LobPool
 var traps: MagnetTraps
 const DAMAGE_NUMBERS_PER_SEC := 22.0
 const REROLL_BASE_COST := 220.0
-const DEATH_TIP_NEWBIE := 6
-const DEATH_TIP_EVERY := 3
-const DEATH_FAST_TIME := 100.0
 const REROLL_GROWTH := 1.55
 const QUICK_CLEAR_TIME := 10.0
 const GOLD_CLEAR_TIME := 5.0
@@ -186,6 +183,7 @@ func start(_weapon_id: StringName = &"") -> void:
 	enemies = EnemyManager.new()
 	add_child(enemies)
 	enemies.setup(player, entities, ENEMY_CAPACITY, map.nav_direction)
+	map.attach_cache_enemies(enemies)
 	pickups.setup(player)
 	for i in WEAPON_PICKUPS:
 		var pickup := WeaponPickup.new()
@@ -241,7 +239,9 @@ func start(_weapon_id: StringName = &"") -> void:
 	events.encounter_requested.connect(_open_run_encounter)
 	enemies.enemy_died.connect(_on_enemy_died)
 	enemies.enemy_damaged.connect(_on_enemy_damaged)
-	enemies.enemy_armor_cracked.connect(func(enemy: Enemy) -> void: fx.armor_feedback(enemy.get_aim_point()))
+	enemies.enemy_armor_cracked.connect(func(enemy: Enemy) -> void:
+		fx.armor_feedback(enemy.get_aim_point())
+		SoundManager.play_armor_break())
 	enemies.enemy_exploded.connect(_on_enemy_exploded)
 	enemies.enemy_blocked.connect(_on_enemy_blocked)
 	enemies.enemy_blinked.connect(_on_enemy_blinked)
@@ -251,6 +251,10 @@ func start(_weapon_id: StringName = &"") -> void:
 	pickups.xp_collected.connect(_on_xp_collected)
 	map.object_destroyed.connect(_on_object_destroyed)
 	map.crate_landed.connect(_on_crate_landed)
+	map.cache_reward.connect(_on_activity_reward)
+	map.area_disabled.connect(func(at: Vector2, radius: float, seconds: float) -> void:
+		hazards.suppress_area(at, radius, seconds)
+		hud.toast("ЗОНА ОТКЛЮЧЕНА", "Безопасный проход на 30 с · в складе 15 монет", UiStyle.GOLD))
 	director.boss_spawned.connect(_on_boss_spawned)
 	director.wave_started.connect(_on_wave_started)
 	director.siren.connect(_on_siren)
@@ -364,6 +368,8 @@ func _find_target(from: Vector2, max_distance: float) -> Node2D:
 
 func _physics_process(delta: float) -> void:
 	super._physics_process(delta)
+	if player != null and not player.is_dead:
+		_combat_report.advance(delta)
 	if _rail_combo > 0:
 		_rail_timer -= delta
 		if _rail_timer <= 0.0:
@@ -468,41 +474,12 @@ func _run_summary() -> Dictionary:
 	}
 
 
-## Подсказка после смерти: короткая, по причине; новичкам — почти всегда, остальным — раз в три смерти.
+## После гибели всегда объясняем, как уйти от последней угрозы.
 func _death_tip() -> String:
-	if bosses_killed > 0 and not player.is_dead:
+	if not player.is_dead:
 		return ""
-	var count := int(SaveService.data.get("death_tips", 0))
-	SaveService.data["death_tips"] = count + 1
-	if count >= DEATH_TIP_NEWBIE and count % DEATH_TIP_EVERY != 0:
-		return ""
-	var boss := director.boss
-	var text: String
-	if _combat_report.last_source in [&"blast", &"projectile", &"acid", &"trap", &"shock", &"collapse", &"laser"]:
-		text = _combat_report.avoidance_tip()
-	elif boss != null and boss.is_alive() and boss.hp > boss.max_hp * 0.55:
-		text = ["Босс слишком жирный для твоего урона. Прокачай урон или скорость атаки.",
-			"Босс почти не поцарапан. Ты точно в него стрелял, а не рядом?",
-			"Босс сказал, что ему было щекотно. Прокачай урон."].pick_random()
-	elif director.elapsed < DEATH_FAST_TIME:
-		text = ["Тебя слишком быстро убивают. Рекорд скорости, но не тот. Качни здоровье и броню.",
-			"Это был не забег, а пробежка. Прокачка поможет дожить до второй волны."].pick_random()
-	else:
-		text = ["Ты опять отлетел. Иди качнись, пока крысы не заскучали.",
-			"Снова отлетел. В Прокачке лечат и не такое.",
-			"Слабовато. Иди качнись, Нэлл ставила на тебя.",
-			"Не получается? Прокачка есть, смущаться не надо.",
-			"Умираешь часто: качни выживаемость. Долго бьёшь босса: качни урон.",
-			"Ты умер красиво. Теперь умри чуть дальше: качни броню.",
-			"Крысы просили передать: «Спасибо за развлечение». Иди качнись.",
-			"Игрок, мы всё видели. Прокачка в меню, не стесняйся."].pick_random()
-	var cheapest := 1 << 30
-	for perk_id in SaveService.PERKS:
-		if not SaveService.is_perk_maxed(perk_id):
-			cheapest = mini(cheapest, SaveService.get_perk_cost(perk_id))
-	if SaveService.get_nuts() + nuts >= cheapest:
-		text += " Монет уже хватает на улучшение."
-	return text
+	SaveService.data["death_tips"] = int(SaveService.data.get("death_tips", 0)) + 1
+	return _combat_report.avoidance_tip()
 
 
 func _run_summary_lines() -> PackedStringArray:
@@ -757,7 +734,7 @@ func _on_enemy_blocked(_enemy: Enemy, at: Vector2) -> void:
 	fx.burst(at, Color("#ffe27a"), 8, 260.0, 3.0)
 	if randf() < 0.35:
 		fx.popup(at + Vector2(0, -16), "БЛОК", Color("#ffe27a"), 24.0)
-	SoundManager.play_pitched(&"hit", 1.7, -4.0)
+	SoundManager.play_impact(true)
 
 
 ## Крупье исчезает в вихре карт: вспышка там и тут, чтобы глаз успел за ним.

@@ -17,8 +17,12 @@ extends Node2D
 
 signal object_destroyed(object: DestructibleObject)
 signal crate_landed(crate: DestructibleObject)
+signal cache_reward(coins: int)
+signal area_disabled(at: Vector2, radius: float, seconds: float)
 
 var passages: Array[MapPassage] = []
+var route_caches: Array[RouteCache] = []
+var _cache_enemies: EnemyManager
 var _passage_clear: Array[Rect2] = []
 
 enum CellType { EMPTY, WALL, COVER, DESTRUCTIBLE }
@@ -161,6 +165,7 @@ func build(layers: BiomeLayers, chapter_def: Dictionary) -> void:
 	_place_crate(player_start + Vector2(0, -210))
 	_flow.setup(grid_size, _blocked_mask())
 	_flow_ready = true
+	_build_route_caches()
 
 
 ## Снос всего построенного (переход в следующую главу).
@@ -188,6 +193,7 @@ func clear() -> void:
 	safes.clear()
 	shrines.clear()
 	passages.clear()
+	route_caches.clear()
 	_passage_clear.clear()
 	story_cells.clear()
 	_story_clear.clear()
@@ -209,8 +215,16 @@ func attach_player(player: Player) -> void:
 	_player = player
 	for passage in passages:
 		passage.player = player
+	for cache in route_caches:
+		cache.player = player
 	if _world_life != null and is_instance_valid(_world_life):
 		_world_life.attach(player)
+
+
+func attach_cache_enemies(manager: EnemyManager) -> void:
+	_cache_enemies = manager
+	for cache in route_caches:
+		cache.enemies = manager
 
 
 # --- Координаты -------------------------------------------------------------------------------
@@ -587,13 +601,17 @@ static func _calm_shader() -> Shader:
 		_calm = Shader.new()
 		_calm.code = """
 shader_type canvas_item;
+uniform float saturation = 0.42;
+uniform float contrast = 0.65;
+uniform vec3 floor_tint = vec3(0.92, 0.9, 1.0);
+uniform vec3 shadow_fill = vec3(0.22, 0.2, 0.3);
 void fragment() {
 	vec4 c = texture(TEXTURE, UV);
 	float l = dot(c.rgb, vec3(0.3, 0.55, 0.15));
 	vec3 grey = vec3(l);
-	vec3 rgb = mix(grey, c.rgb, 0.42);
-	rgb = mix(vec3(0.22, 0.2, 0.3), rgb, 0.65);
-	COLOR = vec4(rgb * vec3(0.92, 0.9, 1.0), c.a);
+	vec3 rgb = mix(grey, c.rgb, saturation);
+	rgb = mix(shadow_fill, rgb, contrast);
+	COLOR = vec4(rgb * floor_tint, c.a);
 }
 """
 	return _calm
@@ -619,10 +637,24 @@ func _build_floor() -> void:
 		ground.scale = Vector2.ONE * GROUND_SCALE
 		ground.region_rect = Rect2(bounds.position / GROUND_SCALE, bounds.size / GROUND_SCALE)
 		ground.position = bounds.position
-		if not map_ground:
-			var calm := ShaderMaterial.new()
-			calm.shader = _calm_shader()
-			ground.material = calm
+		var calm := ShaderMaterial.new()
+		calm.shader = _calm_shader()
+		if map_ground:
+			var map_id := str(chapter.get("map_card", ""))
+			var tint := Vector3(0.96, 0.92, 0.88)
+			if "acid" in map_id:
+				tint = Vector3(0.86, 0.98, 0.88)
+			elif "ice" in map_id:
+				tint = Vector3(0.83, 0.94, 1.0)
+			elif "roof" in map_id:
+				tint = Vector3(0.88, 0.9, 1.0)
+			elif "vault" in map_id:
+				tint = Vector3(1.0, 0.95, 0.84)
+			calm.set_shader_parameter("saturation", 0.72)
+			calm.set_shader_parameter("contrast", 0.85)
+			calm.set_shader_parameter("shadow_fill", Vector3(0.16, 0.17, 0.2))
+			calm.set_shader_parameter("floor_tint", tint)
+		ground.material = calm
 		_own(ground, self)
 		_add_macro_overlay(float(chapter.get("macro", 1.0)))
 		return
@@ -1898,6 +1930,37 @@ func _build_route_features() -> void:
 				passage.door.hp = 120.0
 				passage.door.nut_reward = 12
 		_passage_clear.append(Rect2(at - Vector2(240, 260), Vector2(480, 520)))
+
+
+## Точки взаимодействия выбираются по окончательным коллизиям, после декора и связности.
+func _build_route_caches() -> void:
+	for passage in passages:
+		var at := Vector2.INF
+		var control := Vector2.INF
+		for offset in [Vector2(0, -256), Vector2(0, 256), Vector2(160, -256), Vector2(-160, -256), Vector2(160, 256), Vector2(-160, 256), Vector2(-256, 0), Vector2(256, 0)]:
+			var candidate: Vector2 = passage.position + offset
+			if candidate.distance_to(player_start) < 360 or boss_rect.grow(160).has_point(candidate) or not is_area_clear(candidate, 55):
+				continue
+			for direction in [Vector2.RIGHT, Vector2.LEFT, Vector2.DOWN, Vector2.UP, Vector2(1, 1).normalized(), Vector2(-1, 1).normalized()]:
+				var near: Vector2 = candidate + direction * 240
+				if is_area_clear(near, 65):
+					at = candidate
+					control = near
+					break
+			if at != Vector2.INF:
+				break
+		if at == Vector2.INF:
+			continue
+		var cache := RouteCache.new()
+		cache.position = at
+		cache.theme = passage.theme
+		cache.cache_offset = Vector2.ZERO
+		cache.control_offset = control - at
+		cache.enemies = _cache_enemies
+		cache.rewarded.connect(func(coins: int) -> void: cache_reward.emit(coins))
+		cache.disabled.connect(func(center: Vector2, radius: float, seconds: float) -> void: area_disabled.emit(center, radius, seconds))
+		_own(cache, _layers.decals)
+		route_caches.append(cache)
 
 
 ## Вышки, сейфы и особые объекты вдали от старта, площади и босса.
