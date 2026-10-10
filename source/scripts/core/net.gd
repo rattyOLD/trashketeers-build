@@ -1,7 +1,7 @@
 extends Node
 ## Сетевой фасад для коопа. Геймплей работает с этим классом, а не с пирами: транспорт (ENet на нативных платформах,
 ## WebSocket в вебе) выбирается здесь, логика синхронизации у них общая. Сервер авторитетный: клиенты шлют ввод,
-## сервер считает бой и награды. Подробности: проект AppRaccoon, claude/netcode_design.md и claude/coop_plan.md.
+## сервер считает бой и награды.
 
 signal joined(peer_id: int, profile: Dictionary)
 signal left(peer_id: int)
@@ -149,7 +149,7 @@ func _on_auth(id: int, data: PackedByteArray) -> void:
 	api.complete_auth(id)
 
 
-## Проверка токена на сервере: /auth/v1/user отдаёт владельца токена, и только потом читаем его профиль.
+## Проверка токена на сервере: /auth/v1/user проверяет токен перед загрузкой профиля.
 ## Ник и тег берутся отсюда, а не от клиента.
 func verify_token(jwt: String) -> Dictionary:
 	if jwt.is_empty():

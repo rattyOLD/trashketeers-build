@@ -147,7 +147,7 @@ class LightBuffer:
 	var radii := PackedFloat32Array()
 
 
-## Packed-массивы в аргументах копируются при изменении; владелец буферов передаётся по ссылке.
+## Packed-массивы в аргументах копируются при изменении; объект с буферами передаётся по ссылке.
 static func collect(view: Rect2, buffer: LightBuffer) -> void:
 	buffer.positions.clear()
 	buffer.colors.clear()

@@ -36,8 +36,8 @@
 - `draw_probe`, `prof_battle`, `tools/gdprof.py` — вызовы отрисовки и профайлер GDScript.
 
 ## Телеметрия
-Веб и APK шлют отчёты (perf, spike, error, run, prev_session_died с хвостом лога) в Google Apps Script → таблица. Чтение для разработки — отдельное развёртывание Apps Script с `doGet` и ключом (ключ у владельца, в репозиторий не кладётся).
+Веб и APK шлют отчёты (perf, spike, error, run, prev_session_died с хвостом лога) в Google Apps Script → таблица. Чтение для разработки — отдельное развёртывание Apps Script с `doGet` и ключом (ключ хранится вне репозитория).
 
 ## Для Астры
 Арт кладётся в `source/assets/<папка>/`. Нарезку и прозрачность делает `tools/slice_vfx.py`.
-Промпты и требования — в проектных документах Claude Project «AppRaccoon» (`astra_brief.md`).
+Требования к арту — в `astra/from_claude/BRIEF_v32_all_needs.md`.

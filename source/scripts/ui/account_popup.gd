@@ -107,7 +107,7 @@ func _render_guest() -> void:
 		elif result == "weak":
 			_say("Слишком простой пароль. Добавь знаков.")
 		elif result == "confirm":
-			_say("Сервер просит подтверждение почты: владельцу надо отключить Confirm email в Supabase (Authentication, Providers, Email).")
+			_say("Регистрация временно недоступна. Попробуй позже.")
 		elif result == "offline":
 			_diagnose()
 		else:
