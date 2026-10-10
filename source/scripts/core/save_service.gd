@@ -41,6 +41,7 @@ const DEFAULTS := {
 	"patches": {},
 	"patch_worn": [],
 	"patch_slots_open": 2,
+	"objects_intro_count": 0,
 	"story_best": {},
 	"story_choice": {},
 	"story_resume": {},

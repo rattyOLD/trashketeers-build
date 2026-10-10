@@ -181,12 +181,34 @@ static func cards() -> Array[UpgradeData]:
 	return out
 
 
-static func run_description(id: String) -> String:
+static func pair_preview(id: String, stats: RunStats) -> Dictionary:
+	for combo: Dictionary in SETS:
+		if not combo["ids"].has(id):
+			continue
+		var partner: String = combo["ids"][1] if combo["ids"][0] == id else combo["ids"][0]
+		var state := &"active" if stats.patch_set_titles().has(combo["title"]) else (&"completes" if stats.patch_ids.has(partner) and not stats.patch_ids.has(id) else &"missing")
+		return {"title": combo["title"], "desc": combo["desc"], "partner": partner, "state": state}
+	return {}
+
+
+static func run_description(id: String, stats: RunStats = null) -> String:
 	var values: Array = []
 	for fx: Array in RUN_FX[id]:
 		var v: float = absf(float(fx[1]))
-		values.append(str(snappedf(v, 0.1)) if fx[0] == &"regen" else str(snappedf(v * (100.0 if v < 1.0 else 1.0), 0.1)))
+		var shown := snappedf(v if fx[0] == &"regen" else v * (100.0 if v < 1.0 else 1.0), 0.1)
+		values.append(str(int(round(shown))) if is_equal_approx(shown, round(shown)) else str(shown))
 	var text := str(CATALOG[id]["desc"]) % values
+	if stats != null:
+		var pair := pair_preview(id, stats)
+		if not pair.is_empty():
+			match pair["state"]:
+				&"active":
+					text += "\n«%s» уже действует: %s." % [pair["title"], pair["desc"]]
+				&"completes":
+					text += "\nОткроет «%s»: %s." % [pair["title"], pair["desc"]]
+				_:
+					text += "\nНужна «%s»: %s («%s»)." % [CATALOG[pair["partner"]]["title"], pair["desc"], pair["title"]]
+		return text
 	for combo: Dictionary in SETS:
 		if combo["ids"].has(id):
 			var partner: String = combo["ids"][1] if combo["ids"][0] == id else combo["ids"][0]

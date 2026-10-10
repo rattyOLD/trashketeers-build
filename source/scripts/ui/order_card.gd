@@ -147,10 +147,23 @@ func _draw() -> void:
 		var gp := int(goal.get("progress", 0))
 		var gg := maxi(int(goal.get("goal", 1)), 1)
 		var x := 6.0 + cell * i
-		draw_string(font, Vector2(x + 2.0, SIZE.y + 11.0), "%s %d/%d" % [str(goal.get("title", "")), gp, gg], HORIZONTAL_ALIGNMENT_LEFT, cell - 8.0, 12, color)
+		var count := "ГОТОВО" if bool(goal.get("done", false)) else "%d/%d" % [gp, gg]
+		var count_width := font.get_string_size(count, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x
+		var title_width := maxf(1.0, cell - count_width - 20.0)
+		var goal_title := _fit_text(font, str(goal.get("title", "")), title_width, 12)
+		draw_string(font, Vector2(x + 2.0, SIZE.y + 11.0), goal_title, HORIZONTAL_ALIGNMENT_LEFT, title_width, 12, color)
+		draw_string(font, Vector2(x + cell - count_width - 6.0, SIZE.y + 11.0), count, HORIZONTAL_ALIGNMENT_LEFT, count_width, 12, color)
 		var track := Rect2(x + 2.0, SIZE.y + 16.0, cell - 10.0, 5.0)
 		draw_rect(track, Color(0, 0, 0, 0.5))
 		draw_rect(Rect2(track.position, Vector2(track.size.x * clampf(float(gp) / float(gg), 0.0, 1.0), track.size.y)), Color(color, 0.85))
+
+
+static func _fit_text(font: Font, text: String, width: float, font_size: int) -> String:
+	if font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x <= width:
+		return text
+	while not text.is_empty() and font.get_string_size(text + "…", HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x > width:
+		text = text.left(text.length() - 1)
+	return text + "…" if not text.is_empty() else ""
 
 
 func _on_gui_input(event: InputEvent) -> void:

@@ -120,6 +120,10 @@ func _card_width() -> float:
 
 func _make_card(upgrade: UpgradeData, index: int, stats: RunStats) -> Button:
 	var accent := upgrade.rarity_color() if upgrade.category != "evolution" else Color("#ff5cf0")
+	if upgrade.category == "patch":
+		var pair := Patches.pair_preview(String(upgrade.id).trim_prefix("patch_"), stats)
+		if pair.get("state", &"") == &"completes":
+			accent = UiStyle.GOLD
 	var card_w := _card_width()
 	var text_width := 444.0 if Orient.portrait else card_w - 48.0
 	var card := UiStyle.button("", UiStyle.PANEL_LIGHT, 28, Vector2(520, 148) if Orient.portrait else Vector2(card_w, 280))
@@ -182,7 +186,7 @@ func _make_card(upgrade: UpgradeData, index: int, stats: RunStats) -> Button:
 	var tag := "%s  •  %s" % [upgrade.rarity_title() if upgrade.category != "evolution" else "ЭВОЛЮЦИЯ", upgrade.category_title() if upgrade.category != "evolution" else "СИНЕРГИЯ"]
 	if upgrade.category == "patch":
 		var id := String(upgrade.id).trim_prefix("patch_")
-		tag = "НАШИВКА · " + ("УЛУЧШИТЬ" if stats.patch_ids.has(id) else "ЗАНЯТЬ СЛОТ")
+		tag = "НАШИВКА · " + ("УЛУЧШИТЬ" if stats.patch_ids.has(id) else "СЛОТ %d/%d" % [stats.patch_ids.size() + 1, Patches.SLOTS])
 	var tag_label := UiStyle.label(tag, 14, accent, 4)
 	tag_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	tag_label.custom_minimum_size = Vector2(text_width, 0)
@@ -207,7 +211,8 @@ func _make_card(upgrade: UpgradeData, index: int, stats: RunStats) -> Button:
 	title.add_theme_font_size_override("font_size", title_size)
 	column.add_child(title)
 	# «−» (U+2212) в шрифте нет — показывался квадрат.
-	var desc := UiStyle.label(upgrade.description.replace("−", "-"), 18, UiStyle.TEXT, 5)
+	var description := Patches.run_description(String(upgrade.id).trim_prefix("patch_"), stats) if upgrade.category == "patch" else upgrade.description
+	var desc := UiStyle.label(description.replace("−", "-"), 18, UiStyle.TEXT, 5)
 	desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	desc.custom_minimum_size = Vector2(text_width, 0)

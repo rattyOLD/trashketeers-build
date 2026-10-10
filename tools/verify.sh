@@ -90,6 +90,10 @@ XDG_DATA_HOME="$LOG/battle-tactics-user" timeout 90 "$GODOT" --headless --path "
 if ! grep -q 'BATTLE_TACTICS failures=0' "$LOG/battle-tactics.log" || grep -qE 'SCRIPT ERROR|Lambda capture' "$LOG/battle-tactics.log"; then
   fail=1
 fi
+XDG_DATA_HOME="$LOG/navigation-choices-user" timeout 90 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/navigation_choices_test.tscn > "$LOG/navigation-choices.log" 2>&1
+if ! grep -q 'NAVIGATION_CHOICES failures=0' "$LOG/navigation-choices.log" || grep -qE 'SCRIPT ERROR|Lambda capture' "$LOG/navigation-choices.log"; then
+  fail=1
+fi
 XDG_DATA_HOME="$LOG/combat-polish-layout-user" timeout 90 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/combat_polish_layout_test.tscn > "$LOG/combat-polish-layout.log" 2>&1
 if ! grep -q 'COMBAT_POLISH_LAYOUT failures=0' "$LOG/combat-polish-layout.log" || grep -q 'SCRIPT ERROR' "$LOG/combat-polish-layout.log"; then
   fail=1

@@ -101,6 +101,8 @@ var story: StoryRun
 var radio: SurvivalRadio
 var wanted: Wanted
 var _wave_task := WaveTask.new()
+var _task_nav_target: Node2D
+var _task_nav_clock := 0.0
 var liquids: LiquidFx
 var story_target: Node2D
 var _switching := false
@@ -370,6 +372,10 @@ func _physics_process(delta: float) -> void:
 		return
 	_update_interact()
 	map.update_ripples(player, fx, delta)
+	_task_nav_clock -= delta
+	if _task_nav_clock <= 0.0:
+		_task_nav_clock = 0.25
+		_update_task_navigation()
 	var target: Node2D = director.boss if director.boss != null and director.boss.is_alive() else null
 	if story_target != null:
 		target = story_target
@@ -377,7 +383,10 @@ func _physics_process(delta: float) -> void:
 		target = _portal
 	if target != null and target is Enemy:
 		hud.set_boss_posture((target as Enemy).posture_fraction(), (target as Enemy).posture_stun > 0.0)
-	_arrow.track(camera.get_screen_center_position(), get_viewport_rect().size / camera.zoom, target)
+	if target == null and not finished and is_instance_valid(_task_nav_target) and _wave_task.accepts_target(_task_nav_target):
+		_arrow.track(camera.get_screen_center_position(), get_viewport_rect().size / camera.zoom, _task_nav_target, true)
+	else:
+		_arrow.track(camera.get_screen_center_position(), get_viewport_rect().size / camera.zoom, target)
 	_combo_timer -= delta
 	if _combo_timer <= 0.0:
 		_combo = 0
@@ -388,6 +397,23 @@ func _physics_process(delta: float) -> void:
 			stats.add_flat(&"fire_rate_mult", -ADRENALINE_FIRE)
 			player.set_speed_buff(0.0)
 			player.apply_run_stats(stats)
+
+
+func _update_task_navigation() -> void:
+	if not is_instance_valid(_task_nav_target):
+		_task_nav_target = null
+	if finished or player == null or _wave_task.completed or _wave_task.goal <= 0:
+		_task_nav_target = null
+		return
+	match _wave_task.kind:
+		&"tower":
+			_task_nav_target = _wave_task.nearest_target(player.global_position, map.towers, _task_nav_target)
+		&"break":
+			_task_nav_target = _wave_task.nearest_target(player.global_position, map.destructibles, _task_nav_target)
+		&"kill":
+			_task_nav_target = _wave_task.nearest_target(player.global_position, enemies.get_active(), _task_nav_target)
+		_:
+			_task_nav_target = null
 
 
 func _update_hud_timer() -> void:
@@ -503,6 +529,8 @@ func _apply_chapter_look(chapter: Dictionary) -> void:
 func _on_wave_started(number: int, title: String, mood: String, is_boss: bool) -> void:
 	Platform.note_event("wave %d %s boss=%s" % [number, title, is_boss])
 	_wave_task.start(director._wave.get("task", {}) if story_mission.is_empty() and not is_boss and not director.is_mini_wave() else {})
+	_task_nav_target = null
+	_task_nav_clock = 0.0
 	if _wave_task.kind == &"tower":
 		var available := false
 		for tower in map.towers:
@@ -1868,6 +1896,10 @@ func _advance_wave_task(kind: StringName, amount: int = 1) -> void:
 
 
 func _complete_wave_task() -> void:
+	_task_nav_target = null
+	_task_nav_clock = 0.0
+	if is_instance_valid(_arrow) and _arrow._objective:
+		_arrow.hide()
 	nuts += _wave_task.reward
 	hud.set_nuts(nuts)
 	hud.toast("ЦЕЛЬ ВОЛНЫ", "%s · +%d монет" % [_wave_task.title, _wave_task.reward], UiStyle.GOLD)
@@ -2182,7 +2214,7 @@ func _make_glow() -> WorldEnvironment:
 	return node
 
 
-## Неоновая стрелка у края экрана к боссу или открытому порталу.
+## Указатель к боссу/порталу; золотая метка ведёт к необязательной цели волны.
 class TargetArrow:
 	extends Node2D
 
@@ -2190,15 +2222,26 @@ class TargetArrow:
 	const COLOR := Color("#ff2ea6")
 
 	var _pulse := 0.0
+	var _objective := false
+	var _on_screen := false
 
-	func track(screen_center: Vector2, view_size: Vector2, target: Node2D) -> void:
+	func _init() -> void:
+		z_as_relative = false
+		z_index = 30
+
+	func track(screen_center: Vector2, view_size: Vector2, target: Node2D, objective: bool = false) -> void:
 		if target == null or not is_instance_valid(target):
 			visible = false
 			return
-		var half := view_size * 0.5 - Vector2.ONE * EDGE_MARGIN
+		_objective = objective
+		var half := (view_size * 0.5 - Vector2.ONE * EDGE_MARGIN).max(Vector2.ONE * 16.0)
 		var offset := target.global_position - screen_center
-		if absf(offset.x) < half.x + EDGE_MARGIN and absf(offset.y) < half.y + EDGE_MARGIN:
-			visible = false
+		_on_screen = absf(offset.x) < view_size.x * 0.5 and absf(offset.y) < view_size.y * 0.5
+		if _on_screen:
+			visible = objective
+			global_position = target.global_position
+			rotation = 0.0
+			modulate = Color.WHITE
 			return
 		var scale_to_edge := minf(half.x / maxf(absf(offset.x), 0.001), half.y / maxf(absf(offset.y), 0.001))
 		global_position = screen_center + offset * scale_to_edge
@@ -2212,11 +2255,20 @@ class TargetArrow:
 			queue_redraw()
 
 	func _draw() -> void:
+		var color := UiStyle.GOLD if _objective else COLOR
+		if _on_screen:
+			# Одна небольшая метка над точкой объекта; никаких световых пятен или частиц.
+			var diamond := PackedVector2Array([Vector2(0, -30), Vector2(9, -21), Vector2(0, -12), Vector2(-9, -21), Vector2(0, -30)])
+			draw_polyline(diamond, UiStyle.OUTLINE, 7.0, true)
+			draw_polyline(diamond, color, 3.0, true)
+			return
 		var grow := 1.0 + 0.12 * sin(_pulse)
 		var tip := PackedVector2Array([Vector2(26, 0) * grow, Vector2(-14, -18) * grow, Vector2(-6, 0) * grow, Vector2(-14, 18) * grow])
-		draw_colored_polygon(tip, Color(COLOR, 0.35))
-		draw_polyline(PackedVector2Array([tip[0], tip[1], tip[2], tip[3], tip[0]]), COLOR, 4.0, true)
-		draw_circle(Vector2(-26, 0), 7.0, Color(COLOR, 0.8))
+		draw_colored_polygon(tip, Color(color, 0.35))
+		var edge := PackedVector2Array([tip[0], tip[1], tip[2], tip[3], tip[0]])
+		draw_polyline(edge, UiStyle.OUTLINE, 8.0, true)
+		draw_polyline(edge, color, 4.0, true)
+		draw_circle(Vector2(-26, 0), 7.0, Color(color, 0.8))
 
 
 func _upgrade_pool() -> Array[UpgradeData]:

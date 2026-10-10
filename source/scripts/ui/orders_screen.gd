@@ -57,7 +57,10 @@ func open(order: Dictionary, goals: Array, stats: RunStats = null) -> void:
 		list.add_child(patch_strip(stats))
 	for goal: Dictionary in goals:
 		var title := str(goal.get("title", ""))
-		list.add_child(_card("ЦЕЛЬ ВОЛНЫ" if stats != null else "ЦЕЛЬ МИССИИ", title, str(HINTS.get(title, "")), int(goal.get("progress", 0)), int(goal.get("goal", 1)), bool(goal.get("done", false)), Color("#ffd257")))
+		var hint := str(goal.get("hint", HINTS.get(title, "")))
+		if int(goal.get("reward", 0)) > 0:
+			hint += "\nНаграда: %d монет. Цель необязательна и действует до конца волны." % int(goal["reward"])
+		list.add_child(_card("ЦЕЛЬ ВОЛНЫ" if stats != null else "ЦЕЛЬ МИССИИ", title, hint, int(goal.get("progress", 0)), int(goal.get("goal", 1)), bool(goal.get("done", false)), Color("#ffd257")))
 	var back := UiStyle.button("НАЗАД", UiStyle.PANEL_LIGHT, 32, Vector2(0, 88))
 	back.pressed.connect(_close)
 	column.add_child(back)
@@ -125,8 +128,12 @@ static func patch_strip(stats: RunStats, compact: bool = false) -> Control:
 	for i in Patches.SLOTS:
 		var cell := VBoxContainer.new()
 		cell.add_theme_constant_override("separation", 2)
+		if not compact:
+			cell.custom_minimum_size.x = 150.0
 		row.add_child(cell)
 		var id: String = stats.patch_ids[i] if i < stats.patch_ids.size() else ""
+		if not id.is_empty():
+			cell.tooltip_text = str(Patches.CATALOG[id]["title"]) + "\nЗа каждую карточку:\n" + Patches.run_description(id, stats)
 		var icon := TextureRect.new()
 		icon.texture = Patches.art("slot_empty" if id.is_empty() else id)
 		icon.custom_minimum_size = Vector2.ONE * (28.0 if compact else 48.0)
@@ -134,8 +141,19 @@ static func patch_strip(stats: RunStats, compact: bool = false) -> Control:
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		cell.add_child(icon)
 		var rank := stats.get_stacks(StringName("patch_" + id))
-		cell.add_child(UiStyle.label("—" if id.is_empty() else "%d/5" % rank, 14, UiStyle.TEXT, 2))
+		var caption := "ПУСТО" if id.is_empty() else ("БАЗА" if rank == 0 else "%d/%d" % [rank, Patches.RUN_LEVELS])
+		if not compact and not id.is_empty():
+			var name_label := UiStyle.label(str(Patches.CATALOG[id]["title"]), 16, UiStyle.TEXT, 2)
+			name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+			name_label.custom_minimum_size.x = 10.0
+			cell.add_child(name_label)
+		cell.add_child(UiStyle.label(caption, 14, UiStyle.TEXT_DIM, 2))
 	var sets := stats.patch_set_titles()
 	if not sets.is_empty():
-		box.add_child(UiStyle.label("Сочетания: " + ", ".join(sets), 16, UiStyle.GOLD, 2))
+		if compact:
+			box.add_child(UiStyle.label("Сочетания: " + ", ".join(sets), 16, UiStyle.GOLD, 2))
+		else:
+			for combo: Dictionary in Patches.SETS:
+				if sets.has(combo["title"]):
+					box.add_child(UiStyle.label("%s · %s" % [combo["title"], combo["desc"]], 16, UiStyle.GOLD, 2))
 	return panel
