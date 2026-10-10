@@ -1,0 +1,161 @@
+{
+  "version": 32,
+  "images": {
+    "common.png": {
+      "size": [
+        256,
+        256
+      ],
+      "cellSize": [
+        256,
+        256
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "87d01b31b1f5c3cc81d99fa199dab8a4a75c1213ed710eea4ec0d692a89a99b5"
+    },
+    "common_open.png": {
+      "size": [
+        256,
+        256
+      ],
+      "cellSize": [
+        256,
+        256
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "639ddd174fa16cdce49e7d735a08be0609895bb68fd17fe3c267f6a1d65efeb4"
+    },
+    "cosmetic.png": {
+      "size": [
+        256,
+        256
+      ],
+      "cellSize": [
+        256,
+        256
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "7b45775c9218d5df652fb053ca7140598e17d2ad0a64b753486ba3ce65afc8d2"
+    },
+    "cosmetic_open.png": {
+      "size": [
+        256,
+        256
+      ],
+      "cellSize": [
+        256,
+        256
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "985aff81cf47b705b5f2ffe0be81671dc6dea6e610f408cc3020e7589e85e27f"
+    },
+    "epic.png": {
+      "size": [
+        256,
+        256
+      ],
+      "cellSize": [
+        256,
+        256
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "7f7da2e607939c827670e8beb28a41d05ddf767ecaaac0d8a26ada2c6923047e"
+    },
+    "epic_open.png": {
+      "size": [
+        256,
+        256
+      ],
+      "cellSize": [
+        256,
+        256
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "2f9565240c03a0e860bab5e9d820eedf722d6701beeb9e79bed9203c7b45be77"
+    },
+    "free.png": {
+      "size": [
+        256,
+        256
+      ],
+      "cellSize": [
+        256,
+        256
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "eb7a7f2f1a266b7726eb73613630326d5f733d6c93141a2a397f37b7c0048d0e"
+    },
+    "free_open.png": {
+      "size": [
+        256,
+        256
+      ],
+      "cellSize": [
+        256,
+        256
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "d8e8ab0383bc8b5bcf8b2a8c441c4505a4fa518cd842d7581d7d7d4ec6ba8281"
+    },
+    "legendary.png": {
+      "size": [
+        256,
+        256
+      ],
+      "cellSize": [
+        256,
+        256
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "c470cb1b3b833b318d6283980f6cbd25379367ce3be2d8f362a002f686ce16a5"
+    },
+    "legendary_open.png": {
+      "size": [
+        256,
+        256
+      ],
+      "cellSize": [
+        256,
+        256
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "42c4f5f418dc87dd4cb8a56005a6499b8bb81a0175ca69bf78b1d01f810ed398"
+    },
+    "rare.png": {
+      "size": [
+        256,
+        256
+      ],
+      "cellSize": [
+        256,
+        256
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "b50fb2a86f6acfbfa9b609aa9860434d946dd3164bcdf85216fb97951fd56497"
+    },
+    "rare_open.png": {
+      "size": [
+        256,
+        256
+      ],
+      "cellSize": [
+        256,
+        256
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "af9b71cc3666d2a94470eda3814f7bea58e39038e2a41ac225a842d290f35c51"
+    }
+  }
+}

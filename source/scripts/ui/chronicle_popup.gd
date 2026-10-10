@@ -65,17 +65,29 @@ static func entries() -> Array:
 			"text": "Он не злой, просто ему тесно в собственной вечной мерзлоте. Теперь озеро тихо, а лёд держит. Пока.",
 			"open": _stat("raid_wins") >= 1},
 		{"title": "Дневник Нэлл. Стр. 1", "hint": "Пройди миссию 1",
-			"text": "Тяжёлая Бочка работала без выходных: мусор на входе, свет на выходе. Я вела её двенадцать лет. Чай пила всегда один и тот же, потому что только он не остывал рядом с реактором. Помню день, когда город впервые показался мне чистым.",
+			"text": "Тяжёлая Бочка работала без выходных: мусор на входе, свет на выходе. Я вела её двенадцать лет. Помню день, когда город впервые показался мне чистым. Мы ещё были вместе.",
+			"image": "res://assets/story/diary/diary_01.png",
 			"open": SaveService.story_done("m1")},
 		{"title": "Дневник Нэлл. Стр. 2", "hint": "Пройди миссию 1",
-			"text": "Рико не знает, откуда у него штрихкод на груди. Я знаю. Пока не говорю: он и так бежит быстрее, чем думает. Осколков шесть, ключ один. Арифметика меня пугает.",
+			"text": "Магнат принёс договор и велел запустить реактор на полной мощности. Я смотрела на рычаг и думала, кто заплатит за его обещания.",
+			"image": "res://assets/story/diary/diary_02.png",
 			"open": SaveService.story_done("m1")},
 		{"title": "Дневник Нэлл. Стр. 3", "hint": "Пройди миссию 2",
-			"text": "Запись закрыта: страница порвана. На краю бумаги пятно от чая и чьи-то пальцы.",
+			"text": "Одна вспышка — и Бочка разлетелась на шесть осколков. На бумаге осталось пятно от чая. В городе — то, что нам теперь приходится разгребать.",
+			"image": "res://assets/story/diary/diary_03.png",
 			"open": SaveService.story_done("m2")},
 		{"title": "Дневник Нэлл. Стр. 4", "hint": "Пройди миссию 3",
-			"text": "Запись закрыта: страница порвана. На краю бумаги пятно от чая и чьи-то пальцы.",
+			"text": "Я снова в диспетчерской. Рация шипит, чай остывает, рядом фотография. Я записываю всё, чтобы не забыть их голоса.",
+			"image": "res://assets/story/diary/diary_04.png",
 			"open": SaveService.story_done("m3")},
+		{"title": "Дневник Нэлл. Стр. 5", "hint": "Пройди миссию 4",
+			"text": "Рико не знает, откуда у него штрихкод на груди. Я знаю. Пока не говорю: он и так бежит быстрее, чем думает. Осколков шесть, ключ один. Арифметика меня пугает.",
+			"image": "res://assets/story/diary/diary_05.png",
+			"open": SaveService.story_done("m4")},
+		{"title": "Дневник Нэлл. Стр. 6", "hint": "Пройди миссию 6",
+			"text": "На краю чашки лежит осколок. В окно наконец заглянуло солнце. Город ещё можно спасти. Сегодня я допью чай горячим.",
+			"image": "res://assets/story/diary/diary_06.png",
+			"open": SaveService.story_done("m6")},
 		{"title": "Горизонт", "hint": "Сыграй 25 забегов",
 			"text": "Мусорщики знают: город лучше всего смотрится в ширину. Поэтому телефон держат боком, а на вертикаль смотрят с уважением.",
 			"open": _stat("runs") >= 25},
@@ -129,6 +141,16 @@ func _make_entry(entry: Dictionary, is_open: bool) -> Control:
 	var title := UiStyle.label(str(entry["title"]) if is_open else "???", 26, UiStyle.GOLD if is_open else UiStyle.TEXT_DIM, 6)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	column.add_child(title)
+	if is_open and entry.has("image"):
+		var aspect := AspectRatioContainer.new()
+		aspect.ratio = 16.0 / 9.0
+		aspect.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var illustration := TextureRect.new()
+		illustration.texture = load(str(entry["image"])) as Texture2D
+		illustration.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		illustration.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		aspect.add_child(illustration)
+		column.add_child(aspect)
 	var body := UiStyle.label(str(entry["text"]) if is_open else "Откроется: " + str(entry["hint"]), 19, UiStyle.TEXT if is_open else UiStyle.TEXT_DIM, 4)
 	body.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

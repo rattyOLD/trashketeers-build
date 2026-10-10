@@ -534,6 +534,8 @@ class CosmeticArt:
 				add_child(_icon_rect)
 			_icon_rect.texture = icon
 			_icon_rect.self_modulate = Color(0.42, 0.42, 0.46) if dim else Color.WHITE
+			if Cosmetics.kind_of(key) == "color" and not dim:
+				_icon_rect.self_modulate = Cosmetics.color_of(key)
 			return
 		match Cosmetics.kind_of(key):
 			"dash":

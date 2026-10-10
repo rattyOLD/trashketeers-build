@@ -1,0 +1,200 @@
+{
+  "version": 32,
+  "images": {
+    "face_angry.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "bb7d99951298c8b44163d52cac3e9c9b888d8db046a3dc976258adeef9c2b4c8"
+    },
+    "face_grin.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "86bf7f600ba4ed74a18125654307b07ecd0fba41031f6b40fcddd88db898d2a6"
+    },
+    "face_hit.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "9175708a195b3b809e28a3845a58b7689f61b9963a9179323df08f3f07687c36"
+    },
+    "face_proud.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "696e670cd3d1b6e38e75004a008f17373f014cbbb881b0d6c5cb98bb4e9b6a02"
+    },
+    "face_scared.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "289fb7fe8e1ec64d15d00a38c56436c13962f426da72338bbbe92b3604526838"
+    },
+    "face_tired.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "558385a8721e126938705550a518a5eb2691d05933e421e429af7fc041255d23"
+    },
+    "hud_sniper_f_0.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "3c0a497225f890e6e4af601d4b68d735496bd7db1d242fab7abe8e0f7c3a71a1"
+    },
+    "hud_sniper_f_1.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "d143102939b9704a6415a8340b3e554f91bbfa809a16527e5f638a664f589997"
+    },
+    "hud_sniper_f_2.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "0d4b3f800e0d6ec2f9b10055ad7d210cd034dab96543897e7c999afe961ebeee"
+    },
+    "hud_sniper_f_3.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "3fc6dac3e498c293f4c234a1fb248de50ec28bfbac6dcff17556fc16e75c9948"
+    },
+    "lose_0.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "a0b3a6c7eaa74c4e1b4ffe730f100c1c9d03819944207f0cd35055ab35ff74ae"
+    },
+    "lose_1.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "a5a891b6b46fa55e7bed17e73bb4f3ef93f0704a729c8858d074f15b34237d07"
+    },
+    "sniper_f.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "d8f534402070bab93fa228b39e242251e60919ccb97737275b5dab6215cbd8a0"
+    },
+    "win_0.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "439e4e2dc13a60a53932264e326ea41f06ab930280e44bb142bc3c771c7fe851"
+    },
+    "win_1.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "3c716b8a9665fe8839bc33019c2a125aef9e8207f54aae58c0719a904c68c487"
+    }
+  }
+}

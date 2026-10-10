@@ -93,12 +93,17 @@ func _on_input(event: InputEvent) -> void:
 
 
 func _burst() -> void:
-	_stage = 1
-	_chest.visible = false
+	_stage = 2
+	_chest.open_lid()
 	_hint.text = "Тап — дальше"
 	SoundManager.play(&"explosion", -8.0, false)
 	_flash_screen(Color.WHITE, 0.6)
-	_next()
+	get_tree().create_timer(0.45).timeout.connect(func() -> void:
+		if not is_inside_tree():
+			return
+		_chest.visible = false
+		_stage = 1
+		_next())
 
 
 func _flash_screen(color: Color, strength: float) -> void:
@@ -296,18 +301,28 @@ class ChestIcon:
 	extends Control
 	var color: Color
 	var texture: Texture2D
+	var open_texture: Texture2D
 	var _time := 0.0
 	var _shaking := false
 
 	func _init(chest_color: Color, chest_id: String) -> void:
 		color = chest_color
-		texture = ArenaProp.texture_of("res://assets/ui/chests/chest_%s.png" % chest_id)
+		texture = ArenaProp.texture_of("res://assets/ui/chests_v2/%s.png" % chest_id)
+		open_texture = ArenaProp.texture_of("res://assets/ui/chests_v2/%s_open.png" % chest_id)
 		custom_minimum_size = ChestReveal.CHEST_SIZE
 		pivot_offset = ChestReveal.CHEST_SIZE * 0.5
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	func start_shake() -> void:
 		_shaking = true
+
+	func open_lid() -> void:
+		_shaking = false
+		rotation = 0.0
+		scale = Vector2.ONE
+		if open_texture != null:
+			texture = open_texture
+		queue_redraw()
 
 	func _process(delta: float) -> void:
 		if not _shaking:

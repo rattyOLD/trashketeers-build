@@ -156,6 +156,10 @@ class Badge:
 		var r := minf(size.x, size.y) * 0.5 - 2.0
 		var dark := Color("#120d1c")
 		if locked or empty or id.is_empty():
+			var slot_art := Patches.art("slot_locked" if locked else "slot_empty")
+			if slot_art != null:
+				draw_texture_rect(slot_art, Rect2(c - Vector2(r, r), Vector2(r, r) * 2.0), false)
+				return
 			draw_circle(c, r, Color("#1c1714"))
 			for i in 24:
 				var a := TAU * i / 24.0

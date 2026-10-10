@@ -1,0 +1,187 @@
+{
+  "version": 32,
+  "images": {
+    "bolt.png": {
+      "size": [
+        128,
+        128
+      ],
+      "cellSize": [
+        128,
+        128
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "b0ad50fbe6a7ff3f5c377a6da86789d89890880d688df115ba0224df7edfe254"
+    },
+    "boot.png": {
+      "size": [
+        128,
+        128
+      ],
+      "cellSize": [
+        128,
+        128
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "9e19eeb34559db787c3a847c3e1daa9b02eb1e810e981354a2e50d34f59f4512"
+    },
+    "bullet.png": {
+      "size": [
+        128,
+        128
+      ],
+      "cellSize": [
+        128,
+        128
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "bde01fa5566a6d8b8169499937c95b24a53e0a15a5477fe50e177f154f94592d"
+    },
+    "clover.png": {
+      "size": [
+        128,
+        128
+      ],
+      "cellSize": [
+        128,
+        128
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "9debcad42b79710c4dd3f38aa9703d51b1424d1aef272d63ee33d23132e76c36"
+    },
+    "fist.png": {
+      "size": [
+        128,
+        128
+      ],
+      "cellSize": [
+        128,
+        128
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "65b2964bdd914b35d43a67a8567ce7e447877082c3176474281e69cc1ae4a96c"
+    },
+    "gear.png": {
+      "size": [
+        128,
+        128
+      ],
+      "cellSize": [
+        128,
+        128
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "277c36c66ebe2d1b62267a35a3971dbd944884db7dd8fce44aece1f8dcfe4caf"
+    },
+    "heart.png": {
+      "size": [
+        128,
+        128
+      ],
+      "cellSize": [
+        128,
+        128
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "92d164b54afb8ea1662eb4d71a40ac0eabc627e08bbe7cd5770fc503e52a8fae"
+    },
+    "magnet.png": {
+      "size": [
+        128,
+        128
+      ],
+      "cellSize": [
+        128,
+        128
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "67e3e1fbc73bf4822b04c65735a0955fba921e8021b5086e1bcca5d2bf62ea9f"
+    },
+    "mug.png": {
+      "size": [
+        128,
+        128
+      ],
+      "cellSize": [
+        128,
+        128
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "333a64c75f7114eab9ed451a0b566d7e4ef9472f419332c1ccb9665d73110db2"
+    },
+    "rat.png": {
+      "size": [
+        128,
+        128
+      ],
+      "cellSize": [
+        128,
+        128
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "e2340a5f63cc4914831dce3eb9fc8ab8b995894bdee8556ee23ca333ea8d2511"
+    },
+    "skull.png": {
+      "size": [
+        128,
+        128
+      ],
+      "cellSize": [
+        128,
+        128
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "3b2d8021a1949196673243be827d103fd7db783c733e91d4b5f00d88a2219c85"
+    },
+    "slot_empty.png": {
+      "size": [
+        128,
+        128
+      ],
+      "cellSize": [
+        128,
+        128
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "80d3d342d0a0176d1fd55360cafa896708a102c3fe5664f7fcbac4b0a9bceafc"
+    },
+    "slot_locked.png": {
+      "size": [
+        128,
+        128
+      ],
+      "cellSize": [
+        128,
+        128
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "91c9e466e7f0d2dc0667f3d8a234c8ed81046ed3c44bde08c62ba34ced8847f7"
+    },
+    "star.png": {
+      "size": [
+        128,
+        128
+      ],
+      "cellSize": [
+        128,
+        128
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "d84360381e36aaea388916edeb7d79426140f883f1a4dc682a84f8b4e17ed357"
+    }
+  }
+}

@@ -1,0 +1,135 @@
+{
+  "version": 32,
+  "images": {
+    "agent.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "50a49b0350f96acbdaaa5573449b4f468cab439b304e182c1c4ee7c92b38dfbb"
+    },
+    "agent_alt.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "33ee9bb2b21acc6d068a13e4a6654ea58bd8a6542f381f4e49588adaaf6e0ea9"
+    },
+    "clerk.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "268023bb6227dca44d9ed951a95d5435c1a4eac5885797a5acefa12c6a3bcc25"
+    },
+    "clerk_alt.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "5ca94db2d317831f1aa829ee8bd191109b7d8e49d527a0600693c951cfb012b0"
+    },
+    "deputy.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "ddd57868ddd8bb4e0ab8e3df7768dadb73be2b7a19da9b946f02d889d5c097d8"
+    },
+    "deputy_alt.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "d1887994e101a69c59772abaf2a854b58817b77fe5f39c2718bf546bf80839e6"
+    },
+    "pigguard.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "ecb5702930841116fcfd3186dcab6bb777419104d8dfdb446faf80509e542cd0"
+    },
+    "pigguard_alt.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "cb95e4d5376f8a77d693b3ba53ee18d0fde936a8260f4b392a1152fc6a775866"
+    },
+    "snyr.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "2cadb6ce28d291094c083318d40d11317df2d585c5474bf231f1564696cdc606"
+    },
+    "snyr_alt.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "a0bd1e57e6694f7a35845ce940c7458827c732cfa9b606839f73718907c20d13"
+    }
+  }
+}

@@ -485,7 +485,7 @@ func get_quality() -> int:
 func get_fps_cap() -> int:
 	var cap := int(data.get("fps_cap", 0))
 	if cap == 0:
-		return 30 if bool(data.get("eco_fps", false)) else 60
+		return 30 if bool(data.get("eco_fps", false)) or Platform.is_galaxy_a13() else 60
 	return cap if cap in [30, 60, 120] else 60
 
 

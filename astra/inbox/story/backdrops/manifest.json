@@ -183,5 +183,242 @@
       "sourceSheet": "m6_layers",
       "frame": 2
     }
-  ]
+  ],
+  "version": 32,
+  "images": {
+    "m1_far.png": {
+      "size": [
+        2048,
+        512
+      ],
+      "cellSize": [
+        2048,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "c1d5bbe2e0fd780a726af91de2af00964a99f70515e956f30b7eea10e203876d"
+    },
+    "m1_mid.png": {
+      "size": [
+        2048,
+        512
+      ],
+      "cellSize": [
+        2048,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "1f16d2b31bd472edde1c18775166e48b4fc7d5ebaaeebd82ae4ecf782d421eed"
+    },
+    "m1_near.png": {
+      "size": [
+        2048,
+        512
+      ],
+      "cellSize": [
+        2048,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "560e773bccdb221aa37f0d1bab5e307cb65905a21da3dbc8138e804795e59edd"
+    },
+    "m2_far.png": {
+      "size": [
+        2048,
+        512
+      ],
+      "cellSize": [
+        2048,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "50e1241670111f2f147b69a3214336ff65c5b4bf6052e21ab4fcec99cd2d7f08"
+    },
+    "m2_mid.png": {
+      "size": [
+        2048,
+        512
+      ],
+      "cellSize": [
+        2048,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "1aa3469325f25cd9ace694686ac3d4d0c38645207155f49e281d530d28a8d33b"
+    },
+    "m2_near.png": {
+      "size": [
+        2048,
+        512
+      ],
+      "cellSize": [
+        2048,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "a3b18476c84a34d458a61cd9e71f21dde392748dae7dcae4becdb09ef50a2926"
+    },
+    "m3_far.png": {
+      "size": [
+        2048,
+        512
+      ],
+      "cellSize": [
+        2048,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "1d803d63759b2af8d4f392cd46f2556e51577bbcd56dce364a555eaf0e2aa7ab"
+    },
+    "m3_mid.png": {
+      "size": [
+        2048,
+        512
+      ],
+      "cellSize": [
+        2048,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "5668989004f7e5cc298e0af3c3667a1ff0a01d36f255f8b555ee85bd5db95d9d"
+    },
+    "m3_near.png": {
+      "size": [
+        2048,
+        512
+      ],
+      "cellSize": [
+        2048,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "0f4047283d1bc76bb3f3c124e3f1928d6748a7a217f2e6b66fe01f14f3e2e3b7"
+    },
+    "m4_far.png": {
+      "size": [
+        2048,
+        512
+      ],
+      "cellSize": [
+        2048,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "7fc00218653d7a26402965f0c74484ebb82f49c532b219ee114134dd1f3a359e"
+    },
+    "m4_mid.png": {
+      "size": [
+        2048,
+        512
+      ],
+      "cellSize": [
+        2048,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "365312353bfce433b66c9030e499516bb3dfc9cce8a41e1cf82c6a83beb35eda"
+    },
+    "m4_near.png": {
+      "size": [
+        2048,
+        512
+      ],
+      "cellSize": [
+        2048,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "493e85320c36a67bee569d2919b0dc84fff69c28e20b69e2d8ae6187283d0d68"
+    },
+    "m5_far.png": {
+      "size": [
+        2048,
+        512
+      ],
+      "cellSize": [
+        2048,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "8839bd7c731618e66f2f59f9e04fb6fbf3d31dbc28ffeaf62a15f3a05353cf08"
+    },
+    "m5_mid.png": {
+      "size": [
+        2048,
+        512
+      ],
+      "cellSize": [
+        2048,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "292b689e5cfcf45b2533bdb96f568ca9b0ce41dc9104d5e3152dfaf872c98aa2"
+    },
+    "m5_near.png": {
+      "size": [
+        2048,
+        512
+      ],
+      "cellSize": [
+        2048,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "d04d8f5f3ca9d2f9ec9c6c73a2fb12a268df7411f322a81784de7ea68c437da0"
+    },
+    "m6_far.png": {
+      "size": [
+        2048,
+        512
+      ],
+      "cellSize": [
+        2048,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "56076e8cb78921af30cea49f17ccf6040020d152de2e45bf9517a06461401abb"
+    },
+    "m6_mid.png": {
+      "size": [
+        2048,
+        512
+      ],
+      "cellSize": [
+        2048,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "b466319d26c0c71b0ddb9b1e85edc253e1942d5ea85c4fcd9399231ab6228333"
+    },
+    "m6_near.png": {
+      "size": [
+        2048,
+        512
+      ],
+      "cellSize": [
+        2048,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "c395be79d63f0af6475452f1346bd64da25f207c41c28dcbc9bf3080de291050"
+    }
+  }
 }

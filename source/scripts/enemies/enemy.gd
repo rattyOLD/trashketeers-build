@@ -650,14 +650,14 @@ func make_elite(kind: String) -> void:
 	# Светящееся кольцо цвета особенности под ногами — элиту видно в толпе.
 	if _elite_ring == null:
 		_elite_ring = Sprite2D.new()
-		_elite_ring.texture = NeonSign.get_light_texture()
 		_elite_ring.show_behind_parent = true
 		add_child(_elite_ring)
 		move_child(_elite_ring, 0)
 	_elite_ring.visible = true
+	_elite_ring.texture = ArenaProp.texture_of("res://assets/ui/ascension/elite_%s.png" % kind)
 	_elite_ring.position = Vector2(0, data.radius * 0.75 * _size_mult)
-	_elite_ring.scale = Vector2(data.radius / 19.0, data.radius / 45.0) * _size_mult
-	_elite_ring.modulate = Color(Ascension.ELITE_COLORS.get(kind, Color.WHITE), 1.0)
+	_elite_ring.scale = Vector2(data.radius * 3.2 / 128.0, data.radius * 1.6 / 64.0) * _size_mult
+	_elite_ring.modulate = Color.WHITE
 	match kind:
 		"fast":
 			elite_speed = 1.45

@@ -537,13 +537,13 @@ func _build_stage() -> Control:
 	stage.add_child(_season_pill)
 	if Orient.portrait:
 		stage.add_child(_make_side_button("gift", "res://assets/ui/hub/gift_box.png", "ПОДАРОК", false, 8.0, func() -> void: _daily.open()))
-		stage.add_child(_make_side_button("chest", "res://assets/ui/hub/chest_free.png", "БЕСПЛАТНО", false, 132.0, func() -> void: _chests.open()))
+		stage.add_child(_make_side_button("chest", "res://assets/ui/chests_v2/free.png", "БЕСПЛАТНО", false, 132.0, func() -> void: _chests.open()))
 		stage.add_child(_make_side_button("news", "res://assets/ui/hub/news.png", "НОВОСТИ", true, 8.0, func() -> void: _changelog.open()))
 		stage.add_child(_make_side_button("vip", "res://assets/ui/hub/vip.png", "VIP", true, 124.0, func() -> void: _vip.open()))
 	else:
 		var left := [
 			["gift", "res://assets/ui/hub/gift_box.png", "ПОДАРОК", func() -> void: _daily.open()],
-			["chest", "res://assets/ui/hub/chest_free.png", "БЕСПЛАТНО", func() -> void: _chests.open()],
+			["chest", "res://assets/ui/chests_v2/free.png", "БЕСПЛАТНО", func() -> void: _chests.open()],
 		]
 		var right := [
 			["vip", "res://assets/ui/hub/vip.png", "VIP", func() -> void: _vip.open()],
@@ -749,6 +749,10 @@ func _refresh_mod_chip() -> void:
 		_chips_row.visible = _mode == Mode.SURVIVAL
 	if _asc_chip != null:
 		_asc_chip.text = Ascension.button_text()
+		var art_path := "res://assets/ui/ascension/tier_%d.png" % Ascension.chosen()
+		_asc_chip.icon = load(art_path) as Texture2D if ResourceLoader.exists(art_path) else null
+		_asc_chip.expand_icon = true
+		_asc_chip.add_theme_constant_override("icon_max_width", 24)
 		_asc_chip.add_theme_color_override("font_color", Color("#ff4d6d") if Ascension.chosen() > 0 else Color("#ffb066"))
 		_asc_chip.visible = _mode == Mode.SURVIVAL and Ascension.unlocked() > 0
 

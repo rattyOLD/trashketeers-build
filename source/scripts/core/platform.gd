@@ -191,12 +191,28 @@ func is_ios() -> bool:
 
 
 var _ios := -1
+var _touch := -1
+var _a13 := -1
+var native_render_scale := 1.0
+
+
+func is_galaxy_a13() -> bool:
+	if _a13 < 0:
+		var model := OS.get_model_name() if is_native_app else ""
+		if is_web:
+			var ua: Variant = _js("return navigator.userAgent;")
+			var re := RegEx.new()
+			re.compile("(?i)SM-A13[567][A-Z0-9/]*")
+			var match_model := re.search(str(ua))
+			model = match_model.get_string() if match_model != null else ""
+		_a13 = 1 if DevicePerformance.is_galaxy_a13(model) else 0
+	return _a13 == 1
 
 
 func is_touch() -> bool:
-	if is_web:
-		return _js_bool("!!window.__trash_is_touch || ('ontouchstart' in window) || (navigator.maxTouchPoints || 0) > 0")
-	return DisplayServer.is_touchscreen_available()
+	if _touch < 0:
+		_touch = 1 if (is_native_app or (_js_bool("!!window.__trash_is_touch || ('ontouchstart' in window) || (navigator.maxTouchPoints || 0) > 0") if is_web else DisplayServer.is_touchscreen_available())) else 0
+	return _touch == 1
 
 
 ## Потолок плотности пикселей холста (web/render_scale.js): движок подхватывает его со следующего кадра.
@@ -204,10 +220,9 @@ func set_render_cap(cap: float) -> void:
 	if is_web:
 		_js("window.__trash_dpr_cap = %s;" % str(cap))
 	elif is_native_app and is_inside_tree():
-		# В приложении экран телефона в 2–4 раза плотнее, чем веб рисует на «качестве 0–1»: там рендер в
-		# логическом размере 720×1280 с растяжкой на экран (меньше нагрев), на «качестве 2» — полное разрешение.
-		# Даже «качество 2» в полном разрешении (1080×2175 на moto g32 / Adreno 610) давало 11 FPS — в приложении всегда 720×1280.
+		native_render_scale = DevicePerformance.native_render_scale(cap)
 		get_tree().root.content_scale_mode = Window.CONTENT_SCALE_MODE_VIEWPORT
+		Orient.refresh(get_tree().root)
 
 
 const BATTLE_FLAG := "__trash_battle"

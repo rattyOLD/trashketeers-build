@@ -83,6 +83,10 @@ func try_use() -> bool:
 			_squall()
 		"firecrackers":
 			_firecrackers()
+		"precision_shot":
+			_precision_shot()
+		"field_dressing":
+			_field_dressing()
 	if _shake.is_valid():
 		_shake.call(0.35)
 	SoundManager.play(&"shield_up")
@@ -92,6 +96,21 @@ func try_use() -> bool:
 
 func _power() -> float:
 	return 1.0 + _stats.get_stat(&"damage_mult")
+
+
+func _precision_shot() -> void:
+	var shot := WeaponData.from_dict({"weapon_id": "mirage_skill", "damage": 160.0 * _power(), "bullet_speed": 1700.0,
+		"range": 1400.0, "bullet_lifetime": 1.0, "piercing": true, "bullet_radius": 9.0,
+		"effect_color": "#ffe0a8", "crit_chance": 0.0, "knockback": 1.5}, func(_path: String) -> Texture2D: return null)
+	BulletPool.spawn(shot, _player.global_position + _aim() * 30.0, _aim())
+	_fx.ring(_player.global_position, Color("#ffe0a8"), 90.0)
+
+
+func _field_dressing() -> void:
+	_player.heal(_player.max_hp * 0.25)
+	_player.grant_invuln(0.8)
+	_fx.ring(_player.global_position, Color("#82d8b1"), 150.0)
+	_fx.popup(_player.global_position + Vector2(0, -90), "ПЕРЕВЯЗКА", Color("#b8ffe0"), 28.0)
 
 
 func _enemies_in(center: Vector2, radius: float) -> Array[Enemy]:

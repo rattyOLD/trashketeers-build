@@ -87,8 +87,8 @@ func _make_chest(chest_id: String) -> Control:
 	var head := HBoxContainer.new()
 	head.add_theme_constant_override("separation", 12)
 	var icon := TextureRect.new()
-	# Сундуки из одного рисованного набора с бесплатным (assets/ui/chests/<редкость>.png).
-	icon.texture = ArenaProp.texture_of("res://assets/ui/chests/%s.png" % chest_id)
+	# Единый набор: та же модель используется при раскрытии сундука.
+	icon.texture = ArenaProp.texture_of("res://assets/ui/chests_v2/%s.png" % chest_id)
 	icon.custom_minimum_size = Vector2(96, 72)
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -158,7 +158,7 @@ func _make_ad_chest() -> Control:
 	row.add_theme_constant_override("separation", 12)
 	panel.add_child(row)
 	var icon := TextureRect.new()
-	icon.texture = ArenaProp.texture_of("res://assets/ui/hub/chest_free.png")
+	icon.texture = ArenaProp.texture_of("res://assets/ui/chests_v2/free.png")
 	icon.custom_minimum_size = Vector2(72, 72)
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED

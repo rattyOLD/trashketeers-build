@@ -337,9 +337,7 @@
         "arm_scale": 0.26,
         "arm_len": 100,
         "arm_pivot_y": 60,
-        "arm_color": "#403048",
-        "clips": "res://assets/heroes/tactical/night_",
-        "clips_grip": "res://data/grip_night.json"
+        "arm_color": "#403048"
       },
       "passive": {
         "title": "Метка",
@@ -523,41 +521,93 @@
       "id": "sniper_f",
       "title": "Кейт «Мираж»",
       "description": "Снайпер, дальний бой.",
-      "currency": "gems",
-      "price": 0,
+      "currency": "nuts",
+      "price": 12000,
       "recolor": {},
       "proportions": {},
-      "stats": {},
-      "traits": "Скоро в отряде",
-      "portrait": "res://assets/ui/portraits/soon_kate.png",
+      "stats": {
+        "speed": -0.05,
+        "hp": -0.08,
+        "dash": 0.0,
+        "crit": 0.1
+      },
+      "traits": "+10% шанс крита, −5% скорость, −8% здоровья",
+      "portrait": "res://assets/ui/portraits/sniper_f.png",
       "passive": {
-        "title": "Скоро",
-        "text": "Герой в разработке. Следи за обновлениями."
+        "title": "Дальняя оптика",
+        "text": "+25% дальности оружия"
       },
       "role": "Снайпер",
-      "lore": "Снайпер «Особой Семёрки». Спокойная, ироничная, с оптикой и шарфом. Её никогда не видели, зато всегда слышали выстрел. Скоро в отряде.",
+      "lore": "Снайпер «Особой Семёрки». Спокойная, ироничная, с оптикой и шарфом. Её никогда не видели, зато всегда слышали выстрел.",
       "quote": "Я уже попала. Ты просто ещё не знаешь.",
-      "coming_soon": true
+      "coming_soon": false,
+      "sprite": {
+        "path": "res://assets/heroes/tactical/sniper_f_idle.png",
+        "cells": 4,
+        "cell_w": 300,
+        "cell_h": 200,
+        "run": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "clips": "res://assets/heroes/tactical/sniper_f_",
+        "clips_grip": "res://data/grip_sniper_f.json"
+      },
+      "skill": {
+        "id": "precision_shot",
+        "title": "Точный выстрел",
+        "cooldown": 18.0,
+        "text": "Мощная пробивающая пуля по линии прицела.",
+        "color": "#ffe0a8"
+      }
     },
     {
       "id": "medic_f",
       "title": "Лиза «Док»",
       "description": "Лечит и подкалывает.",
-      "currency": "gems",
-      "price": 0,
+      "currency": "nuts",
+      "price": 12000,
       "recolor": {},
       "proportions": {},
-      "stats": {},
-      "traits": "Скоро в отряде",
-      "portrait": "res://assets/ui/portraits/soon_liza.png",
+      "stats": {
+        "speed": -0.03,
+        "hp": 0.12,
+        "dash": 0.0,
+        "crit": 0.0
+      },
+      "traits": "+12% здоровья, −3% скорость",
+      "portrait": "res://assets/ui/portraits/medic_f.png",
       "passive": {
-        "title": "Скоро",
-        "text": "Герой в разработке. Следи за обновлениями."
+        "title": "Полевая медицина",
+        "text": "Восстанавливает 0.5 здоровья в секунду"
       },
       "role": "Медик",
-      "lore": "Полевой медик «Особой Семёрки». Строгая, с красным крестом на разгрузке. Штопала всех, и Рико тоже, и ругалась при этом громче, чем он. Скоро в отряде.",
+      "lore": "Полевой медик «Особой Семёрки». Строгая, с красным крестом на разгрузке. Штопала всех, и Рико тоже, и ругалась при этом громче, чем он.",
       "quote": "Не геройствуй. Я устала тебя зашивать.",
-      "coming_soon": true
+      "coming_soon": false,
+      "sprite": {
+        "path": "res://assets/heroes/tactical/medic_f_idle.png",
+        "cells": 4,
+        "cell_w": 300,
+        "cell_h": 200,
+        "run": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "clips": "res://assets/heroes/tactical/medic_f_",
+        "clips_grip": "res://data/grip_medic_f.json"
+      },
+      "skill": {
+        "id": "field_dressing",
+        "title": "Перевязка",
+        "cooldown": 25.0,
+        "text": "Восстанавливает 25% здоровья и даёт 0.8 с неуязвимости.",
+        "color": "#82d8b1"
+      }
     }
   ]
 }

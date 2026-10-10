@@ -763,6 +763,10 @@ class Scenery:
 		"camp": "res://assets/ui/camp/bg_%s.jpg",
 		"hangar": "res://assets/ui/loading/bg_hangar_%s.jpg",
 		"briefing": "res://assets/ui/loading/bg_briefing_%s.jpg",
+		"acid": "res://assets/ui/loading/bg_acid_%s.jpg",
+		"vault": "res://assets/ui/loading/bg_vault_%s.jpg",
+		"ice": "res://assets/ui/loading/bg_ice_%s.jpg",
+		"roofs": "res://assets/ui/loading/bg_roofs_%s.jpg",
 	}
 	static var _last_variant := ""
 	var _bg: Texture2D

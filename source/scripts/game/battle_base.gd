@@ -125,6 +125,10 @@ func _spawn_player(at: Vector2, weapon: WeaponData, target_finder: Callable) -> 
 			stats.add_flat(&"poison_chance", 0.2)
 			stats.add_flat(&"poison_power", 0.3)
 			stats.add_flat(&"regen", 0.5)
+		"sniper_f":
+			stats.add_flat(&"range_mult", 0.25)
+		"medic_f":
+			stats.add_flat(&"regen", 0.5)
 	# Интерполяция физики: герой, враги и камера движутся в физическом шаге (60 Гц), а кадр рисуется
 	# между шагами — плавно при любом лимите кадров (30/60/120) и без подёргиваний от рассинхрона.
 	player.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_ON
@@ -270,7 +274,7 @@ func _apply_camera_zoom() -> void:
 
 
 static func camera_zoom() -> float:
-	return PORTRAIT_ZOOM if Orient.portrait else LANDSCAPE_ZOOM
+	return (PORTRAIT_ZOOM if Orient.portrait else LANDSCAPE_ZOOM) * (Platform.native_render_scale if Platform.is_native_app else 1.0)
 
 
 func set_camera_bounds(bounds: Rect2) -> void:
@@ -368,7 +372,7 @@ func _adapt_quality(delta: float) -> void:
 	var fps := _adapt_frames / _adapt_time
 	_adapt_time = 0.0
 	_adapt_frames = 0
-	if fps >= (ADAPT_FPS if _adapt_level < 2 else ADAPT_HARD_FPS):
+	if fps >= DevicePerformance.adapt_threshold(Engine.max_fps if Engine.max_fps > 0 else 60, _adapt_level >= 2):
 		_adapt_strikes = 0
 		return
 	_adapt_strikes += 1

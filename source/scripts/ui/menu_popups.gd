@@ -267,6 +267,8 @@ class Settings:
 		if Platform.is_ios() and _quality_buttons.size() > 2:
 			_quality_buttons[2].disabled = true
 		_quality_hint.text = QUALITY_HINTS[q] + ("\n«Красиво» на iPhone отключено: Safari не хватает памяти, игра вылетала." if Platform.is_ios() else "") + ("\nИгра закрылась во время боя, поэтому графика снижена автоматически." if bool(SaveService.data.get("crash_downgraded", false)) else "")
+		if Platform.is_galaxy_a13():
+			_quality_hint.text += "\nGalaxy A13: по умолчанию 30 кадров/с для меньшего нагрева. Можно выбрать 60 вручную."
 		_fps.set_pressed_no_signal(bool(SaveService.data["show_fps"]))
 		_lite.set_pressed_no_signal(SaveService.is_fx_lite())
 		_mini.set_pressed_no_signal(SaveService.is_minimap_enabled())

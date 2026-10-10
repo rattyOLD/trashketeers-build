@@ -1,0 +1,57 @@
+{
+  "version": 32,
+  "images": {
+    "boost_coins.png": {
+      "size": [
+        256,
+        256
+      ],
+      "cellSize": [
+        256,
+        256
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "fefe0b421d7aa3624884c44d71b293bc64009ee0a6c8948c23dd5cf9e70abb09"
+    },
+    "boost_pass.png": {
+      "size": [
+        256,
+        256
+      ],
+      "cellSize": [
+        256,
+        256
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "1af3c91f81058a15ce95c31505f8439063a2b65df30a6c11c89dd28f454cf4fa"
+    },
+    "nick_color.png": {
+      "size": [
+        256,
+        256
+      ],
+      "cellSize": [
+        256,
+        256
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "ce62bb84042682d491d3ec8ae1767ba6477e1e70b039f0fb1f81782ec40dcd48"
+    },
+    "title_plate.png": {
+      "size": [
+        256,
+        256
+      ],
+      "cellSize": [
+        256,
+        256
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "7bbf1bd83a4f87e37dda767dcd9fc0feb3768e8167d12ad06976100cefb6cb20"
+    }
+  }
+}

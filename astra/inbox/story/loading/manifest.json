@@ -1,0 +1,369 @@
+{
+  "version": 32,
+  "images": {
+    "background_landscape.png": {
+      "size": [
+        1920,
+        1080
+      ],
+      "cellSize": [
+        1920,
+        1080
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "9f12e97c7eadc68c52d9c35f26d88264440030f4d56bd3b8483369c0e03593b0"
+    },
+    "background_portrait.png": {
+      "size": [
+        1080,
+        1920
+      ],
+      "cellSize": [
+        1080,
+        1920
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "ffc2d78c40eb0af78ae950290e4a0fb1b6fe5e77db55f337beeb0cfca6e35c2c"
+    },
+    "bg_acid_landscape.png": {
+      "size": [
+        1920,
+        1080
+      ],
+      "cellSize": [
+        1920,
+        1080
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "279e3aebfd44891fbcf566e047abacb169463c422cbb93c516ebc2e14d3391da"
+    },
+    "bg_acid_portrait.png": {
+      "size": [
+        1080,
+        1920
+      ],
+      "cellSize": [
+        1080,
+        1920
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "6848e7f641f56cb647ba03d452685fff33f8c1aec0f4aa0395ff24895dc769e5"
+    },
+    "bg_ice_landscape.png": {
+      "size": [
+        1920,
+        1080
+      ],
+      "cellSize": [
+        1920,
+        1080
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "ecfafd76d0aed109ecd3c0bfe2c789d7b14a4337b61b47f3a57f7a56f14b7e6f"
+    },
+    "bg_ice_portrait.png": {
+      "size": [
+        1080,
+        1920
+      ],
+      "cellSize": [
+        1080,
+        1920
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "05e2059edcaef9b63505f072fda5ef12edc7f1c8f512b6153449bb3149dff91f"
+    },
+    "bg_roofs_landscape.png": {
+      "size": [
+        1920,
+        1080
+      ],
+      "cellSize": [
+        1920,
+        1080
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "3179c9266b4507c39c342393ff2f107d76846604f5a15c18c25851e4861225ba"
+    },
+    "bg_roofs_portrait.png": {
+      "size": [
+        1080,
+        1920
+      ],
+      "cellSize": [
+        1080,
+        1920
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "e4e2471820f5f4beff0724173831038a49341cdf60b6393597343e76e5f8ef71"
+    },
+    "bg_vault_landscape.png": {
+      "size": [
+        1920,
+        1080
+      ],
+      "cellSize": [
+        1920,
+        1080
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "03fe1a2d926c3dc726b16d625dfd9401b47c1d50e09a190f1aa9039269983cd8"
+    },
+    "bg_vault_portrait.png": {
+      "size": [
+        1080,
+        1920
+      ],
+      "cellSize": [
+        1080,
+        1920
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "2eeb109dfbc83872e6c36e35fa845d31ee57421bec2a4af2d3c9c5a2d8560ebc"
+    },
+    "dividers_sheet.png": {
+      "size": [
+        384,
+        192
+      ],
+      "cellSize": [
+        384,
+        192
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "cf2a3a7ad525927d8a2dc1135a85dc9927831307a95ea069e44d8ff45394558a"
+    },
+    "icon_bottle.png": {
+      "size": [
+        96,
+        96
+      ],
+      "cellSize": [
+        96,
+        96
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "831de9b779f124102ddd04530e7a361bd3b32f71f09e43a62816268f7dfac859"
+    },
+    "icon_cap.png": {
+      "size": [
+        96,
+        96
+      ],
+      "cellSize": [
+        96,
+        96
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "7075d159995a700ce4d87f88183226945630b092aaef7205ec492cd6ca571174"
+    },
+    "icon_crouton.png": {
+      "size": [
+        96,
+        96
+      ],
+      "cellSize": [
+        96,
+        96
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "88b5cfe5024cbb9c319188a915503463556aced139717d8040015fface380499"
+    },
+    "icon_empty_mug.png": {
+      "size": [
+        96,
+        96
+      ],
+      "cellSize": [
+        96,
+        96
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "ac6ba492cfb9ab659476a1d8325d40ed798846253157563be43db67ec81cb580"
+    },
+    "icon_fish_lure.png": {
+      "size": [
+        96,
+        96
+      ],
+      "cellSize": [
+        96,
+        96
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "2bbe060e7de25f29d26f65dca15b2419a500ba215a4e9c325b40aa4e63323ff3"
+    },
+    "icon_foam.png": {
+      "size": [
+        96,
+        96
+      ],
+      "cellSize": [
+        96,
+        96
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "1ab6f8439075b77cfb1732bd9e6f523ffccfa1a524d87be574e0d4467e5cdc9e"
+    },
+    "icon_mug.png": {
+      "size": [
+        96,
+        96
+      ],
+      "cellSize": [
+        96,
+        96
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "b5d97f0944c1f0e48e402284eee1cc2d0f233a1cb1cf79210d4b04f75033f19d"
+    },
+    "icon_nuts.png": {
+      "size": [
+        96,
+        96
+      ],
+      "cellSize": [
+        96,
+        96
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "9d83c6762e9ba79d6ea43504de2f3c32b1bd058b674402aed044bc9579efe892"
+    },
+    "logo_horizontal.png": {
+      "size": [
+        1024,
+        512
+      ],
+      "cellSize": [
+        1024,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "cf8423c6ccbf9579abe71223e96d3bab68098f3605f3f86f3b4eeb76bede1bb2"
+    },
+    "logo_vertical.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "e61ccd401b714ef5ce08e272b9e9db2152eb5e2d914d52b6338b36993a6acb85"
+    },
+    "mascots_sheet.png": {
+      "size": [
+        1536,
+        1024
+      ],
+      "cellSize": [
+        1536,
+        1024
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "81555deec8d39ed75f6af6887dbd5dd2c70b50ba4441e30e4e2200140b22ba75"
+    },
+    "raccoon_aviator.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "9558d46481dea25b44e1967bd18d7b010cfa9411908e1e3c0188d2e5665648ee"
+    },
+    "raccoon_goatee.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "014a0f523dd5d7442f74dd6e80fecd98b389b602da87f9607543ceea0814dd1a"
+    },
+    "raccoon_hardhat.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "ddaac5f3110272654f807f7846187c007eeb70eeeadcb19e1154df87817d0c12"
+    },
+    "rico_beer_drink.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "f2e17ee565e9eae6d768fd8466ca4131702173bce5e0bbf460b62b6a35589adf"
+    },
+    "rico_beer_raise.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "57ddb2d4bbcac982d5f596f60e404a36252ed7b6900e05a0648c400834196fb8"
+    },
+    "rico_beer_toast.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "9dc2ceae8a6aa0e1651b1fe13a6599a57f2291e9007579878ec7c1047c77d74c"
+    }
+  }
+}

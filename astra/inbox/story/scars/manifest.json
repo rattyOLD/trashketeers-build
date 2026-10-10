@@ -1,0 +1,135 @@
+{
+  "version": 32,
+  "images": {
+    "icon_brow.png": {
+      "size": [
+        64,
+        64
+      ],
+      "cellSize": [
+        64,
+        64
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "b420ddc879a8f072f9bfea3270a6748002da6a348cb01232c21cc6f5b7be0f63"
+    },
+    "icon_cracked_cap.png": {
+      "size": [
+        64,
+        64
+      ],
+      "cellSize": [
+        64,
+        64
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "2597a1b4e803c877d9442c5b3bd065b281c0e74a83a0c50fc76db06c88b79cdd"
+    },
+    "icon_eye_patch.png": {
+      "size": [
+        64,
+        64
+      ],
+      "cellSize": [
+        64,
+        64
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "3a034dc69cfe1ba19a9427aa883a959b528d63f6a655ac0bc05924d08a740381"
+    },
+    "icon_nose_plaster.png": {
+      "size": [
+        64,
+        64
+      ],
+      "cellSize": [
+        64,
+        64
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "8de1bba400550b6121774ba0b463efbdff0c6b6f744f16905f105f2933825941"
+    },
+    "icon_torn_ear.png": {
+      "size": [
+        64,
+        64
+      ],
+      "cellSize": [
+        64,
+        64
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "025146c0afc044ca16c76c0c619c000e5bb8f6821eb5f10c1320d1f8dc691352"
+    },
+    "scar_brow.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "2642c8cac82073e284f2565f19babb99763ea07dd5ca5648d33e443dade1ed98"
+    },
+    "scar_cracked_cap.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "6b12dea65a90e3f092e3fa4bda15f341cf5264d46ee0f3fd5db7293511832c81"
+    },
+    "scar_eye_patch.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "6c58dc7b3632b0b2970d747330c3372773add8d2513d1f9ee7b58a087d23a35f"
+    },
+    "scar_nose_plaster.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "378c40e32b8081beb0f87a16d79ff9202b2b9fb1f9fc63592ba37595fdf4c2f8"
+    },
+    "scar_torn_ear.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "60e8f2ea0fa8d279c8ccb9eb0067a594f1634c935db4d69dd264b062f6ada322"
+    }
+  }
+}

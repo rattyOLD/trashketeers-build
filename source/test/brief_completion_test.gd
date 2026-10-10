@@ -16,6 +16,24 @@ func _check(ok: bool, label: String) -> void:
 func _run() -> void:
 	SaveService.data = SaveService.DEFAULTS.duplicate(true)
 	SaveService._sanitize_arsenal()
+	for id in ["sniper_f", "medic_f"]:
+		var hero: Dictionary = CharacterDB.get_character(id)
+		_check(not hero.get("coming_soon", true) and hero.has("skill"), id + " available with skill")
+		var portrait := HudWidgets.DamagePortrait.new()
+		portrait.set_character(hero)
+		for stage in 4:
+			_check(portrait.has_art(stage), id + " damage portrait " + str(stage))
+		portrait.free()
+		for clip in ["idle", "run", "shoot", "hit", "dash", "death", "revive", "fidget"]:
+			_check(ResourceLoader.exists("res://assets/heroes/tactical/" + id + "_" + clip + ".png"), id + " clip " + clip)
+	SaveService.add_stat("scars", 5, false)
+	var scar_face := HudWidgets.DamagePortrait.new()
+	scar_face.set_character(CharacterDB.get_character("raccoon"))
+	_check(scar_face._face.scars.size() == 5 and scar_face._face.scars_visible, "Rico scars align only to healthy base")
+	scar_face.health = 0.4
+	scar_face._pick_face()
+	_check(not scar_face._face.scars_visible, "scar overlays hidden on differently framed damage portraits")
+	scar_face.free()
 	for id in ["raccoon", "red_panda", "snow", "night", "maloy"]:
 		var tex := MenuWidgets.Avatar.get_texture_for(CharacterDB.get_character(id), "default")
 		_check(tex != null and tex.get_width() <= 160, "small avatar " + id)

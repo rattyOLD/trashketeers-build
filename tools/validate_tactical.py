@@ -70,5 +70,5 @@ def validate(hero):
 
 
 if __name__ == '__main__':
-    for hero in sys.argv[1:] or ['neon_hopper', 'fluffy_chemist', 'pigeon_mafioso']:
+    for hero in sys.argv[1:] or ['neon_hopper', 'fluffy_chemist', 'pigeon_mafioso', 'sniper_f', 'medic_f']:
         validate(hero)

@@ -13,6 +13,16 @@ func _ready() -> void:
 	Engine.time_scale = float(OS.get_environment("SCALE")) if not OS.get_environment("SCALE").is_empty() else 2.0
 	SaveService.data = SaveService.DEFAULTS.duplicate(true)
 	SaveService._sanitize_arsenal()
+	if not OS.get_environment("HERO").is_empty():
+		SaveService.data["character"] = OS.get_environment("HERO")
+		(SaveService.data["characters"] as Array).append(OS.get_environment("HERO"))
+	if OS.get_environment("NATIVE_A13") == "1":
+		Platform.is_native_app = true
+		Platform._touch = 1
+		Platform._a13 = 1
+		SaveService.data["fps_cap"] = 30
+		SaveService.apply_quality()
+		Platform.set_render_cap(1.0)
 	if mode.begins_with("mod:"):
 		SaveService.data["run_mod"] = mode.trim_prefix("mod:")
 	main = Node.new()

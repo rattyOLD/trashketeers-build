@@ -1,0 +1,334 @@
+{
+  "hero": "medic_f",
+  "brief": "v32 section 8 / v21",
+  "cellWidth": 480,
+  "cellHeight": 320,
+  "columns": 4,
+  "clips": {
+    "idle": 8,
+    "run": 8,
+    "shoot": 4,
+    "hit": 4,
+    "dash": 6,
+    "death": 8,
+    "revive": 6,
+    "idle_fidget": 8
+  },
+  "layerOrder": [
+    "fronthand",
+    "body_nohands",
+    "rearhand"
+  ],
+  "farForearmInFront": true,
+  "assets": [
+    {
+      "path": "medic_f_body_nohands_idle.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "56dda5c8b78f11f3a6484675ddd0fc6d17bf659799aaf3fd02e06bfde2410c8d",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "medic_f_body_nohands_run.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "48d918903455f11515a1cdcd66a47b5cffa56cb2cf5fec72e4381208625e0117",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "medic_f_body_nohands_shoot.png",
+      "width": 1920,
+      "height": 320,
+      "background": "transparent",
+      "sha256": "1ed7869923a1550ec605615721f8248b44b67a07ffec377f82d947f4d8752add",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 4,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "medic_f_dash.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "e3c7168568b53b693154404f82ca842a2f915b6eb61998acd601ffa8fd7ebd1b",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 6,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "medic_f_death.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "48e9a46e449d11146601076ea38557a85e8fa7f8db1703830b6075dd10cd07d8",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "medic_f_fronthand_idle.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "efd95332d0a686668c742fa33da1b9abed82abe33b7ee303b32782aaf4cd1a6d",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "medic_f_fronthand_run.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "cdea2e6f68eabecd8180e9487d61d0c9ee2e3c09e689ce2345c36c2d66964db9",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "medic_f_fronthand_shoot.png",
+      "width": 1920,
+      "height": 320,
+      "background": "transparent",
+      "sha256": "421a98d397040255809f9cb8dc13c106abb51ba1bd7f5db34693888cbfa47fc7",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 4,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "medic_f_hit.png",
+      "width": 1920,
+      "height": 320,
+      "background": "transparent",
+      "sha256": "3b14b947ee8d3315fc40da050d9ff915fd22d5cd5d7cc4385f7f3170ebf867d3",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 4,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "medic_f_idle.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "eccd1568beba0a0cccbab25fa6b62a711a1c81c008e589866b7e3e0ab3d3453a",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "medic_f_idle_fidget.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "566a4944d66177ae31fddd3dabe2f2fda7b66ae100962ea33044ff971cb531c6",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "medic_f_rearhand_idle.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "7ff78a939ebf3fb1131c68b6334416cc4627c409086b375d0c0c9bd7b5a2661f",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "medic_f_rearhand_run.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "74b1511dde4a3648fe78c71087183610f690ae17897ae6f650a76d3f043f7eed",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "medic_f_rearhand_shoot.png",
+      "width": 1920,
+      "height": 320,
+      "background": "transparent",
+      "sha256": "efd525a9b833012c05e288c1d152429b019f8ea38f00556ccb905fa518ee201f",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 4,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "medic_f_revive.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "1cc0e74dea0c2da8510b57fb7ba1f03dee11db7d722c29583d316a58bbe3de0f",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 6,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "medic_f_run.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "d7958fa907c181e42f0ad9f6af425b3bbad9ed438ea962fc9c996a29ec5956ec",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "medic_f_shoot.png",
+      "width": 1920,
+      "height": 320,
+      "background": "transparent",
+      "sha256": "8d255b2439dfb3b819b20220cd897917ab09b0e33eb2cc1c80997953d23dc6f1",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 4,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "ui/face_angry.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "f4ecbf7aea95b6f0ff02a6151a11cac154dfe5c0bfda9a458dd520d80ddbe14f"
+    },
+    {
+      "path": "ui/face_grin.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "3a220563807f0817e9d7b6280c83e9ded65b13e6979f315a61c1bc354a391665"
+    },
+    {
+      "path": "ui/face_hit.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "af83762ab86c9feb0a9ea5e385979375d66fa8deb0d0c5773abf11b5102e2a83"
+    },
+    {
+      "path": "ui/face_proud.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "2077927dab85a58c667cf41be404c51d29922b9a6558dca6ed26af35b2e48e72"
+    },
+    {
+      "path": "ui/face_scared.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "55d24ac48b9e674e34a6c08b64b4c23f4d0a73a65c9372098516a8bdd10bfccc"
+    },
+    {
+      "path": "ui/face_tired.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "10dc6d09de1160c69c47629e90d19d66028f38e4515f06f3d4cad9e91c877ca0"
+    },
+    {
+      "path": "ui/hud_medic_f_0.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "da0ca0989d3fadebe06ca871e08b359ac31858048a4a43785cdf8f6bdd02aafb"
+    },
+    {
+      "path": "ui/hud_medic_f_1.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "62dc71590f88076c44b983024fecf657a79c75a74d3f1b5771e9871e17edafe0"
+    },
+    {
+      "path": "ui/hud_medic_f_2.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "b4df94e1d4e5cb63a73873c1bf63d8261f1c22a6f9e46a006765f0e96ad636b9"
+    },
+    {
+      "path": "ui/hud_medic_f_3.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "e540332dfa86709008b2e2f3e4b3bc88e0efc4ec79763a0637d81c000c82c8d5"
+    },
+    {
+      "path": "ui/lose_0.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "5de3cc524411b7c3068b8ad3f0b38c3ea5916fa1012ed8cb85d64670325c83d0"
+    },
+    {
+      "path": "ui/lose_1.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "733900268bfad4d61f19c1c995f52aed467e9199c87816bd045ba5043698e8f1"
+    },
+    {
+      "path": "ui/medic_f.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "b3c9c26155898dde499f27fc5a121c688547afb08bd2956e6ea51f8ba294159f"
+    },
+    {
+      "path": "ui/win_0.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "660e7bd2b0b0797b833f5784f9aa6ac968ec8d8017921f287155fe4035af14fb"
+    },
+    {
+      "path": "ui/win_1.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "bd45a22cd0478a4dc9e0d09c7421ba5641b170337d19d9e0c30602fe362d9934"
+    }
+  ]
+}

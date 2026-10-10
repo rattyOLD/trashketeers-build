@@ -36,15 +36,20 @@ func _shot(name: String) -> void:
 
 
 func _run() -> void:
+	if OS.get_environment("UI_NATIVE_A13") == "1":
+		Platform.is_native_app = true
+		Platform._touch = 1
+		Platform._a13 = 1
 	output = OS.get_environment("UI_V32_OUT")
 	if not output.is_empty():
 		DirAccess.make_dir_recursive_absolute(output)
 	SaveService.data = SaveService.DEFAULTS.duplicate(true)
 	SaveService._sanitize_arsenal()
 	SaveService.data["quality"] = 0
+	var render_scale := float(OS.get_environment("UI_RENDER_SCALE")) if OS.get_environment("UI_RENDER_SCALE") != "" else 1.0
 	for portrait in [false, true]:
 		Orient.portrait = portrait
-		get_window().content_scale_size = Orient.PORTRAIT_SIZE if portrait else Orient.LANDSCAPE_SIZE
+		get_window().content_scale_size = Vector2i(Vector2(Orient.PORTRAIT_SIZE if portrait else Orient.LANDSCAPE_SIZE) * render_scale)
 		get_window().size = get_window().content_scale_size
 		var suffix := "portrait" if portrait else "landscape"
 		await _settle()
@@ -69,6 +74,7 @@ func _run() -> void:
 		await _settle()
 		_check(hud._xp_title.text == "УР 12" and hud._xp_title.is_visible_in_tree(), suffix + " visible level")
 		_check(not hud._level_badge.visible, "portrait medal hidden")
+		_check(not hud._boss_bar.get_global_rect().intersects(hud._xp_row.get_global_rect()), suffix + " boss clear of XP")
 		_check(hud._xp_title.get_global_rect().end.x <= hud._xp_bar.get_global_rect().position.x, "level before XP bar")
 		var portrait_right := (hud._portrait.get_global_transform() * Vector2(HudWidgets.DamagePortrait.SIDE, 0)).x
 		_check(hud._xp_title.get_global_rect().position.x - 6.0 > portrait_right, suffix + " level clear of portrait")

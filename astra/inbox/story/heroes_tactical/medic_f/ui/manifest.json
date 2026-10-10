@@ -1,0 +1,200 @@
+{
+  "version": 32,
+  "images": {
+    "face_angry.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "f4ecbf7aea95b6f0ff02a6151a11cac154dfe5c0bfda9a458dd520d80ddbe14f"
+    },
+    "face_grin.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "3a220563807f0817e9d7b6280c83e9ded65b13e6979f315a61c1bc354a391665"
+    },
+    "face_hit.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "af83762ab86c9feb0a9ea5e385979375d66fa8deb0d0c5773abf11b5102e2a83"
+    },
+    "face_proud.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "2077927dab85a58c667cf41be404c51d29922b9a6558dca6ed26af35b2e48e72"
+    },
+    "face_scared.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "55d24ac48b9e674e34a6c08b64b4c23f4d0a73a65c9372098516a8bdd10bfccc"
+    },
+    "face_tired.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "10dc6d09de1160c69c47629e90d19d66028f38e4515f06f3d4cad9e91c877ca0"
+    },
+    "hud_medic_f_0.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "da0ca0989d3fadebe06ca871e08b359ac31858048a4a43785cdf8f6bdd02aafb"
+    },
+    "hud_medic_f_1.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "62dc71590f88076c44b983024fecf657a79c75a74d3f1b5771e9871e17edafe0"
+    },
+    "hud_medic_f_2.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "b4df94e1d4e5cb63a73873c1bf63d8261f1c22a6f9e46a006765f0e96ad636b9"
+    },
+    "hud_medic_f_3.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "e540332dfa86709008b2e2f3e4b3bc88e0efc4ec79763a0637d81c000c82c8d5"
+    },
+    "lose_0.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "5de3cc524411b7c3068b8ad3f0b38c3ea5916fa1012ed8cb85d64670325c83d0"
+    },
+    "lose_1.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "733900268bfad4d61f19c1c995f52aed467e9199c87816bd045ba5043698e8f1"
+    },
+    "medic_f.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "b3c9c26155898dde499f27fc5a121c688547afb08bd2956e6ea51f8ba294159f"
+    },
+    "win_0.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "660e7bd2b0b0797b833f5784f9aa6ac968ec8d8017921f287155fe4035af14fb"
+    },
+    "win_1.png": {
+      "size": [
+        512,
+        512
+      ],
+      "cellSize": [
+        512,
+        512
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "bd45a22cd0478a4dc9e0d09c7421ba5641b170337d19d9e0c30602fe362d9934"
+    }
+  }
+}

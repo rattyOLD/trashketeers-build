@@ -154,6 +154,7 @@ class DamagePortrait:
 		if tex == null:
 			return
 		_face.tex = tex
+		_face.scars_visible = false
 		_face.queue_redraw()
 		_react_left = time
 
@@ -172,6 +173,12 @@ class DamagePortrait:
 	func set_character(character: Dictionary) -> void:
 		var id := str(character.get("id", ""))
 		_hero_id = id
+		_face.scars.clear()
+		if id == "raccoon":
+			var scar_count := clampi(SaveService.get_stat("scars"), 0, 5)
+			var names := ["brow", "cracked_cap", "eye_patch", "nose_plaster", "torn_ear"]
+			for index in scar_count:
+				_face.scars.append(AvatarPicker.portrait_texture("res://assets/story/scars/scar_" + names[index] + ".png"))
 		_react_cache.clear()
 		_faces.clear()
 		for n in 4:
@@ -185,6 +192,7 @@ class DamagePortrait:
 	func _pick_face() -> void:
 		var stage := 0 if health > 0.7 else (1 if health > 0.45 else (2 if health > 0.2 else 3))
 		_stage = stage
+		_face.scars_visible = stage == 0
 		var tex: Texture2D = _faces[stage] if stage < _faces.size() else null
 		if tex == null:
 			for i in range(stage, -1, -1):
@@ -252,6 +260,8 @@ class Face:
 	extends Control
 
 	var tex: Texture2D
+	var scars: Array[Texture2D] = []
+	var scars_visible := false
 
 	func _init() -> void:
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -260,6 +270,10 @@ class Face:
 		if tex == null:
 			return
 		MenuWidgets.Avatar.draw_round(self, tex, size * 0.5, minf(size.x, size.y) * 0.5)
+		if scars_visible:
+			for scar in scars:
+				if scar != null:
+					MenuWidgets.Avatar.draw_round(self, scar, size * 0.5, minf(size.x, size.y) * 0.5)
 
 
 ## Верхний слой портрета: оправа, трещины, кровь и красная вуаль. Рисуется поверх лица.

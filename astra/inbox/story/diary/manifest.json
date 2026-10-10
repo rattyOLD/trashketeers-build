@@ -63,5 +63,86 @@
       "sourceSheet": "diary_6",
       "frame": 0
     }
-  ]
+  ],
+  "version": 32,
+  "images": {
+    "diary_01.png": {
+      "size": [
+        960,
+        540
+      ],
+      "cellSize": [
+        960,
+        540
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "a91c2dcc83b527e016a25aaeee0d30d535ec5e090652a26693521d7ac34b7f81"
+    },
+    "diary_02.png": {
+      "size": [
+        960,
+        540
+      ],
+      "cellSize": [
+        960,
+        540
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "284fc650be186b16f91c5a88862e1cc32489b1153e4ead8b49a8d755eaf98b41"
+    },
+    "diary_03.png": {
+      "size": [
+        960,
+        540
+      ],
+      "cellSize": [
+        960,
+        540
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "d75a54c97b8de4c1c0af189e8425c15b30942e44cd840bddb241218fee5d5edb"
+    },
+    "diary_04.png": {
+      "size": [
+        960,
+        540
+      ],
+      "cellSize": [
+        960,
+        540
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "533204ff29f3bf9f6a57f4c4e0a68f80eab32929ba5ed783a4233abe3f516681"
+    },
+    "diary_05.png": {
+      "size": [
+        960,
+        540
+      ],
+      "cellSize": [
+        960,
+        540
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "36abba229ce5945af6e2383c84b855b8133a0c653e1eb6b9bcd3decb002d8aa2"
+    },
+    "diary_06.png": {
+      "size": [
+        960,
+        540
+      ],
+      "cellSize": [
+        960,
+        540
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "149663fe25e50226889b9f34165716581c9d2c8ccb1b484ab5caf3c3548bf0d0"
+    }
+  }
 }

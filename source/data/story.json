@@ -57,7 +57,9 @@
     "agent": {
       "name": "БЮРО ЛИКВИДАЦИИ",
       "color": "#ff5a5a",
-      "glyph": "Б"
+      "glyph": "Б",
+      "portrait": "res://assets/story/portraits3/agent.png",
+      "portrait_alt": "res://assets/story/portraits3/agent_alt.png"
     },
     "chief": {
       "name": "ДИРЕКТОР",
@@ -90,17 +92,23 @@
     "deputy": {
       "name": "КАЗНАЧЕЙ",
       "color": "#ff9ab8",
-      "glyph": "К"
+      "glyph": "К",
+      "portrait": "res://assets/story/portraits3/deputy.png",
+      "portrait_alt": "res://assets/story/portraits3/deputy_alt.png"
     },
     "pigguard": {
       "name": "ОХРАННИК",
       "color": "#ffb3c6",
-      "glyph": "О"
+      "glyph": "О",
+      "portrait": "res://assets/story/portraits3/pigguard.png",
+      "portrait_alt": "res://assets/story/portraits3/pigguard_alt.png"
     },
     "clerk": {
       "name": "БУХГАЛТЕР ХРЮНДЕЛЬ",
       "color": "#b07cff",
-      "glyph": "Б"
+      "glyph": "Б",
+      "portrait": "res://assets/story/portraits3/clerk.png",
+      "portrait_alt": "res://assets/story/portraits3/clerk_alt.png"
     },
     "fuzzy": {
       "name": "ФРЭНК «ФАЗЗИ»",
@@ -120,7 +128,9 @@
       "name": "ШНЫРЬ",
       "color": "#b07cff",
       "glyph": "Ш",
-      "radio": true
+      "radio": true,
+      "portrait": "res://assets/story/portraits3/snyr.png",
+      "portrait_alt": "res://assets/story/portraits3/snyr_alt.png"
     }
   },
   "missions": [

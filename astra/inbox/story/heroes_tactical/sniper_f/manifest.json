@@ -1,0 +1,334 @@
+{
+  "hero": "sniper_f",
+  "brief": "v32 section 8 / v21",
+  "cellWidth": 480,
+  "cellHeight": 320,
+  "columns": 4,
+  "clips": {
+    "idle": 8,
+    "run": 8,
+    "shoot": 4,
+    "hit": 4,
+    "dash": 6,
+    "death": 8,
+    "revive": 6,
+    "idle_fidget": 8
+  },
+  "layerOrder": [
+    "fronthand",
+    "body_nohands",
+    "rearhand"
+  ],
+  "farForearmInFront": true,
+  "assets": [
+    {
+      "path": "sniper_f_body_nohands_idle.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "6545e9fa926fa14096e5e46fed8b34a95522bf7a8b4cab2dbebf6e5739fb3378",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "sniper_f_body_nohands_run.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "c3e15bde6aba93007894d5f8c04d8fac069730e58ba0872682c8acd23702f21a",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "sniper_f_body_nohands_shoot.png",
+      "width": 1920,
+      "height": 320,
+      "background": "transparent",
+      "sha256": "c0cd87797e83b50b9369a4ffa3a5b471f6ea3e26f4f6056492ef4afd7af281da",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 4,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "sniper_f_dash.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "83de38f9749c284d515d7f52d6ca6584df9e6e2511d76f4b9e611345b91cfac6",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 6,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "sniper_f_death.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "bc81e3befa298dc4802406a32095e1b4e186f3224b6bd3fe1b726ac4ad6a5021",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "sniper_f_fronthand_idle.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "21c2caf5c6c4360af14cd6b7e596983df3a4466f99ba8442484862779a639776",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "sniper_f_fronthand_run.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "28f75a72127589b7a084260ac716495aeef328165ec0c36517767d2108a66a68",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "sniper_f_fronthand_shoot.png",
+      "width": 1920,
+      "height": 320,
+      "background": "transparent",
+      "sha256": "9b707b3281654278bf3015aaaf7d910912162cc6e1ee4f2a11cd3a2407ba5ad3",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 4,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "sniper_f_hit.png",
+      "width": 1920,
+      "height": 320,
+      "background": "transparent",
+      "sha256": "6e9e5aab2c3979f205e591d2c85e191954dbb0a1d64afc33fd34b3dd59ed6987",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 4,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "sniper_f_idle.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "26190b539e38e292a8ba149dd93576a2ecde5456d13192ab380dd3d04fa74c21",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "sniper_f_idle_fidget.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "56f1eae1f0a24d30b5a83420b18fd77a660c012cde83056f39dc960b1e88f2a8",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "sniper_f_rearhand_idle.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "de9fe220472467b1ea8aa3e8d875a1aac6059942f61c004476f30a9f0c7b78d7",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "sniper_f_rearhand_run.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "624b849d391454dbd92f100695f388854bc8fc53dd021ab71d0c271b5bc5d78e",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "sniper_f_rearhand_shoot.png",
+      "width": 1920,
+      "height": 320,
+      "background": "transparent",
+      "sha256": "b3209ffa438807584eb5e92b6cae4bae61f206b1c53955ac48166178ff14e778",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 4,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "sniper_f_revive.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "cb4e2934565f03b1090f6d6b9e5b4fa58a0c0289fcf79de6bb533affefc95627",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 6,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "sniper_f_run.png",
+      "width": 1920,
+      "height": 640,
+      "background": "transparent",
+      "sha256": "e172f42597246e88769badbf0b9a349263bf8b8bf9e0ba48fdb599e39bfa8a5a",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 8,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "sniper_f_shoot.png",
+      "width": 1920,
+      "height": 320,
+      "background": "transparent",
+      "sha256": "edb6d576cd9e8751db01e617978ecf65660d04159008ae5c0671cf63b14be099",
+      "cellWidth": 480,
+      "cellHeight": 320,
+      "columns": 4,
+      "frames": 4,
+      "frameOrder": "left-to-right top-to-bottom"
+    },
+    {
+      "path": "ui/face_angry.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "bb7d99951298c8b44163d52cac3e9c9b888d8db046a3dc976258adeef9c2b4c8"
+    },
+    {
+      "path": "ui/face_grin.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "86bf7f600ba4ed74a18125654307b07ecd0fba41031f6b40fcddd88db898d2a6"
+    },
+    {
+      "path": "ui/face_hit.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "9175708a195b3b809e28a3845a58b7689f61b9963a9179323df08f3f07687c36"
+    },
+    {
+      "path": "ui/face_proud.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "696e670cd3d1b6e38e75004a008f17373f014cbbb881b0d6c5cb98bb4e9b6a02"
+    },
+    {
+      "path": "ui/face_scared.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "289fb7fe8e1ec64d15d00a38c56436c13962f426da72338bbbe92b3604526838"
+    },
+    {
+      "path": "ui/face_tired.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "558385a8721e126938705550a518a5eb2691d05933e421e429af7fc041255d23"
+    },
+    {
+      "path": "ui/hud_sniper_f_0.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "3c0a497225f890e6e4af601d4b68d735496bd7db1d242fab7abe8e0f7c3a71a1"
+    },
+    {
+      "path": "ui/hud_sniper_f_1.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "d143102939b9704a6415a8340b3e554f91bbfa809a16527e5f638a664f589997"
+    },
+    {
+      "path": "ui/hud_sniper_f_2.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "0d4b3f800e0d6ec2f9b10055ad7d210cd034dab96543897e7c999afe961ebeee"
+    },
+    {
+      "path": "ui/hud_sniper_f_3.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "3fc6dac3e498c293f4c234a1fb248de50ec28bfbac6dcff17556fc16e75c9948"
+    },
+    {
+      "path": "ui/lose_0.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "a0b3a6c7eaa74c4e1b4ffe730f100c1c9d03819944207f0cd35055ab35ff74ae"
+    },
+    {
+      "path": "ui/lose_1.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "a5a891b6b46fa55e7bed17e73bb4f3ef93f0704a729c8858d074f15b34237d07"
+    },
+    {
+      "path": "ui/sniper_f.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "d8f534402070bab93fa228b39e242251e60919ccb97737275b5dab6215cbd8a0"
+    },
+    {
+      "path": "ui/win_0.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "439e4e2dc13a60a53932264e326ea41f06ab930280e44bb142bc3c771c7fe851"
+    },
+    {
+      "path": "ui/win_1.png",
+      "width": 512,
+      "height": 512,
+      "background": "transparent",
+      "sha256": "3c716b8a9665fe8839bc33019c2a125aef9e8207f54aae58c0719a904c68c487"
+    }
+  ]
+}

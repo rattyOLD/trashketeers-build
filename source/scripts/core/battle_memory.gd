@@ -15,6 +15,7 @@ static func release() -> void:
 	WeaponVfx._sheets.clear()
 	WeaponVfx._atlas.clear()
 	ContentDB._texture_cache.clear()
+	Cosmetics._skin_tex.clear()
 	for id in ContentDB.get_enemy_ids():
 		var data := ContentDB.get_enemy(id)
 		if data != null:

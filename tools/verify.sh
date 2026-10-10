@@ -65,6 +65,10 @@ XDG_DATA_HOME="$LOG/ui-v32-user" xvfb-run -a -s "-screen 0 1280x1400x24" "$GODOT
 if ! grep -q 'UI_V32 failures=0' "$LOG/ui-v32.log" || grep -q 'SCRIPT ERROR' "$LOG/ui-v32.log"; then
   fail=1
 fi
+UI_NATIVE_A13=1 UI_RENDER_SCALE=0.75 XDG_DATA_HOME="$LOG/ui-a13-user" xvfb-run -a -s "-screen 0 1280x1400x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/ui_v32_test.tscn > "$LOG/ui-a13.log" 2>&1
+if ! grep -q 'UI_V32 failures=0' "$LOG/ui-a13.log" || grep -q 'SCRIPT ERROR' "$LOG/ui-a13.log"; then
+  fail=1
+fi
 XDG_DATA_HOME="$LOG/hand-grip-user" "$GODOT" --headless --path "$P" res://test/hand_grip_test.tscn > "$LOG/hand-grip.log" 2>&1
 if ! grep -q 'HAND_GRIP failures=0' "$LOG/hand-grip.log" || grep -q 'SCRIPT ERROR' "$LOG/hand-grip.log"; then
   fail=1
@@ -74,6 +78,13 @@ for m in survival story raid mod:blast; do
     --resolution 1280x720 --path "$P" res://test/mode_audit.tscn > "$LOG/$m.log" 2>&1
   n=$(grep -c "SCRIPT ERROR" "$LOG/$m.log"); done_ok=$(grep -c MODE_AUDIT_DONE "$LOG/$m.log")
   echo "$m: errors=$n finished=$done_ok"
+  [ "$n" != "0" ] || [ "$done_ok" != "1" ] && fail=1
+done
+for hero in sniper_f medic_f; do
+  MODE=survival HERO="$hero" NATIVE_A13=1 SOAK=1 WAVE=30 SCALE=1 DURATION=30 timeout 300 xvfb-run -a -s "-screen 0 1280x1400x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 \
+    --resolution 1280x720 --path "$P" res://test/mode_audit.tscn > "$LOG/a13-$hero.log" 2>&1
+  n=$(grep -c "SCRIPT ERROR" "$LOG/a13-$hero.log"); done_ok=$(grep -c MODE_AUDIT_DONE "$LOG/a13-$hero.log")
+  echo "a13-$hero: errors=$n finished=$done_ok"
   [ "$n" != "0" ] || [ "$done_ok" != "1" ] && fail=1
 done
 if [ "$fail" = 0 ]; then

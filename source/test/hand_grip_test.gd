@@ -2,7 +2,7 @@ extends Node2D
 ## Every tactical hero holds short/long guns at all aim angles and animation frames.
 var failures := 0
 var actors: Array[RaccoonVisual] = []
-const IDS := ["raccoon", "red_panda", "snow", "night", "neon_hopper", "fluffy_chemist", "pigeon_mafioso"]
+const IDS := ["raccoon", "red_panda", "snow", "night", "neon_hopper", "fluffy_chemist", "pigeon_mafioso", "sniper_f", "medic_f"]
 
 
 func _ready() -> void:

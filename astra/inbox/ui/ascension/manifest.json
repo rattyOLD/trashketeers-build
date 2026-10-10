@@ -1,0 +1,174 @@
+{
+  "version": 32,
+  "images": {
+    "elite_armored.png": {
+      "size": [
+        128,
+        64
+      ],
+      "cellSize": [
+        128,
+        64
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "d8222896548d127718a479fc70be4b7adfa6a185284b8d36b6d8c110fe5589e5"
+    },
+    "elite_explosive.png": {
+      "size": [
+        128,
+        64
+      ],
+      "cellSize": [
+        128,
+        64
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "b9dd0b7c8ae390e5581516eb13b95a0daae836769254c23971f12dd5a08f306c"
+    },
+    "elite_fast.png": {
+      "size": [
+        128,
+        64
+      ],
+      "cellSize": [
+        128,
+        64
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "929cc006230a287ecd9f18c80d0b74d7bf8394d74fcbdb9c0fd668bba0b57b37"
+    },
+    "tier_1.png": {
+      "size": [
+        128,
+        128
+      ],
+      "cellSize": [
+        128,
+        128
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "3e16456d0d66f00e79e8a6bcb311deb84a94cf22770597a69d170ffe10c0897a"
+    },
+    "tier_10.png": {
+      "size": [
+        128,
+        128
+      ],
+      "cellSize": [
+        128,
+        128
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "c756299eaa277bc6af640a8c3b5a0a7fdce90364672755ef7f8ca86469e7d066"
+    },
+    "tier_2.png": {
+      "size": [
+        128,
+        128
+      ],
+      "cellSize": [
+        128,
+        128
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "dbcaf95b62091ce334803f5863c6b07f5ce47e97c1329f949d546750902b7c39"
+    },
+    "tier_3.png": {
+      "size": [
+        128,
+        128
+      ],
+      "cellSize": [
+        128,
+        128
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "5dd0a0b252a3ee94c0f06eb7c059bdcc091462405a3675903d305c8a7a4c5b89"
+    },
+    "tier_4.png": {
+      "size": [
+        128,
+        128
+      ],
+      "cellSize": [
+        128,
+        128
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "a1cb2f3268d44faa7b90b5351b2faea1059b807041364b03641c14a872d89dc9"
+    },
+    "tier_5.png": {
+      "size": [
+        128,
+        128
+      ],
+      "cellSize": [
+        128,
+        128
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "ec99dfbe52654450eee20c92bae2c89e0f0d18485fa95c48374eae79a78bac59"
+    },
+    "tier_6.png": {
+      "size": [
+        128,
+        128
+      ],
+      "cellSize": [
+        128,
+        128
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "29c3d70e0d39f4ce7414c67b87219ff079cacaa8f0b648f4b10a7a4c10749e21"
+    },
+    "tier_7.png": {
+      "size": [
+        128,
+        128
+      ],
+      "cellSize": [
+        128,
+        128
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "991bd4c94cf0c93e7a0db8b79d28e95c3361b3b4337ade1bdfb13c09135ef14e"
+    },
+    "tier_8.png": {
+      "size": [
+        128,
+        128
+      ],
+      "cellSize": [
+        128,
+        128
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "ad0ce8fd4a7a87a2685250b807187877756b477c612a07b3454778a740c580a9"
+    },
+    "tier_9.png": {
+      "size": [
+        128,
+        128
+      ],
+      "cellSize": [
+        128,
+        128
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "0bb8e8205fc794ce6ffb0a1e94b3e5fb2b3132621f4c6a7f86829792a5954a5d"
+    }
+  }
+}

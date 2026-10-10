@@ -274,5 +274,190 @@
     "columns": 6,
     "frames": 6,
     "fps": 8
+  },
+  "version": 32,
+  "images": {
+    "altar.png": {
+      "size": [
+        260,
+        260
+      ],
+      "cellSize": [
+        260,
+        260
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "de2f6c531fa5bf8b33ca6794e030121a9a8b118aeadfade2b0932986845471b1"
+    },
+    "altar_active.png": {
+      "size": [
+        1560,
+        260
+      ],
+      "cellSize": [
+        1560,
+        260
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "6e1aa3db08185eb3ae786ed0a1cad29e8ec63dc039168e98454e2195f5d74814"
+    },
+    "charge_tower.png": {
+      "size": [
+        200,
+        360
+      ],
+      "cellSize": [
+        200,
+        360
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "a21260c29c477405d4add3f4ba4415de1af1ee6c7f181579cc847abe2885eca7"
+    },
+    "charge_tower_charge.png": {
+      "size": [
+        1200,
+        360
+      ],
+      "cellSize": [
+        1200,
+        360
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "85b767934816f42a4c3b6ec4e159a4c6ec0fe29d18ddfb9281bed73ae3655e25"
+    },
+    "charge_tower_off.png": {
+      "size": [
+        200,
+        360
+      ],
+      "cellSize": [
+        200,
+        360
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "e1c66d9744e3f772c96714f94f844561a348bdd7bb539192b45b3bf4c682014a"
+    },
+    "firmware_icons.png": {
+      "size": [
+        1024,
+        128
+      ],
+      "cellSize": [
+        128,
+        128
+      ],
+      "frames": 8,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "93cd9d0bf7b891f2caa94a1beb11eec2127e7861dfc55581cce641b83b5b256e"
+    },
+    "greed_register.png": {
+      "size": [
+        160,
+        180
+      ],
+      "cellSize": [
+        160,
+        180
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "3d7ffebb0c8d53c1645a922a82b89e8cf26f737a4fc0a8b5fd48aff4f7caa58c"
+    },
+    "greed_ring.png": {
+      "size": [
+        640,
+        180
+      ],
+      "cellSize": [
+        640,
+        180
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "97d895d879a9dcf59834211b9ac65cd8a61e2f5f9be58073b1680a410cb2cef2"
+    },
+    "junk_safe.png": {
+      "size": [
+        140,
+        150
+      ],
+      "cellSize": [
+        140,
+        150
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "b34a740b7e744bb4d3cdcc1968ee9b061c04cb71e4539fe0706e61b291024b64"
+    },
+    "junk_safe_open.png": {
+      "size": [
+        180,
+        150
+      ],
+      "cellSize": [
+        180,
+        150
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "b38c52ab2e41eadf25510d1abedca30d5366725b9b7e26c79a27f7f7ba1ed006"
+    },
+    "ring.png": {
+      "size": [
+        420,
+        300
+      ],
+      "cellSize": [
+        420,
+        300
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "62b5df98123048cf30048d008c05ff5c25021f9129fa7197c6fe8b87da59ac4c"
+    },
+    "siren.png": {
+      "size": [
+        128,
+        128
+      ],
+      "cellSize": [
+        128,
+        128
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "c9f757f092ad486061349e094bf3a0026a925ae4f0b76f116a923e847d9e9e0a"
+    },
+    "vacuum.png": {
+      "size": [
+        200,
+        200
+      ],
+      "cellSize": [
+        200,
+        200
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "a70c8242843b92e35bb3c2f938ac1476b8b4626d0e582feea8dfcd2cdaf712ed"
+    },
+    "vacuum_on.png": {
+      "size": [
+        800,
+        200
+      ],
+      "cellSize": [
+        800,
+        200
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "cadeabd47853e0a619c108b06ec78cdbc53b78dbebd377cbbfe29d09e96c6096"
+    }
   }
 }

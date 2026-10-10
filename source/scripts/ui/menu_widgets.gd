@@ -259,6 +259,8 @@ class Avatar:
 
 	## Картинка строго внутри круга: полигон с UV вместо квадрата, чтобы углы не вылезали за рамку.
 	static func draw_round(item: CanvasItem, tex: Texture2D, center: Vector2, radius: float) -> void:
+		if tex == null or radius <= 0.0:
+			return
 		var points := PackedVector2Array()
 		var uvs := PackedVector2Array()
 		for i in 40:

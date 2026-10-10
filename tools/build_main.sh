@@ -1,10 +1,24 @@
-#!/bin/bash
-S=/tmp/claude-0/-home-claude/0fd7481c-189d-5931-953e-db25d6f3cd99/scratchpad
-cd $S && bash sync.sh
-cd $S/t5 && timeout 300 ../godot --headless --path . --import > ../imp_t5.log 2>&1
-timeout 120 ../godot --headless --path . res://test/check_all.tscn > ../check_t5.log 2>&1
-timeout 300 ../godot --headless --path . res://test/smoke.tscn > ../smoke_t5.log 2>&1
-rm -rf build/web && mkdir -p build/web
-timeout 500 ../godot --headless --path . --export-release "Web" build/web/index.html > ../exp_t5.log 2>&1
-cd $S && python3 make_site.py $S/t5/build/web > make_site.log 2>&1
-echo DONE > build_main.done
+#!/usr/bin/env bash
+# Build a tested release locally; publishing remains an explicit git push.
+set -euo pipefail
+ROOT=$(cd "$(dirname "$0")/.." && pwd)
+GODOT=${GODOT:-godot}
+LOG=${LOG:-/tmp/trashsquad-release}
+PROJECT=$(mktemp -d /tmp/trashsquad-project.XXXXXX)
+trap 'rm -rf "$PROJECT"' EXIT
+mkdir -p "$LOG" "$ROOT/source/build/web"
+export XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-$LOG/editor-config}
+python3 - "$ROOT/source" "$PROJECT" <<'PY'
+import shutil, sys
+shutil.copytree(sys.argv[1], sys.argv[2], dirs_exist_ok=True, ignore=shutil.ignore_patterns('.godot', 'build'))
+PY
+cd "$ROOT"
+python3 tools/validate_v32_art.py
+XDG_DATA_HOME="$LOG/user" GODOT="$GODOT" LOG="$LOG" bash tools/verify.sh "$PROJECT"
+"$GODOT" --headless --path "$PROJECT" --export-release Web "$ROOT/source/build/web/index.html" > "$LOG/export.log" 2>&1
+if rg -q 'SCRIPT ERROR|Export failed' "$LOG/export.log"; then
+    cat "$LOG/export.log"
+    exit 1
+fi
+python3 tools/make_site.py "$ROOT/source/build/web" > "$LOG/site.log"
+echo "Release build ready: $ROOT/tools/site"

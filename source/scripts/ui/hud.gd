@@ -732,9 +732,11 @@ func _fit_band() -> void:
 
 ## Полоса босса — на месте рации (рация на время боя с боссом скрыта).
 func _dock_boss_bar() -> void:
-	if _band == null or _barks == null or not _barks.is_inside_tree():
+	if _barks == null or not _barks.is_inside_tree():
 		return
-	var inverse := _band.get_global_transform().affine_inverse()
+	if _band == null and _root.size.x >= 1100.0:
+		return
+	var inverse := (_band.get_global_transform() if _band != null else _root.get_global_transform()).affine_inverse()
 	var top_left := inverse * _barks.get_global_rect().position
 	_boss_bar.compact = true
 	_boss_bar.custom_minimum_size = Vector2.ZERO
@@ -822,7 +824,8 @@ func show_boss(boss_name: String, hp: float, max_hp: float, winged: bool = false
 		_barks.say("boss", true)
 	update_boss(hp, max_hp)
 	_boss_bar.visible = true
-	if _band != null and _barks != null:
+	_dock_boss_bar.call_deferred()
+	if (_band != null or _root.size.x < 1100.0) and _barks != null:
 		_barks.set_muted(true)
 	UiStyle.pop_in(_boss_bar, 0.5)
 
@@ -1269,7 +1272,7 @@ func _build_top_bar(currency_icon: Texture2D) -> Control:
 	_xp_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	bars.add_child(_xp_row)
 	var xp_gap := Control.new()
-	xp_gap.custom_minimum_size = Vector2(24 if Orient.portrait else 20, 0)
+	xp_gap.custom_minimum_size = Vector2(32 if Orient.portrait else 20, 0)
 	xp_gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_xp_row.add_child(xp_gap)
 	# Уровень — крупно перед полосой опыта (медаль у портрета перекрывали плашки).

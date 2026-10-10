@@ -1,0 +1,44 @@
+{
+  "version": 32,
+  "images": {
+    "bit.png": {
+      "size": [
+        32,
+        32
+      ],
+      "cellSize": [
+        32,
+        32
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "cb7d612e7011fbc1c0122ba0634c1882454225e9d805d7e7ae72838bb47b5044"
+    },
+    "burst.png": {
+      "size": [
+        768,
+        128
+      ],
+      "cellSize": [
+        128,
+        128
+      ],
+      "frames": 6,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "70795a9be8194050b900d76d6bf1c3b530c023b7db3c16babbef3e7547d4b91c"
+    },
+    "trail.png": {
+      "size": [
+        256,
+        64
+      ],
+      "cellSize": [
+        256,
+        64
+      ],
+      "frames": 1,
+      "order": "left-to-right, top-to-bottom",
+      "sha256": "4b26a3433d16a16745638024604283c31566b668736ef436d1a992e1434dbeb7"
+    }
+  }
+}

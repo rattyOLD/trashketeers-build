@@ -15,7 +15,7 @@ from astra_key import key
 
 SRC = "astra/inbox/story/heroes_tactical"
 DST = "source/assets/heroes/tactical"
-HEROES = ("raccoon", "red_panda", "snow", "night", "neon_hopper", "fluffy_chemist", "pigeon_mafioso")
+HEROES = ("raccoon", "red_panda", "snow", "night", "neon_hopper", "fluffy_chemist", "pigeon_mafioso", "sniper_f", "medic_f")
 # Аргументы — только эти герои (python3 tools/hero_tactical.py night), иначе все.
 HANDS_ONLY = False
 COUNTS = {"idle": 8, "run": 8, "shoot": 4, "hit": 4, "dash": 6, "death": 8, "revive": 6}
@@ -191,6 +191,8 @@ UI = {
     "neon_hopper": {"card": ("ui/neon_hopper.png", "neon_hopper.png")},
     "fluffy_chemist": {"card": ("ui/fluffy_chemist.png", "fluffy_chemist.png")},
     "pigeon_mafioso": {"card": ("ui/pigeon_mafioso.png", "pigeon_mafioso.png")},
+    "sniper_f": {"card": ("ui/sniper_f.png", "sniper_f.png")},
+    "medic_f": {"card": ("ui/medic_f.png", "medic_f.png")},
 }
 PORTRAITS = "source/assets/ui/portraits"
 

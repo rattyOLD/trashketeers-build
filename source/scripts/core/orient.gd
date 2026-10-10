@@ -34,5 +34,6 @@ static func refresh(window: Window) -> bool:
 	var want := wants_portrait(size.x, size.y)
 	var changed := want != portrait
 	portrait = want
-	window.content_scale_size = PORTRAIT_SIZE if want else LANDSCAPE_SIZE
+	var base := PORTRAIT_SIZE if want else LANDSCAPE_SIZE
+	window.content_scale_size = Vector2i(Vector2(base) * Platform.native_render_scale) if Platform.is_native_app else base
 	return changed

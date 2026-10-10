@@ -43,9 +43,40 @@ func _ready() -> void:
 	_check(empty.direction_at(Vector2i.ZERO) == Vector2.ZERO, "empty map")
 	_check_atlas()
 	_check_rig_release()
+	_check_device_profile()
 	_benchmark()
 	print("ANDROID_PERF_REGRESSION failures=", failures)
 	get_tree().quit(0 if failures == 0 else 1)
+
+
+func _check_device_profile() -> void:
+	for model in ["SM-A135F", "SM-A135F/DS", "SM-A137F", "SM-A136U", "Galaxy A13"]:
+		_check(DevicePerformance.is_galaxy_a13(model), "A13 model " + model)
+	for model in ["SM-A145F", "SM-A315F", "SM-S918B", "", "Galaxy A13x"]:
+		_check(not DevicePerformance.is_galaxy_a13(model), "other model " + model)
+	var old_profile := Platform._a13
+	var old_native := Platform.is_native_app
+	var old_data: Dictionary = SaveService.data.duplicate(true)
+	var old_size := get_window().content_scale_size
+	Platform._a13 = 1
+	Platform.is_native_app = true
+	SaveService.data["fps_cap"] = 0
+	SaveService.data["eco_fps"] = false
+	_check(SaveService.get_fps_cap() == 30, "A13 default frame cap")
+	SaveService.data["fps_cap"] = 60
+	_check(SaveService.get_fps_cap() == 60, "explicit cap preserved")
+	Platform.set_render_cap(1.0)
+	_check(get_window().content_scale_size == Vector2i(960, 540), "native cap changes render size")
+	_check(is_equal_approx(BattleBase.camera_zoom() / Platform.native_render_scale, BattleBase.LANDSCAPE_ZOOM), "native render cap preserves world view")
+	Orient.refresh(get_window())
+	_check(get_window().content_scale_size == Vector2i(960, 540), "orientation refresh retains render cap")
+	Platform.set_render_cap(1.5)
+	_check(get_window().content_scale_size == Orient.LANDSCAPE_SIZE, "render size restored")
+	_check(DevicePerformance.adapt_threshold(30, false) < 30.0 and DevicePerformance.adapt_threshold(30, true) < 30.0, "stable 30 FPS does not degrade")
+	Platform._a13 = old_profile
+	Platform.is_native_app = old_native
+	SaveService.data = old_data
+	get_window().content_scale_size = old_size
 
 
 func _check_atlas() -> void:

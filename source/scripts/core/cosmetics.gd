@@ -37,6 +37,10 @@ const CATALOG := {
 	"dash:void": {"name": "Рывок «Пустота»", "rarity": "epic", "color": "#7a3dff", "bits": "#e0d0ff"},
 	"dash:gold": {"name": "Золотой рывок", "rarity": "legendary", "color": "#ffd23f", "bits": "#fff6c0"},
 	"dash:cat": {"name": "Кошачий след", "rarity": "legendary", "color": "#ff8fc8", "bits": "#ffffff"},
+	"dash:beer": {"name": "Рывок «Пивная пена»", "rarity": "rare", "color": "#ffd23f", "bits": "#fff6dd"},
+	"dash:confetti": {"name": "Рывок «Конфетти»", "rarity": "rare", "color": "#ff8fc8", "bits": "#75dfef"},
+	"dash:dust": {"name": "Рывок «Пыль свалки»", "rarity": "common", "color": "#bf976d", "bits": "#ead3ad"},
+	"dash:ice": {"name": "Рывок «Лёд»", "rarity": "rare", "color": "#70d8ff", "bits": "#e4faff"},
 	"shot:plasma": {"name": "Трассер «Плазма»", "rarity": "common", "color": "#6adcff"},
 	"shot:candy": {"name": "Трассер «Карамель»", "rarity": "rare", "color": "#ff9ad5"},
 	"shot:venom": {"name": "Трассер «Яд»", "rarity": "rare", "color": "#9dff4a"},
@@ -207,6 +211,18 @@ static func roll_ad_skin() -> String:
 
 ## Иконка Астры для витрины и меню (бриф v28: assets/ui/cosmetics/<вид>_<id>.png); null — рисуем кодом.
 static func icon_of(key: String) -> Texture2D:
+	var reward_file := ""
+	match kind_of(key):
+		"boost":
+			reward_file = "boost_coins" if key == "boost:coins" else "boost_pass"
+		"title":
+			reward_file = "title_plate"
+		"color":
+			reward_file = "nick_color"
+	if not reward_file.is_empty():
+		var reward_path := "res://assets/ui/rewards/%s.png" % reward_file
+		if ResourceLoader.exists(reward_path):
+			return load(reward_path) as Texture2D
 	var path := "res://assets/ui/cosmetics/%s_%s.png" % [kind_of(key), key.get_slice(":", 1)]
 	return load(path) as Texture2D if ResourceLoader.exists(path) else null
 
