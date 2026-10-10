@@ -30,12 +30,13 @@ var _smoke: PackedVector3Array = PackedVector3Array()
 const SWAY_IDS := ["spruce", "bush", "bush_low", "planter"]
 const SWAY_SHADER := """
 shader_type canvas_item;
+global uniform float world_time;
 uniform float amount = 5.0;
 void vertex() {
 	vec2 world = (MODEL_MATRIX * vec4(VERTEX, 0.0, 1.0)).xy;
 	float top = 1.0 - UV.y;
-	float gust = 0.7 + 0.3 * sin(TIME * 0.37 + world.y * 0.002);
-	VERTEX.x += sin(TIME * 1.7 + world.x * 0.013 + world.y * 0.007) * amount * top * top * gust;
+	float gust = 0.7 + 0.3 * sin(world_time * 0.37 + world.y * 0.002);
+	VERTEX.x += sin(world_time * 1.7 + world.x * 0.013 + world.y * 0.007) * amount * top * top * gust;
 }
 """
 static var _sway: ShaderMaterial

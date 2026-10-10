@@ -44,7 +44,11 @@ var _clock := 0.0
 
 
 func _init() -> void:
-	process_mode = Node.PROCESS_MODE_ALWAYS
+	process_mode = Node.PROCESS_MODE_PAUSABLE
+
+
+func _process(delta: float) -> void:
+	_clock += delta
 
 
 func build(parent: Node, layer: int) -> void:
@@ -115,7 +119,6 @@ func _sync() -> void:
 	_ambient.color = ambient
 	_lights.view = main.canvas_transform.affine_inverse() * main.get_visible_rect()
 	# Пятна лежат в мире (ползут медленно), покрывают видимую область с запасом.
-	_clock += get_process_delta_time()
 	var tile := float(TEXTURE_SIZE) * MOTTLE_SCALE
 	var area := _lights.view.grow(tile)
 	var origin := (area.position / tile).floor() * tile
@@ -174,19 +177,17 @@ class LightDraw:
 	extends Node2D
 	var owner_map: LightMap
 	var view := Rect2()
-	var _pos := PackedVector2Array()
-	var _color := PackedColorArray()
-	var _radius := PackedFloat32Array()
+	var _buffer := EnvLights.LightBuffer.new()
 
 	func _draw() -> void:
 		var tex := LightMap.light_texture()
-		EnvLights.collect(view, _pos, _color, _radius)
+		EnvLights.collect(view, _buffer)
 		if owner_map.player != null and is_instance_valid(owner_map.player):
-			_pos.append(owner_map.player.global_position)
-			_color.append(LightMap.HERO_COLOR * LightMap.HERO_STRENGTH)
-			_radius.append(LightMap.HERO_RADIUS)
-		for i in _pos.size():
-			var r := _radius[i]
-			var c := _color[i] * LightMap.LIGHT_GAIN
+			_buffer.positions.append(owner_map.player.global_position)
+			_buffer.colors.append(LightMap.HERO_COLOR * LightMap.HERO_STRENGTH)
+			_buffer.radii.append(LightMap.HERO_RADIUS)
+		for i in _buffer.positions.size():
+			var r := _buffer.radii[i]
+			var c := _buffer.colors[i] * LightMap.LIGHT_GAIN
 			c.a = 1.0
-			draw_texture_rect(tex, Rect2(_pos[i] - Vector2(r, r), Vector2(r, r) * 2.0), false, c)
+			draw_texture_rect(tex, Rect2(_buffer.positions[i] - Vector2(r, r), Vector2(r, r) * 2.0), false, c)

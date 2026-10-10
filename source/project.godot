@@ -24,6 +24,7 @@ SoundManager="*res://scripts/core/sound_manager.gd"
 ContentDB="*res://scripts/content/content_db.gd"
 BulletPool="*res://scripts/combat/bullet_pool.gd"
 AppActivity="*res://scripts/core/app_activity.gd"
+WorldClock="*res://scripts/core/world_clock.gd"
 
 [debug]
 
@@ -61,6 +62,13 @@ pointing/emulate_touch_from_mouse=true
 [physics]
 
 common/physics_interpolation=true
+
+[shader_globals]
+
+world_time={
+"type": "float",
+"value": 0.0
+}
 
 [rendering]
 

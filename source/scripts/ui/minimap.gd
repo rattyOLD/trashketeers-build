@@ -39,6 +39,11 @@ var _inner: StyleBoxFlat
 var _batch := PolyBatch.new()
 
 
+func _init() -> void:
+	# HUD работает на паузе, но точки карты относятся к остановленному миру.
+	process_mode = Node.PROCESS_MODE_PAUSABLE
+
+
 func setup(level: LevelSpawner, player: Player, enemies: EnemyManager, director: WaveDirector) -> void:
 	_level = level
 	_player = player

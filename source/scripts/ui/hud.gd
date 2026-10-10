@@ -676,7 +676,8 @@ func _apply_hud_items() -> void:
 		node.set_meta("ui_scale", factor)
 		node.set_meta("ui_alpha", alpha)
 		node.scale = Vector2.ONE * factor
-		node.modulate.a = alpha
+		# Перерасчёт каждые 0.25 с не должен показывать мини-карту под окном.
+		node.modulate.a = 0.0 if id == "minimap" and get_tree().paused else alpha
 
 
 ## Правка интерфейса прямо в бою: пауза, фон прозрачный, любой элемент двигается, меняет размер и прозрачность.
@@ -1047,7 +1048,7 @@ func is_pause_open() -> bool:
 func _process(delta: float) -> void:
 	# Мини-карта прячется под любым окном (пауза, прокачка, сундук): иначе вылезает поверх интерфейса.
 	if _minimap_slot != null:
-		_minimap_slot.modulate.a = 0.0 if get_tree().paused else 1.0
+		_minimap_slot.modulate.a = 0.0 if get_tree().paused else float(_minimap_slot.get_meta("ui_alpha", 1.0))
 	if _band != null and _rail_combo.visible:
 		_rail_combo.modulate.a = 0.0 if (_chapter_card.visible or _toast.visible or _banner.visible or (_wave_sub.visible and _wave_sub.modulate.a > 0.05)) else 1.0
 	_items_clock += delta

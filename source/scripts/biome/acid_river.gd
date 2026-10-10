@@ -11,6 +11,7 @@ const BRIDGES := ["res://assets/terrain/bridge_scrap.png", "res://assets/terrain
 const BANK_WIDTH := 30.0
 const SHADER := """
 shader_type canvas_item;
+global uniform float world_time;
 uniform float flow = 0.06;
 uniform float water = 0.0;
 varying vec4 tint;
@@ -18,9 +19,9 @@ void vertex() {
 	tint = COLOR;
 }
 void fragment() {
-	vec2 uv = UV + vec2(TIME * flow, sin(TIME * 0.7 + UV.x * 3.0) * 0.015);
+	vec2 uv = UV + vec2(world_time * flow, sin(world_time * 0.7 + UV.x * 3.0) * 0.015);
 	vec4 c = texture(TEXTURE, uv);
-	float glow = 0.85 + 0.15 * sin(TIME * 2.0 + UV.x * 6.0);
+	float glow = 0.85 + 0.15 * sin(world_time * 2.0 + UV.x * 6.0);
 	vec3 rgb = c.rgb;
 	if (water > 0.5) {
 		// Та же текстура, перекрашенная по яркости в бирюзу бассейна: блики светлые, глубина синяя.
@@ -28,7 +29,7 @@ void fragment() {
 		rgb = mix(vec3(0.05, 0.32, 0.62), vec3(0.75, 0.97, 1.0), smoothstep(0.35, 0.95, l));
 	}
 	// Блики: редкие бегущие светлые искры по поверхности — жидкость, а не ковёр.
-	float spec = pow(max(0.0, sin(UV.x * 9.0 + TIME * 1.7) * sin(UV.y * 6.0 - TIME * 1.1 + UV.x * 2.0)), 14.0);
+	float spec = pow(max(0.0, sin(UV.x * 9.0 + world_time * 1.7) * sin(UV.y * 6.0 - world_time * 1.1 + UV.x * 2.0)), 14.0);
 	rgb += vec3(spec * (water > 0.5 ? 0.55 : 0.35));
 	// COLOR во fragment уже умножен на текстуру — берём чистый цвет вершины.
 	COLOR = vec4(rgb * glow, c.a) * tint;

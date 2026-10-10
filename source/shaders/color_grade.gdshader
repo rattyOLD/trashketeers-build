@@ -1,4 +1,5 @@
 shader_type canvas_item;
+global uniform float world_time;
 // Постобработка мира (под HUD и погодой): мягкий «фильмовый» тон, контраст и насыщенность,
 // сплит-тонирование (тени — в фиолет, света — в тёплый неон), лёгкое зерно и хроматическая
 // аберрация по краям экрана, которая вспыхивает при получении урона (aberration → 1).
@@ -31,6 +32,6 @@ void fragment() {
 	float lum = clamp(luma, 0.0, 1.0);
 	col += shadow_tint * (1.0 - smoothstep(0.0, 0.45, lum)) * 0.6;
 	col += highlight_tint * smoothstep(0.55, 1.0, lum);
-	col += (hash(uv * 800.0 + fract(TIME * 7.0) * 13.0) - 0.5) * grain;
+	col += (hash(uv * 800.0 + fract(world_time * 7.0) * 13.0) - 0.5) * grain;
 	COLOR = vec4(clamp(col, 0.0, 1.0), 1.0);
 }

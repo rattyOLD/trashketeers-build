@@ -140,10 +140,18 @@ static func sample(at: Vector2) -> Color:
 
 
 ## Источники в прямоугольнике view (с мерцанием и вспышками) — для карты освещения (LightMap).
-static func collect(view: Rect2, out_pos: PackedVector2Array, out_color: PackedColorArray, out_radius: PackedFloat32Array) -> void:
-	out_pos.clear()
-	out_color.clear()
-	out_radius.clear()
+class LightBuffer:
+	extends RefCounted
+	var positions := PackedVector2Array()
+	var colors := PackedColorArray()
+	var radii := PackedFloat32Array()
+
+
+## Packed-массивы в аргументах копируются при изменении; владелец буферов передаётся по ссылке.
+static func collect(view: Rect2, buffer: LightBuffer) -> void:
+	buffer.positions.clear()
+	buffer.colors.clear()
+	buffer.radii.clear()
 	for id in _pos.size():
 		var r := _radius[id]
 		if r <= 0.0 or not view.grow(r).has_point(_pos[id]):
@@ -154,15 +162,15 @@ static func collect(view: Rect2, out_pos: PackedVector2Array, out_color: PackedC
 			if not node.is_visible_in_tree():
 				continue
 			f = (node as Light2D).energy if node is Light2D else node.modulate.a
-		out_pos.append(_pos[id])
-		out_color.append(_color[id] * f)
-		out_radius.append(r)
+		buffer.positions.append(_pos[id])
+		buffer.colors.append(_color[id] * f)
+		buffer.radii.append(r)
 	for k in _flash_life.size():
 		if _flash_life[k] <= 0.0 or not view.grow(_flash_radius[k]).has_point(_flash_pos[k]):
 			continue
-		out_pos.append(_flash_pos[k])
-		out_color.append(_flash_color[k] * (_flash_life[k] / _flash_total[k]))
-		out_radius.append(_flash_radius[k])
+		buffer.positions.append(_flash_pos[k])
+		buffer.colors.append(_flash_color[k] * (_flash_life[k] / _flash_total[k]))
+		buffer.radii.append(_flash_radius[k])
 
 
 static func _key(at: Vector2) -> Vector2i:
