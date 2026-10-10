@@ -95,6 +95,9 @@ var _hero_cfg: Dictionary = {}
 var _hero_frames: Array[AtlasTexture] = []
 var _hero_shoulder := Vector2.ZERO
 var _clip_mode := false
+## Витрина: стойка продолжает дышать при выстреле; отдача движет оружие и руки
+## без перезапуска короткого боевого клипа тела на каждой пуле очереди.
+var preview_mode := false
 var _fidget_t := 0.0
 var _dash_t := 0.0
 var _reviving := false
@@ -377,8 +380,12 @@ func play_fidget() -> bool:
 			atlas.region = Rect2((i % 4) * CLIP_CELL.x, (i / 4) * CLIP_CELL.y, CLIP_CELL.x, CLIP_CELL.y)
 			list.append(atlas)
 		_clip_frames["fidget"] = list
-	_fidget_t = FIDGET_TIME
+	_fidget_t = _fidget_duration()
 	return true
+
+
+func _fidget_duration() -> float:
+	return 0.8 if preview_mode else FIDGET_TIME
 
 
 ## Покадровый герой (руки нарисованы в кадре): прицел ему водить плавно и в пределах хвата.
@@ -393,7 +400,7 @@ func _sc() -> float:
 ## Кадр по состоянию: стрельба стоя — shoot, ход — run по фазе шага, иначе idle. Заодно точка хвата кадра.
 func _clip_pick() -> void:
 	var clip := "idle"
-	var idx := int(_time * IDLE_FPS) % 8
+	var idx := 0 if preview_mode else int(_time * IDLE_FPS) % 8
 	if _dead:
 		if _reviving:
 			clip = "revive"
@@ -404,14 +411,14 @@ func _clip_pick() -> void:
 	elif _fidget_t > 0.0 and _run < 0.12 and _clip_frames.has("fidget"):
 		clip = "fidget"
 		var count: int = (_clip_frames["fidget"] as Array).size()
-		idx = clampi(int((1.0 - _fidget_t / FIDGET_TIME) * count), 0, count - 1)
+		idx = clampi(int((1.0 - _fidget_t / _fidget_duration()) * count), 0, count - 1)
 	elif dashing:
 		clip = "dash"
 		idx = clampi(int(_dash_t / DASH_CLIP_TIME * 6.0), 0, 5)
 	elif _hurt > HURT_TIME - HIT_CLIP_TIME:
 		clip = "hit"
 		idx = clampi(int((HURT_TIME - _hurt) / HIT_CLIP_TIME * 4.0), 0, 3)
-	elif _shoot_t > 0.0 and _run < 0.3:
+	elif _shoot_t > 0.0 and _run < 0.3 and not preview_mode:
 		clip = "shoot"
 		idx = clampi(int((1.0 - _shoot_t / SHOOT_ANIM_TIME) * 4.0), 0, 3)
 	elif _run > 0.12:
@@ -746,6 +753,11 @@ func _update_pose() -> void:
 		_stretch = 1.0
 		_squash = 1.0 + (_squash - 1.0 - sin(_gait * 2.0) * 0.025 * _run + 0.14 * _dash_blend)
 		_sway -= 0.03 * _facing * _run
+		if preview_mode and _run < 0.12 and _fidget_t <= 0.0 and not _dead:
+			# В крупных превью несогласованные стойки заметно сдвигают голову.
+			# Нейтральная стойка дышит непрерывно; руки следуют тому же трансформу.
+			_bob = sin(_breath) * 0.4
+			_squash += sin(_breath) * 0.003
 		if _dead:
 			_squash = 1.0
 			_sway = 0.0

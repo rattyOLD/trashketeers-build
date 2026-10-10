@@ -408,7 +408,7 @@ class RaccoonPreview:
 	var _time := 0.0
 	var _scale := 1.0
 	var _cheer_timer := 0.0
-	## Витрина боя: герой периодически замирает в стойке, разворачивается и даёт очередь; тап делает то же самое.
+	## Витрина: герой даёт короткую очередь, сохраняя направление стойки.
 	var _volley_timer := 0.0
 	var _aim_dir := Vector2.RIGHT
 	var _aim_hold := 0.0
@@ -422,6 +422,7 @@ class RaccoonPreview:
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_scale = preview_scale
 		raccoon = RaccoonVisual.new()
+		raccoon.preview_mode = true
 		raccoon.apply_look(character if not character.is_empty() else SaveService.get_character(), skin)
 		raccoon.weapon_icon = SaveService.get_loadout().icon
 		raccoon.weapon_color = SaveService.get_loadout().effect_color
@@ -441,9 +442,12 @@ class RaccoonPreview:
 	func celebrate() -> void:
 		raccoon.cheer()
 
-	## Очередь в случайную сторону: герой поворачивается, отдача и трассеры.
+	## Во время жеста очередь ждёт его завершения; поза не разворачивается скачком.
 	func fire_burst() -> void:
-		var side := 1.0 if randf() < 0.5 else -1.0
+		if raccoon._fidget_t > 0.0:
+			_volley_timer = 0.0
+			return
+		var side := _idle_side if raccoon.uses_clips() else raccoon._facing
 		_aim_dir = Vector2(side, randf_range(-0.12, 0.05)).normalized()
 		_aim_hold = SHOT_GAP * BURST_SHOTS + 0.55
 		_shots_left = BURST_SHOTS
@@ -461,17 +465,17 @@ class RaccoonPreview:
 			_aim_hold -= delta
 			look = _aim_dir
 			_tick_burst(delta)
-		else:
+		elif raccoon._fidget_t <= 0.0:
 			_volley_timer -= delta
 			if _volley_timer <= 0.0:
 				_volley_timer = randf_range(3.0, 5.5)
 				fire_burst()
 		raccoon.update_motion(Vector2.ZERO, look, delta)
 		_cheer_timer -= delta
-		if _cheer_timer <= 0.0:
+		if _cheer_timer <= 0.0 and _aim_hold <= 0.0 and _shots_left == 0 and raccoon._fidget_t <= 0.0:
 			_cheer_timer = randf_range(6.0, 11.0)
 			# Покадровые герои показывают свой «тик» (если нарисован), остальные — подпрыгивают.
-			if not raccoon.uses_clips() or (_aim_hold <= 0.0 and not raccoon.play_fidget()):
+			if not raccoon.uses_clips() or not raccoon.play_fidget():
 				if not raccoon.uses_clips():
 					raccoon.cheer()
 		_move_tracers(delta)
@@ -482,7 +486,7 @@ class RaccoonPreview:
 		_shot_timer -= delta
 		if _shot_timer > 0.0:
 			return
-		_shot_timer = SHOT_GAP
+		_shot_timer += SHOT_GAP
 		_shots_left -= 1
 		raccoon.kick(_aim_dir, 1.0)
 		var muzzle := get_global_transform().affine_inverse() * raccoon.get_muzzle_global(_aim_dir)

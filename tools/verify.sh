@@ -73,6 +73,10 @@ XDG_DATA_HOME="$LOG/hand-grip-user" "$GODOT" --headless --path "$P" res://test/h
 if ! grep -q 'HAND_GRIP failures=0' "$LOG/hand-grip.log" || grep -q 'SCRIPT ERROR' "$LOG/hand-grip.log"; then
   fail=1
 fi
+XDG_DATA_HOME="$LOG/menu-motion-user" timeout 90 "$GODOT" --headless --path "$P" res://test/menu_preview_motion_test.tscn > "$LOG/menu-motion.log" 2>&1
+if ! grep -q 'MENU_PREVIEW_MOTION failures=0' "$LOG/menu-motion.log" || grep -q 'SCRIPT ERROR' "$LOG/menu-motion.log"; then
+  fail=1
+fi
 for m in survival story raid mod:blast; do
   MODE=$m DURATION=45 timeout 300 xvfb-run -a -s "-screen 0 1280x1400x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 \
     --resolution 1280x720 --path "$P" res://test/mode_audit.tscn > "$LOG/$m.log" 2>&1
