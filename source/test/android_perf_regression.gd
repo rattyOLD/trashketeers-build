@@ -44,6 +44,7 @@ func _ready() -> void:
 	_check_atlas()
 	_check_rig_release()
 	_check_device_profile()
+	_check_separation()
 	_benchmark()
 	print("ANDROID_PERF_REGRESSION failures=", failures)
 	get_tree().quit(0 if failures == 0 else 1)
@@ -77,6 +78,60 @@ func _check_device_profile() -> void:
 	Platform.is_native_app = old_native
 	SaveService.data = old_data
 	get_window().content_scale_size = old_size
+
+
+## Полный перебор служит независимым эталоном сил: обычные враги, боссы,
+## отрицательные координаты, совпадающие точки и повторное использование пула.
+func _check_separation() -> void:
+	var manager := EnemyManager.new()
+	manager._player = Player.new()
+	manager._player.position = Vector2(-31, 19)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 13135
+	for count in [0, 1, 24, 90, 3, 140, 0]:
+		while manager._active.size() > count:
+			manager._active.pop_back().free()
+		while manager._active.size() < count:
+			var enemy := Enemy.new()
+			enemy.data = EnemyData.new()
+			enemy._shape = CircleShape2D.new()
+			manager._active.append(enemy)
+		for i in count:
+			var enemy := manager._active[i]
+			enemy.position = Vector2(rng.randf_range(-250, 250), rng.randf_range(-250, 250))
+			enemy._shape.radius = 80.0 if i % 11 == 0 else rng.randf_range(8, 45)
+			enemy.data.behavior = EnemyData.Behavior.BOSS if i % 11 == 0 else EnemyData.Behavior.CHASER
+		if count > 2:
+			manager._active[1].position = manager._active[2].position
+		var expected := PackedVector2Array()
+		expected.resize(count)
+		for i in count:
+			var a := manager._active[i]
+			for j in range(i + 1, count):
+				var b := manager._active[j]
+				var d := b.position - a.position
+				var reach := (a.get_radius() + b.get_radius()) * 1.15
+				var ds := d.length_squared()
+				if ds < reach * reach and ds >= 0.01:
+					var dist := sqrt(ds)
+					var force := d / dist * (1.0 - dist / reach) * EnemyManager.SEPARATION_SPEED
+					expected[i] -= force
+					expected[j] += force
+			var dp := a.position - manager._player.position
+			var near := a.get_radius() + Player.RADIUS
+			var dist := dp.length()
+			if dist < near and dist > 0.01 and not a.data.is_boss():
+				expected[i] += dp / dist * (1.0 - dist / near) * EnemyManager.PLAYER_PUSH
+		manager._compute_separation()
+		for i in count:
+			_check(manager._active[i].separation.distance_to(expected[i]) < 0.001, "separation count=%d index=%d" % [count, i])
+		if count == 140:
+			var start := Time.get_ticks_usec()
+			for tick in 1000:
+				manager._compute_separation()
+			print("SEPARATION_BENCHMARK enemies=140 ticks=1000 us=", Time.get_ticks_usec() - start)
+	manager._player.free()
+	manager.free()
 
 
 func _check_atlas() -> void:

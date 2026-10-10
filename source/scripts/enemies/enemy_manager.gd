@@ -160,62 +160,64 @@ func _physics_process(delta: float) -> void:
 ## все пары, O(n²): при 30+ врагах это заметная доля кадра на слабом телефоне). Крупные враги (боссы,
 ## танки) с радиусом больше клетки проверяются со всеми, как раньше. Итог тот же, что у полного перебора.
 const SEP_CELL := 110.0
+# Буферы растут только при новом максимуме врагов. Ячейки содержат голову
+# связного списка индексов вместо отдельных PackedArray (копируются при записи).
 var _sep_grid := {}
+var _sep_positions := PackedVector2Array()
+var _sep_radii := PackedFloat32Array()
+var _sep_next := PackedInt32Array()
 
 
 func _compute_separation() -> void:
 	var count := _active.size()
-	var positions := PackedVector2Array()
-	var radii := PackedFloat32Array()
-	positions.resize(count)
-	radii.resize(count)
+	if _sep_positions.size() < count:
+		_sep_positions.resize(count)
+		_sep_radii.resize(count)
+		_sep_next.resize(count)
 	_sep_grid.clear()
-	var big := PackedInt32Array()
-	for i in count:
+	# Обратная вставка сохраняет порядок индексов внутри каждой ячейки.
+	for i in range(count - 1, -1, -1):
 		var e := _active[i]
 		e.separation = Vector2.ZERO
-		positions[i] = e.global_position
-		radii[i] = e.get_radius()
-		if radii[i] * 2.3 > SEP_CELL:
-			big.append(i)
-		var key := Vector2i(floori(positions[i].x / SEP_CELL), floori(positions[i].y / SEP_CELL))
-		if _sep_grid.has(key):
-			(_sep_grid[key] as PackedInt32Array).append(i)
-		else:
-			_sep_grid[key] = PackedInt32Array([i])
+		_sep_positions[i] = e.global_position
+		_sep_radii[i] = e.get_radius()
+		var key := Vector2i(floori(_sep_positions[i].x / SEP_CELL), floori(_sep_positions[i].y / SEP_CELL))
+		_sep_next[i] = int(_sep_grid.get(key, -1))
+		_sep_grid[key] = i
 	var player_pos := _player.global_position
 	for i in count:
 		var push := Vector2.ZERO
-		var pi := positions[i]
-		var ri := radii[i]
+		var pi := _sep_positions[i]
+		var ri := _sep_radii[i]
 		var is_big := ri * 2.3 > SEP_CELL
-		var cell := Vector2i(floori(pi.x / SEP_CELL), floori(pi.y / SEP_CELL))
-		for dy in range(-1, 2):
-			for dx in range(-1, 2):
-				var bucket: Variant = _sep_grid.get(cell + Vector2i(dx, dy))
-				if bucket == null:
-					continue
-				for j: int in bucket:
-					# Пару считает младший индекс; пары с крупным врагом — отдельным проходом ниже.
-					if j <= i or (radii[j] * 2.3 > SEP_CELL) or is_big:
-						continue
-					push += _sep_pair(i, j, positions, radii)
-		if is_big:
+		if not is_big:
+			var cell := Vector2i(floori(pi.x / SEP_CELL), floori(pi.y / SEP_CELL))
+			for dy in range(-1, 2):
+				for dx in range(-1, 2):
+					var j := int(_sep_grid.get(cell + Vector2i(dx, dy), -1))
+					while j >= 0:
+						var candidate := j
+						j = _sep_next[j]
+						# Крупные враги считаются отдельно; каждая пара — один раз.
+						if candidate > i and _sep_radii[candidate] * 2.3 <= SEP_CELL:
+							push += _sep_pair(i, candidate)
+		else:
 			for j in count:
-				if j != i and (j > i or radii[j] * 2.3 <= SEP_CELL):
-					push += _sep_pair(i, j, positions, radii)
+				if j != i and (j > i or _sep_radii[j] * 2.3 <= SEP_CELL):
+					push += _sep_pair(i, j)
 		var to_player := pi - player_pos
 		var near := ri + Player.RADIUS
-		var pd := to_player.length()
-		if pd < near and pd > 0.01 and not _active[i].data.is_boss():
+		var pd_sq := to_player.length_squared()
+		if pd_sq < near * near and pd_sq > 0.0001 and not _active[i].data.is_boss():
+			var pd := sqrt(pd_sq)
 			push += to_player / pd * (1.0 - pd / near) * PLAYER_PUSH
 		_active[i].separation += push
 
 
 ## Толчок пары: возвращает силу на i, на j добавляет противоположную.
-func _sep_pair(i: int, j: int, positions: PackedVector2Array, radii: PackedFloat32Array) -> Vector2:
-	var d := positions[j] - positions[i]
-	var reach := (radii[i] + radii[j]) * 1.15
+func _sep_pair(i: int, j: int) -> Vector2:
+	var d := _sep_positions[j] - _sep_positions[i]
+	var reach := (_sep_radii[i] + _sep_radii[j]) * 1.15
 	var dist_sq := d.length_squared()
 	if dist_sq >= reach * reach or dist_sq < 0.01:
 		return Vector2.ZERO

@@ -124,6 +124,12 @@ jobs:
         with:
           tag_name: android-beta
           name: TrashSquad beta (Beer Party Studio)
+          body: |
+            TrashSquad · Beer Party Studio · beta.${{ github.run_number }}
+
+            Galaxy A13 (4G и 5G): автоматические 30 FPS, адаптивное разрешение и оптимизированный расчёт расталкивания врагов без временных массивов на каждом кадре. Ручной лимит кадров сохраняется.
+
+            APK: TrashSquad.apk. Производительность на физическом Galaxy A13 проверяется тестерами.
           prerelease: true
           make_latest: false
           files: |
