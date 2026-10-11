@@ -73,6 +73,7 @@ func _init() -> void:
 			button.icon = load(ART + "filter_%s.png" % FILTER_ICONS[str(row[0])]) as Texture2D
 			button.expand_icon = true
 			button.add_theme_constant_override("icon_max_width", 22)
+		UiStyle.size_flow_button(button)
 		button.pressed.connect(_select_filter.bind(str(row[0])))
 		filters.add_child(button)
 	content.add_child(filters)
@@ -96,6 +97,7 @@ func _select_filter(kind: String) -> void:
 
 
 func _refresh() -> void:
+	_grid.columns = 2 if Orient.portrait or get_viewport_rect().size.x < 1120.0 else 3
 	MenuPopups.clear(_grid)
 	var known := 0
 	for entry in _entries:
@@ -110,7 +112,9 @@ func _card(entry: Dictionary) -> Control:
 	var id := str(entry["id"])
 	var known := discovered(id)
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2((panel_width() - 76.0) / 3.0, 440)
+	var available := minf(panel_width(), ScreenSafeArea.rect(get_viewport_rect().size).size.x - 48.0)
+	panel.custom_minimum_size = Vector2((available - 104.0) / _grid.columns, 440)
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var family := "boss" if entry["kind"] == "boss" else ("elite" if bool(entry["elite"]) else "normal")
 	var frame := StyleBoxTexture.new()
 	frame.texture = load(ART + "card_%s.png" % (family if known else "locked")) as Texture2D

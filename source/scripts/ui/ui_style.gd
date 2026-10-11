@@ -87,6 +87,17 @@ static func fit_plate_label(label_node: Label, base: int) -> void:
 	fit.call_deferred()
 
 
+## A FlowContainer needs a readable width even when Button clips its caption.
+static func size_flow_button(button_node: Button, base: int = 16) -> void:
+	var font := button_node.get_theme_font("font")
+	var needed := font.get_string_size(button_node.text, HORIZONTAL_ALIGNMENT_LEFT, -1, base).x
+	needed += button_node.get_theme_stylebox("normal").get_minimum_size().x
+	needed += button_node.get_theme_constant("outline_size") * 2.0
+	if button_node.icon != null:
+		needed += minf(button_node.icon.get_width(), button_node.get_theme_constant("icon_max_width")) + button_node.get_theme_constant("h_separation")
+	button_node.custom_minimum_size.x = maxf(button_node.custom_minimum_size.x, ceilf(needed))
+
+
 static func _fit_button_contents(button_node: Button, base: int) -> void:
 	if button_node.size.x <= 0.0 or button_node.text.is_empty():
 		return

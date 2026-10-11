@@ -35,6 +35,7 @@ func _run() -> void:
 	SaveService.add_gems(100000, false)
 	var armory := MenuPopups.Armory.new()
 	add_child(armory)
+	await _test_filters(armory)
 	var tested := 0
 	for weapon in WeaponDB.get_player_weapons():
 		if not Economy.is_buyable(weapon):
@@ -92,6 +93,76 @@ func _run() -> void:
 	SaveService.data = original_save
 	SaveService.save_data()
 	get_tree().quit(0 if failures == 0 else 1)
+
+func _test_filters(armory: MenuPopups.Armory) -> void:
+	armory.open()
+	var original_size := get_window().content_scale_size
+	var bestiary := BestiaryPopup.new()
+	add_child(bestiary)
+	for viewport_size in [Vector2i(1280, 720), Vector2i(960, 540)]:
+		get_window().content_scale_size = viewport_size
+		for tick in 4:
+			await get_tree().process_frame
+		armory._refresh()
+		bestiary.open()
+		for tick in 4:
+			await get_tree().process_frame
+		var screen := get_viewport().get_visible_rect()
+		_check(screen.encloses(armory._panel.get_global_rect()), "armory fits wide and compact viewport")
+		_check(screen.encloses(bestiary._panel.get_global_rect()), "bestiary fits wide and compact viewport")
+		for chip: Button in armory._chips.values():
+			var needed := chip.get_theme_font("font").get_string_size(chip.text, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
+			needed += chip.get_theme_stylebox("normal").get_minimum_size().x + chip.get_theme_constant("outline_size") * 2.0
+			_check(chip.size.x >= needed - 0.5 and chip.get_theme_font_size("font_size") >= 16, "armory caption fits both viewports: " + chip.text)
+			_check(armory._panel.get_global_rect().encloses(chip.get_global_rect()), "armory filter stays inside panel")
+		_check(bestiary._grid.columns == (3 if viewport_size.x >= 1120 else 2), "bestiary column count follows viewport")
+		for chip: Button in bestiary._filter_buttons:
+			var needed := chip.get_theme_font("font").get_string_size(chip.text, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
+			needed += chip.get_theme_stylebox("normal").get_minimum_size().x + chip.get_theme_constant("outline_size") * 2.0
+			if chip.icon != null:
+				needed += 22.0 + chip.get_theme_constant("h_separation")
+			_check(chip.size.x >= needed - 0.5 and chip.get_theme_font_size("font_size") >= 16, "bestiary caption and icon fit: " + chip.text)
+			_check(bestiary._panel.get_global_rect().encloses(chip.get_global_rect()), "bestiary filter stays inside panel")
+		bestiary.visible = false
+		GlassPopup._open_stack.erase(bestiary)
+	get_window().content_scale_size = original_size
+	bestiary.queue_free()
+	for tick in 4:
+		await get_tree().process_frame
+	armory._refresh()
+	for tick in 4:
+		await get_tree().process_frame
+	_check(armory._chips.size() == 12, "all twelve armory filters exist")
+	for chip: Button in armory._chips.values():
+		var font := chip.get_theme_font("font")
+		var needed := font.get_string_size(chip.text, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x
+		needed += chip.get_theme_stylebox("normal").get_minimum_size().x + chip.get_theme_constant("outline_size") * 2.0
+		_check(chip.size.x >= needed - 0.5, "filter caption fits at readable size: " + chip.text)
+		_check(chip.get_theme_font_size("font_size") >= 16, "filter caption does not shrink: " + chip.text)
+		_check(armory._panel.get_global_rect().encloses(chip.get_global_rect()), "filter stays inside armory")
+	armory._chips["kind:melee"].pressed.emit()
+	_check(armory._kind == "melee" and armory._chips["kind:melee"].button_pressed and not armory._chips["kind:all"].button_pressed, "kind selection updates one active chip")
+	armory._chips["own:mine"].pressed.emit()
+	_check(armory._found.text.begins_with("Найдено: 0"), "unowned melee is excluded by mine filter")
+	var reset := _button(armory._list, "СБРОСИТЬ ФИЛЬТРЫ")
+	_check(reset != null, "empty filter result offers reset")
+	if reset != null:
+		reset.pressed.emit()
+	_check(armory._kind == "all" and armory._own == "all" and armory._rarity == "all", "reset clears all filter groups")
+	armory._chips["own:mine"].pressed.emit()
+	_check(armory._found.text.begins_with("Найдено: 1 ·"), "mine shows the starting weapon")
+	armory._chips["rarity:legendary"].pressed.emit()
+	_check(armory._found.text.begins_with("Найдено: 0") and armory._chips["own:mine"].button_pressed and armory._chips["rarity:legendary"].button_pressed, "ownership and rarity filters combine")
+	armory._chips["own:all"].pressed.emit()
+	_check(not armory._found.text.begins_with("Найдено: 0"), "legendary catalog returns after clearing ownership")
+	armory._chips["rarity:all"].pressed.emit()
+	armory._open_detail(StringName(SaveService.START_WEAPON), 1)
+	_check(not armory._filters[1].visible, "detail hides filter row")
+	armory._detail = &""
+	armory._refresh()
+	_check(armory._filters[1].visible, "catalog restores filter row")
+	print("ARMORY_FILTERS failures=", failures)
+
 
 func _test_boss(mission_id: String) -> void:
 	SaveService.data = SaveService.DEFAULTS.duplicate(true)

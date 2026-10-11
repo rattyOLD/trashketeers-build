@@ -12,6 +12,7 @@ func _ready() -> void:
 		"Shop": func() -> Control: return MenuPopups.Shop.new(false),
 		"Skins": func() -> Control: return MenuPopups.Shop.new(true),
 		"Armory": func() -> Control: return MenuPopups.Armory.new(),
+		"Bestiary": func() -> Control: return BestiaryPopup.new(),
 		"Upgrades": func() -> Control: return MenuPopups.Upgrades.new(),
 		"Achievements": func() -> Control: return MenuPopups.Achievements.new(),
 		"Profile": func() -> Control: return MenuPopups.Profile.new(),

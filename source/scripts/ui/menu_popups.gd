@@ -678,6 +678,12 @@ class Armory:
 		for entry in entries:
 			var key: String = entry[0]
 			var chip := UiStyle.button(entry[1], UiStyle.PANEL, 16, Vector2(0, 44))
+			# Flow uses minimum width; clipped Button text contributes no width to it.
+			UiStyle.size_flow_button(chip)
+			chip.toggle_mode = true
+			var accent: Color = WeaponData.RARITY_COLORS[key] if group == "rarity" and key != "all" else UiStyle.GOLD
+			for state: String in ["pressed", "hover_pressed"]:
+				chip.add_theme_stylebox_override(state, UiStyle.button_box(accent, true))
 			if group == "rarity" and key != "all":
 				chip.add_theme_color_override("font_color", WeaponData.RARITY_COLORS[key])
 			chip.pressed.connect(func() -> void:
@@ -780,7 +786,10 @@ class Armory:
 	func _refresh() -> void:
 		for key: String in _chips:
 			var parts := key.split(":")
-			(_chips[key] as Button).modulate = Color.WHITE if str(get("_" + parts[0])) == parts[1] else Color(1, 1, 1, 0.5)
+			var chip := _chips[key] as Button
+			var selected := str(get("_" + parts[0])) == parts[1]
+			chip.set_pressed_no_signal(selected)
+			chip.modulate = Color.WHITE if selected else Color(1, 1, 1, 0.85)
 		for entry in SORTS:
 			if entry[0] == _sort:
 				_sort_btn.text = entry[1]
@@ -815,7 +824,7 @@ class Armory:
 			total += items.size()
 			_list.add_child(_group_header("%s · у тебя %d из %d" % [group[1], owned, all_count]))
 			var grid := GridContainer.new()
-			grid.columns = 2 if Orient.portrait else 3
+			grid.columns = 2 if Orient.portrait or get_viewport_rect().size.x < 1120.0 else 3
 			grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			grid.add_theme_constant_override("h_separation", 10)
 			grid.add_theme_constant_override("v_separation", 10)
