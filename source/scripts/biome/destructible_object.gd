@@ -142,7 +142,9 @@ func _common_setup() -> void:
 	if _flash_shader == null:
 		_flash_shader = load("res://shaders/flash.gdshader")
 	_flash_material = ShaderMaterial.new()
-	_flash_material.shader = _flash_shader
+	_flash_material.shader = load("res://shaders/prop_damage.gdshader") if kind == Kind.ART else _flash_shader
+	if kind == Kind.ART:
+		_flash_material.set_shader_parameter(&"metal", impact_is_metal())
 	if kind == Kind.WEAPON_CRATE:
 		material = _flash_material
 	_time = randf() * TAU
@@ -201,6 +203,8 @@ func take_damage(amount: float, _direction: Vector2 = Vector2.ZERO, _is_crit: bo
 	if hp <= 0.0 or drop_height > 0.0:
 		return
 	hp -= amount
+	if kind == Kind.ART:
+		_flash_material.set_shader_parameter(&"damage_amount", clampf(1.0 - hp / max_hp, 0.0, 1.0))
 	_flash_left = FLASH_TIME
 	_shake = 1.0
 	_flash_material.set_shader_parameter(&"flash_amount", 0.85)
@@ -222,6 +226,7 @@ func _destroy() -> void:
 
 
 func _break_art() -> void:
+	_flash_material.set_shader_parameter(&"damage_amount", 0.0)
 	var broken := str(_destruct.get("broken", ""))
 	var glow := get_node_or_null(^"Glow")
 	if glow != null:

@@ -637,6 +637,7 @@ func _switch_chapter(index: int = -1) -> void:
 		pickup.clear()
 	pickups.clear()
 	map.clear()
+	battle_wear.clear()
 	if story_mission.is_empty():
 		chapter = MapCards.apply_chapter(chapter)
 	map.build(layers, chapter)
@@ -1520,6 +1521,9 @@ func _clear_remaining_enemies() -> void:
 # --- Лут -----------------------------------------------------------------------------------------
 
 func _on_object_destroyed(object: DestructibleObject) -> void:
+	var effect := str(object._destruct.get("effect", "crate"))
+	var mark_kind := 2 if effect in ["wood", "crate"] else (3 if effect == "toxic" else 1)
+	battle_wear.stamp(object.global_position, mark_kind, 86 if mark_kind != 3 else 118)
 	if object.kind == DestructibleObject.Kind.ART:
 		_advance_wave_task(&"break")
 	pickups.spawn(object.global_position + Vector2(0, -10), object.nut_reward)

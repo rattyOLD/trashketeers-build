@@ -71,6 +71,7 @@ var camera: Camera2D
 var hud: Hud
 var atmosphere: AtmosphereFX
 var light_map: LightMap
+var battle_wear: BattleWear
 
 var _shake := 0.0
 var _hud_timer := 0.0
@@ -87,6 +88,8 @@ func _build_layers() -> BiomeLayers:
 	fx = FxManager.new()
 	layers.fx.add_child(fx)
 	fx.attach_ground(layers.decals)
+	battle_wear = BattleWear.new()
+	layers.decals.add_child(battle_wear)
 	return layers
 
 
@@ -783,6 +786,7 @@ func _eject_casing(weapon: WeaponData, origin: Vector2, direction: Vector2) -> v
 
 
 func _on_explosion(at: Vector2, radius: float, color: Color, _team: Bullet.Team) -> void:
+	battle_wear.stamp(at, 0, radius * 1.1)
 	fx.light_flash(at, color.lerp(Color("#ffd27a"), 0.5), 1.8, radius * 2.6, 0.45)
 	fx.burst(at, color, 26, 420.0, 5.0)
 	fx.burst(at, Color("#fff2b0"), 14, 260.0, 4.0)

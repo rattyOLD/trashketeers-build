@@ -24,31 +24,22 @@ func build(at: Vector2, radius: float, texture: Texture2D, tint: Color, curb: Co
 	var ring := _blob(radius) if shape == "blob" else _rounded_rect(half, 46.0)
 	# Мягкая тень-подложка: у природных — широкий размытый край, у рукотворных — узкая тень бордюра.
 	var soft := shape == "blob"
-	for k in (3 if soft else 1):
+	for k in (0 if soft else 1):
 		var shade := Polygon2D.new()
 		shade.polygon = _scaled(ring, 1.03 + 0.035 * k if soft else 1.025)
 		shade.color = Color(0, 0, 0, 0.12 if soft else 0.3)
 		shade.light_mask = BiomeLayers.LIGHT_MASK_FLOOR
 		add_child(shade)
 	var body := Polygon2D.new()
-	body.polygon = ring
+	body.polygon = _scaled(ring, 0.88) if soft else ring
 	body.texture = texture
 	body.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
-	body.uv = ring
+	body.uv = body.polygon
 	body.color = tint
 	body.light_mask = BiomeLayers.LIGHT_MASK_FLOOR
 	add_child(body)
 	if soft:
-		# Край травы не режется линией: внешний ободок той же травы полупрозрачный — переход мягкий.
-		var fringe := Polygon2D.new()
-		fringe.polygon = _scaled(ring, 1.045)
-		fringe.texture = texture
-		fringe.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
-		fringe.uv = fringe.polygon
-		fringe.color = Color(tint, 0.45)
-		fringe.light_mask = BiomeLayers.LIGHT_MASK_FLOOR
-		add_child(fringe)
-		move_child(fringe, get_child_count() - 2)
+		_add_transition(ring, texture, tint)
 	else:
 		var edge := Line2D.new()
 		var closed := ring.duplicate()
@@ -68,12 +59,58 @@ func build(at: Vector2, radius: float, texture: Texture2D, tint: Color, curb: Co
 	# Всё одной сеткой FlatMesh: один вызов отрисовки вместо десятков линий и кружков.
 	var m := FlatMesh.new()
 	_paint(m)
+	if soft:
+		_paint_fringe(m, ring)
 	var mesh := m.commit()
 	if mesh != null:
 		var layer := FxManager.DrawLayer.new()
 		layer.painter = func(ci: CanvasItem) -> void: ci.draw_mesh(mesh, null)
 		add_child(layer)
 		layer.queue_redraw()
+
+
+## Полоса вершин с непрерывной альфой: нет наложенных непрозрачных колец.
+func _add_transition(ring: PackedVector2Array, texture: Texture2D, tint: Color) -> void:
+	var vertices := PackedVector2Array()
+	var colors := PackedColorArray()
+	var uv := PackedVector2Array()
+	var tex_size := texture.get_size()
+	for i in ring.size():
+		var j := (i + 1) % ring.size()
+		var inner_a := center + (ring[i] - center) * 0.88
+		var inner_b := center + (ring[j] - center) * 0.88
+		var outer_a := center + (ring[i] - center) * 1.06
+		var outer_b := center + (ring[j] - center) * 1.06
+		for point in [inner_a, inner_b, outer_b, inner_a, outer_b, outer_a]:
+			vertices.append(point)
+			uv.append(point / tex_size)
+		colors.append_array(PackedColorArray([tint, tint, Color(tint, 0), tint, Color(tint, 0), Color(tint, 0)]))
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = vertices
+	arrays[Mesh.ARRAY_TEX_UV] = uv
+	arrays[Mesh.ARRAY_COLOR] = colors
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	var edge := MeshInstance2D.new()
+	edge.name = &"SurfaceTransition"
+	edge.mesh = mesh
+	edge.texture = texture
+	edge.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+	edge.light_mask = BiomeLayers.LIGHT_MASK_FLOOR
+	add_child(edge)
+
+
+func _paint_fringe(m: FlatMesh, ring: PackedVector2Array) -> void:
+	for i in ring.size():
+		var j := (i + 1) % ring.size()
+		for k in 2:
+			var p := ring[i].lerp(ring[j], _rng.randf_range(0.15, 0.85))
+			p = center + (p - center) * _rng.randf_range(0.93, 1.03)
+			var h := _rng.randf_range(4.0, 10.0)
+			var color := Color(0.22, 0.31, 0.19, _rng.randf_range(0.35, 0.62))
+			m.line(p, p + Vector2(-2, -h), color, 1.5)
+			m.line(p, p + Vector2(3, -h * 0.7), color, 1.2)
 
 
 func _blob(radius: float) -> PackedVector2Array:
