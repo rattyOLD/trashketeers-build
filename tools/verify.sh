@@ -130,6 +130,10 @@ XDG_DATA_HOME="$LOG/visual-direction-user" timeout 90 xvfb-run -a -s "-screen 0 
 if ! grep -q 'VISUAL_DIRECTION failures=0' "$LOG/visual-direction.log" || grep -qE 'SCRIPT ERROR|Lambda capture' "$LOG/visual-direction.log"; then
   fail=1
 fi
+XDG_DATA_HOME="$LOG/character-motion-user" timeout 120 xvfb-run -a -s "-screen 0 1700x1100x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/character_motion_test.tscn > "$LOG/character-motion.log" 2>&1
+if ! grep -q 'CHARACTER_MOTION failures=0' "$LOG/character-motion.log" || grep -qE 'SCRIPT ERROR|Lambda capture|Shader compilation failed' "$LOG/character-motion.log"; then
+  fail=1
+fi
 XDG_DATA_HOME="$LOG/battle-expansion-user" timeout 120 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/battle_expansion_test.tscn > "$LOG/battle-expansion.log" 2>&1
 if ! grep -q 'BATTLE_EXPANSION failures=0' "$LOG/battle-expansion.log" || grep -qE 'SCRIPT ERROR|Lambda capture' "$LOG/battle-expansion.log"; then
   fail=1

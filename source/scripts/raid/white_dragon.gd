@@ -168,6 +168,7 @@ var _tail_fx: TailWaveFx
 var _tail_hit := false
 var _tail_dir := 0.0
 var _tail_combo := 0
+var _visual_time := 0.0
 
 ## Дыхание сейчас задевает Енота: Raid добавляет ему озноб.
 var breath_hitting := false
@@ -734,15 +735,19 @@ func _attack_mult() -> float:
 
 
 func _update_visuals(delta: float) -> void:
+	_visual_time += delta
 	var lift := clampf(altitude / AERIAL_ALTITUDE, 0.0, 2.0)
-	_shadow.global_position = _shadow.global_position.lerp(global_position, clampf(SHADOW_LAG * delta, 0.0, 1.0))
+	_shadow.global_position = _shadow.global_position.lerp(global_position, 1.0 - exp(-SHADOW_LAG * delta))
 	_shadow.scale = Vector2(9.0, 3.2) * (1.0 - clampf(lift, 0.0, 1.0) * 0.35)
 	if state == State.DEAD:
 		return
 	_update_animation()
 	_sprite.rotation = facing + PI * 0.5
-	_sprite.position = Vector2(0, -altitude)
-	_sprite.scale = Vector2.ONE * SPRITE_SCALE * (1.0 + lift * 0.18) / _art_density
+	var breath := sin(_visual_time * (3.2 if is_fury else 2.1))
+	var resting := _phase == Phase.GAP and altitude <= 20.0
+	_sprite.position = Vector2(0, -altitude - (breath * 1.2 if resting else 0.0))
+	var breathing_scale := Vector2(1.0 - breath * 0.004, 1.0 + breath * 0.006) if resting else Vector2.ONE
+	_sprite.scale = breathing_scale * SPRITE_SCALE * (1.0 + lift * 0.18) / _art_density
 	z_index = AERIAL_Z if altitude > 20.0 else 0
 
 	var alpha := lerpf(1.0, AERIAL_ALPHA, clampf(lift, 0.0, 1.0))

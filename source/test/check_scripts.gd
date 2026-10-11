@@ -7,7 +7,7 @@ func _ready() -> void:
 	var failed := 0
 	for f in files:
 		var s: Script = load(f)
-		if s == null or not s.can_instantiate() and not (s as GDScript).is_abstract() if s is GDScript else false:
+		if s == null or not s.can_instantiate():
 			failed += 1
 			print("CHECK failed ", f)
 	print("CHECK checked %d scripts, failed %d" % [files.size(), failed])

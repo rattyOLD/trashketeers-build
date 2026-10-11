@@ -102,6 +102,10 @@ float inside(vec2 uv) {
 		* step(uv.x, sample_rect.x + sample_rect.z) * step(uv.y, sample_rect.y + sample_rect.w);
 }
 
+vec2 sprite_uv(vec2 uv, vec2 texel) {
+	return clamp(uv, sample_rect.xy + texel * 0.5, sample_rect.xy + sample_rect.zw - texel * 0.5);
+}
+
 vec3 recolor(vec2 uv, vec3 col) {
 	vec4 r0 = texture(regions0, uv);
 	vec4 r1 = texture(regions1, uv);
@@ -162,7 +166,7 @@ void fragment() {
 			uv = wheel.xy + vec2(q.x * wheel.z, q.y) * logical_pixel;
 		}
 	}
-	vec4 base = texture(TEXTURE, uv) * inside(uv);
+	vec4 base = (texture(TEXTURE, sprite_uv(uv, TEXTURE_PIXEL_SIZE)) * inside(uv));
 	vec3 rgb = base.rgb;
 	if (recolor_enabled) {
 		rgb = recolor(uv, rgb);
@@ -189,7 +193,7 @@ void fragment() {
 		rgb = eyelid(eye1, uv, rgb, lid_color(eye1, texture(TEXTURE, eye1.xy - vec2(0.0, eye1.w * 1.25)).rgb));
 	}
 	if (rim_strength > 0.0) {
-		float lit_edge = (1.0 - texture(TEXTURE, uv - logical_pixel * 4.0).a * inside(uv - logical_pixel * 4.0)) * a;
+		float lit_edge = (1.0 - (texture(TEXTURE, sprite_uv(uv - logical_pixel * 4.0, TEXTURE_PIXEL_SIZE)) * inside(uv - logical_pixel * 4.0)).a) * a;
 		rgb += vec3(0.65, 0.72, 0.78) * lit_edge * rim_strength;
 	}
 	rgb = worn_boss(painted_color(rgb), uv) * tint.rgb;
@@ -199,14 +203,14 @@ void fragment() {
 	if (outline_px > 0.0) {
 		vec2 px = logical_pixel * outline_px;
 		vec2 dg = px * 0.7071;
-		float ring = texture(TEXTURE, uv + vec2(px.x, 0.0)).a * inside(uv + vec2(px.x, 0.0));
-		ring = max(ring, texture(TEXTURE, uv - vec2(px.x, 0.0)).a * inside(uv - vec2(px.x, 0.0)));
-		ring = max(ring, texture(TEXTURE, uv + vec2(0.0, px.y)).a * inside(uv + vec2(0.0, px.y)));
-		ring = max(ring, texture(TEXTURE, uv - vec2(0.0, px.y)).a * inside(uv - vec2(0.0, px.y)));
-		ring = max(ring, texture(TEXTURE, uv + dg).a * inside(uv + dg));
-		ring = max(ring, texture(TEXTURE, uv - dg).a * inside(uv - dg));
-		ring = max(ring, texture(TEXTURE, uv + vec2(dg.x, -dg.y)).a * inside(uv + vec2(dg.x, -dg.y)));
-		ring = max(ring, texture(TEXTURE, uv + vec2(-dg.x, dg.y)).a * inside(uv + vec2(-dg.x, dg.y)));
+		float ring = (texture(TEXTURE, sprite_uv(uv + vec2(px.x, 0.0), TEXTURE_PIXEL_SIZE)) * inside(uv + vec2(px.x, 0.0))).a;
+		ring = max(ring, (texture(TEXTURE, sprite_uv(uv - vec2(px.x, 0.0), TEXTURE_PIXEL_SIZE)) * inside(uv - vec2(px.x, 0.0))).a);
+		ring = max(ring, (texture(TEXTURE, sprite_uv(uv + vec2(0.0, px.y), TEXTURE_PIXEL_SIZE)) * inside(uv + vec2(0.0, px.y))).a);
+		ring = max(ring, (texture(TEXTURE, sprite_uv(uv - vec2(0.0, px.y), TEXTURE_PIXEL_SIZE)) * inside(uv - vec2(0.0, px.y))).a);
+		ring = max(ring, (texture(TEXTURE, sprite_uv(uv + dg, TEXTURE_PIXEL_SIZE)) * inside(uv + dg)).a);
+		ring = max(ring, (texture(TEXTURE, sprite_uv(uv - dg, TEXTURE_PIXEL_SIZE)) * inside(uv - dg)).a);
+		ring = max(ring, (texture(TEXTURE, sprite_uv(uv + vec2(dg.x, -dg.y), TEXTURE_PIXEL_SIZE)) * inside(uv + vec2(dg.x, -dg.y))).a);
+		ring = max(ring, (texture(TEXTURE, sprite_uv(uv + vec2(-dg.x, dg.y), TEXTURE_PIXEL_SIZE)) * inside(uv + vec2(-dg.x, dg.y))).a);
 		float rim = clamp(ring, 0.0, 1.0) * outline_color.a;
 		rgb = mix(outline_color.rgb, rgb, a);
 		a = a + rim * (1.0 - a);

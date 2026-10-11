@@ -46,6 +46,7 @@ static func _sprite(kind: StringName) -> Dictionary:
 				"center": center,
 				"grip": (Vector2(float(grip[0]), float(grip[1])) - center) * unit,
 				"muzzle": (Vector2(float(muzzle_px[0]), float(muzzle_px[1])) - center) * unit,
+				"support": (Vector2(float(raw["support"][0]), float(raw["support"][1])) - center) * unit if raw.has("support") else Vector2.INF,
 			}
 			# Отдельная картинка для меню (моргенштерн: в руке только рукоять, в меню — с цепью и шаром).
 			var menu_path := str(raw.get("menu", ""))
@@ -90,6 +91,9 @@ static func support(kind: StringName, sidearm: bool = false) -> Vector2:
 	var handle := grip(kind)
 	if sidearm:
 		return handle + Vector2(3.0, 2.0)
+	var sprite := _sprite(kind)
+	if not sprite.is_empty() and (sprite["support"] as Vector2).is_finite():
+		return sprite["support"]
 	var tip := muzzle(kind)
 	# The shotgun's wooden fore-end starts farther forward than the rifle receiver.
 	var fraction := 0.58 if kind == &"shotgun" else 0.35

@@ -1,12 +1,7 @@
 class_name MainMenuUI
 extends Control
-## Хаб в стиле .io-игр (альбомный):
-##   фон — живая Неоновая Свалка (MenuBackdrop) под тёмным градиентом;
-##   верх — аватарка, уровень, валюты, шестерёнка;
-##   логотип Trash Squad, на надписи сидит Енот в текущем скине;
-##   поле ника с кубиком случайного имени, большая зелёная [ ИГРАТЬ ], выбор режима;
-##   низ — ПРОКАЧКА · ОРУЖИЕ + MERGE · ГЕРОИ (гардероб) · АЧИВКИ.
-## Альбомная раскладка: слева сцена с Енотом и боковыми кнопками, справа логотип, ствол, режим и ИГРАТЬ, снизу дока.
+## Главный хаб: профиль и валюты сверху, выбор боя по центру, навигация снизу.
+## Боковые награды и новости остаются доступны без сцены персонажа.
 
 signal start_requested(weapon_id: StringName)
 signal raid_requested(weapon_id: StringName)
@@ -21,7 +16,6 @@ const LOGO_FONT := "res://assets/fonts/RussoOne-Regular.ttf"
 const CAPSULE := Color("#2b2f31")
 
 var _mode: Mode = Mode.SURVIVAL
-var _preview: MenuWidgets.RaccoonPreview
 var _avatar: MenuWidgets.Avatar
 var _profile: MenuPopups.Profile
 var _editor: ControlEditor
@@ -99,7 +93,6 @@ func _ready() -> void:
 
 func _build() -> void:
 	_backdrop = MenuBackdrop.new()
-	_backdrop.modulate = Color(0.46, 0.5, 0.46)
 	add_child(_backdrop)
 	_backdrop.build(get_viewport_rect().size)
 	var shade := ShadeOverlay.new()
@@ -206,7 +199,7 @@ func _build_portrait_layout() -> Control:
 	add_child(column)
 	column.add_child(_build_top_bar())
 	column.add_child(_build_logo())
-	column.add_child(_build_stage())
+	column.add_child(_build_utility_area())
 	column.add_child(_build_weapon_chip())
 	column.add_child(_build_modes())
 	column.add_child(_build_coop_button())
@@ -235,18 +228,18 @@ func _build_landscape_layout() -> Control:
 	margin.add_child(column)
 
 	column.add_child(_build_top_bar())
-	var middle := HBoxContainer.new()
+	var middle := _build_utility_area()
 	middle.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	middle.add_theme_constant_override("separation", 26)
 	column.add_child(middle)
-	var stage := _build_stage()
-	stage.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	middle.add_child(stage)
+	var center := CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	middle.add_child(center)
 	var side := VBoxContainer.new()
 	side.custom_minimum_size = Vector2(RIGHT_WIDTH, 0)
 	side.alignment = BoxContainer.ALIGNMENT_CENTER
-	side.add_theme_constant_override("separation", 10)
-	middle.add_child(side)
+	side.add_theme_constant_override("separation", 8)
+	center.add_child(side)
 	side.add_child(_build_logo())
 	side.add_child(_build_weapon_chip())
 	side.add_child(_build_modes())
@@ -394,7 +387,7 @@ func _add_capsule(row: HBoxContainer, icon_texture: Texture2D, kind: String) -> 
 	return label
 
 
-# --- Логотип и Енот на надписи ----------------------------------------------------------------
+# --- Логотип и быстрые действия ----------------------------------------------------------------
 
 ## Боковая кнопка сцены: иконка без подписи; подпись и красная точка появляются, только когда есть что забрать.
 func _make_side_button(key: String, icon_path: String, caption_text: String, right: bool, y: float, action: Callable, column: int = 0, px: float = 96.0) -> Button:
@@ -505,7 +498,7 @@ func _build_tester_button() -> Button:
 
 func _build_logo() -> Control:
 	var holder := Control.new()
-	holder.custom_minimum_size = Vector2(0, 150 if Orient.portrait else 118)
+	holder.custom_minimum_size = Vector2(0, 150 if Orient.portrait else 88)
 	var logo := LogoText.new()
 	logo.set_anchors_preset(Control.PRESET_FULL_RECT)
 	logo.font = load(LOGO_FONT) if ResourceLoader.exists(LOGO_FONT) else ThemeDB.fallback_font
@@ -513,14 +506,11 @@ func _build_logo() -> Control:
 	return holder
 
 
-## Сцена героя: живой Енот в текущем скине на неоновой платформе — главный акцент экрана.
-func _build_stage() -> Control:
-	var stage := HeroStage.new()
-	stage.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	stage.custom_minimum_size = Vector2(0, 300 if Orient.portrait else 260)
-	_preview = MenuWidgets.RaccoonPreview.new(SaveService.get_skin(), 2.5)
-	_preview.set_anchors_preset(Control.PRESET_FULL_RECT)
-	stage.add_child(_preview)
+## Компактные быстрые действия вокруг центрального выбора боя.
+func _build_utility_area() -> Control:
+	var stage := Control.new()
+	stage.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stage.custom_minimum_size = Vector2(0, 146 if Orient.portrait else 260)
 	_season_pill = Button.new()
 	_season_pill.text = "СЕЗОН · РЕЛЬСОТРОН"
 	_season_pill.focus_mode = Control.FOCUS_NONE
@@ -528,42 +518,25 @@ func _build_stage() -> Control:
 	_season_pill.add_theme_color_override("font_color", Color("#ffb347"))
 	for state in ["normal", "hover", "pressed"]:
 		_season_pill.add_theme_stylebox_override(state, UiStyle.box(Color(0.1, 0.11, 0.1, 0.92), Color("#d9962b"), 2, 6))
-	_season_pill.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	_season_pill.offset_left = -140.0
-	_season_pill.offset_right = 140.0
+	_season_pill.set_anchors_preset(Control.PRESET_CENTER_TOP if Orient.portrait else Control.PRESET_TOP_LEFT)
+	_season_pill.offset_left = -140.0 if Orient.portrait else 4.0
+	_season_pill.offset_right = 140.0 if Orient.portrait else 284.0
 	_season_pill.offset_top = 4.0
 	_season_pill.offset_bottom = 40.0
 	_season_pill.pressed.connect(func() -> void: _pass.open())
 	stage.add_child(_season_pill)
-	if Orient.portrait:
-		stage.add_child(_make_side_button("gift", "res://assets/ui/hub/gift_box.png", "ПОДАРОК", false, 8.0, func() -> void: _daily.open()))
-		stage.add_child(_make_side_button("chest", "res://assets/ui/chests_v2/free.png", "БЕСПЛАТНО", false, 132.0, func() -> void: _chests.open()))
-		stage.add_child(_make_side_button("news", "res://assets/ui/hub/news.png", "НОВОСТИ", true, 8.0, func() -> void: _changelog.open()))
-		stage.add_child(_make_side_button("vip", "res://assets/ui/hub/vip.png", "VIP", true, 124.0, func() -> void: _vip.open()))
-	else:
-		var left := [
-			["gift", "res://assets/ui/hub/gift_box.png", "ПОДАРОК", func() -> void: _daily.open()],
-			["chest", "res://assets/ui/chests_v2/free.png", "БЕСПЛАТНО", func() -> void: _chests.open()],
-		]
-		var right := [
-			["vip", "res://assets/ui/hub/vip.png", "VIP", func() -> void: _vip.open()],
-			["news", "res://assets/ui/hub/news.png", "НОВОСТИ", func() -> void: _changelog.open()],
-		]
-		for i in left.size():
-			var spec: Array = left[i]
-			stage.add_child(_make_side_button(spec[0], spec[1], spec[2], false, 6.0, spec[3], i, 76.0))
-		for i in right.size():
-			var spec: Array = right[i]
-			stage.add_child(_make_side_button(spec[0], spec[1], spec[2], true, 6.0, spec[3], i, 76.0))
+	var actions := [
+		["gift", "res://assets/ui/hub/gift_box.png", "ПОДАРОК", false, 0, func() -> void: _daily.open()],
+		["chest", "res://assets/ui/chests_v2/free.png", "БЕСПЛАТНО", false, 1, func() -> void: _chests.open()],
+		["vip", "res://assets/ui/hub/vip.png", "VIP", true, 0, func() -> void: _vip.open()],
+		["news", "res://assets/ui/hub/news.png", "НОВОСТИ", true, 1, func() -> void: _changelog.open()],
+	]
+	for spec: Array in actions:
+		stage.add_child(_make_side_button(spec[0], spec[1], spec[2], spec[3], 54.0, spec[5], spec[4], 76.0))
 	for key in _side_buttons:
 		(_side_buttons[key]["caption"] as Label).visible = true
 	_stage = stage
 	_sync_tester_button()
-	stage.gui_input.connect(func(event: InputEvent) -> void:
-		var tapped := UiStyle.is_tap(event)
-		if tapped:
-			_preview.celebrate()
-			_preview.fire_burst())
 	return stage
 
 
@@ -572,7 +545,7 @@ func _build_stage() -> Control:
 func _build_play() -> Control:
 	var play := Button.new()
 	play.text = "В БОЙ"
-	play.custom_minimum_size = Vector2(0, 136 if Orient.portrait else 108)
+	play.custom_minimum_size = Vector2(0, 136 if Orient.portrait else 88)
 	play.focus_mode = Control.FOCUS_NONE
 	play.add_theme_font_size_override("font_size", 60 if Orient.portrait else 54)
 	for state in ["font_color", "font_hover_color", "font_pressed_color"]:
@@ -596,7 +569,7 @@ func _build_modes() -> Control:
 	row.add_theme_constant_override("separation", 12)
 	var titles := ["ВЫЖИВАНИЕ", "ЛЕДЯНОЙ РЕЙД", "КАМПАНИЯ"]
 	for i in 3:
-		var button := UiStyle.button(titles[i], UiStyle.PANEL, 22 if Orient.portrait else 20, Vector2(0, 68 if Orient.portrait else 60))
+		var button := UiStyle.button(titles[i], UiStyle.PANEL, 22 if Orient.portrait else 20, Vector2(0, 68 if Orient.portrait else 56))
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.toggle_mode = true
 		button.pressed.connect(_on_mode_pressed.bind(i))
@@ -616,7 +589,7 @@ func _build_modes() -> Control:
 
 ## Отдельное окно коопа на двоих («Выживание»): тренировка, комната, приглашения друзей.
 func _build_coop_button() -> Control:
-	var button := UiStyle.button("КООП · ОТРЯД НА ДВОИХ", Color("#00a5b8"), 22 if Orient.portrait else 20, Vector2(0, 58 if Orient.portrait else 50))
+	var button := UiStyle.button("КООП · ОТРЯД НА ДВОИХ", Color("#00a5b8"), 22 if Orient.portrait else 20, Vector2(0, 58 if Orient.portrait else 46))
 	button.name = "CoopButton"
 	_coop_button = button
 	button.pressed.connect(func() -> void: open_coop())
@@ -836,7 +809,7 @@ func _select_mode(mode: int) -> void:
 
 func _build_weapon_chip() -> Control:
 	var chip := Button.new()
-	chip.custom_minimum_size = Vector2(0, 84 if Orient.portrait else 78)
+	chip.custom_minimum_size = Vector2(0, 84 if Orient.portrait else 74)
 	chip.focus_mode = Control.FOCUS_NONE
 	var normal := UiStyle.box(Color(0.12, 0.13, 0.12, 0.9), Color("#d9962b"), 3, 8)
 	chip.add_theme_stylebox_override("normal", normal)
@@ -937,17 +910,11 @@ func _on_play() -> void:
 
 
 func _on_skin_changed() -> void:
-	_preview.set_skin(SaveService.get_skin())
-	_preview.celebrate()
 	_avatar.queue_redraw()
 	_refresh()
 
 
 func _on_weapon_changed(_weapon_id: StringName) -> void:
-	var weapon := SaveService.get_loadout()
-	_preview.raccoon.weapon_icon = weapon.icon
-	_preview.raccoon.weapon_tier = weapon.tier
-	_preview.raccoon.weapon_color = weapon.effect_color
 	_refresh()
 
 
@@ -1012,37 +979,6 @@ class _NotifyDot:
 		draw_circle(Vector2(12, 12), 9.0, UiStyle.DANGER)
 
 
-## Сборная металлическая площадка под героем, без мигающих колец и искр.
-class HeroStage:
-	extends Control
-
-	func _init() -> void:
-		mouse_filter = Control.MOUSE_FILTER_STOP
-		resized.connect(queue_redraw)
-
-	func _draw() -> void:
-		var center := Vector2(size.x * 0.5, size.y * 0.5 + 118.0)
-		var half := minf(206.0, size.x * 0.37)
-		for i in 4:
-			draw_circle(center - Vector2(0, 92), 185.0 - i * 38, Color(1.0, 0.67, 0.32, 0.022))
-		var top := PackedVector2Array([center + Vector2(-half + 30, -40), center + Vector2(half - 30, -40), center + Vector2(half, 8), center + Vector2(half - 22, 38), center + Vector2(-half + 22, 38), center + Vector2(-half, 8)])
-		var lip := top.duplicate()
-		for i in lip.size():
-			lip[i].y += 10
-		draw_colored_polygon(lip, Color("#0d1217"))
-		draw_colored_polygon(top, Color("#293237"))
-		var outline := top.duplicate()
-		outline.append(top[0])
-		draw_polyline(outline, Color("#81908e"), 2, true)
-		for i in range(-3, 4):
-			var x := center.x + i * half * 0.22
-			draw_line(Vector2(x, center.y - 33), Vector2(x + 18, center.y + 29), Color("#151d22"), 2, true)
-		draw_line(center + Vector2(-half + 25, 33), center + Vector2(half - 25, 33), Color("#ba965e"), 3, true)
-		for side in [-1, 1]:
-			for y in [-28, 23]:
-				draw_circle(center + Vector2(side * (half - 38), y), 3, Color("#9caaa6"))
-
-
 ## Тёмный градиент поверх живого фона: читаемость интерфейса.
 class ShadeOverlay:
 	extends Control
@@ -1055,7 +991,7 @@ class ShadeOverlay:
 		var steps := 24
 		for i in steps:
 			var t := float(i) / (steps - 1)
-			var alpha := lerpf(0.72, 0.35, sin(t * PI)) if t < 0.5 else lerpf(0.35, 0.85, (t - 0.5) * 2.0)
+			var alpha := lerpf(0.45, 0.12, sin(t * PI)) if t < 0.5 else lerpf(0.12, 0.5, (t - 0.5) * 2.0)
 			draw_rect(Rect2(0, h * i / steps, size.x, h / steps + 1.0), Color(0.02, 0.024, 0.02, alpha))
 
 
@@ -1069,19 +1005,21 @@ class LogoText:
 
 	func _draw() -> void:
 		var title := "TRASH SQUAD"
-		var fs := 84
+		var compact := size.y < 100.0
+		var fs := 64 if compact else 84
 		while fs > 30 and font.get_string_size(title, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > size.x * 0.94:
 			fs -= 4
 		var w := font.get_string_size(title, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
-		var start := Vector2((size.x - w) * 0.5, size.y - 52.0)
+		var start := Vector2((size.x - w) * 0.5, size.y - (34.0 if compact else 52.0))
 		draw_string_outline(font, start + Vector2(0, 5), title, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 14, Color(0, 0, 0, 0.55))
 		draw_string_outline(font, start, title, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 12, Color("#0d0f0e"))
 		var split := start.x + font.get_string_size("TRASH ", HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
 		draw_string(font, start, "TRASH ", HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color("#ece7d3"))
 		draw_string(font, Vector2(split, start.y), "SQUAD", HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color("#ff9a2e"))
 		var cx := size.x * 0.5
-		var y := size.y - 34.0
+		var y := size.y - (24.0 if compact else 34.0)
 		draw_line(Vector2(cx - w * 0.5, y), Vector2(cx + w * 0.5, y), Color("#d9962b"), 3.0)
 		var sub := "ОТРЯД ЗАЧИСТКИ"
-		var sw := font.get_string_size(sub, HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
-		draw_string(font, Vector2(cx - sw * 0.5, size.y - 8.0), sub, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, Color("#c9bd96"))
+		var sub_size := 16 if compact else 20
+		var sw := font.get_string_size(sub, HORIZONTAL_ALIGNMENT_LEFT, -1, sub_size).x
+		draw_string(font, Vector2(cx - sw * 0.5, size.y - (3.0 if compact else 8.0)), sub, HORIZONTAL_ALIGNMENT_LEFT, -1, sub_size, Color("#c9bd96"))

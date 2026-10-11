@@ -188,6 +188,10 @@ var _framed := false
 var _auto := false
 var _run_phase := 0.0
 var _idle_phase := 0.0
+var _frame_clip := ""
+var _frame_elapsed := 0.0
+var _frame_state := -1
+var _running := false
 var _hit_variant := 0
 var _gait := 0.0
 var _time := 0.0
@@ -529,6 +533,10 @@ func _setup_visual() -> void:
 	_move_amount = 0.0
 	_run_phase = randf() * 4.0
 	_idle_phase = randf() * 4.0
+	_frame_clip = ""
+	_frame_elapsed = 0.0
+	_frame_state = -1
+	_running = false
 	_hit_variant = 0
 	_shield_dir = Vector2.RIGHT
 
@@ -648,7 +656,12 @@ func tick(delta: float, player: Player, nav: Callable = Callable()) -> void:
 		var bonus := 1.5 if _act == Act.LUNGE or _act == Act.DASH else 1.0
 		Player.last_source = data.id
 		player.take_damage(data.contact_damage * bonus * damage_mult, dir)
-	_animate(delta, desired)
+	# Отброс и расталкивание не превращаются в шаги; стена останавливает цикл бега.
+	var moved := (global_position - before) / maxf(delta, 0.001)
+	var locomotion := Vector2.ZERO
+	if desired.length_squared() > 0.001:
+		locomotion = desired.normalized() * clampf(moved.dot(desired.normalized()), 0.0, desired.length())
+	_animate(delta, locomotion)
 	if data.is_boss():
 		_update_boss_damage(delta)
 
@@ -1220,7 +1233,8 @@ func _animate(delta: float, desired: Vector2) -> void:
 	var moving := speed > 5.0
 	_time += delta
 	_move_amount = move_toward(_move_amount, clampf(speed / maxf(data.move_speed, 1.0), 0.0, 1.0) if moving else 0.0, delta * 5.0)
-	_gait += delta * (4.0 + 9.0 * _move_amount) * clampf(speed / 110.0, 0.6, 2.0)
+	var stride := clampf(data.radius * 2.2, 42.0, 138.0)
+	_gait += delta * speed * TAU / stride
 	var step_wave := absf(sin(_gait))
 	# У рисованных кадров ноги уже задают шаг: точка опоры остаётся на земле.
 	var hop := step_wave * HOP_HEIGHT * _move_amount * (0.0 if _framed or _auto else (0.5 if data.is_boss() else 1.0))
@@ -1266,9 +1280,9 @@ func _animate(delta: float, desired: Vector2) -> void:
 			_facing_left = _shield_dir.x < 0.0
 	elif _brain != null or data.behavior in [EnemyData.Behavior.RANGED, EnemyData.Behavior.BOMBER, EnemyData.Behavior.TRAPPER, EnemyData.Behavior.TRICKSTER]:
 		var face_delta := _target_pos.x - global_position.x
-		if absf(face_delta) > maxf(8.0, data.radius * 0.35):
+		if absf(face_delta) > maxf(8.0, data.radius * 0.35) and (_brain == null or _brain.windup <= 0.0 and _brain.strike <= 0.0) and _act in [Act.MOVE, Act.RECOVER]:
 			_facing_left = face_delta < 0.0
-	elif absf(desired.x) > 5.0 and _act != Act.WINDUP:
+	elif absf(desired.x) > 5.0 and _act == Act.MOVE:
 		_facing_left = desired.x < 0.0
 	var hover_bob := sin(_time * 3.4) * 5.0 if data.flying else 0.0
 	var tremble := Vector2.ZERO
@@ -1347,45 +1361,65 @@ func _pick_frame(delta: float, speed: float, hurt: float) -> void:
 	var sheet := _sprite.frame_sheet
 	var clip := ""
 	var phase := 0.0
+	if _move_amount >= 0.2 and speed > 5.0:
+		_running = true
+	elif _move_amount <= 0.08 or speed <= 1.0:
+		_running = false
 	if _brain != null:
-		var pick: Array = _brain.clip(_move_amount > 0.2, hurt)
+		var pick: Array = _brain.clip(_running, hurt)
 		clip = str(pick[0])
 		phase = float(pick[1])
-		if phase < 0.0:
-			var fps := FrameDB.clip_fps(sheet, clip) if FrameDB.has_clip(sheet, clip) else 3.0
-			_idle_phase += delta * fps
-			phase = _idle_phase
+		if int(_brain.state) != _frame_state:
+			_frame_state = int(_brain.state)
+			_frame_clip = ""
 		if FrameDB.has_clip(sheet, clip):
+			_frame_elapsed = _frame_elapsed + delta if clip == _frame_clip else 0.0
+			_frame_clip = clip
+			if phase < 0.0:
+				phase = _locomotion_phase(sheet, clip, speed, delta)
+			elif is_zero_approx(phase):
+				phase = _frame_elapsed * FrameDB.clip_fps(sheet, clip)
 			_sprite.set_frame(FrameDB.clip_frame(sheet, clip, phase))
 			return
 		clip = ""
 	match _act:
-		Act.WINDUP, Act.AIM:
+		Act.WINDUP, Act.THROW, Act.SLAM:
 			clip = "windup"
+			phase = clampf(1.0 - _act_time / _act_total, 0.0, 0.999) * FrameDB.clip_length(sheet, clip)
+		Act.AIM:
+			clip = "aim" if FrameDB.has_clip(sheet, "aim") else "windup"
+			phase = clampf(1.0 - _act_time / _act_total, 0.0, 0.999) * FrameDB.clip_length(sheet, clip)
 		Act.LUNGE, Act.DASH:
 			clip = "strike"
-			phase = clampf(1.0 - _act_time / _act_total, 0.0, 0.999) * FrameDB.clip_length(sheet, "strike")
+			phase = clampf(1.0 - _act_time / _act_total, 0.0, 0.999) * FrameDB.clip_length(sheet, clip)
 		Act.RECOVER:
 			if _act_time > RECOVER_TIME - 0.14:
 				clip = "strike"
 				phase = 99.0
 		Act.FUSE:
 			clip = "taunt"
+			phase = (FUSE_TIME - _act_time) * FrameDB.clip_fps(sheet, clip)
 	if not clip.is_empty() and not FrameDB.has_clip(sheet, clip):
 		clip = ""
 	if clip.is_empty():
 		if hurt > 0.0 and FrameDB.has_clip(sheet, "hit"):
 			clip = "hit"
-			phase = _hit_variant
-		elif _move_amount > 0.2:
-			clip = "run"
-			_run_phase += delta * FrameDB.clip_fps(sheet, "run") * clampf(speed / maxf(data.move_speed, 1.0), 0.6, 1.8)
-			phase = _run_phase
+			phase = (HIT_POP - _pop) * FrameDB.clip_fps(sheet, clip)
 		else:
-			clip = "idle"
-			_idle_phase += delta * FrameDB.clip_fps(sheet, "idle")
-			phase = _idle_phase
+			clip = "run" if _running else "idle"
+			phase = _locomotion_phase(sheet, clip, speed, delta)
+	_frame_clip = clip
 	_sprite.set_frame(FrameDB.clip_frame(sheet, clip, phase))
+
+
+func _locomotion_phase(sheet: Dictionary, clip: String, speed: float, delta: float) -> float:
+	var fps := FrameDB.clip_fps(sheet, clip)
+	if clip.ends_with("run"):
+		_run_phase += delta * fps * clampf(speed / maxf(data.move_speed, 1.0), 0.0, 2.5)
+		_gait = _run_phase * TAU / maxf(FrameDB.clip_length(sheet, clip), 1)
+		return _run_phase
+	_idle_phase += delta * fps
+	return _idle_phase
 
 
 ## Авто-риг: ноги вразвалку, корпус переваливается и наклоняется в атаку, голова кивает,
@@ -1456,6 +1490,12 @@ func aim_parts(world_target: Vector2) -> void:
 func part_muzzle(index: int) -> Vector2:
 	if index < _parts.count():
 		return _parts.muzzle(index)
+	if _framed:
+		var frame_points: Array = _sprite.frame_sheet.get("muzzles", [])
+		if _sprite.frame_index >= 0 and _sprite.frame_index < frame_points.size():
+			var points: PackedVector2Array = frame_points[_sprite.frame_index]
+			if index >= 0 and index < points.size():
+				return _sprite.global_transform * points[index]
 	if index < data.muzzles.size():
 		var m: Vector2 = data.muzzles[index]
 		return global_position + Vector2(-m.x if _facing_left else m.x, m.y) * _size_mult

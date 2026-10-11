@@ -1043,7 +1043,10 @@ func clip(moving: bool, hurt: float) -> Array:
 				return ["vomit", 0.0]
 	match state:
 		State.TRANSFORM:
-			return ["hit" if pattern == "overlord" else "wreck", 0.0]
+			var transform_clip := "wreck"
+			if pattern == "overlord" and not FrameDB.has_clip(enemy.get_sprite().frame_sheet, transform_clip):
+				transform_clip = "hit"
+			return [transform_clip, state_time * 4.0]
 		State.ROCKETS:
 			return ["strike" if _flash_clip > 0.0 else "aim", 0.0]
 		State.BASS_WINDUP, State.BASS:

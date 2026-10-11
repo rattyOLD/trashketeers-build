@@ -18,6 +18,11 @@ func _check(ok: bool, message: String) -> void:
 
 func _run() -> void:
 	var configs: Array = ConfigLoader.load_json("res://data/characters.json").get("characters", [])
+	var weapons: Array[StringName] = []
+	for sprite: Dictionary in ConfigLoader.load_json("res://data/weapon_sprites.json").get("sprites", []):
+		var icon := StringName(str(sprite["icon"]))
+		if not str(icon).begins_with("melee_"):
+			weapons.append(icon)
 	for id in IDS:
 		var character: Dictionary = {}
 		for cfg: Dictionary in configs:
@@ -34,7 +39,7 @@ func _run() -> void:
 				actor._clip_idx = frame
 				var point: Array = actor._clip_grip[clip][frame]
 				actor._clip_grip_px = Vector2(float(point[0]), float(point[1]))
-				for weapon: StringName in [&"pistol", &"revolver", &"shotgun", &"rifle", &"sniper", &"minigun"]:
+				for weapon: StringName in weapons:
 					actor.weapon_icon = weapon
 					for angle_index in 8:
 						var dir := Vector2.from_angle(angle_index * TAU / 8.0)
@@ -94,6 +99,9 @@ func _run() -> void:
 			{"name":"arms", "weapon":&"pistol", "dir":Vector2.RIGHT, "show_weapon":false},
 			{"name":"pistol", "weapon":&"pistol", "dir":Vector2.RIGHT},
 			{"name":"shotgun", "weapon":&"shotgun", "dir":Vector2.RIGHT},
+			{"name":"tommy", "weapon":&"tommy", "dir":Vector2.RIGHT},
+			{"name":"golden_smg", "weapon":&"golden_smg", "dir":Vector2.RIGHT},
+			{"name":"sniper", "weapon":&"sniper", "dir":Vector2.RIGHT},
 			{"name":"up", "weapon":&"rifle", "dir":Vector2.UP},
 			{"name":"left", "weapon":&"pistol", "dir":Vector2.LEFT},
 			{"name":"run_shotgun", "weapon":&"shotgun", "dir":Vector2.RIGHT, "velocity":Vector2(160,0)},
@@ -107,9 +115,11 @@ func _run() -> void:
 				actor._shoot_t = 0.0
 				actor._fidget_t = 0.0
 				actor.update_motion(sample.get("velocity",Vector2.ZERO), sample["dir"], 1.0)
+				actor._blink_t = -1.0
+				actor._apply_hero()
 			for i in 4:
 				await get_tree().process_frame
 			await RenderingServer.frame_post_draw
 			get_viewport().get_texture().get_image().save_png(output.path_join(sample["name"] + ".png"))
-	print("HAND_GRIP failures=%d" % failures)
+	print("HAND_GRIP failures=%d weapons=%d heroes=%d" % [failures, weapons.size(), actors.size()])
 	get_tree().quit(1 if failures else 0)

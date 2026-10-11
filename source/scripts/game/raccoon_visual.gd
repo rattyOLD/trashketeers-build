@@ -56,7 +56,7 @@ const CARRY_SIDEARM := [0.3, 0.05]
 const CARRY_LONG := [0.4, 0.0]
 const CARRY_HEAVY := [0.35, -0.12]
 const CARRY_MELEE := [-0.35, -0.7]
-const SIDEARMS := [&"pistol", &"revolver", &"scrap_pistol", &"blaster", &"capgun", &"slingshot", &"golden_smg", &"harpoon", &"coil", &"casino"]
+const SIDEARMS := [&"pistol", &"revolver", &"scrap_pistol", &"blaster", &"capgun", &"slingshot"]
 const HEAVY_GUNS := [&"launcher", &"mortar", &"minigun", &"lmg", &"railgun", &"flamer", &"heavy_barrel", &"magnet", &"toaster", &"prism"]
 const GUN_SCALE := 0.7
 const SHADOW_OFFSET := Vector2(0, 18)
@@ -325,7 +325,7 @@ func _enter_hero(cfg: Dictionary) -> void:
 	hero.visible = true
 	body.visible = false
 	arm.visible = false
-	hero.texture = _clip_frames["idle"][0] if _clip_mode else _hero_frames[1]
+	_set_hero_texture(_clip_frames["idle"][0] if _clip_mode else _hero_frames[1])
 	_apply_rig()
 
 
@@ -468,7 +468,7 @@ func _clip_pick() -> void:
 		idx = int(fposmod(_gait / TAU, 1.0) * 8.0) % 8
 	if not _clip_frames.has(clip):
 		_load_lazy_clip(clip)
-	hero.texture = (_clip_frames[clip] as Array)[idx]
+	_set_hero_texture((_clip_frames[clip] as Array)[idx])
 	_clip_cur = clip
 	_clip_idx = idx
 	var points: Array = _clip_grip.get(clip, [])
@@ -489,6 +489,18 @@ func _leave_hero() -> void:
 	body.visible = true
 	arm.visible = true
 	_apply_rig()
+
+
+func _set_hero_texture(tex: Texture2D) -> void:
+	if hero.texture == tex:
+		return
+	hero.texture = tex
+	var uv_rect := Vector4(0, 0, 1, 1)
+	if tex is AtlasTexture:
+		var region := (tex as AtlasTexture).region
+		var size := (tex as AtlasTexture).atlas.get_size()
+		uv_rect = Vector4(region.position.x / size.x, region.position.y / size.y, region.size.x / size.x, region.size.y / size.y)
+	(hero.material as ShaderMaterial).set_shader_parameter("frame_rect", uv_rect)
 
 
 func _hero_frame_index() -> int:
@@ -554,7 +566,8 @@ func update_motion(velocity: Vector2, aim: Vector2, delta: float) -> void:
 	var speed := velocity.length()
 	_run = move_toward(_run, clampf(speed / 200.0, 0.0, 1.0), delta * 6.0)
 
-	_gait += delta * (5.0 + 9.0 * _run) * (0.6 + 0.4 * clampf(speed / 240.0, 0.0, 1.4))
+	# Один полный цикл — два шага; неподвижные ноги не прокручивают бег под стойкой.
+	_gait += delta * minf(speed, 420.0) * TAU / 112.0
 	_breath += delta * (2.4 + 2.0 * _run)
 	_dash_blend = move_toward(_dash_blend, 1.0 if dashing else 0.0, delta * 12.0)
 	_dash_t = _dash_t + delta if dashing else 0.0
@@ -584,7 +597,7 @@ func update_motion(velocity: Vector2, aim: Vector2, delta: float) -> void:
 	_body_kick = _body_kick.lerp(Vector2.ZERO, 1.0 - exp(-KICK_DECAY * delta))
 	var local_accel := accel.x * _facing
 	var lean_target := clampf(velocity.x / 260.0, -1.0, 1.0) * 0.07 + clampf(accel.x * 0.00004, -0.05, 0.05)
-	_lean = lerpf(_lean, lean_target * (1.0 - _dash_blend), clampf(10.0 * delta, 0.0, 1.0))
+	_lean = lerpf(_lean, lean_target * (1.0 - _dash_blend), 1.0 - exp(-10.0 * delta))
 	_shot_squash = move_toward(_shot_squash, 0.0, delta * 0.9)
 	_turn = move_toward(_turn, 0.0, delta * 9.0)
 	var phase := floori(_gait / PI)
@@ -612,10 +625,10 @@ func update_motion(velocity: Vector2, aim: Vector2, delta: float) -> void:
 		target += sin(_action_left / ACTION_TIME * PI) * 0.12
 	if aiming and aim.length_squared() > 0.0001:
 		target = _local_angle(aim) + sin(_gait) * 0.012 * _run
-	_carry_lag = lerpf(_carry_lag, clampf(-local_accel * 0.00022, -0.14, 0.14), clampf(9.0 * delta, 0.0, 1.0))
+	_carry_lag = lerpf(_carry_lag, clampf(-local_accel * 0.00022, -0.14, 0.14), 1.0 - exp(-9.0 * delta))
 	target += _carry_lag * (0.35 if aiming else 1.0)
-	_gun_angle = lerp_angle(_gun_angle, target, clampf(AIM_SMOOTH * delta, 0.0, 1.0))
-	_aim_local = lerpf(_aim_local, clampf(_gun_angle, -0.9, 0.9) if aiming else 0.0, clampf(8.0 * delta, 0.0, 1.0))
+	_gun_angle = lerp_angle(_gun_angle, target, 1.0 - exp(-AIM_SMOOTH * delta))
+	_aim_local = lerpf(_aim_local, clampf(_gun_angle, -0.9, 0.9) if aiming else 0.0, 1.0 - exp(-8.0 * delta))
 	_apply_rig()
 	queue_redraw()
 	_gun_layer.queue_redraw()
@@ -626,7 +639,7 @@ func update_motion(velocity: Vector2, aim: Vector2, delta: float) -> void:
 
 ## Свет окружения (EnvLights.sample) — плавно, без скачков при входе в пятно.
 func set_env_light(light: Color, delta: float) -> void:
-	_env = _env.lerp(light, clampf(delta * 8.0, 0.0, 1.0))
+	_env = _env.lerp(light, 1.0 - exp(-delta * 8.0))
 	var v := Vector3(_env.r, _env.g, _env.b)
 	body.set_param("env_light", v)
 	_arm_material.set_shader_parameter("env_light", v)
@@ -634,6 +647,8 @@ func set_env_light(light: Color, delta: float) -> void:
 
 func flash() -> void:
 	_flash = FLASH_TIME
+	if _hurt > HURT_TIME - HIT_CLIP_TIME:
+		return
 	_hurt = HURT_TIME
 	_head_spring.kick(-4.5)
 	_ear_spring.kick(-6.0)
@@ -929,7 +944,7 @@ func _apply_hero() -> void:
 	if _clip_mode:
 		_clip_pick()
 	else:
-		hero.texture = _hero_frames[_hero_frame_index()]
+		_set_hero_texture(_hero_frames[_hero_frame_index()])
 	var tint := _current_tint()
 	var lit := Color(clampf(0.95 + _env.r * 0.35, 0.95, 1.3), clampf(0.95 + _env.g * 0.35, 0.95, 1.3), clampf(0.95 + _env.b * 0.35, 0.95, 1.3))
 	hero.modulate = Color(tint.r * lit.r, tint.g * lit.g, tint.b * lit.b, tint.a)
@@ -1132,7 +1147,6 @@ func _draw_gun_layer() -> void:
 	if _clip_has_arm_rig():
 		_draw_clip_part(_gun_layer, "left", "fore", _clip_hand_target("left", center, dir))
 		_gun_layer.draw_set_transform_matrix(Transform2D.IDENTITY)
-		_draw_clip_arm(_gun_layer, "right", _clip_hand_target("right", center, dir), dir, false)
 	if show_held_weapon:
 		WeaponIcons.draw(_gun_layer, weapon_icon, center, _weapon_scale(), dir.angle(), weapon_color, dir.x < 0.0)
 		if not melee_active:
@@ -1152,9 +1166,11 @@ func _draw_gun_layer() -> void:
 			_gun_layer.draw_circle(paw, 4.5, sleeve.lightened(0.15))
 	if _clip_mode and not _dead:
 		if _clip_has_arm_rig():
+			# Ближнее предплечье и кисть перекрывают приклад/рукоять до спуска.
+			_draw_clip_arm(_gun_layer, "right", _clip_hand_target("right", center, dir), dir, false)
 			_draw_clip_arm(_gun_layer, "right", _clip_hand_target("right", center, dir), dir, true)
-			# The supporting palm stays beneath/behind the fore-end. Its fore texture already
-			# contains the hand; painting its cuff/fingers over the receiver creates a false wrist.
+			# Дальняя рука проходит под стволом, пальцы охватывают цевьё поверх него.
+			_draw_clip_arm(_gun_layer, "left", _clip_hand_target("left", center, dir), dir, true)
 		else:
 			_draw_grip_hand()
 	if show_aim_line and aiming and not melee_active:

@@ -40,13 +40,17 @@ func _run() -> void:
 	for path: String in art:
 		var texture: Texture2D = load(path)
 		var logical: Array = art[path]["logical_size"]
-		_check(texture.get_size() == Vector2(float(logical[0]), float(logical[1])) * 2.0, "texture density " + path)
-		_check(EnemyArt.density(path) == 2.0, "density registry " + path)
+		var density := float(art[path]["density"])
+		var expanded_boss := path in ["res://assets/bosses/overlord_frames.png", "res://assets/bosses/magnate_frames.png"]
+		_check(density == (1.0 if expanded_boss else 2.0), "reviewed texture density " + path)
+		_check(texture.get_size() == Vector2(float(logical[0]), float(logical[1])) * density, "texture dimensions " + path)
+		_check(EnemyArt.density(path) == density, "density registry " + path)
 	for sid: String in raw_sheets:
 		var raw: Dictionary = raw_sheets[sid]
 		if not art.has(raw["texture"]):
 			continue
 		var sheet := FrameDB.get_sheet(sid)
+		var density := float(sheet["density"])
 		var sprite := RigSprite.new()
 		_check(sprite.setup_frames(sid, 0.0), "setup " + sid)
 		var image: Image = sprite.texture.get_image()
@@ -61,13 +65,13 @@ func _run() -> void:
 			var vertices: PackedVector2Array = arrays[Mesh.ARRAY_VERTEX]
 			var uv: PackedVector2Array = arrays[Mesh.ARRAY_TEX_UV]
 			_check(vertices[0].is_equal_approx(-pivot) and vertices[2].is_equal_approx(rect.size - pivot), "world geometry " + sid + str(index))
-			_check(uv[0].is_equal_approx(rect.position * 2.0 / sprite.texture.get_size()), "HD atlas UV " + sid + str(index))
-			_check(not image.get_region(Rect2i(rect.position * 2.0, rect.size * 2.0)).is_invisible(), "nonempty pose " + sid + str(index))
+			_check(uv[0].is_equal_approx(rect.position * density / sprite.texture.get_size()), "atlas UV " + sid + str(index))
+			_check(not image.get_region(Rect2i(rect.position * density, rect.size * density)).is_invisible(), "nonempty pose " + sid + str(index))
 			frame_count += 1
 		var corpse := RigSprite.new()
 		corpse.setup_frames(sid)
 		corpse.copy_look(sprite)
-		_check(corpse.shader_material.get_shader_parameter("sample_density") == 2.0, "corpse outline density " + sid)
+		_check(corpse.shader_material.get_shader_parameter("sample_density") == density, "corpse outline density " + sid)
 		corpse.free()
 		sprite.free()
 	for rid: String in rigs:

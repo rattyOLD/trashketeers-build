@@ -97,6 +97,12 @@ static func _parse(sheet_id: String, raw: Dictionary) -> Dictionary:
 	var regions := PackedStringArray()
 	for p in raw.get("regions", []):
 		regions.append(str(p))
+	var muzzles: Array[PackedVector2Array] = []
+	for frame_points: Array in raw.get("muzzles", []):
+		var points := PackedVector2Array()
+		for point: Array in frame_points:
+			points.append(Vector2(float(point[0]), float(point[1])))
+		muzzles.append(points)
 	return {
 		"density": EnemyArt.density(texture_path),
 		"id": sheet_id,
@@ -108,4 +114,5 @@ static func _parse(sheet_id: String, raw: Dictionary) -> Dictionary:
 		"pivots": pivots,
 		"clips": clips,
 		"faces_right": bool(raw.get("faces_right", true)),
+		"muzzles": muzzles,
 	}

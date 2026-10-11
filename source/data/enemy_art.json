@@ -37,10 +37,10 @@
       ]
     },
     "res://assets/bosses/magnate_frames.png": {
-      "density": 2,
+      "density": 1,
       "logical_size": [
-        908,
-        602
+        2048,
+        1024
       ]
     },
     "res://assets/enemies/map_acid_rain.png": {
@@ -254,10 +254,10 @@
       ]
     },
     "res://assets/bosses/overlord_frames.png": {
-      "density": 2,
+      "density": 1,
       "logical_size": [
-        892,
-        566
+        2048,
+        1024
       ]
     },
     "res://assets/bosses/baron_frames.png": {
