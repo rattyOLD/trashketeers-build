@@ -193,6 +193,8 @@ var _gait := 0.0
 var _time := 0.0
 var _heal_timer := 1.0
 var _move_amount := 0.0
+var _visual_lean := 0.0
+var _visual_squash := 1.0
 var _recoil := 0.0
 var _alt_time := 0.0
 var _shield_dir := Vector2.RIGHT
@@ -301,6 +303,8 @@ func activate(enemy_data: EnemyData, at: Vector2, hp_mult: float = 1.0, dmg_mult
 	last_damage_kind = &""
 	_emerge = 0.0 if data.is_boss() else EMERGE_TIME
 	_recoil = 0.0
+	_visual_lean = 0.0
+	_visual_squash = 1.0
 	_alt_time = 0.0
 	_block_cooldown = 0.0
 	_attack_count = 0
@@ -422,7 +426,7 @@ func is_framed() -> bool:
 func get_corpse_origin() -> Vector2:
 	if _auto and _sprite.texture != null:
 		var pivot: Vector2 = _sprite.rig.get("pivot", Vector2.ZERO)
-		var center := _sprite.texture.get_size() * 0.5 - pivot
+		var center := EnemyArt.logical_size(_sprite.texture) * 0.5 - pivot
 		return _sprite.global_transform * center
 	return global_position + _sprite.position
 
@@ -479,7 +483,9 @@ func _setup_visual() -> void:
 		target.set_shader_parameter("outline_px", outline_px)
 		target.set_shader_parameter("flash", 0.0)
 		target.set_shader_parameter("tint", data.sprite_modulate)
-	_alt_material.set_shader_parameter("outline_px", data.outline_world / maxf(_alt_scale(), 0.01))
+	var alt_density := EnemyArt.density(data.attack_texture.resource_path) if data.attack_texture != null else 1.0
+	_alt_material.set_shader_parameter("sample_density", alt_density)
+	_alt_material.set_shader_parameter("outline_px", data.outline_world / maxf(_alt_scale() * alt_density, 0.01))
 	_parts.set_param("outline_color", rim)
 	_parts.set_param("boss_damage", 0.0)
 	_parts.set_param("outline_px", outline_px * 0.8)
@@ -556,7 +562,7 @@ static func _pick_weighted(table: Array) -> Dictionary:
 func _alt_scale() -> float:
 	if data.attack_texture == null:
 		return 1.0
-	var width := data.attack_width if data.attack_width > 0.0 else data.attack_texture.get_width() * data.sprite_scale.x
+	var width := data.attack_width if data.attack_width > 0.0 else EnemyArt.logical_size(data.attack_texture).x * data.sprite_scale.x
 	return width / data.attack_texture.get_width()
 
 
@@ -1216,7 +1222,8 @@ func _animate(delta: float, desired: Vector2) -> void:
 	_move_amount = move_toward(_move_amount, clampf(speed / maxf(data.move_speed, 1.0), 0.0, 1.0) if moving else 0.0, delta * 5.0)
 	_gait += delta * (4.0 + 9.0 * _move_amount) * clampf(speed / 110.0, 0.6, 2.0)
 	var step_wave := absf(sin(_gait))
-	var hop := step_wave * HOP_HEIGHT * _move_amount * (0.5 if data.is_boss() else 1.0)
+	# У рисованных кадров ноги уже задают шаг: точка опоры остаётся на земле.
+	var hop := step_wave * HOP_HEIGHT * _move_amount * (0.0 if _framed or _auto else (0.5 if data.is_boss() else 1.0))
 	var squash := 1.0 + (0.5 - step_wave) * 0.11 * _move_amount + sin(_time * 2.2) * 0.02 * (1.0 - _move_amount)
 	var lean := 0.0
 	var windup := 0.0
@@ -1255,24 +1262,32 @@ func _animate(delta: float, desired: Vector2) -> void:
 	_recoil = move_toward(_recoil, 0.0, delta * 4.0)
 
 	if data.shield:
-		_facing_left = _shield_dir.x < 0.0
+		if absf(_shield_dir.x) > 0.08:
+			_facing_left = _shield_dir.x < 0.0
 	elif _brain != null or data.behavior in [EnemyData.Behavior.RANGED, EnemyData.Behavior.BOMBER, EnemyData.Behavior.TRAPPER, EnemyData.Behavior.TRICKSTER]:
-		_facing_left = _target_pos.x < global_position.x
+		var face_delta := _target_pos.x - global_position.x
+		if absf(face_delta) > maxf(8.0, data.radius * 0.35):
+			_facing_left = face_delta < 0.0
 	elif absf(desired.x) > 5.0 and _act != Act.WINDUP:
 		_facing_left = desired.x < 0.0
 	var hover_bob := sin(_time * 3.4) * 5.0 if data.flying else 0.0
 	var tremble := Vector2.ZERO
 	if _brain != null and windup > 0.2:
-		tremble = Vector2(sin(_time * 70.0), cos(_time * 83.0)) * 3.0 * windup
+		tremble = Vector2(sin(_time * 18.0), cos(_time * 21.0)) * 0.65 * windup
 	_sprite.position = Vector2(0, _sprite_base_y() + hover_bob - (0.0 if data.flying else hop) + rise) + tremble
 	var sway := sin(_gait) * (0.025 if (_framed or _auto) else 0.06) * _move_amount
 	if _act == Act.MOVE:
 		lean += 0.16 * _move_amount
 	if _framed:
-		lean *= 0.5
-		squash = 1.0 + (squash - 1.0) * 0.6
-	_sprite.rotation = (sway + lean * 0.6) * (-1.0 if _facing_left else 1.0)
-	_apply_sprite_scale((2.0 - squash) * pop, squash * pop)
+		lean *= 0.28
+		squash = 1.0 + (squash - 1.0) * 0.25
+	var response := 1.0 - exp(-delta * (32.0 if strike > 0.1 else 18.0))
+	_visual_lean = lerpf(_visual_lean, sway + lean * 0.6, response)
+	_visual_squash = lerpf(_visual_squash, squash, response)
+	_sprite.rotation = _visual_lean * (-1.0 if _facing_left else 1.0)
+	_apply_sprite_scale((2.0 - _visual_squash) * pop, _visual_squash * pop)
+	if _framed and _recoil > 0.0:
+		_sprite.position.x -= (1.0 if data.faces_right != _facing_left else -1.0) * 2.5 * _recoil
 
 	var visible_target := 1.0
 	if data.stealth_alpha < 1.0 and (_act == Act.MOVE or _act == Act.VANISH) and hurt <= 0.0:
@@ -1302,7 +1317,7 @@ func _animate(delta: float, desired: Vector2) -> void:
 	if _framed:
 		_pick_frame(delta, speed, hurt)
 	elif _auto:
-		_pose_auto(windup, strike, hurt)
+		_pose_auto(windup, strike, hurt, delta)
 	_parts.tick(delta)
 	_update_alt(delta, flash)
 	if _auto:
@@ -1375,20 +1390,20 @@ func _pick_frame(delta: float, speed: float, hurt: float) -> void:
 
 ## Авто-риг: ноги вразвалку, корпус переваливается и наклоняется в атаку, голова кивает,
 ## оружие/щит/бутылка/молот на своих костях — замах назад, удар вперёд, отдача.
-func _pose_auto(windup: float, strike: float, hurt: float) -> void:
+func _pose_auto(windup: float, strike: float, hurt: float, delta: float) -> void:
 	var m := _move_amount
 	var g := _gait
 	var t := _time
-	_sprite.reset_pose()
+	var response := 1.0 - exp(-delta * (32.0 if strike > 0.1 or _recoil > 0.5 else 18.0))
 	var step := sin(g)
-	_sprite.angles[BONE_LEG_L] = 0.34 * step * m
-	_sprite.angles[BONE_LEG_R] = -0.34 * step * m
-	_sprite.offsets[BONE_LEG_L] = Vector2(0, -7.0 * maxf(0.0, step) * m)
-	_sprite.offsets[BONE_LEG_R] = Vector2(0, -7.0 * maxf(0.0, -step) * m)
-	_sprite.angles[BONE_TORSO] = 0.07 * step * m + 0.05 * m - 0.16 * windup + 0.2 * strike - 0.1 * hurt
-	_sprite.offsets[BONE_TORSO] = Vector2(0, -4.0 * absf(step) * m)
-	_sprite.stretches[BONE_TORSO] = Vector2(-0.02, 0.025) * sin(t * 2.1) * (1.0 - m)
-	_sprite.angles[BONE_HEAD] = -0.05 * step * m + 0.04 * sin(t * 1.3) * (1.0 - m) - 0.25 * hurt + 0.08 * windup
+	_sprite.angles[BONE_LEG_L] = lerpf(_sprite.angles[BONE_LEG_L], 0.34 * step * m, response)
+	_sprite.angles[BONE_LEG_R] = lerpf(_sprite.angles[BONE_LEG_R], -0.34 * step * m, response)
+	_sprite.offsets[BONE_LEG_L] = _sprite.offsets[BONE_LEG_L].lerp(Vector2(0, -7.0 * maxf(0.0, step) * m), response)
+	_sprite.offsets[BONE_LEG_R] = _sprite.offsets[BONE_LEG_R].lerp(Vector2(0, -7.0 * maxf(0.0, -step) * m), response)
+	_sprite.angles[BONE_TORSO] = lerpf(_sprite.angles[BONE_TORSO], 0.07 * step * m + 0.05 * m - 0.16 * windup + 0.2 * strike - 0.1 * hurt, response)
+	_sprite.offsets[BONE_TORSO] = _sprite.offsets[BONE_TORSO].lerp(Vector2(1.2 * step * m, 0), response)
+	_sprite.stretches[BONE_TORSO] = _sprite.stretches[BONE_TORSO].lerp(Vector2(-0.02, 0.025) * sin(t * 2.1) * (1.0 - m), response)
+	_sprite.angles[BONE_HEAD] = lerpf(_sprite.angles[BONE_HEAD], -0.05 * step * m + 0.04 * sin(t * 1.3) * (1.0 - m) - 0.25 * hurt + 0.08 * windup, response)
 	var weapon := 0.04 * sin(t * 2.0)
 	var fist := 0.0
 	match data.behavior:
@@ -1405,8 +1420,8 @@ func _pose_auto(windup: float, strike: float, hurt: float) -> void:
 		weapon += -0.06
 	if _brain != null:
 		weapon = -0.3 * _brain.windup + 0.2 * _brain.strike
-	_sprite.angles[BONE_WEAPON] = weapon
-	_sprite.angles[BONE_FIST] = fist
+	_sprite.angles[BONE_WEAPON] = lerpf(_sprite.angles[BONE_WEAPON], weapon, response)
+	_sprite.angles[BONE_FIST] = lerpf(_sprite.angles[BONE_FIST], fist, response)
 	if data.behavior == EnemyData.Behavior.EXPLODER and _act == Act.FUSE:
 		_sprite.angles[BONE_TORSO] += 0.08 * sin(t * 50.0)
 		_sprite.angles[BONE_HEAD] += 0.12 * sin(t * 37.0)

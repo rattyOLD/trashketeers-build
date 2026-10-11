@@ -31,6 +31,7 @@ def main():
             image.thumbnail((512, 128) if path.stem == "bestiary_banner" else (96, 96), Image.Resampling.LANCZOS)
         image.save(DST / path.name, optimize=True)
     frames = json.loads((SOURCE / "data/frames.json").read_text())["sheets"]
+    art = json.loads((SOURCE / "data/enemy_art.json").read_text())["assets"]
     entries = json.loads((SOURCE / "data/enemies.json").read_text())["enemies"]
     portraits = DST / "portraits"
     portraits.mkdir(exist_ok=True)
@@ -41,6 +42,8 @@ def main():
         if sheet:
             first = sheet["clips"]["idle"]["frames"][0]
             x, y, w, h = sheet["frames"][first][:4]
+            density = art.get(path, {}).get("density", 1)
+            x, y, w, h = (round(v * density) for v in (x, y, w, h))
             im = im.crop((x, y, x + w, y + h))
         box = im.getchannel("A").getbbox()
         im = im.crop(box) if box else im

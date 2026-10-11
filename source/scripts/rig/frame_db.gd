@@ -98,6 +98,7 @@ static func _parse(sheet_id: String, raw: Dictionary) -> Dictionary:
 	for p in raw.get("regions", []):
 		regions.append(str(p))
 	return {
+		"density": EnemyArt.density(texture_path),
 		"id": sheet_id,
 		"texture": null,
 		"texture_path": texture_path,

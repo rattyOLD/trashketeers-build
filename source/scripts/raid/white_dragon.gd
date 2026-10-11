@@ -162,6 +162,7 @@ var _barrage_clock := 0.0
 var _flash := 0.0
 var _wear_material: ShaderMaterial
 var _wear_stage := 0
+var _art_density := EnemyArt.density(STRIP_PATHS[&"idle"])
 var _flap_timer := 0.0
 var _tail_fx: TailWaveFx
 var _tail_hit := false
@@ -182,8 +183,8 @@ func _init() -> void:
 	_sprite.material = _wear_material
 	_sprite.frame_changed.connect(_sync_wear_frame)
 	_sprite.sprite_frames = _build_frames()
-	_sprite.scale = Vector2.ONE * SPRITE_SCALE
-	_sprite.offset = SPRITE_TORSO_OFFSET
+	_sprite.scale = Vector2.ONE * SPRITE_SCALE / _art_density
+	_sprite.offset = SPRITE_TORSO_OFFSET * _art_density
 	add_child(_sprite)
 	_sprite.play(&"idle")
 	var shape := CircleShape2D.new()
@@ -710,7 +711,7 @@ func _tick_death(delta: float) -> void:
 	var fade := clampf((t - 0.55) / 0.45, 0.0, 1.0)
 	_sprite.modulate = Color(1.0 + 2.0 * flash, 1.0 + 2.0 * flash, 1.0 + 2.0 * flash, 1.0 - fade)
 	_sprite.position = Vector2(0, -altitude + 30.0 * t)
-	_sprite.scale = Vector2.ONE * SPRITE_SCALE * (1.0 - 0.18 * t)
+	_sprite.scale = Vector2.ONE * SPRITE_SCALE * (1.0 - 0.18 * t) / _art_density
 	_shadow.modulate.a = 0.3 * (1.0 - fade)
 	_sync_reflection(1.0 - fade)
 	if not _sprite.is_playing() and _sprite.animation == &"death":
@@ -741,7 +742,7 @@ func _update_visuals(delta: float) -> void:
 	_update_animation()
 	_sprite.rotation = facing + PI * 0.5
 	_sprite.position = Vector2(0, -altitude)
-	_sprite.scale = Vector2.ONE * SPRITE_SCALE * (1.0 + lift * 0.18)
+	_sprite.scale = Vector2.ONE * SPRITE_SCALE * (1.0 + lift * 0.18) / _art_density
 	z_index = AERIAL_Z if altitude > 20.0 else 0
 
 	var alpha := lerpf(1.0, AERIAL_ALPHA, clampf(lift, 0.0, 1.0))
@@ -762,9 +763,10 @@ func _sync_reflection(alpha: float) -> void:
 	_reflection.global_position = global_position + Vector2(0, 64.0 + altitude * 0.9)
 	_reflection.rotation = -_sprite.rotation
 	_reflection.scale = _sprite.scale * 0.94
-	_reflection.offset = Vector2(SPRITE_TORSO_OFFSET.x, -SPRITE_TORSO_OFFSET.y)
+	_reflection.offset = Vector2(SPRITE_TORSO_OFFSET.x, -SPRITE_TORSO_OFFSET.y) * _art_density
 	_reflection.modulate.a = alpha
 	var material := _reflection.material as ShaderMaterial
+	material.set_shader_parameter("sample_density", _art_density)
 	material.set_shader_parameter("boss_damage", float(_wear_stage) * 0.5)
 	material.set_shader_parameter("wear_rect", _wear_material.get_shader_parameter("wear_rect"))
 
@@ -787,10 +789,11 @@ static func _build_frames() -> SpriteFrames:
 		frames.set_animation_speed(anim, 2.5 if anim == &"death" else (7.0 if anim == &"idle" else 8.0))
 		frames.set_animation_loop(anim, anim != &"death")
 		var sheet := load(STRIP_PATHS[anim]) as Texture2D
+		var density := EnemyArt.density(STRIP_PATHS[anim])
 		for i in STRIP_FRAMES:
 			var atlas := AtlasTexture.new()
 			atlas.atlas = sheet
-			atlas.region = Rect2(Vector2(i * STRIP_CELL.x, 0), Vector2(STRIP_CELL))
+			atlas.region = Rect2(Vector2(i * STRIP_CELL.x * density, 0), Vector2(STRIP_CELL) * density)
 			frames.add_frame(anim, atlas)
 	return frames
 

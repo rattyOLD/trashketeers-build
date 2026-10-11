@@ -17,6 +17,10 @@ if ! "$GODOT" --headless --path "$P" res://test/check_scripts.tscn > "$LOG/scrip
   fail=1
 fi
 grep 'CHECK checked' "$LOG/scripts.log"
+XDG_DATA_HOME="$LOG/enemy-art-user" timeout 90 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/enemy_art_test.tscn > "$LOG/enemy-art.log" 2>&1
+if ! grep -q 'ENEMY_ART failures=0' "$LOG/enemy-art.log" || grep -q 'SCRIPT ERROR' "$LOG/enemy-art.log"; then
+  fail=1
+fi
 XDG_DATA_HOME="$LOG/brief-user" "$GODOT" --headless --path "$P" res://test/brief_completion_test.tscn > "$LOG/brief.log" 2>&1
 if ! grep -q 'BRIEF_COMPLETION failures=0' "$LOG/brief.log" || grep -q 'SCRIPT ERROR' "$LOG/brief.log"; then
   fail=1

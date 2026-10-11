@@ -1,0 +1,362 @@
+{
+  "version": 1,
+  "assets": {
+    "res://assets/enemies/cash_collector_frames.png": {
+      "density": 2,
+      "logical_size": [
+        964,
+        184
+      ]
+    },
+    "res://assets/enemies/courier_rat_frames.png": {
+      "density": 2,
+      "logical_size": [
+        1008,
+        164
+      ]
+    },
+    "res://assets/enemies/fed_agent.png": {
+      "density": 2,
+      "logical_size": [
+        996,
+        750
+      ]
+    },
+    "res://assets/enemies/fed_bagel.png": {
+      "density": 2,
+      "logical_size": [
+        906,
+        620
+      ]
+    },
+    "res://assets/enemies/fed_chief.png": {
+      "density": 2,
+      "logical_size": [
+        1512,
+        955
+      ]
+    },
+    "res://assets/bosses/magnate_frames.png": {
+      "density": 2,
+      "logical_size": [
+        908,
+        602
+      ]
+    },
+    "res://assets/enemies/map_acid_rain.png": {
+      "density": 2,
+      "logical_size": [
+        1344,
+        896
+      ]
+    },
+    "res://assets/enemies/map_gold_vault.png": {
+      "density": 2,
+      "logical_size": [
+        984,
+        656
+      ]
+    },
+    "res://assets/enemies/map_neon_market.png": {
+      "density": 2,
+      "logical_size": [
+        1104,
+        736
+      ]
+    },
+    "res://assets/enemies/map_night_dump.png": {
+      "density": 2,
+      "logical_size": [
+        1518,
+        1012
+      ]
+    },
+    "res://assets/enemies/map_pigeon_roofs.png": {
+      "density": 2,
+      "logical_size": [
+        1242,
+        828
+      ]
+    },
+    "res://assets/bosses/pig_magnate.png": {
+      "density": 2,
+      "logical_size": [
+        1400,
+        514
+      ]
+    },
+    "res://assets/enemies/pig_mech.png": {
+      "density": 2,
+      "logical_size": [
+        1400,
+        268
+      ]
+    },
+    "res://assets/enemies/pig_sniper.png": {
+      "density": 2,
+      "logical_size": [
+        1400,
+        270
+      ]
+    },
+    "res://assets/enemies/pigeon_bomber_frames.png": {
+      "density": 2,
+      "logical_size": [
+        984,
+        204
+      ]
+    },
+    "res://assets/enemies/rat_base.png": {
+      "density": 2,
+      "logical_size": [
+        1400,
+        237
+      ]
+    },
+    "res://assets/enemies/rat_mad_sheet.png": {
+      "density": 2,
+      "logical_size": [
+        1400,
+        238
+      ]
+    },
+    "res://assets/enemies/rat_toxic_sheet.png": {
+      "density": 2,
+      "logical_size": [
+        1400,
+        246
+      ]
+    },
+    "res://assets/bosses/shaman_frames.png": {
+      "density": 2,
+      "logical_size": [
+        1400,
+        728
+      ]
+    },
+    "res://assets/enemies/trash_tank_frames.png": {
+      "density": 2,
+      "logical_size": [
+        928,
+        208
+      ]
+    },
+    "res://assets/enemies/bruiser.png": {
+      "density": 2,
+      "logical_size": [
+        290,
+        189
+      ]
+    },
+    "res://assets/enemies/croupier.png": {
+      "density": 2,
+      "logical_size": [
+        130,
+        224
+      ]
+    },
+    "res://assets/enemies/dropper.png": {
+      "density": 2,
+      "logical_size": [
+        250,
+        227
+      ]
+    },
+    "res://assets/enemies/pig_angry.png": {
+      "density": 2,
+      "logical_size": [
+        210,
+        207
+      ]
+    },
+    "res://assets/enemies/pig_default.png": {
+      "density": 2,
+      "logical_size": [
+        200,
+        181
+      ]
+    },
+    "res://assets/enemies/pig_heavy.png": {
+      "density": 2,
+      "logical_size": [
+        210,
+        202
+      ]
+    },
+    "res://assets/enemies/pig_redtie.png": {
+      "density": 2,
+      "logical_size": [
+        200,
+        175
+      ]
+    },
+    "res://assets/enemies/pig_royal.png": {
+      "density": 2,
+      "logical_size": [
+        220,
+        209
+      ]
+    },
+    "res://assets/enemies/pig_security.png": {
+      "density": 2,
+      "logical_size": [
+        200,
+        193
+      ]
+    },
+    "res://assets/enemies/rat_gang.png": {
+      "density": 2,
+      "logical_size": [
+        200,
+        194
+      ]
+    },
+    "res://assets/enemies/rat_toxic.png": {
+      "density": 2,
+      "logical_size": [
+        180,
+        206
+      ]
+    },
+    "res://assets/enemies/shank.png": {
+      "density": 2,
+      "logical_size": [
+        190,
+        249
+      ]
+    },
+    "res://assets/enemies/spark_rat.png": {
+      "density": 2,
+      "logical_size": [
+        200,
+        206
+      ]
+    },
+    "res://assets/enemies/trapper.png": {
+      "density": 2,
+      "logical_size": [
+        150,
+        217
+      ]
+    },
+    "res://assets/enemies/vault_pig.png": {
+      "density": 2,
+      "logical_size": [
+        250,
+        253
+      ]
+    },
+    "res://assets/enemies/throne_speaker.png": {
+      "density": 2,
+      "logical_size": [
+        176,
+        224
+      ]
+    },
+    "res://assets/bosses/overlord_frames.png": {
+      "density": 2,
+      "logical_size": [
+        892,
+        566
+      ]
+    },
+    "res://assets/bosses/baron_frames.png": {
+      "density": 2,
+      "logical_size": [
+        2016,
+        1104
+      ]
+    },
+    "res://assets/bosses/sea_pirate_frames.png": {
+      "density": 2,
+      "logical_size": [
+        916,
+        780
+      ]
+    },
+    "res://assets/bosses/chef_boss_frames.png": {
+      "density": 2,
+      "logical_size": [
+        928,
+        808
+      ]
+    },
+    "res://assets/enemies/spark_rat_fire.png": {
+      "density": 2,
+      "logical_size": [
+        280,
+        225
+      ]
+    },
+    "res://assets/enemies/bruiser_bash.png": {
+      "density": 2,
+      "logical_size": [
+        320,
+        241
+      ]
+    },
+    "res://assets/enemies/shank_stab.png": {
+      "density": 2,
+      "logical_size": [
+        230,
+        258
+      ]
+    },
+    "res://assets/enemies/trapper_fire.png": {
+      "density": 2,
+      "logical_size": [
+        380,
+        209
+      ]
+    },
+    "res://assets/enemies/vault_pig_smash.png": {
+      "density": 2,
+      "logical_size": [
+        260,
+        337
+      ]
+    },
+    "res://assets/enemies/croupier_fire.png": {
+      "density": 2,
+      "logical_size": [
+        240,
+        267
+      ]
+    },
+    "res://assets/bosses/ice_dragon_idle.png": {
+      "density": 2,
+      "logical_size": [
+        1280,
+        368
+      ]
+    },
+    "res://assets/bosses/ice_dragon_fly.png": {
+      "density": 2,
+      "logical_size": [
+        1280,
+        368
+      ]
+    },
+    "res://assets/bosses/ice_dragon_breath.png": {
+      "density": 2,
+      "logical_size": [
+        1280,
+        368
+      ]
+    },
+    "res://assets/bosses/ice_dragon_tail.png": {
+      "density": 2,
+      "logical_size": [
+        1280,
+        368
+      ]
+    },
+    "res://assets/bosses/ice_dragon_death.png": {
+      "density": 2,
+      "logical_size": [
+        1280,
+        368
+      ]
+    }
+  }
+}

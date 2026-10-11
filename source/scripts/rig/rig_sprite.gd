@@ -12,7 +12,7 @@ const SHADER_PATH := "res://shaders/rig2d.gdshader"
 ## Внешность особи (окрас, обводка, свет) — переносится на «труп» того же вида.
 const LOOK_PARAMS: Array[StringName] = [&"recolor_enabled", &"regions0", &"regions1", &"grad_dark", &"grad_mid",
 	&"grad_light", &"grad_range", &"hue_shift", &"tint", &"outline_px", &"outline_color", &"env_light",
-	&"paint_strength", &"paint_shadow", &"paint_light", &"paint_saturation", &"rim_strength", &"boss_damage", &"wear_rect"]
+	&"paint_strength", &"paint_shadow", &"paint_light", &"paint_saturation", &"rim_strength", &"boss_damage", &"wear_rect", &"sample_density"]
 
 static var _shader: Shader
 static var _meshes: Dictionary = {}
@@ -47,6 +47,8 @@ func setup(rig_id: String, margin: float = 0.0, cull: bool = true) -> bool:
 	frame_sheet = {}
 	frame_index = -1
 	texture = rig["texture"]
+	shader_material.set_shader_parameter("sample_density", EnemyArt.density(rig["texture_path"]))
+	shader_material.set_shader_parameter("sample_rect", Vector4(0, 0, 1, 1))
 	mesh = _get_mesh(rig, margin, cull)
 	var weights: PackedStringArray = rig["weights"]
 	var has_rig := weights.size() >= 3
@@ -85,13 +87,15 @@ static func prewarm(rig_id: String, margin: float, cull: bool = true) -> void:
 
 ## Запасной вариант без рига (нет описания в rigs.json): та же сетка и шейдер, кости выключены.
 func setup_texture(tex: Texture2D, margin: float = 0.0) -> void:
-	rig = {"id": "plain:%d" % tex.get_instance_id(), "texture": tex, "pivot": tex.get_size() * 0.5, "grid": 64,
+	rig = {"id": "plain:%d" % tex.get_instance_id(), "texture": tex, "pivot": EnemyArt.logical_size(tex) * 0.5, "grid": 64,
 		"bones": PackedVector2Array(), "bone_index": {}, "eyes": [Vector4(-1, -1, -1, -1), Vector4(-1, -1, -1, -1)],
 		"wheel": Vector4(-1, -1, -1, -1), "extra": {}, "weights": PackedStringArray(), "regions": PackedStringArray()}
 	(rig["bones"] as PackedVector2Array).resize(RigDB.BONE_COUNT)
 	frame_sheet = {}
 	frame_index = -1
 	texture = tex
+	shader_material.set_shader_parameter("sample_density", EnemyArt.density(tex.resource_path))
+	shader_material.set_shader_parameter("sample_rect", Vector4(0, 0, 1, 1))
 	mesh = _get_mesh(rig, margin, false)
 	shader_material.set_shader_parameter("rig_enabled", false)
 	shader_material.set_shader_parameter("recolor_enabled", false)
@@ -111,6 +115,7 @@ func setup_frames(sheet_id: String, margin: float = 0.0) -> bool:
 	rig = {"id": "frames:" + sheet_id, "bones": PackedVector2Array(), "bone_index": {}}
 	(rig["bones"] as PackedVector2Array).resize(RigDB.BONE_COUNT)
 	texture = frame_sheet["texture"]
+	shader_material.set_shader_parameter("sample_density", frame_sheet["density"])
 	_frame_margin = margin
 	shader_material.set_shader_parameter("rig_enabled", false)
 	var regions: PackedStringArray = frame_sheet["regions"]
@@ -133,8 +138,9 @@ func set_frame(index: int) -> void:
 	frame_index = index
 	mesh = _get_frame_mesh(frame_sheet, index, _frame_margin)
 	var rect: Rect2 = frame_sheet["rects"][index]
-	var size := texture.get_size()
+	var size := texture.get_size() / float(frame_sheet["density"])
 	set_param(&"wear_rect", Vector4(rect.position.x / size.x, rect.position.y / size.y, rect.size.x / size.x, rect.size.y / size.y))
+	set_param(&"sample_rect", Vector4(rect.position.x / size.x, rect.position.y / size.y, rect.size.x / size.x, rect.size.y / size.y))
 
 
 func is_framed() -> bool:
@@ -200,7 +206,8 @@ static func _get_mesh(rig_data: Dictionary, margin: float, cull: bool) -> ArrayM
 	if _meshes.has(key):
 		return _meshes[key]
 	var tex: Texture2D = rig_data["texture"]
-	var size := tex.get_size()
+	var density := EnemyArt.density(tex.resource_path)
+	var size := tex.get_size() / density
 	var pivot: Vector2 = rig_data["pivot"]
 	var step := float(rig_data["grid"])
 	var image: Image = tex.get_image() if cull else null
@@ -217,7 +224,7 @@ static func _get_mesh(rig_data: Dictionary, margin: float, cull: bool) -> ArrayM
 	for row in rows:
 		for col in cols:
 			var cell := Rect2(x0 + col * step, y0 + row * step, step, step)
-			if image != null and _is_empty(image, cell.grow(margin + 3.0)):
+			if image != null and _is_empty(image, Rect2(cell.grow(margin + 3.0).position * density, cell.grow(margin + 3.0).size * density)):
 				continue
 			var corners := [Vector2i(col, row), Vector2i(col + 1, row), Vector2i(col + 1, row + 1), Vector2i(col, row + 1)]
 			var ids := PackedInt32Array()
@@ -246,7 +253,7 @@ static func _get_frame_mesh(sheet: Dictionary, index: int, margin: float) -> Arr
 		return _meshes[key]
 	var rect: Rect2 = (sheet["rects"] as Array)[index]
 	var pivot: Vector2 = (sheet["pivots"] as PackedVector2Array)[index]
-	var size := (sheet["texture"] as Texture2D).get_size()
+	var size := (sheet["texture"] as Texture2D).get_size() / float(sheet.get("density", 1.0))
 	var outer := rect.grow(margin)
 	var origin := rect.position + pivot
 	var corners := [outer.position, Vector2(outer.end.x, outer.position.y), outer.end, Vector2(outer.position.x, outer.end.y)]

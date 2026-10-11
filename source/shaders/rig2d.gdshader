@@ -53,6 +53,8 @@ uniform float hue_shift = 0.0;
 uniform float flash = 0.0;
 uniform vec4 tint : source_color = vec4(1.0);
 uniform float outline_px = 0.0;
+uniform float sample_density = 1.0;
+uniform vec4 sample_rect = vec4(0.0, 0.0, 1.0, 1.0);
 uniform vec4 outline_color : source_color = vec4(1.0, 0.9, 0.8, 0.85);
 uniform float alpha = 1.0;
 uniform float rim_strength = 0.0;
@@ -96,7 +98,8 @@ void vertex() {
 }
 
 float inside(vec2 uv) {
-	return step(0.0, uv.x) * step(0.0, uv.y) * step(uv.x, 1.0) * step(uv.y, 1.0);
+	return step(sample_rect.x, uv.x) * step(sample_rect.y, uv.y)
+		* step(uv.x, sample_rect.x + sample_rect.z) * step(uv.y, sample_rect.y + sample_rect.w);
 }
 
 vec3 recolor(vec2 uv, vec3 col) {
@@ -144,9 +147,10 @@ vec3 lid_color(vec4 eye, vec3 sampled) {
 }
 
 void fragment() {
+	vec2 logical_pixel = TEXTURE_PIXEL_SIZE * sample_density;
 	vec2 uv = UV;
 	if (wheel.z > 0.0 && abs(wheel_angle) > 0.0001) {
-		vec2 px = (uv - wheel.xy) / TEXTURE_PIXEL_SIZE;
+		vec2 px = (uv - wheel.xy) / logical_pixel;
 		vec2 q = vec2(px.x / wheel.z, px.y);
 		float r = length(q);
 		float window = 1.0 - smoothstep(1.45, 1.9, abs(atan(q.y, q.x)));
@@ -155,7 +159,7 @@ void fragment() {
 			float c = cos(a);
 			float s = sin(a);
 			q = vec2(q.x * c - q.y * s, q.x * s + q.y * c);
-			uv = wheel.xy + vec2(q.x * wheel.z, q.y) * TEXTURE_PIXEL_SIZE;
+			uv = wheel.xy + vec2(q.x * wheel.z, q.y) * logical_pixel;
 		}
 	}
 	vec4 base = texture(TEXTURE, uv) * inside(uv);
@@ -185,7 +189,7 @@ void fragment() {
 		rgb = eyelid(eye1, uv, rgb, lid_color(eye1, texture(TEXTURE, eye1.xy - vec2(0.0, eye1.w * 1.25)).rgb));
 	}
 	if (rim_strength > 0.0) {
-		float lit_edge = (1.0 - texture(TEXTURE, uv - TEXTURE_PIXEL_SIZE * 4.0).a) * a;
+		float lit_edge = (1.0 - texture(TEXTURE, uv - logical_pixel * 4.0).a * inside(uv - logical_pixel * 4.0)) * a;
 		rgb += vec3(0.65, 0.72, 0.78) * lit_edge * rim_strength;
 	}
 	rgb = worn_boss(painted_color(rgb), uv) * tint.rgb;
@@ -193,7 +197,7 @@ void fragment() {
 	rgb = mix(rgb, vec3(1.0), clamp(flash, 0.0, 1.0) * 0.85);
 
 	if (outline_px > 0.0) {
-		vec2 px = TEXTURE_PIXEL_SIZE * outline_px;
+		vec2 px = logical_pixel * outline_px;
 		vec2 dg = px * 0.7071;
 		float ring = texture(TEXTURE, uv + vec2(px.x, 0.0)).a * inside(uv + vec2(px.x, 0.0));
 		ring = max(ring, texture(TEXTURE, uv - vec2(px.x, 0.0)).a * inside(uv - vec2(px.x, 0.0)));
