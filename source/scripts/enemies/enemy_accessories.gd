@@ -31,7 +31,7 @@ func setup(anchor_point: Vector2, pool: PackedStringArray, forced: bool) -> void
 			items.append(shuffled[i])
 	fuse_lit = false
 	visible = not items.is_empty()
-	set_process(items.has("bomb") or items.has("booster"))
+	set_process(items.has("bomb") or items.has("booster") or items.has("antenna"))
 	queue_redraw()
 
 
@@ -121,7 +121,7 @@ func _draw_goggles(p: Vector2) -> void:
 func _draw_antenna(p: Vector2) -> void:
 	_batch.line(p, p + Vector2(-8, -44), LINE, 7.0)
 	_batch.line(p, p + Vector2(-8, -44), METAL, 3.0)
-	var blink := 0.5 + 0.5 * sin(Time.get_ticks_msec() * 0.008)
+	var blink := 0.5 + 0.5 * sin(_time * 8.0)
 	_batch.circle(p + Vector2(-8, -48), 8.0, LINE)
 	_batch.circle(p + Vector2(-8, -48), 5.5, Color(cloth, 0.6 + 0.4 * blink))
 
@@ -141,8 +141,8 @@ func _draw_bomb(p: Vector2) -> void:
 	_batch.polyline(fuse, LINE, 6.0, true)
 	_batch.polyline(fuse, Color("#d9b27a"), 3.0, true)
 	var spark := p + Vector2(18, -52)
-	var rate := 0.05 if fuse_lit else 0.012
-	var flicker := 0.5 + 0.5 * sin(Time.get_ticks_msec() * rate)
+	var rate := 50.0 if fuse_lit else 12.0
+	var flicker := 0.5 + 0.5 * sin(_time * rate)
 	var size := (13.0 if fuse_lit else 8.0) * (0.7 + 0.3 * flicker)
 	_batch.circle(spark, size * 1.6, Color(1.0, 0.6, 0.1, 0.35))
 	_batch.circle(spark, size, Color(1.0, 0.85, 0.3))

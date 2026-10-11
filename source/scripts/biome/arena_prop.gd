@@ -35,13 +35,20 @@ func _ready() -> void:
 const SWAY_IDS := ["spruce", "bush", "bush_low", "planter"]
 const SWAY_SHADER := """
 shader_type canvas_item;
+#include "res://shaders/paint_palette.gdshaderinc"
 global uniform float world_time;
 uniform float amount = 5.0;
+varying vec4 item_color;
 void vertex() {
+	item_color = COLOR;
 	vec2 world = (MODEL_MATRIX * vec4(VERTEX, 0.0, 1.0)).xy;
 	float top = 1.0 - UV.y;
 	float gust = 0.7 + 0.3 * sin(world_time * 0.37 + world.y * 0.002);
 	VERTEX.x += sin(world_time * 1.7 + world.x * 0.013 + world.y * 0.007) * amount * top * top * gust;
+}
+void fragment() {
+	vec4 c = texture(TEXTURE, UV);
+	COLOR = vec4(painted_color(c.rgb), c.a) * item_color;
 }
 """
 static var _sway: ShaderMaterial
@@ -126,6 +133,8 @@ func setup(prop_id: String, solid: bool = true, flip: int = 0) -> void:
 	if SWAY_IDS.has(prop_id) and SaveService.get_quality() > 0:
 		sprite.material = sway_material()
 	add_child(sprite)
+	if solid and not def.get("flat", false):
+		ForegroundFade.register(sprite)
 	if collision_layer != 0:
 		var collision := CollisionShape2D.new()
 		collision.shape = make_shape(prop_id)
@@ -163,6 +172,7 @@ static func make_sprite(path: String, width: float) -> Sprite2D:
 	s.scale = Vector2.ONE * k
 	s.centered = true
 	s.offset = Vector2(0, -tex.get_height() * 0.5 + tex.get_height() * 0.03)
+	s.material = ArtDirection.material("bank" if "pigs" in path or "gold_vault" in path else "scrap", 0.26)
 	return s
 
 

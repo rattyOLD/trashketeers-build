@@ -4,14 +4,14 @@ extends RefCounted
 ## Всё строится кодом, чтобы UI не зависел от .tres-тем и легко правился в одном месте.
 
 const OUTLINE := Color("#0d0f0e")
-const PANEL := Color("#221d19")
-const PANEL_LIGHT := Color("#302823")
-const NEON := Color("#ff8a1f")
+const PANEL := Color("#1b2228")
+const PANEL_LIGHT := Color("#2c353b")
+const NEON := Color("#dc9a53")
 const HOT := Color("#ff5a1f")
 const GOLD := Color("#f5c04a")
 const DANGER := Color("#e8412f")
 const TEXT := Color("#f1efe6")
-const TEXT_DIM := Color("#aaa898")
+const TEXT_DIM := Color("#b3b8b5")
 
 
 static func box(bg: Color, border: Color = OUTLINE, border_width: int = 4, radius: int = 18) -> StyleBoxFlat:
@@ -34,7 +34,7 @@ static func label(text: String, font_size: int, color: Color = TEXT, outline: in
 	l.add_theme_font_size_override("font_size", font_size)
 	l.add_theme_color_override("font_color", color)
 	l.add_theme_color_override("font_outline_color", OUTLINE)
-	l.add_theme_constant_override("outline_size", outline)
+	l.add_theme_constant_override("outline_size", mini(outline, 4 if font_size >= 28 else 3))
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -47,13 +47,13 @@ static var _kit_cache: Dictionary = {}
 
 
 ## Единая палитра карточек окон (под набор Астры: ржавчина, золото, бирюза): тёмная тёплая плашка, янтарная рамка.
-const CARD_BG := Color("#25201c")
-const CARD_BORDER := Color("#b07a30")
-const CARD_TEAL := Color("#3fc8d8")
+const CARD_BG := Color("#222a30")
+const CARD_BORDER := Color("#92724c")
+const CARD_TEAL := Color("#7eabb0")
 
 
-static func card_box(accent: Color = CARD_BORDER, width: int = 3) -> StyleBoxFlat:
-	return box(CARD_BG, accent, width, 14)
+static func card_box(accent: Color = CARD_BORDER, width: int = 2) -> StyleBoxFlat:
+	return box(CARD_BG, accent, mini(width, 2), 10)
 
 
 ## Шрифт кнопки уменьшается (не меньше 11), пока надпись не влезет в max_width: текст не вылезает из плашки.
@@ -172,22 +172,13 @@ static func button(text: String, color: Color, font_size: int = 30, min_size: Ve
 	b.add_theme_color_override("font_pressed_color", TEXT)
 	b.add_theme_color_override("font_hover_pressed_color", TEXT)
 	b.add_theme_color_override("font_outline_color", OUTLINE)
-	b.add_theme_constant_override("outline_size", 8)
+	b.add_theme_constant_override("outline_size", 3)
 	b.add_theme_color_override("font_disabled_color", Color(TEXT, 0.55))
-	var small := min_size.y < 100.0 or font_size <= 30
-	var family := _kit_family(color)
-	if KIT_ON and ResourceLoader.exists(KIT_DIR + "btn_%s_normal.png" % family):
-		b.add_theme_stylebox_override("normal", kit_box(family, "normal", small))
-		b.add_theme_stylebox_override("hover", kit_box(family, "normal", small, Color(1.12, 1.12, 1.12)))
-		b.add_theme_stylebox_override("pressed", kit_box(family, "pressed", small))
-		b.add_theme_stylebox_override("hover_pressed", kit_box(family, "pressed", small))
-		b.add_theme_stylebox_override("disabled", kit_box(family, "disabled", small))
-	else:
-		b.add_theme_stylebox_override("normal", button_box(color, false))
-		b.add_theme_stylebox_override("hover", button_box(color.lightened(0.06), false))
-		b.add_theme_stylebox_override("pressed", button_box(color.lightened(0.1), true))
-		b.add_theme_stylebox_override("hover_pressed", button_box(color.lightened(0.1), true))
-		b.add_theme_stylebox_override("disabled", button_box(color.darkened(0.45).lerp(Color("#4a4742"), 0.5), false))
+	b.add_theme_stylebox_override("normal", button_box(color, false))
+	b.add_theme_stylebox_override("hover", button_box(color.lightened(0.10), false))
+	b.add_theme_stylebox_override("pressed", button_box(color, true))
+	b.add_theme_stylebox_override("hover_pressed", button_box(color.lightened(0.08), true))
+	b.add_theme_stylebox_override("disabled", button_box(Color("#434b50"), false))
 	b.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 	b.pressed.connect(func() -> void: SoundManager.play(&"ui_click"))
 	b.clip_text = true
@@ -241,16 +232,16 @@ static func flat_button(min_size: Vector2) -> Button:
 ## при нажатии губа уходит, текст опускается — кнопка «продавливается».
 static func button_box(color: Color, pressed: bool) -> StyleBoxFlat:
 	var s := StyleBoxFlat.new()
-	s.bg_color = color
-	s.border_color = color.darkened(0.6).lerp(OUTLINE, 0.35)
-	s.set_border_width_all(4)
-	s.border_width_bottom = 5 if pressed else 11
-	s.set_corner_radius_all(20)
+	var active := color.s > 0.3 and color.v > 0.4
+	s.bg_color = PANEL_LIGHT.lerp(color, 0.24 if active else 0.10).lightened(0.04 if pressed else 0.0)
+	s.border_color = color.lerp(CARD_BORDER, 0.25) if active else Color("#59646a")
+	s.set_border_width_all(2)
+	s.border_width_bottom = 2 if pressed else 4
+	s.set_corner_radius_all(10)
 	s.content_margin_left = 16
 	s.content_margin_right = 16
-	s.content_margin_top = 16 if pressed else 10
-	s.content_margin_bottom = 8 if pressed else 14
-	s.expand_margin_top = -6.0 if pressed else 0.0
+	s.content_margin_top = 11 if pressed else 10
+	s.content_margin_bottom = 9 if pressed else 10
 	s.anti_aliasing = true
 	return s
 
@@ -293,10 +284,10 @@ static func pop_in(control: Control, duration: float = 0.6) -> void:
 	keep_pivot_centered(control)
 	var user_scale: float = float(control.get_meta(&"ui_scale", 1.0))
 	var user_alpha: float = float(control.get_meta(&"ui_alpha", 1.0))
-	control.scale = Vector2(0.55, 0.55) * user_scale
+	control.scale = Vector2(0.97, 0.97) * user_scale
 	control.modulate.a = 0.0
 	var tween := control.create_tween().set_parallel(true)
-	tween.tween_property(control, "scale", Vector2.ONE * user_scale, duration).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+	tween.tween_property(control, "scale", Vector2.ONE * user_scale, minf(duration, 0.22)).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	tween.tween_property(control, "modulate:a", user_alpha, duration * 0.3)
 
 

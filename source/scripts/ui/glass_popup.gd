@@ -1,14 +1,13 @@
 class_name GlassPopup
 extends Control
 ## Всплывающее окно по паспорту интерфейса: тёмное матовое стекло (шейдер размытия),
-## скруглённые углы, неоновый бирюзовый контур. Появление — вылет из центра с пружиной
-## (TRANS_ELASTIC): окно на долю секунды становится больше и «встаёт» на место.
+## скруглённые углы, тонкая рамка и короткое плавное появление.
 ## Наследники наполняют content и переопределяют _refresh().
 
 signal closed
 
 const CORNER := 28.0
-const BORDER := Color("#ff8200")
+const BORDER := UiStyle.CARD_BORDER
 
 static var _glass_shader: Shader
 ## Открытые окна по порядку: поле ввода браузера показывается только у верхнего (иначе оно висело бы поверх других окон).
@@ -22,6 +21,8 @@ var _frame: Panel
 var _title: Label
 var _center: CenterContainer
 var _lifted := false
+var _input_focused := false
+var _keyboard_overlap := 0.0
 var _closing := false
 ## Поверх окна открыт полноэкранный слой (просмотр фото, галерея): браузерное поле ввода прячется.
 var overlays := 0
@@ -72,18 +73,10 @@ func _init(title_text: String) -> void:
 	var frame_style := StyleBoxFlat.new()
 	frame_style.bg_color = Color(0, 0, 0, 0)
 	frame_style.border_color = BORDER
-	frame_style.set_border_width_all(4)
+	frame_style.set_border_width_all(2)
 	frame_style.set_corner_radius_all(int(CORNER))
 	frame_style.anti_aliasing = true
-	if UiStyle.KIT_ON and ResourceLoader.exists(UiStyle.KIT_DIR + "window_neon_turquoise_s.png"):
-		var tex_frame := StyleBoxTexture.new()
-		tex_frame.texture = load(UiStyle.KIT_DIR + "window_neon_turquoise_s.png") as Texture2D
-		tex_frame.draw_center = false
-		for side in [SIDE_LEFT, SIDE_RIGHT, SIDE_TOP, SIDE_BOTTOM]:
-			tex_frame.set_texture_margin(side, 22.0)
-		_frame.add_theme_stylebox_override("panel", tex_frame)
-	else:
-		_frame.add_theme_stylebox_override("panel", frame_style)
+	_frame.add_theme_stylebox_override("panel", frame_style)
 	_panel.add_child(_frame)
 
 	var inner := MarginContainer.new()
@@ -107,24 +100,14 @@ func _init(title_text: String) -> void:
 	_title = UiStyle.label(title_text, 34, UiStyle.TEXT, 9)
 	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	# Табличка заголовка из набора интерфейса Астры (assets/ui/kit/header_plate.png).
-	if UiStyle.KIT_ON and ResourceLoader.exists(UiStyle.KIT_DIR + "header_plate.png"):
-		var plate := StyleBoxTexture.new()
-		plate.texture = load(UiStyle.KIT_DIR + "header_plate.png") as Texture2D
-		# Табличка обрезана по рисунку: сверху рельс 16 px, тёмная полоса, снизу рельс 10 px. Текст — строго
-		# в тёмной полосе: поля больше рельсов, по бокам — шире болтов, шрифт ужимается под ширину.
-		plate.set_texture_margin(SIDE_LEFT, 34.0)
-		plate.set_texture_margin(SIDE_RIGHT, 34.0)
-		plate.set_texture_margin(SIDE_TOP, 16.0)
-		plate.set_texture_margin(SIDE_BOTTOM, 10.0)
-		plate.set_content_margin(SIDE_LEFT, 56.0)
-		plate.set_content_margin(SIDE_RIGHT, 56.0)
-		plate.set_content_margin(SIDE_TOP, 18.0)
-		plate.set_content_margin(SIDE_BOTTOM, 12.0)
-		_title.add_theme_font_size_override("font_size", 26)
-		_title.add_theme_constant_override("outline_size", 7)
-		_title.add_theme_stylebox_override("normal", plate)
-		_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var plate := UiStyle.box(UiStyle.PANEL_LIGHT, UiStyle.CARD_BORDER, 2, 8)
+	plate.set_content_margin(SIDE_LEFT, 18.0)
+	plate.set_content_margin(SIDE_RIGHT, 18.0)
+	plate.set_content_margin(SIDE_TOP, 12.0)
+	plate.set_content_margin(SIDE_BOTTOM, 12.0)
+	_title.add_theme_font_size_override("font_size", 26)
+	_title.add_theme_constant_override("outline_size", 3)
+	_title.add_theme_stylebox_override("normal", plate)
 	header.add_child(_title)
 	UiStyle.fit_plate_label(_title, 26)
 	# Место под крестик в заголовке; сам крестик — один, закреплён в углу окна и не уезжает при прокрутке.
@@ -187,6 +170,7 @@ func set_frame(file: String) -> void:
 
 
 func open() -> void:
+	_lift(false)
 	_closing = false
 	_open_stack.erase(self)
 	_open_stack.append(self)
@@ -195,17 +179,21 @@ func open() -> void:
 	_fit_popup_height.call_deferred()
 	visible = true
 	_panel.pivot_offset = _panel.size * 0.5
-	_panel.scale = Vector2(0.4, 0.4)
+	_panel.scale = Vector2(0.97, 0.97)
 	_panel.modulate.a = 0.0
 	var tween := create_tween().set_parallel(true)
-	tween.tween_property(_panel, "scale", Vector2.ONE, 0.7).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+	tween.tween_property(_panel, "scale", Vector2.ONE, 0.22).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	tween.tween_property(_panel, "modulate:a", 1.0, 0.15)
 
 
 func close() -> void:
 	_closing = true
+	_lift(false)
+	get_viewport().gui_release_focus()
+	if DisplayServer.has_feature(DisplayServer.FEATURE_VIRTUAL_KEYBOARD):
+		DisplayServer.virtual_keyboard_hide()
 	var tween := create_tween().set_parallel(true)
-	tween.tween_property(_panel, "scale", Vector2(0.6, 0.6), 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
+	tween.tween_property(_panel, "scale", Vector2(0.97, 0.97), 0.16).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
 	tween.tween_property(_panel, "modulate:a", 0.0, 0.18)
 	tween.chain().tween_callback(func() -> void:
 		visible = false
@@ -264,51 +252,42 @@ func _watch_inputs(node: Node) -> void:
 		node.child_entered_tree.connect(_watch_inputs)
 
 
+func _keyboard_inset() -> float:
+	return Platform.keyboard_inset()
+
+
 func _lift(up: bool) -> void:
-	if not Platform.is_touch():
+	_input_focused = up
+	_sync_keyboard(_keyboard_inset())
+
+
+## Фокус может остаться в поле после кнопки «Назад»; размер окна зависит только от реальной клавиатуры.
+func _sync_keyboard(inset: float) -> void:
+	var overlap := maxf(inset, 0.0) if _input_focused else 0.0
+	var lifted := overlap > 60.0
+	if lifted == _lifted and is_equal_approx(overlap, _keyboard_overlap):
 		return
-	_lifted = up
-	# Обработку не выключаем: чат и выбор фото опрашивают сервер/браузер в своём _process.
-	if up:
-		set_process(true)
-	if up:
-		_apply_lift()
+	_lifted = lifted
+	_keyboard_overlap = overlap
+	if lifted:
+		_center.set_anchors_preset(Control.PRESET_FULL_RECT)
+		var safe := ScreenSafeArea.rect(get_viewport_rect().size).grow(-12.0)
+		_center.offset_left = safe.position.x
+		_center.offset_right = safe.end.x - get_viewport_rect().size.x
+		_center.offset_top = safe.position.y
+		_center.offset_bottom = minf(safe.end.y, get_viewport_rect().size.y - overlap) - get_viewport_rect().size.y
 	else:
-		_center.anchor_top = 0.0
-		_center.anchor_bottom = 1.0
-		_center.offset_top = 0.0
-		_center.offset_bottom = 0.0
+		ScreenSafeArea.fit(_center, get_viewport_rect().size, 12.0)
 	_fit_popup_height.call_deferred()
 
 
-## Высота области над клавиатурой, в которую должно уместиться поднятое окно.
 func _lift_height() -> float:
-	var view_h := get_viewport_rect().size.y
-	var inset := Platform.keyboard_inset()
-	return view_h - inset - 24.0 if inset > 60.0 else view_h * 0.5 - 40.0
-
-
-## Пока открыта клавиатура, окно целиком умещается над ней (высота берётся из видимой области браузера).
-## Если страница размер не меняла (Android) и клавиатуры «не видно», окно просто уходит в верхнюю половину.
-func _apply_lift() -> void:
-	var inset := Platform.keyboard_inset()
-	_center.anchor_top = 0.0
-	if inset > 60.0:
-		_center.anchor_bottom = 1.0
-		_center.offset_top = 24.0
-		_center.offset_bottom = -inset
-	else:
-		_center.anchor_bottom = 0.5
-		_center.offset_top = 40.0
-		_center.offset_bottom = 0.0
+	return maxf(0.0, get_viewport_rect().size.y - _keyboard_overlap)
 
 
 func _process(_delta: float) -> void:
-	if _lifted:
-		var before := _center.offset_bottom
-		_apply_lift()
-		if not is_equal_approx(before, _center.offset_bottom):
-			_fit_popup_height()
+	if visible and (_input_focused or _lifted):
+		_sync_keyboard(_keyboard_inset())
 
 
 func _sync_glass() -> void:

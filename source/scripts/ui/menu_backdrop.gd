@@ -69,36 +69,21 @@ func _process(delta: float) -> void:
 
 
 func _build_floor() -> void:
-	# Бетонный двор базы: тайлы пола миссии 1 (тёмный двор и металлолом), у центральной полосы ворот.
-	var tile_set := TileSet.new()
-	tile_set.tile_size = Vector2i(256, 256)
-	var ids := {}
-	for name in FLOORS:
-		var texture := ArenaProp.texture_of(FLOOR_DIR + name + ".png")
-		if texture == null:
-			continue
-		var source := TileSetAtlasSource.new()
-		source.texture = texture
-		source.texture_region_size = Vector2i(256, 256)
-		source.create_tile(Vector2i.ZERO)
-		ids[name] = tile_set.add_source(source)
-	if ids.is_empty():
-		return
-	var tiles := TileMapLayer.new()
-	tiles.tile_set = tile_set
-	tiles.scale = Vector2.ONE * (TILE_WORLD / 256.0)
-	var count := Vector2i(AREA / TILE_WORLD) + Vector2i.ONE
-	for y in count.y:
-		for x in count.x:
-			var lane := x == 5 or y == 7
-			var pick := "floor_gate_dark" if lane else FLOORS[0]
-			var roll := randf()
-			if not lane:
-				pick = FLOORS[0] if roll < 0.62 else (FLOORS[1] if roll < 0.82 else FLOORS[2])
-			if not ids.has(pick):
-				pick = ids.keys()[0]
-			tiles.set_cell(Vector2i(x, y), int(ids[pick]), Vector2i.ZERO)
-	_layers.floor_layer.add_child(tiles)
+	var floor_sprite := Sprite2D.new()
+	floor_sprite.texture = load("res://assets/maps/night_dump/floor.png")
+	floor_sprite.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+	floor_sprite.region_enabled = true
+	floor_sprite.centered = false
+	floor_sprite.region_rect = Rect2(Vector2.ZERO, AREA / 2.0)
+	floor_sprite.scale = Vector2.ONE * 2.0
+	floor_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	var mat := ShaderMaterial.new()
+	mat.shader = LevelSpawner._calm_shader()
+	mat.set_shader_parameter("mirror_tiles", true)
+	mat.set_shader_parameter("wear_enabled", true)
+	mat.set_shader_parameter("wear_atlas", load("res://assets/maps/night_dump/wear_atlas.png"))
+	floor_sprite.material = mat
+	_layers.floor_layer.add_child(floor_sprite)
 
 
 func _build_props() -> void:

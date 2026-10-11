@@ -2113,6 +2113,7 @@ func _build_map_card_art(area: Rect2, center: Vector2) -> void:
 			pad.tint = Color(str(landmark.def["baked_light"]["color"]))
 			_own(pad, _layers.decals)
 			landmark.tree_exiting.connect(pad.queue_free)
+
 		var base_angle := randf() * TAU
 		for k in 3:
 			var at := (anchor + Vector2.from_angle(base_angle + k * 0.9) * randf_range(70.0, 130.0)).snapped(Vector2(8, 8))
@@ -2129,6 +2130,7 @@ func _build_map_card_art(area: Rect2, center: Vector2) -> void:
 			sprite.scale = Vector2.ONE * randf_range(0.5, 0.6) * Vector2(-1.0 if randf() < 0.5 else 1.0, 1.0)
 			sprite.position = at
 			_own(sprite, _layers.world)
+			ForegroundFade.register(sprite)
 		for k in 2:
 			if decals.is_empty():
 				break

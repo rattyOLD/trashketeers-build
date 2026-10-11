@@ -10,7 +10,7 @@ const DIVIDER := 4
 const TEXTURE_SIZE := 64
 const HERO_RADIUS := 420.0
 const HERO_COLOR := Color(1.0, 0.86, 0.66)
-const HERO_STRENGTH := 0.42
+const HERO_STRENGTH := 0.34
 const LIGHT_GAIN := 0.9
 
 static var _texture: ImageTexture
@@ -18,21 +18,27 @@ static var _vignette: ImageTexture
 static var _mottle: ImageTexture
 ## Неровность света: мягкая полутень по краям экрана и медленно плывущие пятна по полу —
 ## два дешёвых умножения в маленьком вьюпорте, убирают «плоский» ровный свет.
-const VIGNETTE_EDGE := 0.68
-const MOTTLE_DEPTH := 0.28
+const VIGNETTE_EDGE := 0.78
+const MOTTLE_DEPTH := 0.16
 const MOTTLE_SCALE := 9.0
 const MOTTLE_DRIFT := Vector2(14.0, 6.0)
 
 var ambient := Color(0.7, 0.68, 0.78)
 ## Тон по типу главы: Свалка (М1–М3) — темнее, Банк (М4–М6) — светлее. Не хоррор: свет только мягче/ярче.
 const LAYOUT_AMBIENT := {
-	"junkyard": Color(0.66, 0.64, 0.74),
-	"bank": Color(0.84, 0.81, 0.86),
+	"junkyard": Color(0.76, 0.77, 0.82),
+	"bank": Color(0.90, 0.87, 0.82),
+}
+const MAP_AMBIENT := {
+	"night_dump": Color(0.76, 0.77, 0.82),
+	"acid_rain": Color(0.73, 0.81, 0.74),
+	"gold_vault": Color(0.90, 0.87, 0.82),
+	"pigeon_roofs": Color(0.78, 0.82, 0.88),
 }
 
 
-func set_layout(layout: String) -> void:
-	ambient = LAYOUT_AMBIENT.get(layout, ambient)
+func set_layout(layout: String, map_id: String = "") -> void:
+	ambient = MAP_AMBIENT.get(map_id, LAYOUT_AMBIENT.get(layout, ambient))
 var player: Node2D
 
 var _viewport: SubViewport

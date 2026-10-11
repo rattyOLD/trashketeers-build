@@ -1622,12 +1622,12 @@ class PausePanel:
 		center.set_anchors_preset(Control.PRESET_FULL_RECT)
 		add_child(center)
 		_panel = PanelContainer.new()
-		var style := UiStyle.box(UiStyle.PANEL, UiStyle.OUTLINE, 6, 32)
+		var style := UiStyle.box(UiStyle.PANEL, UiStyle.CARD_BORDER, 2, 12)
 		style.set_content_margin_all(26)
 		_panel.add_theme_stylebox_override("panel", style)
 		center.add_child(_panel)
 		var box := VBoxContainer.new()
-		box.custom_minimum_size = Vector2(1000, 0)
+		box.custom_minimum_size = Vector2(900, 0)
 		box.add_theme_constant_override("separation", 14)
 		_panel.add_child(box)
 
@@ -1635,13 +1635,13 @@ class PausePanel:
 		head.alignment = BoxContainer.ALIGNMENT_CENTER
 		head.add_theme_constant_override("separation", 12)
 		head.add_child(BattlePanels.icon_rect(BattlePanels.icon("pause"), 46))
-		head.add_child(UiStyle.label("ПАУЗА", 56, UiStyle.TEXT, 14))
+		head.add_child(UiStyle.label("ПАУЗА", 40, UiStyle.TEXT, 14))
 		box.add_child(head)
 		var body := HBoxContainer.new()
 		body.add_theme_constant_override("separation", 24)
 		box.add_child(body)
 		var summary := VBoxContainer.new()
-		summary.custom_minimum_size = Vector2(440, 0)
+		summary.custom_minimum_size = Vector2(360, 0)
 		summary.add_theme_constant_override("separation", 14)
 		body.add_child(summary)
 		var actions := VBoxContainer.new()
@@ -1678,19 +1678,19 @@ class PausePanel:
 		actions.add_child(_tips_button)
 		_refresh_tips_button()
 
-		var resume := BattlePanels.icon_button(BattlePanels.icon("play"), "ПРОДОЛЖИТЬ", "", Color("#35c46a"), 100)
+		var resume := BattlePanels.icon_button(BattlePanels.icon("play"), "ПРОДОЛЖИТЬ", "", Color("#35c46a"), 76)
 		resume.pressed.connect(_resume)
 		actions.add_child(resume)
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 12)
 		actions.add_child(row)
-		var again := UiStyle.button("ПЕРЕЗАПУСК", UiStyle.HOT, 26, Vector2(0, 76))
+		var again := UiStyle.button("ПЕРЕЗАПУСК", UiStyle.HOT, 26, Vector2(0, 64))
 		again.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		again.pressed.connect(func() -> void:
 			visible = false
 			restart_pressed.emit())
 		row.add_child(again)
-		var leave := UiStyle.button("НА БАЗУ", UiStyle.PANEL_LIGHT, 26, Vector2(0, 76))
+		var leave := UiStyle.button("НА БАЗУ", UiStyle.PANEL_LIGHT, 26, Vector2(0, 64))
 		leave.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		leave.pressed.connect(func() -> void:
 			visible = false
@@ -1698,7 +1698,7 @@ class PausePanel:
 		row.add_child(leave)
 
 	func _tool_button(caption: String, color: Color, action: Callable) -> Button:
-		var button := UiStyle.button(caption, color, 22, Vector2(0, 72))
+		var button := UiStyle.button(caption, color, 22, Vector2(0, 60))
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.pressed.connect(action)
 		return button

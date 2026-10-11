@@ -9,6 +9,7 @@ static func shader() -> Shader:
 		_shader = Shader.new()
 		_shader.code = """
 shader_type canvas_item;
+#include "res://shaders/paint_palette.gdshaderinc"
 varying vec4 item_color;
 void vertex() { item_color = COLOR; }
 void fragment() {
@@ -17,7 +18,7 @@ void fragment() {
 	vec3 rgb = mix(vec3(l), c.rgb, 0.58);
 	// Amber fixtures retain their warmth; cool accents become weathered teal.
 	rgb *= vec3(0.92, 0.93, 0.96);
-	COLOR = vec4(rgb, c.a);
+	COLOR = vec4(painted_color(rgb), c.a);
 }
 """
 	return _shader

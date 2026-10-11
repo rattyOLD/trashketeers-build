@@ -369,8 +369,8 @@ func _add_capsule(row: HBoxContainer, icon_texture: Texture2D, kind: String) -> 
 		if tapped:
 			SoundManager.play(&"ui_click")
 			_currency.open_kind(kind))
-	var accent := Color("#35c8ff") if kind == "gems" else Color("#ffb020")
-	var style := UiStyle.box(Color(CAPSULE, 0.94), accent, 3, 14)
+	var accent := UiStyle.CARD_TEAL if kind == "gems" else UiStyle.CARD_BORDER
+	var style := UiStyle.box(Color(UiStyle.PANEL, 0.94), accent, 2, 10)
 	style.content_margin_left = 8
 	style.content_margin_right = 8
 	capsule.add_theme_stylebox_override("panel", style)
@@ -576,26 +576,18 @@ func _build_play() -> Control:
 	play.focus_mode = Control.FOCUS_NONE
 	play.add_theme_font_size_override("font_size", 60 if Orient.portrait else 54)
 	for state in ["font_color", "font_hover_color", "font_pressed_color"]:
-		play.add_theme_color_override(state, Color.WHITE)
-	play.add_theme_color_override("font_outline_color", Color("#3a1d02"))
-	play.add_theme_constant_override("outline_size", 14)
-	if UiStyle.KIT_ON:
-		play.add_theme_stylebox_override("normal", UiStyle.kit_box("gold", "normal", false))
-		play.add_theme_stylebox_override("hover", UiStyle.kit_box("gold", "normal", false, Color(1.1, 1.1, 1.1)))
-		play.add_theme_stylebox_override("pressed", UiStyle.kit_box("gold", "pressed", false))
-	else:
-		var normal := UiStyle.box(PLAY_GREEN, Color("#2c5a07"), 6, 30)
-		normal.border_width_bottom = 14
-		var hover := UiStyle.box(PLAY_GREEN.lightened(0.15), Color("#2c5a07"), 6, 30)
-		hover.border_width_bottom = 14
-		var down := UiStyle.box(PLAY_GREEN.darkened(0.08), Color("#2c5a07"), 6, 30)
-		down.border_width_bottom = 6
-		play.add_theme_stylebox_override("normal", normal)
-		play.add_theme_stylebox_override("hover", hover)
-		play.add_theme_stylebox_override("pressed", down)
+		play.add_theme_color_override(state, UiStyle.PANEL)
+	play.add_theme_constant_override("outline_size", 0)
+	var amber := Color("#d8a157")
+	for state: String in ["normal", "hover", "pressed", "hover_pressed"]:
+		var down := state in ["pressed", "hover_pressed"]
+		var bg := amber.darkened(0.08) if down else (amber.lightened(0.08) if state == "hover" else amber)
+		var style := UiStyle.box(bg, Color("#80623c"), 2, 10)
+		style.border_width_bottom = 2 if down else 5
+		play.add_theme_stylebox_override(state, style)
 	play.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 	play.pressed.connect(_on_play)
-	UiStyle.pulse(play, 0.04, 1.1)
+	UiStyle.press_feedback(play)
 	return play
 
 
@@ -1019,41 +1011,35 @@ class _NotifyDot:
 		draw_circle(Vector2(12, 12), 9.0, UiStyle.DANGER)
 
 
-## Платформа под Енотом: свечение, неоновые кольца, поднимающиеся искры.
+## Сборная металлическая площадка под героем, без мигающих колец и искр.
 class HeroStage:
 	extends Control
-	var _time := 0.0
-	var _sparks: Array[Vector3] = []
 
 	func _init() -> void:
 		mouse_filter = Control.MOUSE_FILTER_STOP
-		for i in 14:
-			_sparks.append(Vector3(randf(), randf(), randf_range(0.2, 0.6)))
-
-	func _process(delta: float) -> void:
-		_time += delta
-		for i in _sparks.size():
-			var spark := _sparks[i]
-			spark.y -= delta * spark.z * 0.5
-			if spark.y < 0.0:
-				spark = Vector3(randf(), 1.0, randf_range(0.2, 0.6))
-			_sparks[i] = spark
-		queue_redraw()
+		resized.connect(queue_redraw)
 
 	func _draw() -> void:
-		var floor_center := Vector2(size.x * 0.5, size.y * 0.5 + 118.0)
-		for i in 6:
-			draw_circle(Vector2(size.x * 0.5, size.y * 0.5 + 20.0), 250.0 - i * 34.0, Color(1.000, 0.554, 0.090, 0.035))
-		draw_set_transform(floor_center, 0.0, Vector2(1.0, 0.3))
-		draw_circle(Vector2.ZERO, 200.0, Color(0.074, 0.071, 0.066, 0.75))
-		draw_arc(Vector2.ZERO, 200.0, 0.0, TAU, 64, Color("#ff8200"), 8.0, true)
-		draw_arc(Vector2.ZERO, 158.0, 0.0, TAU, 64, Color("#ffd257", 0.8), 5.0, true)
-		var pulse := fmod(_time * 0.6, 1.0)
-		draw_arc(Vector2.ZERO, 60.0 + pulse * 130.0, 0.0, TAU, 48, Color(1.0, 0.6, 0.18, (1.0 - pulse) * 0.5), 4.0, true)
-		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-		for spark in _sparks:
-			var pos := Vector2(size.x * (0.2 + spark.x * 0.6), size.y * spark.y)
-			draw_circle(pos, 3.0 + spark.z * 4.0, Color(1.0, 0.85, 0.4, sin(spark.y * PI) * 0.7))
+		var center := Vector2(size.x * 0.5, size.y * 0.5 + 118.0)
+		var half := minf(206.0, size.x * 0.37)
+		for i in 4:
+			draw_circle(center - Vector2(0, 92), 185.0 - i * 38, Color(1.0, 0.67, 0.32, 0.022))
+		var top := PackedVector2Array([center + Vector2(-half + 30, -40), center + Vector2(half - 30, -40), center + Vector2(half, 8), center + Vector2(half - 22, 38), center + Vector2(-half + 22, 38), center + Vector2(-half, 8)])
+		var lip := top.duplicate()
+		for i in lip.size():
+			lip[i].y += 10
+		draw_colored_polygon(lip, Color("#0d1217"))
+		draw_colored_polygon(top, Color("#293237"))
+		var outline := top.duplicate()
+		outline.append(top[0])
+		draw_polyline(outline, Color("#81908e"), 2, true)
+		for i in range(-3, 4):
+			var x := center.x + i * half * 0.22
+			draw_line(Vector2(x, center.y - 33), Vector2(x + 18, center.y + 29), Color("#151d22"), 2, true)
+		draw_line(center + Vector2(-half + 25, 33), center + Vector2(half - 25, 33), Color("#ba965e"), 3, true)
+		for side in [-1, 1]:
+			for y in [-28, 23]:
+				draw_circle(center + Vector2(side * (half - 38), y), 3, Color("#9caaa6"))
 
 
 ## Тёмный градиент поверх живого фона: читаемость интерфейса.

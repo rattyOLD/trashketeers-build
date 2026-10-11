@@ -401,6 +401,7 @@ func _backdrop(path: String, foot: Vector2, scale_k: float) -> Sprite2D:
 	if not path.contains("junkyard_v2"):
 		_tone(item)
 	add_child(item)
+	ForegroundFade.register(item)
 	if _neon and item.texture.get_width() * item.scale.x > 120.0:
 		_light.call_deferred(item)
 	return item

@@ -11,7 +11,8 @@ extends MeshInstance2D
 const SHADER_PATH := "res://shaders/rig2d.gdshader"
 ## Внешность особи (окрас, обводка, свет) — переносится на «труп» того же вида.
 const LOOK_PARAMS: Array[StringName] = [&"recolor_enabled", &"regions0", &"regions1", &"grad_dark", &"grad_mid",
-	&"grad_light", &"grad_range", &"hue_shift", &"tint", &"outline_px", &"outline_color", &"env_light"]
+	&"grad_light", &"grad_range", &"hue_shift", &"tint", &"outline_px", &"outline_color", &"env_light",
+	&"paint_strength", &"paint_shadow", &"paint_light", &"paint_saturation", &"rim_strength"]
 
 static var _shader: Shader
 static var _meshes: Dictionary = {}

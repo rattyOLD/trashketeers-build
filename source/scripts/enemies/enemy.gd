@@ -328,6 +328,8 @@ func activate(enemy_data: EnemyData, at: Vector2, hp_mult: float = 1.0, dmg_mult
 	_apply_sprite_scale(1.0, 1.0)
 	var forced := data.behavior == EnemyData.Behavior.EXPLODER or data.behavior == EnemyData.Behavior.DASHER
 	_accessories.setup(data.accessory_anchor, data.accessories, forced)
+	_accessories.cloth = ArtDirection.FACTIONS[ArtDirection.faction(str(data.id))][2]
+	_accessories.queue_redraw()
 	_shadow.scale = Vector2(data.radius / 16.0, data.radius / 40.0) * _size_mult * (0.8 if data.flying else 1.0)
 	_shadow.position = Vector2(0, data.radius * 0.75 * _size_mult)
 	_shape.radius = data.radius * _size_mult
@@ -458,6 +460,7 @@ func _setup_visual() -> void:
 	var rim := Color("#140a1e")
 	rim.a = 0.9
 	for target in [_sprite.shader_material, _alt_material]:
+		ArtDirection.apply(target, ArtDirection.faction(str(data.id)), 0.48)
 		target.set_shader_parameter("outline_color", rim)
 		target.set_shader_parameter("rim_strength", 0.11 if data.is_boss() else 0.07)
 		target.set_shader_parameter("outline_px", outline_px)
@@ -466,12 +469,19 @@ func _setup_visual() -> void:
 	_alt_material.set_shader_parameter("outline_px", data.outline_world / maxf(_alt_scale(), 0.01))
 	_parts.set_param("outline_color", rim)
 	_parts.set_param("outline_px", outline_px * 0.8)
+	var palette: Array = ArtDirection.FACTIONS[ArtDirection.faction(str(data.id))]
+	_parts.set_param("paint_strength", 0.48)
+	_parts.set_param("paint_shadow", palette[0])
+	_parts.set_param("paint_light", palette[1])
+	_parts.set_param("paint_saturation", 0.84)
 	_sprite.set_param("hue_shift", 0.0)
 	_sprite.set_param("blink", 0.0)
 	_sprite.set_param("squint", 0.0)
 	_sprite.set_param("wheel_angle", 0.0)
 	var recolor := data.recolor.duplicate()
 	if _framed:
+		if not recolor.has("clothes"):
+			recolor["clothes"] = ArtDirection.CLOTHES[ArtDirection.faction(str(data.id))].duplicate()
 		if not data.accent_variants.is_empty():
 			var accent: Dictionary = _pick_weighted(data.accent_variants)
 			for region in accent:

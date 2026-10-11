@@ -211,7 +211,7 @@ func start(_weapon_id: StringName = &"") -> void:
 	layers.fx.add_child(_last_marker)
 
 	_setup_common(map.view_bounds, pickups.nut_texture)
-	light_map.set_layout(map.layout)
+	light_map.set_layout(map.layout, str(map.chapter.get("map_card", "")))
 	_last_marker.setup(director, enemies, camera)
 	minimap = Minimap.new()
 	minimap.setup(map, player, enemies, director)
@@ -646,7 +646,7 @@ func _switch_chapter(index: int = -1) -> void:
 	_hook_run_objects()
 	SoundManager.start_ambient(map.layout)
 	hazards.attach_level(map)
-	light_map.set_layout(map.layout)
+	light_map.set_layout(map.layout, str(map.chapter.get("map_card", "")))
 	_portal = null
 	player.global_position = map.player_start
 	player.reset_physics_interpolation()
@@ -844,6 +844,7 @@ func _on_enemy_fx(_enemy: Enemy, kind: String, at: Vector2, radius: float) -> vo
 func _on_boss_phase(boss: Enemy, phase: int) -> void:
 	if phase < 2:
 		return
+	focus_camera(boss.global_position, 0.9)
 	if story != null and not director.is_mini_wave():
 		story.on_boss_phase(phase)
 	hud.set_boss_fury()
@@ -1030,6 +1031,7 @@ func debug_boss(enemy_id: StringName) -> void:
 
 func _on_boss_spawned(boss: Enemy) -> void:
 	Platform.note_event("boss spawned")
+	focus_camera(boss.global_position, 1.4)
 	if story != null:
 		story.on_boss_spawned(director.is_mini_wave())
 	hud.show_boss(boss.data.display_name, boss.hp, boss.max_hp)
@@ -1438,6 +1440,7 @@ func _start_phase_two() -> void:
 
 
 func _on_boss_killed(boss: Enemy, at: Vector2) -> void:
+	focus_camera(at, 1.0)
 	# Босс пал — возвращается музыка главы.
 	get_tree().create_timer(2.5, false).timeout.connect(func() -> void:
 		if not finished:

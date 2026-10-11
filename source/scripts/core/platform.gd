@@ -601,8 +601,8 @@ if (!el) {
   el.style.cssText = 'position:fixed;z-index:20;box-sizing:border-box;border:0;outline:0;background:transparent;color:#0c1d29;padding:0 14px;font-family:system-ui,-apple-system,sans-serif;-webkit-appearance:none;border-radius:16px';
   el.addEventListener('keydown', function (e) { if (e.key === 'Enter') { el.dataset.enter = '1'; e.preventDefault(); } });
   el.addEventListener('input', function () { el.dataset.changed = '1'; });
-  var dock = function () { var v = window.visualViewport; document.documentElement.style.setProperty('--trk-vt', (v ? v.offsetTop : 0) + 'px'); };
-  el.addEventListener('focus', function () { dock(); el.classList.add('trk_docked'); if (window.visualViewport) { window.visualViewport.addEventListener('scroll', dock); window.visualViewport.addEventListener('resize', dock); } });
+  var dock = function () { var v = window.visualViewport; var c = document.getElementById('canvas'); var hidden = v && c ? c.getBoundingClientRect().height - v.height : 0; el.classList.toggle('trk_docked', document.activeElement === el && hidden > 60); document.documentElement.style.setProperty('--trk-vt', (v ? v.offsetTop : 0) + 'px'); };
+  el.addEventListener('focus', function () { dock(); if (window.visualViewport) { window.visualViewport.addEventListener('scroll', dock); window.visualViewport.addEventListener('resize', dock); } });
   el.addEventListener('blur', function () { el.classList.remove('trk_docked'); if (window.visualViewport) { window.visualViewport.removeEventListener('scroll', dock); window.visualViewport.removeEventListener('resize', dock); } });
   document.body.appendChild(el);
 }
@@ -634,9 +634,12 @@ el.dataset.enter = ''; el.dataset.changed = ''; return out;
 ## Сколько логических пикселей холста закрыла экранная клавиатура (iOS не меняет размер страницы, а сужает «видимое окно»).
 ## Пока открыто браузерное поле, страница в шаблоне сдвигает холст за видимой областью, поэтому закрыт всегда низ.
 func keyboard_inset() -> float:
-	if not is_web:
-		return 0.0
 	var view := get_viewport().get_visible_rect().size
+	if not is_web:
+		if not DisplayServer.has_feature(DisplayServer.FEATURE_VIRTUAL_KEYBOARD):
+			return 0.0
+		var window_height := maxf(float(DisplayServer.window_get_size().y), 1.0)
+		return DisplayServer.virtual_keyboard_get_height() * view.y / window_height
 	var value: Variant = _js("""
 var vv = window.visualViewport; var c = document.getElementById('canvas') || document.querySelector('canvas'); if (!vv || !c) return 0;
 var h = c.getBoundingClientRect().height; if (h <= 0) return 0;

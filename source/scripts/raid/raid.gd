@@ -104,6 +104,7 @@ func start(_weapon_id: StringName = &"") -> void:
 	hud.set_nuts(SaveService.get_star_dust())
 	dragon.scale_health(player.weapon_controller.weapon.get_dps())
 	hud.show_boss("Хладгор · Хозяин Озера", dragon.hp, dragon.max_hp, true)
+	focus_camera(dragon.global_position, 1.4)
 	hud.show_banner("ЛЕДЯНОЙ НАЛЁТ: ХЛАДГОР", Color("#bff6ff"), 2.4)
 	_thermos_button = hud.add_thermos(_use_thermos)
 	_update_thermos()
@@ -358,6 +359,7 @@ func _on_dragon_slammed(_at: Vector2) -> void:
 
 
 func _on_fury_started() -> void:
+	focus_camera(dragon.global_position, 0.9)
 	hud.set_boss_fury()
 	hud.show_banner("ФАЗА III: АБСОЛЮТНАЯ СТУЖА", WhiteDragon.COLOR_FURY, 2.4)
 	fx.ring(dragon.global_position, WhiteDragon.COLOR_FURY, 260.0)

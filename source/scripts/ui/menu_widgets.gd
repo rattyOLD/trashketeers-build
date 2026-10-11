@@ -534,9 +534,9 @@ class NavButton:
 		custom_minimum_size = Vector2(0, 124)
 		size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		focus_mode = Control.FOCUS_NONE
-		add_theme_stylebox_override("normal", UiStyle.box(Color(0.184, 0.177, 0.166, 0.82), color.darkened(0.2), 4, 22))
-		add_theme_stylebox_override("hover", UiStyle.box(Color(0.239, 0.230, 0.215, 0.9), color, 4, 22))
-		add_theme_stylebox_override("pressed", UiStyle.box(color.darkened(0.55), Color.WHITE, 4, 22))
+		add_theme_stylebox_override("normal", UiStyle.box(UiStyle.PANEL, UiStyle.CARD_BORDER, 2, 10))
+		add_theme_stylebox_override("hover", UiStyle.box(UiStyle.PANEL_LIGHT, color.lerp(UiStyle.CARD_BORDER, 0.4), 2, 10))
+		add_theme_stylebox_override("pressed", UiStyle.box(UiStyle.PANEL_LIGHT.lightened(0.04), color, 2, 10))
 		add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 		pressed.connect(func() -> void: SoundManager.play(&"ui_click"))
 

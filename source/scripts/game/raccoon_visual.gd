@@ -174,6 +174,8 @@ var _carry_lag := 0.0
 var _hop := 0.0
 var _aim_local := 0.0
 var _env := Color(0, 0, 0)
+var _weight_shift := Vector2.ZERO
+var _brace := 0.0
 
 var _head_spring := SpringValue.new(140.0, 11.0)
 var _ear_spring := SpringValue.new(220.0, 9.0)
@@ -198,6 +200,7 @@ func _init() -> void:
 	hero.visible = false
 	var hero_rim := ShaderMaterial.new()
 	hero_rim.shader = load("res://shaders/hero_rim.gdshader")
+	ArtDirection.apply(hero_rim, "scrap", 0.18)
 	hero.material = hero_rim
 	add_child(hero)
 	_rig_ok = body.setup(RIG_ID, 0.0, false)
@@ -210,6 +213,10 @@ func _init() -> void:
 	_arm_material.shader = load(RigSprite.SHADER_PATH)
 	_arm_material.set_shader_parameter("rig_enabled", false)
 	_arm_material.set_shader_parameter("rim_strength", 0.12)
+	ArtDirection.apply(_arm_material, "scrap", 0.18)
+	ArtDirection.apply(body.shader_material, "scrap", 0.18)
+	_rear_layer.material = ArtDirection.material("scrap", 0.18)
+	_gun_layer.material = ArtDirection.material("scrap", 0.18)
 	body.set_param("rim_strength", 0.14)
 	arm.material = _arm_material
 	add_child(arm)
@@ -585,6 +592,13 @@ func update_motion(velocity: Vector2, aim: Vector2, delta: float) -> void:
 	_twitch_l.update(0.0, delta)
 	_twitch_r.update(0.0, delta)
 	_update_face(delta)
+	# Вес переносится вместе со всей позой; плечи и обе кисти остаются в одной системе координат.
+	var weight_target := Vector2.ZERO
+	if not preview_mode and not _dead and not dashing:
+		weight_target = Vector2(sin(_gait) * _run * 0.85, absf(sin(_gait)) * _run * 0.45)
+		weight_target.x += clampf(velocity.x / 260.0, -1.0, 1.0) * 0.65
+	_weight_shift = _weight_shift.lerp(weight_target, 1.0 - exp(-12.0 * delta))
+	_brace = lerpf(_brace, 1.0 if aiming and _run < 0.2 and not preview_mode else 0.0, 1.0 - exp(-9.0 * delta))
 	_update_pose()
 	var target := _carry_angle()
 	if _action == "ready" and _action_left > 0.0 and not aiming and not dashing:
@@ -833,10 +847,10 @@ func _update_pose() -> void:
 ## Трансформ «пиксели текстуры относительно точки опоры → локальные координаты узла».
 ## Отражение по x (взгляд влево) зашито в масштаб: рука, аксессуары и кости отражаются с телом.
 func _sprite_xform() -> Transform2D:
-	var squash := _squash - _shot_squash
+	var squash := _squash - _shot_squash - _brace * 0.006
 	var scale_vec := Vector2(_facing * _sc() * (2.0 - squash) * _stretch * (1.0 - 0.2 * _turn), _sc() * squash)
 	# Тело и оба слоя рук получают один трансформ, включая остановку и выход из рывка.
-	return Transform2D(_sway + (0.0 if _dead else _lean), scale_vec, 0.0, Vector2(0, -_bob - _hop + 1.5 * sin(_landing * PI)) + _body_kick + _brake_shift)
+	return Transform2D(_sway + (0.0 if _dead else _lean), scale_vec, 0.0, Vector2(0, -_bob - _hop + 1.5 * sin(_landing * PI)) + _body_kick + _brake_shift + _weight_shift)
 
 
 func _apply_rig() -> void:

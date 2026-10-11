@@ -122,6 +122,10 @@ XDG_DATA_HOME="$LOG/battle-wear-user" timeout 90 xvfb-run -a -s "-screen 0 1280x
 if ! grep -q 'BATTLE_WEAR failures=0' "$LOG/battle-wear.log" || grep -qE 'SCRIPT ERROR|Lambda capture' "$LOG/battle-wear.log"; then
   fail=1
 fi
+XDG_DATA_HOME="$LOG/visual-direction-user" timeout 90 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/visual_direction_test.tscn > "$LOG/visual-direction.log" 2>&1
+if ! grep -q 'VISUAL_DIRECTION failures=0' "$LOG/visual-direction.log" || grep -qE 'SCRIPT ERROR|Lambda capture' "$LOG/visual-direction.log"; then
+  fail=1
+fi
 for m in survival story raid mod:blast; do
   MODE=$m DURATION=45 timeout 300 xvfb-run -a -s "-screen 0 1280x1400x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 \
     --resolution 1280x720 --path "$P" res://test/mode_audit.tscn > "$LOG/$m.log" 2>&1

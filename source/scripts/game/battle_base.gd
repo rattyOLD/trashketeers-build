@@ -72,6 +72,11 @@ var hud: Hud
 var atmosphere: AtmosphereFX
 var light_map: LightMap
 var battle_wear: BattleWear
+var foreground_fade: ForegroundFade
+var _focus_point := Vector2.ZERO
+var _focus_left := 0.0
+var _focus_total := 1.0
+var _focus_weight := 0.0
 
 var _shake := 0.0
 var _hud_timer := 0.0
@@ -174,6 +179,9 @@ func _setup_common(camera_bounds: Rect2, currency_icon: Texture2D) -> void:
 	light_map.player = player
 	add_child(light_map)
 	light_map.build(self, 1)
+	foreground_fade = ForegroundFade.new()
+	foreground_fade.player = player
+	add_child(foreground_fade)
 	_apply_visual_budget()
 
 	Bullet.liquid_sink = fx.droplet
@@ -617,6 +625,8 @@ func _show_result(victory: bool, lines: PackedStringArray, title: String = "", c
 
 
 func _update_shake(delta: float) -> void:
+	if get_tree().paused:
+		return
 	_kick = _kick.lerp(Vector2.ZERO, 1.0 - exp(-CAMERA_KICK_DECAY * delta))
 	## В вертикали шапка закрывает верх, а пальцы на кнопках — низ: енот чуть ниже центра, посередине свободной зоны.
 	# Упреждение: по ходу движения и, пока стреляешь, — в сторону прицела (видно, куда бьёшь).
@@ -624,7 +634,17 @@ func _update_shake(delta: float) -> void:
 	var wc := player.weapon_controller
 	if wc.trigger and not wc.auto_mode:
 		lead_target += wc.aim_direction.normalized() * 54.0
-	_camera_lead = _camera_lead.lerp(lead_target.limit_length(72.0), minf(delta * 4.0, 1.0))
+	# Экспоненциальное следование одинаково на 30/60/120 кадрах.
+	_focus_left = maxf(0.0, _focus_left - delta)
+	var focus_target := sin(clampf(_focus_left / _focus_total, 0.0, 1.0) * PI) if _focus_left > 0.0 else 0.0
+	if not bool(SaveService.data.get("camera_focus", true)):
+		focus_target = 0.0
+		_focus_left = 0.0
+		_focus_weight = 0.0
+	_focus_weight = lerpf(_focus_weight, focus_target, 1.0 - exp(-7.0 * delta))
+	if _focus_weight > 0.001:
+		lead_target += (_focus_point - player.global_position).limit_length(110.0) * _focus_weight
+	_camera_lead = _camera_lead.lerp(lead_target.limit_length(90.0), 1.0 - exp(-4.0 * delta))
 	var base := Vector2(0.0, -PORTRAIT_CAMERA_DROP) if Orient.portrait else Vector2(0.0, 18.0 / LANDSCAPE_ZOOM) + _camera_lead
 	if not bool(SaveService.data.get("camera_shake", true)):
 		_shake = 0.0
@@ -637,6 +657,15 @@ func _update_shake(delta: float) -> void:
 	_shake = maxf(_shake - delta * 2.5, 0.0)
 	var power := _shake * _shake * 18.0
 	camera.offset = base + _kick + Vector2(randf_range(-power, power), randf_range(-power, power))
+
+
+## Короткий взгляд на событие сохраняет героя в кадре и не меняет масштаб управления.
+func focus_camera(at: Vector2, duration: float = 1.2) -> void:
+	if finished or get_tree().paused or not bool(SaveService.data.get("camera_focus", true)):
+		return
+	_focus_point = at
+	_focus_total = clampf(duration, 0.4, 2.0)
+	_focus_left = _focus_total
 
 
 func _request_skill() -> void:

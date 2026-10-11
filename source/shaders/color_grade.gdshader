@@ -5,13 +5,13 @@ global uniform float world_time;
 // аберрация по краям экрана, которая вспыхивает при получении урона (aberration → 1).
 
 uniform sampler2D screen_texture : hint_screen_texture, filter_linear;
-uniform float contrast = 1.08;
-uniform float saturation = 1.12;
+uniform float contrast = 1.04;
+uniform float saturation = 0.98;
 uniform vec3 shadow_tint = vec3(0.10, 0.02, 0.16);
 uniform vec3 highlight_tint = vec3(0.06, 0.03, -0.02);
-uniform float grain = 0.035;
+uniform float grain = 0.018;
 uniform float aberration = 0.0;
-uniform float base_aberration = 0.0012;
+uniform float base_aberration = 0.0;
 
 float hash(vec2 p) {
 	return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);

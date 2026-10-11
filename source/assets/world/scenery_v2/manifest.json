@@ -19,5 +19,11 @@
   "anchor": [
     256,
     496
-  ]
+  ],
+  "sha256": {
+    "night_dump.png": "2a780caeaf3089545599add97fcf5feb1f25a8ae6f27773f0d14134f155b729c",
+    "acid_rain.png": "8414bc2c1127284d429058dc4810caa9736c08ed1985217e60d3fc3bd3ab4cb1",
+    "gold_vault.png": "3139d69c792b24042f382b9e1d9d8eeb873d8afd53de6134fcbbb9641e847475",
+    "pigeon_roofs.png": "d4b0799fbbffa1ba42a66bb6f37b48e81d2ba88a38d0e628370bf9bf55766374"
+  }
 }
