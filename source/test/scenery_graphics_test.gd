@@ -97,6 +97,7 @@ func _run() -> void:
 	if not baseline:
 		await _test_seams()
 		await _test_shadow_lifetime()
+		await _test_district_floor_boundary()
 	print("SCENERY_GRAPHICS failures=", failures)
 	get_tree().quit(0 if failures == 0 else 1)
 
@@ -151,3 +152,41 @@ func _test_shadow_lifetime() -> void:
 		await _settle()
 		_check(shadows._rect_active[0] == 0 and shadows._circle_active[0] == 0 and shadows._mesh == null, "removed obstacle leaves no ghost shadow")
 		shadows.free()
+
+
+func _test_district_floor_boundary() -> void:
+	var view := SubViewport.new()
+	view.size = Vector2i(768, 512)
+	view.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	add_child(view)
+	var floor_color := Color(0.2, 0.5, 0.9)
+	var floor := ColorRect.new()
+	floor.size = Vector2(view.size)
+	floor.color = floor_color
+	view.add_child(floor)
+	var inner := Rect2(112, 112, 512, 256)
+	for quality in [0, 2]:
+		SaveService.data["quality"] = quality
+		for layout in ["junkyard", "bank"]:
+			var district := ArenaDistrict.new()
+			view.add_child(district)
+			district.build(layout, layout, Rect2(48, 48, 640, 384), inner, 240, 40)
+			# Убираем декор, чтобы проверить именно место смены двух покрытий.
+			for child in district.get_children():
+				if child is CanvasItem:
+					child.visible = child == district._holder
+			await _settle()
+			var img := view.get_texture().get_image()
+			var edge := ArenaDistrict.floor_rect(inner)
+			var center := edge.get_center()
+			for pair in [
+				[Vector2(center.x, edge.position.y + 1), Vector2(center.x, edge.position.y - 1)],
+				[Vector2(center.x, edge.end.y - 1), Vector2(center.x, edge.end.y + 1)],
+				[Vector2(edge.position.x + 1, center.y), Vector2(edge.position.x - 1, center.y)],
+				[Vector2(edge.end.x - 1, center.y), Vector2(edge.end.x + 1, center.y)],
+			]:
+				var inside := img.get_pixelv(Vector2i(pair[0]))
+				var outside := img.get_pixelv(Vector2i(pair[1]))
+				_check(absf(inside.b - floor_color.b) < 0.01 and absf(outside.b - floor_color.b) > 0.05, "floor reaches fence base on all sides " + layout + " quality " + str(quality))
+			district.free()
+	view.free()

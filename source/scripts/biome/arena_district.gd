@@ -14,6 +14,9 @@ const MARGIN_BOTTOM := 120.0
 const TICK := 0.1
 const FENCE_SCALE := 0.75
 const SIDE_FENCE_SCALE := 0.5
+const FENCE_TOP_OFFSET := 6.0
+const FENCE_BOTTOM_OFFSET := 92.0
+const FENCE_SIDE_OFFSET := 30.0
 const SPECTATOR_SCALE := 0.82
 const TOP_SPACING := 84.0
 const SIDE_SPACING := 96.0
@@ -69,6 +72,11 @@ static func has_art(layout: String) -> bool:
 	return DISTRICTS.has(layout)
 
 
+## Покрытие арены доходит до основания забора; район начинается за ним.
+static func floor_rect(inner: Rect2) -> Rect2:
+	return inner.grow_individual(FENCE_SIDE_OFFSET, -FENCE_TOP_OFFSET, FENCE_SIDE_OFFSET, FENCE_BOTTOM_OFFSET)
+
+
 func build(layout: String, chapter_id: String, bounds: Rect2, inner: Rect2, gate_y: float, gate_half: float) -> void:
 	y_sort_enabled = true
 	var district: Dictionary = DISTRICTS[layout]
@@ -82,12 +90,13 @@ func build(layout: String, chapter_id: String, bounds: Rect2, inner: Rect2, gate
 	var chapter_dir := ROOT + chapter_key + "/"
 	var view := view_rect(bounds)
 	_inner = inner
-	# Земля района — всё вне игровой площадки: кольцо стен и поля камеры за ним.
+	# Граница покрытия проходит под основанием забора, а не под его верхним краем.
 	var ground := dir + str(district["prefix"]) + "_ground_tile.png"
-	_ground(ground, Rect2(view.position, Vector2(view.size.x, inner.position.y - view.position.y)))
-	_ground(ground, Rect2(Vector2(view.position.x, inner.end.y), Vector2(view.size.x, view.end.y - inner.end.y)))
-	_ground(ground, Rect2(Vector2(view.position.x, inner.position.y), Vector2(inner.position.x - view.position.x, inner.size.y)))
-	_ground(ground, Rect2(Vector2(inner.end.x, inner.position.y), Vector2(view.end.x - inner.end.x, inner.size.y)))
+	var floor_area := floor_rect(inner)
+	_ground(ground, Rect2(view.position, Vector2(view.size.x, floor_area.position.y - view.position.y)))
+	_ground(ground, Rect2(Vector2(view.position.x, floor_area.end.y), Vector2(view.size.x, view.end.y - floor_area.end.y)))
+	_ground(ground, Rect2(Vector2(view.position.x, floor_area.position.y), Vector2(floor_area.position.x - view.position.x, floor_area.size.y)))
+	_ground(ground, Rect2(Vector2(floor_area.end.x, floor_area.position.y), Vector2(view.end.x - floor_area.end.x, floor_area.size.y)))
 	var buildings: Array[String] = []
 	for id in district["buildings"]:
 		buildings.append(dir + str(id) + ".png")
@@ -113,19 +122,19 @@ func build(layout: String, chapter_id: String, bounds: Rect2, inner: Rect2, gate
 	var gate_bottom := gate_y + gate_half * GATE_CLEAR
 	var lite := SaveService.get_quality() == 0
 	# Верх: забор ровно по краю площадки, сразу за ним трибуна в два-три ряда, дальше дома.
-	_fence_row(fence_h, inner.position.x - 40.0, inner.end.x + 40.0, inner.position.y + 6.0)
+	_fence_row(fence_h, inner.position.x - 40.0, inner.end.x + 40.0, inner.position.y + FENCE_TOP_OFFSET)
 	# Один редкий ряд зрителей: живо, но без пёстрой стены из толпы.
 	_crowd_row(crowd, inner.position.x, inner.end.x, inner.position.y - 58.0, TOP_SPACING * 2.0)
 	_backdrop_row(buildings, small, view.position.x, view.end.x, inner.position.y - 215.0, 0.72)
 	# Низ: забор по краю, за ним (ближе к камере) машины и объекты — без зрителей: там кнопки.
-	_fence_row(fence_h, inner.position.x - 40.0, inner.end.x + 40.0, inner.end.y + 92.0)
+	_fence_row(fence_h, inner.position.x - 40.0, inner.end.x + 40.0, inner.end.y + FENCE_BOTTOM_OFFSET)
 	_backdrop_row(buildings, small, view.position.x, view.end.x, inner.end.y + 200.0, 0.55)
 	# Бока: забор столбом по краю площадки (проход у ворот), зрители в два столбца, дома дальше.
 	for side: float in [-1.0, 1.0]:
 		var edge: float = inner.position.x if side < 0.0 else inner.end.x
-		var spans := [Vector2(inner.position.y + 6.0, gate_top), Vector2(gate_bottom, inner.end.y + 92.0)]
+		var spans := [Vector2(inner.position.y + FENCE_TOP_OFFSET, gate_top), Vector2(gate_bottom, inner.end.y + FENCE_BOTTOM_OFFSET)]
 		for span: Vector2 in spans:
-			_fence_column(fence_v, edge + side * 30.0, span.x, span.y)
+			_fence_column(fence_v, edge + side * FENCE_SIDE_OFFSET, span.x, span.y)
 			var y := span.x + 70.0
 			while y < span.y - 20.0:
 				_spectator(crowd.pick_random(), Vector2(edge + side * randf_range(86.0, 100.0), y))
