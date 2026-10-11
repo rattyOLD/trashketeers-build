@@ -126,6 +126,10 @@ XDG_DATA_HOME="$LOG/visual-direction-user" timeout 90 xvfb-run -a -s "-screen 0 
 if ! grep -q 'VISUAL_DIRECTION failures=0' "$LOG/visual-direction.log" || grep -qE 'SCRIPT ERROR|Lambda capture' "$LOG/visual-direction.log"; then
   fail=1
 fi
+XDG_DATA_HOME="$LOG/battle-expansion-user" timeout 120 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/battle_expansion_test.tscn > "$LOG/battle-expansion.log" 2>&1
+if ! grep -q 'BATTLE_EXPANSION failures=0' "$LOG/battle-expansion.log" || grep -qE 'SCRIPT ERROR|Lambda capture' "$LOG/battle-expansion.log"; then
+  fail=1
+fi
 for m in survival story raid mod:blast; do
   MODE=$m DURATION=45 timeout 300 xvfb-run -a -s "-screen 0 1280x1400x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 \
     --resolution 1280x720 --path "$P" res://test/mode_audit.tscn > "$LOG/$m.log" 2>&1

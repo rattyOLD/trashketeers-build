@@ -73,6 +73,7 @@ var atmosphere: AtmosphereFX
 var light_map: LightMap
 var battle_wear: BattleWear
 var foreground_fade: ForegroundFade
+var chain_hazards: ChainHazards
 var _focus_point := Vector2.ZERO
 var _focus_left := 0.0
 var _focus_total := 1.0
@@ -95,6 +96,8 @@ func _build_layers() -> BiomeLayers:
 	fx.attach_ground(layers.decals)
 	battle_wear = BattleWear.new()
 	layers.decals.add_child(battle_wear)
+	chain_hazards = ChainHazards.new()
+	layers.decals.add_child(chain_hazards)
 	return layers
 
 
@@ -144,6 +147,7 @@ func _spawn_player(at: Vector2, weapon: WeaponData, target_finder: Callable) -> 
 	entities.add_child(player)
 	player.setup(target_finder, weapon, stats)
 	player.visual.apply_look(SaveService.get_character(), SaveService.get_skin())
+	player.visual.apply_equipment(stats.patch_ids)
 	player.visual.battle_marker = true
 	var marker_material := CanvasItemMaterial.new()
 	marker_material.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
@@ -181,6 +185,8 @@ func _setup_common(camera_bounds: Rect2, currency_icon: Texture2D) -> void:
 	light_map.build(self, 1)
 	foreground_fade = ForegroundFade.new()
 	foreground_fade.player = player
+	chain_hazards.player = player
+	chain_hazards.fx = fx
 	add_child(foreground_fade)
 	_apply_visual_budget()
 
@@ -195,6 +201,7 @@ func _setup_common(camera_bounds: Rect2, currency_icon: Texture2D) -> void:
 	player.damaged.connect(_on_player_damaged)
 	player.died.connect(_on_player_died)
 	player.weapon_controller.fired.connect(_on_player_fired)
+	player.weapon_controller.fired.connect(chain_hazards.on_fired)
 	player.weapon_controller.melee.swing_started.connect(_on_melee_swing)
 	player.weapon_controller.melee.hit_resolved.connect(_on_melee_hit)
 	player.weapon_controller.weapon_changed.connect(hud.set_weapon)

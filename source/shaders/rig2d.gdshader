@@ -1,4 +1,5 @@
 shader_type canvas_item;
+#include "res://shaders/boss_wear.gdshaderinc"
 #include "res://shaders/paint_palette.gdshaderinc"
 // GPU-риг для 2D-персонажей (енот, крысы). Спрайт натянут на сетку MeshInstance2D (RigSprite),
 // каждая вершина деформируется до 12 костями. Веса костей лежат в трёх RGBA-картах в UV-пространстве
@@ -187,7 +188,7 @@ void fragment() {
 		float lit_edge = (1.0 - texture(TEXTURE, uv - TEXTURE_PIXEL_SIZE * 4.0).a) * a;
 		rgb += vec3(0.65, 0.72, 0.78) * lit_edge * rim_strength;
 	}
-	rgb = painted_color(rgb) * tint.rgb;
+	rgb = worn_boss(painted_color(rgb), uv) * tint.rgb;
 	rgb = rgb * (vec3(1.0) + env_light * 0.85) + env_light * 0.04;
 	rgb = mix(rgb, vec3(1.0), clamp(flash, 0.0, 1.0) * 0.85);
 

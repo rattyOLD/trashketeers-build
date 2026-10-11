@@ -946,6 +946,7 @@ func _on_skin_changed() -> void:
 func _on_weapon_changed(_weapon_id: StringName) -> void:
 	var weapon := SaveService.get_loadout()
 	_preview.raccoon.weapon_icon = weapon.icon
+	_preview.raccoon.weapon_tier = weapon.tier
 	_preview.raccoon.weapon_color = weapon.effect_color
 	_refresh()
 

@@ -425,6 +425,7 @@ class RaccoonPreview:
 		raccoon.preview_mode = true
 		raccoon.apply_look(character if not character.is_empty() else SaveService.get_character(), skin)
 		raccoon.weapon_icon = SaveService.get_loadout().icon
+		raccoon.weapon_tier = SaveService.get_loadout().tier
 		raccoon.weapon_color = SaveService.get_loadout().effect_color
 		raccoon.scale = Vector2.ONE * preview_scale
 		add_child(raccoon)

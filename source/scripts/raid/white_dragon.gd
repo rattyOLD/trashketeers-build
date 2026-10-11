@@ -160,6 +160,8 @@ var _beam_channel := -1
 var _barrage: Array[Vector2] = []
 var _barrage_clock := 0.0
 var _flash := 0.0
+var _wear_material: ShaderMaterial
+var _wear_stage := 0
 var _flap_timer := 0.0
 var _tail_fx: TailWaveFx
 var _tail_hit := false
@@ -175,6 +177,10 @@ func _init() -> void:
 	collision_mask = 0
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	_sprite = AnimatedSprite2D.new()
+	_wear_material = ShaderMaterial.new()
+	_wear_material.shader = load("res://shaders/boss_skin.gdshader")
+	_sprite.material = _wear_material
+	_sprite.frame_changed.connect(_sync_wear_frame)
 	_sprite.sprite_frames = _build_frames()
 	_sprite.scale = Vector2.ONE * SPRITE_SCALE
 	_sprite.offset = SPRITE_TORSO_OFFSET
@@ -237,6 +243,8 @@ func setup(player: Player, arena: DragonArena, comets: CometPool, laser: WhiteDr
 func scale_health(weapon_dps: float) -> void:
 	max_hp = clampf(weapon_dps * HP_PER_DPS, MAX_HP, HP_CAP)
 	hp = max_hp
+	_wear_stage = 0
+	_wear_material.set_shader_parameter("boss_damage", 0.0)
 
 
 func is_targetable() -> bool:
@@ -259,6 +267,8 @@ func take_damage(amount: float, _direction: Vector2 = Vector2.ZERO, _is_crit: bo
 	if not is_targetable():
 		return
 	hp = maxf(hp - amount * (EXHAUST_DAMAGE_MULT if exhausted else 1.0), 0.0)
+	_wear_stage = maxi(_wear_stage, 2 if hp <= max_hp * FURY_THRESHOLD else (1 if hp <= max_hp * PHASE2_THRESHOLD else 0))
+	_wear_material.set_shader_parameter("boss_damage", float(_wear_stage) * 0.5)
 	_flash = 0.07
 	health_changed.emit(hp, max_hp)
 	if hp <= 0.0:
@@ -754,6 +764,19 @@ func _sync_reflection(alpha: float) -> void:
 	_reflection.scale = _sprite.scale * 0.94
 	_reflection.offset = Vector2(SPRITE_TORSO_OFFSET.x, -SPRITE_TORSO_OFFSET.y)
 	_reflection.modulate.a = alpha
+	var material := _reflection.material as ShaderMaterial
+	material.set_shader_parameter("boss_damage", float(_wear_stage) * 0.5)
+	material.set_shader_parameter("wear_rect", _wear_material.get_shader_parameter("wear_rect"))
+
+
+func _sync_wear_frame() -> void:
+	if _sprite.sprite_frames == null or not _sprite.sprite_frames.has_animation(_sprite.animation):
+		return
+	var tex := _sprite.sprite_frames.get_frame_texture(_sprite.animation, _sprite.frame)
+	if tex is AtlasTexture:
+		var rect := (tex as AtlasTexture).region
+		var size := (tex as AtlasTexture).atlas.get_size()
+		_wear_material.set_shader_parameter("wear_rect", Vector4(rect.position.x / size.x, rect.position.y / size.y, rect.size.x / size.x, rect.size.y / size.y))
 
 
 static func _build_frames() -> SpriteFrames:

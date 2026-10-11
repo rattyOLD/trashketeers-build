@@ -128,6 +128,9 @@ var _arm_material: ShaderMaterial
 var _gun_layer: Node2D
 var _rear_layer: Node2D
 var _front_layer: Node2D
+var _patch_layer: Node2D
+var equipped_patches: Array[String] = []
+var weapon_tier := 1
 var _rig_ok := false
 var _b: Dictionary = {}
 var _shoulder := Vector2.ZERO
@@ -203,6 +206,9 @@ func _init() -> void:
 	ArtDirection.apply(hero_rim, "scrap", 0.18)
 	hero.material = hero_rim
 	add_child(hero)
+	_patch_layer = Node2D.new()
+	_patch_layer.draw.connect(_draw_equipment)
+	add_child(_patch_layer)
 	_rig_ok = body.setup(RIG_ID, 0.0, false)
 	_gun_layer = Node2D.new()
 	_gun_layer.draw.connect(_draw_gun_layer)
@@ -257,6 +263,7 @@ func apply_skin(skin: Dictionary) -> void:
 ## Герой + наряд → параметры шейдера. Регионы наряда перекрывают регионы героя.
 func apply_look(character: Dictionary, skin: Dictionary) -> void:
 	_hero_id = str(character.get("id", "raccoon"))
+	apply_equipment(Patches.worn())
 	skin_effect = str(skin.get("effect", ""))
 	if not _rig_ok:
 		return
@@ -612,6 +619,8 @@ func update_motion(velocity: Vector2, aim: Vector2, delta: float) -> void:
 	_apply_rig()
 	queue_redraw()
 	_gun_layer.queue_redraw()
+	if not equipped_patches.is_empty():
+		_patch_layer.queue_redraw()
 	_front_layer.queue_redraw()
 
 
@@ -703,6 +712,7 @@ func _refresh() -> void:
 	_apply_rig()
 	queue_redraw()
 	_gun_layer.queue_redraw()
+	_patch_layer.queue_redraw()
 
 
 ## Глобальная точка дула при выстреле в direction — отсюда летит пуля и вспыхивает выстрел.
@@ -1125,6 +1135,8 @@ func _draw_gun_layer() -> void:
 		_draw_clip_arm(_gun_layer, "right", _clip_hand_target("right", center, dir), dir, false)
 	if show_held_weapon:
 		WeaponIcons.draw(_gun_layer, weapon_icon, center, _weapon_scale(), dir.angle(), weapon_color, dir.x < 0.0)
+		if not melee_active:
+			WeaponIcons.draw_fittings(_gun_layer, weapon_icon, center, _weapon_scale(), dir.angle(), weapon_tier, dir.x < 0.0)
 	if _hero_mode and not _clip_mode:
 		# В покадровом режиме руки уже нарисованы в кадрах, старую руку поверх не рисуем.
 		var shoulder := _sprite_xform() * _hero_shoulder
@@ -1166,6 +1178,44 @@ func _draw_gun_layer() -> void:
 
 func _clip_has_arm_rig() -> bool:
 	return _clip_mode and _clip_cur in ["idle", "run", "shoot"] and _clip_arms.size() == 6
+
+
+func apply_equipment(ids: Array[String]) -> void:
+	equipped_patches.clear()
+	for id in ids:
+		if Patches.CATALOG.has(id) and not equipped_patches.has(id) and equipped_patches.size() < Patches.SLOTS:
+			equipped_patches.append(id)
+			Patches.art(id)
+	_patch_layer.queue_redraw()
+
+
+func equipment_anchor() -> Vector2:
+	if _clip_has_arm_rig():
+		var right := _clip_source_joint("right", "shoulder")
+		var left := _clip_source_joint("left", "shoulder")
+		var frames: Array = (_clip_grip.get("rig", {}) as Dictionary).get("frames", {}).get(_clip_cur, [])
+		if not frames.is_empty():
+			var frame: Dictionary = frames[mini(_clip_idx, frames.size() - 1)]
+			right = _vec(frame.get("right", [right.x, right.y]))
+			left = _vec(frame.get("left", [left.x, left.y]))
+		return right.lerp(left, 0.34) + hero.offset + Vector2(0, 8)
+	return Vector2(5, -85) if _hero_mode else Vector2(5, -70)
+
+
+func _draw_equipment() -> void:
+	if _dead or equipped_patches.is_empty() or (_clip_mode and _clip_cur not in ["idle", "run", "shoot"]):
+		return
+	var anchor := equipment_anchor()
+	_patch_layer.draw_set_transform_matrix(_sprite_xform())
+	for i in equipped_patches.size():
+		var at := anchor + Vector2((i % 2) * 12.0, (i / 2) * 12.0)
+		var tex := Patches.art(equipped_patches[i])
+		_patch_layer.draw_circle(at, 5.8, Color("#171a1c"))
+		if tex != null:
+			_patch_layer.draw_texture_rect(tex, Rect2(at - Vector2.ONE * 5.0, Vector2.ONE * 10.0), false)
+		else:
+			_patch_layer.draw_circle(at, 4.5, Color(str(Patches.CATALOG[equipped_patches[i]]["color"])))
+	_patch_layer.draw_set_transform_matrix(Transform2D.IDENTITY)
 
 
 func _held_direction() -> Vector2:

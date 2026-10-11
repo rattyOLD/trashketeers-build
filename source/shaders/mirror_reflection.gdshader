@@ -1,5 +1,6 @@
 shader_type canvas_item;
 render_mode blend_add;
+#include "res://shaders/boss_wear.gdshaderinc"
 
 // Отражение актёра на зеркальном обсидиане: спрайт уже перевёрнут узлом (flip_v),
 // шейдер размывает его по вертикали (5 выборок) и гасит до strength — по паспорту 0.15.
@@ -15,5 +16,5 @@ void fragment() {
 	c += texture(TEXTURE, UV + step_uv * 2.0) * 0.1;
 	c += texture(TEXTURE, UV - step_uv * 2.0) * 0.1;
 	float fade = 1.0 - UV.y * 0.6;
-	COLOR = vec4(c.rgb * tint.rgb, c.a * strength * fade);
+	COLOR = vec4(worn_boss(c.rgb, UV) * tint.rgb, c.a * strength * fade);
 }

@@ -168,6 +168,8 @@ func setup(owner_game: Game, mission_id: String) -> bool:
 	meter.bind(barrel)
 	game.hud.dock_story_meter(meter)
 	game.player.damaged.connect(func(_amount: float) -> void:
+		if finished_mission:
+			return
 		_zone_hit = true
 		_ever_hit = true)
 	_start_y = game.map.player_start.y
@@ -272,6 +274,8 @@ func _count(stat: String, amount: int = 1) -> void:
 
 
 func on_kill(data: EnemyData) -> void:
+	if finished_mission:
+		return
 	_count("story_kills")
 	kills += 1
 	var milestone := str((_banter.get("kills", {}) as Dictionary).get(str(kills), ""))
@@ -1023,6 +1027,7 @@ func finish() -> void:
 		return
 	finished_mission = true
 	SaveService.clear_story_resume()
+	game.player.celebrating = true
 	var shards := int(mission.get("shards", 1))
 	SaveService.story_complete(str(mission.get("id", "")), shards, score + lives * LIFE_BONUS)
 	for hero_id in SaveService.grant_story_heroes(str(mission.get("id", ""))):

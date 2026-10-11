@@ -13,6 +13,7 @@ extends StaticBody2D
 
 signal destroyed(object: DestructibleObject)
 signal landed(object: DestructibleObject)
+signal leaked(object: DestructibleObject)
 
 enum Kind { ART, WEAPON_CRATE }
 
@@ -72,6 +73,7 @@ var _shake := 0.0
 var _fx: FxManager
 var _spark_left := 0.0
 var _spark_cd := 0.0
+var _leaked := false
 
 
 ## Форма коллизии объекта и её центр относительно origin (генератор проверяет наложения).
@@ -181,6 +183,10 @@ func chain_kind() -> String:
 	return effect if effect == "explode" or effect == "toxic" else ""
 
 
+func is_fuel_container() -> bool:
+	return kind == Kind.ART and prop_id.contains("barrel") and str(_destruct.get("effect", "")) == "explode"
+
+
 func is_intact() -> bool:
 	return hp > 0.0 and drop_height <= 0.0
 
@@ -203,6 +209,9 @@ func take_damage(amount: float, _direction: Vector2 = Vector2.ZERO, _is_crit: bo
 	if hp <= 0.0 or drop_height > 0.0:
 		return
 	hp -= amount
+	if not _leaked and hp > 0.0 and hp <= max_hp * 0.55 and is_fuel_container():
+		_leaked = true
+		leaked.emit(self)
 	if kind == Kind.ART:
 		_flash_material.set_shader_parameter(&"damage_amount", clampf(1.0 - hp / max_hp, 0.0, 1.0))
 	_flash_left = FLASH_TIME

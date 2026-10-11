@@ -333,6 +333,7 @@ func _draw_gun() -> void:
 		if i % 2 == 0:
 			draw_circle(q, 1.6, Color(weapon.effect_color, 0.28 * (1.0 - u)))
 	WeaponIcons.draw(self, weapon.icon, pos, scale_factor, -_recoil * 0.05, weapon.effect_color)
+	WeaponIcons.draw_fittings(self, weapon.icon, pos, scale_factor, -_recoil * 0.05, weapon.tier)
 	if _flash > 0.0:
 		_draw_muzzle_flash()
 	for b in _bullets:

@@ -145,6 +145,7 @@ func _physics_process(delta: float) -> void:
 	if _support_timer <= 0.0:
 		_support_timer = 0.3
 		_update_support_positions()
+		_update_faction_positions()
 	var player_pos := _player.global_position
 	_compute_separation()
 	# Обход с конца по той же причине, что и в BulletPool: смерть врага внутри тика
@@ -241,6 +242,44 @@ func _compute_separation() -> void:
 			var pd := sqrt(pd_sq)
 			push += to_player / pd * (1.0 - pd / near) * PLAYER_PUSH
 		_active[i].separation += push
+
+
+## Общая линия группы пересчитывается раз в 0.3 с, без перебора всех пар.
+func _update_faction_positions() -> void:
+	var groups := {}
+	var at := _player.global_position
+	for e in _active:
+		e.tactic_anchor = Vector2.INF
+		e.tactic_role = &""
+		if not e.is_alive() or e.data.is_boss() or e.fleeing or e.global_position.distance_squared_to(at) > 650.0 * 650.0:
+			continue
+		var faction := ArtDirection.faction(str(e.data.id))
+		if not groups.has(faction):
+			groups[faction] = {"ranged": Vector2.ZERO, "count": 0}
+		if e.data.behavior in [EnemyData.Behavior.RANGED, EnemyData.Behavior.TRAPPER, EnemyData.Behavior.BOMBER]:
+			groups[faction]["ranged"] += e.global_position
+			groups[faction]["count"] += 1
+	for e in _active:
+		if not e.is_alive() or e.data.is_boss() or e.fleeing or e.data.heal_radius > 0.0 or e.data.flying:
+			continue
+		var dist := e.global_position.distance_to(at)
+		if dist < 150.0 or dist > 650.0:
+			continue
+		var faction := ArtDirection.faction(str(e.data.id))
+		var group: Dictionary = groups.get(faction, {})
+		var radial := at.direction_to(e.global_position)
+		var side := e._strafe_sign
+		if e.data.shield and int(group.get("count", 0)) > 0:
+			var rear: Vector2 = group["ranged"] / float(group["count"])
+			e.tactic_role = &"screen"
+			e.tactic_anchor = rear + rear.direction_to(at) * minf(130.0, rear.distance_to(at) * 0.4) + radial.orthogonal() * side * 44.0
+		elif e.data.behavior == EnemyData.Behavior.CHASER and faction in ["scrap", "roofs"]:
+			e.tactic_role = &"flank"
+			var lead := _player.velocity * 0.4 if faction == "roofs" else Vector2.ZERO
+			e.tactic_anchor = at + lead + radial.rotated(side * 0.7) * 150.0
+		elif e.data.behavior == EnemyData.Behavior.RANGED and faction in ["bureau", "toxic"]:
+			e.tactic_role = &"line"
+			e.tactic_anchor = at + radial.rotated(side * 0.22) * e.data.preferred_distance
 
 
 ## Толчок пары: возвращает силу на i, на j добавляет противоположную.

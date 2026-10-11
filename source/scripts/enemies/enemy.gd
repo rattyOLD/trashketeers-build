@@ -105,6 +105,7 @@ var data: EnemyData
 var hp := 0.0
 var max_hp := 0.0
 var pool_index := -1
+var activation_id := 0
 ## Множитель урона атак от сложности волны.
 var damage_mult := 1.0
 ## Возвышения: элита с особенностью ("fast", "armored", "explosive"; "" — обычный враг).
@@ -178,6 +179,10 @@ var _act_total := 1.0
 var _act_dir := Vector2.RIGHT
 var _aim_target := Vector2.ZERO
 var support_anchor := Vector2.INF
+var tactic_anchor := Vector2.INF
+var tactic_role: StringName = &""
+var _wear_stage := 0
+var _smoke_cd := 0.0
 var _visual_id := ""
 var _framed := false
 var _auto := false
@@ -257,6 +262,7 @@ func _init() -> void:
 
 func activate(enemy_data: EnemyData, at: Vector2, hp_mult: float = 1.0, dmg_mult: float = 1.0) -> void:
 	data = enemy_data
+	activation_id += 1
 	stuck_time = 0.0
 	_detour_time = 0.0
 	poison_stacks = 0
@@ -310,6 +316,10 @@ func activate(enemy_data: EnemyData, at: Vector2, hp_mult: float = 1.0, dmg_mult
 	_strafe_sign = 1.0 if randf() < 0.5 else -1.0
 	_flank = (1.0 if randf() < 0.5 else -1.0) if randf() < data.flank_chance else 0.0
 	support_anchor = Vector2.INF
+	tactic_anchor = Vector2.INF
+	tactic_role = &""
+	_wear_stage = 0
+	_smoke_cd = 0.0
 	_size_mult = 1.0 + randf_range(-data.size_variance, data.size_variance)
 	_act = Act.MOVE
 	_act_time = 0.0
@@ -460,6 +470,9 @@ func _setup_visual() -> void:
 	var rim := Color("#140a1e")
 	rim.a = 0.9
 	for target in [_sprite.shader_material, _alt_material]:
+		target.set_shader_parameter("boss_damage", 0.0)
+		if not _framed:
+			target.set_shader_parameter("wear_rect", Vector4(0, 0, 1, 1))
 		ArtDirection.apply(target, ArtDirection.faction(str(data.id)), 0.48)
 		target.set_shader_parameter("outline_color", rim)
 		target.set_shader_parameter("rim_strength", 0.11 if data.is_boss() else 0.07)
@@ -468,6 +481,7 @@ func _setup_visual() -> void:
 		target.set_shader_parameter("tint", data.sprite_modulate)
 	_alt_material.set_shader_parameter("outline_px", data.outline_world / maxf(_alt_scale(), 0.01))
 	_parts.set_param("outline_color", rim)
+	_parts.set_param("boss_damage", 0.0)
 	_parts.set_param("outline_px", outline_px * 0.8)
 	var palette: Array = ArtDirection.FACTIONS[ArtDirection.faction(str(data.id))]
 	_parts.set_param("paint_strength", 0.48)
@@ -573,6 +587,7 @@ func tick(delta: float, player: Player, nav: Callable = Callable()) -> void:
 			path_dir = ((player.global_position + player.velocity * lead - global_position).normalized() * 0.7 + dir * 0.3).normalized()
 	if _flank != 0.0 and dist > FLANK_RELEASE:
 		path_dir = path_dir.rotated(_flank * FLANK_ANGLE).normalized()
+	path_dir = _tactical_direction(path_dir, dist)
 	if _detour_time > 0.0:
 		_detour_time -= delta
 		path_dir = (path_dir * 0.35 + _detour).normalized()
@@ -628,6 +643,37 @@ func tick(delta: float, player: Player, nav: Callable = Callable()) -> void:
 		Player.last_source = data.id
 		player.take_damage(data.contact_damage * bonus * damage_mult, dir)
 	_animate(delta, desired)
+	if data.is_boss():
+		_update_boss_damage(delta)
+
+
+func _tactical_direction(path_dir: Vector2, dist: float) -> Vector2:
+	if not tactic_anchor.is_finite() or dist < 150.0 or dist > 650.0 or _act != Act.MOVE or _detour_time > 0.0:
+		return path_dir
+	var toward := tactic_anchor - global_position
+	if toward.length_squared() < 48.0 * 48.0:
+		return path_dir if tactic_role == &"flank" else Vector2.ZERO
+	var steering := toward.normalized()
+	# Тактика не отменяет обход укрытия и не тянет врага через стену.
+	if test_move(global_transform, steering * 56.0):
+		return path_dir
+	return (path_dir * 0.35 + steering * 0.65).normalized()
+
+
+func _update_boss_damage(delta: float = 0.0) -> void:
+	var stage := 2 if hp <= max_hp * 0.35 else (1 if hp <= max_hp * 0.7 else 0)
+	if stage > _wear_stage:
+		_wear_stage = stage
+		var amount := 1.0 if stage == 2 else 0.5
+		_sprite.set_param("boss_damage", amount)
+		_alt_material.set_shader_parameter("boss_damage", amount)
+		_parts.set_param("boss_damage", amount)
+		request_fx("armor_shed", data.radius)
+	if _wear_stage == 2:
+		_smoke_cd -= delta
+		if _smoke_cd <= 0.0:
+			_smoke_cd = 0.85
+			request_fx("boss_smoke", data.radius, get_corpse_origin())
 
 
 ## Упёрся в угол коллизии (сетка поля потоков грубее реальных форм пропов): через
@@ -711,6 +757,8 @@ func take_damage(amount: float, direction: Vector2 = Vector2.ZERO, is_crit: bool
 	if _brain != null:
 		amount *= _brain.damage_taken_mult()
 	hp -= amount
+	if hp > 0.0 and data.is_boss():
+		_update_boss_damage()
 	if hp > 0.0 and data.is_boss():
 		_add_posture(amount)
 	if data.blink_distance > 0.0 and _blink_cd <= 0.0 and hp > 0.0 and hp < max_hp * 0.8:
@@ -872,6 +920,8 @@ func _take_dot(amount: float, kind: String) -> void:
 		amount = minf(amount * BOSS_DOT_SCALE, max_hp * BOSS_DOT_CAP)
 	hp -= amount
 	last_damage_kind = StringName(kind)
+	if hp > 0.0 and data.is_boss():
+		_update_boss_damage()
 	if status_sink.is_valid():
 		status_sink.call(self, amount, kind)
 	if hp <= 0.0:
@@ -1050,6 +1100,8 @@ func _keep_distance(dir: Vector2, path_dir: Vector2, dist: float, strafe: float)
 		return path_dir * data.move_speed
 	if dist < data.preferred_distance - RANGED_BAND:
 		return -dir * data.move_speed
+	if tactic_role == &"line" and tactic_anchor.is_finite():
+		return path_dir * data.move_speed * strafe
 	return dir.orthogonal() * _strafe_sign * data.move_speed * strafe
 
 

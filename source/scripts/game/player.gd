@@ -62,6 +62,7 @@ var visual: RaccoonVisual
 var weapon_controller: WeaponController
 
 var _invuln := 0.0
+var celebrating := false
 var _knockback := Vector2.ZERO
 var _speed_buff := 0.0
 ## «Кураж» ближнего боя: временная прибавка скорости за убийства (BattleBase ведёт стаки).
@@ -136,6 +137,7 @@ func apply_run_stats(stats: RunStats) -> void:
 	move_speed = BASE_SPEED * (1.0 + minf(stats.get_stat(&"move_speed_mult"), MAX_SPEED_BONUS))
 	magnet_radius = BASE_MAGNET * (1.0 + stats.get_stat(&"magnet_mult"))
 	weapon_controller.apply_run_stats(stats)
+	visual.apply_equipment(stats.patch_ids)
 	_resist = clampf(stats.get_stat(&"damage_resist"), 0.0, MAX_RESIST)
 	var new_shield := int(stats.get_stat(&"shield_max"))
 	if new_shield > shield_max:
@@ -244,7 +246,7 @@ func _draw() -> void:
 
 
 func take_damage(amount: float, _direction: Vector2 = Vector2.ZERO, _is_crit: bool = false) -> void:
-	if is_dead or _invuln > 0.0 or amount <= 0.0 or Tester.flag("god"):
+	if is_dead or celebrating or _invuln > 0.0 or amount <= 0.0 or Tester.flag("god"):
 		return
 	if shield > 0:
 		shield -= 1
@@ -347,6 +349,7 @@ func heal(amount: float) -> void:
 func _on_weapon_changed(weapon: WeaponData) -> void:
 	visual.weapon_color = weapon.effect_color
 	visual.weapon_icon = weapon.icon
+	visual.weapon_tier = weapon.tier
 	visual.recoil_recovery = WeaponFeel.recovery(weapon)
 	visual.play_action("ready")
 

@@ -95,6 +95,7 @@ var _recorded := false
 var _portal: Portal
 var story_mission := ""
 var story: StoryRun
+var extraction: Extraction
 var radio: SurvivalRadio
 var wanted: Wanted
 var _wave_task := WaveTask.new()
@@ -183,6 +184,7 @@ func start(_weapon_id: StringName = &"") -> void:
 	enemies = EnemyManager.new()
 	add_child(enemies)
 	enemies.setup(player, entities, ENEMY_CAPACITY, map.nav_direction)
+	chain_hazards.enemies = enemies
 	map.attach_cache_enemies(enemies)
 	pickups.setup(player)
 	for i in WEAPON_PICKUPS:
@@ -749,6 +751,10 @@ func _on_enemy_blinked(_enemy: Enemy, from: Vector2, to: Vector2) -> void:
 
 func _on_enemy_fx(_enemy: Enemy, kind: String, at: Vector2, radius: float) -> void:
 	match kind:
+		"armor_shed":
+			fx.chunks(at + Vector2(0, -35), Color("#817665"), 5, 150.0, 3.0)
+		"boss_smoke":
+			fx.burst(at, Color("#403b39"), 2, 28.0, 7.0)
 		"emerge":
 			fx.dust(at + Vector2(0, 6), 3, radius * 1.6)
 		"transform":
@@ -1179,6 +1185,8 @@ var _safes_opened := 0
 
 
 func _hook_run_objects() -> void:
+	chain_hazards.enemies = enemies
+	chain_hazards.attach(map.destructibles)
 	for tower in map.towers:
 		if not tower.charged.is_connected(_on_tower_charged):
 			tower.charged.connect(_on_tower_charged)
@@ -1608,9 +1616,31 @@ func announce_boss(boss: Enemy) -> void:
 
 ## Миссия пройдена: итоговый экран боя (победа).
 func story_finished() -> void:
-	if finished:
+	if finished or is_instance_valid(extraction):
 		return
-	story_result(true, story.result_lines(true))
+	chain_hazards.clear()
+	hazards.clear()
+	hazards.set_physics_process(false)
+	lobs.clear()
+	traps.clear()
+	BulletPool.release_all()
+	director.phase = WaveDirector.Phase.PORTAL
+	events.reset()
+	events.set_physics_process(false)
+	extraction = Extraction.new()
+	layers.world.add_child(extraction)
+	extraction.completed.connect(_on_extracted)
+	extraction.start(self)
+
+
+func _on_extracted(boarded: bool) -> void:
+	var lines := story.result_lines(true)
+	if boarded:
+		SaveService.add_coins(Extraction.BONUS)
+		lines.append("Отряд эвакуирован: +%d монет" % Extraction.BONUS)
+	else:
+		lines.append("Нэлл подобрала отряд. Награды миссии сохранены")
+	story_result(true, lines)
 
 
 func story_result(victory: bool, lines: PackedStringArray) -> void:
@@ -2147,6 +2177,9 @@ func _on_achievement(achievement: Dictionary) -> void:
 # --- Смерть, возрождение, конец забега -----------------------------------------------------------
 
 func _on_player_died() -> void:
+	if is_instance_valid(extraction) and extraction.active:
+		extraction.finish(false)
+		return
 	Platform.note_event("player died lvl=%d" % level)
 	fx.burst(player.global_position, UiStyle.DANGER, 50, 380.0, 5.0)
 	fx.chunks(player.global_position, Color("#8e8aa6"), 14, 260.0, 5.0)

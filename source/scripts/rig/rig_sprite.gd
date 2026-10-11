@@ -12,7 +12,7 @@ const SHADER_PATH := "res://shaders/rig2d.gdshader"
 ## Внешность особи (окрас, обводка, свет) — переносится на «труп» того же вида.
 const LOOK_PARAMS: Array[StringName] = [&"recolor_enabled", &"regions0", &"regions1", &"grad_dark", &"grad_mid",
 	&"grad_light", &"grad_range", &"hue_shift", &"tint", &"outline_px", &"outline_color", &"env_light",
-	&"paint_strength", &"paint_shadow", &"paint_light", &"paint_saturation", &"rim_strength"]
+	&"paint_strength", &"paint_shadow", &"paint_light", &"paint_saturation", &"rim_strength", &"boss_damage", &"wear_rect"]
 
 static var _shader: Shader
 static var _meshes: Dictionary = {}
@@ -132,6 +132,9 @@ func set_frame(index: int) -> void:
 		return
 	frame_index = index
 	mesh = _get_frame_mesh(frame_sheet, index, _frame_margin)
+	var rect: Rect2 = frame_sheet["rects"][index]
+	var size := texture.get_size()
+	set_param(&"wear_rect", Vector4(rect.position.x / size.x, rect.position.y / size.y, rect.size.x / size.x, rect.size.y / size.y))
 
 
 func is_framed() -> bool:

@@ -25,6 +25,7 @@ func _init(skin_key: String = "", skin_kind: String = "dash") -> void:
 	hero = RaccoonVisual.new()
 	hero.apply_look(SaveService.get_character(), SaveService.get_skin())
 	hero.weapon_icon = SaveService.get_loadout().icon
+	hero.weapon_tier = SaveService.get_loadout().tier
 	hero.weapon_color = SaveService.get_loadout().effect_color
 	hero.scale = Vector2.ONE * 1.1
 	add_child(hero)

@@ -129,6 +129,37 @@ static func muzzle(kind: StringName) -> Vector2:
 	return _get_entry(kind)["muzzle"]
 
 
+## Накладки на корпус и планку: рукоять, дуло и хват сохраняются.
+static func draw_fittings(canvas: CanvasItem, kind: StringName, center: Vector2, size_scale: float, angle: float, tier: int, flip_y: bool = false) -> void:
+	var rank := clampi(tier, 1, 5)
+	if rank <= 1:
+		return
+	var muzzle_at := muzzle(kind)
+	var receiver := grip(kind).lerp(muzzle_at, 0.30)
+	canvas.draw_set_transform_matrix(Transform2D(angle, Vector2(size_scale, size_scale * (-1 if flip_y else 1)), 0.0, center))
+	var color := Color("#8f9189") if rank < 4 else Color("#b4a17c")
+	var plate := Rect2(receiver + Vector2(-6, -3), Vector2(13, 5))
+	canvas.draw_rect(plate.grow(0.7), OUTLINE)
+	canvas.draw_rect(plate, METAL_LIGHT.darkened(0.15))
+	canvas.draw_line(plate.position + Vector2(1, 1), Vector2(plate.end.x - 1, plate.position.y + 1), color, 1)
+	canvas.draw_circle(plate.position + Vector2(2, 3), 0.7, OUTLINE)
+	canvas.draw_circle(plate.position + Vector2(10, 3), 0.7, OUTLINE)
+	if rank >= 3:
+		var rail := Vector2(receiver.x, muzzle_at.y - 1.0)
+		canvas.draw_rect(Rect2(rail + Vector2(-7, -2), Vector2(16, 3)), OUTLINE)
+		canvas.draw_line(rail + Vector2(-6, -1), rail + Vector2(8, -1), color, 1)
+	if rank >= 4:
+		var clamp_at := muzzle_at.lerp(receiver, 0.43)
+		canvas.draw_rect(Rect2(clamp_at + Vector2(-2, -3), Vector2(4, 6)), OUTLINE)
+		canvas.draw_rect(Rect2(clamp_at + Vector2(-1, -2), Vector2(2, 4)), color)
+	if rank >= 5:
+		var optic := Vector2(receiver.x - 3, muzzle_at.y - 4)
+		canvas.draw_rect(Rect2(optic + Vector2(-3, -2), Vector2(8, 4)), OUTLINE)
+		canvas.draw_rect(Rect2(optic + Vector2(-2, -1), Vector2(6, 2)), color)
+		canvas.draw_rect(Rect2(optic + Vector2(3, -1), Vector2(1, 2)), Color("#598785"))
+	canvas.draw_set_transform_matrix(Transform2D.IDENTITY)
+
+
 static func _part_color(part: int, accent: Color) -> Color:
 	match part:
 		Part.METAL:
