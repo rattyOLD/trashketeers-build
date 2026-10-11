@@ -177,7 +177,8 @@ func _test_district_floor_boundary() -> void:
 					child.visible = child == district._holder
 			await _settle()
 			var img := view.get_texture().get_image()
-			var edge := ArenaDistrict.floor_rect(inner)
+			var edge := ArenaDistrict.floor_rect(inner, layout)
+			_check(is_equal_approx(edge.end.y, inner.end.y + (71.0 if layout == "junkyard" else 77.0)), "floor ends at visible rail, not transparent PNG padding")
 			var center := edge.get_center()
 			for pair in [
 				[Vector2(center.x, edge.position.y + 1), Vector2(center.x, edge.position.y - 1)],

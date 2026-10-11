@@ -1,6 +1,16 @@
 {
  "entries": [
   {
+   "version": "v51.2",
+   "date": "11.10",
+   "title": "Граница пола под перекладиной",
+   "image": "res://assets/world/scenery_v2/night_dump.png",
+   "short": [
+    "Покрытие меняется сразу под перекладиной забора. Убрана оставшаяся полоса асфальта под оградой.",
+    "TrashSquad · Beer Party Studio."
+   ]
+  },
+  {
    "version": "v51.1",
    "date": "11.10",
    "title": "Пол до основания забора",

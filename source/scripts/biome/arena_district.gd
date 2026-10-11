@@ -17,6 +17,8 @@ const SIDE_FENCE_SCALE := 0.5
 const FENCE_TOP_OFFSET := 6.0
 const FENCE_BOTTOM_OFFSET := 92.0
 const FENCE_SIDE_OFFSET := 30.0
+# Нижняя перекладина заканчивается раньше PNG: 28/20 прозрачных пикселей при масштабе 0.75.
+const FENCE_FOOT_INSET := {"junkyard": 21.0, "bank": 15.0}
 const SPECTATOR_SCALE := 0.82
 const TOP_SPACING := 84.0
 const SIDE_SPACING := 96.0
@@ -72,9 +74,10 @@ static func has_art(layout: String) -> bool:
 	return DISTRICTS.has(layout)
 
 
-## Покрытие арены доходит до основания забора; район начинается за ним.
-static func floor_rect(inner: Rect2) -> Rect2:
-	return inner.grow_individual(FENCE_SIDE_OFFSET, -FENCE_TOP_OFFSET, FENCE_SIDE_OFFSET, FENCE_BOTTOM_OFFSET)
+## Смена покрытий проходит под видимой перекладиной, без прозрачного поля PNG.
+static func floor_rect(inner: Rect2, layout: String = "junkyard") -> Rect2:
+	var inset := float(FENCE_FOOT_INSET.get(layout, 0.0))
+	return inner.grow_individual(FENCE_SIDE_OFFSET, inset - FENCE_TOP_OFFSET, FENCE_SIDE_OFFSET, FENCE_BOTTOM_OFFSET - inset)
 
 
 func build(layout: String, chapter_id: String, bounds: Rect2, inner: Rect2, gate_y: float, gate_half: float) -> void:
@@ -92,7 +95,7 @@ func build(layout: String, chapter_id: String, bounds: Rect2, inner: Rect2, gate
 	_inner = inner
 	# Граница покрытия проходит под основанием забора, а не под его верхним краем.
 	var ground := dir + str(district["prefix"]) + "_ground_tile.png"
-	var floor_area := floor_rect(inner)
+	var floor_area := floor_rect(inner, layout)
 	_ground(ground, Rect2(view.position, Vector2(view.size.x, floor_area.position.y - view.position.y)))
 	_ground(ground, Rect2(Vector2(view.position.x, floor_area.end.y), Vector2(view.size.x, view.end.y - floor_area.end.y)))
 	_ground(ground, Rect2(Vector2(view.position.x, floor_area.position.y), Vector2(floor_area.position.x - view.position.x, floor_area.size.y)))
