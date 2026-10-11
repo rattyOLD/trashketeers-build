@@ -1666,6 +1666,66 @@
       "shadow": 122,
       "flip": true,
       "building": true
+    },
+    "scenery_night_dump": {
+      "texture": "res://assets/world/scenery_v2/night_dump.png",
+      "width": 320,
+      "footprint": [
+        246,
+        82
+      ],
+      "shadow": 0,
+      "flip": false,
+      "baked_light": {
+        "color": "#ffc26a",
+        "radius": 290,
+        "strength": 0.3
+      }
+    },
+    "scenery_acid_rain": {
+      "texture": "res://assets/world/scenery_v2/acid_rain.png",
+      "width": 300,
+      "footprint": [
+        226,
+        86
+      ],
+      "shadow": 0,
+      "flip": false,
+      "baked_light": {
+        "color": "#b5dd73",
+        "radius": 290,
+        "strength": 0.3
+      }
+    },
+    "scenery_gold_vault": {
+      "texture": "res://assets/world/scenery_v2/gold_vault.png",
+      "width": 320,
+      "footprint": [
+        248,
+        76
+      ],
+      "shadow": 0,
+      "flip": false,
+      "baked_light": {
+        "color": "#ffd687",
+        "radius": 290,
+        "strength": 0.3
+      }
+    },
+    "scenery_pigeon_roofs": {
+      "texture": "res://assets/world/scenery_v2/pigeon_roofs.png",
+      "width": 300,
+      "footprint": [
+        224,
+        84
+      ],
+      "shadow": 0,
+      "flip": false,
+      "baked_light": {
+        "color": "#e8b276",
+        "radius": 290,
+        "strength": 0.3
+      }
     }
   }
 }

@@ -1,0 +1,23 @@
+{
+  "cell_size": [
+    512,
+    512
+  ],
+  "frames": 4,
+  "order": [
+    "night_dump",
+    "acid_rain",
+    "gold_vault",
+    "pigeon_roofs"
+  ],
+  "files": [
+    "night_dump.png",
+    "acid_rain.png",
+    "gold_vault.png",
+    "pigeon_roofs.png"
+  ],
+  "anchor": [
+    256,
+    496
+  ]
+}

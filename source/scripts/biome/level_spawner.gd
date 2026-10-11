@@ -22,6 +22,8 @@ signal area_disabled(at: Vector2, radius: float, seconds: float)
 
 var passages: Array[MapPassage] = []
 var route_caches: Array[RouteCache] = []
+var landmarks: Array[ArenaProp] = []
+var _scenery_anchors: Array[Vector2] = []
 var _cache_enemies: EnemyManager
 var _passage_clear: Array[Rect2] = []
 
@@ -194,6 +196,8 @@ func clear() -> void:
 	shrines.clear()
 	passages.clear()
 	route_caches.clear()
+	landmarks.clear()
+	_scenery_anchors.clear()
 	_passage_clear.clear()
 	story_cells.clear()
 	_story_clear.clear()
@@ -591,7 +595,7 @@ func _cells_rect(cell: Vector2i, size_cells: Vector2i) -> Rect2:
 ## Тайлы пола — 128 px мира (2×2 клетки), атлас главы 256 px/тайл, ряд — по зоне.
 ## Земля Свалки во всех режимах — асфальт района Астры в трещинах (лужи, решётки, мусор): одна
 ## тайловая картинка на всю карту, как за забором — арена и район один мир.
-const JUNK_GROUND := "res://assets/district/junkyard/rats_ground_tile.png"
+const JUNK_GROUND := "res://assets/maps/night_dump/floor.png"
 const GROUND_SCALE := 1.35
 static var _calm: Shader
 
@@ -605,8 +609,15 @@ uniform float saturation = 0.42;
 uniform float contrast = 0.65;
 uniform vec3 floor_tint = vec3(0.92, 0.9, 1.0);
 uniform vec3 shadow_fill = vec3(0.22, 0.2, 0.3);
+uniform bool mirror_tiles = false;
 void fragment() {
-	vec4 c = texture(TEXTURE, UV);
+	vec2 uv = UV;
+	if (mirror_tiles) {
+		vec2 cell = floor(uv);
+		uv = fract(uv);
+		uv = mix(uv, vec2(1.0) - uv, mod(cell, vec2(2.0)));
+	}
+	vec4 c = texture(TEXTURE, uv);
 	float l = dot(c.rgb, vec3(0.3, 0.55, 0.15));
 	vec3 grey = vec3(l);
 	vec3 rgb = mix(grey, c.rgb, saturation);
@@ -627,6 +638,7 @@ func _build_floor() -> void:
 		var ground := Sprite2D.new()
 		ground.texture = load(ground_path) as Texture2D
 		ground.texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+		ground.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 		ground.region_enabled = true
 		ground.region_rect = Rect2(bounds.position, bounds.size)
 		ground.centered = false
@@ -639,7 +651,7 @@ func _build_floor() -> void:
 		ground.position = bounds.position
 		var calm := ShaderMaterial.new()
 		calm.shader = _calm_shader()
-		if map_ground:
+		if map_ground or ground_path == JUNK_GROUND:
 			var map_id := str(chapter.get("map_card", ""))
 			var tint := Vector3(0.96, 0.92, 0.88)
 			if "acid" in map_id:
@@ -650,10 +662,11 @@ func _build_floor() -> void:
 				tint = Vector3(0.88, 0.9, 1.0)
 			elif "vault" in map_id:
 				tint = Vector3(1.0, 0.95, 0.84)
-			calm.set_shader_parameter("saturation", 0.72)
-			calm.set_shader_parameter("contrast", 0.85)
+			calm.set_shader_parameter("saturation", 0.66)
+			calm.set_shader_parameter("contrast", 0.78)
 			calm.set_shader_parameter("shadow_fill", Vector3(0.16, 0.17, 0.2))
 			calm.set_shader_parameter("floor_tint", tint)
+			calm.set_shader_parameter("mirror_tiles", ground_path == JUNK_GROUND or map_id in ["night_dump", "acid_rain", "gold_vault", "pigeon_roofs"])
 		ground.material = calm
 		_own(ground, self)
 		_add_macro_overlay(float(chapter.get("macro", 1.0)))
@@ -742,8 +755,6 @@ func _add_macro_overlay(strength: float) -> void:
 
 ## Узлы теней по секторам — первыми детьми слоя декалей, чтобы тени лежали под светом.
 func _build_shadow_layers() -> void:
-	if SaveService.get_quality() == 0:
-		return
 	for sy in ceili(float(grid_size.y) / SECTOR):
 		for sx in ceili(float(grid_size.x) / SECTOR):
 			var node := ShadowDecals.new()
@@ -751,18 +762,18 @@ func _build_shadow_layers() -> void:
 			_shadows[Vector2i(sx, sy)] = node
 
 
-func _add_shadow(shape: Shape2D, center: Vector2, height: float) -> void:
+func _add_shadow(shape: Shape2D, center: Vector2, height: float, owner: Node2D = null) -> void:
 	var cell := world_to_cell(center)
 	var sector := Vector2i(clampi(cell.x / SECTOR, 0, (grid_size.x - 1) / SECTOR), clampi(cell.y / SECTOR, 0, (grid_size.y - 1) / SECTOR))
 	var node: ShadowDecals = _shadows.get(sector)
 	if node == null:
 		return
 	if shape is CircleShape2D:
-		node.add_circle(center, (shape as CircleShape2D).radius, height)
+		node.add_circle(center, (shape as CircleShape2D).radius, height, owner)
 	else:
 		var rect := shape.get_rect()
 		rect.position += center
-		node.add_rect(rect, height)
+		node.add_rect(rect, height, owner)
 
 
 # --- Кольцо стен и бордюр -----------------------------------------------------------------------
@@ -2050,7 +2061,7 @@ const MAP_CLUSTERS := 3
 func _build_map_card_art(area: Rect2, center: Vector2) -> void:
 	var id := str(chapter.get("map_card", ""))
 	if id.is_empty():
-		return
+		id = "gold_vault" if layout == "bank" else "night_dump"
 	var props := _map_textures(id, "props")
 	var decals := _map_textures(id, "decals")
 	if props.is_empty():
@@ -2071,9 +2082,25 @@ func _build_map_card_art(area: Rect2, center: Vector2) -> void:
 			continue
 		anchors.append(p)
 	for anchor in anchors:
+		_scenery_anchors.append(anchor)
+		var landmark_id := "scenery_" + (id if id in ["night_dump", "acid_rain", "gold_vault", "pigeon_roofs"] else "night_dump")
+		var landmark := _place_prop(anchor, landmark_id, false)
+		if landmark != null:
+			landmarks.append(landmark)
+			var pad := SceneryGround.new()
+			pad.position = anchor
+			pad.width = float(landmark.def["width"])
+			pad.bank = id == "gold_vault"
+			pad.tint = Color(str(landmark.def["baked_light"]["color"]))
+			_own(pad, _layers.decals)
+			landmark.tree_exiting.connect(pad.queue_free)
 		var base_angle := randf() * TAU
 		for k in 3:
 			var at := (anchor + Vector2.from_angle(base_angle + k * 0.9) * randf_range(70.0, 130.0)).snapped(Vector2(8, 8))
+			if landmark != null:
+				at = anchor + Vector2(-210 if k == 0 else 210, 36 + k * 42)
+				if k == 2:
+					continue
 			if not is_walkable(at):
 				continue
 			var sprite := Sprite2D.new()
@@ -2312,7 +2339,7 @@ func _build_lot(plan: Array, rect: Rect2, frame: String = "") -> void:
 
 ## Двор Свалки — земля района Астры (асфальт в трещинах, лужи, мусор), как за забором: карта и фон — один мир.
 func _lot_ground(rect: Rect2) -> void:
-	var path := "res://assets/district/junkyard/rats_ground_tile.png" if layout == "junkyard" else ""
+	var path := JUNK_GROUND if layout == "junkyard" else ""
 	if path.is_empty():
 		return
 	var ground := Sprite2D.new()
@@ -2637,7 +2664,7 @@ func _can_place(shape: Shape2D, center: Vector2) -> bool:
 
 func _commit(shape: Shape2D, center: Vector2, kind: CellType, wall_node: Node2D, shadow_height: float) -> void:
 	if shadow_height > 0.0:
-		_add_shadow(shape, center, shadow_height)
+		_add_shadow(shape, center, shadow_height, wall_node)
 	var entry := [_shrunk(shape), Transform2D(0.0, center)]
 	for cell in _covered_cells(shape, center):
 		var i := _index(cell)

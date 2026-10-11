@@ -110,6 +110,10 @@ XDG_DATA_HOME="$LOG/paused-world-user" timeout 90 xvfb-run -a -s "-screen 0 1280
 if ! grep -q 'PAUSED_WORLD failures=0' "$LOG/paused-world.log" || grep -q 'SCRIPT ERROR' "$LOG/paused-world.log"; then
   fail=1
 fi
+XDG_DATA_HOME="$LOG/scenery-graphics-user" timeout 150 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/scenery_graphics_test.tscn > "$LOG/scenery-graphics.log" 2>&1
+if ! grep -q 'SCENERY_GRAPHICS failures=0' "$LOG/scenery-graphics.log" || grep -qE 'SCRIPT ERROR|Lambda capture' "$LOG/scenery-graphics.log"; then
+  fail=1
+fi
 for m in survival story raid mod:blast; do
   MODE=$m DURATION=45 timeout 300 xvfb-run -a -s "-screen 0 1280x1400x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 \
     --resolution 1280x720 --path "$P" res://test/mode_audit.tscn > "$LOG/$m.log" 2>&1

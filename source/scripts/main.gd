@@ -16,7 +16,8 @@ const UI_FONT := "res://assets/fonts/RussoOne-Regular.ttf"
 const BATTLE_RESOURCES := [
 	"res://assets/enemies/rat_base.png",
 	"res://assets/enemies/spark_rat.png",
-	"res://assets/district/junkyard/rats_ground_tile.png",
+	"res://assets/maps/night_dump/floor.png",
+	"res://assets/world/scenery_v2/night_dump.png",
 	"res://assets/props/ch1/container.png",
 	"res://assets/props/ch1/junk_pile.png",
 	"res://assets/audio/music/battle.ogg",

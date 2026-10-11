@@ -25,6 +25,11 @@ var _smoke_at := Vector2.INF
 var _smoke: PackedVector3Array = PackedVector3Array()
 
 
+func _ready() -> void:
+	# setup вызывается до входа в дерево; здесь отменяем автоматическое включение _process.
+	set_process(_light != null and _flicker > 0.0 or _smoke_at != Vector2.INF)
+
+
 ## Растения качаются на ветру: верх спрайта гуляет по синусу, фаза — от положения в мире (не в унисон).
 ## Один общий материал на все растения — отрисовка не дробится.
 const SWAY_IDS := ["spruce", "bush", "bush_low", "planter"]
@@ -114,6 +119,8 @@ func setup(prop_id: String, solid: bool = true, flip: int = 0) -> void:
 	collision_layer = PhysicsLayers.OBSTACLE if solid and not def.get("flat", false) else 0
 	collision_mask = 0
 	sprite = make_sprite(str(def.get("texture", "")), float(def.get("width", 0.0)))
+	if def.has("baked_light"):
+		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	if def.get("flip", false):
 		sprite.flip_h = (flip > 0) if flip != 0 else randf() < 0.5
 	if SWAY_IDS.has(prop_id) and SaveService.get_quality() > 0:
@@ -128,6 +135,9 @@ func setup(prop_id: String, solid: bool = true, flip: int = 0) -> void:
 		_build_light(def["light"])
 	elif def.has("light"):
 		_register_plain_light.call_deferred(def["light"])
+	elif def.has("baked_light"):
+		# Нарисованные лампы используют общую карту света, без дополнительного PointLight2D.
+		_register_plain_light.call_deferred(def["baked_light"])
 	if def.has("smoke"):
 		var s: Array = def["smoke"]
 		_smoke_at = Vector2(float(s[0]) * (-1.0 if sprite.flip_h else 1.0), float(s[1]))
@@ -186,7 +196,7 @@ func _register_plain_light(cfg: Dictionary) -> void:
 		return
 	var cast: Array = cfg.get("cast", [0, 0])
 	var at := global_position + Vector2(float(cast[0]), float(cast[1]) * 0.5 + 10.0)
-	_light_id = EnvLights.add(at, Color(str(cfg.get("color", "#ffffff"))), float(cfg.get("radius", 200.0)) * 0.9, 0.6)
+	_light_id = EnvLights.add(at, Color(str(cfg.get("color", "#ffffff"))), float(cfg.get("radius", 200.0)) * 0.9, float(cfg.get("strength", 0.6)))
 
 
 func _exit_tree() -> void:
