@@ -298,8 +298,9 @@ class WeatherDraw:
 			var flip := cos(_debris_spin[i])
 			var axis := Vector2.from_angle(_debris_spin[i] * 0.5)
 			if absf(flip) < 0.1:
-				draw_line(c - axis * 9.0, c + axis * 9.0, Color(0.85, 0.82, 0.92, 0.4), 2.0)
+				draw_line(c - axis * 9.0, c + axis * 9.0, Color(0.55, 0.54, 0.49, 0.25), 2.0)
 				continue
 			var side := axis.orthogonal() * 7.0 * flip
-			var sheet := PackedVector2Array([c - axis * 9.0 - side, c + axis * 9.0 - side, c + axis * 9.0 + side, c - axis * 9.0 + side])
-			draw_colored_polygon(sheet, Color(0.85, 0.82, 0.92, 0.35 + 0.25 * absf(flip)))
+			var sheet := PackedVector2Array([c - axis * 9.0 - side * 0.7, c - axis * 3.0 - side, c + axis * 8.0 - side * 0.8, c + axis * 9.0 + side * 0.4, c + axis * 2.0 + side, c - axis * 9.0 + side * 0.8])
+			draw_colored_polygon(sheet, Color(0.55, 0.54, 0.49, 0.19 + 0.1 * absf(flip)))
+			draw_line(c - axis * 6.0, c + axis * 7.0, Color(0.2, 0.22, 0.23, 0.16), 1.0, true)

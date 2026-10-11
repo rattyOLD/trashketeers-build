@@ -438,6 +438,22 @@ func burst_dir(at: Vector2, direction: Vector2, color: Color, count: int, spread
 		_spark(at, Vector2.from_angle(angle) * speed * randf_range(0.4, 1.0), color, size)
 
 
+## Броня даёт короткий веер искр, ткань — небольшой пылевой удар без второй яркой вспышки.
+func surface_hit(at: Vector2, direction: Vector2, armored: bool, critical: bool, dense: bool) -> void:
+	if armored:
+		var count := 5 if critical else (2 if dense else 3)
+		for i in BattleQuality.particles(count):
+			var velocity := -direction.rotated(randf_range(-0.85, 0.85)) * randf_range(120, 240)
+			_spark(at, velocity, Color("#ffc679"), 1.6)
+			var index := (_sp_next - 1 + SPARK_CAPACITY) % SPARK_CAPACITY
+			_sp_life[index] = 0.12
+			_sp_max[index] = 0.12
+	else:
+		dust(at, 1 if dense else 2, 9)
+		if critical and not dense:
+			chunks(at, Color("#a79983"), 2, 65, 2)
+
+
 ## Цепная молния: ломаная между двумя точками, гаснет за BOLT_LIFE.
 func bolt(from: Vector2, to: Vector2, color: Color) -> void:
 	var k := _bo_next

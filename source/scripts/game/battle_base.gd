@@ -673,8 +673,9 @@ func _on_bullet_hit(bullet: Bullet, target: Node2D) -> void:
 		return
 	var color := bullet.weapon.effect_color
 	var crit := bullet.last_hit_crit
+	var armored := false
 	if bullet.team == Bullet.Team.PLAYER:
-		var armored := target is DestructibleObject and (target as DestructibleObject).impact_is_metal()
+		armored = target is DestructibleObject and (target as DestructibleObject).impact_is_metal()
 		if target is Enemy:
 			var enemy := target as Enemy
 			armored = enemy.data != null and not enemy.armor_broken and (enemy.data.armor >= 0.2 or enemy.elite_armor >= 0.2)
@@ -689,14 +690,8 @@ func _on_bullet_hit(bullet: Bullet, target: Node2D) -> void:
 		return
 	_hit_fx_budget -= 1.0
 	var dense := BulletPool.get_lod() > 0
-	if _shot_hit != null and bullet.team == Bullet.Team.PLAYER and bullet.weapon.bullet_texture == ConfigLoader.get_tracer_texture():
-		fx.flipbook(_shot_hit, bullet.global_position, 4, 20.0, 54.0, randf() * TAU)
 	if crit and bullet.team == Bullet.Team.PLAYER:
-		fx.ring(bullet.global_position, Color("#ffb347"), 26.0)
-	if bullet.team == Bullet.Team.PLAYER:
-		var impact_tex := WeaponVfx.impact_for(bullet.weapon)
-		if impact_tex != null:
-			fx.sprite_flash(impact_tex, bullet.global_position, WeaponVfx.impact_width(bullet.weapon) * (1.25 if crit else 1.0), 0.14)
+		fx.ring(bullet.global_position, Color("#c9a46b"), 18.0)
 	if bullet.weapon.id == &"beer_jet_v1":
 		# Пиво при ударе: брызги назад и в стороны плюс белая пена — без твёрдых «комков».
 		fx.burst_dir(bullet.global_position, -bullet.velocity.normalized(), color.lightened(0.3), 7, 1.3, 300.0, 3.0)
@@ -708,9 +703,10 @@ func _on_bullet_hit(bullet: Bullet, target: Node2D) -> void:
 		fx.chunks(bullet.global_position, Color("#c9a83a"), 3, 170.0, 3.2)
 		fx.chunks(bullet.global_position, Color("#6b4f1d"), 2, 140.0, 2.6)
 		return
-	fx.burst_dir(bullet.global_position, -bullet.velocity.normalized(), color, 6 if crit else (2 if dense else 4), 0.8, 260.0, 3.0)
-	if target is Enemy and not dense:
-		fx.chunks(bullet.global_position, (target as Enemy).data.fx_color if (target as Enemy).data != null else color, 2, 140.0, 3.5)
+	if bullet.team == Bullet.Team.PLAYER:
+		fx.surface_hit(bullet.global_position, bullet.velocity.normalized(), armored, crit, dense)
+	else:
+		fx.burst_dir(bullet.global_position, -bullet.velocity.normalized(), color, 2, 0.8, 180.0, 2.0)
 
 
 func _on_melee_swing(weapon: WeaponData, origin: Vector2, direction: Vector2, _combo: int, heavy: bool, side: float) -> void:

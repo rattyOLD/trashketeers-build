@@ -459,6 +459,7 @@ func _setup_visual() -> void:
 	rim.a = 0.9
 	for target in [_sprite.shader_material, _alt_material]:
 		target.set_shader_parameter("outline_color", rim)
+		target.set_shader_parameter("rim_strength", 0.11 if data.is_boss() else 0.07)
 		target.set_shader_parameter("outline_px", outline_px)
 		target.set_shader_parameter("flash", 0.0)
 		target.set_shader_parameter("tint", data.sprite_modulate)
@@ -1223,7 +1224,7 @@ func _animate(delta: float, desired: Vector2) -> void:
 	if _flash > -FLASH_GAP_BOSS:
 		_flash -= delta
 		if _flash > 0.0:
-			flash = (0.55 + 0.45 * _flash / FLASH_TIME) * (0.5 if data.is_boss() else 1.0)
+			flash = (0.22 + 0.28 * _flash / FLASH_TIME) * (0.5 if data.is_boss() else 1.0)
 	if _act == Act.WINDUP or _act == Act.SLAM or (_act == Act.FUSE and int(_act_time * 16.0) % 2 == 0):
 		flash = maxf(flash, 0.35)
 	if bool(SaveService.data.get("reduced_flashes", false)):

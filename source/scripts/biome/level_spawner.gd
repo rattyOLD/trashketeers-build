@@ -610,6 +610,9 @@ uniform float contrast = 0.65;
 uniform vec3 floor_tint = vec3(0.92, 0.9, 1.0);
 uniform vec3 shadow_fill = vec3(0.22, 0.2, 0.3);
 uniform bool mirror_tiles = false;
+uniform bool wear_enabled = false;
+uniform sampler2D wear_atlas : filter_linear_mipmap, repeat_disable;
+float cell_hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
 void fragment() {
 	vec2 uv = UV;
 	if (mirror_tiles) {
@@ -618,6 +621,19 @@ void fragment() {
 		uv = mix(uv, vec2(1.0) - uv, mod(cell, vec2(2.0)));
 	}
 	vec4 c = texture(TEXTURE, uv);
+	if (wear_enabled) {
+		// Large, independently selected surfaces feather into the seamless base at every edge.
+		vec2 world_uv = UV * 0.62;
+		vec2 cell = floor(world_uv);
+		vec2 local = fract(world_uv);
+		float variant = floor(cell_hash(cell) * 4.0);
+		vec2 quadrant = vec2(mod(variant, 2.0), floor(variant * 0.5));
+		vec2 rotated = mix(local, vec2(1.0) - local, step(0.5, cell_hash(cell + 23.0)));
+		vec3 wear = texture(wear_atlas, (quadrant + rotated * 0.984 + 0.008) * 0.5).rgb;
+		vec2 edge = min(local, vec2(1.0) - local);
+		float feather = smoothstep(0.0, 0.16, min(edge.x, edge.y));
+		c.rgb = mix(c.rgb, wear, feather * 0.92);
+	}
 	float l = dot(c.rgb, vec3(0.3, 0.55, 0.15));
 	vec3 grey = vec3(l);
 	vec3 rgb = mix(grey, c.rgb, saturation);
@@ -667,6 +683,9 @@ func _build_floor() -> void:
 			calm.set_shader_parameter("shadow_fill", Vector3(0.16, 0.17, 0.2))
 			calm.set_shader_parameter("floor_tint", tint)
 			calm.set_shader_parameter("mirror_tiles", ground_path == JUNK_GROUND or map_id in ["night_dump", "acid_rain", "gold_vault", "pigeon_roofs"])
+		if ground_path == JUNK_GROUND:
+			calm.set_shader_parameter("wear_enabled", true)
+			calm.set_shader_parameter("wear_atlas", load("res://assets/maps/night_dump/wear_atlas.png"))
 		ground.material = calm
 		_own(ground, self)
 		_add_macro_overlay(float(chapter.get("macro", 1.0)))

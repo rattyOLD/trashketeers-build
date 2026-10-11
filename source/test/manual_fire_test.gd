@@ -29,7 +29,14 @@ func _wait(sec: float) -> void:
 func _run() -> void:
 	await _wait(0.6)
 	main._start_game(SaveService.get_selected_weapon())
-	await _wait(2.5)
+	var deadline := Time.get_ticks_msec() + 30000
+	while not (main._screen is Game) or main._loading != null:
+		if Time.get_ticks_msec() >= deadline:
+			_check(false, "game did not finish loading")
+			print("MANUAL_FIRE failures=%d" % failures)
+			get_tree().quit(1)
+			return
+		await get_tree().process_frame
 	var game := main._screen as Game
 	game.director.set_physics_process(false)
 	var wc := game.player.weapon_controller

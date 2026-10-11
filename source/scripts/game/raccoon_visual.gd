@@ -196,6 +196,9 @@ func _init() -> void:
 	hero = Sprite2D.new()
 	hero.centered = false
 	hero.visible = false
+	var hero_rim := ShaderMaterial.new()
+	hero_rim.shader = load("res://shaders/hero_rim.gdshader")
+	hero.material = hero_rim
 	add_child(hero)
 	_rig_ok = body.setup(RIG_ID, 0.0, false)
 	_gun_layer = Node2D.new()
@@ -206,6 +209,8 @@ func _init() -> void:
 	_arm_material = ShaderMaterial.new()
 	_arm_material.shader = load(RigSprite.SHADER_PATH)
 	_arm_material.set_shader_parameter("rig_enabled", false)
+	_arm_material.set_shader_parameter("rim_strength", 0.12)
+	body.set_param("rim_strength", 0.14)
 	arm.material = _arm_material
 	add_child(arm)
 	_front_layer = Node2D.new()

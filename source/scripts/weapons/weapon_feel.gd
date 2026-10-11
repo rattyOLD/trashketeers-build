@@ -23,7 +23,7 @@ static func flash_scale(w: WeaponData) -> float:
 
 
 static func flash_time(w: WeaponData) -> float:
-	return 0.05 if automatic(w) else (0.11 if precision(w) else 0.085)
+	return 0.05 if automatic(w) else (0.07 if precision(w) else 0.065)
 
 
 static func camera_scale(w: WeaponData) -> float:

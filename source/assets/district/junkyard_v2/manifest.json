@@ -1,0 +1,39 @@
+{
+  "cell": 512,
+  "anchor": [
+    256,
+    496
+  ],
+  "buildings": [
+    "bar",
+    "apartments",
+    "garage",
+    "workshop"
+  ],
+  "atlas_regions": {
+    "bar": [
+      0,
+      0,
+      627,
+      627
+    ],
+    "apartments": [
+      627,
+      0,
+      1254,
+      627
+    ],
+    "garage": [
+      0,
+      627,
+      654,
+      1254
+    ],
+    "workshop": [
+      654,
+      627,
+      1254,
+      1254
+    ]
+  }
+}

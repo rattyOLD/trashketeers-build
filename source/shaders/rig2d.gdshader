@@ -53,6 +53,7 @@ uniform vec4 tint : source_color = vec4(1.0);
 uniform float outline_px = 0.0;
 uniform vec4 outline_color : source_color = vec4(1.0, 0.9, 0.8, 0.85);
 uniform float alpha = 1.0;
+uniform float rim_strength = 0.0;
 // Свет окружения (EnvLights.sample): огонь, неон, вспышки выстрелов подкрашивают персонажа.
 uniform vec3 env_light = vec3(0.0);
 
@@ -180,6 +181,10 @@ void fragment() {
 	if (eye0.z > 0.0 && max(max(blink, squint), happy) > 0.01) {
 		rgb = eyelid(eye0, uv, rgb, lid_color(eye0, texture(TEXTURE, eye0.xy - vec2(0.0, eye0.w * 1.25)).rgb));
 		rgb = eyelid(eye1, uv, rgb, lid_color(eye1, texture(TEXTURE, eye1.xy - vec2(0.0, eye1.w * 1.25)).rgb));
+	}
+	if (rim_strength > 0.0) {
+		float lit_edge = (1.0 - texture(TEXTURE, uv - TEXTURE_PIXEL_SIZE * 4.0).a) * a;
+		rgb += vec3(0.65, 0.72, 0.78) * lit_edge * rim_strength;
 	}
 	rgb *= tint.rgb;
 	rgb = rgb * (vec3(1.0) + env_light * 0.85) + env_light * 0.04;

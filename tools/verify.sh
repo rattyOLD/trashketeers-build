@@ -45,7 +45,7 @@ XDG_DATA_HOME="$LOG/story-tester-user" "$GODOT" --headless --path "$P" res://tes
 if ! grep -q 'STORY_TESTER_START failures=0' "$LOG/story-tester-start.log" || grep -q 'SCRIPT ERROR' "$LOG/story-tester-start.log"; then
   fail=1
 fi
-XDG_DATA_HOME="$LOG/manual-fire-user" "$GODOT" --headless --path "$P" res://test/manual_fire_test.tscn > "$LOG/manual-fire.log" 2>&1
+XDG_DATA_HOME="$LOG/manual-fire-user" timeout 90 "$GODOT" --headless --path "$P" res://test/manual_fire_test.tscn > "$LOG/manual-fire.log" 2>&1
 if ! grep -q 'MANUAL_FIRE failures=0' "$LOG/manual-fire.log" || grep -q 'SCRIPT ERROR' "$LOG/manual-fire.log"; then
   fail=1
 fi
@@ -108,6 +108,10 @@ if ! grep -q 'COMBAT_POLISH_LAYOUT failures=0' "$LOG/combat-polish-layout.log" |
 fi
 XDG_DATA_HOME="$LOG/paused-world-user" timeout 90 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/paused_world_test.tscn > "$LOG/paused-world.log" 2>&1
 if ! grep -q 'PAUSED_WORLD failures=0' "$LOG/paused-world.log" || grep -q 'SCRIPT ERROR' "$LOG/paused-world.log"; then
+  fail=1
+fi
+XDG_DATA_HOME="$LOG/graphics-upgrade-user" timeout 90 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/graphics_upgrade_test.tscn > "$LOG/graphics-upgrade.log" 2>&1
+if ! grep -q 'GRAPHICS_UPGRADE failures=0' "$LOG/graphics-upgrade.log" || grep -qE 'SCRIPT ERROR|Lambda capture' "$LOG/graphics-upgrade.log"; then
   fail=1
 fi
 XDG_DATA_HOME="$LOG/scenery-graphics-user" timeout 150 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/scenery_graphics_test.tscn > "$LOG/scenery-graphics.log" 2>&1

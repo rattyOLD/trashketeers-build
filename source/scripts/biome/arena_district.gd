@@ -62,7 +62,9 @@ var _holder: Node2D
 ## Ночью на Свалке у домов горят вывески и окна: мягкие пятна света (EnvLights), иначе район тонет в темноте.
 var _neon := false
 var _lights: PackedInt32Array = PackedInt32Array()
-const NEON := [Color("#3df2ff"), Color("#ff7a3d"), Color("#ff4fd8"), Color("#ffd257")]
+var _shadows: ShadowDecals
+const NEON := [Color("#ffc16b"), Color("#e8a85b"), Color("#72a8ad")]
+const NEW_BUILDINGS := ["bar", "apartments", "garage", "workshop"]
 
 
 ## Видимая область с районом (камера ограничена ею, а не стенами арены).
@@ -86,7 +88,7 @@ func build(layout: String, chapter_id: String, bounds: Rect2, inner: Rect2, gate
 	_neon = layout == "junkyard"
 	# Ночная Свалка темнее карты освещения: район чуть подсвечен, чтобы толпу и дома было видно.
 	# Район — фон: чуть приглушён, чтобы взгляд оставался на поле боя.
-	modulate = Color(1.1, 1.06, 1.15) if _neon else Color(0.82, 0.82, 0.86)
+	modulate = Color(0.94, 0.93, 1.0) if _neon else Color(0.82, 0.82, 0.86)
 	var dir := ROOT + layout + "/"
 	var chapter_key: String = CHAPTER_OF.get(chapter_id, CHAPTER_OF.get(chapter_id.get_slice("_", 0), "ch1" if layout == "junkyard" else "ch4"))
 	var special: Array = CHAPTERS[chapter_key]
@@ -94,16 +96,20 @@ func build(layout: String, chapter_id: String, bounds: Rect2, inner: Rect2, gate
 	var view := view_rect(bounds)
 	_inner = inner
 	# Граница покрытия проходит под основанием забора, а не под его верхним краем.
-	var ground := dir + str(district["prefix"]) + "_ground_tile.png"
+	var ground := "res://assets/maps/night_dump/floor.png" if _neon else dir + str(district["prefix"]) + "_ground_tile.png"
 	var floor_area := floor_rect(inner, layout)
 	_ground(ground, Rect2(view.position, Vector2(view.size.x, floor_area.position.y - view.position.y)))
 	_ground(ground, Rect2(Vector2(view.position.x, floor_area.end.y), Vector2(view.size.x, view.end.y - floor_area.end.y)))
 	_ground(ground, Rect2(Vector2(view.position.x, floor_area.position.y), Vector2(floor_area.position.x - view.position.x, floor_area.size.y)))
 	_ground(ground, Rect2(Vector2(floor_area.end.x, floor_area.position.y), Vector2(view.end.x - floor_area.end.x, floor_area.size.y)))
 	var buildings: Array[String] = []
-	for id in district["buildings"]:
-		buildings.append(dir + str(id) + ".png")
-	for id in special[0]:
+	if _neon:
+		for id in NEW_BUILDINGS:
+			buildings.append(ROOT + "junkyard_v2/" + id + ".png")
+	else:
+		for id in district["buildings"]:
+			buildings.append(dir + str(id) + ".png")
+	for id in (special[0] if chapter_key != "ch1" or not _neon else []):
 		# Свои здания главы попадаются вдвое чаще общих.
 		buildings.append(chapter_dir + str(id) + ".png")
 		buildings.append(chapter_dir + str(id) + ".png")
@@ -171,6 +177,7 @@ func build(layout: String, chapter_id: String, bounds: Rect2, inner: Rect2, gate
 		for i in 2:
 			var car := Sprite2D.new()
 			car.visible = false
+			_tone(car)
 			car.offset = Vector2(0, -60.0)
 			add_child(car)
 			_traffic.append({"car": car, "wait": randf_range(1.0, 6.0) + 5.0 * i, "dir": 1.0, "speed": 0.0})
@@ -257,6 +264,20 @@ func _ground(path: String, rect: Rect2) -> void:
 	ground.centered = false
 	ground.position = rect.position - _ground_holder().position
 	ground.modulate = Color(0.9, 0.88, 0.94)
+	ground.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	if _neon:
+		ground.scale = Vector2.ONE * LevelSpawner.GROUND_SCALE
+		ground.region_rect = Rect2(rect.position / LevelSpawner.GROUND_SCALE, rect.size / LevelSpawner.GROUND_SCALE)
+		var mat := ShaderMaterial.new()
+		mat.shader = LevelSpawner._calm_shader()
+		mat.set_shader_parameter("mirror_tiles", true)
+		mat.set_shader_parameter("wear_enabled", true)
+		mat.set_shader_parameter("wear_atlas", load("res://assets/maps/night_dump/wear_atlas.png"))
+		mat.set_shader_parameter("saturation", 0.55)
+		mat.set_shader_parameter("contrast", 0.82)
+		mat.set_shader_parameter("shadow_fill", Vector3(0.13, 0.14, 0.16))
+		mat.set_shader_parameter("floor_tint", Vector3(0.91, 0.92, 0.96))
+		ground.material = mat
 	_ground_holder().add_child(ground)
 
 
@@ -292,6 +313,7 @@ func _fence_row(path: String, from_x: float, to_x: float, foot_y: float) -> void
 	fence.centered = false
 	fence.offset = Vector2(0, -texture.get_height())
 	fence.position = Vector2(from_x, foot_y)
+	_tone(fence)
 	add_child(fence)
 
 
@@ -308,6 +330,7 @@ func _fence_column(path: String, center_x: float, from_y: float, to_y: float) ->
 	fence.centered = false
 	fence.offset = Vector2(-texture.get_width() * 0.5, -fence.region_rect.size.y)
 	fence.position = Vector2(center_x, to_y)
+	_tone(fence)
 	add_child(fence)
 
 
@@ -371,11 +394,14 @@ func _backdrop_row(big: Array[String], small: Array[String], from_x: float, to_x
 func _backdrop(path: String, foot: Vector2, scale_k: float) -> Sprite2D:
 	var item := Sprite2D.new()
 	item.texture = _texture(path)
-	item.scale = Vector2.ONE * scale_k
+	item.scale = Vector2.ONE * scale_k * (0.62 if path.contains("junkyard_v2") else 1.0)
 	item.offset = Vector2(0, -item.texture.get_height() * 0.5)
 	item.position = foot
+	item.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	if not path.contains("junkyard_v2"):
+		_tone(item)
 	add_child(item)
-	if _neon and item.texture.get_width() * scale_k > 120.0:
+	if _neon and item.texture.get_width() * item.scale.x > 120.0:
 		_light.call_deferred(item)
 	return item
 
@@ -387,7 +413,29 @@ func _light(target: Variant) -> void:
 		return
 	var item := target as Sprite2D
 	var height := item.texture.get_height() * item.scale.y
-	_lights.append(EnvLights.add(item.global_position - Vector2(0, height * 0.4), NEON.pick_random(), 220.0, 0.55))
+	_lights.append(EnvLights.add(item.global_position - Vector2(0, height * 0.32), Color("#ffc16b"), 200.0, 0.48))
+	if _shadows == null:
+		_shadows = ShadowDecals.new()
+		_ground_holder().add_child(_shadows)
+		_shadows.position = -_holder.position
+	var width := item.texture.get_width() * item.scale.x
+	_shadows.add_rect(Rect2(item.position - Vector2(width * 0.36, 18), Vector2(width * 0.72, 28)), height * 0.7, item)
+	if item.texture.resource_path.contains("junkyard_v2"):
+		var ambient := SceneryAmbience.new()
+		ambient.kind = item.texture.resource_path.get_file().get_basename()
+		ambient.phase = fposmod(item.position.x * 0.013 + item.position.y * 0.007, TAU)
+		item.add_child(ambient)
+		# Sprites use a bottom-center offset; ambience shares the same anchor.
+		ambient.position = Vector2(0, -16)
+		ambient.scale.x = -1.0 if item.flip_h else 1.0
+
+
+func _tone(item: CanvasItem) -> void:
+	if not _neon:
+		return
+	var mat := ShaderMaterial.new()
+	mat.shader = DistrictMaterial.shader()
+	item.material = mat
 
 
 func _exit_tree() -> void:
