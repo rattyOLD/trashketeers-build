@@ -43,6 +43,7 @@ func _ready() -> void:
 	_check(empty.direction_at(Vector2i.ZERO) == Vector2.ZERO, "empty map")
 	_check_atlas()
 	_check_rig_release()
+	_check_hero_cache_release()
 	_check_device_profile()
 	_check_separation()
 	_benchmark()
@@ -168,6 +169,29 @@ func _check_rig_release() -> void:
 		_check(rig["texture"] == null and reference.get_ref() == null, "battle release drops rig texture " + id)
 		_check(RigDB.get_rig(id)["texture"] != null, "rig reloads after release " + id)
 	RigDB.release_textures()
+
+
+func _check_hero_cache_release() -> void:
+	var actors: Array[RaccoonVisual] = []
+	var textures: Array[WeakRef] = []
+	for character: Dictionary in ConfigLoader.load_json("res://data/characters.json").get("characters", []):
+		if str((character.get("sprite", {}) as Dictionary).get("clips", "")).is_empty():
+			continue
+		var actor := RaccoonVisual.new()
+		add_child(actor)
+		actor.apply_look(character, {})
+		actors.append(actor)
+		textures.append(weakref((actor._clip_frames["idle"][0] as AtlasTexture).atlas))
+		if actors.size() == 2:
+			break
+	_check(actors.size() == 2, "two animated heroes available")
+	BattleMemory.release()
+	for i in actors.size():
+		_check((actors[i]._clip_frames["idle"][0] as AtlasTexture).atlas == textures[i].get_ref(), "live hero retains its frames after cache release")
+	for actor in actors:
+		actor.free()
+	for reference in textures:
+		_check(reference.get_ref() == null, "closed hero releases its atlas")
 
 
 func _benchmark() -> void:

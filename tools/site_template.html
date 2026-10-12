@@ -1325,25 +1325,32 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	}
 
 	function download(key) {
-		return Promise.all(FILES[key].parts.map(function (part, index) {
-			return downloadPart(key, index);
-		})).then(function (pieces) {
-			if (pieces.length === 1) {
-				return pieces[0];
+		const parts = FILES[key].parts;
+		if (parts.length === 1) {
+			return downloadPart(key, 0).then(function (piece) {
+				if (piece.length !== parts[0].rawBytes) { throw new Error('Неверный размер ресурса ' + parts[0].url); }
+				return piece;
+			});
+		}
+		const offsets = [];
+		let length = 0;
+		for (const part of parts) {
+			offsets.push(length);
+			length += part.rawBytes;
+		}
+		const out = new Uint8Array(length);
+		let next = 0;
+		async function worker() {
+			while (next < parts.length) {
+				const index = next++;
+				let piece = await downloadPart(key, index);
+				if (piece.length !== parts[index].rawBytes) { throw new Error('Неверный размер ресурса ' + parts[index].url); }
+				out.set(piece, offsets[index]);
+				piece = null;
 			}
-			let length = 0;
-			for (const piece of pieces) {
-				length += piece.length;
-			}
-			const out = new Uint8Array(length);
-			let offset = 0;
-			for (const piece of pieces) {
-				out.set(piece, offset);
-				offset += piece.length;
-			}
-			pieces.length = 0;
-			return out;
-		});
+		}
+		// Two parts at a time: retain only the final pack and two temporary chunks.
+		return Promise.all([worker(), worker()]).then(function () { return out; });
 	}
 
 	// Хост может сам отдать .gz с Content-Encoding: gzip — тогда байты уже распакованы.

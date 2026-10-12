@@ -14,6 +14,16 @@ js = open(os.path.join(build, "index.js"), encoding="utf-8").read()
 needle = "this._source.connect(this.getPositionWorklet());"
 assert needle in js, "position worklet hook not found"
 js = js.replace(needle, "")
+# The pack is immutable after preload. MEMFS can own its downloaded bytes rather than copying
+# the entire pack twice (Uint8Array constructor, then FS.writeFile) during engine startup.
+pack_copy = 'FS.writeFile(path,new Uint8Array(buffer))'
+assert js.count(pack_copy) == 1, "pack filesystem copy hook not found"
+js = js.replace(pack_copy, 'FS.writeFile(path,buffer instanceof Uint8Array?buffer:new Uint8Array(buffer),{canOwn:path==="index.pck"})')
+# AudioBufferSourceNodes have independent playback state and can share immutable PCM.
+# Godot 4.4.1 clones the entire decoded sound on every shot, restart and music resume.
+sample_buffer = 'getAudioBuffer(){return this._duplicateAudioBuffer()}setAudioBuffer(val){this._audioBuffer=val}'
+assert js.count(sample_buffer) == 1, "sample audio buffer hook not found"
+js = js.replace(sample_buffer, 'getAudioBuffer(){if(!this._audioBuffer){throw new Error("Sample audio buffer is cleared")}if(this._audioBuffer.numberOfChannels===this.numberOfChannels){return this._audioBuffer}if(!this._playbackBuffer){this._playbackBuffer=this._duplicateAudioBuffer()}return this._playbackBuffer}setAudioBuffer(val){this._audioBuffer=val;this._playbackBuffer=null}')
 # Шина семпла: вместо сплиттера на 6 каналов + 6 GainNode + мерджера (8 узлов на КАЖДЫЙ звук)
 # один GainNode. Громкость каналов у нас одинаковая (2D-звук без панорамы).
 start = js.index("SampleNodeBus:class SampleNodeBus{")
@@ -46,7 +56,7 @@ def write_parts(raw, prefix, chunk):
         # Хеш содержимого в адресе: загрузчик берёт части с cache: 'force-cache', и без него браузер навсегда
         # отдавал старый пак (новая страница + старая игра). Неизменённые части по-прежнему берутся из кэша.
         digest = hashlib.sha1(data).hexdigest()[:12]
-        parts.append('{url:"%s?h=%s",bytes:%d}' % (name, digest, len(data)))
+        parts.append('{url:"%s?h=%s",bytes:%d,rawBytes:%d}' % (name, digest, len(data), len(raw[i:i + chunk])))
     return "[" + ",".join(parts) + "]"
 
 

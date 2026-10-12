@@ -7,6 +7,7 @@ extends RefCounted
 
 
 static func release() -> void:
+	RaccoonVisual.release_cached_textures()
 	FrameDB.release_textures()
 	RigDB.release_textures()
 	ArenaProp._textures.clear()

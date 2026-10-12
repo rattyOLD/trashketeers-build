@@ -636,7 +636,7 @@ html.orientation-ready:not(.upright) #rotate .phone, html.orientation-ready:not(
 </script>
 
 <script>
-window.__trash_build = {label: 'v58.4', time: '12.10 08:28'};
+window.__trash_build = {label: 'v59.1', time: '12.10 19:36'};
 document.getElementById('ver').textContent = 'Версия ' + window.__trash_build.label + ' · сборка от ' + window.__trash_build.time;
 </script>
 <script>
@@ -700,8 +700,8 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	// Загрузчик Godot (Preloader) берёт файлы через window.fetch: подменяем fetch для
 	// index.wasm / index.pck и отдаём ему уже скачанные и распакованные байты.
 	const FILES = {
-		wasm: { parts: [{url:"raccoon.core.0.wasm?h=4cbe7e5f476b",bytes:5221065},{url:"raccoon.core.1.wasm?h=a8fbc151befa",bytes:4165384}] },
-		pck: { parts: [{url:"raccoon.pack.0.wasm?h=d138214b44ad",bytes:11666247},{url:"raccoon.pack.1.wasm?h=2b9c042d93a7",bytes:12554127},{url:"raccoon.pack.2.wasm?h=8c60d052804e",bytes:12568738},{url:"raccoon.pack.3.wasm?h=79630cd60fab",bytes:12564513},{url:"raccoon.pack.4.wasm?h=0707496f3836",bytes:12561096},{url:"raccoon.pack.5.wasm?h=0c181a617463",bytes:12575750},{url:"raccoon.pack.6.wasm?h=19e4f5cef6cb",bytes:12560505},{url:"raccoon.pack.7.wasm?h=3c3fb1479846",bytes:12533224},{url:"raccoon.pack.8.wasm?h=66161b2da712",bytes:12528953},{url:"raccoon.pack.9.wasm?h=31e3c4635a3c",bytes:12498259},{url:"raccoon.pack.10.wasm?h=1ed13dd4018b",bytes:12553442},{url:"raccoon.pack.11.wasm?h=3ee5dc7fe0b5",bytes:12128325},{url:"raccoon.pack.12.wasm?h=be634c53afb0",bytes:860842}] },
+		wasm: { parts: [{url:"raccoon.core.0.wasm?h=4cbe7e5f476b",bytes:5221065,rawBytes:25165824},{url:"raccoon.core.1.wasm?h=a8fbc151befa",bytes:4165384,rawBytes:18533366}] },
+		pck: { parts: [{url:"raccoon.pack.0.wasm?h=12e1ee8648f6",bytes:11666233,rawBytes:12582912},{url:"raccoon.pack.1.wasm?h=2b9c042d93a7",bytes:12554127,rawBytes:12582912},{url:"raccoon.pack.2.wasm?h=8c60d052804e",bytes:12568738,rawBytes:12582912},{url:"raccoon.pack.3.wasm?h=79630cd60fab",bytes:12564513,rawBytes:12582912},{url:"raccoon.pack.4.wasm?h=0707496f3836",bytes:12561096,rawBytes:12582912},{url:"raccoon.pack.5.wasm?h=0c181a617463",bytes:12575750,rawBytes:12582912},{url:"raccoon.pack.6.wasm?h=19e4f5cef6cb",bytes:12560505,rawBytes:12582912},{url:"raccoon.pack.7.wasm?h=3c3fb1479846",bytes:12533224,rawBytes:12582912},{url:"raccoon.pack.8.wasm?h=66161b2da712",bytes:12528953,rawBytes:12582912},{url:"raccoon.pack.9.wasm?h=31e3c4635a3c",bytes:12498259,rawBytes:12582912},{url:"raccoon.pack.10.wasm?h=1ed13dd4018b",bytes:12553442,rawBytes:12582912},{url:"raccoon.pack.11.wasm?h=06b9f59fe52a",bytes:12127733,rawBytes:12582912},{url:"raccoon.pack.12.wasm?h=9558de9654be",bytes:861691,rawBytes:996176}] },
 	};
 	const GODOT_CONFIG = {
 		args: [],
@@ -709,7 +709,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 		ensureCrossOriginIsolationHeaders: false,
 		executable: 'index',
 		experimentalVK: false,
-		fileSizes: { 'index.pck': 151990256, 'index.wasm': 43699190 },
+		fileSizes: { 'index.pck': 151991120, 'index.wasm': 43699190 },
 		focusCanvas: true,
 		gdextensionLibs: [],
 		onPrint: function () {
@@ -734,7 +734,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 
 	// Адрес сбора отчётов о вылетах (Google Apps Script / Supabase и т.п.); пусто — отчёты не отправляются.
 	const REPORT_URL = 'https://script.google.com/macros/s/AKfycbxVyy-SnRANW0Im-1Blne2TcUbca93WqzyBulpADwWWD7YH6x3KIygBYImTe8VfP5pp/exec';
-	const BUILD_ID_REPORT = '1791768498';
+	const BUILD_ID_REPORT = '1791808612';
 	const SESSION_ID = Math.random().toString(36).slice(2, 8);
 	const SESSION_START = Date.now();
 	const REPORT_CAP = 250;
@@ -951,7 +951,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	window.trkReport('session_start', gpuInfo() + ' | ' + navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + (window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio) + ' | screen ' + screen.width + 'x' + screen.height + ' | cores ' + (navigator.hardwareConcurrency || '?'));
 
 	// Вкладка могла висеть со старой версией: при возврате в неё сверяем номер сборки и предлагаем обновиться.
-	const BUILD_ID = '1791768498';
+	const BUILD_ID = '1791808612';
 	// Важное обновление: старая сборка дальше не работает, иначе аккаунты и сохранения ломаются старым кодом.
 	function blockOldBuild(v) {
 		const wall = document.createElement('div');
@@ -1325,25 +1325,32 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	}
 
 	function download(key) {
-		return Promise.all(FILES[key].parts.map(function (part, index) {
-			return downloadPart(key, index);
-		})).then(function (pieces) {
-			if (pieces.length === 1) {
-				return pieces[0];
+		const parts = FILES[key].parts;
+		if (parts.length === 1) {
+			return downloadPart(key, 0).then(function (piece) {
+				if (piece.length !== parts[0].rawBytes) { throw new Error('Неверный размер ресурса ' + parts[0].url); }
+				return piece;
+			});
+		}
+		const offsets = [];
+		let length = 0;
+		for (const part of parts) {
+			offsets.push(length);
+			length += part.rawBytes;
+		}
+		const out = new Uint8Array(length);
+		let next = 0;
+		async function worker() {
+			while (next < parts.length) {
+				const index = next++;
+				let piece = await downloadPart(key, index);
+				if (piece.length !== parts[index].rawBytes) { throw new Error('Неверный размер ресурса ' + parts[index].url); }
+				out.set(piece, offsets[index]);
+				piece = null;
 			}
-			let length = 0;
-			for (const piece of pieces) {
-				length += piece.length;
-			}
-			const out = new Uint8Array(length);
-			let offset = 0;
-			for (const piece of pieces) {
-				out.set(piece, offset);
-				offset += piece.length;
-			}
-			pieces.length = 0;
-			return out;
-		});
+		}
+		// Two parts at a time: retain only the final pack and two temporary chunks.
+		return Promise.all([worker(), worker()]).then(function () { return out; });
 	}
 
 	// Хост может сам отдать .gz с Content-Encoding: gzip — тогда байты уже распакованы.

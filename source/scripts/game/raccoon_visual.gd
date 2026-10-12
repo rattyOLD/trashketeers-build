@@ -74,6 +74,12 @@ static var _arm_texture: Texture2D
 static var _hero_textures: Dictionary = {}
 static var _clip_cache: Dictionary = {}
 
+
+## Instances retain their own frames; the shared cache must not retain every previously selected hero.
+static func release_cached_textures() -> void:
+	_hero_textures.clear()
+	_clip_cache.clear()
+
 var aim_direction := Vector2.RIGHT
 ## false — цели нет: рука опущена, ствол смотрит вперёд-вниз.
 var aiming := true
