@@ -91,6 +91,7 @@ func _refresh() -> void:
 			content.remove_child(child)
 			child.queue_free()
 	_last_id = 0
+	_busy = false
 	_last_day = ""
 	_checks.clear()
 	_read_upto = 0
@@ -239,7 +240,10 @@ func _poll() -> void:
 	if _busy:
 		return
 	_busy = true
-	var result := await Cloud.get_chat(friend_code, _last_id)
+	Cloud.request_for(_list, Cloud.get_chat.bind(friend_code, _last_id), _apply_chat)
+
+
+func _apply_chat(result: Dictionary) -> void:
 	_busy = false
 	if not is_instance_valid(self) or not is_instance_valid(_list):
 		return
@@ -259,7 +263,10 @@ func _poll() -> void:
 
 
 func _poll_peer() -> void:
-	var peer := await Cloud.chat_peer(friend_code)
+	Cloud.request_for(_status, Cloud.chat_peer.bind(friend_code), _apply_peer)
+
+
+func _apply_peer(peer: Dictionary) -> void:
 	if not is_instance_valid(self) or not is_instance_valid(_status):
 		return
 	if peer.is_empty():
@@ -500,10 +507,10 @@ func _make_long_press(target: Control, column: VBoxContainer, id: int, mine: boo
 		if down:
 			var stamp := Time.get_ticks_msec() / 1000.0
 			pressed_at[0] = stamp
-			get_tree().create_timer(LONG_PRESS).timeout.connect(func() -> void:
+			SceneDelay.after(column, LONG_PRESS, func() -> void:
 				if is_instance_valid(column) and pressed_at[0] == stamp:
 					pressed_at[0] = -1.0
-					_open_message_menu(column, id, mine))
+					_open_message_menu(column, id, mine), true, false)
 		elif up:
 			pressed_at[0] = -1.0)
 
@@ -556,18 +563,18 @@ func _open_message_menu(column: VBoxContainer, id: int, mine: bool) -> void:
 			if is_instance_valid(report):
 				report.text = "OK" if result == "ok" else "X"
 				report.disabled = true
-				get_tree().create_timer(1.2).timeout.connect(func() -> void:
+				SceneDelay.after(menu, 1.2, func() -> void:
 					if is_instance_valid(menu):
-						menu.queue_free()))
+						menu.queue_free(), true, false))
 		row.add_child(report)
 	column.add_child(menu)
 	column.move_child(menu, 0)
 	menu.pivot_offset = Vector2(0, 30)
 	menu.scale = Vector2(0.7, 0.7)
 	menu.create_tween().tween_property(menu, "scale", Vector2.ONE, 0.2).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	get_tree().create_timer(4.0).timeout.connect(func() -> void:
+	SceneDelay.after(menu, 4.0, func() -> void:
 		if is_instance_valid(menu):
-			menu.queue_free())
+			menu.queue_free(), true, false)
 
 
 func _deleted_label() -> Label:
@@ -609,7 +616,10 @@ func _apply_reaction(id: int, emoji: String) -> void:
 
 
 func _poll_reactions() -> void:
-	var rows := await Cloud.chat_reactions(friend_code)
+	Cloud.request_for(_list, Cloud.chat_reactions.bind(friend_code), _apply_reactions)
+
+
+func _apply_reactions(rows: Array) -> void:
 	if not is_instance_valid(self):
 		return
 	var seen := {}

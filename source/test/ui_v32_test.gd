@@ -145,5 +145,14 @@ func _run() -> void:
 		SaveService.data = previous
 		shop.free()
 	Orient.portrait = false
+	# Диагностика: дождаться ответа уже начатых запросов после закрытия окон.
+	var deadline := Time.get_ticks_msec() + 35000
+	while Cloud._profile_busy or Cloud._session_busy or not Cloud.find_children("*", "HTTPRequest", false, false).is_empty():
+		if Time.get_ticks_msec() > deadline:
+			_check(false, "pending cloud requests complete after closing popups")
+			break
+		await get_tree().process_frame
+	for i in 4:
+		await get_tree().process_frame
 	print("UI_V32 failures=%d" % failures)
 	get_tree().quit(1 if failures else 0)

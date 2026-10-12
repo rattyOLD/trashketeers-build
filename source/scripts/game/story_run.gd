@@ -345,7 +345,7 @@ func try_respawn() -> bool:
 	var scars := SaveService.get_stat("scars")
 	if [1, 5, 15, 40].has(scars):
 		var scar_text: Dictionary = {1: "Первый шрам. Нэлл: Это не дефект, это стиль.", 5: "Пять шрамов. Нэлл: Ты уже похож на карту сокровищ.", 15: "15 шрамов. Рико: Я теперь на ощупь читаю.", 40: "40 шрамов. Нэлл: Живого места нет. Зато характер."}
-		get_tree().create_timer(4.6, false).timeout.connect(func() -> void: game.hud.toast("ШРАМ №%d" % scars, str(scar_text[scars]), Color("#ff9a8a")))
+		SceneDelay.after(self, 4.6, func() -> void: game.hud.toast("ШРАМ №%d" % scars, str(scar_text[scars]), Color("#ff9a8a")), false, false)
 	game.hud.show_banner("ЖИЗНЬ ПОТЕРЯНА · ОСТАЛОСЬ %d" % lives, UiStyle.DANGER, 1.6)
 	var quips: Array = mission.get("death_lines", [])
 	if not quips.is_empty():
@@ -353,8 +353,8 @@ func try_respawn() -> bool:
 		var pool: Array = _banter.get("death", [])
 		if lives_lost == 2 and not pool.is_empty():
 			quip = str(pool.pick_random())
-		get_tree().create_timer(1.7, false).timeout.connect(func() -> void: game.hud.show_banner(quip, UiStyle.NEON, 2.6))
-	get_tree().create_timer(1.3, false).timeout.connect(func() -> void: game.story_respawn(checkpoint))
+		SceneDelay.after(self, 1.7, func() -> void: game.hud.show_banner(quip, UiStyle.NEON, 2.6), false, false)
+	SceneDelay.after(self, 1.3, func() -> void: game.story_respawn(checkpoint), false, false)
 	return true
 
 
@@ -740,13 +740,13 @@ func _offer_choice(key: String) -> void:
 	if not choices.has(key):
 		return
 	var card: Dictionary = choices[key]
-	get_tree().create_timer(1.6, true, false, true).timeout.connect(func() -> void:
+	SceneDelay.after(self, 1.6, func() -> void:
 		if game == null or game.finished or game.player == null or game.player.is_dead:
 			return
 		var panel := ChoiceCard.new()
 		game.add_child(panel)
 		panel.chosen.connect(_on_choice.bind(card))
-		panel.open(card))
+		panel.open(card), true, true)
 
 
 func _on_choice(index: int, card: Dictionary) -> void:
@@ -961,8 +961,8 @@ func _king_banter() -> void:
 		_chatter(_who_name(prefix), str(lines.pick_random()), _who_color(prefix))
 	var after: Array = _banter.get("nell_after", [])
 	if not after.is_empty():
-		get_tree().create_timer(2.6, true, false, true).timeout.connect(func() -> void:
-			_chatter("НЭЛЛ", str(after.pick_random()), Color("#5ff2ff")))
+		SceneDelay.after(self, 2.6, func() -> void:
+			_chatter("НЭЛЛ", str(after.pick_random()), Color("#5ff2ff")), true, true)
 
 
 ## Босс подкалывает за ствол: донатный из пропуска, или наоборот слишком скромный.
@@ -978,15 +978,15 @@ func _weapon_taunt(is_mini: bool) -> void:
 		return
 	var name := _who_name(who)
 	var color := _who_color(who)
-	get_tree().create_timer(OPEN_DELAY + 7.5, true, false, true).timeout.connect(func() -> void:
+	SceneDelay.after(self, OPEN_DELAY + 7.5, func() -> void:
 		if _boss_alive:
 			_chatter(name, str(lines.pick_random()), color)
 		if paid.has(str(wc.base_weapon.id)) and not is_mini:
 			var nell: Array = _banter.get("nell_donate", [])
 			if not nell.is_empty():
-				get_tree().create_timer(3.2, true, false, true).timeout.connect(func() -> void:
+				SceneDelay.after(self, 3.2, func() -> void:
 					if _boss_alive:
-						_chatter("НЭЛЛ", str(nell.pick_random()), Color("#5ff2ff"))))
+						_chatter("НЭЛЛ", str(nell.pick_random()), Color("#5ff2ff")), true, true), true, true)
 
 
 func on_miniboss_killed() -> void:
@@ -1063,9 +1063,9 @@ func _say(key: String, delay: float) -> void:
 	_seen[key] = true
 	SaveService.log_dialog(str(mission.get("id", "")), key)
 	if (mission.get("ambient", []) as Array).has(key):
-		get_tree().create_timer(delay, false).timeout.connect(func() -> void:
+		SceneDelay.after(self, delay, func() -> void:
 			if _ambient != null and not game.finished:
-				_ambient.push(dialogs[key]))
+				_ambient.push(dialogs[key]), false, false)
 		return
 	_queue.append(dialogs[key])
 	get_tree().create_timer(delay, true, false, true).timeout.connect(_pump)
@@ -1294,9 +1294,9 @@ func _place_training_target() -> void:
 	target.position = game.player.global_position + Vector2(0.0, -280.0)
 	target.broken.connect(_on_training_broken)
 	game.layers.world.add_child(target)
-	get_tree().create_timer(2.5, false).timeout.connect(func() -> void:
+	SceneDelay.after(target, 2.5, func() -> void:
 		if is_instance_valid(target):
-			game.hud.radio().push_named("НЭЛЛ", "#5ff2ff", "Держи палец на экране, где цель! Отпустил — Рико не стреляет, он не волшебник.", 7.0))
+			game.hud.radio().push_named("НЭЛЛ", "#5ff2ff", "Держи палец на экране, где цель! Отпустил — Рико не стреляет, он не волшебник.", 7.0), false, false)
 
 
 func _on_training_broken(target: TrainingTarget) -> void:

@@ -31,7 +31,10 @@ func _refresh() -> void:
 
 
 func _load() -> void:
-	var profile := await Cloud.friend_profile(friend_code)
+	Cloud.request_for(_body, Cloud.friend_profile.bind(friend_code), _apply_profile)
+
+
+func _apply_profile(profile: Dictionary) -> void:
 	if not is_instance_valid(self) or not is_instance_valid(_body):
 		return
 	if profile.is_empty():
@@ -162,10 +165,10 @@ func _two_tap(text: String, color: Color, action: Callable) -> Button:
 		if not armed[0]:
 			armed[0] = true
 			button.text = "Точно? Нажми ещё раз"
-			get_tree().create_timer(2.5).timeout.connect(func() -> void:
+			SceneDelay.after(button, 2.5, func() -> void:
 				if is_instance_valid(button):
 					armed[0] = false
-					button.text = text)
+					button.text = text, true, false)
 			return
 		armed[0] = false
 		button.text = text

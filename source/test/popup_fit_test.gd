@@ -54,6 +54,18 @@ func _ready() -> void:
 				(popup as GlassPopup).open()
 			elif popup.has_method("open"):
 				popup.call("open")
+			if popup is ChatPopup:
+				# Нажатый пузырь исчезает до окончания long press: старый таймер не должен обращаться к нему.
+				var transient := VBoxContainer.new()
+				popup.add_child(transient)
+				var target := Control.new()
+				transient.add_child(target)
+				(popup as ChatPopup)._make_long_press(target, transient, 0, true)
+				var press := InputEventMouseButton.new()
+				press.button_index = MOUSE_BUTTON_LEFT
+				press.pressed = true
+				target.gui_input.emit(press)
+				transient.free()
 			await get_tree().create_timer(0.9).timeout
 			var panel: Control = popup.get("_panel") if popup.get("_panel") != null else null
 			if panel == null:

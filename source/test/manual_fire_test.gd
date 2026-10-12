@@ -73,5 +73,8 @@ func _run() -> void:
 	await _wait(1.0)
 	_check(shots == after, "release stops firing")
 	AimStick.force_touch = false
+	main.queue_free()
+	for i in 4:
+		await get_tree().process_frame
 	print("MANUAL_FIRE failures=%d" % failures)
-	get_tree().quit()
+	get_tree().quit.call_deferred(1 if failures else 0)

@@ -36,6 +36,13 @@ func _run() -> void:
 	var armory := MenuPopups.Armory.new()
 	add_child(armory)
 	await _test_filters(armory)
+	# Недоступные/выбранные виды оружия могут не иметь быстрых действий.
+	# Их плитки должны освобождать и прикреплённые, и временные узлы.
+	for weapon in WeaponDB.get_player_weapons():
+		var orphans := int(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT))
+		var tile := armory._make_tile(weapon)
+		tile.free()
+		_check(int(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)) == orphans, "tile releases every node " + String(weapon.id))
 	var tested := 0
 	for weapon in WeaponDB.get_player_weapons():
 		if not Economy.is_buyable(weapon):

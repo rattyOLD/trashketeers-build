@@ -56,7 +56,10 @@ func _refresh() -> void:
 
 
 func _count_requests() -> void:
-	var requests := await Cloud.list_requests()
+	Cloud.request_for(_tabs_row, Cloud.list_requests, _apply_request_count)
+
+
+func _apply_request_count(requests: Array) -> void:
 	if not is_instance_valid(_tabs_row):
 		return
 	_requests_count = requests.size()
@@ -290,19 +293,18 @@ func _load_top() -> void:
 
 
 func _load_online() -> void:
-	var box := _online_box
-	var result := await Cloud.inbox()
+	Cloud.request_for(_online_box, Cloud.inbox, _apply_online.bind(weakref(_online_box)))
+
+
+func _apply_online(result: Dictionary, receiver: WeakRef) -> void:
+	var box := receiver.get_ref() as VBoxContainer
 	if not is_instance_valid(box) or box != _online_box:
 		return
 	MenuPopups.clear(box)
 	if not bool(result["ok"]):
 		var note := _wrap_label("Нет связи с сервером (%s)\nПроверяю связь..." % Cloud.last_error)
 		box.add_child(note)
-		var report := await Cloud.ping()
-		if is_instance_valid(note):
-			note.text = "Нет связи с сервером (%s)\n%s" % [Cloud.last_error, report]
-			DisplayServer.clipboard_set(report)
-			note.text += "\n(отчёт скопирован, вставь в чат)"
+		Cloud.request_for(note, Cloud.ping, _apply_connection_report.bind(weakref(note)))
 		return
 	var items: Array = result["items"]
 	if items.is_empty():
@@ -331,9 +333,21 @@ func _load_online() -> void:
 	Cloud.refresh_unread()
 
 
+func _apply_connection_report(report: String, receiver: WeakRef) -> void:
+	var note := receiver.get_ref() as Label
+	if note == null:
+		return
+	note.text = "Нет связи с сервером (%s)\n%s" % [Cloud.last_error, report]
+	DisplayServer.clipboard_set(report)
+	note.text += "\n(отчёт скопирован, вставь в чат)"
+
+
 func _load_requests() -> void:
-	var box := _online_box
-	var requests := await Cloud.list_requests()
+	Cloud.request_for(_online_box, Cloud.list_requests, _apply_requests.bind(weakref(_online_box)))
+
+
+func _apply_requests(requests: Array, receiver: WeakRef) -> void:
+	var box := receiver.get_ref() as VBoxContainer
 	if not is_instance_valid(box) or box != _online_box:
 		return
 	MenuPopups.clear(box)
@@ -512,10 +526,10 @@ func _online_row(friend: Dictionary) -> Control:
 		if not armed[0]:
 			armed[0] = true
 			remove.text = "?"
-			get_tree().create_timer(2.0).timeout.connect(func() -> void:
+			SceneDelay.after(remove, 2.0, func() -> void:
 				if is_instance_valid(remove):
 					armed[0] = false
-					remove.text = "X")
+					remove.text = "X", true, false)
 			return
 		await Cloud.remove_friend(str(friend.get("friend_code", "")))
 		if is_instance_valid(self):
@@ -615,10 +629,10 @@ func _friend_row(friend: Dictionary) -> Control:
 		if not armed[0]:
 			armed[0] = true
 			remove.text = "?"
-			get_tree().create_timer(2.0).timeout.connect(func() -> void:
+			SceneDelay.after(remove, 2.0, func() -> void:
 				if is_instance_valid(remove):
 					armed[0] = false
-					remove.text = "X")
+					remove.text = "X", true, false)
 			return
 		SaveService.remove_friend(str(friend.get("id", "")))
 		_refresh_list_only())

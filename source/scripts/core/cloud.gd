@@ -104,6 +104,16 @@ func _ready() -> void:
 		JavaScriptBridge.get_interface("document").addEventListener("visibilitychange", _hidden_callback)
 
 
+## Запрос живёт в сервисе, ответ доставляется только ещё существующему элементу окна.
+## Окно не держит await-цепочку, которая переживает освобождение её владельца.
+func request_for(owner_node: Node, request: Callable, deliver: Callable) -> void:
+	var receiver: WeakRef = weakref(owner_node)
+	var answer: Variant = await request.call()
+	var target := receiver.get_ref() as Node
+	if target != null and target.is_inside_tree() and not target.is_queued_for_deletion() and deliver.is_valid():
+		deliver.call(answer)
+
+
 func start_guest() -> void:
 	if waiting_choice:
 		waiting_choice = false

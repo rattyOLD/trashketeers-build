@@ -53,9 +53,9 @@ func show_for(target: Control, text: String) -> void:
 	pos.y = clampf(pos.y, 12.0, view.y - size.y - 12.0)
 	global_position = pos
 	create_tween().tween_property(self, "modulate:a", 1.0, 0.12)
-	get_tree().create_timer(SHOW_TIME, true, false, true).timeout.connect(func() -> void:
+	SceneDelay.after(self, SHOW_TIME, func() -> void:
 		if token == _token:
-			visible = false)
+			visible = false, true, true)
 
 
 ## Элемент ловит тап и показывает подсказку; вложенные узлы касания не перехватывают.

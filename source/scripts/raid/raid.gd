@@ -426,9 +426,9 @@ func _play_loot_shower(at: Vector2) -> void:
 	fx.burst(at, Color.WHITE, 30, 380.0, 4.0)
 	fx.ring(at, DUST_COLOR, 180.0)
 	for i in 4:
-		get_tree().create_timer(0.25 * (i + 1), false).timeout.connect(func() -> void:
+		SceneDelay.after(self, 0.25 * (i + 1), func() -> void:
 			fx.burst(player.global_position + Vector2.from_angle(randf() * TAU) * 60.0, DUST_COLOR, 16, 260.0, 4.0)
-			SoundManager.play(&"nut_pickup", 4.0))
+			SoundManager.play(&"nut_pickup", 4.0), false, false)
 
 
 func _on_player_fell() -> void:

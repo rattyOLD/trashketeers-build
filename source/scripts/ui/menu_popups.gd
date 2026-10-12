@@ -963,6 +963,9 @@ class Armory:
 			row.add_child(buy)
 		if row.get_child_count() > 0:
 			column.add_child(row)
+		else:
+			# Недоступному оружию не нужна строка действий, но созданный узел надо освободить.
+			row.free()
 
 	func _note(text: String, size: int, color: Color) -> Label:
 		var label := UiStyle.label(text, size, color, 4)
@@ -1462,10 +1465,10 @@ class Profile:
 			if not armed[0]:
 				armed[0] = true
 				out.text = "Точно? Нажми ещё раз"
-				get_tree().create_timer(3.0).timeout.connect(func() -> void:
+				SceneDelay.after(out, 3.0, func() -> void:
 					if is_instance_valid(out) and armed[0]:
 						armed[0] = false
-						out.text = "Выйти на всех устройствах, кроме этого")
+						out.text = "Выйти на всех устройствах, кроме этого", true, false)
 				return
 			armed[0] = false
 			out.disabled = true
@@ -1690,10 +1693,10 @@ class Profile:
 			if not armed[0]:
 				armed[0] = true
 				restore.text = "ТОЧНО?"
-				get_tree().create_timer(3.0).timeout.connect(func() -> void:
+				SceneDelay.after(restore, 3.0, func() -> void:
 					if is_instance_valid(restore):
 						armed[0] = false
-						restore.text = "ВЕРНУТЬ")
+						restore.text = "ВЕРНУТЬ", true, false)
 				return
 			armed[0] = false
 			restore.text = "..."

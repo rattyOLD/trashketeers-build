@@ -76,12 +76,14 @@ static func fit_label_font(label_node: Label, base: int, max_width: float) -> vo
 ## Resize-safe fitting includes plate padding and the text outline.
 static func fit_plate_label(label_node: Label, base: int) -> void:
 	label_node.clip_text = true
+	var receiver: WeakRef = weakref(label_node)
 	var fit := func() -> void:
-		if label_node.size.x <= 0.0:
+		var plate := receiver.get_ref() as Label
+		if plate == null or plate.is_queued_for_deletion() or plate.size.x <= 0.0:
 			return
-		var style := label_node.get_theme_stylebox("normal")
+		var style := plate.get_theme_stylebox("normal")
 		var padding := style.get_content_margin(SIDE_LEFT) + style.get_content_margin(SIDE_RIGHT)
-		fit_label_font(label_node, base, maxf(1.0, label_node.size.x - padding - label_node.get_theme_constant("outline_size") * 2.0))
+		fit_label_font(plate, base, maxf(1.0, plate.size.x - padding - plate.get_theme_constant("outline_size") * 2.0))
 	label_node.resized.connect(fit)
 	label_node.tree_entered.connect(fit.call_deferred)
 	fit.call_deferred()
@@ -96,6 +98,12 @@ static func size_flow_button(button_node: Button, base: int = 16) -> void:
 	if button_node.icon != null:
 		needed += minf(button_node.icon.get_width(), button_node.get_theme_constant("icon_max_width")) + button_node.get_theme_constant("h_separation")
 	button_node.custom_minimum_size.x = maxf(button_node.custom_minimum_size.x, ceilf(needed))
+
+
+static func _fit_live_button(receiver: WeakRef, base: int) -> void:
+	var button_node := receiver.get_ref() as Button
+	if button_node != null and button_node.is_inside_tree() and not button_node.is_queued_for_deletion():
+		_fit_button_contents(button_node, base)
 
 
 static func _fit_button_contents(button_node: Button, base: int) -> void:
@@ -201,7 +209,7 @@ static func button(text: String, color: Color, font_size: int = 30, min_size: Ve
 			small_box.content_margin_right = 12.0
 			b.add_theme_stylebox_override(state, small_box)
 	b.resized.connect(_fit_button_contents.bind(b, font_size))
-	b.tree_entered.connect(_fit_button_contents.bind(b, font_size).call_deferred)
+	b.tree_entered.connect(_fit_live_button.bind(weakref(b), font_size).call_deferred)
 	b.draw.connect(_fit_button_contents.bind(b, font_size))
 	press_feedback(b)
 	return b

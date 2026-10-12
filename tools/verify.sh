@@ -17,7 +17,7 @@ if ! "$GODOT" --audio-driver Dummy --headless --path "$P" res://test/check_scrip
   fail=1
 fi
 grep 'CHECK checked' "$LOG/scripts.log"
-for new_check in "hero_identity_test:HERO_IDENTITY" "loadout_choices_test:LOADOUT_CHOICES" "tactics_test:TACTICS_TEST" "polish_stability_test:POLISH_STABILITY"; do
+for new_check in "hero_identity_test:HERO_IDENTITY" "loadout_choices_test:LOADOUT_CHOICES" "tactics_test:TACTICS_TEST" "polish_stability_test:POLISH_STABILITY" "scene_lifetime_test:SCENE_LIFETIME"; do
   scene=${new_check%:*}
   marker=${new_check#*:}
   XDG_DATA_HOME="$LOG/$scene-user" timeout 100 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --audio-driver Dummy --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" "res://test/$scene.tscn" > "$LOG/$scene.log" 2>&1
@@ -181,7 +181,7 @@ for hero in sniper_f medic_f; do
   echo "a13-$hero: errors=$n finished=$done_ok"
   [ "$n" != "0" ] || [ "$done_ok" != "1" ] && fail=1
 done
-if grep -nE '^ERROR:|SCRIPT ERROR|Shader compilation failed' "$LOG"/*.log; then
+if grep -nE '^ERROR:|SCRIPT ERROR|Shader compilation failed|ObjectDB instances leaked|RID.*leaked|resources still in use' "$LOG"/*.log; then
   fail=1
 fi
 if [ "$fail" = 0 ]; then

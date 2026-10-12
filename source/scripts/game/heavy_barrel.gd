@@ -66,12 +66,12 @@ func _play_assembly() -> void:
 	_atmosphere.letterbox(true)
 	Engine.time_scale = ASSEMBLY_SLOWMO
 	for i in 3:
-		get_tree().create_timer(0.12 + 0.22 * i, true, false, true).timeout.connect(func() -> void:
+		SceneDelay.after(self, 0.12 + 0.22 * i, func() -> void:
 			if active and is_instance_valid(_player):
-				_fx.ring(_player.global_position, FLASH_COLOR if i % 2 == 0 else Color.WHITE, 140.0 + 90.0 * i))
-	get_tree().create_timer(ASSEMBLY_TIME, true, false, true).timeout.connect(func() -> void:
+				_fx.ring(_player.global_position, FLASH_COLOR if i % 2 == 0 else Color.WHITE, 140.0 + 90.0 * i), true, true)
+	SceneDelay.after(self, ASSEMBLY_TIME, func() -> void:
 		Engine.time_scale = 1.0
-		_atmosphere.letterbox(false))
+		_atmosphere.letterbox(false), true, true)
 
 
 func _process(delta: float) -> void:

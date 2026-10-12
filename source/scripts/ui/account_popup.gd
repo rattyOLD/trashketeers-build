@@ -62,10 +62,10 @@ func _render_logged() -> void:
 		if not armed[0]:
 			armed[0] = true
 			out.text = "ТОЧНО? Прогресс останется в облаке"
-			get_tree().create_timer(3.5).timeout.connect(func() -> void:
+			SceneDelay.after(out, 3.5, func() -> void:
 				if is_instance_valid(out):
 					armed[0] = false
-					out.text = "ВЫЙТИ ИЗ АККАУНТА")
+					out.text = "ВЫЙТИ ИЗ АККАУНТА", true, false)
 			return
 		out.disabled = true
 		out.text = "Сохраняю и выхожу..."
