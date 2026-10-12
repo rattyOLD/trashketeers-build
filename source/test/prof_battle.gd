@@ -14,7 +14,7 @@ func _ready() -> void:
 		DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
 	Orient.portrait = false
 	get_window().content_scale_size = Orient.LANDSCAPE_SIZE
-	SaveService.data["quality"] = 0
+	SaveService.data["quality"] = int(OS.get_environment("PROBE_Q")) if OS.get_environment("PROBE_Q") != "" else 0
 	var state: Dictionary = SaveService.data["tester"]
 	state["god"] = true
 	state["start_wave"] = int(OS.get_environment("PROBE_WAVE")) if OS.get_environment("PROBE_WAVE") != "" else 1
@@ -25,11 +25,15 @@ func _ready() -> void:
 	if OS.get_environment("PROBE_STRESS") == "1":
 		_stress(game)
 	var t := 0.0
+	var started := Time.get_ticks_msec()
 	while t < secs:
-		await get_tree().create_timer(5.0).timeout
-		t += 5.0
+		await get_tree().create_timer(5.0, true, false, true).timeout
+		t = (Time.get_ticks_msec() - started) / 1000.0
 		var em: Variant = game.get("enemies")
-		print("PROF t=%d draws=%d objs=%d vmem=%dMB tex=%dMB nodes=%d enemies=%d fps=%d" % [t, int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)), int(Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME)), int(Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0), int(Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0), int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT)), (em as EnemyManager).get_active().size() if em != null else -1, int(Performance.get_monitor(Performance.TIME_FPS))])
+		print("PROF t=%d draws=%d objs=%d vmem=%dMB tex=%dMB nodes=%d enemies=%d fps=%d render=%s adapt=%d" % [t, int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)), int(Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME)), int(Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0), int(Performance.get_monitor(Performance.RENDER_TEXTURE_MEM_USED) / 1048576.0), int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT)), (em as EnemyManager).get_active().size() if em != null else -1, int(Performance.get_monitor(Performance.TIME_FPS)), get_viewport().get_texture().get_size(), game._adapt_level])
+	if not OS.get_environment("OUT").is_empty():
+		await RenderingServer.frame_post_draw
+		get_viewport().get_texture().get_image().save_png(OS.get_environment("OUT"))
 	get_tree().quit()
 
 

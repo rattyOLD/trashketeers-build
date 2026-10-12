@@ -16,6 +16,7 @@ func _ready() -> void:
 	_test_orders()
 	_test_tasks()
 	_test_quality()
+	await _test_screen_feedback()
 	SaveService.data = saved
 	BattleQuality.configure(0, SaveService.is_fx_lite())
 	print("QUALITY_PATCHES failures=", failures)
@@ -154,3 +155,47 @@ func _test_quality() -> void:
 	_check(lite._fx_scale < 0.5, "adaptation never increases lite effects")
 	lite.free()
 	_check(BattleQuality.level == 0, "next screen restores visual budget")
+	# Поздняя просадка не меняет разрешение ни на одной настройке качества.
+	var was_native := Platform.is_native_app
+	var saved_scale := Platform.native_render_scale
+	Platform.is_native_app = true
+	for quality in [0, 1, 2]:
+		SaveService.data["quality"] = quality
+		Platform.native_render_scale = 1.0
+		var sustained := BattleBase.new()
+		add_child(sustained)
+		sustained._perf_age = 600.0
+		for stage in 4:
+			sustained._adapt_quality(5.1)
+		_check(sustained._adapt_level == 4, "late sustained overload exhausts decorative budget")
+		_check(Platform.native_render_scale == 1.0, "late overload keeps chosen canvas resolution")
+		sustained.free()
+	Platform.is_native_app = was_native
+	Platform.native_render_scale = saved_scale
+
+
+func _test_screen_feedback() -> void:
+	SaveService.data["quality"] = 1
+	SaveService.data["reduced_flashes"] = false
+	var arena := Node2D.new()
+	add_child(arena)
+	var atmosphere := AtmosphereFX.new()
+	arena.add_child(atmosphere)
+	atmosphere.build(arena)
+	atmosphere.hit_pulse(10.0)
+	atmosphere._process(0.01)
+	_check(atmosphere._aberration <= 1.0, "damage feedback has a fixed pixel limit")
+	atmosphere.flash(Color.WHITE, 0.4, 0.5)
+	await get_tree().process_frame
+	var previous := atmosphere._flash_tween
+	atmosphere.flash(Color.RED, 0.2, 0.25)
+	_check(not previous.is_running(), "new flash cancels competing fade")
+	get_tree().paused = true
+	_check(not atmosphere._flash.visible and atmosphere._aberration == 0.0, "upgrade pause clears transient distortion")
+	_check(float((atmosphere._grade.material as ShaderMaterial).get_shader_parameter("aberration")) == 0.0, "paused frame has no color separation")
+	get_tree().paused = false
+	SaveService.data["reduced_flashes"] = true
+	atmosphere.hit_pulse()
+	atmosphere.flash(Color.WHITE, 0.6, 0.3)
+	_check(not atmosphere._flash.visible and atmosphere._aberration == 0.0, "comfort setting also suppresses atmospheric flashes")
+	arena.free()

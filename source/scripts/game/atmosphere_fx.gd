@@ -34,6 +34,7 @@ var _weather_layer: CanvasLayer
 var _weather: WeatherDraw
 var _vignette: ColorRect
 var _flash: ColorRect
+var _flash_tween: Tween
 var _fade: ColorRect
 var _fade_tween: Tween
 var _bars: Array[ColorRect] = []
@@ -176,16 +177,35 @@ func letterbox(show: bool) -> void:
 
 ## Удар по игроку: короткая хроматическая аберрация по краям экрана.
 func hit_pulse(strength: float = 1.0) -> void:
-	_aberration = maxf(_aberration, strength)
+	if bool(SaveService.data.get("reduced_flashes", false)):
+		return
+	_aberration = maxf(_aberration, clampf(strength, 0.0, 1.0))
 
 
 ## Вспышка экрана (левел-ап, молния, взрыв босса).
 func flash(color: Color, strength: float, duration: float) -> void:
+	if bool(SaveService.data.get("reduced_flashes", false)):
+		return
+	if _flash_tween != null:
+		_flash_tween.kill()
 	_flash.color = Color(color, strength)
 	_flash.visible = true
-	var tween := create_tween()
-	tween.tween_property(_flash, "color:a", 0.0, duration)
-	tween.tween_callback(func() -> void: _flash.visible = _flash.color.a > 0.01)
+	_flash_tween = create_tween()
+	_flash_tween.tween_property(_flash, "color:a", 0.0, duration)
+	_flash_tween.tween_callback(func() -> void: _flash.visible = false)
+
+
+## Выбор улучшения не должен замораживать вспышку или расслоение кадра от последнего удара.
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PAUSED:
+		_aberration = 0.0
+		if _grade != null:
+			(_grade.material as ShaderMaterial).set_shader_parameter(&"aberration", 0.0)
+		if _flash_tween != null:
+			_flash_tween.kill()
+		if _flash != null:
+			_flash.visible = false
+			_flash.color.a = 0.0
 
 
 func _process(delta: float) -> void:

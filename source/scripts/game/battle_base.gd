@@ -396,8 +396,8 @@ func _perf_context() -> String:
 		int(OS.get_static_memory_usage() / 1048576.0), _extra_context() + " fpshist=" + ",".join(_fps_hist.map(str))]
 
 
-## Динамическое качество: если 5 секунд подряд средний FPS ниже порога — упрощаем эффекты, затем снижаем разрешение холста.
-## Изменения действуют только в этом бою; настройки игрока не трогаем. На «Красиво» разрешение и FPS не снижаются: игрок выбрал максимум сам.
+## При устойчивой просадке FPS сокращаем декоративные эффекты, сохраняя выбранное разрешение.
+## Перестройка всего холста посреди боя размывала HUD и могла дёргать экран на телефонах.
 func _adapt_quality(delta: float) -> void:
 	var crawling := Engine.get_frames_per_second() < 15.0
 	if _perf_age < (6.0 if crawling else ADAPT_WARMUP) or _adapt_level >= ADAPT_MAX:
@@ -423,10 +423,6 @@ func _adapt_quality(delta: float) -> void:
 	_apply_visual_budget()
 	_fx_scale = (0.5 if SaveService.is_fx_lite() else 1.0) * maxf(0.2, 1.0 - 0.2 * _adapt_level)
 	SoftGlow.lite = true
-	# Выбранное «Красиво» сохраняет разрешение; количество врагов не меняется.
-	if SaveService.get_quality() < 2:
-		if _adapt_level >= 2:
-			Platform.set_render_cap(0.7 if _adapt_level >= 4 else 1.0)
 	Platform.note_event("adapt level %d at fps %.0f" % [_adapt_level, fps])
 	Platform.send_report("adapt", "level %d fps %.0f | %s" % [_adapt_level, fps, _perf_context()])
 
