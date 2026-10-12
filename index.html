@@ -636,7 +636,7 @@ html.orientation-ready:not(.upright) #rotate .phone, html.orientation-ready:not(
 </script>
 
 <script>
-window.__trash_build = {label: 'v58.3', time: '12.10 08:13'};
+window.__trash_build = {label: 'v58.4', time: '12.10 08:28'};
 document.getElementById('ver').textContent = 'Версия ' + window.__trash_build.label + ' · сборка от ' + window.__trash_build.time;
 </script>
 <script>
@@ -701,7 +701,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	// index.wasm / index.pck и отдаём ему уже скачанные и распакованные байты.
 	const FILES = {
 		wasm: { parts: [{url:"raccoon.core.0.wasm?h=4cbe7e5f476b",bytes:5221065},{url:"raccoon.core.1.wasm?h=a8fbc151befa",bytes:4165384}] },
-		pck: { parts: [{url:"raccoon.pack.0.wasm?h=288cb943e027",bytes:11666238},{url:"raccoon.pack.1.wasm?h=2b9c042d93a7",bytes:12554127},{url:"raccoon.pack.2.wasm?h=8c60d052804e",bytes:12568738},{url:"raccoon.pack.3.wasm?h=79630cd60fab",bytes:12564513},{url:"raccoon.pack.4.wasm?h=0707496f3836",bytes:12561096},{url:"raccoon.pack.5.wasm?h=0c181a617463",bytes:12575750},{url:"raccoon.pack.6.wasm?h=19e4f5cef6cb",bytes:12560505},{url:"raccoon.pack.7.wasm?h=3c3fb1479846",bytes:12533224},{url:"raccoon.pack.8.wasm?h=66161b2da712",bytes:12528953},{url:"raccoon.pack.9.wasm?h=31e3c4635a3c",bytes:12498259},{url:"raccoon.pack.10.wasm?h=1ed13dd4018b",bytes:12553442},{url:"raccoon.pack.11.wasm?h=cae6e2d58f68",bytes:12128456},{url:"raccoon.pack.12.wasm?h=9797da195613",bytes:862025}] },
+		pck: { parts: [{url:"raccoon.pack.0.wasm?h=d138214b44ad",bytes:11666247},{url:"raccoon.pack.1.wasm?h=2b9c042d93a7",bytes:12554127},{url:"raccoon.pack.2.wasm?h=8c60d052804e",bytes:12568738},{url:"raccoon.pack.3.wasm?h=79630cd60fab",bytes:12564513},{url:"raccoon.pack.4.wasm?h=0707496f3836",bytes:12561096},{url:"raccoon.pack.5.wasm?h=0c181a617463",bytes:12575750},{url:"raccoon.pack.6.wasm?h=19e4f5cef6cb",bytes:12560505},{url:"raccoon.pack.7.wasm?h=3c3fb1479846",bytes:12533224},{url:"raccoon.pack.8.wasm?h=66161b2da712",bytes:12528953},{url:"raccoon.pack.9.wasm?h=31e3c4635a3c",bytes:12498259},{url:"raccoon.pack.10.wasm?h=1ed13dd4018b",bytes:12553442},{url:"raccoon.pack.11.wasm?h=3ee5dc7fe0b5",bytes:12128325},{url:"raccoon.pack.12.wasm?h=be634c53afb0",bytes:860842}] },
 	};
 	const GODOT_CONFIG = {
 		args: [],
@@ -709,7 +709,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 		ensureCrossOriginIsolationHeaders: false,
 		executable: 'index',
 		experimentalVK: false,
-		fileSizes: { 'index.pck': 151991552, 'index.wasm': 43699190 },
+		fileSizes: { 'index.pck': 151990256, 'index.wasm': 43699190 },
 		focusCanvas: true,
 		gdextensionLibs: [],
 		onPrint: function () {
@@ -734,7 +734,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 
 	// Адрес сбора отчётов о вылетах (Google Apps Script / Supabase и т.п.); пусто — отчёты не отправляются.
 	const REPORT_URL = 'https://script.google.com/macros/s/AKfycbxVyy-SnRANW0Im-1Blne2TcUbca93WqzyBulpADwWWD7YH6x3KIygBYImTe8VfP5pp/exec';
-	const BUILD_ID_REPORT = '1791767595';
+	const BUILD_ID_REPORT = '1791768498';
 	const SESSION_ID = Math.random().toString(36).slice(2, 8);
 	const SESSION_START = Date.now();
 	const REPORT_CAP = 250;
@@ -951,7 +951,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	window.trkReport('session_start', gpuInfo() + ' | ' + navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + (window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio) + ' | screen ' + screen.width + 'x' + screen.height + ' | cores ' + (navigator.hardwareConcurrency || '?'));
 
 	// Вкладка могла висеть со старой версией: при возврате в неё сверяем номер сборки и предлагаем обновиться.
-	const BUILD_ID = '1791767595';
+	const BUILD_ID = '1791768498';
 	// Важное обновление: старая сборка дальше не работает, иначе аккаунты и сохранения ломаются старым кодом.
 	function blockOldBuild(v) {
 		const wall = document.createElement('div');

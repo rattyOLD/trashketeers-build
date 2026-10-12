@@ -17,6 +17,10 @@ if ! "$GODOT" --headless --path "$P" res://test/check_scripts.tscn > "$LOG/scrip
   fail=1
 fi
 grep 'CHECK checked' "$LOG/scripts.log"
+XDG_DATA_HOME="$LOG/survival-access-user" timeout 90 "$GODOT" --headless --audio-driver Dummy --path "$P" res://test/survival_access_test.tscn > "$LOG/survival-access.log" 2>&1
+if ! grep -q 'SURVIVAL_ACCESS failures=0' "$LOG/survival-access.log" || grep -q 'SCRIPT ERROR' "$LOG/survival-access.log"; then
+  fail=1
+fi
 XDG_DATA_HOME="$LOG/interface-user" timeout 100 xvfb-run -a -s "-screen 0 1700x1100x24" "$GODOT" --audio-driver Dummy --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/interface_complete_test.tscn > "$LOG/interface.log" 2>&1
 if ! grep -q 'INTERFACE_COMPLETE failures=0' "$LOG/interface.log" || grep -q 'SCRIPT ERROR' "$LOG/interface.log"; then
   fail=1

@@ -25,7 +25,6 @@ var _xp_bar: ProgressBar
 var _side_buttons: Dictionary = {}
 var _nav_upgrades: MenuWidgets.NavButton
 var _nav_pass: MenuWidgets.NavButton
-var _lock_mark: LockMark
 var _mode_hint: HintBubble
 var _nuts_label: Label
 var _dust_label: Label
@@ -620,15 +619,8 @@ func _build_modes() -> Control:
 		button.pressed.connect(_on_mode_pressed.bind(i))
 		row.add_child(button)
 		_mode_buttons.append(button)
-	_select_mode(Mode.STORY if _survival_locked() else Mode.SURVIVAL)
+	_select_mode(Mode.SURVIVAL)
 	_mode_buttons[2].text = "КАМПАНИЯ %d/6" % SaveService.story_shards()
-	_lock_mark = LockMark.new()
-	_mode_buttons[0].add_child(_lock_mark)
-	_lock_mark.visible = _survival_locked()
-	_apply_lock_look()
-	if not _survival_locked() and not bool(SaveService.data.get("survival_unlock_seen", false)):
-		SaveService.set_flag("survival_unlock_seen", true)
-		_lock_mark.play_open.call_deferred()
 	return row
 
 
@@ -799,40 +791,7 @@ func _on_mode_pressed(mode: int) -> void:
 		_mode_intro.open()
 
 
-func _apply_lock_look() -> void:
-	var button := _mode_buttons[0]
-	# Под замком название не пишем: цепи и замок по центру иначе ложатся прямо на буквы.
-	button.text = "" if _survival_locked() else "ВЫЖИВАНИЕ"
-	if _survival_locked():
-		button.add_theme_color_override("font_color", Color(UiStyle.TEXT_DIM, 0.35))
-	elif _mode != Mode.SURVIVAL:
-		button.add_theme_color_override("font_color", UiStyle.TEXT_DIM)
-
-
-func _shake(control: Control) -> void:
-	var origin := control.position.x
-	var tween := create_tween()
-	for dx in [-8.0, 8.0, -5.0, 5.0, 0.0]:
-		tween.tween_property(control, "position:x", origin + dx, 0.05)
-
-
-func _survival_locked() -> bool:
-	return SaveService.get_stat("story_missions") < 1 and not Tester.flag("survival_open")
-
-
 func _select_mode(mode: int) -> void:
-	if mode == Mode.SURVIVAL and _survival_locked():
-		_mode_buttons[0].set_pressed_no_signal(false)
-		SoundManager.play(&"ui_click", -6.0)
-		_shake(_mode_buttons[0])
-		if _mode_hint == null:
-			_mode_hint = HintBubble.new()
-			add_child(_mode_hint)
-		_mode_hint.show_for(_mode_buttons[0], "Пройди первую миссию «Кампании» — и выживание откроется.")
-		if _mode == Mode.SURVIVAL:
-			mode = Mode.STORY
-		else:
-			return
 	_mode = mode
 	if _mod_chip != null:
 		_mod_chip.visible = mode == Mode.SURVIVAL
@@ -847,8 +806,6 @@ func _select_mode(mode: int) -> void:
 		b.add_theme_color_override("font_color", colors[i] if active or i == 2 else UiStyle.TEXT_DIM)
 		b.add_theme_color_override("font_pressed_color", colors[i])
 		b.add_theme_color_override("font_hover_pressed_color", colors[i])
-	if _lock_mark != null:
-		_apply_lock_look()
 
 
 # --- Карточка ствола и нижняя панель ----------------------------------------------------------------
@@ -977,8 +934,6 @@ func _refresh() -> void:
 	_nick_label.add_theme_color_override("font_color", Cosmetics.nick_color(UiStyle.GOLD))
 	if _mode_buttons.size() > 2:
 		_mode_buttons[2].text = "КАМПАНИЯ %d/6" % SaveService.story_shards()
-	if _lock_mark != null and _survival_locked():
-		_lock_mark.visible = true
 	_level_label.text = "LVL %d" % SaveService.get_account_level() + (" · VIP %d" % Premium.level() if Premium.level() > 0 else "")
 	_xp_bar.value = SaveService.get_level_progress()
 	_nuts_label.text = str(SaveService.get_nuts())

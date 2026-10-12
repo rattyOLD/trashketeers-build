@@ -82,15 +82,6 @@ func _refresh() -> void:
 
 	_section("СЮЖЕТ И РЕЖИМЫ")
 	var story := _grid()
-	var open := Tester.flag("survival_open")
-	var open_button := UiStyle.button("Выживание: %s" % ("ОТКРЫТО" if open else "закрыто"), Color("#2fae5f") if open else UiStyle.PANEL_LIGHT, 21, Vector2(0, 62))
-	open_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_fit(open_button)
-	open_button.pressed.connect(func() -> void:
-		Tester.toggle("survival_open")
-		changed.emit()
-		_refresh())
-	story.add_child(open_button)
 	_action(story, "Засчитать миссию 1", func() -> String:
 		SaveService.story_complete("m1", 1, 0)
 		SaveService.add_stat("story_missions", 1, false)
