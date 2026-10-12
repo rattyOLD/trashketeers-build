@@ -301,17 +301,17 @@ func start(_weapon_id: StringName = &"") -> void:
 	hud.set_time(0.0)
 	hud.show_chapter(str(chapter.get("subtitle", "")), str(chapter.get("title", "")))
 	if story_mission.is_empty():
-		get_tree().create_timer(5.2, false).timeout.connect(func() -> void: hud.toast("АДРЕНАЛИН!", "+35% скорострельности и +15% скорости на 20 с", Color("#ff7a3d")))
+		SceneDelay.after(self, 5.2, func() -> void: hud.toast("АДРЕНАЛИН!", "+35% скорострельности и +15% скорости на 20 с", Color("#ff7a3d")))
 		if RunMods.active != RunMods.NONE:
 			hud.show_mod_badge(str(RunMods.info(RunMods.active)["title"]))
-			get_tree().create_timer(3.0, false).timeout.connect(func() -> void: hud.toast("МОДИФИКАТОР: %s" % str(RunMods.info(RunMods.active)["title"]).to_upper(), "%s. Монеты ×%.1f" % [RunMods.info(RunMods.active)["desc"], RunMods.mult_of(RunMods.active)], Color("#ff9a3d")))
+			SceneDelay.after(self, 3.0, func() -> void: hud.toast("МОДИФИКАТОР: %s" % str(RunMods.info(RunMods.active)["title"]).to_upper(), "%s. Монеты ×%.1f" % [RunMods.info(RunMods.active)["desc"], RunMods.mult_of(RunMods.active)], Color("#ff9a3d")))
 			SaveService.add_stat("mod_runs", 1, false)
 		if Ascension.active > 0:
-			get_tree().create_timer(2.2, false).timeout.connect(func() -> void:
+			SceneDelay.after(self, 2.2, func() -> void:
 				hud.toast("ВОЗВЫШЕНИЕ %s" % Ascension.title_of(Ascension.active).to_upper(), "Испытания включены. Монеты ×%.2f" % Ascension.coin_mult(), Color("#ff4d6d")))
 		if not MapCards.active.is_empty():
 			var card := MapCards.info(MapCards.active)
-			get_tree().create_timer(1.2, false).timeout.connect(func() -> void:
+			SceneDelay.after(self, 1.2, func() -> void:
 				hud.toast("КАРТА: %s" % str(card["title"]).to_upper(), "%s Монеты ×%.2f" % [card["desc"], float(card["coins"])], MapCards.color_of(MapCards.active)))
 	SoundManager.play_music(StringName(str(chapter.get("music", "battle"))))
 	SoundManager.start_ambient(map.layout)
@@ -541,7 +541,7 @@ func _on_wave_started(number: int, title: String, mood: String, is_boss: bool) -
 	if radio != null:
 		radio.on_wave(is_boss)
 	atmosphere.letterbox(true)
-	get_tree().create_timer(1.9, false).timeout.connect(func() -> void: atmosphere.letterbox(false))
+	SceneDelay.after(self, 1.9, func() -> void: atmosphere.letterbox(false))
 	# Старт волны — ударная волна от героя (у босса красная) и короткая встряска.
 	if player != null:
 		var wave_color := Color("#ff3b30") if is_boss else Color("#ffd257")
@@ -549,7 +549,7 @@ func _on_wave_started(number: int, title: String, mood: String, is_boss: bool) -
 		fx.ring(player.global_position, Color(wave_color, 0.6), 220.0)
 		add_shake(0.3 if is_boss else 0.14)
 	if director.elapsed < 4.0:
-		get_tree().create_timer(2.8, false).timeout.connect(func() -> void: hud.show_wave_intro(maxi(director.wave_number, 1), title, is_boss, director.chapter_index + 1))
+		SceneDelay.after(self, 2.8, func() -> void: hud.show_wave_intro(maxi(director.wave_number, 1), title, is_boss, director.chapter_index + 1))
 	else:
 		hud.show_wave_intro(maxi(director.wave_number, 1), title, is_boss, director.chapter_index + 1)
 	SoundManager.play(&"boss_spawn" if is_boss else &"wave_horn", -2.0, false)
@@ -1095,18 +1095,22 @@ func _on_miniboss_killed(boss: Enemy, at: Vector2) -> void:
 
 
 const SPEED_KILL_TIME := 60.0
-const MINI_CHOICE_RETRIES := 12
 
 
 ## Мини-босс на коленях: пощадить (полное лечение, реролл, редкий ствол) или ограбить (эпик, +50% неонита).
 func _offer_mini_choice(boss: Enemy, at: Vector2, attempt: int) -> void:
-	get_tree().create_timer(1.4 if attempt == 0 else 0.7, true, false, true).timeout.connect(func() -> void:
+	# После смерти узел возвращается в пул: имя и ID фиксируем до задержки.
+	_offer_mini_snapshot(boss.data.display_name, String(boss.data.id), at, attempt)
+
+
+func _offer_mini_snapshot(boss_name: String, boss_id: String, at: Vector2, attempt: int) -> void:
+	SceneDelay.after(self, 1.4 if attempt == 0 else 0.7, func() -> void:
 		if finished or player == null or player.is_dead:
 			return
-		if (_level_up_open or get_tree().paused) and attempt < MINI_CHOICE_RETRIES:
-			_offer_mini_choice(boss, at, attempt + 1)
+		if _level_up_open or get_tree().paused:
+			_offer_mini_snapshot(boss_name, boss_id, at, attempt + 1)
 			return
-		_show_mini_card(boss.data.display_name, String(boss.data.id), at))
+		_show_mini_card(boss_name, boss_id, at), true, true)
 
 
 func _show_mini_card(name: String, boss_id: String, at: Vector2) -> void:
@@ -1449,7 +1453,7 @@ func _start_phase_two() -> void:
 	stats.phase = 2
 	director.phase_hp = PHASE_TWO_HP
 	director.phase_damage = PHASE_TWO_DAMAGE
-	get_tree().create_timer(3.0, false).timeout.connect(func() -> void:
+	SceneDelay.after(self, 3.0, func() -> void:
 		if not finished:
 			hud.show_banner("ФАЗА 2: ОРУЖИЕ РАСКРЫВАЕТСЯ", Color("#ff7a3d"), 2.6)
 			if PhaseFx.tex("phase2_badge") != null:
@@ -1460,7 +1464,7 @@ func _start_phase_two() -> void:
 func _on_boss_killed(boss: Enemy, at: Vector2) -> void:
 	focus_camera(at, 1.0)
 	# Босс пал — возвращается музыка главы.
-	get_tree().create_timer(2.5, false).timeout.connect(func() -> void:
+	SceneDelay.after(self, 2.5, func() -> void:
 		if not finished:
 			SoundManager.play_music(StringName(str(map.chapter.get("music", "battle")))))
 	# Узел босса вернётся в пул и достанется обычному врагу — ссылку снимаем сразу,
@@ -1486,7 +1490,7 @@ func _on_boss_killed(boss: Enemy, at: Vector2) -> void:
 		_start_phase_two()
 	if story == null and story_mission.is_empty() and bosses_killed == 1 and Ascension.on_boss_beaten(Ascension.active):
 		var next := Ascension.unlocked()
-		get_tree().create_timer(4.0, false).timeout.connect(func() -> void:
+		SceneDelay.after(self, 4.0, func() -> void:
 			hud.toast("ОТКРЫТО ВОЗВЫШЕНИЕ %s" % Ascension.roman(next), "«%s» — выбери в меню перед Выживанием." % Ascension.LEVELS[next - 1]["title"], Color("#ff4d6d")))
 	add_shake(1.0)
 	hitstop(BOSS_HITSTOP)

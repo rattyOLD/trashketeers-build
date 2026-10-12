@@ -17,7 +17,7 @@ if ! "$GODOT" --audio-driver Dummy --headless --path "$P" res://test/check_scrip
   fail=1
 fi
 grep 'CHECK checked' "$LOG/scripts.log"
-for new_check in "hero_identity_test:HERO_IDENTITY" "loadout_choices_test:LOADOUT_CHOICES" "tactics_test:TACTICS_TEST"; do
+for new_check in "hero_identity_test:HERO_IDENTITY" "loadout_choices_test:LOADOUT_CHOICES" "tactics_test:TACTICS_TEST" "polish_stability_test:POLISH_STABILITY"; do
   scene=${new_check%:*}
   marker=${new_check#*:}
   XDG_DATA_HOME="$LOG/$scene-user" timeout 100 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --audio-driver Dummy --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" "res://test/$scene.tscn" > "$LOG/$scene.log" 2>&1
@@ -39,7 +39,7 @@ if ! grep -q 'POPUP_FIT_TEST PASS' "$LOG/popup-fit.log" || grep -q 'SCRIPT ERROR
   fail=1
 fi
 XDG_DATA_HOME="$LOG/boss-armory-user" timeout 120 "$GODOT" --headless --audio-driver Dummy --path "$P" res://test/boss_armory_regression.tscn > "$LOG/boss-armory.log" 2>&1
-if ! grep -q 'BOSS_ARMORY_REGRESSION failures=0' "$LOG/boss-armory.log" || grep -q 'SCRIPT ERROR' "$LOG/boss-armory.log"; then
+if ! grep -q 'BOSS_ARMORY_REGRESSION failures=0' "$LOG/boss-armory.log" || grep -qE 'SCRIPT ERROR|ERROR:' "$LOG/boss-armory.log"; then
   fail=1
 fi
 XDG_DATA_HOME="$LOG/enemy-art-user" timeout 90 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --audio-driver Dummy --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/enemy_art_test.tscn > "$LOG/enemy-art.log" 2>&1
@@ -55,7 +55,7 @@ if ! grep -q 'DASH_REGRESSION failures=0' "$LOG/dash.log" || grep -q 'SCRIPT ERR
   fail=1
 fi
 XDG_DATA_HOME="$LOG/landscape-user" "$GODOT" --audio-driver Dummy --headless --path "$P" res://test/landscape_audit.tscn > "$LOG/landscape.log" 2>&1
-if ! grep -q 'LANDSCAPE_AUDIT failures=0' "$LOG/landscape.log" || grep -q 'SCRIPT ERROR' "$LOG/landscape.log"; then
+if ! grep -q 'LANDSCAPE_AUDIT failures=0' "$LOG/landscape.log" || grep -qE 'SCRIPT ERROR|ERROR:' "$LOG/landscape.log"; then
   fail=1
 fi
 XDG_DATA_HOME="$LOG/app-activity-user" "$GODOT" --audio-driver Dummy --headless --path "$P" res://test/app_activity_test.tscn > "$LOG/app-activity.log" 2>&1
@@ -181,6 +181,9 @@ for hero in sniper_f medic_f; do
   echo "a13-$hero: errors=$n finished=$done_ok"
   [ "$n" != "0" ] || [ "$done_ok" != "1" ] && fail=1
 done
+if grep -nE '^ERROR:|SCRIPT ERROR|Shader compilation failed' "$LOG"/*.log; then
+  fail=1
+fi
 if [ "$fail" = 0 ]; then
   echo "VERIFY OK"
 else

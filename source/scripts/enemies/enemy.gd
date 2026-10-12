@@ -1580,6 +1580,8 @@ func _draw_warnings(canvas: Node2D) -> void:
 func _draw_dash_lane(canvas: Node2D) -> void:
 	var t := clampf(1.0 - _act_time / _act_total, 0.0, 1.0)
 	var length := (data.dash_speed if data.dash_speed > 0.0 else data.charge_speed) * DASH_TIME
+	if _act_dir.is_zero_approx() or length <= 0.0:
+		return
 	var side := _act_dir.orthogonal() * _shape.radius
 	var end := _act_dir * length
 	canvas.draw_colored_polygon(PackedVector2Array([side, end + side, end - side, -side]), Color(AttackTelegraph.ink(TELEGRAPH), 0.12 + 0.18 * t))

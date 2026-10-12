@@ -1080,7 +1080,7 @@ func clip(moving: bool, hurt: float) -> Array:
 ## шевроны показывают направление, после фиксации цель мигает жёлтым. end_radius > 0 рисует
 ## круг приземления в конце полосы. Ширина = размер тела босса: уйти нужно поперёк полосы.
 func _draw_lane(canvas: Node2D, from_world: Vector2, dir: Vector2, length: float, t: float, locked: bool, end_radius: float, fade: float = 1.0) -> void:
-	if dir == Vector2.ZERO:
+	if dir.is_zero_approx() or length <= 0.0:
 		return
 	var clock := Time.get_ticks_msec() * 0.001
 	var a := canvas.to_local(from_world)
@@ -1115,6 +1115,8 @@ func _draw_lane(canvas: Node2D, from_world: Vector2, dir: Vector2, length: float
 
 
 func _draw_strip(canvas: Node2D, from_world: Vector2, dir: Vector2, length: float, half_width: float, t: float, locked: bool) -> void:
+	if dir.is_zero_approx() or length <= 0.0 or half_width <= 0.0:
+		return
 	var a := canvas.to_local(from_world)
 	var side := dir.orthogonal() * half_width
 	var b := a + dir * length
@@ -1126,6 +1128,8 @@ func _draw_strip(canvas: Node2D, from_world: Vector2, dir: Vector2, length: floa
 
 
 func _draw_cone(canvas: Node2D, from_world: Vector2, dir: Vector2, half_angle: float, length: float, t: float) -> void:
+	if dir.is_zero_approx() or half_angle <= 0.0 or length <= 0.0:
+		return
 	var a := canvas.to_local(from_world)
 	var pts := PackedVector2Array([a])
 	for i in 9:

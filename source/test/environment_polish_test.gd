@@ -57,8 +57,12 @@ func _run() -> void:
 	await _test_result(game)
 	game.free()
 	get_tree().paused = false
+	# Даём отложенным освобождениям окон и GPU-ресурсов завершиться до выхода.
+	for frame in 3:
+		await get_tree().process_frame
+	await RenderingServer.frame_post_draw
 	print("ENVIRONMENT_POLISH failures=", failures)
-	get_tree().quit(0 if failures == 0 else 1)
+	get_tree().quit.call_deferred(0 if failures == 0 else 1)
 
 
 func _test_report() -> void:

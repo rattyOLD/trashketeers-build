@@ -58,7 +58,7 @@ func on_wave(is_boss: bool) -> void:
 		return
 	_run_waves += 1
 	if _run_waves == 1:
-		get_tree().create_timer(8.5, false).timeout.connect(func() -> void:
+		SceneDelay.after(self, 8.5, func() -> void:
 			_play("first", true)
 			_king_record())
 	elif is_boss:

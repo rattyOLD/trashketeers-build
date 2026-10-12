@@ -597,7 +597,8 @@ func _draw_bar() -> void:
 			for i in pts.size():
 				pts[i].x = clampf(pts[i].x, inner_l, inner_r)
 			if absf(pts[0].x - pts[2].x) + absf(pts[1].x - pts[3].x) > 1.0:
-				_bar.draw_colored_polygon(pts, Color(0.0, 0.25, 0.0, 0.16))
+				# У края заливки две вершины совпадают: quad рисуем без триангуляции контура.
+				_bar.draw_primitive(pts, PackedColorArray([Color(0.0, 0.25, 0.0, 0.16)]), PackedVector2Array())
 			x0 += 44.0
 	var head := Vector2(fill_rect.end.x - 4.0, r.size.y * 0.5)
 	for k in 3:
