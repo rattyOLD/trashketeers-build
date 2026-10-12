@@ -13,7 +13,7 @@ func _init() -> void:
 	super("АККАУНТ")
 	_status = UiStyle.label("", 20, UiStyle.NEON, 5)
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_status.custom_minimum_size = Vector2(panel_width() - 110.0, 0)
+	_status.custom_minimum_size = Vector2(0, 0)
 	content.add_child(_status)
 	_body = VBoxContainer.new()
 	_body.add_theme_constant_override("separation", 10)

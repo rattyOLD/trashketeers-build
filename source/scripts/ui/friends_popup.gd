@@ -45,7 +45,7 @@ func _refresh() -> void:
 	_image_b64 = ""
 	_status = UiStyle.label("", 19, UiStyle.NEON, 4)
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_status.custom_minimum_size = Vector2(panel_width() - 110.0, 0)
+	_status.custom_minimum_size = Vector2(0, 0)
 	content.add_child(_status)
 	_tabs_row = HBoxContainer.new()
 	_tabs_row.add_theme_constant_override("separation", 6)
@@ -141,7 +141,7 @@ func _build_add(list: VBoxContainer) -> void:
 	var card := CardView.new()
 	card.info = SaveService.card_info()
 	card.qr_text = SaveService.card_qr_text()
-	card.custom_minimum_size = Vector2(panel_width() - 110.0, (panel_width() - 110.0) * CARD_SIZE.y / CARD_SIZE.x)
+	card.custom_minimum_size = Vector2(0, (content_width() - 28.0) * CARD_SIZE.y / CARD_SIZE.x)
 	list.add_child(card)
 	var share_card := UiStyle.button("Поделиться визиткой", UiStyle.PANEL_LIGHT, 20, Vector2(0, 56))
 	share_card.pressed.connect(func() -> void:
@@ -155,7 +155,7 @@ func _build_add(list: VBoxContainer) -> void:
 	list.add_child(_section("БОНУС ЗА ПРИГЛАШЕНИЕ"))
 	var invite := UiStyle.label("Твой код %s: другу +%d монет и +%d неонита, тебе столько же." % [SaveService.invite_code(), SaveService.INVITE_COINS, SaveService.INVITE_GEMS], 18, UiStyle.TEXT_DIM, 4)
 	invite.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	invite.custom_minimum_size = Vector2(panel_width() - 110.0, 0)
+	invite.custom_minimum_size = Vector2(0, 0)
 	list.add_child(invite)
 	var copy_invite := UiStyle.button("Скопировать код приглашения", UiStyle.PANEL_LIGHT, 20, Vector2(0, 54))
 	copy_invite.pressed.connect(func() -> void:
@@ -363,7 +363,7 @@ func _empty_art(id: String) -> Control:
 func _wrap_label(text: String) -> Label:
 	var label := UiStyle.label(text, 19, UiStyle.TEXT_DIM, 4)
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label.custom_minimum_size = Vector2(panel_width() - 120.0, 0)
+	label.custom_minimum_size = Vector2(0, 0)
 	return label
 
 
@@ -576,7 +576,7 @@ func _fill_friends() -> void:
 		_friends_box.add_child(_empty_art("friends"))
 		var empty := UiStyle.label("Пока пусто. Вставь код визитки друга выше.", 20, UiStyle.TEXT_DIM, 4)
 		empty.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		empty.custom_minimum_size = Vector2(panel_width() - 110.0, 0)
+		empty.custom_minimum_size = Vector2(0, 0)
 		_friends_box.add_child(empty)
 		return
 	for friend in friends:

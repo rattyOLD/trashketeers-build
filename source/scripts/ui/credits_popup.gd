@@ -23,5 +23,5 @@ func _label(text: String, size: int, color: Color) -> Label:
 	var label := UiStyle.label(text, size, color, 6)
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.custom_minimum_size = Vector2(panel_width() - 70.0, 0)
+	label.custom_minimum_size = Vector2(0, 0)
 	return label

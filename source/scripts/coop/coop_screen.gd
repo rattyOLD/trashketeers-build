@@ -14,6 +14,7 @@ const ME_COLOR := Color("#ff8200")
 const FRIEND_COLOR := Color("#ff8a3d")
 
 var mode: Mode = Mode.MENU
+var _backdrop: MenuBackdrop
 var _body: VBoxContainer
 var _status: Label
 var _view: CoopView
@@ -61,22 +62,32 @@ static func host() -> String:
 func _init() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	var bg := ColorRect.new()
-	bg.color = Color("#272523")
-	bg.set_anchors_preset(Control.PRESET_FULL_RECT)
-	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(bg)
-	var center := CenterContainer.new()
+	_backdrop = MenuBackdrop.new()
+	add_child(_backdrop)
+	var shade := ColorRect.new()
+	shade.color = Color(0.02, 0.025, 0.03, 0.48)
+	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	shade.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(shade)
+	var center := MarginContainer.new()
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	for edge in ["left", "right", "top", "bottom"]:
+		center.add_theme_constant_override("margin_" + edge, 24)
 	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(center)
+	resized.connect(func() -> void:
+		ScreenSafeArea.fit(center, get_viewport_rect().size)
+		_backdrop.build(get_viewport_rect().size)
+		_fit_lobby.call_deferred())
 	_body = VBoxContainer.new()
-	_body.custom_minimum_size = Vector2(minf(GlassPopup.panel_width(), 560.0), 0)
+	_body.custom_minimum_size = Vector2.ZERO
 	_body.add_theme_constant_override("separation", 14)
 	center.add_child(_body)
 
 
 func _ready() -> void:
+	_backdrop.build(get_viewport_rect().size)
+	ScreenSafeArea.fit(_body.get_parent(), get_viewport_rect().size)
 	_show_lobby()
 	var refresh := Timer.new()
 	refresh.wait_time = 30.0
@@ -95,6 +106,25 @@ func _process(_delta: float) -> void:
 	if _count_label != null and is_instance_valid(_count_label) and _count_end_ms >= 0:
 		var left := maxf(0.0, (_count_end_ms - Time.get_ticks_msec()) / 1000.0)
 		_count_label.text = "Старт через %d..." % int(ceil(left))
+
+
+## Resize the existing lobby: opening a phone keyboard must preserve its focused editor.
+func _fit_lobby() -> void:
+	if mode not in [Mode.MENU, Mode.CONNECTING, Mode.ROOM]:
+		return
+	var width := _slot_width()
+	for slot_name in ["SlotMe", "SlotFriend", "EmptySlot"]:
+		var slot := _body.find_child(slot_name, true, false) as Control
+		if slot == null:
+			continue
+		slot.custom_minimum_size.x = width
+		var avatar := slot.find_child("LobbyAvatar", true, false) as Control
+		if avatar != null:
+			avatar.custom_minimum_size = Vector2.ONE * minf(width * 0.62, 156.0)
+
+
+func _slot_width() -> float:
+	return maxf(120.0, (ScreenSafeArea.rect(get_viewport_rect().size).size.x - 66.0) * 0.52 / 2.0 - 7.0)
 
 
 func _exit_tree() -> void:
@@ -128,7 +158,8 @@ func _show_lobby() -> void:
 	_count_label = null
 	_status = null
 	_friends_box = null
-	_body.custom_minimum_size = Vector2(minf(GlassPopup.panel_width(), 620.0), 0)
+	_body.custom_minimum_size = Vector2.ZERO
+	_body.alignment = BoxContainer.ALIGNMENT_BEGIN
 	# --- верхняя строка: назад, название, приглашения ---
 	var top := HBoxContainer.new()
 	top.add_theme_constant_override("separation", 10)
@@ -170,14 +201,29 @@ func _show_lobby() -> void:
 		slots.add_child(_empty_slot())
 	else:
 		slots.add_child(_slot_card({"name": "Бот Рико", "c": "", "s": "classic", "lv": 1, "ready": true, "host": false, "bot": true}, FRIEND_COLOR, false))
+	var columns := HBoxContainer.new()
+	columns.add_theme_constant_override("separation", 18)
+	columns.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_body.add_child(columns)
 	var controls := VBoxContainer.new()
+	controls.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	controls.size_flags_stretch_ratio = 1.1
 	controls.add_theme_constant_override("separation", 12)
-	controls.add_child(slots)
+	columns.add_child(controls)
+	var scroll := DragScroll.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	controls.add_child(scroll)
+	var details := VBoxContainer.new()
+	details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	details.add_theme_constant_override("separation", 12)
+	scroll.add_child(details)
+	details.add_child(slots)
 	_status = _wrap(_lobby_hint())
-	controls.add_child(_status)
+	details.add_child(_status)
 	if _count_end_ms >= 0:
 		_count_label = UiStyle.label("", 32, UiStyle.GOLD, 6)
-		controls.add_child(_count_label)
+		details.add_child(_count_label)
 	controls.add_child(_main_button(me, other))
 	if online and other.is_empty():
 		var solo := UiStyle.button("ИГРАТЬ С БОТОМ", UiStyle.PANEL_LIGHT, 20, Vector2(0, 52))
@@ -191,8 +237,9 @@ func _show_lobby() -> void:
 		retry.name = "RetryButton"
 		retry.pressed.connect(func() -> void: _connect_then("create"))
 		controls.add_child(retry)
-	_body.add_child(controls)
-	_body.add_child(_friends_panel())
+	var friends := _friends_panel()
+	friends.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	columns.add_child(friends)
 	if SaveService.get_insider() >= 0:
 		_body.add_child(_host_field())   # только для тестеров, внизу
 	_load_friends()
@@ -234,12 +281,12 @@ func _lobby_hint() -> String:
 
 
 func _slot_card(info: Dictionary, color: Color, is_me: bool) -> Control:
-	var width := (minf(GlassPopup.panel_width(), 560.0) - 14.0) / 2.0
+	var width := _slot_width()
 	var card := PanelContainer.new()
 	card.custom_minimum_size = Vector2(width, 0)
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var ready := bool(info.get("ready", false))
-	card.add_theme_stylebox_override("panel", UiStyle.box(Color("#3d3a37"), Color("#35c46a") if ready and not bool(info.get("bot", false)) else color, 5, 26))
+	card.add_theme_stylebox_override("panel", UiStyle.box(UiStyle.CARD_BG, Color("#35c46a") if ready and not bool(info.get("bot", false)) else color, 2, 10))
 	card.name = "SlotMe" if is_me else "SlotFriend"
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 6)
@@ -249,13 +296,15 @@ func _slot_card(info: Dictionary, color: Color, is_me: bool) -> Control:
 		tag += "  · хозяин"
 	column.add_child(UiStyle.label(tag, 17, color, 4))
 	var avatar := FriendsPopup.AvatarView.new()
+	avatar.name = "LobbyAvatar"
 	avatar.character_id = str(info.get("c", ""))
 	avatar.skin_id = str(info.get("s", "classic"))
-	avatar.custom_minimum_size = Vector2(width * 0.62, width * 0.62)
+	avatar.custom_minimum_size = Vector2.ONE * minf(width * 0.62, 156.0)
 	avatar.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	column.add_child(avatar)
 	var name_label := UiStyle.label(str(info.get("name", "Енот")), 24, UiStyle.TEXT, 5)
 	name_label.clip_text = true
+	name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	column.add_child(name_label)
 	column.add_child(UiStyle.label("УР. %d  ·  %s" % [int(info.get("lv", 1)), MenuPopups.Profile.rank_for(int(info.get("lv", 1)))] if not bool(info.get("bot", false)) else "учебный", 17, UiStyle.GOLD, 4))
 	if not bool(info.get("bot", false)) and not str(info.get("tier", "")).is_empty():
@@ -268,13 +317,13 @@ func _slot_card(info: Dictionary, color: Color, is_me: bool) -> Control:
 
 
 func _empty_slot() -> Control:
-	var width := (minf(GlassPopup.panel_width(), 560.0) - 14.0) / 2.0
+	var width := _slot_width()
 	var button := Button.new()
 	button.name = "EmptySlot"
 	button.custom_minimum_size = Vector2(width, 0)
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	button.focus_mode = Control.FOCUS_NONE
-	var style := UiStyle.box(Color("#32302d"), Color(FRIEND_COLOR, 0.8), 4, 26)
+	var style := UiStyle.box(UiStyle.CARD_BG, Color(FRIEND_COLOR, 0.8), 2, 10)
 	for state in ["normal", "hover", "pressed", "focus"]:
 		button.add_theme_stylebox_override(state, style)
 	button.text = "+\nПОЗВАТЬ\nДРУГА"
@@ -337,8 +386,8 @@ func _host_field() -> Control:
 func _friends_panel() -> Control:
 	var panel := PanelContainer.new()
 	panel.name = "FriendsPanel"
-	panel.custom_minimum_size = Vector2(0, 520)
-	panel.add_theme_stylebox_override("panel", UiStyle.box(Color("#32302d"), Color(UiStyle.NEON, 0.6), 4, 22))
+	panel.custom_minimum_size = Vector2.ZERO
+	panel.add_theme_stylebox_override("panel", UiStyle.card_box())
 	var margin := MarginContainer.new()
 	for side in ["left", "right", "top", "bottom"]:
 		margin.add_theme_constant_override("margin_" + side, 14)
@@ -346,13 +395,14 @@ func _friends_panel() -> Control:
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 8)
 	margin.add_child(column)
-	var tabs := HBoxContainer.new()
+	var tabs := HFlowContainer.new()
 	tabs.add_theme_constant_override("separation", 8)
 	var tab_defs := [["friends", "ДРУЗЬЯ"], ["recent", "НЕДАВНИЕ"], ["requests", "ЗАЯВКИ" if _requests.is_empty() else "ЗАЯВКИ %d" % _requests.size()], ["top", "ТОП"]]
 	for def: Array in tab_defs:
 		var active := _tab == str(def[0])
 		var tab := UiStyle.button(str(def[1]), UiStyle.HOT if active else UiStyle.PANEL_LIGHT, 16, Vector2(0, 46))
 		tab.name = "Tab_" + str(def[0])
+		UiStyle.size_flow_button(tab, 16)
 		tab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		tab.pressed.connect(func() -> void:
 			_tab = str(def[0])
@@ -363,7 +413,7 @@ func _friends_panel() -> Control:
 	head.name = "FriendsHead"
 	head.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	column.add_child(head)
-	var scroll := ScrollContainer.new()
+	var scroll := DragScroll.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	column.add_child(scroll)
@@ -907,6 +957,7 @@ func _show_results(results: Dictionary) -> void:
 	_clear_run()
 	mode = Mode.RESULTS
 	_reset_body()
+	_body.alignment = BoxContainer.ALIGNMENT_CENTER
 	var won := bool(results.get("won", false))
 	_body.add_child(UiStyle.label("ПОБЕДА!" if won else "ЗАБЕГ ОКОНЧЕН", 38, UiStyle.GOLD if won else Color("#ff4d6d"), 8))
 	_body.add_child(_wrap("Волн пройдено: %d. Время: %d с." % [int(results.get("waves_cleared", 0)), int(results.get("seconds", 0))]))
@@ -1013,7 +1064,7 @@ func _reset_body() -> void:
 func _wrap(text: String) -> Label:
 	var label := UiStyle.label(text, 19, UiStyle.TEXT_DIM, 4)
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label.custom_minimum_size = Vector2(minf(GlassPopup.panel_width(), 620.0) - 20.0, 0)
+	label.custom_minimum_size = Vector2.ZERO
 	return label
 
 

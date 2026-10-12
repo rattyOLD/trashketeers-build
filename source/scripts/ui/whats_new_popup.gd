@@ -6,6 +6,11 @@ extends Control
 signal open_changelog
 signal closed
 
+var _card: PanelContainer
+var _column: VBoxContainer
+var _scroll: ScrollContainer
+var _picture: TextureRect
+
 const SEEN_KEY := "whatsnew_seen"
 
 
@@ -44,8 +49,9 @@ func _ready() -> void:
 	add_child(center)
 	var width := minf(GlassPopup.panel_width(), 600.0) - 40.0
 	var card := PanelContainer.new()
+	_card = card
 	card.custom_minimum_size = Vector2(width, 0)
-	card.add_theme_stylebox_override("panel", UiStyle.box(Color("#32302d"), UiStyle.GOLD, 5, 28))
+	card.add_theme_stylebox_override("panel", UiStyle.box(UiStyle.CARD_BG, UiStyle.CARD_BORDER, 2, 16))
 	center.add_child(card)
 	var margin := MarginContainer.new()
 	for side in ["left", "right"]:
@@ -54,12 +60,14 @@ func _ready() -> void:
 	margin.add_theme_constant_override("margin_bottom", 20)
 	card.add_child(margin)
 	var column := VBoxContainer.new()
+	_column = column
 	column.add_theme_constant_override("separation", 12)
 	margin.add_child(column)
 	column.add_child(UiStyle.label("ЧТО НОВОГО · %s" % str(entry.get("version", "")), 24, UiStyle.GOLD, 6))
 	var image_path := str(entry.get("image", ""))
 	if not image_path.is_empty() and ResourceLoader.exists(image_path):
 		var picture := TextureRect.new()
+		_picture = picture
 		picture.texture = load(image_path) as Texture2D
 		picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -70,11 +78,13 @@ func _ready() -> void:
 	title.custom_minimum_size = Vector2(width - 50.0, 0)
 	column.add_child(title)
 	# Список изменений прокручивается: кнопки всегда видны, даже если текст длиннее экрана.
-	var scroll := ScrollContainer.new()
+	var scroll := DragScroll.new()
+	_scroll = scroll
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.custom_minimum_size = Vector2(width - 40.0, clampf(get_viewport_rect().size.y - 620.0, 220.0, 380.0))
 	column.add_child(scroll)
 	var rows := VBoxContainer.new()
+	rows.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	rows.add_theme_constant_override("separation", 12)
 	scroll.add_child(rows)
 	for line in entry.get("short", []):
@@ -83,17 +93,40 @@ func _ready() -> void:
 		row.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		row.custom_minimum_size = Vector2(width - 60.0, 0)
 		rows.add_child(row)
-	var more := UiStyle.button("ВСЁ ОБ ОБНОВЛЕНИИ", UiStyle.HOT, 24, Vector2(0, 68))
+	var actions := HBoxContainer.new()
+	actions.add_theme_constant_override("separation", 10)
+	column.add_child(actions)
+	var more := UiStyle.button("ВСЁ ОБ ОБНОВЛЕНИИ", UiStyle.HOT, 20, Vector2(0, 56))
 	more.name = "MoreButton"
 	more.pressed.connect(func() -> void:
 		open_changelog.emit()
 		_close())
-	column.add_child(more)
+	more.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	actions.add_child(more)
 	var ok := UiStyle.button("ПОНЯТНО", UiStyle.PANEL_LIGHT, 22, Vector2(0, 56))
 	ok.name = "CloseButton"
 	ok.pressed.connect(_close)
-	column.add_child(ok)
+	ok.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	actions.add_child(ok)
+	resized.connect(_fit.call_deferred)
+	_column.minimum_size_changed.connect(_fit.call_deferred)
+	_fit.call_deferred()
 	UiStyle.pop_in(card, 0.5)
+
+
+func _fit() -> void:
+	if _card == null or not is_inside_tree():
+		return
+	var safe := ScreenSafeArea.rect(get_viewport_rect().size)
+	var width := minf(560.0, safe.size.x - 48.0)
+	_card.custom_minimum_size.x = width
+	for label in _column.find_children("*", "Label", true, false):
+		label.custom_minimum_size.x = 0.0
+	_scroll.custom_minimum_size.x = 0.0
+	if _picture != null:
+		_picture.custom_minimum_size.y = 64.0 if safe.size.y < 600.0 else 110.0
+	var others := _column.get_combined_minimum_size().y - _scroll.custom_minimum_size.y + 38.0
+	_scroll.custom_minimum_size.y = clampf(safe.size.y - 48.0 - others, 60.0, 300.0)
 
 
 func _close() -> void:

@@ -17,6 +17,18 @@ if ! "$GODOT" --headless --path "$P" res://test/check_scripts.tscn > "$LOG/scrip
   fail=1
 fi
 grep 'CHECK checked' "$LOG/scripts.log"
+XDG_DATA_HOME="$LOG/interface-user" timeout 100 xvfb-run -a -s "-screen 0 1700x1100x24" "$GODOT" --audio-driver Dummy --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/interface_complete_test.tscn > "$LOG/interface.log" 2>&1
+if ! grep -q 'INTERFACE_COMPLETE failures=0' "$LOG/interface.log" || grep -q 'SCRIPT ERROR' "$LOG/interface.log"; then
+  fail=1
+fi
+XDG_DATA_HOME="$LOG/popup-fit-user" timeout 150 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --audio-driver Dummy --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/popup_fit_test.tscn > "$LOG/popup-fit.log" 2>&1
+if ! grep -q 'POPUP_FIT_TEST PASS' "$LOG/popup-fit.log" || grep -q 'SCRIPT ERROR' "$LOG/popup-fit.log"; then
+  fail=1
+fi
+XDG_DATA_HOME="$LOG/boss-armory-user" timeout 120 "$GODOT" --headless --audio-driver Dummy --path "$P" res://test/boss_armory_regression.tscn > "$LOG/boss-armory.log" 2>&1
+if ! grep -q 'BOSS_ARMORY_REGRESSION failures=0' "$LOG/boss-armory.log" || grep -q 'SCRIPT ERROR' "$LOG/boss-armory.log"; then
+  fail=1
+fi
 XDG_DATA_HOME="$LOG/enemy-art-user" timeout 90 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/enemy_art_test.tscn > "$LOG/enemy-art.log" 2>&1
 if ! grep -q 'ENEMY_ART failures=0' "$LOG/enemy-art.log" || grep -q 'SCRIPT ERROR' "$LOG/enemy-art.log"; then
   fail=1

@@ -50,7 +50,7 @@ func _init() -> void:
 	content.add_child(_balance)
 	var note := UiStyle.label("Покупки действуют одну миссию и сгорают на старте.", 19, UiStyle.TEXT_DIM, 4)
 	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	note.custom_minimum_size = Vector2(520, 0)
+	note.custom_minimum_size = Vector2(0, 0)
 	content.add_child(note)
 	content.add_child(_online_plate())
 	# Торговцы — в прокрутке и в горизонтальном виде: на телефоне (экран ниже 720) с кнопкой чекпоинта
@@ -82,7 +82,7 @@ func _online_plate() -> Control:
 	panel.add_theme_stylebox_override("panel", UiStyle.box(Color(0.14, 0.07, 0.24, 0.95), Color("#ffc487"), 4, 18))
 	var label := UiStyle.label("Продолжи свою историю в онлайне: Сервер Аквилона ещё не вскрыт, остался Директор.", 19, Color("#e9d6ff"), 4)
 	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	label.custom_minimum_size = Vector2(500, 0)
+	label.custom_minimum_size = Vector2(0, 0)
 	panel.add_child(label)
 	return panel
 
@@ -102,7 +102,7 @@ func _refresh() -> void:
 		var card := _trader_card(trader_id)
 		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		if not Orient.portrait:
-			card.custom_minimum_size.x = (panel_width() - 120.0) / TRADERS.size()
+			card.custom_minimum_size.x = (content_width() - 28.0 - 24.0) / TRADERS.size()
 		traders.add_child(card)
 
 
@@ -203,7 +203,7 @@ func _mosya_card() -> Control:
 	column.add_child(UiStyle.label("МОСЯ · кот Рико", 24, Color("#ffd257"), 5))
 	_cat_line = UiStyle.label("Не спрашивай, откуда в лагере кот.", 18, UiStyle.TEXT_DIM, 4)
 	_cat_line.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_cat_line.custom_minimum_size = Vector2(300, 0)
+	_cat_line.custom_minimum_size = Vector2(0, 0)
 	column.add_child(_cat_line)
 	var pet := UiStyle.button("ПОГЛАДИТЬ", Color("#c86600"), 24, Vector2(0, 60))
 	pet.pressed.connect(_pet_mosya)

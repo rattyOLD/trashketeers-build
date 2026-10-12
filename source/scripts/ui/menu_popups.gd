@@ -351,7 +351,7 @@ class Shop:
 			return
 		var hint := UiStyle.label("Скин меняет внешний вид выбранного героя. Купленные скины остаются навсегда.", 18, UiStyle.TEXT_DIM, 4)
 		hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		hint.custom_minimum_size = Vector2(520, 0)
+		hint.custom_minimum_size = Vector2(0, 0)
 		_list.add_child(hint)
 		var grid := GridContainer.new()
 		grid.columns = 2
@@ -369,7 +369,7 @@ class Shop:
 		var hint := UiStyle.label("Скины рывка и трассеры пуль выпадают из сундуков. Надетый скин работает в каждом бою.", 18, UiStyle.TEXT_DIM, 4)
 		hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		hint.custom_minimum_size = Vector2(360, 0)
+		hint.custom_minimum_size = Vector2(0, 0)
 		var head := HBoxContainer.new()
 		head.add_theme_constant_override("separation", 12)
 		# Сундук косметики (арт Астры, assets/ui/cosmetics/chest_cosmetic.png: закрытый | открытый).
@@ -408,7 +408,7 @@ class Shop:
 		for kind in Cosmetics.WEARABLE:
 			_list.add_child(_section("РЫВОК" if kind == "dash" else "ТРАССЕРЫ"))
 			var grid := GridContainer.new()
-			grid.columns = 3 if Orient.portrait else 5
+			grid.columns = mini(3 if Orient.portrait else 5, maxi(1, int((content_width() - 18.0) / 178.0)))
 			grid.add_theme_constant_override("h_separation", 10)
 			grid.add_theme_constant_override("v_separation", 10)
 			_list.add_child(grid)
@@ -839,7 +839,7 @@ class Armory:
 				_kind = "all"
 				_own = "all"
 				_rarity = "all"
-				_refresh())
+				_refresh.call_deferred())
 			_list.add_child(reset)
 
 	## Плитка в сетке: картинка, название, DPS и одна строка состояния. Тап — обзор с покупкой и тирами.
@@ -1188,7 +1188,7 @@ class Upgrades:
 		_patches_button = patches
 		var note := UiStyle.label("Действует только в режиме выживания. В сюжете все начинают с нуля, как в старых аркадах.", 18, UiStyle.TEXT_DIM, 4)
 		note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		note.custom_minimum_size = Vector2(520, 0)
+		note.custom_minimum_size = Vector2(0, 0)
 		content.add_child(note)
 		_list = MenuPopups.scroll_list(content)
 
@@ -1204,7 +1204,7 @@ class Upgrades:
 		if spent == 0:
 			var tip := UiStyle.label("Новичку: начни со «Здоровья» и «Силы», это самая заметная прибавка. Монеты берутся из забегов.", 20, Color("#ffe2b8"), 5)
 			tip.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			tip.custom_minimum_size = Vector2(520, 0)
+			tip.custom_minimum_size = Vector2(0, 0)
 			_list.add_child(tip)
 		for perk_id in SaveService.PERKS:
 			_list.add_child(_make_card(perk_id))
@@ -1313,7 +1313,7 @@ class Achievements:
 		var desc := UiStyle.label(String(achievement["description"]) if done or not achievement.get("hidden", false) else "Скрытое достижение. Хладгор подскажет.", 19, UiStyle.TEXT_DIM, 4)
 		desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 		desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		desc.custom_minimum_size = Vector2(panel_width() - 150.0, 0)
+		desc.custom_minimum_size = Vector2(0, 0)
 		column.add_child(desc)
 		var bar := UiStyle.progress_bar(UiStyle.GOLD if done else UiStyle.NEON, 16)
 		bar.max_value = 1.0

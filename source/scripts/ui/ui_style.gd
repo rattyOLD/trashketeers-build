@@ -210,20 +210,29 @@ static func button(text: String, color: Color, font_size: int = 30, min_size: Ve
 ## Кнопка «прожимается»: под пальцем чуть утапливается, отпустил — пружинит обратно, плюс короткий отклик вибрацией.
 static func press_feedback(b: BaseButton) -> void:
 	b.button_down.connect(func() -> void:
-		if b.disabled:
+		if b.disabled or not b.is_inside_tree():
 			return
+		_stop_press_feedback(b)
 		b.pivot_offset = b.size * 0.5
 		var tween := b.create_tween()
 		tween.tween_property(b, "scale", Vector2(0.94, 0.94), 0.06)
 		b.set_meta(&"press_tween", tween)
 		Platform.haptic("light"))
 	b.button_up.connect(func() -> void:
-		var old: Variant = b.get_meta(&"press_tween") if b.has_meta(&"press_tween") else null
-		if old is Tween and (old as Tween).is_valid():
-			(old as Tween).kill()
+		_stop_press_feedback(b)
+		if not b.is_inside_tree():
+			return
 		b.pivot_offset = b.size * 0.5
 		var tween := b.create_tween()
+		b.set_meta(&"press_tween", tween)
 		tween.tween_property(b, "scale", Vector2.ONE, 0.28).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT))
+	b.tree_exiting.connect(_stop_press_feedback.bind(b))
+
+
+static func _stop_press_feedback(b: BaseButton) -> void:
+	var old: Variant = b.get_meta(&"press_tween") if b.has_meta(&"press_tween") else null
+	if old is Tween and (old as Tween).is_valid():
+		(old as Tween).kill()
 
 
 ## Кнопка без плашки: видна только иконка внутри (у неё уже своя рамка). Нажатие — лёгкое затемнение.

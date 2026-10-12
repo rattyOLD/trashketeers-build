@@ -24,6 +24,7 @@ var _portrait_tex: TextureRect
 var _portrait_box: PanelContainer
 var _name: Label
 var _text: Label
+var _scroll: DragScroll
 var _hint: Label
 var _paused_before := false
 var _done := false
@@ -58,7 +59,7 @@ func _build() -> void:
 	root.add_child(shade)
 
 	_panel = PanelContainer.new()
-	_panel.add_theme_stylebox_override("panel", UiStyle.box(Color(0.184, 0.177, 0.166, 0.96), UiStyle.NEON, 5, 22))
+	_panel.add_theme_stylebox_override("panel", UiStyle.box(Color(UiStyle.CARD_BG, 0.96), UiStyle.NEON, 2, 16))
 	_panel.anchor_left = 0.0
 	_panel.anchor_right = 1.0
 	_panel.anchor_top = 1.0
@@ -100,8 +101,14 @@ func _build() -> void:
 	_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	_text.vertical_alignment = VERTICAL_ALIGNMENT_TOP
 	_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_text.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	column.add_child(_text)
+	_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_scroll = DragScroll.new()
+	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_scroll.custom_minimum_size.y = 60.0
+	_scroll.tapped.connect(_reveal_or_advance)
+	column.add_child(_scroll)
+	_scroll.add_child(_text)
 	_hint = UiStyle.label("тап — дальше", 20, UiStyle.TEXT_DIM, 4)
 	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	column.add_child(_hint)
@@ -115,6 +122,7 @@ func _build() -> void:
 	skip.offset_bottom = 72.0
 	skip.pressed.connect(_finish)
 	root.add_child(skip)
+	root.resized.connect(_fit_panel)
 
 
 func _show_line() -> void:
@@ -134,6 +142,7 @@ func _show_line() -> void:
 	_portrait_box.add_theme_stylebox_override("panel", UiStyle.box(color.darkened(0.7), color, 5, 60 if bool(who.get("radio", false)) else 16))
 	_full_text = str(line.get("text", ""))
 	_text.text = _full_text
+	_scroll.scroll_vertical = 0
 	_fit_panel()
 	_text.visible_characters = 0
 	_typed = 0.0
@@ -144,13 +153,17 @@ func _show_line() -> void:
 ## Высота панели под текст: оценка числа строк по ширине колонки текста.
 func _fit_panel() -> void:
 	var view := get_viewport().get_visible_rect().size
-	var text_width := maxf(view.x - 36.0 - 120.0 - 18.0 - 32.0 - 20.0, 160.0)
+	var safe := ScreenSafeArea.rect(view)
+	var text_width := maxf(safe.size.x - 36.0 - 120.0 - 18.0 - 32.0 - 20.0, 160.0)
 	var chars_per_line := maxf(text_width / 14.5, 8.0)
 	var lines := ceili(float(_full_text.length()) / chars_per_line) + 1
 	var need := 40.0 + float(lines) * 34.0 + 34.0 + 28.0
-	var height := clampf(need, 170.0, view.y * 0.6)
-	_panel.offset_top = -height - 14.0
-	_text.custom_minimum_size = Vector2(text_width, 0.0)
+	var height := clampf(need, 190.0, safe.size.y * 0.6)
+	_panel.offset_left = safe.position.x + 18.0
+	_panel.offset_right = safe.end.x - view.x - 18.0
+	_panel.offset_top = safe.end.y - view.y - height - 14.0
+	_panel.offset_bottom = safe.end.y - view.y - 14.0
+	_text.custom_minimum_size = Vector2.ZERO
 
 
 func _process(delta: float) -> void:
@@ -160,8 +173,12 @@ func _process(delta: float) -> void:
 		_typed += delta * TYPE_SPEED
 		_text.visible_characters = mini(int(_typed), _full_text.length())
 	var typed_out := _text.visible_characters >= _full_text.length()
+	var overflow := _text.get_combined_minimum_size().y > _scroll.size.y + 2.0
+	_hint.text = "Прокрути текст · тап — дальше" if overflow else "тап — дальше"
 	_hint.visible = typed_out
 	if typed_out:
+		if overflow:
+			return
 		if _auto_left < 0.0:
 			_auto_left = clampf(AUTO_BASE + float(_full_text.length()) * AUTO_PER_CHAR, AUTO_BASE, AUTO_MAX)
 		_auto_left -= delta
@@ -176,6 +193,12 @@ func _on_input(event: InputEvent) -> void:
 	elif event is InputEventScreenTouch:
 		pressed = (event as InputEventScreenTouch).pressed
 	if not pressed or _done:
+		return
+	_reveal_or_advance()
+
+
+func _reveal_or_advance() -> void:
+	if _done:
 		return
 	var now := Time.get_ticks_msec()
 	if now - _last_press_ms < 140:

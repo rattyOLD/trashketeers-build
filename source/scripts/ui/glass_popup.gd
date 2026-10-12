@@ -34,6 +34,17 @@ static func panel_width() -> float:
 	return 620.0 if Orient.portrait else 1120.0
 
 
+## Content follows the actual safe viewport, not the desktop reference width.
+func content_width() -> float:
+	if not is_inside_tree():
+		return panel_width() - 56.0
+	return maxf(120.0, minf(panel_width(), ScreenSafeArea.rect(get_viewport_rect().size).size.x - 48.0) - 56.0)
+
+
+func is_top_popup() -> bool:
+	return _open_stack.is_empty() or _open_stack.back() == self
+
+
 func _init(title_text: String) -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP

@@ -88,7 +88,7 @@ class SlotBar:
 			var weapon: WeaponData = weapons[i] if i < weapons.size() else null
 			var is_active := i == active
 			var accent: Color = weapon.get_rarity_color() if weapon != null else RARITY_FALLBACK
-			var fill := Color(0.08, 0.05, 0.16, 0.78 if is_active else 0.5)
+			var fill := Color(UiStyle.CARD_BG, 0.94 if is_active else 0.72)
 			var border := Color(accent, 1.0 if is_active else 0.45)
 			draw_style_box(BattleControls.button_style(fill, border, 6 if is_active else 3), rect)
 			if is_active and _flash > 0.0:

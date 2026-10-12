@@ -41,7 +41,7 @@ func _refresh() -> void:
 	var text := UiStyle.label(pool[randi() % pool.size()], 26, UiStyle.TEXT, 6)
 	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	text.custom_minimum_size = Vector2(panel_width() - 120.0, 0)
+	text.custom_minimum_size = Vector2(0, 0)
 	content.add_child(text)
 	var ok := UiStyle.button("ЕСТЬ", color, 32, Vector2(0, 76))
 	ok.pressed.connect(close)

@@ -97,13 +97,13 @@ func _refresh() -> void:
 	var lore := UiStyle.label(str(character.get("lore", character.get("description", ""))), 19, UiStyle.TEXT, 4)
 	lore.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	lore.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	lore.custom_minimum_size = Vector2(520 if Orient.portrait else 420, 0)
+	lore.custom_minimum_size = Vector2(0, 0)
 	_list.add_child(lore)
 	if character.has("quote"):
 		var quote := UiStyle.label("«%s»" % str(character["quote"]), 20, accent.lightened(0.35), 5)
 		quote.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 		quote.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		quote.custom_minimum_size = Vector2(520 if Orient.portrait else 420, 0)
+		quote.custom_minimum_size = Vector2(0, 0)
 		_list.add_child(quote)
 	_list.add_child(_build_passive(character, accent))
 	_list.add_child(_build_stats(character, level, owned))
@@ -200,7 +200,7 @@ func _build_header(character: Dictionary, rarity: String, accent: Color) -> Cont
 	var title := UiStyle.label(str(character["title"]).to_upper(), 34, UiStyle.TEXT, 8)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	title.custom_minimum_size = Vector2(340, 0)
+	title.custom_minimum_size = Vector2(0, 0)
 	name_box.add_child(title)
 	var role := UiStyle.label(str(character.get("role", "Налётчик")), 20, accent.lightened(0.2), 5)
 	role.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
@@ -227,7 +227,7 @@ func _build_passive(character: Dictionary, accent: Color) -> Control:
 	var text := UiStyle.label(str(passive.get("text", "Нет")), 20, UiStyle.TEXT, 5)
 	text.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	text.custom_minimum_size = Vector2(500, 0)
+	text.custom_minimum_size = Vector2(0, 0)
 	column.add_child(text)
 	var skill: Dictionary = character.get("skill", {})
 	if not skill.is_empty():
@@ -238,7 +238,7 @@ func _build_passive(character: Dictionary, accent: Color) -> Control:
 		var skill_text := UiStyle.label(str(skill.get("text", "")), 18, UiStyle.TEXT, 4)
 		skill_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 		skill_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		skill_text.custom_minimum_size = Vector2(500, 0)
+		skill_text.custom_minimum_size = Vector2(0, 0)
 		column.add_child(skill_text)
 	else:
 		var none := UiStyle.label("НАВЫК: НЕТ", 21, UiStyle.TEXT_DIM, 5)
@@ -309,7 +309,7 @@ func _build_level_card(id: String, level: int) -> Control:
 	var hint_label := UiStyle.label(hint, 18, UiStyle.TEXT_DIM, 4)
 	hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	hint_label.custom_minimum_size = Vector2(500, 0)
+	hint_label.custom_minimum_size = Vector2(0, 0)
 	column.add_child(hint_label)
 	if not maxed:
 		var cost := SaveService.hero_upgrade_cost(id)
@@ -340,7 +340,7 @@ func _build_actions(character: Dictionary, owned: bool) -> void:
 			var hint := UiStyle.label("ИЛИ БЕСПЛАТНО: ПРОЙДИ СЮЖЕТ, ОПЕРАЦИЯ %s%s" % [unlock.trim_prefix("m"), "" if StoryRun.mission_exists(unlock) else " (скоро)"], 17, Color("#a6b84a"), 4)
 			hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-			hint.custom_minimum_size = Vector2(520, 0)
+			hint.custom_minimum_size = Vector2(0, 0)
 			_action_box.add_child(button)
 			_action_box.add_child(hint)
 			return

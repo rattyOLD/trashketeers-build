@@ -116,7 +116,7 @@ func _refresh() -> void:
 	_scroll.scroll_deadzone = 16
 	var view := get_viewport_rect().size
 	_base_height = clampf(view.y * (0.58 if Orient.portrait else 0.5), 320.0, 900.0)
-	_scroll.custom_minimum_size = Vector2(panel_width() - 50.0, _base_height)
+	_scroll.custom_minimum_size = Vector2(0, _base_height)
 	content.add_child(_scroll)
 	_list = VBoxContainer.new()
 	_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -138,7 +138,7 @@ func _refresh() -> void:
 	_sticker_scroll = DragScroll.new()
 	_sticker_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_sticker_scroll.scroll_deadzone = 16
-	_sticker_scroll.custom_minimum_size = Vector2(panel_width() - 50.0, _sticker_h)
+	_sticker_scroll.custom_minimum_size = Vector2(0, _sticker_h)
 	_sticker_scroll.visible = false
 	_stickers.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_sticker_scroll.add_child(_stickers)
@@ -301,7 +301,7 @@ func _empty_hint() -> Control:
 	box.add_child(art)
 	var hint := UiStyle.label("Тут пока тихо. Кинь стикер, это проще, чем придумывать «привет».", 18, UiStyle.TEXT_DIM, 4)
 	hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	hint.custom_minimum_size = Vector2(panel_width() - 120.0, 0)
+	hint.custom_minimum_size = Vector2(0, 0)
 	box.add_child(hint)
 	return box
 

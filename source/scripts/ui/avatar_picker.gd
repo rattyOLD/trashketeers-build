@@ -109,7 +109,7 @@ func _init() -> void:
 	super("ПОРТРЕТ")
 	_hint = UiStyle.label("", 20, UiStyle.TEXT_DIM, 4)
 	_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_hint.custom_minimum_size = Vector2(panel_width() - 70.0, 0)
+	_hint.custom_minimum_size = Vector2(0, 0)
 	content.add_child(_hint)
 	var upload := UiStyle.button("СВОЁ ФОТО С ТЕЛЕФОНА", UiStyle.NEON.darkened(0.45), 28, Vector2(0, 84))
 	upload.pressed.connect(func() -> void:
@@ -180,7 +180,7 @@ func _state(entry: Array) -> int:
 
 func _tile(entry: Array, state: int, selected: bool) -> Control:
 	var tile := PortraitTile.new(str(entry[0]), str(entry[1]), state, selected)
-	tile.custom_minimum_size = Vector2((panel_width() - 70.0) / float(COLUMNS) - 8.0, TILE + 36.0)
+	tile.custom_minimum_size = Vector2((content_width() - 28.0 - (COLUMNS - 1) * 12.0) / float(COLUMNS), TILE + 36.0)
 	tile.gui_input.connect(func(event: InputEvent) -> void:
 		var tapped := UiStyle.is_tap(event)
 		if not tapped:

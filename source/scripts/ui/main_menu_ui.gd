@@ -51,6 +51,10 @@ var _settings: MenuPopups.Settings
 var _shop: HeroPopup
 var _skins: MenuPopups.Shop
 var _tester: TesterPopup
+var _menu_body: VBoxContainer
+var _menu_center: Control
+var _dock: Control
+var _gear: Control
 var _stage: Control
 var _tester_button: Button
 var _account_banner: Control
@@ -231,11 +235,15 @@ func _build_landscape_layout() -> Control:
 	var middle := _build_utility_area()
 	middle.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_child(middle)
-	var center := CenterContainer.new()
+	var center := Control.new()
+	_menu_center = center
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	middle.add_child(center)
+	center.resized.connect(_fit_menu.call_deferred)
 	var side := VBoxContainer.new()
+	_menu_body = side
+	side.minimum_size_changed.connect(_fit_menu.call_deferred)
 	side.custom_minimum_size = Vector2(RIGHT_WIDTH, 0)
 	side.alignment = BoxContainer.ALIGNMENT_CENTER
 	side.add_theme_constant_override("separation", 8)
@@ -248,6 +256,41 @@ func _build_landscape_layout() -> Control:
 	side.add_child(_build_play())
 	column.add_child(_build_dock())
 	return column
+
+
+func _fit_menu() -> void:
+	if _menu_body == null or _dock == null or _menu_center.size.y <= 0.0:
+		return
+	var compact := get_viewport_rect().size.y < 600.0
+	var children := _menu_body.get_children()
+	children[0].custom_minimum_size.y = 60.0 if compact else 88.0
+	children[1].custom_minimum_size.y = 66.0 if compact else 74.0
+	for button in _mode_buttons:
+		button.custom_minimum_size.y = 44.0 if compact else 56.0
+	_coop_button.custom_minimum_size.y = 44.0 if compact else 46.0
+	children[5].custom_minimum_size.y = 64.0 if compact else 88.0
+	children[5].add_theme_font_size_override("font_size", 44 if compact else 54)
+	_menu_body.add_theme_constant_override("separation", 6 if compact else 8)
+	_avatar.custom_minimum_size = Vector2.ONE * (60.0 if compact else 76.0)
+	_gear.custom_minimum_size = Vector2.ONE * (52.0 if compact else 64.0)
+	_nick_label.add_theme_font_size_override("font_size", 22 if compact else 26)
+	_level_label.add_theme_font_size_override("font_size", 16 if compact else 18)
+	for button in _dock.get_child(0).get_children():
+		button.custom_minimum_size.y = 72.0 if compact else 88.0
+	var target: Control = _chips_row if compact else _chips_box
+	if _asc_chip.get_parent() != target:
+		_asc_chip.reparent(target)
+	_asc_chip.text = Ascension.button_text().replace("ВОЗВЫШЕНИЕ:", "ВОЗВ.:") if compact else Ascension.button_text()
+	_mod_chip.text = RunMods.button_text().replace("МОДИФИКАТОР:", "МОД.:") if compact else RunMods.button_text()
+	var minimum := _menu_body.get_combined_minimum_size()
+	var factor := minf(1.0, minf(_menu_center.size.x / minimum.x, _menu_center.size.y / minimum.y))
+	_menu_body.size = minimum
+	_menu_body.scale = Vector2.ONE * factor
+	_menu_body.position = (_menu_center.size - minimum * factor) * 0.5
+	var side_width := maxf(110.0, (_menu_center.size.x - minimum.x * factor) * 0.5 - 12.0)
+	_season_pill.offset_right = 4.0 + minf(280.0, side_width)
+	_season_pill.text = ("ПРОПУСК · !" if BattlePass.has_unclaimed() else "ПРОПУСК") if compact else str(_season_pill.get_meta("full_caption", _season_pill.text))
+	UiStyle.fit_button_font(_season_pill, 16, _season_pill.size.x - 20.0)
 
 
 ## Плашка «Заведи аккаунт» под верхней панелью: не перекрывает экран и не спорит с клавиатурой, как всплывающее окно.
@@ -313,6 +356,7 @@ func _build_top_bar() -> Control:
 	_nick_label = UiStyle.label("", 26, UiStyle.GOLD, 7)
 	_nick_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	_nick_label.clip_text = true
+	_nick_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	_nick_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	info.add_child(_nick_label)
 	_level_label = UiStyle.label("", 18, UiStyle.TEXT_DIM, 4)
@@ -332,6 +376,7 @@ func _build_top_bar() -> Control:
 		full.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(full)
 	var gear := MenuWidgets.GearButton.new()
+	_gear = gear
 	gear.custom_minimum_size = Vector2(64, 64)
 	gear.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	gear.pressed.connect(func() -> void: _settings.open())
@@ -720,6 +765,7 @@ func _refresh_mod_chip() -> void:
 		_asc_chip.add_theme_constant_override("icon_max_width", 24)
 		_asc_chip.add_theme_color_override("font_color", Color("#ff4d6d") if Ascension.chosen() > 0 else Color("#ffb066"))
 		_asc_chip.visible = _mode == Mode.SURVIVAL and Ascension.unlocked() > 0
+	_fit_menu.call_deferred()
 
 
 func _on_asc_pressed() -> void:
@@ -853,6 +899,7 @@ func _build_weapon_chip() -> Control:
 
 func _build_dock() -> Control:
 	var dock := PanelContainer.new()
+	_dock = dock
 	var style := UiStyle.box(Color(0.110, 0.106, 0.099, 0.88), Color("#4a4d44"), 3, 10)
 	style.content_margin_left = 10
 	style.content_margin_right = 10
@@ -961,6 +1008,8 @@ func _refresh() -> void:
 		_season_pill.text = "БОЕВОЙ ПРОПУСК"
 	# Надпись целиком внутри плашки, по центру: шрифт уменьшается под ширину.
 	UiStyle.fit_button_font(_season_pill, 16, 280.0 - 20.0)
+	_season_pill.set_meta("full_caption", _season_pill.text)
+	_fit_menu.call_deferred()
 	_set_side_alert("vip", false)
 	if _nav_upgrades != null:
 		_nav_upgrades.badge = _can_afford_perk()
@@ -1006,7 +1055,7 @@ class LogoText:
 	func _draw() -> void:
 		var title := "TRASH SQUAD"
 		var compact := size.y < 100.0
-		var fs := 64 if compact else 84
+		var fs := mini(64, int(size.y) - 24) if compact else 84
 		while fs > 30 and font.get_string_size(title, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x > size.x * 0.94:
 			fs -= 4
 		var w := font.get_string_size(title, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x

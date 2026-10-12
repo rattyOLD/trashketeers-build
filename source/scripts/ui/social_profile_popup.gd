@@ -23,7 +23,7 @@ func _refresh() -> void:
 			child.queue_free()
 	_status = UiStyle.label("Загружаю профиль...", 20, UiStyle.NEON, 5)
 	_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_status.custom_minimum_size = Vector2(panel_width() - 110.0, 0)
+	_status.custom_minimum_size = Vector2(0, 0)
 	content.add_child(_status)
 	var list := MenuPopups.scroll_list(content)
 	_body = list
@@ -46,7 +46,7 @@ func _load() -> void:
 	info["w"] = int(profile.get("best_wave", 0))
 	var card := FriendsPopup.CardView.new()
 	card.info = info
-	card.custom_minimum_size = Vector2(panel_width() - 110.0, (panel_width() - 110.0) * FriendsPopup.CARD_SIZE.y / FriendsPopup.CARD_SIZE.x)
+	card.custom_minimum_size = Vector2(0, (content_width() - 28.0) * FriendsPopup.CARD_SIZE.y / FriendsPopup.CARD_SIZE.x)
 	_body.add_child(card)
 	var is_friend := bool(profile.get("is_friend", false))
 	var is_self := friend_code == Cloud.friend_code
@@ -145,7 +145,7 @@ func _compare_block(theirs: Dictionary) -> Control:
 	var verdict_list: Array = VERDICT_WIN if my_wins > his_wins else (VERDICT_LOSE if his_wins > my_wins else VERDICT_DRAW)
 	var verdict := UiStyle.label("%d:%d. %s" % [my_wins, his_wins, str(verdict_list.pick_random())], 20, UiStyle.NEON, 5)
 	verdict.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	verdict.custom_minimum_size = Vector2(panel_width() - 110.0, 0)
+	verdict.custom_minimum_size = Vector2(0, 0)
 	box.add_child(verdict)
 	return box
 
