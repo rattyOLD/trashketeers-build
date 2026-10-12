@@ -107,9 +107,15 @@ func _ready() -> void:
 	get_tree().paused = false
 	await _fresh()
 	game.stats.apply(_pick("sentry"))
+	_check(not game.stats.is_available(_pick("switcher")), "switching tactic unavailable with one weapon")
+	game.stats.apply(_pick("switcher"))
+	_check(CombatTactics.rank(game.stats, "switcher") == 0, "unusable tactic cannot impose its damage penalty")
+	game.player.weapon_controller.set_slot(1, WeaponDB.get_weapon(&"pistol_v1"))
+	_check(not game.stats.is_available(_pick("switcher")), "duplicate weapon does not unlock switching tactic")
+	game.player.weapon_controller.set_slot(1, WeaponDB.get_weapon(&"smg_v1"))
+	_check(game.stats.is_available(_pick("switcher")), "two distinct weapons unlock switching tactic")
 	game.stats.apply(_pick("switcher"))
 	game.player.apply_run_stats(game.stats)
-	game.player.weapon_controller.set_slot(1, WeaponDB.get_weapon(&"smg_v1"))
 	var target := game.enemies.spawn(ContentDB.get_enemy(&"rat_punk"), game.player.global_position + Vector2(220, 0), 100.0)
 	if target != null:
 		target.set_physics_process(false)

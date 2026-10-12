@@ -1751,11 +1751,15 @@ func _refresh_slots() -> void:
 	stats.rail_context = rail
 	var melee := false
 	var ranged := false
+	var distinct := {}
 	for i in wc.slot_count:
+		if wc.slots[i] != null:
+			distinct[wc.slots[i].id] = true
 		melee = melee or (wc.slots[i] != null and wc.slots[i].is_melee())
 		ranged = ranged or (wc.slots[i] != null and not wc.slots[i].is_melee())
 	stats.melee_context = melee
 	stats.ranged_context = ranged
+	stats.multi_weapon_context = distinct.size() >= 2
 	hud.set_slots(wc.slots.slice(0, wc.slot_count), wc.active_slot, wc.slot_count)
 
 

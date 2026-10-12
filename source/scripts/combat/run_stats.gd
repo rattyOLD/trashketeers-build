@@ -70,6 +70,7 @@ var ranged_kills := 0
 var melee_context := false
 ## Есть ли в слотах стрелковое оружие.
 var ranged_context := true
+var multi_weapon_context := false
 ## Фаза забега: 2 — после первого босса Выживания (открываются карточки «ФАЗА 2», враги злее).
 var patch_context := false
 var patch_ids: Array[String] = []
@@ -162,6 +163,8 @@ func has_upgrade(upgrade_id: StringName) -> bool:
 
 
 func is_available(upgrade: UpgradeData) -> bool:
+	if upgrade.id == &"tactic_switcher" and not multi_weapon_context:
+		return false
 	if upgrade.category == "tactic" and CombatTactics.rank(self, String(upgrade.id).trim_prefix("tactic_")) == 0 and CombatTactics.selected(self).size() >= CombatTactics.MAX_TACTICS:
 		return false
 	if upgrade.category == "patch":
