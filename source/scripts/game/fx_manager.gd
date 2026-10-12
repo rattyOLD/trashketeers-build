@@ -1012,7 +1012,9 @@ func _draw_stream_strip(canvas: CanvasItem, chain: Array, flow: float) -> void:
 			_strip_uvs[1] = Vector2(u1, 0.0)
 			_strip_uvs[2] = Vector2(u1, 1.0)
 			_strip_uvs[3] = Vector2(u0, 1.0)
-			canvas.draw_polygon(_strip_points, _strip_colors, _strip_uvs, tex)
+			# A moving spray can fold the four corners or collapse a segment to zero length.
+			# Render the textured quad directly; polygon triangulation rejects those frames.
+			canvas.draw_primitive(_strip_points, _strip_colors, _strip_uvs, tex)
 		prev_left = left
 		prev_right = right
 		prev_u = u
