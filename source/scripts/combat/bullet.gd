@@ -41,6 +41,10 @@ var _age := 0.0
 var _lod := 0
 ## Капля жидкой струи (пиво/рвота): FxManager соединяет соседние капли очереди в сплошную струю.
 var is_liquid := false
+var tactic_generated := false
+var wall_bounces := 0
+var _wall_left := 0
+var _bank_base := 1.0
 ## Сколько врагов эта пуля уже пробила (рельсотрон растит урон с каждым).
 var pierced := 0
 
@@ -95,6 +99,10 @@ func activate(data: WeaponData, origin: Vector2, direction: Vector2, owner_team:
 	_lod = lod
 	pierced = 0
 	damage_scale = 1.0
+	tactic_generated = false
+	wall_bounces = 0
+	_wall_left = data.world_bounces if owner_team == Team.PLAYER else 0
+	_bank_base = 1.0
 	_age = 0.0
 	_sprite.rotation = 0.0
 	weapon = data
@@ -130,6 +138,7 @@ func activate(data: WeaponData, origin: Vector2, direction: Vector2, owner_team:
 		_trail_count = 0
 		_trail.visible = false
 	visible = true
+	queue_redraw()
 	reset_physics_interpolation()
 	# set_deferred безопасен, даже если выстрел пришёл из физического сигнала
 	# (например, из Area2D-детектора целей). Deferred-вызовы исполняются
@@ -170,7 +179,7 @@ func tick(delta: float) -> bool:
 	# Быстрые пули (снайперка, рельса) за кадр пролетают больше своего диаметра и могли бы
 	# «перепрыгнуть» тонкий забор или крысу: луч вдоль шага ставит пулю в точку касания,
 	# и перекрытие Area2D честно срабатывает на следующем физическом кадре.
-	if _lod < 2 and step.length() > _shape.radius * 2.5:
+	if _wall_left > 0 or _lod < 2 and step.length() > _shape.radius * 2.5:
 		step = _sweep(step)
 	global_position += step
 	_advance_trail()
@@ -194,6 +203,20 @@ func _sweep(step: Vector2) -> Vector2:
 	if hit.is_empty():
 		return step
 	var to_hit: Vector2 = hit["position"] - global_position
+	if _wall_left > 0 and _get_layer(hit["collider"]) & PhysicsLayers.WORLD and velocity.dot(hit["normal"]) < 0.0:
+		var normal: Vector2 = hit["normal"]
+		if wall_bounces == 0:
+			_bank_base = damage_scale
+		velocity = velocity.bounce(normal)
+		rotation = velocity.angle()
+		_wall_left -= 1
+		wall_bounces += 1
+		damage_scale = minf(_bank_base * 1.9, damage_scale * 1.25)
+		_distance_left += 80.0
+		_time_left += 0.1
+		_pending_hits.clear()
+		_hit_ids[hit["collider"].get_instance_id()] = true
+		return to_hit + normal * (_shape.radius + 1.0)
 	return to_hit + step.normalized() * _shape.radius * 0.5
 
 
@@ -262,6 +285,15 @@ static func _get_trail_curve() -> Curve:
 		_trail_curve.add_point(Vector2(0.0, 0.15))
 		_trail_curve.add_point(Vector2(1.0, 1.0))
 	return _trail_curve
+
+
+func _draw() -> void:
+	if team != Team.ENEMY or is_liquid or weapon == null:
+		return
+	# The danger rim survives quality changes and is drawn under the original art.
+	var radius := clampf(weapon.bullet_radius + 2.0, 5.0, 11.0)
+	draw_circle(Vector2.ZERO, radius + 1.5, Color("#221820"))
+	draw_arc(Vector2.ZERO, radius, 0.0, TAU, 12, Color("#ffb064"), 1.8, true)
 
 
 func _apply_team_masks(owner_team: Team) -> void:

@@ -55,6 +55,9 @@ const DEFAULTS := {
 	"blueprints": [],
 	"selected_weapon": START_WEAPON,
 	"selected_tier": 1,
+	"secondary_weapon": "",
+	"secondary_tier": 1,
+	"loadout_presets": [],
 	"arsenal": {},
 	"perks": {},
 	"line_votes": {},
@@ -1230,6 +1233,22 @@ func get_loadout() -> WeaponData:
 			tier = best_tier(id)
 		return WeaponDB.get_weapon(id).with_tier(tier)
 	return WeaponDB.get_weapon(StringName(START_WEAPON)).with_tier(1)
+
+
+func get_secondary_loadout() -> WeaponData:
+	var id := StringName(str(data.get("secondary_weapon", "")))
+	if id == get_selected_weapon() or not WeaponDB.has_weapon(id) or not owns_weapon(id):
+		return null
+	var tier := clampi(int(data.get("secondary_tier", 1)), 1, WeaponData.MAX_TIER)
+	return WeaponDB.get_weapon(id).with_tier(tier if get_copies(id, tier) > 0 else best_tier(id))
+
+
+func set_secondary_weapon(id: StringName, tier: int = 1) -> void:
+	if id != &"" and (not owns_weapon(id) or id == get_selected_weapon()):
+		return
+	data["secondary_weapon"] = String(id)
+	data["secondary_tier"] = tier if id != &"" and get_copies(id, tier) > 0 else (best_tier(id) if id != &"" else 1)
+	save_data()
 
 
 ## Оружие, снятое с выдачи: копии конвертируются в орехи (цена качества за каждую копию, T2 = 2 копии и т.д.).

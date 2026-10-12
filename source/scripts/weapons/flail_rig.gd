@@ -20,6 +20,7 @@ const LINKS := 6
 const TRAIL := 6
 
 signal ball_hit(at: Vector2, count: int, strong: bool)
+signal enemy_hit(enemy: Enemy, damage: float)
 
 const ART_DIR := "res://assets/weapons/flail/"
 const BALL_DRAW := 76.0
@@ -139,10 +140,12 @@ func _hit_enemies(delta: float, weapon: WeaponData) -> void:
 			continue
 		_cooldown[id] = HIT_COOLDOWN
 		var crit := randf() < weapon.crit_chance
-		enemy.take_damage(weapon.damage * mult * (weapon.crit_mult if crit else 1.0), velocity.normalized(), crit)
+		var amount := weapon.damage * mult * (weapon.crit_mult if crit else 1.0)
+		enemy.take_damage(amount, velocity.normalized(), crit)
 		if is_instance_valid(enemy) and enemy.is_alive():
 			enemy.push(velocity.normalized() * 260.0 * weapon.knockback * mult)
 			enemy.add_stagger(float(weapon.stagger) * 0.1 * mult)
+			enemy_hit.emit(enemy, amount)
 		count += 1
 	if count > 0:
 		# Отдача: шар теряет часть скорости о толпу.

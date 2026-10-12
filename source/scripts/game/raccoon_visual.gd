@@ -466,6 +466,10 @@ func _clip_pick() -> void:
 	elif _hurt > HURT_TIME - HIT_CLIP_TIME:
 		clip = "hit"
 		idx = clampi(int((HURT_TIME - _hurt) / HIT_CLIP_TIME * 4.0), 0, 3)
+	elif _action == "ready" and _action_left > 0.0 and not aiming and not _walking_clip:
+		# Use the canonical face while the separate hands service the weapon.
+		clip = "idle"
+		idx = 0
 	elif _shoot_t > 0.0 and not _walking_clip and not preview_mode:
 		clip = "shoot"
 		idx = int(_shoot_phase / SHOOT_ANIM_TIME * 4.0) % 4
@@ -1264,6 +1268,11 @@ func _clip_hand_target(which: String, center: Vector2, dir: Vector2) -> Vector2:
 			var shoulder := _clip_shoulder("left")
 			return _clip_reachable(Vector2(shoulder.x+_clip_arm_reach("left")*0.6*_facing,paw.y),shoulder,_clip_arm_lengths("left"))
 		point = _clip_support_point()
+		if _action == "ready" and _action_left > 0.0 and not aiming and not dashing:
+			# The trigger hand keeps its grip; the support palm reaches the magazine,
+			# then returns to the fore-end. The full stock stays visible throughout.
+			var service := WeaponIcons.grip(weapon_icon) + Vector2(8.0, 11.0)
+			point = point.lerp(service, sin(_action_left / ACTION_TIME * PI))
 	point.y *= -1.0 if dir.x < 0.0 else 1.0
 	return center + point.rotated(dir.angle()) * _weapon_scale()
 

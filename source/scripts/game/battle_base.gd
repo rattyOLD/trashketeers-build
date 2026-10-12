@@ -48,6 +48,7 @@ var layers: BiomeLayers
 var entities: Node2D
 var player: Player
 var fx: FxManager
+var tactics: CombatTactics
 var hero_skills: HeroSkills
 var _perf_last_usec := 0
 var _perf_frames: PackedFloat32Array = PackedFloat32Array()
@@ -146,6 +147,10 @@ func _spawn_player(at: Vector2, weapon: WeaponData, target_finder: Callable) -> 
 	player.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_ON
 	entities.add_child(player)
 	player.setup(target_finder, weapon, stats)
+	if meta_enabled:
+		var secondary := SaveService.get_secondary_loadout()
+		if secondary != null and secondary.id != weapon.id:
+			player.weapon_controller.set_slot(1, secondary)
 	player.visual.apply_look(SaveService.get_character(), SaveService.get_skin())
 	player.visual.apply_equipment(stats.patch_ids)
 	player.visual.battle_marker = true
@@ -205,6 +210,9 @@ func _setup_common(camera_bounds: Rect2, currency_icon: Texture2D) -> void:
 	player.weapon_controller.melee.swing_started.connect(_on_melee_swing)
 	player.weapon_controller.melee.hit_resolved.connect(_on_melee_hit)
 	player.weapon_controller.weapon_changed.connect(hud.set_weapon)
+	tactics = CombatTactics.new()
+	layers.decals.add_child(tactics)
+	tactics.setup(player, stats, fx, player.weapon_controller._target_finder)
 	BulletPool.bullet_hit.connect(_on_bullet_hit)
 	BulletPool.exploded.connect(_on_explosion)
 	hud.skill_pressed.connect(_request_skill)
@@ -600,9 +608,12 @@ func hitstop(duration: float) -> void:
 	_hitstop_active = true
 	_hitstop_ready_ms = now + int((duration + HITSTOP_COOLDOWN) * 1000.0)
 	Engine.time_scale = HITSTOP_SCALE
-	get_tree().create_timer(duration, true, false, true).timeout.connect(func() -> void:
-		_hitstop_active = false
-		Engine.time_scale = 1.0)
+	get_tree().create_timer(duration, true, false, true).timeout.connect(_finish_hitstop)
+
+
+func _finish_hitstop() -> void:
+	_hitstop_active = false
+	Engine.time_scale = 1.0
 
 
 ## Хук: обновить таймер в HUD (вызывается 10 раз в секунду).

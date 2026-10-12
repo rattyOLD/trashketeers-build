@@ -510,7 +510,8 @@ class Shop:
 		if bool(character.get("coming_soon", false)) or ResourceLoader.exists(str(character.get("portrait", ""))):
 			var portrait := TextureRect.new()
 			var path := str(character.get("portrait", ""))
-			if ResourceLoader.exists(path):
+			portrait.texture = HeroIdentity.portrait(character)
+			if portrait.texture == null and ResourceLoader.exists(path):
 				portrait.texture = load(path)
 			portrait.custom_minimum_size = Vector2(110, 110)
 			portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -662,6 +663,17 @@ class Armory:
 		flow.add_theme_constant_override("v_separation", 8)
 		content.add_child(flow)
 		_filters.append(flow)
+		var kits := UiStyle.button("КОМПЛЕКТЫ", UiStyle.PANEL, 16, Vector2(0, 44))
+		UiStyle.size_flow_button(kits)
+		kits.pressed.connect(func() -> void:
+			var popup := LoadoutPopup.new()
+			add_child(popup)
+			popup.closed.connect(popup.queue_free)
+			popup.applied.connect(func() -> void:
+				weapon_changed.emit(SaveService.get_selected_weapon())
+				_refresh())
+			popup.open())
+		flow.add_child(kits)
 		_chip_group(flow, "kind", [["all", "ВСЁ"], ["gun", "СТРЕЛКОВОЕ"], ["melee", "БЛИЖНИЙ БОЙ"]])
 		_chip_gap(flow)
 		_chip_group(flow, "own", [["all", "ЛЮБОЕ"], ["mine", "МОИ"], ["locked", "НЕ ОТКРЫТЫ"], ["afford", "ПО КАРМАНУ"]])
@@ -1042,6 +1054,17 @@ class Armory:
 			cell.custom_minimum_size = Vector2(240, 0)
 			grid.add_child(cell)
 		right.add_child(grid)
+		var current := SaveService.get_loadout()
+		if current.id != weapon.id or current.tier != weapon.tier:
+			right.add_child(_group_header("СРАВНЕНИЕ С ТЕКУЩИМ"))
+			right.add_child(_note(current.display_name + " T%d" % current.tier, 17, UiStyle.TEXT_DIM))
+			var reach := weapon.melee_reach if weapon.is_melee() else weapon.max_distance
+			var old_reach := current.melee_reach if current.is_melee() else current.max_distance
+			for diff in [["Урон за удар", weapon.damage - current.damage], ["DPS", weapon.get_dps() - current.get_dps()], ["Дальность", reach - old_reach]]:
+				var delta := float(diff[1])
+				right.add_child(_note("%s: %+.0f" % [diff[0], delta], 18, Color("#9cddac") if delta >= 0.0 else Color("#ffab9a")))
+			right.add_child(_note("Стиль: " + weapon.usage_text(), 17, UiStyle.TEXT))
+
 		if base.has_tiers():
 			right.add_child(_group_header("ЧТО ДАЁТ КАЖДЫЙ ТИР"))
 			var step: Array = WeaponData.TIER_STEPS[base.rarity]
@@ -1063,6 +1086,15 @@ class Armory:
 		if SaveService.owns_weapon(base.id):
 			var selected := SaveService.get_selected_weapon() == base.id
 			_add_actions(actions, base, selected, tier)
+			if not selected:
+				var second := UiStyle.button("ВО ВТОРОЙ СЛОТ", UiStyle.PANEL, 17, Vector2(0, 48))
+				second.pressed.connect(func() -> void:
+					SaveService.set_secondary_weapon(base.id, tier)
+					_refresh())
+				actions.add_child(second)
+				if str(SaveService.data.get("secondary_weapon", "")) == String(base.id):
+					actions.add_child(_note("Выбран во втором слоте · смена оружия в бою", 17, UiStyle.GOLD))
+
 		else:
 			var buy_row := _make_buy_row(base, "КУПИТЬ")
 			if buy_row != null:

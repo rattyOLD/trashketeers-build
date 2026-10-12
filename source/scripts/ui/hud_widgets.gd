@@ -146,6 +146,9 @@ class DamagePortrait:
 	var _scared_done := false
 
 	func react(kind: String, time: float = 1.4) -> void:
+		if HeroIdentity.HEADS.has(_hero_id):
+			_shake = 0.3 if kind == "hit" else 0.12
+			return
 		var key := "%s_%s" % [_hero_id, kind]
 		if not _react_cache.has(key):
 			var path := FACE_DIR + key + ".png"
@@ -181,6 +184,12 @@ class DamagePortrait:
 				_face.scars.append(AvatarPicker.portrait_texture("res://assets/story/scars/scar_" + names[index] + ".png"))
 		_react_cache.clear()
 		_faces.clear()
+		var canonical := HeroIdentity.portrait(character)
+		if canonical != null:
+			_faces.assign([canonical, canonical, canonical, canonical])
+			_face.scars.clear()
+			_pick_face()
+			return
 		for n in 4:
 			var path := "%s%s_%d.png" % [HUD_DIR, id, n]
 			_faces.append(AvatarPicker.portrait_texture(path) if ResourceLoader.exists(path) else null)

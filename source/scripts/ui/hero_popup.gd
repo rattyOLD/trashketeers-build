@@ -121,7 +121,10 @@ func _build_stage(character: Dictionary, accent: Color, owned: bool) -> Control:
 	panel.custom_minimum_size = Vector2(0, stage_h + 10.0)
 	_stage = Control.new()
 	_stage.custom_minimum_size = Vector2(0, stage_h)
-	panel.add_child(_stage)
+	var stage_column := VBoxContainer.new()
+	stage_column.add_theme_constant_override("separation", 4)
+	panel.add_child(stage_column)
+	stage_column.add_child(_stage)
 	var skin: Dictionary = SaveService.get_skin()
 	_preview = null
 	if bool(character.get("coming_soon", false)):
@@ -175,6 +178,16 @@ func _build_stage(character: Dictionary, accent: Color, owned: bool) -> Control:
 			_index += side
 			_refresh())
 		_stage.add_child(arrow)
+	if _preview != null:
+		var motions := HFlowContainer.new()
+		motions.alignment = FlowContainer.ALIGNMENT_CENTER
+		stage_column.add_child(motions)
+		for entry in [["auto", "СТОЙКА"], ["run", "БЕГ"], ["shoot", "СТРЕЛЬБА"], ["ready", "ПОДГОТОВКА"]]:
+			var mode: String = entry[0]
+			var button := UiStyle.button(entry[1], UiStyle.PANEL, 15, Vector2(0, 38))
+			UiStyle.size_flow_button(button)
+			button.pressed.connect(func() -> void: _preview.set_motion(mode))
+			motions.add_child(button)
 	return panel
 
 

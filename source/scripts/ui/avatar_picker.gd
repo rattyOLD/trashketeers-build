@@ -88,6 +88,10 @@ static func store_photo(info: Dictionary) -> bool:
 static func portrait_texture(path: String) -> Texture2D:
 	if path == CUSTOM:
 		return custom_texture()
+	if path.begins_with("res://assets/ui/portraits/avatar/"):
+		var id := path.get_file().get_basename()
+		if HeroIdentity.HEADS.has(id):
+			return HeroIdentity.portrait(CharacterDB.get_character(id))
 	if _cache.has(path):
 		return _cache[path]
 	if not ResourceLoader.exists(path):

@@ -9,6 +9,8 @@ extends Node2D
 
 signal fired(weapon: WeaponData, origin: Vector2, direction: Vector2)
 signal weapon_changed(weapon: WeaponData)
+signal slot_switched(previous: int, current: int)
+signal melee_contact(enemy: Enemy, damage: float)
 signal slots_changed
 signal overdrive_changed(active: bool)
 signal overdrive_fired
@@ -95,10 +97,12 @@ func set_slot(index: int, new_weapon: WeaponData) -> void:
 func switch_slot(index: int) -> bool:
 	if index < 0 or index >= slot_count or slots[index] == null or index == active_slot:
 		return false
+	var previous := active_slot
 	active_slot = index
 	set_base_weapon(slots[index])
 	_cooldown = maxf(_cooldown, EQUIP_DELAY)
 	slots_changed.emit()
+	slot_switched.emit(previous, index)
 	return true
 
 
@@ -134,6 +138,8 @@ func apply_run_stats(stats: RunStats) -> void:
 
 func _rebuild() -> void:
 	weapon = base_weapon.with_run_stats(_stats) if _stats != null else base_weapon
+	if _stats != null and _stats.switch_boost_left > 0.0:
+		weapon.damage *= 1.5 + CombatTactics.rank(_stats, "switcher") * 0.15
 	_cooldown = minf(_cooldown, weapon.fire_interval)
 	weapon_changed.emit(weapon)
 
@@ -255,6 +261,7 @@ func _flail_step(delta: float) -> void:
 	if flail == null:
 		flail = FlailRig.new()
 		add_child(flail)
+		flail.enemy_hit.connect(func(enemy: Enemy, damage: float) -> void: melee_contact.emit(enemy, damage))
 		flail.ball_hit.connect(func(at: Vector2, count: int, strong: bool) -> void:
 			melee.hit_resolved.emit(weapon, at, count, false, strong))
 	flail.visible = true

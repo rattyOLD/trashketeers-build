@@ -1020,6 +1020,9 @@ class PeerAvatar:
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	static func portrait_of(id: String) -> Texture2D:
+		var canonical := HeroIdentity.portrait(CharacterDB.get_character(id))
+		if canonical != null:
+			return canonical
 		if _portraits.is_empty():
 			for entry in ConfigLoader.load_json("res://data/characters.json").get("characters", []):
 				_portraits[str(entry.get("id", ""))] = str(entry.get("portrait", ""))

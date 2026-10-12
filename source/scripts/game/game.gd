@@ -42,6 +42,7 @@ var _damage_acc := {}
 const DAMAGE_MERGE_TIME := 0.07
 
 var map: LevelSpawner
+var boss_cover: BossCover
 var pickups: PickupManager
 var enemies: EnemyManager
 var director: WaveDirector
@@ -619,6 +620,8 @@ func _enter_portal() -> void:
 func _switch_chapter(index: int = -1) -> void:
 	var chapter := ContentDB.get_chapter(director.chapter_index + 1 if index < 0 else index)
 	enemies.release_all()
+	if tactics != null:
+		tactics.clear_fields()
 	# Текстуры прошлой главы (враги, босс, пропсы, живность) — из видеопамяти до прогрева новой:
 	# к 4–6 главе забег держал всех боссов сразу, и iPhone убивал вкладку по памяти.
 	enemies.drop_pooled_visuals()
@@ -906,6 +909,8 @@ func _count_multikill() -> void:
 
 
 func _on_enemy_died(enemy: Enemy) -> void:
+	if tactics != null:
+		tactics.enemy_died(enemy)
 	_ring_enemy_died(enemy)
 	var data := enemy.data
 	if player != null and player.weapon_controller.weapon != null:
@@ -1036,6 +1041,11 @@ func debug_boss(enemy_id: StringName) -> void:
 
 
 func _on_boss_spawned(boss: Enemy) -> void:
+	if boss_cover == null:
+		boss_cover = BossCover.new()
+		layers.decals.add_child(boss_cover)
+	if boss_cover.attach(boss, map.destructibles) > 0:
+		hud.toast("УКРЫТИЕ ИЛИ ВЗРЫВ", "Бочки блокируют пули. Разбей отмеченную рядом с Бароном — прервёшь его атаку на 0,9 с.", UiStyle.GOLD)
 	Platform.note_event("boss spawned")
 	focus_camera(boss.global_position, 1.4)
 	if story != null:
@@ -2055,7 +2065,7 @@ func _open_level_up() -> void:
 		return
 	var bonus := _bonus_choices > 0
 	var luck := clampf(float(level) * 0.015, 0.0, 0.35) + (0.3 if bonus else 0.0) + stats.get_stat(&"luck")
-	var choices := stats.roll_choices(_upgrade_pool(), 3, luck, 1 if bonus else 0)
+	var choices := stats.roll_choices(_draft_pool(), 3, luck, 1 if bonus else 0)
 	if choices.is_empty():
 		_pending_levelups = 0
 		_level_up_open = false
@@ -2116,7 +2126,7 @@ func _on_reroll_requested() -> void:
 		hud.set_nuts(nuts)
 	SoundManager.play(&"merge", -4.0, false)
 	var luck := clampf(float(level) * 0.015, 0.0, 0.35) + (0.3 if _current_bonus else 0.0)
-	var choices := stats.roll_choices(_upgrade_pool(), 3, luck, 1 if _current_bonus else 0, _last_choices)
+	var choices := stats.roll_choices(_draft_pool(), 3, luck, 1 if _current_bonus else 0, _last_choices)
 	if not choices.is_empty():
 		_show_choices(choices, _current_bonus)
 
@@ -2137,6 +2147,8 @@ func _on_upgrade_chosen(upgrade: UpgradeData) -> void:
 	if upgrade.stat == &"heal_pct":
 		player.heal(player.max_hp * upgrade.value)
 	player.apply_run_stats(stats)
+	if upgrade.category == "tactic":
+		hud.toast("БОЕВОЙ СТИЛЬ", CombatTactics.title_line(stats), UiStyle.GOLD)
 	_sync_drones()
 	if _bonus_open:
 		# Выбор из вышки или сейфа: уровни не тратятся; если ждут повышения уровня — открываем их.
@@ -2364,4 +2376,15 @@ func _upgrade_pool() -> Array[UpgradeData]:
 	var pool: Array[UpgradeData] = ContentDB.get_upgrades().duplicate()
 	if stats.patch_context:
 		pool.append_array(Patches.cards())
+	return pool
+
+
+func _draft_pool() -> Array[UpgradeData]:
+	var pool := _upgrade_pool()
+	if level >= 2 and CombatTactics.selected(stats).is_empty():
+		var draft: Array[UpgradeData] = []
+		for upgrade in pool:
+			if upgrade.category == "tactic":
+				draft.append(upgrade)
+		return draft
 	return pool

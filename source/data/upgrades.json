@@ -1204,6 +1204,84 @@
         "melee_long_grip"
       ],
       "style": "melee"
+    },
+    {
+      "upgrade_id": "tactic_arson",
+      "title": "Пиротехник",
+      "description": "Попадания поджигают, убийства оставляют огонь на 3 с. Загоняй толпу в огонь. Прямой урон −8%.",
+      "stat": "tactic_arson",
+      "value": 1,
+      "max_stacks": 3,
+      "color": "#f7a64b",
+      "category": "tactic",
+      "rarity": "common",
+      "weight": 0.6,
+      "style": ""
+    },
+    {
+      "upgrade_id": "tactic_frost",
+      "title": "Ледокол",
+      "description": "Три попадания замораживают врага. При гибели он разлетается осколками. Боссы только замедляются. Прямой урон −8%.",
+      "stat": "tactic_frost",
+      "value": 1,
+      "max_stacks": 3,
+      "color": "#88d8eb",
+      "category": "tactic",
+      "rarity": "common",
+      "weight": 0.6,
+      "style": ""
+    },
+    {
+      "upgrade_id": "tactic_bankshot",
+      "title": "Бильярдист",
+      "description": "Пули отскакивают от стен и усиливаются после отскока. Играй от углов и коридоров. Прямой урон −15%.",
+      "stat": "tactic_bankshot",
+      "value": 1,
+      "max_stacks": 3,
+      "color": "#e5cb79",
+      "category": "tactic",
+      "rarity": "common",
+      "weight": 0.6,
+      "style": "ranged"
+    },
+    {
+      "upgrade_id": "tactic_vanguard",
+      "title": "Авангард",
+      "description": "После рывка по пройденному пути бьёт повторный разрез. Дальность оружия −15%.",
+      "stat": "tactic_vanguard",
+      "value": 1,
+      "max_stacks": 3,
+      "color": "#c6b0ee",
+      "category": "tactic",
+      "rarity": "common",
+      "weight": 0.6,
+      "style": ""
+    },
+    {
+      "upgrade_id": "tactic_sentry",
+      "title": "Окопник",
+      "description": "Постой 1,2 с — поставишь турель. После ухода она работает ещё 3 с. Скорость бега −6%.",
+      "stat": "tactic_sentry",
+      "value": 1,
+      "max_stacks": 3,
+      "color": "#9acbae",
+      "category": "tactic",
+      "rarity": "common",
+      "weight": 0.6,
+      "style": ""
+    },
+    {
+      "upgrade_id": "tactic_switcher",
+      "title": "Два ствола",
+      "description": "Смена оружия даёт 2,4 с усиленного огня и волну отбрасывания. Перезарядка 4 с. Обычный урон −10%.",
+      "stat": "tactic_switcher",
+      "value": 1,
+      "max_stacks": 3,
+      "color": "#efb7cc",
+      "category": "tactic",
+      "rarity": "common",
+      "weight": 0.6,
+      "style": ""
     }
   ]
 }

@@ -68,6 +68,8 @@ for extra in ("manifest.webmanifest", "sw.js", "icon180.png", "icon192.png", "ic
     shutil.copy(os.path.join(ROOT, "tools", extra), os.path.join(site, extra))
 shutil.copy(os.path.join(ROOT, "audio_unlock.js"), os.path.join(site, "audio_unlock.js"))
 shutil.copy(os.path.join(ROOT, "source/web/render_scale.js"), os.path.join(site, "render_scale.js"))
+shutil.copy(os.path.join(ROOT, "source/web/web_music.js"), os.path.join(site, "web_music.js"))
+shutil.copytree(os.path.join(ROOT, "source/web/music"), os.path.join(site, "music"), dirs_exist_ok=True)
 page = open(os.path.join(ROOT, "tools", "site_template.html"), encoding="utf-8").read()
 import json as _json
 _studio = str(_json.load(open(os.path.join(ROOT, "source", "data", "brand.json"))).get("studio", "")).strip()

@@ -134,7 +134,7 @@ func apply_run_stats(stats: RunStats) -> void:
 		hp += new_max - max_hp
 	max_hp = new_max
 	hp = minf(hp, max_hp)
-	move_speed = BASE_SPEED * (1.0 + minf(stats.get_stat(&"move_speed_mult"), MAX_SPEED_BONUS))
+	move_speed = BASE_SPEED * (1.0 + minf(stats.get_stat(&"move_speed_mult"), MAX_SPEED_BONUS)) * (0.94 if CombatTactics.rank(stats, "sentry") > 0 else 1.0)
 	magnet_radius = BASE_MAGNET * (1.0 + stats.get_stat(&"magnet_mult"))
 	weapon_controller.apply_run_stats(stats)
 	visual.apply_equipment(stats.patch_ids)

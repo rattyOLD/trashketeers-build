@@ -144,6 +144,7 @@ const MUSIC := {
 const LITE_MUSIC: Array[StringName] = [&"battle", &"raid"]
 
 var unlocked := false
+var _web_music: Variant = null
 
 var _streams: Dictionary = {}
 var _players: Array[AudioStreamPlayer] = []
@@ -289,6 +290,10 @@ func play_music(id: StringName) -> void:
 	if not unlocked:
 		_pending_music = id
 		return
+	if _web_music != null:
+		_music_id = id
+		_web_music.play(String(id), _web_music_volume())
+		return
 	if id == _music_id and _music.playing:
 		return
 	_music_id = id
@@ -303,13 +308,15 @@ func play_result(victory: bool) -> void:
 	play(&"victory" if victory else &"defeat", 0.0, false)
 	if victory:
 		get_tree().create_timer(1.9, true, false, true).timeout.connect(func() -> void:
-			if _music_id == &"" or not _music.playing:
+			if _music_id == &"" or (_web_music == null and not _music.playing):
 				play_music(&"win"))
 
 
 func stop_music() -> void:
 	_pending_music = &""
 	_music_id = &""
+	if _web_music != null:
+		_web_music.stop()
 	if _music.playing:
 		_fade_music_to(-40.0, true)
 
@@ -343,7 +350,15 @@ func set_volume(channel: String, value: float) -> void:
 	apply_enabled()
 
 
+func _web_music_volume() -> float:
+	if _page_hidden or not is_music_enabled():
+		return 0.0
+	return db_to_linear(float(MUSIC.get(_music_id, -12.0)) + _duck_db) * get_volume("music")
+
+
 func apply_enabled() -> void:
+	if _web_music != null:
+		_web_music.setVolume(_web_music_volume())
 	AudioServer.set_bus_mute(0, _page_hidden)
 	var sfx := AudioServer.get_bus_index(SFX_BUS)
 	var music := AudioServer.get_bus_index(MUSIC_BUS)
@@ -382,12 +397,21 @@ func stop_ambient() -> void:
 
 
 func _process(delta: float) -> void:
+	if _web_music != null and bool(_web_music.failed):
+		_web_music.stop()
+		_web_music = null
+		_preload_music()
+		var retry := _music_id
+		_music_id = &""
+		play_music(retry)
 	_combat_left = maxf(_combat_left - delta, 0.0)
 	var busy := _combat_left > 0.0 and not get_tree().paused and not _page_hidden and is_sfx_enabled()
 	var target := -2.5 if busy else 0.0
 	var next := move_toward(_duck_db, target, delta * (24.0 if busy else 7.0))
 	if not is_equal_approx(next, _duck_db):
 		_duck_db = next
+		if _web_music != null:
+			_web_music.setVolume(_web_music_volume())
 		AudioServer.set_bus_volume_db(AudioServer.get_bus_index(MUSIC_BUS), linear_to_db(maxf(get_volume("music"), 0.001)) + _duck_db)
 		for i in _ambient.size():
 			if _ambient[i].stream != null:
@@ -423,6 +447,8 @@ func _input(event: InputEvent) -> void:
 
 func set_backgrounded(value: bool) -> void:
 	_page_hidden = value
+	if _web_music != null:
+		_web_music.background(value)
 	apply_enabled()
 
 
@@ -463,6 +489,10 @@ func _ensure_buses() -> void:
 
 
 func _preload_streams() -> void:
+	if OS.has_feature("web"):
+		var bridge := JavaScriptBridge.get_interface("trashMusic")
+		if bridge != null and bool(bridge.ready):
+			_web_music = bridge
 	for id in SFX:
 		var stream := _load_stream(SFX_DIR + String(id) + ".ogg")
 		if stream == null:
@@ -472,6 +502,12 @@ func _preload_streams() -> void:
 		_streams[id] = stream
 	# Веб на телефоне держит каждый сыгранный трек целиком в памяти (несжатым): длинные петли боя и рейда
 	# там заменены укороченными версиями (−30 МБ на iPhone). APK и ПК играют полные треки потоком.
+	if _web_music != null:
+		return
+	_preload_music()
+
+
+func _preload_music() -> void:
 	var lite := Platform.is_web and Platform.is_touch()
 	for id in MUSIC:
 		var path := MUSIC_DIR + String(id) + ".ogg"

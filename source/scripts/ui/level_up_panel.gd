@@ -210,6 +210,11 @@ func _make_card(upgrade: UpgradeData, index: int, stats: RunStats) -> Button:
 			longest = maxf(longest, title_font.get_string_size(word, HORIZONTAL_ALIGNMENT_LEFT, -1, title_size).x)
 	title.add_theme_font_size_override("font_size", title_size)
 	column.add_child(title)
+	if upgrade.category == "tactic":
+		var hint := UiStyle.label(CombatTactics.pair_hint(stats, String(upgrade.id).trim_prefix("tactic_")), 15, UiStyle.GOLD, 4)
+		hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		hint.custom_minimum_size = Vector2(text_width, 0)
+		column.add_child(hint)
 	# «−» (U+2212) в шрифте нет — показывался квадрат.
 	var description := Patches.run_description(String(upgrade.id).trim_prefix("patch_"), stats) if upgrade.category == "patch" else upgrade.description
 	var desc := UiStyle.label(description.replace("−", "-"), 18, UiStyle.TEXT, 5)

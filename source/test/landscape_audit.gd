@@ -150,8 +150,9 @@ func _run() -> void:
 		dash_touch.index = 1
 		dash_touch.position = battle.hud._dash.get_global_rect().get_center()
 		battle.player.dash_remaining = 0.0
+		var dash_allowed := not battle.finished and not battle.player.is_dead and not battle.player.is_falling and not battle.player.is_stunned() and battle.player._dash_left <= 0.0
 		battle.hud._dash._input(dash_touch)
-		_check(battle.player.dash_remaining > 0.0, mode + " dash touch activates")
+		_check((battle.player.dash_remaining > 0.0) == dash_allowed, mode + " dash touch respects freeze, falling and defeat")
 		battle._open_pause()
 		await _settle()
 		_inside(battle.hud._pause._panel, mode + " pause")

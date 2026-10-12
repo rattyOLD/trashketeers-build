@@ -136,6 +136,10 @@ func _show_line() -> void:
 	if not emo.is_empty() and who.has("portrait_" + emo):
 		tex_path = str(who["portrait_" + emo])
 	_portrait_tex.texture = load(tex_path) as Texture2D if not tex_path.is_empty() else null
+	var speaker_id := str(line.get("who", ""))
+	var hero_id := "raccoon" if speaker_id == "rico" else speaker_id
+	if HeroIdentity.HEADS.has(hero_id):
+		_portrait_tex.texture = HeroIdentity.portrait(CharacterDB.get_character(hero_id))
 	_portrait_tex.visible = _portrait_tex.texture != null
 	_portrait.text = "" if _portrait_tex.visible else str(who.get("glyph", "?"))
 	_portrait.add_theme_color_override("font_color", color)

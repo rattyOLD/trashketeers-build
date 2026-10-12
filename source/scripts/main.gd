@@ -423,6 +423,8 @@ func _swap_screen(next: Node) -> void:
 		_screen.queue_free()
 	if leaving_battle:
 		BattleMemory.release()
+	elif next is BattleBase:
+		RaccoonVisual.release_cached_textures()
 	_screen = next
 	add_child(next)
 	if _loading != null:

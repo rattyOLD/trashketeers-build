@@ -146,6 +146,7 @@ var bleed_left := 0.0
 var bleed_dps := 0.0
 var bleed_is_burn := false
 var slow_left := 0.0
+var freeze_left := 0.0
 var slow_amount := 0.0
 ## Шкала «выдержки» (ближний бой): на пороге враг оглушён и получает ×1.5 урона.
 var stagger := 0.0
@@ -277,6 +278,7 @@ func activate(enemy_data: EnemyData, at: Vector2, hp_mult: float = 1.0, dmg_mult
 	dash_poison_dps = 0.0
 	bleed_left = 0.0
 	slow_left = 0.0
+	freeze_left = 0.0
 	stagger = 0.0
 	posture = 0.0
 	posture_stun = 0.0
@@ -606,6 +608,13 @@ func tick(delta: float, player: Player, nav: Callable = Callable()) -> void:
 		_detour_time -= delta
 		path_dir = (path_dir * 0.35 + _detour).normalized()
 
+	if freeze_left > 0.0:
+		_tick_status(delta)
+		if data == null:
+			return
+		velocity = Vector2.ZERO
+		_animate(0.0, Vector2.ZERO)
+		return
 	_act_time -= delta
 	_attack_timer -= delta
 	_block_cooldown -= delta
@@ -872,6 +881,16 @@ func add_bleed(dps: float, duration: float, burn: bool = false) -> void:
 	bleed_left = maxf(bleed_left, duration)
 
 
+func freeze(duration: float) -> void:
+	if data == null:
+		return
+	if data.is_boss():
+		add_slow(BOSS_SLOW_CAP, duration)
+	else:
+		freeze_left = maxf(freeze_left, clampf(duration, 0.0, 1.1))
+		add_slow(0.7, duration)
+
+
 func add_slow(amount: float, duration: float) -> void:
 	slow_amount = maxf(slow_amount, minf(amount, BOSS_SLOW_CAP if data.is_boss() else 0.7))
 	slow_left = maxf(slow_left, duration)
@@ -883,6 +902,7 @@ func add_dash_poison(dps: float) -> void:
 
 
 func _tick_status(delta: float) -> void:
+	freeze_left = maxf(0.0, freeze_left - delta)
 	dash_poison_left = maxf(dash_poison_left - delta, 0.0)
 	if dash_poison_left <= 0.0:
 		dash_poison_dps = 0.0

@@ -177,6 +177,7 @@ const MAX_PROJECTILES_PER_SHOT := 14
 ## Оружие «ближнего боя»: дальность до этого значения. Для него работают улучшения «Ближний контакт».
 const CLOSE_RANGE := 360.0
 
+var world_bounces := 0
 var id: StringName
 var display_name: String
 var short_name: String
@@ -463,6 +464,13 @@ func with_run_stats(stats: RunStats) -> WeaponData:
 		w.fire_interval *= squeeze
 		w.damage *= squeeze
 		w.explosion_damage *= squeeze
+	w.damage *= CombatTactics.damage_factor(stats)
+	w.explosion_damage *= CombatTactics.damage_factor(stats)
+	var bank := CombatTactics.rank(stats, "bankshot")
+	w.world_bounces = bank + 1 if bank > 0 and not w.is_melee() else 0
+	if CombatTactics.rank(stats, "vanguard") > 0:
+		w.max_distance *= 0.85
+		w.melee_reach *= 0.85
 	return w
 
 

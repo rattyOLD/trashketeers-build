@@ -29,7 +29,7 @@ func _run() -> void:
 	SaveService.add_stat("scars", 5, false)
 	var scar_face := HudWidgets.DamagePortrait.new()
 	scar_face.set_character(CharacterDB.get_character("raccoon"))
-	_check(scar_face._face.scars.size() == 5 and scar_face._face.scars_visible, "Rico scars align only to healthy base")
+	_check(SaveService.get_stat("scars") == 5 and scar_face._face.scars.is_empty(), "scar history retained without misaligned overlays on canonical face")
 	scar_face.health = 0.4
 	scar_face._pick_face()
 	_check(not scar_face._face.scars_visible, "scar overlays hidden on differently framed damage portraits")

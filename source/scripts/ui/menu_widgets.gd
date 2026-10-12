@@ -271,6 +271,9 @@ class Avatar:
 		item.draw_colored_polygon(points, Color.WHITE, uvs, tex)
 
 	static func get_texture_for(character: Dictionary, skin_id: String) -> ImageTexture:
+		var canonical := HeroIdentity.portrait(character)
+		if canonical != null:
+			return canonical
 		var key := "%s:%s" % [character.get("id", ""), skin_id]
 		if _cache.has(key):
 			return _cache[key]
@@ -417,6 +420,20 @@ class RaccoonPreview:
 	var _shot_timer := 0.0
 	var _tracers: Array[Vector3] = []
 	var _tracer_dirs: Array[Vector2] = []
+	var motion := "auto"
+	var _motion_clock := 0.0
+
+	func set_motion(mode: String) -> void:
+		motion = mode if mode in ["auto", "run", "shoot", "ready"] else "auto"
+		raccoon.preview_mode = motion == "auto"
+		raccoon._fidget_t = 0.0
+		_shots_left = 0
+		_aim_hold = 0.0
+		_motion_clock = 0.0
+		raccoon.aiming = false
+		_tracers.clear()
+		_tracer_dirs.clear()
+		queue_redraw()
 
 	func _init(skin: Dictionary, preview_scale: float = 1.0, character: Dictionary = {}) -> void:
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -455,8 +472,21 @@ class RaccoonPreview:
 		_shot_timer = 0.12
 
 	func _process(delta: float) -> void:
+		if not is_visible_in_tree():
+			return
 		_time += delta
 		raccoon.position = Vector2(size.x * 0.5, size.y * 0.5 + 34.0 * _scale)
+		if motion != "auto":
+			_motion_clock -= delta
+			raccoon.aiming = motion == "shoot"
+			if _motion_clock <= 0.0:
+				_motion_clock = 0.16 if motion == "shoot" else 0.9
+				if motion == "shoot":
+					raccoon.kick(Vector2.RIGHT, 0.5)
+				elif motion == "ready":
+					raccoon.play_action("ready")
+			raccoon.update_motion(Vector2(160, 0) if motion == "run" else Vector2.ZERO, Vector2.RIGHT, delta)
+			return
 		var look := Vector2(cos(_time * 0.7), sin(_time * 1.1) * 0.3)
 		if raccoon.uses_clips():
 			# Руки нарисованы в кадре: ствол не гуляет по кругу и герой не вертится — стоит к зрителю

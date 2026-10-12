@@ -9,14 +9,23 @@ mkdir -p "$LOG"
 export XDG_DATA_HOME=${XDG_DATA_HOME:-$LOG/user}
 export XDG_CACHE_HOME=${XDG_CACHE_HOME:-$LOG/cache}
 fail=0
-if ! timeout 300 "$GODOT" --headless --path "$P" --import > "$LOG/import.log" 2>&1 || grep -q 'SCRIPT ERROR' "$LOG/import.log"; then
+if ! timeout 300 "$GODOT" --audio-driver Dummy --headless --path "$P" --import > "$LOG/import.log" 2>&1 || grep -q 'SCRIPT ERROR' "$LOG/import.log"; then
   echo "VERIFY FAILED — импорт ресурсов: $LOG/import.log"
   exit 1
 fi
-if ! "$GODOT" --headless --path "$P" res://test/check_scripts.tscn > "$LOG/scripts.log" 2>&1 || ! grep -q 'CHECK checked .*failed 0' "$LOG/scripts.log" || grep -q 'SCRIPT ERROR' "$LOG/scripts.log"; then
+if ! "$GODOT" --audio-driver Dummy --headless --path "$P" res://test/check_scripts.tscn > "$LOG/scripts.log" 2>&1 || ! grep -q 'CHECK checked .*failed 0' "$LOG/scripts.log" || grep -q 'SCRIPT ERROR' "$LOG/scripts.log"; then
   fail=1
 fi
 grep 'CHECK checked' "$LOG/scripts.log"
+for new_check in "hero_identity_test:HERO_IDENTITY" "loadout_choices_test:LOADOUT_CHOICES" "tactics_test:TACTICS_TEST"; do
+  scene=${new_check%:*}
+  marker=${new_check#*:}
+  XDG_DATA_HOME="$LOG/$scene-user" timeout 100 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --audio-driver Dummy --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" "res://test/$scene.tscn" > "$LOG/$scene.log" 2>&1
+  if ! grep -q "$marker failures=0" "$LOG/$scene.log" || grep -qE 'SCRIPT ERROR|^ERROR:' "$LOG/$scene.log"; then
+    fail=1
+  fi
+  grep "$marker failures=" "$LOG/$scene.log"
+done
 XDG_DATA_HOME="$LOG/survival-access-user" timeout 90 "$GODOT" --headless --audio-driver Dummy --path "$P" res://test/survival_access_test.tscn > "$LOG/survival-access.log" 2>&1
 if ! grep -q 'SURVIVAL_ACCESS failures=0' "$LOG/survival-access.log" || grep -q 'SCRIPT ERROR' "$LOG/survival-access.log"; then
   fail=1
@@ -33,124 +42,124 @@ XDG_DATA_HOME="$LOG/boss-armory-user" timeout 120 "$GODOT" --headless --audio-dr
 if ! grep -q 'BOSS_ARMORY_REGRESSION failures=0' "$LOG/boss-armory.log" || grep -q 'SCRIPT ERROR' "$LOG/boss-armory.log"; then
   fail=1
 fi
-XDG_DATA_HOME="$LOG/enemy-art-user" timeout 90 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/enemy_art_test.tscn > "$LOG/enemy-art.log" 2>&1
+XDG_DATA_HOME="$LOG/enemy-art-user" timeout 90 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --audio-driver Dummy --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/enemy_art_test.tscn > "$LOG/enemy-art.log" 2>&1
 if ! grep -q 'ENEMY_ART failures=0' "$LOG/enemy-art.log" || grep -q 'SCRIPT ERROR' "$LOG/enemy-art.log"; then
   fail=1
 fi
-XDG_DATA_HOME="$LOG/brief-user" "$GODOT" --headless --path "$P" res://test/brief_completion_test.tscn > "$LOG/brief.log" 2>&1
+XDG_DATA_HOME="$LOG/brief-user" "$GODOT" --audio-driver Dummy --headless --path "$P" res://test/brief_completion_test.tscn > "$LOG/brief.log" 2>&1
 if ! grep -q 'BRIEF_COMPLETION failures=0' "$LOG/brief.log" || grep -q 'SCRIPT ERROR' "$LOG/brief.log"; then
   fail=1
 fi
-XDG_DATA_HOME="$LOG/dash-user" "$GODOT" --headless --path "$P" res://test/dash_regression.tscn > "$LOG/dash.log" 2>&1
+XDG_DATA_HOME="$LOG/dash-user" "$GODOT" --audio-driver Dummy --headless --path "$P" res://test/dash_regression.tscn > "$LOG/dash.log" 2>&1
 if ! grep -q 'DASH_REGRESSION failures=0' "$LOG/dash.log" || grep -q 'SCRIPT ERROR' "$LOG/dash.log"; then
   fail=1
 fi
-XDG_DATA_HOME="$LOG/landscape-user" "$GODOT" --headless --path "$P" res://test/landscape_audit.tscn > "$LOG/landscape.log" 2>&1
+XDG_DATA_HOME="$LOG/landscape-user" "$GODOT" --audio-driver Dummy --headless --path "$P" res://test/landscape_audit.tscn > "$LOG/landscape.log" 2>&1
 if ! grep -q 'LANDSCAPE_AUDIT failures=0' "$LOG/landscape.log" || grep -q 'SCRIPT ERROR' "$LOG/landscape.log"; then
   fail=1
 fi
-XDG_DATA_HOME="$LOG/app-activity-user" "$GODOT" --headless --path "$P" res://test/app_activity_test.tscn > "$LOG/app-activity.log" 2>&1
+XDG_DATA_HOME="$LOG/app-activity-user" "$GODOT" --audio-driver Dummy --headless --path "$P" res://test/app_activity_test.tscn > "$LOG/app-activity.log" 2>&1
 if ! grep -q 'APP_ACTIVITY_TEST failures=0' "$LOG/app-activity.log" || grep -q 'SCRIPT ERROR' "$LOG/app-activity.log"; then
   fail=1
 fi
-XDG_DATA_HOME="$LOG/android-perf-user" "$GODOT" --headless --path "$P" res://test/android_perf_regression.tscn > "$LOG/android-perf.log" 2>&1
+XDG_DATA_HOME="$LOG/android-perf-user" "$GODOT" --audio-driver Dummy --headless --path "$P" res://test/android_perf_regression.tscn > "$LOG/android-perf.log" 2>&1
 if ! grep -q 'ANDROID_PERF_REGRESSION failures=0' "$LOG/android-perf.log" || grep -q 'SCRIPT ERROR' "$LOG/android-perf.log"; then
   fail=1
 fi
-XDG_DATA_HOME="$LOG/app-updater-user" "$GODOT" --headless --path "$P" res://test/app_updater_test.tscn > "$LOG/app-updater.log" 2>&1
+XDG_DATA_HOME="$LOG/app-updater-user" "$GODOT" --audio-driver Dummy --headless --path "$P" res://test/app_updater_test.tscn > "$LOG/app-updater.log" 2>&1
 if ! grep -q 'APP_UPDATER_TEST failures=0' "$LOG/app-updater.log" || grep -q 'SCRIPT ERROR' "$LOG/app-updater.log"; then
   fail=1
 fi
-XDG_DATA_HOME="$LOG/story-tester-user" "$GODOT" --headless --path "$P" res://test/story_tester_start_test.tscn > "$LOG/story-tester-start.log" 2>&1
+XDG_DATA_HOME="$LOG/story-tester-user" "$GODOT" --audio-driver Dummy --headless --path "$P" res://test/story_tester_start_test.tscn > "$LOG/story-tester-start.log" 2>&1
 if ! grep -q 'STORY_TESTER_START failures=0' "$LOG/story-tester-start.log" || grep -q 'SCRIPT ERROR' "$LOG/story-tester-start.log"; then
   fail=1
 fi
-XDG_DATA_HOME="$LOG/manual-fire-user" timeout 90 "$GODOT" --headless --path "$P" res://test/manual_fire_test.tscn > "$LOG/manual-fire.log" 2>&1
+XDG_DATA_HOME="$LOG/manual-fire-user" timeout 90 "$GODOT" --audio-driver Dummy --headless --path "$P" res://test/manual_fire_test.tscn > "$LOG/manual-fire.log" 2>&1
 if ! grep -q 'MANUAL_FIRE failures=0' "$LOG/manual-fire.log" || grep -q 'SCRIPT ERROR' "$LOG/manual-fire.log"; then
   fail=1
 fi
-XDG_DATA_HOME="$LOG/melee-user" timeout 90 "$GODOT" --headless --path "$P" res://test/melee_probe.tscn > "$LOG/melee.log" 2>&1
+XDG_DATA_HOME="$LOG/melee-user" timeout 90 "$GODOT" --audio-driver Dummy --headless --path "$P" res://test/melee_probe.tscn > "$LOG/melee.log" 2>&1
 if ! grep -q 'MELEE_PROBE failures=0' "$LOG/melee.log" || grep -q 'SCRIPT ERROR' "$LOG/melee.log"; then
   fail=1
 fi
-XDG_DATA_HOME="$LOG/levelup-user" xvfb-run -a -s "-screen 0 1700x900x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 1560x720 --path "$P" res://test/levelup_layout_test.tscn > "$LOG/levelup.log" 2>&1
+XDG_DATA_HOME="$LOG/levelup-user" xvfb-run -a -s "-screen 0 1700x900x24" "$GODOT" --audio-driver Dummy --display-driver x11 --rendering-driver opengl3 --resolution 1560x720 --path "$P" res://test/levelup_layout_test.tscn > "$LOG/levelup.log" 2>&1
 if ! grep -q 'LEVELUP_LAYOUT failures=0' "$LOG/levelup.log" || grep -q 'SCRIPT ERROR' "$LOG/levelup.log"; then
   fail=1
 fi
 # Узкий телефон (iPhone в «альбомной» вкладке): окно должно ужаться и встать по центру.
-XDG_DATA_HOME="$LOG/levelup-narrow-user" xvfb-run -a -s "-screen 0 1700x900x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 923x420 --path "$P" res://test/levelup_layout_test.tscn > "$LOG/levelup-narrow.log" 2>&1
+XDG_DATA_HOME="$LOG/levelup-narrow-user" xvfb-run -a -s "-screen 0 1700x900x24" "$GODOT" --audio-driver Dummy --display-driver x11 --rendering-driver opengl3 --resolution 923x420 --path "$P" res://test/levelup_layout_test.tscn > "$LOG/levelup-narrow.log" 2>&1
 if ! grep -q 'LEVELUP_LAYOUT failures=0' "$LOG/levelup-narrow.log" || grep -q 'SCRIPT ERROR' "$LOG/levelup-narrow.log"; then
   fail=1
 fi
-XDG_DATA_HOME="$LOG/ui-v32-user" xvfb-run -a -s "-screen 0 1280x1400x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/ui_v32_test.tscn > "$LOG/ui-v32.log" 2>&1
+XDG_DATA_HOME="$LOG/ui-v32-user" xvfb-run -a -s "-screen 0 1280x1400x24" "$GODOT" --audio-driver Dummy --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/ui_v32_test.tscn > "$LOG/ui-v32.log" 2>&1
 if ! grep -q 'UI_V32 failures=0' "$LOG/ui-v32.log" || grep -q 'SCRIPT ERROR' "$LOG/ui-v32.log"; then
   fail=1
 fi
-UI_NATIVE_A13=1 UI_RENDER_SCALE=0.75 XDG_DATA_HOME="$LOG/ui-a13-user" xvfb-run -a -s "-screen 0 1280x1400x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/ui_v32_test.tscn > "$LOG/ui-a13.log" 2>&1
+UI_NATIVE_A13=1 UI_RENDER_SCALE=0.75 XDG_DATA_HOME="$LOG/ui-a13-user" xvfb-run -a -s "-screen 0 1280x1400x24" "$GODOT" --audio-driver Dummy --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/ui_v32_test.tscn > "$LOG/ui-a13.log" 2>&1
 if ! grep -q 'UI_V32 failures=0' "$LOG/ui-a13.log" || grep -q 'SCRIPT ERROR' "$LOG/ui-a13.log"; then
   fail=1
 fi
-XDG_DATA_HOME="$LOG/hand-grip-user" "$GODOT" --headless --path "$P" res://test/hand_grip_test.tscn > "$LOG/hand-grip.log" 2>&1
+XDG_DATA_HOME="$LOG/hand-grip-user" "$GODOT" --audio-driver Dummy --headless --path "$P" res://test/hand_grip_test.tscn > "$LOG/hand-grip.log" 2>&1
 if ! grep -q 'HAND_GRIP failures=0' "$LOG/hand-grip.log" || grep -q 'SCRIPT ERROR' "$LOG/hand-grip.log"; then
   fail=1
 fi
-XDG_DATA_HOME="$LOG/menu-motion-user" timeout 90 "$GODOT" --headless --path "$P" res://test/menu_preview_motion_test.tscn > "$LOG/menu-motion.log" 2>&1
+XDG_DATA_HOME="$LOG/menu-motion-user" timeout 90 "$GODOT" --audio-driver Dummy --headless --path "$P" res://test/menu_preview_motion_test.tscn > "$LOG/menu-motion.log" 2>&1
 if ! grep -q 'MENU_PREVIEW_MOTION failures=0' "$LOG/menu-motion.log" || grep -q 'SCRIPT ERROR' "$LOG/menu-motion.log"; then
   fail=1
 fi
-XDG_DATA_HOME="$LOG/quality-patches-user" timeout 90 "$GODOT" --headless --path "$P" res://test/quality_patches_test.tscn > "$LOG/quality-patches.log" 2>&1
+XDG_DATA_HOME="$LOG/quality-patches-user" timeout 90 "$GODOT" --audio-driver Dummy --headless --path "$P" res://test/quality_patches_test.tscn > "$LOG/quality-patches.log" 2>&1
 if ! grep -q 'QUALITY_PATCHES failures=0' "$LOG/quality-patches.log" || grep -q 'SCRIPT ERROR' "$LOG/quality-patches.log"; then
   fail=1
 fi
-XDG_DATA_HOME="$LOG/combat-polish-user" timeout 90 "$GODOT" --headless --path "$P" res://test/combat_polish_test.tscn > "$LOG/combat-polish.log" 2>&1
+XDG_DATA_HOME="$LOG/combat-polish-user" timeout 90 "$GODOT" --audio-driver Dummy --headless --path "$P" res://test/combat_polish_test.tscn > "$LOG/combat-polish.log" 2>&1
 if ! grep -q 'COMBAT_POLISH failures=0' "$LOG/combat-polish.log" || grep -q 'SCRIPT ERROR' "$LOG/combat-polish.log"; then
   fail=1
 fi
-XDG_DATA_HOME="$LOG/battle-tactics-user" timeout 90 "$GODOT" --headless --path "$P" res://test/battle_tactics_test.tscn > "$LOG/battle-tactics.log" 2>&1
+XDG_DATA_HOME="$LOG/battle-tactics-user" timeout 90 "$GODOT" --audio-driver Dummy --headless --path "$P" res://test/battle_tactics_test.tscn > "$LOG/battle-tactics.log" 2>&1
 if ! grep -q 'BATTLE_TACTICS failures=0' "$LOG/battle-tactics.log" || grep -qE 'SCRIPT ERROR|Lambda capture' "$LOG/battle-tactics.log"; then
   fail=1
 fi
-XDG_DATA_HOME="$LOG/navigation-choices-user" timeout 90 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/navigation_choices_test.tscn > "$LOG/navigation-choices.log" 2>&1
+XDG_DATA_HOME="$LOG/navigation-choices-user" timeout 90 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --audio-driver Dummy --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/navigation_choices_test.tscn > "$LOG/navigation-choices.log" 2>&1
 if ! grep -q 'NAVIGATION_CHOICES failures=0' "$LOG/navigation-choices.log" || grep -qE 'SCRIPT ERROR|Lambda capture' "$LOG/navigation-choices.log"; then
   fail=1
 fi
-XDG_DATA_HOME="$LOG/run-improvements-user" timeout 120 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/run_improvements_test.tscn > "$LOG/run-improvements.log" 2>&1
+XDG_DATA_HOME="$LOG/run-improvements-user" timeout 120 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --audio-driver Dummy --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/run_improvements_test.tscn > "$LOG/run-improvements.log" 2>&1
 if ! grep -q 'RUN_IMPROVEMENTS failures=0' "$LOG/run-improvements.log" || grep -qE 'SCRIPT ERROR|Lambda capture' "$LOG/run-improvements.log"; then
   fail=1
 fi
-XDG_DATA_HOME="$LOG/environment-polish-user" timeout 120 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/environment_polish_test.tscn > "$LOG/environment-polish.log" 2>&1
+XDG_DATA_HOME="$LOG/environment-polish-user" timeout 120 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --audio-driver Dummy --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/environment_polish_test.tscn > "$LOG/environment-polish.log" 2>&1
 if ! grep -q 'ENVIRONMENT_POLISH failures=0' "$LOG/environment-polish.log" || grep -qE 'SCRIPT ERROR|Lambda capture' "$LOG/environment-polish.log"; then
   fail=1
 fi
-XDG_DATA_HOME="$LOG/combat-polish-layout-user" timeout 90 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/combat_polish_layout_test.tscn > "$LOG/combat-polish-layout.log" 2>&1
+XDG_DATA_HOME="$LOG/combat-polish-layout-user" timeout 90 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --audio-driver Dummy --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/combat_polish_layout_test.tscn > "$LOG/combat-polish-layout.log" 2>&1
 if ! grep -q 'COMBAT_POLISH_LAYOUT failures=0' "$LOG/combat-polish-layout.log" || grep -q 'SCRIPT ERROR' "$LOG/combat-polish-layout.log"; then
   fail=1
 fi
-XDG_DATA_HOME="$LOG/paused-world-user" timeout 90 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/paused_world_test.tscn > "$LOG/paused-world.log" 2>&1
+XDG_DATA_HOME="$LOG/paused-world-user" timeout 90 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --audio-driver Dummy --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/paused_world_test.tscn > "$LOG/paused-world.log" 2>&1
 if ! grep -q 'PAUSED_WORLD failures=0' "$LOG/paused-world.log" || grep -q 'SCRIPT ERROR' "$LOG/paused-world.log"; then
   fail=1
 fi
-XDG_DATA_HOME="$LOG/graphics-upgrade-user" timeout 90 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/graphics_upgrade_test.tscn > "$LOG/graphics-upgrade.log" 2>&1
+XDG_DATA_HOME="$LOG/graphics-upgrade-user" timeout 90 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --audio-driver Dummy --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/graphics_upgrade_test.tscn > "$LOG/graphics-upgrade.log" 2>&1
 if ! grep -q 'GRAPHICS_UPGRADE failures=0' "$LOG/graphics-upgrade.log" || grep -qE 'SCRIPT ERROR|Lambda capture' "$LOG/graphics-upgrade.log"; then
   fail=1
 fi
-XDG_DATA_HOME="$LOG/scenery-graphics-user" timeout 150 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/scenery_graphics_test.tscn > "$LOG/scenery-graphics.log" 2>&1
+XDG_DATA_HOME="$LOG/scenery-graphics-user" timeout 150 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --audio-driver Dummy --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/scenery_graphics_test.tscn > "$LOG/scenery-graphics.log" 2>&1
 if ! grep -q 'SCENERY_GRAPHICS failures=0' "$LOG/scenery-graphics.log" || grep -qE 'SCRIPT ERROR|Lambda capture' "$LOG/scenery-graphics.log"; then
   fail=1
 fi
-XDG_DATA_HOME="$LOG/battle-wear-user" timeout 90 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/battle_wear_test.tscn > "$LOG/battle-wear.log" 2>&1
+XDG_DATA_HOME="$LOG/battle-wear-user" timeout 90 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --audio-driver Dummy --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/battle_wear_test.tscn > "$LOG/battle-wear.log" 2>&1
 if ! grep -q 'BATTLE_WEAR failures=0' "$LOG/battle-wear.log" || grep -qE 'SCRIPT ERROR|Lambda capture' "$LOG/battle-wear.log"; then
   fail=1
 fi
-XDG_DATA_HOME="$LOG/visual-direction-user" timeout 90 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/visual_direction_test.tscn > "$LOG/visual-direction.log" 2>&1
+XDG_DATA_HOME="$LOG/visual-direction-user" timeout 90 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --audio-driver Dummy --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/visual_direction_test.tscn > "$LOG/visual-direction.log" 2>&1
 if ! grep -q 'VISUAL_DIRECTION failures=0' "$LOG/visual-direction.log" || grep -qE 'SCRIPT ERROR|Lambda capture' "$LOG/visual-direction.log"; then
   fail=1
 fi
-XDG_DATA_HOME="$LOG/character-motion-user" timeout 120 xvfb-run -a -s "-screen 0 1700x1100x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/character_motion_test.tscn > "$LOG/character-motion.log" 2>&1
+XDG_DATA_HOME="$LOG/character-motion-user" timeout 120 xvfb-run -a -s "-screen 0 1700x1100x24" "$GODOT" --audio-driver Dummy --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/character_motion_test.tscn > "$LOG/character-motion.log" 2>&1
 if ! grep -q 'CHARACTER_MOTION failures=0' "$LOG/character-motion.log" || grep -qE 'SCRIPT ERROR|Lambda capture|Shader compilation failed' "$LOG/character-motion.log"; then
   fail=1
 fi
-XDG_DATA_HOME="$LOG/battle-expansion-user" timeout 120 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/battle_expansion_test.tscn > "$LOG/battle-expansion.log" 2>&1
+XDG_DATA_HOME="$LOG/battle-expansion-user" timeout 120 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --audio-driver Dummy --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" res://test/battle_expansion_test.tscn > "$LOG/battle-expansion.log" 2>&1
 if ! grep -q 'BATTLE_EXPANSION failures=0' "$LOG/battle-expansion.log" || grep -qE 'SCRIPT ERROR|Lambda capture' "$LOG/battle-expansion.log"; then
   fail=1
 fi
@@ -159,14 +168,14 @@ if ! grep -q 'BARON_STREAM failures=0' "$LOG/baron-stream.log" || grep -qE 'SCRI
   fail=1
 fi
 for m in survival story raid mod:blast; do
-  MODE=$m DURATION=45 timeout 300 xvfb-run -a -s "-screen 0 1280x1400x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 \
+  MODE=$m DURATION=45 timeout 300 xvfb-run -a -s "-screen 0 1280x1400x24" "$GODOT" --audio-driver Dummy --display-driver x11 --rendering-driver opengl3 \
     --resolution 1280x720 --path "$P" res://test/mode_audit.tscn > "$LOG/$m.log" 2>&1
   n=$(grep -c "SCRIPT ERROR" "$LOG/$m.log"); done_ok=$(grep -c MODE_AUDIT_DONE "$LOG/$m.log")
   echo "$m: errors=$n finished=$done_ok"
   [ "$n" != "0" ] || [ "$done_ok" != "1" ] && fail=1
 done
 for hero in sniper_f medic_f; do
-  MODE=survival HERO="$hero" NATIVE_A13=1 SOAK=1 WAVE=30 SCALE=1 DURATION=30 timeout 300 xvfb-run -a -s "-screen 0 1280x1400x24" "$GODOT" --display-driver x11 --rendering-driver opengl3 \
+  MODE=survival HERO="$hero" NATIVE_A13=1 SOAK=1 WAVE=30 SCALE=1 DURATION=30 timeout 300 xvfb-run -a -s "-screen 0 1280x1400x24" "$GODOT" --audio-driver Dummy --display-driver x11 --rendering-driver opengl3 \
     --resolution 1280x720 --path "$P" res://test/mode_audit.tscn > "$LOG/a13-$hero.log" 2>&1
   n=$(grep -c "SCRIPT ERROR" "$LOG/a13-$hero.log"); done_ok=$(grep -c MODE_AUDIT_DONE "$LOG/a13-$hero.log")
   echo "a13-$hero: errors=$n finished=$done_ok"

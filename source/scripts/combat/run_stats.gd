@@ -3,6 +3,7 @@ extends RefCounted
 ## Бонусы текущего забега. Живут только до конца боя; базовые конфиги не трогают.
 
 const STAT_KEYS: Array[StringName] = [
+	&"tactic_arson", &"tactic_frost", &"tactic_bankshot", &"tactic_vanguard", &"tactic_sentry", &"tactic_switcher",
 	&"dodge_damage", &"dodge_blast", &"dodge_poison", &"dodge_shock", &"dodge_cooldown", &"dodge_distance",
 	&"damage_mult",
 	&"fire_rate_mult",
@@ -58,6 +59,8 @@ const STAT_KEYS: Array[StringName] = [
 const INSTANT_STATS: Array[StringName] = [&"heal_pct"]
 
 ## Есть ли в руках ствол ближнего боя (ставит игра): без него карточки «ближнего боя» не выпадают.
+var has_tactics := false
+var switch_boost_left := 0.0
 var close_context := false
 var rail_context := false
 ## Убийства за забег: ближним оружием и всем остальным — по ним выдача карточек подстраивается под стиль.
@@ -134,8 +137,10 @@ func can_take(upgrade: UpgradeData) -> bool:
 
 
 func apply(upgrade: UpgradeData) -> void:
-	if upgrade.category in ["dash", "dash_element", "patch"] and not is_available(upgrade):
+	if upgrade.category in ["dash", "dash_element", "patch", "tactic"] and not is_available(upgrade):
 		return
+	if upgrade.category == "tactic":
+		has_tactics = true
 	_stacks[upgrade.id] = get_stacks(upgrade.id) + 1
 	if upgrade.category == "patch":
 		var id := String(upgrade.id).trim_prefix("patch_")
@@ -157,6 +162,8 @@ func has_upgrade(upgrade_id: StringName) -> bool:
 
 
 func is_available(upgrade: UpgradeData) -> bool:
+	if upgrade.category == "tactic" and CombatTactics.rank(self, String(upgrade.id).trim_prefix("tactic_")) == 0 and CombatTactics.selected(self).size() >= CombatTactics.MAX_TACTICS:
+		return false
 	if upgrade.category == "patch":
 		var id := String(upgrade.id).trim_prefix("patch_")
 		if not patch_context or not Patches.unlocked(id) or (not patch_ids.has(id) and patch_ids.size() >= Patches.SLOTS):

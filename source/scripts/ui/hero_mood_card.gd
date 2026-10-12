@@ -135,6 +135,10 @@ static func _mood_name(mood: String) -> String:
 
 ## Победа: самый бодрый кадр. Поражение: кадр «сильно побит»; если нарисован один кадр, остальное дорисует код.
 func _pick_texture(id: String, win: bool) -> Texture2D:
+	var canonical := HeroIdentity.portrait(_character)
+	if canonical != null:
+		_posed = true
+		return canonical
 	# Нарисованные позы итога (Астра): победа — салют/кружка, поражение — понурый герой. Иначе — портрет боя.
 	var poses: Array[String] = []
 	for n in 6:
