@@ -230,7 +230,10 @@ func _poll_orientation() -> void:
 func _on_window_resized() -> void:
 	_resize_serial += 1
 	var serial := _resize_serial
-	await get_tree().create_timer(0.35, true, false, true).timeout
+	SceneDelay.after(self, 0.35, func() -> void: _settle_window_resize(serial), true, true)
+
+
+func _settle_window_resize(serial: int) -> void:
 	if serial != _resize_serial:
 		return
 	# Открылась или закрылась экранная клавиатура, пока вводят текст: меню не перестраиваем, иначе окно

@@ -9,6 +9,13 @@ const MIN_OPEN_MS := 500
 var _paused_before := false
 var _done := false
 var _opened_ms := 0
+var _panel: PanelContainer
+var _scroll: ScrollContainer
+var _body: VBoxContainer
+var _options: HBoxContainer
+var _center: CenterContainer
+var _title: Label
+var _text: Label
 
 
 func _init() -> void:
@@ -31,20 +38,32 @@ func open(card: Dictionary) -> void:
 	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(shade)
 	var center := CenterContainer.new()
+	_center = center
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(center)
 	var panel := PanelContainer.new()
+	_panel = panel
 	var style := UiStyle.box(Color(0.184, 0.177, 0.166, 0.98), color, 6, 28)
-	style.set_content_margin_all(24)
+	style.set_content_margin_all(16)
 	panel.add_theme_stylebox_override("panel", style)
 	center.add_child(panel)
-	var width := clampf(get_viewport().get_visible_rect().size.x - 60.0, 320.0, 700.0)
+	var width := minf(700.0, maxf(200.0, get_viewport().get_visible_rect().size.x - 64.0))
+	var outer := VBoxContainer.new()
+	outer.add_theme_constant_override("separation", 12)
+	panel.add_child(outer)
+	_scroll = DragScroll.new()
+	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_scroll.custom_minimum_size.x = width
+	outer.add_child(_scroll)
 	var box := VBoxContainer.new()
-	box.custom_minimum_size = Vector2(width, 0)
+	_body = box
+	box.custom_minimum_size = Vector2(width - 16.0, 0)
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	box.add_theme_constant_override("separation", 12)
-	panel.add_child(box)
+	_scroll.add_child(box)
 	var title := UiStyle.label(str(card.get("title", "")).to_upper(), 30, color, 8)
+	_title = title
 	title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	title.custom_minimum_size = Vector2(width - 20.0, 0)
 	box.add_child(title)
@@ -52,7 +71,7 @@ func open(card: Dictionary) -> void:
 	if not image_path.is_empty() and ResourceLoader.exists(image_path):
 		var stage := Glow.new()
 		stage.tint = color
-		stage.custom_minimum_size = Vector2(0, 250)
+		stage.custom_minimum_size = Vector2(0, clampf(get_viewport().get_visible_rect().size.y * 0.22, 96.0, 160.0))
 		box.add_child(stage)
 		var picture := TextureRect.new()
 		picture.texture = load(image_path) as Texture2D
@@ -67,23 +86,50 @@ func open(card: Dictionary) -> void:
 	text_plate.add_theme_stylebox_override("panel", plate_style)
 	box.add_child(text_plate)
 	var text := UiStyle.label(str(card.get("text", "")), 22, UiStyle.TEXT, 5)
+	_text = text
 	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	text.custom_minimum_size = Vector2(width - 60.0, 0)
 	text_plate.add_child(text)
 	var options: Array = card.get("options", [])
 	var row := HBoxContainer.new()
+	_options = row
 	row.add_theme_constant_override("separation", 12)
-	box.add_child(row)
+	outer.add_child(row)
 	var cell := (width - 12.0 * maxi(options.size() - 1, 0)) / maxf(options.size(), 1)
 	for i in options.size():
 		row.add_child(_make_option(options[i], i, color, cell))
+	_body.minimum_size_changed.connect(_fit_layout.call_deferred)
+	_options.minimum_size_changed.connect(_fit_layout.call_deferred)
+	get_viewport().size_changed.connect(_fit_layout.call_deferred)
+	_fit_layout.call_deferred()
 	SoundManager.play(&"ui_confirm", -6.0)
+
+
+func _fit_layout() -> void:
+	if not is_inside_tree() or _scroll == null:
+		return
+	var view := get_viewport().get_visible_rect().size
+	var safe := ScreenSafeArea.rect(view)
+	ScreenSafeArea.fit(_center, view, 12.0)
+	var width := minf(700.0, maxf(200.0, safe.size.x - 64.0))
+	_scroll.custom_minimum_size.x = width
+	_body.custom_minimum_size.x = width - 16.0
+	_title.custom_minimum_size.x = width - 20.0
+	_text.custom_minimum_size.x = width - 60.0
+	var count := _options.get_child_count()
+	var cell := (width - 12.0 * maxi(count - 1, 0)) / maxf(count, 1)
+	for option: Button in _options.get_children():
+		option.custom_minimum_size.x = cell
+		for label: Label in option.find_children("*", "Label", true, false):
+			label.custom_minimum_size.x = cell - 16.0
+	var room := safe.size.y - 76.0 - _options.get_combined_minimum_size().y
+	_scroll.custom_minimum_size.y = minf(_body.get_combined_minimum_size().y, maxf(32.0, room))
 
 
 func _make_option(option: Dictionary, index: int, color: Color, cell: float) -> Button:
 	var accent := Color("#3fe0a0") if index == 0 else Color("#ff6a3d")
 	var button := Button.new()
-	button.custom_minimum_size = Vector2(cell, 250)
+	button.custom_minimum_size = Vector2(cell, 180)
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	button.focus_mode = Control.FOCUS_NONE
 	for state in ["normal", "hover", "pressed"]:
@@ -110,6 +156,8 @@ func _make_option(option: Dictionary, index: int, color: Color, cell: float) -> 
 		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		column.add_child(icon)
 	var label := UiStyle.label(str(option.get("label", "")), 24, UiStyle.TEXT, 6)
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.custom_minimum_size.x = cell - 16.0
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	column.add_child(label)
 	var bullets: Array = option.get("bullets", [])
@@ -122,8 +170,12 @@ func _make_option(option: Dictionary, index: int, color: Color, cell: float) -> 
 	for line in bullets:
 		var good := not str(line).begins_with("-")
 		var row := UiStyle.label(("+ %s" % line) if good else ("- %s" % str(line).substr(1)), 18, Color("#b9ffd9") if good else Color("#ff9a8a"), 4)
+		row.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		row.custom_minimum_size.x = cell - 16.0
 		row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		column.add_child(row)
+	column.minimum_size_changed.connect(func() -> void:
+		button.custom_minimum_size.y = maxf(180.0, column.get_combined_minimum_size().y + 16.0))
 	return button
 
 

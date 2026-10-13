@@ -62,7 +62,7 @@ func _run() -> void:
 		if weapon.has_tiers():
 			SaveService.add_weapon(weapon.id, 1)
 			armory._open_detail(weapon.id, 1)
-			var merge := _button(armory._list, "MERGE » T2")
+			var merge := _button(armory._list, "СЛИТЬ В T2")
 			_check(merge != null, "detail merge " + String(weapon.id))
 			if merge != null:
 				merge.pressed.emit()

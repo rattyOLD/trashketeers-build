@@ -633,6 +633,9 @@ class Armory:
 		super("ОРУЖЕЙНАЯ")
 		_balance = UiStyle.label("", 22, UiStyle.GOLD, 6)
 		_balance.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		if not Orient.portrait:
+			_balance.custom_minimum_size.x = 300
+			UiStyle.fit_plate_label(_balance, 22)
 		var search_row := HBoxContainer.new()
 		search_row.add_theme_constant_override("separation", 10)
 		if Orient.portrait:
@@ -795,6 +798,10 @@ class Armory:
 		var kind := ("БЛИЖНИЙ " + str(CLASS_NAMES.get(weapon.melee_class, ""))) if weapon.is_melee() else "СТРЕЛКОВОЕ"
 		return SearchBar.matches(_query, "%s %s %s %s" % [weapon.get_title(), weapon.short_name, WeaponData.RARITY_NAMES[weapon.rarity], kind])
 
+	func _fit_balance() -> void:
+		if not Orient.portrait and _balance.size.x > 0:
+			UiStyle.fit_label_font(_balance, 22, _balance.size.x - 12.0)
+
 	func _refresh() -> void:
 		for key: String in _chips:
 			var parts := key.split(":")
@@ -806,6 +813,8 @@ class Armory:
 			if entry[0] == _sort:
 				_sort_btn.text = entry[1]
 		_balance.text = "%s · %s" % [SaveService.format_coins(SaveService.get_coins()), Economy.format_gems(SaveService.get_gems())]
+		_balance.tooltip_text = _balance.text
+		_fit_balance.call_deferred()
 		MenuPopups.clear(_list)
 		for filter in _filters:
 			filter.visible = _detail == &""
@@ -938,7 +947,7 @@ class Armory:
 		if owned and base.has_tiers():
 			for t in range(1, WeaponData.MAX_TIER):
 				if SaveService.can_merge(base.id, t):
-					var merge := UiStyle.button("T%d → T%d" % [t, t + 1], Color("#7ed321").darkened(0.2), 16, Vector2(0, 42))
+					var merge := UiStyle.button("T%d>T%d" % [t, t + 1], Color("#7ed321").darkened(0.2), 16, Vector2(0, 42))
 					merge.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 					var from_tier := t
 					merge.pressed.connect(func() -> void:
@@ -961,6 +970,15 @@ class Armory:
 			buy.disabled = not afford
 			buy.pressed.connect(func() -> void: _buy(base, with_gems))
 			row.add_child(buy)
+		for action: Button in row.get_children():
+			# Узкие действия остаются в одной строке; цене отдаём больше места.
+			action.add_theme_constant_override("outline_size", 4)
+			action.size_flags_stretch_ratio = 2.0 if action.text.begins_with("+КОПИЯ") or action.text.begins_with("КУПИТЬ") else 1.0
+			for state: String in ["normal", "hover", "pressed", "disabled"]:
+				var style := action.get_theme_stylebox(state).duplicate() as StyleBox
+				style.content_margin_left = 8
+				style.content_margin_right = 8
+				action.add_theme_stylebox_override(state, style)
 		if row.get_child_count() > 0:
 			column.add_child(row)
 		else:
@@ -985,7 +1003,7 @@ class Armory:
 		# В горизонтали слева витрина и цифры, справа описание и кнопки — всё видно без долгой прокрутки.
 		var left := _list
 		var right := _list
-		if not Orient.portrait:
+		if not Orient.portrait and content_width() >= 1000.0:
 			var columns := HBoxContainer.new()
 			columns.add_theme_constant_override("separation", 18)
 			_list.add_child(columns)
@@ -1147,7 +1165,7 @@ class Armory:
 				_refresh())
 			tiers.add_child(chip)
 			if SaveService.can_merge(base.id, t):
-				var merge := UiStyle.button("MERGE » T%d" % (t + 1), Color("#7ed321").darkened(0.2), 20, Vector2(170, 54))
+				var merge := UiStyle.button("СЛИТЬ В T%d" % (t + 1), Color("#7ed321").darkened(0.2), 20, Vector2(170, 54))
 				merge.pressed.connect(func() -> void:
 					if SaveService.merge(base.id, t):
 						SoundManager.play(&"merge", 0.0, false)

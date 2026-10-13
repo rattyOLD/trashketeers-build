@@ -37,6 +37,8 @@ func _run() -> void:
 			get_tree().quit(1)
 			return
 		await get_tree().process_frame
+	while main.get_children().any(func(node: Node) -> bool: return node is OrientationIntro):
+		await get_tree().process_frame
 	var game := main._screen as Game
 	game.director.set_physics_process(false)
 	var wc := game.player.weapon_controller
@@ -48,7 +50,8 @@ func _run() -> void:
 	_check(shots == 0, "no shots without a finger (got %d)" % shots)
 	AimStick.force_touch = true
 	var view := get_viewport().get_visible_rect().size
-	var start := Vector2(view.x * 0.8, view.y * 0.6)
+	var start := Vector2(view.x * 0.62, view.y * 0.66)
+	_check(Controls.touch_owner(start, view) == 2, "test finger starts in the free aim zone")
 	var press := InputEventScreenTouch.new()
 	press.index = 0
 	press.position = start
@@ -73,6 +76,8 @@ func _run() -> void:
 	await _wait(1.0)
 	_check(shots == after, "release stops firing")
 	AimStick.force_touch = false
+	# A resize can still be settling when the application screen is closed.
+	main._on_window_resized()
 	main.queue_free()
 	for i in 4:
 		await get_tree().process_frame
