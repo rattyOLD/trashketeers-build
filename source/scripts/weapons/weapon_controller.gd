@@ -54,6 +54,9 @@ var muzzle_provider: Callable
 var _target_finder: Callable
 var _stats: RunStats
 var _cooldown := 0.0
+## Каждый слот восстанавливается отдельно, в том числе пока оружие убрано.
+var _slot_cooldowns := PackedFloat32Array([0.0, 0.0, 0.0])
+var _equip_left := 0.0
 var _overdrive_left := 0.0
 var _retarget_timer := 0.0
 var _target: Node2D
@@ -78,6 +81,9 @@ func setup(target_finder: Callable, start_weapon: WeaponData, stats: RunStats) -
 	slot_count = Controls.weapon_slot_count()
 	slots = [start_weapon, null, null]
 	active_slot = 0
+	_cooldown = 0.0
+	_slot_cooldowns.fill(0.0)
+	_equip_left = 0.0
 	set_base_weapon(start_weapon)
 	slots_changed.emit()
 
@@ -90,6 +96,13 @@ func first_empty_slot() -> int:
 
 
 func set_slot(index: int, new_weapon: WeaponData) -> void:
+	if index < 0 or index >= slot_count or new_weapon == null:
+		return
+	if slots[index] != new_weapon:
+		_slot_cooldowns[index] = 0.0
+		if index == active_slot:
+			_cooldown = 0.0
+			_equip_left = EQUIP_DELAY
 	slots[index] = new_weapon
 	if index == active_slot:
 		set_base_weapon(new_weapon)
@@ -100,9 +113,11 @@ func switch_slot(index: int) -> bool:
 	if index < 0 or index >= slot_count or slots[index] == null or index == active_slot:
 		return false
 	var previous := active_slot
+	_slot_cooldowns[previous] = _cooldown
 	active_slot = index
 	set_base_weapon(slots[index])
-	_cooldown = maxf(_cooldown, EQUIP_DELAY)
+	_cooldown = _slot_cooldowns[index]
+	_equip_left = EQUIP_DELAY
 	slots_changed.emit()
 	slot_switched.emit(previous, index)
 	return true
@@ -147,7 +162,6 @@ func _rebuild() -> void:
 	weapon = base_weapon.with_run_stats(_stats) if _stats != null else base_weapon
 	if _stats != null and _stats.switch_boost_left > 0.0:
 		weapon.damage *= CombatTactics.swap_damage_multiplier(CombatTactics.rank(_stats, "switcher"))
-	_cooldown = minf(_cooldown, weapon.fire_interval)
 	weapon_changed.emit(weapon)
 
 
@@ -155,6 +169,10 @@ func _physics_process(delta: float) -> void:
 	if weapon == null or not _target_finder.is_valid():
 		return
 	_cooldown = maxf(_cooldown - delta, 0.0)
+	_equip_left = maxf(_equip_left - delta, 0.0)
+	for index in slot_count:
+		if index != active_slot:
+			_slot_cooldowns[index] = maxf(_slot_cooldowns[index] - delta, 0.0)
 	var moved := global_position.distance_to(_last_pos)
 	_last_pos = global_position
 	_still_time = _still_time + delta if moved < 30.0 * delta else 0.0
@@ -193,7 +211,7 @@ func _physics_process(delta: float) -> void:
 		aim_point = helped.global_position if helped != null else global_position + dir * weapon.max_distance
 	aim_direction = global_position.direction_to(aim_point)
 	_tick_spin(delta, has_target)
-	if _cooldown > 0.0:
+	if _cooldown > 0.0 or _equip_left > 0.0:
 		return
 	_cooldown = weapon.fire_interval
 	if weapon.trait_id == &"spin":

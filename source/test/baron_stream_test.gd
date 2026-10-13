@@ -6,6 +6,7 @@ var elapsed := 0.0
 var seen := {}
 var counts := {1: {"beer_jet_v1": 0, "puke_v1": 0}, 2: {"beer_jet_v1": 0, "puke_v1": 0}}
 var captured := false
+var phase_two := false
 func _ready() -> void:
 	Controls.apply_keys()
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -24,15 +25,24 @@ func _ready() -> void:
 	game.enemies.release_all()
 	baron = game.enemies.spawn(ContentDB.get_enemy(&"beer_baron"), game.player.global_position + Vector2(350, 0))
 	game._on_boss_spawned(baron)
+	if OS.get_environment("BARON_TEST_DELAY") == "1":
+		# Детерминированно воспроизвести задержанный цикл, который обрывал прежний тест.
+		baron.posture_stun = 12.0
 func _physics_process(delta: float) -> void:
 	if baron == null:
 		return
-	elapsed += delta
 	if game._level_up_open:
 		game.hud._level_up._armed_at = 0
 		game.hud._level_up._pick(0)
+	if get_tree().paused:
+		return
+	elapsed += delta
 	game.player.hp = game.player.max_hp
-	baron.hp = baron.max_hp * (1.0 if elapsed < 20.0 else 0.4)
+	# Не обрывать первую фазу раньше, чем она действительно показала обе атаки.
+	if not phase_two and elapsed >= 20.0 and _phase_complete(1):
+		phase_two = true
+		print("BARON_STREAM phase1_complete t=", elapsed, " brain_t=", baron._brain._fight_time)
+	baron.hp = baron.max_hp * (0.4 if phase_two else 1.0)
 	var live_beer := 0
 	for bullet: Bullet in BulletPool._active:
 		if bullet.weapon.id not in [&"beer_jet_v1", &"puke_v1"]:
@@ -46,7 +56,7 @@ func _physics_process(delta: float) -> void:
 	if live_beer >= 6 and not captured:
 		captured = true
 		_snapshot.call_deferred()
-	if elapsed >= 45.0:
+	if elapsed >= 75.0 or (elapsed >= 45.0 and captured and _phase_complete(1) and _phase_complete(2)):
 		print("BARON_STREAM counts=", counts, " captured=", captured)
 		var passed := captured
 		for phase: int in counts:
@@ -54,6 +64,8 @@ func _physics_process(delta: float) -> void:
 				passed = passed and counts[phase][weapon] > 0
 		print("BARON_STREAM failures=0" if passed else "BARON_STREAM failures=1")
 		get_tree().quit(0 if passed else 1)
+func _phase_complete(phase: int) -> bool:
+	return counts[phase]["beer_jet_v1"] > 0 and counts[phase]["puke_v1"] > 0
 func _snapshot() -> void:
 	await RenderingServer.frame_post_draw
 	if not OS.get_environment("OUT").is_empty():
