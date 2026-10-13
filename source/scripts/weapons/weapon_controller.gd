@@ -139,7 +139,7 @@ func apply_run_stats(stats: RunStats) -> void:
 func _rebuild() -> void:
 	weapon = base_weapon.with_run_stats(_stats) if _stats != null else base_weapon
 	if _stats != null and _stats.switch_boost_left > 0.0:
-		weapon.damage *= 1.5 + CombatTactics.rank(_stats, "switcher") * 0.15
+		weapon.damage *= CombatTactics.swap_damage_multiplier(CombatTactics.rank(_stats, "switcher"))
 	_cooldown = minf(_cooldown, weapon.fire_interval)
 	weapon_changed.emit(weapon)
 

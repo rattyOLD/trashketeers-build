@@ -217,6 +217,8 @@ func _make_card(upgrade: UpgradeData, index: int, stats: RunStats) -> Button:
 		column.add_child(hint)
 	# «−» (U+2212) в шрифте нет — показывался квадрат.
 	var description := Patches.run_description(String(upgrade.id).trim_prefix("patch_"), stats) if upgrade.category == "patch" else upgrade.description
+	if upgrade.category == "tactic":
+		description = CombatTactics.run_description(String(upgrade.id).trim_prefix("tactic_"), stats)
 	var desc := UiStyle.label(description.replace("−", "-"), 18, UiStyle.TEXT, 5)
 	desc.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

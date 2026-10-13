@@ -20,6 +20,7 @@ var _clock := 0.0
 var _tick_left := 0.0
 var _proc_left := 0.0
 var _kill_left := 0.0
+var _shatter_left := 0.0
 var _swap_left := 0.0
 var _still := 0.0
 var _last_pos := Vector2.ZERO
@@ -67,7 +68,7 @@ static func pair_hint(run: RunStats, id: String) -> String:
 	if others.is_empty():
 		return "Первая тактика · ещё одну можно добавить позже"
 	if others.has(id):
-		return "Следующий ранг: сильнее основной эффект"
+		return "Максимальный ранг" if rank(run, id) == 3 else "Следующий ранг: сильнее основной эффект"
 	if (id == "arson" and others.has("frost")) or (id == "frost" and others.has("arson")):
 		return "ТЕПЛОВОЙ УДАР: мороз по горящему врагу вызывает взрыв"
 	if (id == "arson" and others.has("vanguard")) or (id == "vanguard" and others.has("arson")):
@@ -77,6 +78,39 @@ static func pair_hint(run: RunStats, id: String) -> String:
 	if (id == "sentry" and others.has("switcher")) or (id == "switcher" and others.has("sentry")):
 		return "ПЕРЕВООРУЖЕНИЕ: турель получает новое оружие и усиление смены"
 	return "Вторая тактика дополняет первую · лимит две за забег"
+
+static func freeze_seconds(tier: int) -> float:
+	return minf(1.1, 0.65 + tier * 0.15) if tier > 0 else 0.0
+
+static func echo_damage_scale(tier: int) -> float:
+	return 0.55 + tier * 0.2 if tier > 0 else 0.0
+
+static func turret_interval(tier: int) -> float:
+	return maxf(0.22, 0.58 - tier * 0.09)
+
+static func swap_damage_multiplier(tier: int) -> float:
+	return 1.5 + tier * 0.15 if tier > 0 else 1.0
+
+static func _rank_change(current: int, before: String, after: String) -> String:
+	return after if current == 0 else (before if current >= 3 else "%s, станет %s" % [before, after])
+
+static func run_description(id: String, run: RunStats) -> String:
+	var current := rank(run, id)
+	var next := mini(current + 1, 3)
+	match id:
+		"arson":
+			return "Попадания поджигают. Убийства оставляют огонь на 3 с.\nУрон зоны: %s/с. Прямой урон -8%%." % _rank_change(current, str(current * 6), str(next * 6))
+		"frost":
+			return "Три попадания замораживают обычного врага на %s с.\nПри гибели замороженного: %s осколков. Боссы только замедляются. Прямой урон -8%%." % [_rank_change(current, "%.2f" % freeze_seconds(current), "%.2f" % freeze_seconds(next)), _rank_change(current, str(4 + current), str(4 + next))]
+		"bankshot":
+			return "Отскоков от стен: %s. После каждого урон ×1,25, максимум ×1,9.\nПрямой урон -15%%." % _rank_change(current, str(current + 1), str(next + 1))
+		"vanguard":
+			return "После рывка удар по пройденному пути: %s%% урона оружия.\nДальность оружия -15%%." % _rank_change(current, str(roundi(echo_damage_scale(current) * 100.0)), str(roundi(echo_damage_scale(next) * 100.0)))
+		"sentry":
+			return "Стой 1,2 с — установишь турель. Выстрел раз в %s с.\nПосле ухода работает 3 с. Скорость бега -6%%." % _rank_change(current, "%.2f" % turret_interval(current), "%.2f" % turret_interval(next))
+		"switcher":
+			return "Смена оружия: +%s%% урона на 2,4 с и отбрасывание.\nПерезарядка эффекта 4 с. Обычный урон -10%%." % _rank_change(current, str(roundi((swap_damage_multiplier(current) - 1.0) * 100.0)), str(roundi((swap_damage_multiplier(next) - 1.0) * 100.0)))
+	return ""
 
 func setup(actor: Player, run: RunStats, effects: FxManager, finder: Callable) -> void:
 	player = actor
@@ -96,6 +130,7 @@ func _physics_process(delta: float) -> void:
 	_clock += delta
 	_proc_left = maxf(0.0, _proc_left - delta)
 	_kill_left = maxf(0.0, _kill_left - delta)
+	_shatter_left = maxf(0.0, _shatter_left - delta)
 	_swap_left = maxf(0.0, _swap_left - delta)
 	if stats.switch_boost_left > 0.0:
 		stats.switch_boost_left = maxf(0.0, stats.switch_boost_left - delta)
@@ -152,13 +187,15 @@ func _affect(enemy: Enemy, damage: float, bounced: bool) -> void:
 	if frost_rank > 0:
 		var key := enemy.get_instance_id()
 		if _frost_hits.size() < 64 or _frost_hits.has(key):
-			var record: Dictionary = _frost_hits.get(key, {"hits": 0, "time": _clock})
+			var record: Dictionary = _frost_hits.get(key, {})
+			if int(record.get("activation", -1)) != enemy.activation_id:
+				record = {"hits": 0, "time": _clock, "activation": enemy.activation_id}
 			record["hits"] = int(record["hits"]) + 1
 			record["time"] = _clock
 			var freeze := int(record["hits"]) >= 3 or bounced and rank(stats, "bankshot") > 0
-			enemy.add_slow(0.65 if enemy.data.is_boss() else (0.95 if freeze else 0.45), (0.65 + frost_rank * 0.15) if freeze else 1.2)
+			enemy.add_slow(0.65 if enemy.data.is_boss() else (0.95 if freeze else 0.45), freeze_seconds(frost_rank) if freeze else 1.2)
 			if freeze:
-				enemy.freeze(0.65 + frost_rank * 0.15)
+				enemy.freeze(freeze_seconds(frost_rank))
 				fx.ring(enemy.global_position, Color("#88d8eb"), enemy.data.radius + 12.0)
 				record["hits"] = 0
 			_frost_hits[key] = record
@@ -172,16 +209,16 @@ func _affect(enemy: Enemy, damage: float, bounced: bool) -> void:
 
 func enemy_died(enemy: Enemy) -> void:
 	_frost_hits.erase(enemy.get_instance_id())
-	if _busy or _kill_left > 0.0:
+	if _busy:
 		return
 	var fire_rank := rank(stats, "arson")
 	var frost_rank := rank(stats, "frost")
-	if fire_rank > 0:
+	if fire_rank > 0 and _kill_left <= 0.0:
 		_add_field("fire", enemy.global_position, enemy.global_position, 92.0 + fire_rank * 12.0, 3.0, 6.0 * fire_rank)
-	if frost_rank > 0 and enemy.slow_left > 0.0 and enemy.slow_amount >= 0.7:
-		_shatter(enemy.global_position, frost_rank)
-	if fire_rank > 0 or frost_rank > 0:
 		_kill_left = 0.18
+	if frost_rank > 0 and enemy.freeze_left > 0.0 and _shatter_left <= 0.0:
+		_shatter(enemy.global_position, frost_rank)
+		_shatter_left = 0.18
 
 func _shatter(at: Vector2, tier: int) -> void:
 	if _shard_weapon == null:
@@ -207,7 +244,7 @@ func _on_dash_ended(at: Vector2) -> void:
 	var tier := rank(stats, "vanguard")
 	if tier <= 0:
 		return
-	_add_field("echo", _dash_from, at, 42.0, 0.9, player.weapon_controller.weapon.damage * (0.55 + 0.2 * tier))
+	_add_field("echo", _dash_from, at, 42.0, 0.9, player.weapon_controller.weapon.damage * echo_damage_scale(tier))
 	if rank(stats, "arson") > 0:
 		for i in 3:
 			var point := _dash_from.lerp(at, float(i + 1) / 4.0)
@@ -263,7 +300,7 @@ func _tick_sentry(delta: float) -> void:
 	var target: Node2D = _find_target.call(_turret_at, 480.0)
 	if not is_instance_valid(target):
 		return
-	_turret_shot = maxf(0.22, 0.58 - tier * 0.09)
+	_turret_shot = turret_interval(tier)
 	var source := player.weapon_controller.weapon
 	if _turret_weapon == null or _turret_source != source:
 		_turret_source = source
