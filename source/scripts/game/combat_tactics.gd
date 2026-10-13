@@ -4,6 +4,12 @@ extends Node2D
 const MAX_TACTICS := 2
 const MAX_FIELDS := 10
 const QUERY_LIMIT := 24
+const PAIRS := [
+	{"ids": ["arson", "frost"], "title": "Тепловой удар", "text": "Мороз по горящему врагу вызывает взрыв вокруг него."},
+	{"ids": ["arson", "vanguard"], "title": "Огненный след", "text": "Рывок оставляет огонь по пройденному пути."},
+	{"ids": ["bankshot", "frost"], "title": "Ледяной банк", "text": "Отскочившая пуля сразу замораживает обычного врага. Боссы только замедляются."},
+	{"ids": ["sentry", "switcher"], "title": "Перевооружение", "text": "Смена оружия обновляет турель. Во время усиления смены её урон +40%."},
+]
 const CATALOG := {
 	"arson": {"title": "Пиротехник", "color": "#f7a64b", "text": "Попадания поджигают, убийства оставляют огненные зоны на 3 с. Загоняй толпу в огонь. Прямой урон −8%."},
 	"frost": {"title": "Ледокол", "color": "#88d8eb", "text": "Три попадания замораживают обычного врага. Замороженные враги разлетаются осколками при гибели. Боссы только замедляются. Прямой урон −8%."},
@@ -63,20 +69,53 @@ static func title_line(run: RunStats) -> String:
 		names.append("%s %d/3" % [CATALOG[id]["title"], rank(run, id)])
 	return " · ".join(names)
 
+static func pair_for(first: String, second: String) -> Dictionary:
+	if first == second:
+		return {}
+	for pair: Dictionary in PAIRS:
+		if pair["ids"].has(first) and pair["ids"].has(second):
+			return pair
+	return {}
+
+static func active_pairs(run: RunStats) -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for pair: Dictionary in PAIRS:
+		if rank(run, pair["ids"][0]) > 0 and rank(run, pair["ids"][1]) > 0:
+			result.append(pair)
+	return result
+
+static func preview_pair(run: RunStats, id: String) -> Dictionary:
+	if rank(run, id) > 0:
+		return {}
+	for other in selected(run):
+		var pair := pair_for(other, id)
+		if not pair.is_empty():
+			return pair
+	return {}
+
+static func next_pair_hint(run: RunStats) -> String:
+	var chosen := selected(run)
+	if chosen.is_empty() or not active_pairs(run).is_empty():
+		return ""
+	for pair: Dictionary in PAIRS:
+		if pair["ids"].has(chosen[0]):
+			var partner: String = pair["ids"][1] if pair["ids"][0] == chosen[0] else pair["ids"][0]
+			var requirement := "С двумя разными стволами добавь" if partner == "switcher" else "Добавь"
+			return "Следующий забег: %s «%s», чтобы собрать «%s»." % [requirement.to_lower(), CATALOG[partner]["title"], pair["title"]]
+	return ""
+
 static func pair_hint(run: RunStats, id: String) -> String:
 	var others := selected(run)
 	if others.is_empty():
 		return "Первая тактика · ещё одну можно добавить позже"
 	if others.has(id):
-		return "Максимальный ранг" if rank(run, id) == 3 else "Следующий ранг: сильнее основной эффект"
-	if (id == "arson" and others.has("frost")) or (id == "frost" and others.has("arson")):
-		return "ТЕПЛОВОЙ УДАР: мороз по горящему врагу вызывает взрыв"
-	if (id == "arson" and others.has("vanguard")) or (id == "vanguard" and others.has("arson")):
-		return "ОГНЕННЫЙ СЛЕД: рывок оставляет огонь по пути"
-	if (id == "bankshot" and others.has("frost")) or (id == "frost" and others.has("bankshot")):
-		return "ЛЕДЯНОЙ БАНК: отскочившая пуля сразу замораживает обычного врага"
-	if (id == "sentry" and others.has("switcher")) or (id == "switcher" and others.has("sentry")):
-		return "ПЕРЕВООРУЖЕНИЕ: турель получает новое оружие и усиление смены"
+		var pairs := active_pairs(run)
+		var current := "СИНЕРГИЯ: %s\n" % pairs[0]["title"] if not pairs.is_empty() else ""
+		return current + ("Максимальный ранг" if rank(run, id) == 3 else "Следующий ранг: сильнее основной эффект")
+	for other in others:
+		var pair := pair_for(other, id)
+		if not pair.is_empty():
+			return "ОТКРОЕТ: %s\n%s" % [pair["title"], pair["text"]]
 	return "Вторая тактика дополняет первую · лимит две за забег"
 
 static func freeze_seconds(tier: int) -> float:
@@ -302,11 +341,13 @@ func _tick_sentry(delta: float) -> void:
 		return
 	_turret_shot = turret_interval(tier)
 	var source := player.weapon_controller.weapon
+	var boosted := rank(stats, "switcher") > 0 and stats.switch_boost_left > 0.0
 	if _turret_weapon == null or _turret_source != source:
 		_turret_source = source
 		_turret_weapon = source.duplicate_data()
 		_turret_weapon.id = &"tactic_sentry"
-		_turret_weapon.damage = clampf(source.damage * 0.25, 8.0, 35.0) * (1.4 if stats.switch_boost_left > 0.0 else 1.0)
+		var base_damage := source.damage / (swap_damage_multiplier(rank(stats, "switcher")) if boosted else 1.0)
+		_turret_weapon.damage = clampf(base_damage * 0.25, 8.0, 35.0)
 		_turret_weapon.bullet_radius = 5.0
 		_turret_weapon.explosion_radius = 0.0
 		_turret_weapon.ricochet_count = 0
@@ -320,10 +361,11 @@ func _tick_sentry(delta: float) -> void:
 			_turret_weapon.bullet_texture = fallback.bullet_texture
 			_turret_weapon.sprite_scale = fallback.sprite_scale
 			_turret_weapon.bullet_modulate = Color("#9acbae")
-	_turret_aim = _turret_at.direction_to(target.global_position)
+	_turret_aim = _turret_at.direction_to(AimAssist.point(target))
 	var bullet := BulletPool.spawn(_turret_weapon, _turret_at, _turret_aim, Bullet.Team.PLAYER)
 	if bullet != null:
 		bullet.tactic_generated = true
+		bullet.damage_scale = 1.4 if boosted else 1.0
 		shots_from_turret += 1
 
 func clear_fields() -> void:

@@ -1742,6 +1742,13 @@ func _clear_encounter_input() -> void:
 
 func _build_report() -> String:
 	var lines: PackedStringArray = []
+	if stats.has_tactics:
+		lines.append("Сборка: " + CombatTactics.title_line(stats))
+		for pair in CombatTactics.active_pairs(stats):
+			lines.append("%s · %s" % [pair["title"], pair["text"]])
+		var suggestion := CombatTactics.next_pair_hint(stats)
+		if not suggestion.is_empty():
+			lines.append(suggestion)
 	for combo: Dictionary in Patches.SETS:
 		if stats.patch_set_titles().has(combo["title"]):
 			lines.append("%s · %s" % [combo["title"], combo["desc"]])
@@ -2084,7 +2091,7 @@ func _open_level_up() -> void:
 		return
 	var bonus := _bonus_choices > 0
 	var luck := clampf(float(level) * 0.015, 0.0, 0.35) + (0.3 if bonus else 0.0) + stats.get_stat(&"luck")
-	var choices := stats.roll_choices(_draft_pool(), 3, luck, 1 if bonus else 0)
+	var choices := stats.roll_choices(_draft_pool(), 3, luck, 1 if bonus else 0, [], _tactic_offer_due(bonus))
 	if choices.is_empty():
 		_pending_levelups = 0
 		_level_up_open = false
@@ -2101,6 +2108,10 @@ func _reroll_cost() -> int:
 	var early := clampf(1.2 - float(level) * 0.025, 0.55, 1.2)
 	var deal := 0.5 if _reroll_deal else 1.0
 	return maxi(int(round(REROLL_BASE_COST * pow(REROLL_GROWTH, _rerolls_paid) * early * deal / 5.0)) * 5, 5)
+
+func _tactic_offer_due(bonus: bool) -> bool:
+	var choice_level := level - _pending_levelups + 1
+	return not bonus and story_mission.is_empty() and choice_level >= 3 and choice_level % 3 == 0
 
 
 func _reroll_label() -> String:
@@ -2145,7 +2156,7 @@ func _on_reroll_requested() -> void:
 		hud.set_nuts(nuts)
 	SoundManager.play(&"merge", -4.0, false)
 	var luck := clampf(float(level) * 0.015, 0.0, 0.35) + (0.3 if _current_bonus else 0.0)
-	var choices := stats.roll_choices(_draft_pool(), 3, luck, 1 if _current_bonus else 0, _last_choices)
+	var choices := stats.roll_choices(_draft_pool(), 3, luck, 1 if _current_bonus else 0, _last_choices, _tactic_offer_due(_current_bonus))
 	if not choices.is_empty():
 		_show_choices(choices, _current_bonus)
 
@@ -2162,12 +2173,20 @@ func _on_upgrade_chosen(upgrade: UpgradeData) -> void:
 		_close_dealer()
 	SaveService.add_stat("picks", 1, false)
 	SoundManager.play(&"ui_confirm")
+	var previous_pairs := CombatTactics.active_pairs(stats)
 	stats.apply(upgrade)
 	if upgrade.stat == &"heal_pct":
 		player.heal(player.max_hp * upgrade.value)
 	player.apply_run_stats(stats)
 	if upgrade.category == "tactic":
-		hud.toast("БОЕВОЙ СТИЛЬ", CombatTactics.title_line(stats), UiStyle.GOLD)
+		var pairs := CombatTactics.active_pairs(stats)
+		if not pairs.is_empty() and previous_pairs.is_empty():
+			hud.toast("СИНЕРГИЯ: " + str(pairs[0]["title"]), str(pairs[0]["text"]), UiStyle.GOLD)
+			SoundManager.play(&"merge", -4.0, false)
+			fx.ring(player.global_position, UiStyle.GOLD, 90.0)
+			player.visual.cheer()
+		else:
+			hud.toast("БОЕВОЙ СТИЛЬ", CombatTactics.title_line(stats), UiStyle.GOLD)
 	_sync_drones()
 	if _bonus_open:
 		# Выбор из вышки или сейфа: уровни не тратятся; если ждут повышения уровня — открываем их.
@@ -2399,11 +2418,4 @@ func _upgrade_pool() -> Array[UpgradeData]:
 
 
 func _draft_pool() -> Array[UpgradeData]:
-	var pool := _upgrade_pool()
-	if level >= 2 and CombatTactics.selected(stats).is_empty():
-		var draft: Array[UpgradeData] = []
-		for upgrade in pool:
-			if upgrade.category == "tactic":
-				draft.append(upgrade)
-		return draft
-	return pool
+	return _upgrade_pool()

@@ -120,6 +120,9 @@ func _card_width() -> float:
 
 func _make_card(upgrade: UpgradeData, index: int, stats: RunStats) -> Button:
 	var accent := upgrade.rarity_color() if upgrade.category != "evolution" else Color("#ff5cf0")
+	var completes := upgrade.category == "tactic" and not CombatTactics.preview_pair(stats, String(upgrade.id).trim_prefix("tactic_")).is_empty()
+	if completes:
+		accent = UiStyle.GOLD
 	if upgrade.category == "patch":
 		var pair := Patches.pair_preview(String(upgrade.id).trim_prefix("patch_"), stats)
 		if pair.get("state", &"") == &"completes":
@@ -132,7 +135,7 @@ func _make_card(upgrade: UpgradeData, index: int, stats: RunStats) -> Button:
 	card.add_theme_stylebox_override("hover", UiStyle.box(UiStyle.PANEL_LIGHT.lightened(0.08), accent.lightened(0.25), border, 22))
 	card.add_theme_stylebox_override("pressed", UiStyle.box(UiStyle.PANEL_LIGHT.lightened(0.15), Color.WHITE, border, 22))
 	# Рамки карточек наград Астры по редкости (assets/ui/kit/reward_card_*): ржавая, бирюзовая, золотая с короной.
-	var frame_path := UiStyle.KIT_DIR + "reward_card_%s_s.png" % ["common", "rare", "legendary"][clampi(upgrade.rarity_rank, 0, 2)]
+	var frame_path := UiStyle.KIT_DIR + "reward_card_%s_s.png" % ["common", "rare", "legendary"][2 if completes else clampi(upgrade.rarity_rank, 0, 2)]
 	if UiStyle.KIT_ON and upgrade.category != "evolution" and ResourceLoader.exists(frame_path):
 		for state: String in ["normal", "hover", "pressed", "focus"]:
 			var tex := StyleBoxTexture.new()
@@ -184,6 +187,8 @@ func _make_card(upgrade: UpgradeData, index: int, stats: RunStats) -> Button:
 		card.add_child(art)
 	var stacks := stats.get_stacks(upgrade.id)
 	var tag := "%s  •  %s" % [upgrade.rarity_title() if upgrade.category != "evolution" else "ЭВОЛЮЦИЯ", upgrade.category_title() if upgrade.category != "evolution" else "СИНЕРГИЯ"]
+	if upgrade.category == "tactic":
+		tag = "СИНЕРГИЯ · ОТКРЫТЬ" if completes else ("ТАКТИКА · УСИЛИТЬ" if stacks > 0 else "ТАКТИКА · ВЫБРАТЬ")
 	if upgrade.category == "patch":
 		var id := String(upgrade.id).trim_prefix("patch_")
 		tag = "НАШИВКА · " + ("УЛУЧШИТЬ" if stats.patch_ids.has(id) else "СЛОТ %d/%d" % [stats.patch_ids.size() + 1, Patches.SLOTS])

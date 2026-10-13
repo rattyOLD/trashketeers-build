@@ -272,7 +272,7 @@ func archetype_shares(pool: Array[UpgradeData]) -> Dictionary:
 
 
 ## avoid — id улучшений, только что показанных: при реролле их вес резко падает, чтобы выпало другое.
-func roll_choices(pool: Array[UpgradeData], count: int, luck: float = 0.0, guarantee_rarity: int = 0, avoid: Array[StringName] = []) -> Array[UpgradeData]:
+func roll_choices(pool: Array[UpgradeData], count: int, luck: float = 0.0, guarantee_rarity: int = 0, avoid: Array[StringName] = [], tactic_offer: bool = false) -> Array[UpgradeData]:
 	var candidates: Array[UpgradeData] = []
 	var filler: Array[UpgradeData] = []
 	for upgrade in pool:
@@ -294,6 +294,10 @@ func roll_choices(pool: Array[UpgradeData], count: int, luck: float = 0.0, guara
 			if not categories.has(u.category):
 				fresh.append(u)
 		var source: Array[UpgradeData] = fresh if not fresh.is_empty() and picked.size() < 3 else candidates
+		if tactic_offer and picked.is_empty() and guarantee_rarity <= 0:
+			var tactics := _tactic_candidates(candidates, avoid)
+			if not tactics.is_empty():
+				source = tactics
 		var need_rarity := guarantee_rarity > 0 and picked.size() == count - 1 and not _has_rarity(picked, guarantee_rarity)
 		var total := 0.0
 		var weights: Array[float] = []
@@ -327,6 +331,28 @@ func roll_choices(pool: Array[UpgradeData], count: int, luck: float = 0.0, guara
 		categories[chosen.category] = true
 		candidates.erase(chosen)
 	return picked
+
+func _tactic_candidates(candidates: Array[UpgradeData], avoid: Array[StringName]) -> Array[UpgradeData]:
+	var available: Array[UpgradeData] = []
+	var fresh: Array[UpgradeData] = []
+	for upgrade in candidates:
+		if upgrade.category == "tactic":
+			available.append(upgrade)
+			if not avoid.has(upgrade.id):
+				fresh.append(upgrade)
+	# Реролл меняет и тактический вариант, если есть другая доступная тактика.
+	if not fresh.is_empty():
+		available = fresh
+	var chosen := CombatTactics.selected(self)
+	if chosen.size() == 1:
+		var partners: Array[UpgradeData] = []
+		for upgrade in available:
+			var id := String(upgrade.id).trim_prefix("tactic_")
+			if not CombatTactics.pair_for(chosen[0], id).is_empty():
+				partners.append(upgrade)
+		if not partners.is_empty():
+			return partners
+	return available
 
 
 ## Насколько чаще выпадает открывшаяся ступень ветки.
