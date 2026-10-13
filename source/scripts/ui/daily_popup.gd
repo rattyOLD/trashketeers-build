@@ -54,11 +54,21 @@ func _make_cell(day: int, step: int, can: bool) -> Control:
 	var coins := int(SaveService.DAILY_REWARDS[day - 1]) * mult
 	var gems := int(SaveService.DAILY_GEMS.get(day, 0)) * mult
 	var tier := 2 if day == 7 else (1 if gems > 0 else 0)
-	return RewardTile.new("ДЕНЬ %d" % day, coins, gems, tier, state, day == 7)
+	var tile := RewardTile.new("ДЕНЬ %d" % day, coins, gems, tier, state, day == 7)
+	if can and day == step:
+		tile.mouse_filter = Control.MOUSE_FILTER_STOP
+		tile.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+		tile.tooltip_text = "Забрать сегодняшний подарок"
+		for child: Control in tile.find_children("*", "Control", true, false):
+			child.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		tile.gui_input.connect(func(event: InputEvent) -> void:
+			if UiStyle.is_tap(event):
+				_claim())
+	return tile
 
 
 func _claim() -> void:
 	if SaveService.claim_daily() > 0:
 		SoundManager.play(&"star_dust")
 		claimed.emit()
-		_refresh()
+		_refresh.call_deferred()

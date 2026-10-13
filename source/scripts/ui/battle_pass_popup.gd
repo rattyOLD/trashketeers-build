@@ -10,6 +10,8 @@ var _status: Label
 var _list: VBoxContainer
 var _scroll_box: VBoxContainer
 var _scroll_target: Control
+var _scroll_revision := 0
+var _refresh_queued := false
 
 const ROAD_WIDTH := 110.0
 const ROW_HEIGHT := 132.0
@@ -134,7 +136,7 @@ func _quests_card() -> Control:
 			if BattlePass.claim_quest(quest):
 				SoundManager.play(&"star_dust")
 				changed.emit()
-				_refresh())
+				_queue_refresh())
 		row.add_child(button)
 	return panel
 
@@ -188,12 +190,17 @@ func _feature_card() -> Control:
 			if BattlePass.claim("prem", 1):
 				SoundManager.play(&"star_dust")
 				changed.emit()
-				_refresh())
+				_queue_refresh())
 		texts.add_child(take)
 	return panel
 
 
 func _refresh() -> void:
+	var initial := _list.get_child_count() == 0
+	var scroll := _scroll_box.get_parent().get_parent() as ScrollContainer
+	var position_before := scroll.scroll_vertical if scroll != null else 0
+	_scroll_revision += 1
+	var revision := _scroll_revision
 	var level := BattlePass.tier()
 	_build_hero(level)
 	MenuPopups.clear(_actions)
@@ -211,7 +218,7 @@ func _refresh() -> void:
 			parts.append("%d опыта" % int(got["xp"]))
 		_status.text = "Собрано наград: %d. %s" % [int(got["count"]), ", ".join(parts)]
 		changed.emit()
-		_refresh())
+		_queue_refresh())
 	_actions.add_child(claim)
 	if not BattlePass.is_premium() and BattlePass.is_claimed("prem", 1):
 		var buy := UiStyle.button("ОТКРЫТЬ ПРЕМИУМ · %s" % Premium.price_text(BattlePass.price()), Color("#35c8ff"), 26, Vector2(0, 76))
@@ -224,9 +231,6 @@ func _refresh() -> void:
 		bonus.disabled = ready <= 0
 		bonus.pressed.connect(_claim_bonus)
 		_actions.add_child(bonus)
-	var milestone := BattlePass.next_milestone()
-	if not milestone.is_empty() and str(milestone["item"]) != FEATURE_ITEM:
-		_actions.add_child(_milestone_card(milestone))
 	if BattlePass.tier() < BattlePass.TIERS:
 		var can_skip_n := mini(SaveService.get_gems() / BattlePass.SKIP_COST, BattlePass.TIERS - BattlePass.tier())
 		var skip := UiStyle.button("ПРОПУСТИТЬ УРОВЕНЬ · %s (можно: %d)" % [Economy.format_gems(BattlePass.SKIP_COST), can_skip_n], Color("#35c8ff") if BattlePass.can_skip() else UiStyle.PANEL, 17, Vector2(0, 50))
@@ -236,8 +240,11 @@ func _refresh() -> void:
 				SoundManager.play(&"star_dust")
 				_status.text = "Уровень пропущен"
 				changed.emit()
-				_refresh())
+				_queue_refresh())
 		_actions.add_child(skip)
+	var milestone := BattlePass.next_milestone()
+	if not milestone.is_empty() and str(milestone["item"]) != FEATURE_ITEM:
+		_actions.add_child(_milestone_card(milestone))
 	if _status.text.is_empty():
 		_status.text = "Уровень = 100 очков. Очки дают забеги (чем дальше волна, тем больше) и ежедневный подарок."
 	MenuPopups.clear(_list)
@@ -248,7 +255,27 @@ func _refresh() -> void:
 		_list.add_child(row)
 		if tier == clampi(level, 1, BattlePass.TIERS):
 			_scroll_target = row
-	get_tree().process_frame.connect(_scroll_to_target, CONNECT_ONE_SHOT)
+	# Rebuilt containers settle before restoring the view; a newer refresh cancels this one.
+	SceneDelay.after(self, 0.001, func() -> void:
+		SceneDelay.after(self, 0.001, func() -> void:
+			if revision != _scroll_revision:
+				return
+			if initial:
+				_scroll_to_target()
+			elif scroll != null:
+				scroll.scroll_vertical = position_before))
+
+
+func _queue_refresh() -> void:
+	if _refresh_queued:
+		return
+	_refresh_queued = true
+	_apply_queued_refresh.call_deferred()
+
+
+func _apply_queued_refresh() -> void:
+	_refresh_queued = false
+	_refresh()
 
 
 func _scroll_to_target() -> void:
@@ -311,7 +338,7 @@ func _claim_bonus() -> void:
 		_:
 			_status.text = "Бонус: %s" % SaveService.format_coins(int(prize["amount"]))
 	changed.emit()
-	_refresh()
+	_queue_refresh()
 
 
 func _buy() -> void:
@@ -319,7 +346,7 @@ func _buy() -> void:
 	SoundManager.play(&"star_dust")
 	_status.text = "Премиум-ветка открыта!" + ("" if Premium.PAYMENTS_LIVE else " (оплата отключена, тестовая выдача)")
 	changed.emit()
-	_refresh()
+	_queue_refresh()
 
 
 func _header_row() -> Control:
@@ -405,7 +432,7 @@ func _cell(track: String, tier: int) -> Control:
 			if tapped and BattlePass.claim(track, tier):
 				SoundManager.play(&"star_dust")
 				changed.emit()
-				_refresh())
+				_queue_refresh())
 	return panel
 
 
