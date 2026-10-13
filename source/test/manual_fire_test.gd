@@ -81,5 +81,11 @@ func _run() -> void:
 	main.queue_free()
 	for i in 4:
 		await get_tree().process_frame
+	SoundManager.stop_all_loops()
+	SoundManager.stop_ambient()
+	SoundManager.stop_music()
+	await _wait(SoundManager.MUSIC_FADE + 0.1)
+	SoundManager._music.stop()
+	SoundManager._music.stream = null
 	print("MANUAL_FIRE failures=%d" % failures)
 	get_tree().quit.call_deferred(1 if failures else 0)

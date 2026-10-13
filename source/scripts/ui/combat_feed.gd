@@ -20,6 +20,7 @@ var low_hp := 0.0
 var _font: Font
 var _lines: Array[Dictionary] = []
 var _total := 0
+var _last_points := 0
 var _total_life := 0.0
 var _total_pop := 0.0
 var _medal := ""
@@ -27,6 +28,9 @@ var _medal_color := GOLD
 var _medal_life := 0.0
 var _hits: Array[Dictionary] = []
 var _time := 0.0
+var _chain := 0
+var _chain_left := 0.0
+var _chain_window := 1.0
 
 
 func _init() -> void:
@@ -39,12 +43,24 @@ func _init() -> void:
 
 ## Убийство: строка в стопку и прибавка к сумме серии.
 func kill(points: int, label: String, color: Color = Color.WHITE) -> void:
+	_last_points = points
 	_lines.push_front({"text": "+%d %s" % [points, label], "color": color, "life": LINE_LIFE})
 	while _lines.size() > MAX_LINES:
 		_lines.pop_back()
 	_total += points
 	_total_life = TOTAL_HOLD
 	_total_pop = 1.0
+	_wake()
+
+
+func set_chain(count: int, window: float) -> void:
+	_chain = maxi(count, 0)
+	if _chain == 1:
+		_total = _last_points
+		if _lines.size() > 1:
+			_lines.resize(1)
+	_chain_window = maxf(window, 0.01)
+	_chain_left = _chain_window if _chain > 0 else 0.0
 	_wake()
 
 
@@ -83,6 +99,9 @@ func _wake() -> void:
 
 func _process(delta: float) -> void:
 	_time += delta
+	_chain_left = maxf(_chain_left - delta, 0.0)
+	if _chain_left <= 0.0:
+		_chain = 0
 	for line in _lines:
 		line["life"] = float(line["life"]) - delta
 	while not _lines.is_empty() and float(_lines.back()["life"]) <= 0.0:
@@ -97,7 +116,7 @@ func _process(delta: float) -> void:
 	while not _hits.is_empty() and float(_hits.front()["life"]) <= 0.0:
 		_hits.pop_front()
 	queue_redraw()
-	if _lines.is_empty() and _total_life <= 0.0 and _medal_life <= 0.0 and _hits.is_empty() and low_hp <= 0.0:
+	if _lines.is_empty() and _total_life <= 0.0 and _medal_life <= 0.0 and _hits.is_empty() and low_hp <= 0.0 and _chain_left <= 0.0:
 		set_process(false)
 
 
@@ -124,6 +143,13 @@ func _text(at: Vector2, text: String, font_size: int, color: Color, align: Horiz
 ## Сумма серии и строки под ней — справа от центра, рядом с тем местом, куда смотрит игрок.
 func _draw_ticker() -> void:
 	var anchor := Vector2(size.x * 0.5 + 150.0, size.y * 0.36)
+	if _chain >= 2 and _chain_left > 0.0:
+		var heat := clampf(float(_chain) / 12.0, 0.0, 1.0)
+		var accent := GOLD.lerp(HOT, heat)
+		var bar := Rect2(anchor + Vector2(0, -30), Vector2(126, 4))
+		_text(anchor + Vector2(0, -40), "СЕРИЯ ×%d" % _chain, 22, accent, HORIZONTAL_ALIGNMENT_LEFT)
+		draw_rect(bar, Color(OUTLINE, 0.75))
+		draw_rect(Rect2(bar.position, Vector2(bar.size.x * _chain_left / _chain_window, bar.size.y)), accent)
 	if _total > 0 and _total_life > 0.0:
 		var fade := clampf(_total_life / 0.5, 0.0, 1.0)
 		var font_size := int(34.0 * (1.0 + 0.35 * _total_pop))
@@ -144,10 +170,11 @@ func _draw_medal() -> void:
 	var age := MEDAL_LIFE - _medal_life
 	var punch := 1.0 + 0.7 * pow(1.0 - clampf(age / 0.18, 0.0, 1.0), 2.0)
 	var alpha := clampf(_medal_life / 0.35, 0.0, 1.0) * clampf(age / 0.06, 0.0, 1.0)
-	var center := Vector2(size.x * 0.5, size.y * 0.66)
-	var font_size := int(44.0 * punch)
+	var center := Vector2(size.x * 0.5, size.y * 0.14)
+	var width := _font.get_string_size(_medal, HORIZONTAL_ALIGNMENT_LEFT, -1, 44).x
+	var font_size := maxi(int(44.0 * minf(punch, size.x * 0.44 / maxf(width, 1.0))), 12)
 	_text(center + Vector2(0.0, font_size * 0.35), _medal, font_size, Color(_medal_color, alpha), HORIZONTAL_ALIGNMENT_CENTER)
-	var half := 120.0 * punch
+	var half := minf(120.0 * punch, size.x * 0.2)
 	var y := center.y + font_size * 0.55
 	draw_line(center + Vector2(-half, y - center.y), center + Vector2(-26.0, y - center.y), Color(_medal_color, alpha * 0.8), 3.0, true)
 	draw_line(center + Vector2(26.0, y - center.y), center + Vector2(half, y - center.y), Color(_medal_color, alpha * 0.8), 3.0, true)

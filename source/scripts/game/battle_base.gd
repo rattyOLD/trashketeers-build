@@ -725,11 +725,13 @@ func _on_bullet_hit(bullet: Bullet, target: Node2D) -> void:
 		if target is Enemy:
 			var enemy := target as Enemy
 			armored = enemy.data != null and not enemy.armor_broken and (enemy.data.armor >= 0.2 or enemy.elite_armor >= 0.2)
-		SoundManager.play_impact(armored, crit)
-		if target is Enemy and _mark_cd <= 0.0:
+		var survived := not target is Enemy or (target as Enemy).is_alive()
+		if survived:
+			SoundManager.play_impact(armored, crit)
+		if survived and target is Enemy and _mark_cd <= 0.0:
 			_mark_cd = MARK_GAP
 			fx.hitmarker((target as Enemy).get_aim_point(), 1 if crit else 0, target)
-		if crit:
+		if crit and survived:
 			hitstop(0.035)
 	# При плотном огне частицы попаданий идут по бюджету в секунду: 100 пуль/с не должны рождать 100 вспышек.
 	if _hit_fx_budget < 1.0:

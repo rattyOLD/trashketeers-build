@@ -22,6 +22,7 @@ const TEXT_LIFE := 0.8
 const TEXT_RISE := 80.0
 const SPLAT_LIFE := 7.0
 const CORPSE_LIFE := 0.9
+const CORPSE_DRAG := 9.0
 const GHOST_LIFE := 0.28
 const PUFF_LIFE := 0.45
 const FLASH_LIFE := 0.06
@@ -81,6 +82,7 @@ var _spl_next := 0
 
 var _co_tex: Array[Texture2D] = []
 var _co_pos := PackedVector2Array()
+var _co_vel := PackedVector2Array()
 var _co_scale := PackedVector2Array()
 var _co_life := PackedFloat32Array()
 var _co_dir := PackedFloat32Array()
@@ -175,6 +177,7 @@ const FRAME_CORPSE_FADE := 0.6
 var _fc_root: Node2D
 var _fc_nodes: Array[RigSprite] = []
 var _fc_life := PackedFloat32Array()
+var _fc_vel := PackedVector2Array()
 var _fc_tint := PackedColorArray()
 var _fc_next := 0
 ## Вспышки-спрайты (взрыв бочки, брызги шампанского): растут и тают.
@@ -249,6 +252,7 @@ func _init() -> void:
 	_fc_root = Node2D.new()
 	add_child(_fc_root)
 	_fc_life.resize(FRAME_CORPSE_POOL)
+	_fc_vel.resize(FRAME_CORPSE_POOL)
 	_fc_tint.resize(FRAME_CORPSE_POOL)
 	for i in FRAME_CORPSE_POOL:
 		var corpse_sprite := RigSprite.new()
@@ -325,7 +329,7 @@ func attach_ground(decals_layer: Node2D) -> void:
 
 
 ## Смерть покадрового врага: кадры клипа death поверх земли, окрас и обводка — как у живой особи.
-func frame_corpse(source: RigSprite, at: Vector2, sprite_scale: Vector2, style: int = 0) -> void:
+func frame_corpse(source: RigSprite, at: Vector2, sprite_scale: Vector2, style: int = 0, impulse: Vector2 = Vector2.ZERO) -> void:
 	if not source.is_framed() or not FrameDB.has_clip(source.frame_sheet, "death"):
 		return
 	var k := _fc_next
@@ -345,6 +349,7 @@ func frame_corpse(source: RigSprite, at: Vector2, sprite_scale: Vector2, style: 
 	node.visible = true
 	_fc_life[k] = FRAME_CORPSE_LIFE
 	_fc_style[k] = style
+	_fc_vel[k] = impulse.limit_length(260.0)
 
 
 ## Вспышка-картинка (взрыв с концепт-листа): width — ширина в мире, растёт на 25% и гаснет.
@@ -584,13 +589,14 @@ func splat(at: Vector2, color: Color, radius: float, life: float = SPLAT_LIFE) -
 
 
 ## Короткая анимация падения вместо исчезновения: спрайт заваливается набок, плющится и гаснет.
-func corpse(texture: Texture2D, at: Vector2, sprite_scale: Vector2, knock_dir: float, tint: Color = Color.WHITE, style: int = 0) -> void:
+func corpse(texture: Texture2D, at: Vector2, sprite_scale: Vector2, knock_dir: float, tint: Color = Color.WHITE, style: int = 0, impulse: Vector2 = Vector2.ZERO) -> void:
 	if texture == null:
 		return
 	var k := _co_next
 	_co_next = (_co_next + 1) % CORPSE_CAPACITY
 	_co_tex[k] = texture
 	_co_pos[k] = at
+	_co_vel[k] = impulse.limit_length(260.0)
 	_co_scale[k] = sprite_scale
 	_co_life[k] = CORPSE_LIFE
 	_co_dir[k] = knock_dir
@@ -659,6 +665,9 @@ func _tick_frame_corpses(delta: float) -> void:
 		if _fc_life[i] <= 0.0:
 			continue
 		var node := _fc_nodes[i]
+		var drag := exp(-CORPSE_DRAG * delta)
+		node.position += _fc_vel[i] * ((1.0 - drag) / CORPSE_DRAG)
+		_fc_vel[i] *= drag
 		_fc_life[i] -= delta
 		if _fc_life[i] <= 0.0:
 			node.visible = false
@@ -793,6 +802,9 @@ func _process(delta: float) -> void:
 	for i in CORPSE_CAPACITY:
 		if _co_life[i] > 0.0:
 			_co_life[i] -= delta
+			var drag := exp(-CORPSE_DRAG * delta)
+			_co_pos[i] += _co_vel[i] * ((1.0 - drag) / CORPSE_DRAG)
+			_co_vel[i] *= drag
 	for i in GHOST_CAPACITY:
 		if _gh_life[i] > 0.0:
 			_gh_life[i] -= delta
@@ -1171,6 +1183,7 @@ func _resize_all() -> void:
 	_spl_seed = PackedFloat32Array(); _spl_seed.resize(SPLAT_CAPACITY)
 	_co_tex.resize(CORPSE_CAPACITY)
 	_co_pos = PackedVector2Array(); _co_pos.resize(CORPSE_CAPACITY)
+	_co_vel = PackedVector2Array(); _co_vel.resize(CORPSE_CAPACITY)
 	_co_scale = PackedVector2Array(); _co_scale.resize(CORPSE_CAPACITY)
 	_co_life = PackedFloat32Array(); _co_life.resize(CORPSE_CAPACITY)
 	_co_dir = PackedFloat32Array(); _co_dir.resize(CORPSE_CAPACITY)

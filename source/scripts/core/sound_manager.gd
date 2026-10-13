@@ -22,6 +22,8 @@ const PRIORITY_SFX: Array[StringName] = [&"player_hurt", &"explosion", &"level_u
 const LOOP_CHANNELS := 3
 ## Сколько запусков должно оставаться в бюджете, чтобы сыграл шаг.
 const STEP_BUDGET_RESERVE := 3.0
+const KILL_CHANNEL := SFX_POOL_SIZE - 2
+const KILL_GAP_MS := 180
 const PITCH_MIN := 0.95
 const PITCH_MAX := 1.05
 const MUSIC_FADE := 0.8
@@ -164,6 +166,7 @@ var _ambient: Array[AudioStreamPlayer] = []
 var _ambient_timers: Dictionary = {}
 var _ambient_on := false
 var _impact_ms := -100000
+var _kill_ms := -100000
 var _combat_left := 0.0
 var _duck_db := 0.0
 
@@ -206,24 +209,35 @@ func play_armor_break() -> void:
 	play_pitched(&"k_stick_crystal", 0.85)
 
 
+## Одно подтверждение вместо трёх звуков. Резерв в общем бюджете и пуле сохраняет его под огнём.
+func play_kill(chain: int, special: bool = false) -> void:
+	var now := Time.get_ticks_msec()
+	if now - _kill_ms < KILL_GAP_MS:
+		return
+	_kill_ms = now
+	_combat_left = 0.5
+	var pitch := 0.96 + 0.025 * mini(maxi(chain - 1, 0), 10)
+	_play(&"k_perfect" if special else &"kill_confirm", 0.0, pitch, false, true)
+
+
 ## Один канал существующего пула сохраняет сигнал опасности под непрерывным огнём.
 func play_warning(id: StringName, volume_offset_db: float = 0.0) -> void:
 	_play(id, volume_offset_db, 1.0, true)
 
 
-func _play(id: StringName, volume_offset_db: float, pitch: float, warning: bool = false) -> void:
+func _play(id: StringName, volume_offset_db: float, pitch: float, warning: bool = false, kill: bool = false) -> void:
 	if not unlocked or not _streams.has(id):
 		return
 	var now := Time.get_ticks_msec()
 	var cfg: Array = SFX[id]
 	if warning and now - _last_warning_ms < 500:
 		return
-	if not warning and now - int(_last_played_ms.get(id, -100000)) < int(cfg[1] * 1000.0):
+	if not warning and not kill and now - int(_last_played_ms.get(id, -100000)) < int(cfg[1] * 1000.0):
 		return
 	_budget = minf(_budget + float(now - _budget_ms) * 0.001 * SFX_BUDGET_PER_SEC, SFX_BUDGET_BURST)
 	_budget_ms = now
 	if not warning and not PRIORITY_SFX.has(id):
-		if _budget < 1.0:
+		if _budget < (1.0 if kill else 2.0):
 			return
 		_budget -= 1.0
 	if warning:
@@ -231,7 +245,7 @@ func _play(id: StringName, volume_offset_db: float, pitch: float, warning: bool 
 	else:
 		_last_played_ms[id] = now
 
-	var index := SFX_POOL_SIZE - 1 if warning else _pick_player()
+	var index := SFX_POOL_SIZE - 1 if warning else (KILL_CHANNEL if kill else _pick_player())
 	var player := _players[index]
 	player.stream = _streams[id]
 	player.volume_db = cfg[0] + volume_offset_db
@@ -454,7 +468,7 @@ func set_backgrounded(value: bool) -> void:
 
 func _pick_player() -> int:
 	var oldest := 0
-	for i in _players.size() - 1:
+	for i in _players.size() - 2:
 		if not _players[i].playing:
 			return i
 		if _started_ms[i] < _started_ms[oldest]:

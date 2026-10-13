@@ -83,7 +83,7 @@ var _weapon_pickups: Array[WeaponPickup] = []
 var _adrenaline_left := ADRENALINE_TIME
 var _combo := 0
 ## Серия убийств подряд (окно MULTI_WINDOW): на порогах — выкрик над енотом, звук и встряска.
-const MULTI_WINDOW := 0.55
+const MULTI_WINDOW := 1.25
 const MULTI_CALLS := {2: "ДВОЙНОЕ!", 3: "ТРОЙНОЕ!", 5: "РЕЗНЯ!", 8: "МЯСОРУБКА!", 12: "АПОКАЛИПСИС!"}
 var _multi := 0
 ## Для отчёта о забеге (баланс): здоровье в % на старте каждой волны и полученный урон по источникам.
@@ -911,12 +911,12 @@ func _threat_direction() -> Vector2:
 func _count_multikill() -> void:
 	_multi = _multi + 1 if _multi_left > 0.0 else 1
 	_multi_left = MULTI_WINDOW
+	hud.combat_feed.set_chain(_multi, MULTI_WINDOW)
 	if not MULTI_CALLS.has(_multi):
 		return
 	var heat := minf(_multi / 12.0, 1.0)
 	hud.combat_feed.medal(MULTI_CALLS[_multi], heat)
 	if _multi >= 3:
-		SoundManager.play(&"k_perfect")
 		add_shake(0.12)
 
 
@@ -933,12 +933,13 @@ func _on_enemy_died(enemy: Enemy) -> void:
 	if data.is_boss():
 		player.external_pull = Vector2.ZERO
 	var at := enemy.global_position
-	var fall_dir := 1.0 if randf() < 0.5 else -1.0
+	var impulse := enemy.last_hit_direction * (90.0 if data.is_boss() else 220.0)
+	var fall_dir := signf(impulse.x) if absf(impulse.x) > 0.01 else (1.0 if randf() < 0.5 else -1.0)
 	var style := 1 if enemy.last_damage_kind == &"ice" or enemy.slow_left > 0.0 and enemy.slow_amount >= 0.9 else (2 if enemy.last_damage_kind == &"shock" else (3 if enemy.last_damage_kind in [&"fire", &"burn"] or enemy.bleed_is_burn and enemy.bleed_left > 0.0 else 0))
 	if enemy.is_framed():
-		fx.frame_corpse(enemy.get_sprite(), at + enemy.get_sprite_offset(), enemy.get_sprite_scale(), style)
+		fx.frame_corpse(enemy.get_sprite(), at + enemy.get_sprite_offset(), enemy.get_sprite_scale(), style, impulse)
 	else:
-		fx.corpse(enemy.get_texture(), enemy.get_corpse_origin(), enemy.get_sprite_scale(), fall_dir, enemy.get_corpse_tint(), style)
+		fx.corpse(enemy.get_texture(), enemy.get_corpse_origin(), enemy.get_sprite_scale(), fall_dir, enemy.get_corpse_tint(), style, impulse)
 	var body := enemy.get_aim_point()
 	if fx.allow_defeat_fx(data.is_boss()):
 		fx.burst(body, data.fx_color, 5 if not data.is_boss() else 70, 240.0, 3.5)
@@ -963,12 +964,11 @@ func _on_enemy_died(enemy: Enemy) -> void:
 		hud.combat_feed.kill(10, "УБИЙСТВО")
 	hero_skills.on_kill()
 	fx.hitmarker(body, 2)
-	SoundManager.play(&"k_combo")
-	SoundManager.play(&"kill_confirm")
+	_count_multikill()
+	SoundManager.play_kill(_multi, data.is_boss() or data.max_hp >= 120.0 or not enemy.elite.is_empty())
 	if not data.is_boss() and data.max_hp >= 120.0:
 		hitstop(0.04)
 		add_shake(0.15)
-	_count_multikill()
 	if SaveService.get_character_id() == "red_panda" and enemy.bleed_left > 0.0 and _torch_depth < 2:
 		_torch_depth += 1
 		BulletPool.explode(at, 95.0, 38.0 * (1.0 + stats.get_stat(&"damage_mult")), Bullet.Team.PLAYER, Color("#ff8a2a"), 1.0, &"fire")
@@ -1000,7 +1000,6 @@ func _on_enemy_died(enemy: Enemy) -> void:
 	if data.is_boss():
 		_on_boss_killed(enemy, at)
 		return
-	SoundManager.play_enemy_death()
 	add_shake(0.1)
 	hitstop(KILL_HITSTOP)
 

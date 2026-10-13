@@ -100,6 +100,7 @@ const FUR_VARIANTS := [
 var armor_broken := false
 var _armor_wear := 0.0
 var last_damage_kind: StringName = &""
+var last_hit_direction := Vector2.ZERO
 
 var data: EnemyData
 var hp := 0.0
@@ -311,6 +312,7 @@ func activate(enemy_data: EnemyData, at: Vector2, hp_mult: float = 1.0, dmg_mult
 	armor_broken = false
 	_armor_wear = 0.0
 	last_damage_kind = &""
+	last_hit_direction = Vector2.ZERO
 	_emerge = 0.0 if data.is_boss() else EMERGE_TIME
 	_recoil = 0.0
 	_visual_lean = 0.0
@@ -744,7 +746,7 @@ func take_bullet(amount: float, direction: Vector2, knockback: float, is_crit: b
 			if _block_cooldown <= 0.0:
 				_block_cooldown = 0.12
 				blocked.emit(self, global_position + _shield_dir * data.radius * 1.1 + Vector2(0, -data.radius * 0.6))
-	take_damage(amount, direction * knockback, is_crit)
+	take_damage(amount, direction * knockback, is_crit, direction)
 
 
 ## Элита (Возвышения): крепче втрое, крупнее, цветное кольцо под ногами и особенность.
@@ -772,7 +774,7 @@ func make_elite(kind: String) -> void:
 			elite_armor = 0.4
 
 
-func take_damage(amount: float, direction: Vector2 = Vector2.ZERO, is_crit: bool = false) -> void:
+func take_damage(amount: float, direction: Vector2 = Vector2.ZERO, is_crit: bool = false, impact_direction: Vector2 = Vector2.ZERO) -> void:
 	var kind := next_kind
 	next_kind = &""
 	if not is_alive():
@@ -805,6 +807,7 @@ func take_damage(amount: float, direction: Vector2 = Vector2.ZERO, is_crit: bool
 		if _framed:
 			_hit_variant = randi() % maxi(FrameDB.clip_length(_sprite.frame_sheet, "hit"), 1)
 	last_damage_kind = kind
+	last_hit_direction = (impact_direction if impact_direction.length_squared() > 0.0 else direction).normalized()
 	if not data.is_boss() and armor >= 0.2 and not armor_broken and kind in [&"", &"projectile", &"melee", &"blast", &"dash"]:
 		_armor_wear += maxf(raw, 0.0)
 		if _armor_wear >= max_hp * 0.6 and hp > 0.0:
@@ -963,6 +966,7 @@ func _take_dot(amount: float, kind: String) -> void:
 		amount = minf(amount * BOSS_DOT_SCALE, max_hp * BOSS_DOT_CAP)
 	hp -= amount
 	last_damage_kind = StringName(kind)
+	last_hit_direction = Vector2.ZERO
 	if hp > 0.0 and data.is_boss():
 		_update_boss_damage()
 	if status_sink.is_valid():
