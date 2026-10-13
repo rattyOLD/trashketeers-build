@@ -172,7 +172,7 @@ func _near(at: Vector2, radius: float) -> Array[Enemy]:
 func _on_hit(bullet: Bullet, target: Node2D) -> void:
 	if not stats.has_tactics or bullet.team != Bullet.Team.PLAYER or bullet.tactic_generated or not target is Enemy or _busy:
 		return
-	_affect(target as Enemy, bullet.weapon.damage * bullet.damage_scale, bullet.wall_bounces > 0)
+	_affect(target as Enemy, bullet.weapon.damage * bullet.hit_scale(target.global_position), bullet.wall_bounces > 0)
 
 func _on_melee_contact(enemy: Enemy, damage: float) -> void:
 	if stats.has_tactics and not _busy and enemy.is_alive():

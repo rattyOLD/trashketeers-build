@@ -36,6 +36,8 @@ var pool_index := -1
 var last_hit_crit := false
 ## Множитель урона снаряда (сложность волны для вражеских пуль).
 var damage_scale := 1.0
+## Position at firing time; INF means this projectile has no close-range trait.
+var close_origin := Vector2.INF
 var _age := 0.0
 ## Уровень упрощения при большой плотности снарядов: 1 — без шлейфа, 2 — ещё и без луча-свипа.
 var _lod := 0
@@ -99,6 +101,7 @@ func activate(data: WeaponData, origin: Vector2, direction: Vector2, owner_team:
 	_lod = lod
 	pierced = 0
 	damage_scale = 1.0
+	close_origin = Vector2.INF
 	tactic_generated = false
 	wall_bounces = 0
 	_wall_left = data.world_bounces if owner_team == Team.PLAYER else 0
@@ -343,9 +346,16 @@ func _resolve_pending_hits() -> bool:
 	return alive
 
 
+## Compute each impact separately, including piercing and reflected projectiles.
+func hit_scale(at: Vector2) -> float:
+	if team == Team.PLAYER and weapon.trait_id == &"close" and close_origin.is_finite():
+		return damage_scale * lerpf(1.9, 0.55, clampf(close_origin.distance_to(at) / weapon.max_distance, 0.0, 1.0))
+	return damage_scale
+
+
 func _apply_damage(target: Node2D) -> void:
 	last_hit_crit = team == Team.PLAYER and randf() < weapon.crit_chance
-	var amount := weapon.damage * damage_scale * (weapon.crit_mult if last_hit_crit else 1.0)
+	var amount := weapon.damage * hit_scale(target.global_position) * (weapon.crit_mult if last_hit_crit else 1.0)
 	if weapon.pierce_ramp > 0.0 and team == Team.PLAYER:
 		amount *= 1.0 + weapon.pierce_ramp * pierced
 		pierced += 1

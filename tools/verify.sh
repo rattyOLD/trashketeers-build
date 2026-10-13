@@ -17,7 +17,7 @@ if ! "$GODOT" --audio-driver Dummy --headless --path "$P" res://test/check_scrip
   fail=1
 fi
 grep 'CHECK checked' "$LOG/scripts.log"
-for new_check in "hero_identity_test:HERO_IDENTITY" "loadout_choices_test:LOADOUT_CHOICES" "tactics_test:TACTICS_TEST" "polish_stability_test:POLISH_STABILITY" "scene_lifetime_test:SCENE_LIFETIME" "choice_layout_test:CHOICE_LAYOUT" "catalog_interface_test:CATALOG_INTERFACE" "mechanics_choices_test:MECHANICS_CHOICES"; do
+for new_check in "hero_identity_test:HERO_IDENTITY" "loadout_choices_test:LOADOUT_CHOICES" "tactics_test:TACTICS_TEST" "polish_stability_test:POLISH_STABILITY" "scene_lifetime_test:SCENE_LIFETIME" "choice_layout_test:CHOICE_LAYOUT" "catalog_interface_test:CATALOG_INTERFACE" "mechanics_choices_test:MECHANICS_CHOICES" "weapon_roles_test:WEAPON_ROLES"; do
   scene=${new_check%:*}
   marker=${new_check#*:}
   XDG_DATA_HOME="$LOG/$scene-user" timeout 180 xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --audio-driver Dummy --display-driver x11 --rendering-driver opengl3 --resolution 1280x720 --path "$P" "res://test/$scene.tscn" > "$LOG/$scene.log" 2>&1

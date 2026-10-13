@@ -3,7 +3,7 @@ extends RefCounted
 ## Различия отдачи и вспышек используют существующие эффекты и общий бюджет.
 
 static func automatic(w: WeaponData) -> bool:
-	return w.icon in [&"smg", &"rifle", &"lmg", &"minigun"]
+	return w.icon in [&"smg", &"golden_smg", &"tommy", &"rifle", &"lmg", &"minigun"]
 
 
 static func heavy(w: WeaponData) -> bool:

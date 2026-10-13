@@ -55,7 +55,7 @@ func _ready() -> void:
 
 
 ## Один выстрел оружия: projectiles_per_shot пуль с разбросом из конфига.
-func fire(weapon: WeaponData, origin: Vector2, direction: Vector2, team: Bullet.Team = Bullet.Team.PLAYER, damage_scale: float = 1.0) -> void:
+func fire(weapon: WeaponData, origin: Vector2, direction: Vector2, team: Bullet.Team = Bullet.Team.PLAYER, damage_scale: float = 1.0, shooter_origin: Vector2 = Vector2.INF) -> void:
 	if weapon == null:
 		push_error("BulletPool.fire: weapon == null")
 		return
@@ -74,6 +74,8 @@ func fire(weapon: WeaponData, origin: Vector2, direction: Vector2, team: Bullet.
 		var bullet := spawn(weapon, origin, Vector2.from_angle(angle), team)
 		if bullet != null:
 			bullet.damage_scale = damage_scale
+			if team == Bullet.Team.PLAYER and weapon.trait_id == &"close":
+				bullet.close_origin = shooter_origin if shooter_origin.is_finite() else origin
 
 
 func spawn(weapon: WeaponData, origin: Vector2, direction: Vector2, team: Bullet.Team = Bullet.Team.PLAYER) -> Bullet:

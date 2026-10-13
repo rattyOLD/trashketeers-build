@@ -133,7 +133,7 @@ func on_player_hit(bullet: Bullet, enemy: Enemy) -> void:
 		return
 	var weapon := bullet.weapon
 	var crit := bullet.last_hit_crit
-	var damage := weapon.damage * bullet.damage_scale * (weapon.crit_mult if crit else 1.0)
+	var damage := weapon.damage * bullet.hit_scale(enemy.global_position) * (weapon.crit_mult if crit else 1.0)
 	_vampirism(damage, crit)
 	if _execute_shot and crit and enemy.data.boss_pattern.is_empty() and enemy.hp < enemy.max_hp * EXECUTE_HP:
 		enemy.take_damage(enemy.hp + 1.0, Vector2.ZERO, true)

@@ -20,6 +20,8 @@ const EQUIP_DELAY := 0.22
 const OVERDRIVE_TIME := 4.0
 const OVERDRIVE_BASE := 2.5
 const OVERDRIVE_STEP := 0.75
+const SPIN_UP_SECONDS := 2.0
+const SPIN_DOWN_PER_SECOND := 0.8
 
 const RETARGET_INTERVAL := 0.1
 ## Стреляем только по тем, кто на экране: за кадром враги не «видны» игроку.
@@ -127,6 +129,11 @@ func set_base_weapon(new_weapon: WeaponData) -> void:
 	if new_weapon == null:
 		return
 	base_weapon = new_weapon
+	_spin_up = 0.0
+	_still_time = 0.0
+	_last_pos = global_position
+	_target = null
+	_retarget_timer = 0.0
 	melee.reset()
 	_rebuild()
 
@@ -173,24 +180,24 @@ func _physics_process(delta: float) -> void:
 		var auto := _target != null and _is_target_valid() and global_position.distance_squared_to(_target.global_position) <= AUTO_SCREEN_RANGE * AUTO_SCREEN_RANGE
 		has_target = auto
 		if not auto:
-			_spin_up = maxf(_spin_up - delta * 0.8, 0.0)
+			_tick_spin(delta, false)
 			return
 		aim_point = _target.global_position
 	else:
 		has_target = trigger
 		if not trigger:
-			_spin_up = maxf(_spin_up - delta * 0.8, 0.0)
+			_tick_spin(delta, false)
 			return
 		var dir := manual_aim if manual_aim.length_squared() > 0.01 else aim_direction
 		var helped := _assist_target(dir, ASSIST_COS_GUN, minf(weapon.max_distance, AUTO_SCREEN_RANGE))
 		aim_point = helped.global_position if helped != null else global_position + dir * weapon.max_distance
 	aim_direction = global_position.direction_to(aim_point)
+	_tick_spin(delta, has_target)
 	if _cooldown > 0.0:
 		return
 	_cooldown = weapon.fire_interval
 	if weapon.trait_id == &"spin":
 		_cooldown *= lerpf(1.7, 0.6, _spin_up)
-		_spin_up = minf(_spin_up + weapon.fire_interval / 1.8, 1.0)
 	var muzzle := global_position + aim_direction * MUZZLE_DISTANCE
 	if muzzle_provider.is_valid():
 		muzzle = muzzle_provider.call(aim_direction)
@@ -208,7 +215,7 @@ func _physics_process(delta: float) -> void:
 		overdrive_changed.emit(false)
 		overdrive_fired.emit()
 	scale *= _trait_scale(target_distance)
-	BulletPool.fire(weapon, spawn, direction, Bullet.Team.PLAYER, scale)
+	BulletPool.fire(weapon, spawn, direction, Bullet.Team.PLAYER, scale, global_position)
 	fired.emit(weapon, muzzle, direction)
 
 
@@ -314,10 +321,17 @@ func _assist_target(dir: Vector2, min_cos: float, max_distance: float) -> Node2D
 	return _target if to.normalized().dot(dir) >= min_cos else null
 
 
-func _trait_scale(target_distance: float) -> float:
+func _tick_spin(delta: float, firing: bool) -> void:
+	if weapon.trait_id != &"spin":
+		_spin_up = 0.0
+	elif firing:
+		_spin_up = minf(_spin_up + delta / SPIN_UP_SECONDS, 1.0)
+	else:
+		_spin_up = maxf(_spin_up - delta * SPIN_DOWN_PER_SECOND, 0.0)
+
+
+func _trait_scale(_target_distance: float) -> float:
 	match weapon.trait_id:
-		&"close":
-			return lerpf(1.9, 0.55, clampf(target_distance / weapon.max_distance, 0.0, 1.0))
 		&"focus":
 			return 0.75 + 1.25 * clampf(_still_time, 0.0, 1.0)
 	return 1.0
