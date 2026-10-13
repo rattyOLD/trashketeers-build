@@ -639,15 +639,8 @@ func _switch_chapter(index: int = -1) -> void:
 	# Текстуры прошлой главы (враги, босс, пропсы, живность) — из видеопамяти до прогрева новой:
 	# к 4–6 главе забег держал всех боссов сразу, и iPhone убивал вкладку по памяти.
 	enemies.drop_pooled_visuals()
-	for id in ContentDB.get_enemy_ids():
-		var data := ContentDB.get_enemy(id)
-		if data != null:
-			data.release_textures()
-	FrameDB.release_textures()
-	ContentDB._texture_cache.clear()
-	ArenaProp._textures.clear()
-	AmbientLife._frames.clear()
-	AmbientLife._textures.clear()
+	fx.clear()
+	BattleMemory.release_chapter()
 	warm_chapter(chapter)
 	BulletPool.release_all()
 	lobs.clear()

@@ -658,6 +658,29 @@ func muzzle_flash(at: Vector2, angle: float, color: Color, size: float = 1.0) ->
 
 func clear() -> void:
 	_resize_all()
+	_stream.clear()
+	_mk_target.clear()
+	_callout = -1
+	_callout_text = ""
+	_bo_life.fill(0.0)
+	_fc_life.fill(0.0)
+	_sf_life.fill(0.0)
+	_sw_life.fill(0.0)
+	_cs_life.fill(0.0)
+	_light_life.fill(0.0)
+	for node in _fc_nodes:
+		node.hide()
+		node.release_visual()
+	for nodes in [_fb_nodes, _sf_nodes, _sw_nodes, _cs_nodes]:
+		for node: Sprite2D in nodes:
+			node.hide()
+			node.texture = null
+	for light in _lights:
+		light.enabled = false
+	_sparks.queue_redraw()
+	_streams.queue_redraw()
+	_texts.queue_redraw()
+	_ground.queue_redraw()
 
 
 func _tick_frame_corpses(delta: float) -> void:
@@ -671,6 +694,7 @@ func _tick_frame_corpses(delta: float) -> void:
 		_fc_life[i] -= delta
 		if _fc_life[i] <= 0.0:
 			node.visible = false
+			node.release_visual()
 			continue
 		var age := FRAME_CORPSE_LIFE - _fc_life[i]
 		var sheet := node.frame_sheet
@@ -721,6 +745,7 @@ func _process(delta: float) -> void:
 		var f := int(_fb_time[i] * _fb_fps[i])
 		if f >= book.hframes:
 			book.visible = false
+			book.texture = null
 		else:
 			book.frame = f
 	EnvLights.tick(delta)
@@ -732,6 +757,7 @@ func _process(delta: float) -> void:
 		var node := _sf_nodes[i]
 		if _sf_life[i] <= 0.0:
 			node.visible = false
+			node.texture = null
 			continue
 		var t := 1.0 - _sf_life[i] / _sf_total[i]
 		node.scale = Vector2(1.0, _sf_flip[i]) * _sf_base[i] * (0.7 + 0.55 * (1.0 - pow(1.0 - t, 3.0)))
@@ -743,6 +769,7 @@ func _process(delta: float) -> void:
 		var sn := _sw_nodes[i]
 		if _sw_life[i] <= 0.0:
 			sn.visible = false
+			sn.texture = null
 			continue
 		var u := 1.0 - _sw_life[i] / _sw_total[i]
 		var lead := clampf(u * 1.15, 0.0, 1.0)
@@ -757,6 +784,7 @@ func _process(delta: float) -> void:
 		var cn := _cs_nodes[i]
 		if _cs_life[i] <= 0.0:
 			cn.visible = false
+			cn.texture = null
 			continue
 		_cs_vel[i] *= pow(0.02, delta)
 		_cs_vel[i].y += 260.0 * delta
@@ -805,9 +833,13 @@ func _process(delta: float) -> void:
 			var drag := exp(-CORPSE_DRAG * delta)
 			_co_pos[i] += _co_vel[i] * ((1.0 - drag) / CORPSE_DRAG)
 			_co_vel[i] *= drag
+			if _co_life[i] <= 0.0:
+				_co_tex[i] = null
 	for i in GHOST_CAPACITY:
 		if _gh_life[i] > 0.0:
 			_gh_life[i] -= delta
+			if _gh_life[i] <= 0.0:
+				_gh_tex[i] = null
 	for i in PUFF_CAPACITY:
 		if _pf_life[i] > 0.0:
 			_pf_life[i] -= delta
@@ -1182,6 +1214,7 @@ func _resize_all() -> void:
 	_spl_color = PackedColorArray(); _spl_color.resize(SPLAT_CAPACITY)
 	_spl_seed = PackedFloat32Array(); _spl_seed.resize(SPLAT_CAPACITY)
 	_co_tex.resize(CORPSE_CAPACITY)
+	_co_tex.fill(null)
 	_co_pos = PackedVector2Array(); _co_pos.resize(CORPSE_CAPACITY)
 	_co_vel = PackedVector2Array(); _co_vel.resize(CORPSE_CAPACITY)
 	_co_scale = PackedVector2Array(); _co_scale.resize(CORPSE_CAPACITY)
@@ -1189,6 +1222,7 @@ func _resize_all() -> void:
 	_co_dir = PackedFloat32Array(); _co_dir.resize(CORPSE_CAPACITY)
 	_co_color = PackedColorArray(); _co_color.resize(CORPSE_CAPACITY)
 	_gh_tex.resize(GHOST_CAPACITY)
+	_gh_tex.fill(null)
 	_gh_pos = PackedVector2Array(); _gh_pos.resize(GHOST_CAPACITY)
 	_gh_scale = PackedVector2Array(); _gh_scale.resize(GHOST_CAPACITY)
 	_gh_life = PackedFloat32Array(); _gh_life.resize(GHOST_CAPACITY)

@@ -147,6 +147,16 @@ func is_framed() -> bool:
 	return not frame_sheet.is_empty()
 
 
+func release_visual() -> void:
+	texture = null
+	mesh = null
+	rig = {}
+	frame_sheet = {}
+	frame_index = -1
+	for key in ["weights0", "weights1", "weights2", "regions0", "regions1"]:
+		shader_material.set_shader_parameter(key, null)
+
+
 func copy_look(other: RigSprite) -> void:
 	for param in LOOK_PARAMS:
 		shader_material.set_shader_parameter(param, other.shader_material.get_shader_parameter(param))

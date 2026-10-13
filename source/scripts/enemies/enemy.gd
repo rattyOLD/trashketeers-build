@@ -393,12 +393,9 @@ func deactivate() -> void:
 ## видеопамяти до конца забега). Следующий activate() соберёт картинку заново.
 func drop_visual() -> void:
 	_visual_id = ""
-	_sprite.texture = null
-	_sprite.rig = {}
-	_sprite.frame_sheet = {}
-	_sprite.frame_index = -1
-	_sprite.shader_material.set_shader_parameter("regions0", null)
-	_sprite.shader_material.set_shader_parameter("regions1", null)
+	_sprite.release_visual()
+	_alt.texture = null
+	_parts.setup([])
 
 
 func get_radius() -> float:

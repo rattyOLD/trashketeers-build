@@ -8,15 +8,19 @@ extends RefCounted
 
 static func release() -> void:
 	RaccoonVisual.release_cached_textures()
+	release_chapter()
+	WeaponVfx._sheets.clear()
+	WeaponVfx._atlas.clear()
+	Cosmetics._skin_tex.clear()
+
+
+static func release_chapter() -> void:
 	FrameDB.release_textures()
 	RigDB.release_textures()
 	ArenaProp._textures.clear()
 	AmbientLife._frames.clear()
 	AmbientLife._textures.clear()
-	WeaponVfx._sheets.clear()
-	WeaponVfx._atlas.clear()
 	ContentDB._texture_cache.clear()
-	Cosmetics._skin_tex.clear()
 	for id in ContentDB.get_enemy_ids():
 		var data := ContentDB.get_enemy(id)
 		if data != null:
