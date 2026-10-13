@@ -25,6 +25,12 @@ func _process(delta: float) -> void:
 	var aiming := controller.manual_aim.length_squared() > 0.01 and not controller.auto_mode
 	_alpha = move_toward(_alpha, 1.0 if aiming else 0.0, delta * (8.0 if aiming else 4.0))
 	if aiming:
+		var gun := controller.weapon != null and not controller.weapon.is_melee()
+		if gun and controller.has_target and controller.shot_origin.is_finite():
+			_from = to_local(controller.shot_origin)
+			_dir = (to_local(controller.shot_origin + controller.shot_direction) - _from).normalized()
+			queue_redraw()
+			return
 		# Ровно туда, куда летят пули: с доводкой на врага (aim_direction), а не просто по стику.
 		_dir = (controller.aim_direction if controller.has_target and controller.aim_direction.length_squared() > 0.01 else controller.manual_aim).normalized()
 		_from = _dir * 34.0 + Vector2(0, -18)
@@ -39,6 +45,8 @@ func _draw() -> void:
 		return
 	var melee := controller.weapon != null and controller.weapon.is_melee()
 	var length := MELEE_LENGTH if melee else LENGTH
+	if not melee and controller.weapon != null:
+		length = minf(length, controller.weapon.max_distance)
 	var from := _from
 	var t := 0.0
 	while t < length:

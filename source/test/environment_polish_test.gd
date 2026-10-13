@@ -57,6 +57,9 @@ func _run() -> void:
 	await _test_result(game)
 	game.free()
 	get_tree().paused = false
+	# Музыкальный автолоад переживает Game: дождаться остановки Ogg-декодера до quit.
+	SoundManager.stop_music()
+	await get_tree().create_timer(SoundManager.MUSIC_FADE + 0.1, true, false, true).timeout
 	# Даём отложенным освобождениям окон и GPU-ресурсов завершиться до выхода.
 	for frame in 3:
 		await get_tree().process_frame

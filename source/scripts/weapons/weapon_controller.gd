@@ -24,6 +24,7 @@ const SPIN_UP_SECONDS := 2.0
 const SPIN_DOWN_PER_SECOND := 0.8
 
 const RETARGET_INTERVAL := 0.1
+const ASSIST_REACQUIRE_COS := 0.995
 ## Стреляем только по тем, кто на экране: за кадром враги не «видны» игроку.
 const AUTO_SCREEN_RANGE := 600.0
 const MUZZLE_DISTANCE := 44.0
@@ -38,6 +39,9 @@ var active_slot := 0
 var slot_count := 2
 var weapon: WeaponData
 var aim_direction := Vector2.RIGHT
+## Shared with AimLine: the actual projectile origin/direction, including muzzle parallax.
+var shot_origin := Vector2.INF
+var shot_direction := Vector2.RIGHT
 var has_target := false
 ## Зажат ли «курок» и куда целятся (нормаль; ZERO — в последнем направлении).
 var trigger := false
@@ -50,6 +54,8 @@ const ASSIST_COS_GUN := 0.97
 const ASSIST_COS_MELEE := 0.8
 ## Callable(direction: Vector2) -> Vector2: глобальная точка дула нарисованного ствола.
 var muzzle_provider: Callable
+## Optional manual finder(from, range, direction, cosine, clear_path).
+var aim_target_finder: Callable
 
 var _target_finder: Callable
 var _stats: RunStats
@@ -61,6 +67,9 @@ var _overdrive_left := 0.0
 var _retarget_timer := 0.0
 var _target: Node2D
 var _ray: PhysicsRayQueryParameters2D
+var _aim_ray: PhysicsRayQueryParameters2D
+var _using_manual_finder := false
+var _last_manual_dir := Vector2.ZERO
 var _last_pos := Vector2.ZERO
 var _still_time := 0.0
 var _spin_up := 0.0
@@ -149,6 +158,9 @@ func set_base_weapon(new_weapon: WeaponData) -> void:
 	_last_pos = global_position
 	_target = null
 	_retarget_timer = 0.0
+	_using_manual_finder = false
+	_last_manual_dir = Vector2.ZERO
+	shot_origin = Vector2.INF
 	melee.reset()
 	_rebuild()
 
@@ -168,6 +180,8 @@ func _rebuild() -> void:
 func _physics_process(delta: float) -> void:
 	if weapon == null or not _target_finder.is_valid():
 		return
+	# Сохраняем остаток шага только для продолжающейся стрельбы, без долга за простой.
+	var overdue := minf(maxf(delta - _cooldown, 0.0), delta) if _cooldown > 0.0 else 0.0
 	_cooldown = maxf(_cooldown - delta, 0.0)
 	_equip_left = maxf(_equip_left - delta, 0.0)
 	for index in slot_count:
@@ -181,9 +195,18 @@ func _physics_process(delta: float) -> void:
 		if _overdrive_left <= 0.0:
 			overdrive_changed.emit(false)
 	_retarget_timer -= delta
-	if _retarget_timer <= 0.0 or not _is_target_valid():
+	var manual_dir := (manual_aim if manual_aim.length_squared() > 0.01 else aim_direction).normalized()
+	var directed := not auto_mode and trigger and weapon.melee_class != "flail" and aim_target_finder.is_valid()
+	var turned := directed and manual_dir.dot(_last_manual_dir) < ASSIST_REACQUIRE_COS
+	if _retarget_timer <= 0.0 or (_target != null and not _is_target_valid()) or directed != _using_manual_finder or turned:
 		_retarget_timer = RETARGET_INTERVAL
-		_target = _target_finder.call(global_position, weapon.max_distance)
+		_using_manual_finder = directed
+		_last_manual_dir = manual_dir
+		if directed:
+			var cone := ASSIST_COS_MELEE if weapon.is_melee() else ASSIST_COS_GUN
+			_target = aim_target_finder.call(global_position, minf(weapon.max_distance, AUTO_SCREEN_RANGE), manual_dir, cone, _can_aim_at)
+		else:
+			_target = _target_finder.call(global_position, weapon.max_distance)
 
 	if weapon.melee_class == "flail":
 		_flail_step(delta)
@@ -195,27 +218,22 @@ func _physics_process(delta: float) -> void:
 
 	var aim_point := Vector2.ZERO
 	if auto_mode:
-		var auto := _target != null and _is_target_valid() and global_position.distance_squared_to(_target.global_position) <= AUTO_SCREEN_RANGE * AUTO_SCREEN_RANGE
+		var auto := _target != null and _is_target_valid() and global_position.distance_squared_to(AimAssist.point(_target)) <= AUTO_SCREEN_RANGE * AUTO_SCREEN_RANGE
 		has_target = auto
 		if not auto:
 			_tick_spin(delta, false)
 			return
-		aim_point = _target.global_position
+		aim_point = AimAssist.point(_target)
 	else:
 		has_target = trigger
 		if not trigger:
 			_tick_spin(delta, false)
 			return
-		var dir := manual_aim if manual_aim.length_squared() > 0.01 else aim_direction
+		var dir := manual_dir
 		var helped := _assist_target(dir, ASSIST_COS_GUN, minf(weapon.max_distance, AUTO_SCREEN_RANGE))
-		aim_point = helped.global_position if helped != null else global_position + dir * weapon.max_distance
+		aim_point = AimAssist.point(helped) if helped != null else global_position + dir * weapon.max_distance
 	aim_direction = global_position.direction_to(aim_point)
 	_tick_spin(delta, has_target)
-	if _cooldown > 0.0 or _equip_left > 0.0:
-		return
-	_cooldown = weapon.fire_interval
-	if weapon.trait_id == &"spin":
-		_cooldown *= lerpf(1.7, 0.6, _spin_up)
 	var muzzle := global_position + aim_direction * MUZZLE_DISTANCE
 	if muzzle_provider.is_valid():
 		muzzle = muzzle_provider.call(aim_direction)
@@ -226,9 +244,21 @@ func _physics_process(delta: float) -> void:
 		direction = muzzle.direction_to(aim_point)
 	else:
 		spawn = global_position + aim_direction * POINT_BLANK_SPAWN
-	var scale := 1.0
+	shot_origin = spawn
+	shot_direction = direction
+	if _cooldown > 0.0 or _equip_left > 0.0:
+		return
+	_cooldown = weapon.fire_interval
+	if weapon.trait_id == &"spin":
+		_cooldown *= lerpf(1.7, 0.6, _spin_up)
+	# Раскрутка не должна обходить бюджет, уже учтённый в with_run_stats.
+	var requested_interval := _cooldown
+	_cooldown = maxf(_cooldown, maxf(float(weapon.projectiles_per_shot) / WeaponData.BULLET_BUDGET_PER_SEC, delta))
+	var rate_scale := _cooldown / requested_interval
+	_cooldown = maxf(_cooldown - overdue, 0.0)
+	var scale := rate_scale
 	if _overdrive_left > 0.0 and weapon.dash_charge:
-		scale = OVERDRIVE_BASE + OVERDRIVE_STEP * (_stats.get_stat(&"rail_overdrive") if _stats != null else 0.0)
+		scale *= OVERDRIVE_BASE + OVERDRIVE_STEP * (_stats.get_stat(&"rail_overdrive") if _stats != null else 0.0)
 		_overdrive_left = 0.0
 		overdrive_changed.emit(false)
 		overdrive_fired.emit()
@@ -333,10 +363,12 @@ func _melee_step(delta: float) -> void:
 func _assist_target(dir: Vector2, min_cos: float, max_distance: float) -> Node2D:
 	if _target == null or not _is_target_valid():
 		return null
-	var to := _target.global_position - global_position
+	var to := AimAssist.point(_target) - global_position
 	if to.length_squared() > max_distance * max_distance or to.length_squared() < 1.0:
 		return null
-	return _target if to.normalized().dot(dir) >= min_cos else null
+	if to.normalized().dot(dir.normalized()) < min_cos:
+		return null
+	return _target if _using_manual_finder or _can_aim_at(_target) else null
 
 
 func _tick_spin(delta: float, firing: bool) -> void:
@@ -355,20 +387,33 @@ func _trait_scale(_target_distance: float) -> float:
 	return 1.0
 
 
-## Дуло нарисованного ствола может торчать за стену, у которой стоит Енот: тогда пуля
-## стартует от корпуса, иначе она родилась бы по ту сторону стены.
+## Дуло может пройти сквозь стену или близкого врага. Пуля должна родиться перед ними.
 func _is_blocked(muzzle: Vector2) -> bool:
 	if _ray == null:
 		_ray = PhysicsRayQueryParameters2D.new()
-		_ray.collision_mask = PhysicsLayers.WORLD | PhysicsLayers.OBSTACLE
-		_ray.collide_with_areas = false
+		_ray.collision_mask = PhysicsLayers.WORLD | PhysicsLayers.OBSTACLE | PhysicsLayers.ENEMY
+		_ray.collide_with_areas = true
+		_ray.hit_from_inside = true
 	_ray.from = global_position
 	_ray.to = muzzle
 	return not get_world_2d().direct_space_state.intersect_ray(_ray).is_empty()
+
+
+func _can_aim_at(target: Node2D) -> bool:
+	if _aim_ray == null:
+		_aim_ray = PhysicsRayQueryParameters2D.new()
+		# SHIELD защищает героя от врагов, но пропускает его собственные пули.
+		_aim_ray.collision_mask = PhysicsLayers.WORLD | PhysicsLayers.OBSTACLE
+		_aim_ray.collide_with_areas = true
+		_aim_ray.hit_from_inside = true
+	_aim_ray.from = global_position
+	_aim_ray.to = AimAssist.point(target)
+	var hit := get_world_2d().direct_space_state.intersect_ray(_aim_ray)
+	return hit.is_empty() or hit["collider"] == target
 
 
 func _is_target_valid() -> bool:
 	if not is_instance_valid(_target) or not _target.call("is_targetable"):
 		return false
 	var reach := weapon.max_distance
-	return global_position.distance_squared_to(_target.global_position) <= reach * reach
+	return global_position.distance_squared_to(AimAssist.point(_target)) <= reach * reach

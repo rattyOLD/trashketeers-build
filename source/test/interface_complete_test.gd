@@ -81,6 +81,9 @@ func _run() -> void:
 	await _test_coop()
 	await _test_scroll()
 	await _test_dialog()
+	# Меню запускает музыку при сенсорном вводе; автолоад переживает его закрытие.
+	SoundManager.stop_music()
+	await get_tree().create_timer(SoundManager.MUSIC_FADE + 0.1, true, false, true).timeout
 	# Дочерние окна и их render-ресурсы освобождаются отложенно после закрытия.
 	for frame in 3:
 		await get_tree().process_frame

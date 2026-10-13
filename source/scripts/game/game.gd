@@ -179,6 +179,7 @@ func start(_weapon_id: StringName = &"") -> void:
 	if not RunMods.only_shotguns(loadout):
 		loadout = WeaponDB.get_weapon(RunMods.SHOTGUN_IDS[0]).with_tier(1)
 	_spawn_player(map.player_start, loadout, _find_target)
+	player.weapon_controller.aim_target_finder = _find_aim_target
 	map.attach_player(player)
 	_hook_run_objects()
 	player.surface_query = map.surface_at
@@ -367,6 +368,17 @@ func _find_target(from: Vector2, max_distance: float) -> Node2D:
 		if secret != null:
 			return secret
 	return map.find_nearest_destructible(from, max_distance)
+
+
+func _find_aim_target(from: Vector2, max_distance: float, direction: Vector2, min_cos: float, clear_path: Callable) -> Node2D:
+	var enemy := AimAssist.select(enemies.get_active(), from, direction, max_distance, min_cos, clear_path, _target_nearest)
+	if enemy != null:
+		return enemy
+	if story != null:
+		var secret := AimAssist.select(story.secrets, from, direction, max_distance, min_cos, clear_path, _target_nearest)
+		if secret != null:
+			return secret
+	return AimAssist.select(map.destructibles, from, direction, max_distance, min_cos, clear_path, _target_nearest)
 
 
 func _physics_process(delta: float) -> void:
