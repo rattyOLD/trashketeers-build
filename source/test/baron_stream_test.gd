@@ -1,5 +1,20 @@
 extends Node
 ## Exercise both Baron phases and the actual textured liquid renderer.
+class ObservedBrain extends BossBrain:
+	var observe: Callable
+	var early_release_puke := false
+	var early_releases := 0
+	func _fire_beer(weapon: WeaponData, direction: Vector2, spread: float) -> void:
+		var before := _beer_count
+		super._fire_beer(weapon, direction, spread)
+		if _beer_count == before or BulletPool._active.is_empty():
+			return
+		var bullet: Bullet = BulletPool._active.back()
+		if bullet.weapon == weapon and bullet.team == Bullet.Team.ENEMY and bullet.spawn_frame == Engine.get_physics_frames():
+			observe.call(bullet)
+			if early_release_puke and weapon == _puke:
+				early_releases += 1
+				BulletPool.release(bullet)
 var game: Game
 var baron: Enemy
 var elapsed := 0.0
@@ -11,6 +26,7 @@ var _started_ms := Time.get_ticks_msec()
 var _trace_ms := 0
 var _bonus_injected := false
 var _bonus_handled := false
+var _sampled_puke := 0
 func _process(_delta: float) -> void:
 	if OS.get_environment("BARON_TRACE") != "1" or baron == null:
 		return
@@ -18,7 +34,7 @@ func _process(_delta: float) -> void:
 	if now - _trace_ms < 10000:
 		return
 	_trace_ms = now
-	print("BARON_TRACE wall=", (now - _started_ms) / 1000.0, " elapsed=", elapsed, " paused=", get_tree().paused, " bonus=", game._bonus_open, " levelup=", game._level_up_open, " dead=", game.player.is_dead, " finished=", game.finished, " bullets=", BulletPool.get_active_count(), " fps=", Engine.get_frames_per_second())
+	print("BARON_TRACE wall=", (now - _started_ms) / 1000.0, " elapsed=", elapsed, " paused=", get_tree().paused, " bonus=", game._bonus_open, " levelup=", game._level_up_open, " dead=", game.player.is_dead, " finished=", game.finished, " bullets=", BulletPool.get_active_count(), " fps=", Engine.get_frames_per_second(), " brain_t=", baron._brain._fight_time, " step=", baron._brain._step, " state=", BossBrain.State.keys()[baron._brain.state], " phase=", baron._brain.phase)
 func _ready() -> void:
 	Controls.apply_keys()
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -33,10 +49,17 @@ func _ready() -> void:
 	game.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(game)
 	game.start(&"")
+	# A projectile can hit before the next live-pool sample. Count that real hit as well.
+	BulletPool.bullet_hit.connect(func(bullet: Bullet, _target: Node2D) -> void: _observe(bullet))
 	await get_tree().create_timer(2.0).timeout
 	game.director.set_physics_process(false)
 	game.enemies.release_all()
 	baron = game.enemies.spawn(ContentDB.get_enemy(&"beer_baron"), game.player.global_position + Vector2(350, 0))
+	var brain := ObservedBrain.new()
+	brain.setup(baron)
+	brain.observe = _observe
+	brain.early_release_puke = OS.get_environment("BARON_TEST_EARLY_RELEASE") == "1"
+	baron._brain = brain
 	game._on_boss_spawned(baron)
 	if OS.get_environment("BARON_TEST_DELAY") == "1":
 		# Детерминированно воспроизвести задержанный цикл, который обрывал прежний тест.
@@ -68,18 +91,19 @@ func _physics_process(delta: float) -> void:
 	for bullet: Bullet in BulletPool._active:
 		if bullet.weapon.id not in [&"beer_jet_v1", &"puke_v1"]:
 			continue
-		var key := str(bullet.get_instance_id()) + ":" + str(bullet.spawn_frame)
-		if not seen.has(key):
-			seen[key] = true
-			counts[baron._brain.phase][str(bullet.weapon.id)] += 1
+		_observe(bullet)
+		if bullet.weapon.id == &"puke_v1": _sampled_puke += 1
 		if bullet.weapon.id == &"beer_jet_v1":
 			live_beer += 1
 	if live_beer >= 6 and not captured:
 		captured = true
 		_snapshot.call_deferred()
 	if elapsed >= 75.0 or (elapsed >= 45.0 and captured and _phase_complete(1) and _phase_complete(2)):
-		print("BARON_STREAM counts=", counts, " captured=", captured, " bonus_handled=", _bonus_handled)
+		var observed := baron._brain as ObservedBrain
+		print("BARON_STREAM counts=", counts, " captured=", captured, " bonus_handled=", _bonus_handled, " early_releases=", observed.early_releases, " sampled_puke=", _sampled_puke)
 		var passed := captured and (OS.get_environment("BARON_TEST_BONUS") != "1" or _bonus_handled)
+		if observed.early_release_puke:
+			passed = passed and observed.early_releases > 0 and _sampled_puke == 0
 		for phase: int in counts:
 			for weapon: String in counts[phase]:
 				passed = passed and counts[phase][weapon] > 0
@@ -87,6 +111,13 @@ func _physics_process(delta: float) -> void:
 		get_tree().quit(0 if passed else 1)
 func _phase_complete(phase: int) -> bool:
 	return counts[phase]["beer_jet_v1"] > 0 and counts[phase]["puke_v1"] > 0
+func _observe(bullet: Bullet) -> void:
+	if baron == null or baron._brain == null or bullet.weapon.id not in [&"beer_jet_v1", &"puke_v1"]:
+		return
+	var key := str(bullet.get_instance_id()) + ":" + str(bullet.spawn_frame)
+	if not seen.has(key):
+		seen[key] = true
+		counts[baron._brain.phase][str(bullet.weapon.id)] += 1
 func _snapshot() -> void:
 	await RenderingServer.frame_post_draw
 	if not OS.get_environment("OUT").is_empty():

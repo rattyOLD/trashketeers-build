@@ -112,14 +112,18 @@ static func capped(key: StringName, raw: float) -> float:
 
 
 ## «Мощь» билда: урон × скорострельность × число снарядов × живучесть. 1.0 — голый герой.
-## По ней выживание подтягивает врагов (см. WaveDirector.adaptive_factor).
+## Общая мощь для отчёта о забеге; защита не участвует в подстройке врагов.
 func power() -> float:
+	var tough := (1.0 + get_stat(&"max_hp_add") / 200.0) / maxf(1.0 - get_stat(&"damage_resist"), 0.3)
+	return offensive_power() * tough
+
+
+func offensive_power() -> float:
 	var dmg := 1.0 + get_stat(&"damage_mult")
 	var rate := 1.0 + get_stat(&"fire_rate_mult")
 	var shots := 1.0 + 0.25 * get_stat(&"extra_projectiles")
-	var tough := (1.0 + get_stat(&"max_hp_add") / 200.0) / maxf(1.0 - get_stat(&"damage_resist"), 0.3)
 	var crit := 1.0 + 0.5 * get_stat(&"crit_chance_add")
-	return dmg * rate * shots * tough * crit
+	return dmg * rate * shots * crit
 
 
 func get_stat(key: StringName) -> float:

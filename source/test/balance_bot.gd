@@ -8,6 +8,16 @@ var dead_logged := false
 var rng := RandomNumberGenerator.new()
 var orbit := 1.0
 var last_wave := 0
+var _hooked := false
+var _wave_at := 0.0
+var _last_level := 1
+var _waves: Array[Dictionary] = []
+var _levels: Array[Dictionary] = []
+var _choices: Array[String] = []
+var _peak_loot := 0
+var _ending := false
+var _last_trace_ms := 0
+var _requested_scale := 3.0
 
 
 func _ready() -> void:
@@ -15,11 +25,13 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	rng.seed = int(OS.get_environment("SEED")) if OS.get_environment("SEED") != "" else 1
 	seed(rng.seed)
-	Engine.time_scale = float(OS.get_environment("SCALE")) if OS.get_environment("SCALE") != "" else 3.0
+	_requested_scale = float(OS.get_environment("SCALE")) if OS.get_environment("SCALE") != "" else 3.0
+	Engine.time_scale = _requested_scale
 	Engine.physics_ticks_per_second = 60
 	Engine.max_physics_steps_per_frame = 16
 	SaveService.data = SaveService.DEFAULTS.duplicate(true)
 	SaveService._sanitize_arsenal()
+	SaveService.data["tips_off"] = true
 	var hero := OS.get_environment("HERO")
 	if hero != "":
 		SaveService.data["character"] = hero
@@ -29,6 +41,8 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if _ending:
+		return
 	t += delta
 	if t > 0.6 and not started:
 		started = true
@@ -37,9 +51,23 @@ func _physics_process(delta: float) -> void:
 	if screen == null or not screen is Game:
 		return
 	var game := screen as Game
+	if not _hooked:
+		_hooked = true
+		# Game.start randomizes production runs; seed the measured battle after it finishes.
+		seed(rng.seed)
+		game.director.wave_cleared.connect(func(number: int) -> void:
+			var row := {"wave": number, "duration": game.director.elapsed - _wave_at, "at": game.director.elapsed, "level": game.level, "hp": game.player.hp, "coins": game.nuts, "ground": game.pickups.get_count(), "adapt": game.director.adapt}
+			_waves.append(row)
+			print("PACE_CLEAR ", JSON.stringify(row)))
 	if game.player == null or not is_instance_valid(game.player):
 		return
 	var p := game.player
+	# Combat hitstop returns production time to 1x. Resume the requested test speed after it.
+	if not game._hitstop_active:
+		Engine.time_scale = _requested_scale
+	if OS.get_environment("PACE_TRACE") == "1" and Time.get_ticks_msec() - _last_trace_ms >= 30000:
+		_last_trace_ms = Time.get_ticks_msec()
+		print("PACE_TRACE elapsed=%.1f wave=%d paused=%s hp=%.1f loot=%d" % [game.director.elapsed, last_wave, get_tree().paused, p.hp, game.pickups.get_count()])
 	if not p.has_meta("hooked"):
 		p.set_meta("hooked", true)
 		if OS.get_environment("DMG_LOG") == "1":
@@ -47,12 +75,36 @@ func _physics_process(delta: float) -> void:
 		p.died.connect(func() -> void: print("DIED_SIGNAL t=%.1f hp=%.0f" % [t, p.hp]))
 	if game.director.wave_number != last_wave:
 		last_wave = game.director.wave_number
-		print("WAVE %d t=%ds hp=%d/%d lvl=%d kills=%d power=%.2f adapt=%.2f" % [last_wave, int(game.run_time if "run_time" in game else t), int(p.hp), int(p.max_hp), game.level, game.kills, game.stats.power(), game.director.adapt])
+		_wave_at = game.director.elapsed
+		print("WAVE %d t=%ds hp=%d/%d lvl=%d kills=%d power=%.2f adapt=%.2f" % [last_wave, int(game.director.elapsed), int(p.hp), int(p.max_hp), game.level, game.kills, game.stats.power(), game.director.adapt])
+	_peak_loot = maxi(_peak_loot, game.pickups.get_count())
+	if game.level != _last_level:
+		_last_level = game.level
+		_levels.append({"level": game.level, "at": game.director.elapsed, "wave": last_wave})
 	if p.is_dead:
 		if not dead_logged:
 			dead_logged = true
-			print("DEAD wave=%d chapter_wave=%d t=%ds lvl=%d kills=%d by=%s" % [game.director.wave_number, game.director.chapter_wave(), int(t), game.level, game.kills, Player.last_source])
-			get_tree().create_timer(0.5, true, false, true).timeout.connect(get_tree().quit)
+			_finish(game, "DEAD")
+		return
+	if get_tree().paused:
+		for node in game.get_children():
+			if node is ChoiceCard and not node._done:
+				node._opened_ms = 0
+				node._pick(rng.randi_range(0, 1))
+				return
+			if node is RunEncounter and not node._resolved:
+				node._resolve(rng.randf() < 0.5)
+				return
+		if game.hud._level_up.visible:
+			game.hud._level_up._armed_at = 0
+			if game._dealer_open:
+				game._on_reroll_requested()
+			else:
+				var choices := game.hud._level_up._choices
+				if not choices.is_empty():
+					var index := rng.randi_range(0, choices.size() - 1)
+					_choices.append(String(choices[index].id))
+					game.hud._level_up._pick(index)
 		return
 	# Уход от толпы: от взвешенного центра ближних врагов + обход по кругу; изредка меняем сторону.
 	var away := Vector2.ZERO
@@ -115,13 +167,31 @@ func _physics_process(delta: float) -> void:
 	# Держимся ближе к центру арены, чтобы не зажали в углу.
 	var center := game.map.bounds.get_center() - p.global_position
 	move += center / maxf(game.map.bounds.size.length() * 0.35, 1.0)
+	if game.director.phase == WaveDirector.Phase.PORTAL and is_instance_valid(game._portal):
+		move = (game._portal.global_position - p.global_position).normalized()
 	# Управление как у игрока — через джойстик (бой сам переписывает move_input из джойстика каждый кадр).
 	game.hud.joystick._touch_index = 99
 	game.hud.joystick.output = move.limit_length(1.0)
 	game._request_skill()
-	if get_tree().paused and game._level_up_open:
-		game.hud._level_up._armed_at = 0
-		game.hud._level_up._pick(rng.randi() % 3)
-	if t > float(OS.get_environment("DURATION") if OS.get_environment("DURATION") != "" else "900"):
-		print("TIMEOUT wave=%d t=%ds" % [game.director.wave_number, int(t)])
-		get_tree().quit()
+	if game.director.elapsed >= float(OS.get_environment("DURATION") if OS.get_environment("DURATION") != "" else "900"):
+		_finish(game, "TIMEOUT")
+
+
+func _finish(game: Game, outcome: String) -> void:
+	_ending = true
+	var report := {"seed": rng.seed, "outcome": outcome, "wave": last_wave, "time": game.director.elapsed, "level": game.level, "kills": game.kills, "coins": game.nuts, "power": game.stats.power(), "peak_loot": _peak_loot, "waves": _waves, "levels": _levels, "choices": _choices, "by": Player.last_source}
+	print(outcome, " wave=%d t=%ds lvl=%d kills=%d by=%s" % [last_wave, int(game.director.elapsed), game.level, game.kills, Player.last_source])
+	print("PACE_REPORT ", JSON.stringify(report))
+	var output := OS.get_environment("PACE_OUT")
+	if not output.is_empty():
+		var file := FileAccess.open(output, FileAccess.WRITE)
+		file.store_string(JSON.stringify(report, "\t"))
+	get_tree().paused = false
+	game.queue_free()
+	SoundManager.stop_all_loops()
+	SoundManager.stop_ambient()
+	SoundManager.stop_music()
+	await get_tree().create_timer(SoundManager.MUSIC_FADE + 0.1, true, false, true).timeout
+	SoundManager._music.stop()
+	SoundManager._music.stream = null
+	get_tree().quit()

@@ -114,8 +114,10 @@ func spawn_xp(at: Vector2, amount: int) -> void:
 			xp_collected.emit(value)
 
 
-func vacuum() -> void:
+func vacuum(xp_only: bool = false) -> void:
 	for i in _count:
+		if xp_only and _kind[i] == Kind.NUT:
+			continue
 		if _attracted[i] == 0:
 			_attracted[i] = 1
 			_attract_time[i] = 0.0
@@ -153,6 +155,14 @@ func is_gold_at(index: int) -> bool:
 
 func get_count() -> int:
 	return _count
+
+
+func get_coin_count() -> int:
+	var coins := 0
+	for i in _count:
+		if _kind[i] == Kind.NUT:
+			coins += 1
+	return coins
 
 
 func _physics_process(delta: float) -> void:

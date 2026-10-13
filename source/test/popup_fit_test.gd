@@ -81,6 +81,25 @@ func _ready() -> void:
 				print("OVERLAP %s: %s" % [key, line])
 			sub.queue_free()
 			await get_tree().process_frame
+	# Social windows can still have awaited HTTP reads after their owner has closed.
+	# Let those reads and queued frees settle before measuring shutdown leaks.
+	var quiet := 0.0
+	var waited := 0.0
+	while quiet < 2.0 and waited < 40.0:
+		await get_tree().create_timer(0.1).timeout
+		waited += 0.1
+		var active := Cloud.find_children("*", "HTTPRequest", true, false).size() + Platform.find_children("*", "HTTPRequest", true, false).size()
+		quiet = quiet + 0.1 if active == 0 else 0.0
+	if quiet < 2.0:
+		bad += 1
+		push_error("POPUP_FIT: HTTP reads did not settle before shutdown")
+	SoundManager.stop_all_loops()
+	SoundManager.stop_ambient()
+	SoundManager.stop_music()
+	await get_tree().create_timer(SoundManager.MUSIC_FADE + 0.1).timeout
+	SoundManager._music.stop()
+	SoundManager._music.stream = null
+	for frame in 4: await get_tree().process_frame
 	print("TEXT_OVERLAPS ", overlaps)
 	print("POPUP_FIT_TEST ", "PASS" if bad == 0 and overlaps == 0 else "FAIL %d bounds, %d overlaps" % [bad, overlaps])
 	get_tree().quit(0 if bad == 0 and overlaps == 0 else 1)

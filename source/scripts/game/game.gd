@@ -574,7 +574,9 @@ func _on_wave_cleared(number: int) -> void:
 	events.on_wave_cleared()
 	if is_instance_valid(_arrow) and _arrow._objective:
 		_arrow.hide()
-	_loot_at_clear = pickups.get_count()
+	_loot_at_clear = pickups.get_coin_count()
+	# Передышка даёт заработанную прокачку; монеты остаются наградой за ручной сбор.
+	pickups.vacuum(true)
 	if player != null and not player.is_dead:
 		player.visual.cheer()
 	var bonus := Economy.wave_bonus(director.chapter_wave(), director.loop)
@@ -1954,7 +1956,7 @@ func _on_weapon_picked(pickup: WeaponPickup) -> void:
 func _check_clean_sweep() -> void:
 	var was := _loot_at_clear
 	_loot_at_clear = 0
-	if was < CLEAN_SWEEP_MIN or pickups.get_count() > 1:
+	if was < CLEAN_SWEEP_MIN or pickups.get_coin_count() > 1:
 		return
 	var bonus := maxi(int(Economy.wave_bonus(maxi(director.chapter_wave() - 1, 1), director.loop) * CLEAN_SWEEP_RATIO), 10)
 	nuts += bonus
