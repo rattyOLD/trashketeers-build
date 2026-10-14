@@ -93,6 +93,8 @@ var _combat_report := CombatReport.new()
 var _multi_left := 0.0
 var _combo_timer := 0.0
 var _recorded := false
+var _record_result: Dictionary = {}
+var _progress_at_start: Dictionary = {}
 var _portal: Portal
 var story_mission := ""
 var story: StoryRun
@@ -139,6 +141,7 @@ static func warm_chapter(chapter: Dictionary) -> void:
 
 
 func start(_weapon_id: StringName = &"") -> void:
+	_progress_at_start = SaveService.progress_snapshot()
 	stats.patch_context = story_mission.is_empty()
 	randomize()
 	RunMods.clear()
@@ -477,7 +480,7 @@ func _run_summary() -> Dictionary:
 		"kills": kills,
 		"level": level,
 		"time": director.elapsed,
-		"coins": RunMods.reward(_earned()),
+		"coins": SaveService.run_payout(RunMods.reward(_earned())),
 		"gems": run_gems,
 		"bosses": bosses_killed,
 		"chapter": str(director.current_chapter().get("title", "")),
@@ -2307,9 +2310,9 @@ func _waves_cleared() -> int:
 
 func _record() -> Dictionary:
 	if _recorded:
-		return {}
+		return _record_result
 	_recorded = true
-	return SaveService.record_run({
+	_record_result = SaveService.record_run({
 		"nuts": RunMods.reward(_earned()),
 		"time": director.elapsed,
 		"wave": _waves_cleared(),
@@ -2319,6 +2322,7 @@ func _record() -> Dictionary:
 		"blueprints": run_blueprints,
 		"bosses": bosses_killed,
 	})
+	return _record_result
 
 
 func _finish() -> void:
@@ -2328,11 +2332,13 @@ func _finish() -> void:
 	hud.hide_revive()
 	var summary := _run_summary()
 	summary["tip"] = _death_tip()
-	var previous_best := SaveService.get_stat("best_wave")
+	var previous_best := int(_progress_at_start.get("best_wave", SaveService.get_stat("best_wave")))
 	var result := _record()
 	summary["friend"] = SaveService.friend_wave_line(int(summary["wave"]), previous_best)
-	_send_run_report("died" if player.is_dead else "finished", summary["wave"], summary["chapter"], result.get("record", false))
-	summary["record"] = result.get("record", false)
+	summary["record"] = bool(result.get("record", false)) or int(summary["wave"]) > previous_best
+	summary["coins"] = int(result.get("coins", summary["coins"]))
+	summary["progress_report"] = SaveService.progress_report(_progress_at_start)
+	_send_run_report("died" if player.is_dead else "finished", summary["wave"], summary["chapter"], bool(summary["record"]))
 	summary["total_coins"] = SaveService.get_coins()
 	finished = true
 	Engine.time_scale = 1.0

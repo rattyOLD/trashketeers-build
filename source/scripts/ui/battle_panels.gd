@@ -581,7 +581,8 @@ class RunResultPanel:
 		var bosses := int(summary.get("bosses", 0))
 		_title.text = "НОВЫЙ РЕКОРД!" if record else ("ГЛАВА ПРОЙДЕНА!" if bosses > 0 else "ЗАБЕГ ОКОНЧЕН")
 		_title.add_theme_color_override("font_color", Color("#7cff6b") if record else UiStyle.GOLD)
-		var line := "%s · лучший результат: %d волн" % [str(summary.get("chapter", "")), int(summary.get("best_wave", 0))]
+		var best_wave := int(summary.get("best_wave", 0))
+		var line := "%s · лучший результат: %d %s" % [str(summary.get("chapter", "")), best_wave, SaveService.plural(best_wave, "волна", "волны", "волн")]
 		if bosses > 0:
 			line += " · боссов: %d" % bosses
 		var friend_line := str(summary.get("friend", ""))
@@ -618,6 +619,9 @@ class RunResultPanel:
 		var tip := str(summary.get("tip", ""))
 		var report := str(summary.get("combat_report", ""))
 		var build := str(summary.get("build_report", ""))
+		var progress := str(summary.get("progress_report", ""))
+		if not progress.is_empty():
+			report = progress + ("\n\n" + report if not report.is_empty() else "")
 		if not build.is_empty():
 			report += ("\n" if not report.is_empty() else "") + build
 		_tip_box.visible = not tip.is_empty() or not report.is_empty()

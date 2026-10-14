@@ -1389,13 +1389,73 @@ func get_achievement_progress(achievement: Dictionary) -> float:
 
 # --- Итоги забегов ---------------------------------------------------------------------------------
 
+func progress_snapshot() -> Dictionary:
+	return {"xp": int(data["account_xp"]), "pass": BattlePass.points(), "season": BattlePass.season(), "achievements": (data["achievements"] as Array).duplicate(), "best_wave": int(data["best_wave"])}
+
+
+func progress_report(before: Dictionary) -> String:
+	var lines := PackedStringArray()
+	var opened := PackedStringArray()
+	var previous: Array = before.get("achievements", [])
+	for achievement: Dictionary in ACHIEVEMENTS:
+		if is_achieved(str(achievement["id"])) and not previous.has(achievement["id"]):
+			opened.append(str(achievement["title"]))
+	if not opened.is_empty():
+		var shown := PackedStringArray()
+		for i in mini(opened.size(), 3): shown.append(opened[i])
+		lines.append("Открыто: " + " · ".join(shown) + (" и ещё %d" % (opened.size() - 3) if opened.size() > 3 else ""))
+	var level := get_account_level()
+	var xp_gain := maxi(int(data["account_xp"]) - int(before.get("xp", data["account_xp"])), 0)
+	var xp_left := maxi(int(XP_PER_LEVEL_BASE * level * level) - int(data["account_xp"]), 1)
+	lines.append("Аккаунт: уровень %d · +%d опыта · ещё %d до уровня %d" % [level, xp_gain, xp_left, level + 1])
+	var pass_points := BattlePass.points()
+	var new_season := int(before.get("season", BattlePass.season())) != BattlePass.season()
+	var pass_gain := pass_points if new_season else maxi(pass_points - int(before.get("pass", pass_points)), 0)
+	var pass_gain_text := "%d %s" % [pass_gain, plural(pass_gain, "очко", "очка", "очков")]
+	var pass_level := BattlePass.tier()
+	var next_reward := ""
+	if pass_level < BattlePass.TIERS:
+		next_reward = "ещё %d до уровня %d" % [BattlePass.POINTS_PER_TIER - pass_points % BattlePass.POINTS_PER_TIER, pass_level + 1]
+	elif BattlePass.bonus_ready() > 0:
+		next_reward = "бонусы готовы: %d" % BattlePass.bonus_ready()
+	else:
+		next_reward = "ещё %d до бонуса" % (BattlePass.BONUS_POINTS - BattlePass.bonus_points_into() % BattlePass.BONUS_POINTS)
+	lines.append("%s: %d/%d · +%s · %s" % ["Новый сезон пропуска" if new_season else "Пропуск", pass_level, BattlePass.TIERS, pass_gain_text, next_reward])
+	if BattlePass.has_unclaimed():
+		lines.append("Награды пропуска готовы — забери на базе")
+	var closest := _closest_progress_goal()
+	if not closest.is_empty():
+		var reward := PackedStringArray()
+		if int(closest["nuts"]) > 0: reward.append("+%d монет" % int(closest["nuts"]))
+		if int(closest["dust"]) > 0: reward.append("+%s" % Economy.format_gems(int(closest["dust"])))
+		lines.append("Ближайшая цель: %s · %d/%d\n%s\nНаграда: %s" % [closest["title"], mini(get_stat(str(closest["stat"])), int(closest["goal"])), closest["goal"], closest["description"], " · ".join(reward)])
+	return "\n".join(lines)
+
+
+func _closest_progress_goal() -> Dictionary:
+	var result: Dictionary = {}
+	var progress := -1.0
+	for achievement: Dictionary in ACHIEVEMENTS:
+		if bool(achievement.get("hidden", false)) or is_achieved(str(achievement["id"])) or int(achievement["goal"]) <= 0:
+			continue
+		var current := get_achievement_progress(achievement)
+		if current > progress:
+			progress = current
+			result = achievement
+	return result
+
+
+func run_payout(amount: int) -> int:
+	var boost := 0.0 if int(data.get("boost_coins", 0)) <= 0 else Cosmetics.BOOST_COINS_BONUS
+	return int(round(maxi(amount, 0) * RUN_PAYOUT * (1.0 + get_perk_bonus("loot") + CharacterDB.get_stat(get_character_id(), "coins") + Premium.coin_bonus() + boost)))
+
+
 ## Итоги забега Свалки. Счётчики боя (kills, crits, crates, boss_kills) уже
 ## накоплены вживую через add_stat() — ачивки открываются прямо в бою; здесь только монеты,
 ## рекорд волны, опыт аккаунта и трофейные стволы (сразу попадают в арсенал).
 ## summary: nuts, time, wave, kills, loot (Array [[id, tier], ...]). Возвращает {"record", "loot"}.
 func record_run(summary: Dictionary) -> Dictionary:
-	var boost_coins := 0.0 if int(data.get("boost_coins", 0)) <= 0 else Cosmetics.BOOST_COINS_BONUS
-	var nuts := int(round(maxi(int(summary.get("nuts", 0)), 0) * RUN_PAYOUT * (1.0 + get_perk_bonus("loot") + CharacterDB.get_stat(get_character_id(), "coins") + Premium.coin_bonus() + boost_coins)))
+	var nuts := run_payout(int(summary.get("nuts", 0)))
 	var wave := int(summary.get("wave", 0))
 	data["nuts"] = get_nuts() + nuts
 	add_account_xp(int(round((int(summary.get("kills", 0)) + wave * 5) * (1.0 + Premium.xp_bonus()))))
@@ -1421,7 +1481,7 @@ func record_run(summary: Dictionary) -> Dictionary:
 	check_achievements()
 	save_data()
 	Cloud.queue_upload()
-	return {"record": is_record, "loot": summary.get("loot", [])}
+	return {"record": is_record, "loot": summary.get("loot", []), "coins": nuts}
 
 
 ## Босс побеждён — счётчик живой, чтобы ачивка открылась сразу.
