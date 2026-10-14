@@ -227,7 +227,10 @@ func _resolve_hit(origin: Vector2, echo_scale: float, echo: bool) -> void:
 			var enemy := target as Enemy
 			if enemy.is_alive():
 				Enemy.next_kind = &"melee"
+				Enemy.next_source = weapon.get_damage_source()
 			enemy.take_bullet(amount, push, knock, crit, PIERCING_CLASSES.has(weapon.melee_class) or strong)
+			Enemy.next_source = &""
+			Enemy.next_kind = &""
 			if enemy.is_alive():
 				enemy.add_stagger(weapon.stagger * CLASS_STAGGER.get(weapon.melee_class, 1.0) * (1.6 if _heavy else 1.0) * echo_scale, strong)
 			elif weapon.trait_id == &"junk_grow":
@@ -235,6 +238,7 @@ func _resolve_hit(origin: Vector2, echo_scale: float, echo: bool) -> void:
 			if weapon.trait_id == &"ice_wave" and enemy.is_alive():
 				enemy.add_slow(0.55, 2.5)
 		else:
+			if target.has_method("set_damage_source"): target.call("set_damage_source", weapon.get_damage_source(), &"melee")
 			target.call("take_damage", amount, push * knock, crit)
 		BulletPool.bullet_hit.emit(proxy, target)
 		landed += 1
@@ -254,13 +258,13 @@ func _apply_trait(weapon: WeaponData, origin: Vector2, victims: Array[Node2D], s
 	match weapon.trait_id:
 		&"quake":
 			if _finisher or _heavy:
-				BulletPool.explode(origin + direction * reach * 0.8, 130.0, weapon.damage * 0.6 * scale, Bullet.Team.PLAYER, weapon.effect_color, 1.6)
+				BulletPool.explode(origin + direction * reach * 0.8, 130.0, weapon.damage * 0.6 * scale, Bullet.Team.PLAYER, weapon.effect_color, 1.6, &"blast", weapon.get_damage_source())
 		&"ice_wave":
 			if _swings % ICE_WAVE_EVERY == 0:
 				_frost_burst(weapon, origin + direction * reach * 0.7)
 		&"gravity":
 			if _gravity_left > 0.0:
-				BulletPool.explode(_gravity_center, 150.0, weapon.damage * 0.9, Bullet.Team.PLAYER, weapon.effect_color, 1.4)
+				BulletPool.explode(_gravity_center, 150.0, weapon.damage * 0.9, Bullet.Team.PLAYER, weapon.effect_color, 1.4, &"blast", weapon.get_damage_source())
 				_gravity_left = 0.0
 			elif not victims.is_empty():
 				_gravity_center = origin + direction * reach * 0.75
@@ -272,7 +276,7 @@ func _apply_trait(weapon: WeaponData, origin: Vector2, victims: Array[Node2D], s
 
 ## Ледяной разлом: каждый 3-й удар обрушивает холод по площади перед Енотом. Никаких снарядов, только удар.
 func _frost_burst(weapon: WeaponData, at: Vector2) -> void:
-	BulletPool.explode(at, FROST_RADIUS, weapon.damage * 0.55, Bullet.Team.PLAYER, weapon.effect_color, 0.8)
+	BulletPool.explode(at, FROST_RADIUS, weapon.damage * 0.55, Bullet.Team.PLAYER, weapon.effect_color, 0.8, &"ice", weapon.get_damage_source())
 	var query := _get_query()
 	(query.shape as CircleShape2D).radius = FROST_RADIUS
 	query.transform = Transform2D(0.0, at)

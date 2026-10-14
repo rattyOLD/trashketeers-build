@@ -170,6 +170,7 @@ func _tick_acid(delta: float) -> void:
 	if enemies != null:
 		for enemy in enemies.get_active().duplicate():
 			if enemy.is_alive() and enemy.global_position.distance_squared_to(center) < ACID_RADIUS * ACID_RADIUS:
+				Enemy.next_source = &"environment"
 				Enemy.next_kind = &"acid"
 				enemy.take_damage(5.0)
 

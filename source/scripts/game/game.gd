@@ -246,6 +246,7 @@ func start(_weapon_id: StringName = &"") -> void:
 	events.encounter_requested.connect(_open_run_encounter)
 	enemies.enemy_died.connect(_on_enemy_died)
 	enemies.enemy_damaged.connect(_on_enemy_damaged)
+	enemies.damage_reported.connect(_combat_report.record_actual)
 	enemies.enemy_armor_cracked.connect(func(enemy: Enemy) -> void:
 		fx.armor_feedback(enemy.get_aim_point())
 		SoundManager.play_armor_break())
@@ -710,7 +711,6 @@ func _on_bullet_hit(bullet: Bullet, target: Node2D) -> void:
 
 
 func _on_enemy_status(enemy: Enemy, amount: float, kind: String) -> void:
-	_combat_report.record_enemy(amount, enemy.hp, StringName(kind))
 	status.on_status_damage(enemy, amount, kind)
 	if enemy.data.is_boss():
 		hud.update_boss(maxf(enemy.hp, 0.0), enemy.max_hp)
@@ -736,7 +736,6 @@ func _flush_damage_numbers(delta: float, force: bool = false) -> void:
 
 
 func _on_enemy_damaged(enemy: Enemy, amount: float, is_crit: bool, kind: StringName) -> void:
-	_combat_report.record_enemy(amount, enemy.hp, kind)
 	if kind == &"melee":
 		var spread := enemy.data.radius * 0.6
 		fx.number(enemy.get_aim_point() + Vector2(randf_range(-spread, spread), -enemy.data.radius * 1.6), amount, FxManager.kind_color(kind), is_crit, FxManager.kind_scale(kind))
@@ -985,7 +984,7 @@ func _on_enemy_died(enemy: Enemy) -> void:
 		add_shake(0.15)
 	if SaveService.get_character_id() == "red_panda" and enemy.bleed_left > 0.0 and _torch_depth < 2:
 		_torch_depth += 1
-		BulletPool.explode(at, 95.0, 38.0 * (1.0 + stats.get_stat(&"damage_mult")), Bullet.Team.PLAYER, Color("#ff8a2a"), 1.0, &"fire")
+		BulletPool.explode(at, 95.0, 38.0 * (1.0 + stats.get_stat(&"damage_mult")), Bullet.Team.PLAYER, Color("#ff8a2a"), 1.0, &"fire", &"skill:hero")
 		_torch_depth -= 1
 	if story != null:
 		story.on_kill(data)

@@ -179,6 +179,7 @@ const CLOSE_RANGE := 360.0
 
 var world_bounces := 0
 var id: StringName
+var damage_source: StringName = &""
 var display_name: String
 var short_name: String
 var enemy_only: bool
@@ -318,6 +319,10 @@ static func from_dict(raw: Dictionary, resolve_texture: Callable) -> WeaponData:
 	_apply_visuals(w, d, resolve_texture)
 	WeaponVfx.apply(w)
 	return w
+
+
+func get_damage_source() -> StringName:
+	return damage_source if damage_source != &"" else id
 
 
 func get_dps() -> float:

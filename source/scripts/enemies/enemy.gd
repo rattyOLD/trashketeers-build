@@ -26,6 +26,7 @@ signal blinked(enemy: Enemy, from: Vector2, to: Vector2)
 ## Эффект по запросу сценария босса: "transform" | "stomp" | "muzzle".
 signal fx_requested(enemy: Enemy, kind: String, at: Vector2, radius: float)
 signal boss_phase(enemy: Enemy, phase: int)
+signal damage_reported(actual: float, kind: StringName, origin: StringName)
 
 enum Act { MOVE, WINDUP, LUNGE, AIM, DASH, RECOVER, FUSE, THROW, SLAM, VANISH }
 
@@ -137,6 +138,9 @@ var _weapon: WeaponData
 var _brain: BossBrain
 var _knockback := Vector2.ZERO
 var _flash := 0.0
+var poison_source: StringName = &""
+var dash_poison_source: StringName = &""
+var bleed_source: StringName = &""
 var poison_stacks := 0
 var poison_left := 0.0
 var poison_dps := 0.0
@@ -162,6 +166,7 @@ var _status_key := 0
 static var status_sink: Callable
 ## Тип урона следующего take_damage (fire, shock, poison, blast, ...): выставляет источник урона, враг сбрасывает.
 static var next_kind: StringName = &""
+static var next_source: StringName = &""
 ## Общий множитель скорости крыс (набирается с волнами и включается на кемперов).
 static var global_speed_mult := 1.0
 static var mod_speed_mult := 1.0
@@ -273,6 +278,9 @@ func activate(enemy_data: EnemyData, at: Vector2, hp_mult: float = 1.0, dmg_mult
 	activation_id += 1
 	stuck_time = 0.0
 	_detour_time = 0.0
+	poison_source = &""
+	dash_poison_source = &""
+	bleed_source = &""
 	poison_stacks = 0
 	poison_dps = 0.0
 	poison_left = 0.0
@@ -773,7 +781,9 @@ func make_elite(kind: String) -> void:
 
 func take_damage(amount: float, direction: Vector2 = Vector2.ZERO, is_crit: bool = false, impact_direction: Vector2 = Vector2.ZERO) -> void:
 	var kind := next_kind
+	var origin := next_source
 	next_kind = &""
+	next_source = &""
 	if not is_alive():
 		return
 	if _brain != null and _brain.is_invulnerable():
@@ -787,7 +797,9 @@ func take_damage(amount: float, direction: Vector2 = Vector2.ZERO, is_crit: bool
 		amount *= STUN_DAMAGE_MULT
 	if _brain != null:
 		amount *= _brain.damage_taken_mult()
+	var hp_before := hp
 	hp -= amount
+	damage_reported.emit(minf(maxf(amount, 0.0), maxf(hp_before, 0.0)), kind, origin)
 	if hp > 0.0 and data.is_boss():
 		_update_boss_damage()
 	if hp > 0.0 and data.is_boss():
@@ -873,13 +885,15 @@ func is_slowed() -> bool:
 	return slow_left > 0.0
 
 
-func add_poison(dps_per_stack: float, duration: float, max_stacks: int) -> void:
+func add_poison(dps_per_stack: float, duration: float, max_stacks: int, origin: StringName = &"") -> void:
+	if dps_per_stack >= poison_dps: poison_source = origin
 	poison_stacks = mini(poison_stacks + 1, max_stacks)
 	poison_dps = maxf(poison_dps, dps_per_stack)
 	poison_left = maxf(poison_left, duration)
 
 
-func add_bleed(dps: float, duration: float, burn: bool = false) -> void:
+func add_bleed(dps: float, duration: float, burn: bool = false, origin: StringName = &"") -> void:
+	if dps >= bleed_dps: bleed_source = origin
 	bleed_is_burn = burn
 	bleed_dps = maxf(bleed_dps, dps)
 	bleed_left = maxf(bleed_left, duration)
@@ -900,7 +914,8 @@ func add_slow(amount: float, duration: float) -> void:
 	slow_left = maxf(slow_left, duration)
 
 
-func add_dash_poison(dps: float) -> void:
+func add_dash_poison(dps: float, origin: StringName = &"skill:dash") -> void:
+	if dps >= dash_poison_dps: dash_poison_source = origin
 	dash_poison_dps = maxf(dash_poison_dps, clampf(dps, 0.0, 7.0))
 	dash_poison_left = 3.0
 
@@ -937,11 +952,11 @@ func _tick_status(delta: float) -> void:
 	if _status_tick <= 0.0:
 		_status_tick = STATUS_TICK
 		if poison_stacks > 0:
-			_take_dot(poison_stacks * poison_dps * STATUS_TICK, "poison")
+			_take_dot(poison_stacks * poison_dps * STATUS_TICK, "poison", poison_source)
 		if is_alive() and dash_poison_left > 0.0:
-			_take_dot(dash_poison_dps * STATUS_TICK, "poison")
+			_take_dot(dash_poison_dps * STATUS_TICK, "poison", dash_poison_source)
 		if is_alive() and bleed_left > 0.0:
-			_take_dot(bleed_dps * STATUS_TICK, "burn" if bleed_is_burn else "bleed")
+			_take_dot(bleed_dps * STATUS_TICK, "burn" if bleed_is_burn else "bleed", bleed_source)
 		if data == null:
 			return
 	var key := (1 if poison_stacks > 0 or dash_poison_left > 0.0 else 0) | (2 if bleed_left > 0.0 else 0) | (4 if slow_left > 0.0 else 0) | (8 if stun_left > 0.0 or posture_stun > 0.0 else 0)
@@ -955,13 +970,15 @@ func _tick_status(delta: float) -> void:
 		_parts.set_param("tint", tint)
 
 
-func _take_dot(amount: float, kind: String) -> void:
+func _take_dot(amount: float, kind: String, origin: StringName = &"") -> void:
 	if not is_alive() or (_brain != null and _brain.is_invulnerable()):
 		return
 	amount *= 1.0 - data.armor * 0.5
 	if data.is_boss():
 		amount = minf(amount * BOSS_DOT_SCALE, max_hp * BOSS_DOT_CAP)
+	var hp_before := hp
 	hp -= amount
+	damage_reported.emit(minf(maxf(amount, 0.0), maxf(hp_before, 0.0)), StringName(kind), origin)
 	last_damage_kind = StringName(kind)
 	last_hit_direction = Vector2.ZERO
 	if hp > 0.0 and data.is_boss():

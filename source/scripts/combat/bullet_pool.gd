@@ -162,7 +162,7 @@ func _physics_process(delta: float) -> void:
 		var pending := _blast_queue
 		_blast_queue = []
 		for blast: Array in pending:
-			explode(blast[0], blast[1], blast[2], blast[3], blast[4], blast[5], blast[6])
+			explode(blast[0], blast[1], blast[2], blast[3], blast[4], blast[5], blast[6], blast[7] if blast.size() > 7 else &"")
 	var live := _active.size()
 	_lod = 2 if live > LOD_SWEEP_OFF else (1 if live > LOD_TRAILS_OFF else 0)
 	# Обход с конца: swap-remove переносит в i уже обработанный последний элемент,
@@ -239,13 +239,13 @@ func _on_bullet_detonated(bullet: Bullet) -> void:
 		if _finisher_cd > 0.0 or randf() > w.finisher_chance:
 			return
 		_finisher_cd = 0.06
-	explode(bullet.global_position, w.explosion_radius, w.explosion_damage, bullet.team, w.effect_color, w.knockback)
+	explode(bullet.global_position, w.explosion_radius, w.explosion_damage, bullet.team, w.effect_color, w.knockback, &"blast", w.get_damage_source() if bullet.team == Bullet.Team.PLAYER else &"effect:chain")
 
 
 ## Взрыв по площади: урон спадает от 100% в центре до 50% на краю, всех отбрасывает наружу.
 ## Взрыв игрока бьёт крыс и разрушаемые объекты; взрыв Бомбо-Крысы — Енота и самих крыс
 ## (цепные реакции — приятный бонус игроку). Вызывается вне физических сигналов.
-func explode(at: Vector2, radius: float, damage: float, team: Bullet.Team, color: Color, knockback: float = 1.0, kind: StringName = &"blast") -> void:
+func explode(at: Vector2, radius: float, damage: float, team: Bullet.Team, color: Color, knockback: float = 1.0, kind: StringName = &"blast", origin: StringName = &"") -> void:
 	if radius <= 0.0 or not is_inside_tree():
 		return
 	# Цепные реакции (взрыв убил врага → тот взорвался → …) не растят стек вызовов: глубже
@@ -253,15 +253,15 @@ func explode(at: Vector2, radius: float, damage: float, team: Bullet.Team, color
 	# Раньше плотная толпа с «взрывными» бонусами роняла веб-версию (Maximum call stack size exceeded).
 	if _blast_nesting >= MAX_BLAST_NESTING or _blasts_this_frame >= MAX_BLASTS_PER_FRAME:
 		if _blast_queue.size() < MAX_BLAST_QUEUE:
-			_blast_queue.append([at, radius, damage, team, color, knockback, kind])
+			_blast_queue.append([at, radius, damage, team, color, knockback, kind, origin])
 		return
 	_blasts_this_frame += 1
 	_blast_nesting += 1
-	_explode_now(at, radius, damage, team, color, knockback, kind)
+	_explode_now(at, radius, damage, team, color, knockback, kind, origin)
 	_blast_nesting -= 1
 
 
-func _explode_now(at: Vector2, radius: float, damage: float, team: Bullet.Team, color: Color, knockback: float, kind: StringName) -> void:
+func _explode_now(at: Vector2, radius: float, damage: float, team: Bullet.Team, color: Color, knockback: float, kind: StringName, origin: StringName) -> void:
 	var query := _get_blast_query()
 	(query.shape as CircleShape2D).radius = radius
 	query.transform = Transform2D(0.0, at)
@@ -278,10 +278,14 @@ func _explode_now(at: Vector2, radius: float, damage: float, team: Bullet.Team, 
 		var falloff := lerpf(1.0, 0.5, clampf(offset.length() / radius, 0.0, 1.0))
 		var push := offset.normalized() * EXPLOSION_KNOCKBACK * knockback if offset.length_squared() > 1.0 else Vector2.ZERO
 		Enemy.next_kind = kind
+		Enemy.next_source = origin if origin != &"" else (&"effect:chain" if team == Bullet.Team.ENEMY else &"")
+		if target.has_method("set_damage_source"):
+			target.call("set_damage_source", Enemy.next_source, kind)
 		if target is Player:
 			Player.last_source = &"blast"
 		target.call("take_damage", damage * falloff, push, false)
 		Enemy.next_kind = &""
+		Enemy.next_source = &""
 		if target is Player:
 			(target as Player).apply_knockback(push * 260.0)
 

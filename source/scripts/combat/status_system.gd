@@ -136,9 +136,11 @@ func on_player_hit(bullet: Bullet, enemy: Enemy) -> void:
 	var damage := weapon.damage * bullet.hit_scale(enemy.global_position) * (weapon.crit_mult if crit else 1.0)
 	_vampirism(damage, crit)
 	if _execute_shot and crit and enemy.data.boss_pattern.is_empty() and enemy.hp < enemy.max_hp * EXECUTE_HP:
+		Enemy.next_source = &"skill:hero"
 		enemy.take_damage(enemy.hp + 1.0, Vector2.ZERO, true)
 		return
 	if _hero == "night" and enemy.hp >= enemy.max_hp - damage * 1.05:
+		Enemy.next_source = &"skill:hero"
 		enemy.take_damage(damage * 0.25, Vector2.ZERO, false)
 	var p := power()
 	var at := enemy.get_aim_point()
@@ -146,7 +148,7 @@ func on_player_hit(bullet: Bullet, enemy: Enemy) -> void:
 	var poison_chance := stats.get_stat(&"poison_chance") + extra_poison
 	if poison_chance > 0.0 and randf() < poison_chance:
 		var per_stack := damage * POISON_DPS_RATIO * (1.0 + stats.get_stat(&"poison_power")) * p
-		enemy.add_poison(per_stack, POISON_DURATION * (1.0 + 0.5 * (p - 1.0)), POISON_MAX_STACKS)
+		enemy.add_poison(per_stack, POISON_DURATION * (1.0 + 0.5 * (p - 1.0)), POISON_MAX_STACKS, weapon.get_damage_source())
 		fx.burst(at, COLOR_POISON, 3, 110.0, 3.0)
 
 	var burning := enemy.bleed_left > 0.0
@@ -158,13 +160,13 @@ func on_player_hit(bullet: Bullet, enemy: Enemy) -> void:
 	if burn_chance > 0.0 and randf() < burn_chance:
 		ignite += BURN_CHANCE_RATIO
 	if ignite > 0.0:
-		enemy.add_bleed(damage * ignite * p, BURN_DURATION * (1.0 + 0.25 * (p - 1.0)), true)
+		enemy.add_bleed(damage * ignite * p, BURN_DURATION * (1.0 + 0.25 * (p - 1.0)), true, weapon.get_damage_source())
 		if randf() < 0.12:
 			fx.burst(at, COLOR_BLAST, 2, 120.0, 3.0)
 
 	var bleed_chance := stats.get_stat(&"bleed_chance")
 	if bleed_chance > 0.0 and (crit or randf() < bleed_chance):
-		enemy.add_bleed(damage * BLEED_DPS_RATIO * p, BLEED_DURATION * p)
+		enemy.add_bleed(damage * BLEED_DPS_RATIO * p, BLEED_DURATION * p, false, weapon.get_damage_source())
 		fx.burst(at, COLOR_BLEED, 3, 130.0, 3.0)
 
 	var slow_chance := stats.get_stat(&"slow_chance")
@@ -176,12 +178,12 @@ func on_player_hit(bullet: Bullet, enemy: Enemy) -> void:
 	if explosive > 0.0 and _blast_cd <= 0.0 and randf() < explosive:
 		_blast_cd = BLAST_COOLDOWN
 		var boost := 1.0 + stats.get_stat(&"blast_power")
-		_blast(enemy.global_position, BLAST_RADIUS * boost, damage * BLAST_DAMAGE_RATIO * boost, COLOR_BLAST)
+		_blast(enemy.global_position, BLAST_RADIUS * boost, damage * BLAST_DAMAGE_RATIO * boost, COLOR_BLAST, weapon.get_damage_source())
 
 	var shock := stats.get_stat(&"shock_chance") + extra_shock
 	if shock > 0.0 and _shock_cd <= 0.0 and randf() < shock:
 		_shock_cd = SHOCK_COOLDOWN
-		_chain(enemy, damage * SHOCK_DAMAGE_RATIO)
+		_chain(enemy, damage * SHOCK_DAMAGE_RATIO, weapon.get_damage_source())
 
 
 func _vampirism(damage: float, crit: bool) -> void:
@@ -205,13 +207,13 @@ func _heal(amount: float) -> void:
 		_heal_acc = 0.0
 
 
-func _blast(at: Vector2, radius: float, damage: float, color: Color) -> void:
+func _blast(at: Vector2, radius: float, damage: float, color: Color, source: StringName = &"") -> void:
 	_blast_depth += 1
-	BulletPool.explode(at, radius, damage, Bullet.Team.PLAYER, color, 0.7)
+	BulletPool.explode(at, radius, damage, Bullet.Team.PLAYER, color, 0.7, &"blast", source)
 	_blast_depth -= 1
 
 
-func _chain(origin: Enemy, damage: float) -> void:
+func _chain(origin: Enemy, damage: float, source: StringName = &"") -> void:
 	var jumps := SHOCK_BASE_JUMPS + int(stats.get_stat(&"shock_jumps"))
 	var freeze := stats.get_stat(&"evo_static_freeze") > 0.0
 	_hit_buffer.clear()
@@ -245,6 +247,7 @@ func _chain(origin: Enemy, damage: float) -> void:
 				amount *= 2.0
 			target.add_slow(SLOW_AMOUNT, 1.6 * power())
 		fx.burst(target.get_aim_point(), COLOR_SHOCK, 5, 200.0, 3.0)
+		Enemy.next_source = source
 		Enemy.next_kind = &"ice" if freeze else &"shock"
 		target.take_damage(amount, Vector2.ZERO, false)
 		Enemy.next_kind = &""
@@ -278,7 +281,7 @@ func on_enemy_died(enemy: Enemy, at: Vector2) -> void:
 	elif _blast_depth < MAX_BLAST_DEPTH and chance > 0.0 and randf() < chance / float(_blast_depth + 1):
 		var boost := 1.0 + stats.get_stat(&"blast_power")
 		var damage := clampf(enemy.max_hp * 0.4, 25.0, 260.0) * boost
-		_blast(at, DEATH_BLAST_RADIUS * boost, damage, COLOR_BLAST)
+		_blast(at, DEATH_BLAST_RADIUS * boost, damage, COLOR_BLAST, &"effect:chain")
 
 
 func _toxic_cloud(at: Vector2) -> void:
@@ -297,7 +300,8 @@ func _toxic_cloud(at: Vector2) -> void:
 		if not candidate.is_alive() or candidate.global_position.distance_squared_to(at) > radius * radius:
 			continue
 		for i in 3:
-			candidate.add_poison(per_stack, POISON_DURATION * power(), POISON_MAX_STACKS)
+			candidate.add_poison(per_stack, POISON_DURATION * power(), POISON_MAX_STACKS, &"effect:chain")
+		Enemy.next_source = &"effect:chain"
 		Enemy.next_kind = &"poison"
 		candidate.take_damage(damage, (candidate.global_position - at).normalized() * 0.6, false)
 		Enemy.next_kind = &""

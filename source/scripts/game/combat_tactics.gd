@@ -256,10 +256,10 @@ func _affect(enemy: Enemy, damage: float, bounced: bool) -> void:
 		if burning and fire_rank > 0 and _proc_left <= 0.0:
 			_proc_left = 0.5
 			_busy = true
-			BulletPool.explode(enemy.global_position, 90.0 + frost_rank * 15.0, (16.0 + damage * 0.35) * _effect_power(), Bullet.Team.PLAYER, Color("#dcc6a8"), 0.5, &"ice")
+			BulletPool.explode(enemy.global_position, 90.0 + frost_rank * 15.0, (16.0 + damage * 0.35) * _effect_power(), Bullet.Team.PLAYER, Color("#dcc6a8"), 0.5, &"ice", &"skill:tactics")
 			_busy = false
 	if fire_rank > 0:
-		enemy.add_bleed((5.0 * fire_rank + damage * 0.12) * _effect_power(), 2.4, true)
+		enemy.add_bleed((5.0 * fire_rank + damage * 0.12) * _effect_power(), 2.4, true, &"skill:tactics")
 
 func enemy_died(enemy: Enemy) -> void:
 	_frost_hits.erase(enemy.get_instance_id())
@@ -320,10 +320,11 @@ func _tick_field(field: Dictionary) -> void:
 		for enemy in _near(a.lerp(b, 0.5), a.distance_to(b) * 0.5 + 50.0):
 			var closest := Geometry2D.get_closest_point_to_segment(enemy.global_position, a, b)
 			if closest.distance_squared_to(enemy.global_position) < pow(float(field["radius"]) + enemy.data.radius, 2.0):
+				Enemy.next_source = &"skill:tactics"
 				enemy.take_damage(float(field["damage"]), a.direction_to(b))
 	else:
 		for enemy in _near(field["at"], float(field["radius"])):
-			enemy.add_bleed(float(field["damage"]), 0.6, true)
+			enemy.add_bleed(float(field["damage"]), 0.6, true, &"skill:tactics")
 
 func _on_swapped(_previous: int, _current: int) -> void:
 	var tier := rank(stats, "switcher")
@@ -361,6 +362,7 @@ func _tick_sentry(delta: float) -> void:
 		_turret_source = source
 		_turret_weapon = source.duplicate_data()
 		_turret_weapon.id = &"tactic_sentry"
+		_turret_weapon.damage_source = &"skill:turret"
 		_turret_weapon.damage = turret_damage(source, stats)
 		_turret_weapon.bullet_radius = 5.0
 		_turret_weapon.explosion_radius = 0.0

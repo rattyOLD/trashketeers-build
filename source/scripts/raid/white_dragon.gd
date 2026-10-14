@@ -22,6 +22,9 @@ extends CharacterBody2D
 ## и догоняет дракона с запаздыванием (иллюзия высоты). На полу — зеркальное отражение.
 
 signal health_changed(hp: float, max_hp: float)
+signal damage_reported(actual: float, kind: StringName, origin: StringName)
+var _damage_origin: StringName = &""
+var _damage_kind: StringName = &""
 signal state_changed(state: State)
 signal slammed(position: Vector2)
 signal fury_started
@@ -265,10 +268,21 @@ func get_mouth_position() -> Vector2:
 	return global_position + Vector2.from_angle(facing) * MOUTH_DISTANCE
 
 
+func set_damage_source(origin: StringName, kind: StringName = &"") -> void:
+	_damage_origin = origin
+	_damage_kind = kind
+
+
 func take_damage(amount: float, _direction: Vector2 = Vector2.ZERO, _is_crit: bool = false) -> void:
+	var origin := _damage_origin
+	var kind := _damage_kind
+	_damage_origin = &""
+	_damage_kind = &""
 	if not is_targetable():
 		return
+	var hp_before := hp
 	hp = maxf(hp - amount * (EXHAUST_DAMAGE_MULT if exhausted else 1.0), 0.0)
+	damage_reported.emit(maxf(hp_before - hp, 0.0), kind, origin)
 	_wear_stage = maxi(_wear_stage, 2 if hp <= max_hp * FURY_THRESHOLD else (1 if hp <= max_hp * PHASE2_THRESHOLD else 0))
 	_wear_material.set_shader_parameter("boss_damage", float(_wear_stage) * 0.5)
 	_flash = 0.07

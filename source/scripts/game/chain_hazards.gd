@@ -166,6 +166,7 @@ func _damage(zone: Dictionary) -> void:
 	if enemies != null:
 		for e: Enemy in enemies.get_active().duplicate():
 			if e.is_alive() and e.global_position.distance_to(at) < radius + e.get_radius() * 0.3:
+				Enemy.next_source = &"environment"
 				Enemy.next_kind = kind
 				e.take_damage(16.0 if electric else 12.0)
 				if e.is_alive():

@@ -161,10 +161,10 @@ func _mines() -> void:
 		_later(1.5, func() -> void:
 			if not is_instance_valid(_player):
 				return
-			BulletPool.explode(spot, 150.0, 105.0 * _power(), Bullet.Team.PLAYER, color, 1.4, &"fire")
+			BulletPool.explode(spot, 150.0, 105.0 * _power(), Bullet.Team.PLAYER, color, 1.4, &"fire", &"skill:hero")
 			_fx.burst(spot, Color("#ffb347"), 22, 400.0, 5.0)
 			for enemy in _enemies_in(spot, 160.0):
-				enemy.add_bleed(14.0 * _power(), 4.0, true)
+				enemy.add_bleed(14.0 * _power(), 4.0, true, &"skill:hero")
 			if _shake.is_valid():
 				_shake.call(0.15))
 	_fx.popup(at + Vector2(0, -90), "МИНЫ!", Color("#ffd257"), 28.0)
@@ -178,9 +178,9 @@ func _fire_ring() -> void:
 			if is_instance_valid(_player):
 				_fx.ring(at, color.lerp(Color("#ffe27a"), 0.3 * k), 260.0 + 60.0 * k))
 	_fx.burst(at, Color("#ffb347"), 38, 460.0, 5.0)
-	BulletPool.explode(at, 300.0, 70.0 * _power(), Bullet.Team.PLAYER, color, 1.6, &"fire")
+	BulletPool.explode(at, 300.0, 70.0 * _power(), Bullet.Team.PLAYER, color, 1.6, &"fire", &"skill:hero")
 	for enemy in _enemies_in(at, 320.0):
-		enemy.add_bleed(16.0 * _power(), 4.0, true)
+		enemy.add_bleed(16.0 * _power(), 4.0, true, &"skill:hero")
 	_player.grant_invuln(0.25)
 
 
@@ -194,7 +194,7 @@ func _firecrackers() -> void:
 		_later(0.25 + 0.12 * k, func() -> void:
 			if not is_instance_valid(_player):
 				return
-			BulletPool.explode(spot, 120.0, 55.0 * _power(), Bullet.Team.PLAYER, Color("#ff6a3d"), 1.0, &"fire")
+			BulletPool.explode(spot, 120.0, 55.0 * _power(), Bullet.Team.PLAYER, Color("#ff6a3d"), 1.0, &"fire", &"skill:hero")
 			_fx.burst(spot, Color("#ffd257"), 14, 300.0, 4.0)
 			for enemy in _enemies_in(spot, 130.0):
 				enemy.add_stagger(1.0, true)
@@ -257,7 +257,7 @@ func _rail_dash() -> void:
 	for step in range(1, 8):
 		var at := start + dir * (70.0 * step)
 		_later(0.03 * step, func() -> void:
-			BulletPool.explode(at, 95.0, 95.0 * _power(), Bullet.Team.PLAYER, color, 0.8, &"shock")
+			BulletPool.explode(at, 95.0, 95.0 * _power(), Bullet.Team.PLAYER, color, 0.8, &"shock", &"skill:hero")
 			_fx.burst(at, color, 6, 240.0, 3.5))
 	_fx.ring(start, color, 120.0)
 
@@ -276,7 +276,7 @@ func _toxic_flask() -> void:
 	zone.setup(_player, 210.0, 6.0, Color("#7dff5c"), 0.4, false)
 	zone.global_position = target
 	zone.tick.connect(func(enemy: Enemy) -> void:
-		enemy.add_poison(14.0 * _power(), 3.0, 5)
+		enemy.add_poison(14.0 * _power(), 3.0, 5, &"skill:hero")
 		enemy.add_slow(0.35, 0.7))
 	_player.get_parent().add_child(zone)
 	zone.global_position = target
@@ -293,7 +293,7 @@ func _drone_strike() -> void:
 		var at := start + dir * (120.0 + 105.0 * i)
 		_fx.ring(at, warn, 70.0)
 		_later(0.7 + 0.11 * i, func() -> void:
-			BulletPool.explode(at, 125.0, 115.0 * _power(), Bullet.Team.PLAYER, Color("#ffb347"), 1.5)
+			BulletPool.explode(at, 125.0, 115.0 * _power(), Bullet.Team.PLAYER, Color("#ffb347"), 1.5, &"blast", &"skill:hero")
 			_fx.burst(at, Color("#ffb347"), 12, 340.0, 4.5)
 			if _shake.is_valid():
 				_shake.call(0.12))

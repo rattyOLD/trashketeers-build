@@ -34,6 +34,16 @@ func _ready() -> void:
 	_check(probe._log_pos == NativeTelemetry.LOG_READ_LIMIT and probe._log_line.size() <= NativeTelemetry.LOG_LINE_LIMIT, "bounded long lines")
 	probe.free()
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+	for chapter_index in 6:
+		var ids := WebResourcePacks.chapter_enemy_ids(ContentDB.get_chapter(chapter_index))
+		for group: Array in Wanted.GROUPS:
+			for id: StringName in group:
+				_check(ids.has(str(id)), "wanted agent available in chapter %d: %s" % [chapter_index, id])
+		for id in ids.duplicate():
+			var data := ContentDB.get_enemy(StringName(id))
+			_check(data != null, "valid enemy dependency " + str(id))
+			if data != null and data.split_into != &"":
+				_check(ids.has(str(data.split_into)), "transitive split dependency " + str(data.split_into))
 	_check(await WebResourcePacks.ensure(PackedStringArray(["world", "heroes"])), "native remains offline")
 	var menu := MainMenuUI.new()
 	add_child(menu)

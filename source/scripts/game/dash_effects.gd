@@ -117,9 +117,12 @@ func _on_moved(from: Vector2, to: Vector2) -> void:
 		var enemy := target as Enemy
 		if enemy != null and not enemy.is_alive():
 			continue
+		Enemy.next_source = &"skill:dash"
 		Enemy.next_kind = &"dash"
+		if target.has_method("set_damage_source"): target.call("set_damage_source", &"skill:dash", Enemy.next_kind)
 		target.call("take_damage", 12.0 + rank * 6.0, Vector2.ZERO, false)
 		Enemy.next_kind = &""
+		Enemy.next_source = &""
 		if enemy != null and is_instance_valid(enemy) and enemy.is_alive():
 			var poison := mini(int(_stats.get_stat(&"dodge_poison")), 2)
 			if poison > 0:
@@ -129,7 +132,7 @@ func _on_moved(from: Vector2, to: Vector2) -> void:
 		_element_used = true
 		var blast := mini(int(_stats.get_stat(&"dodge_blast")), 2)
 		if blast > 0:
-			BulletPool.explode(at, 72.0, 8.0 + blast * 6.0, Bullet.Team.PLAYER, Color("#ff9b32"), 0.3)
+			BulletPool.explode(at, 72.0, 8.0 + blast * 6.0, Bullet.Team.PLAYER, Color("#ff9b32"), 0.3, &"blast", &"skill:dash")
 		var shock := mini(int(_stats.get_stat(&"dodge_shock")), 2)
 		if shock > 0:
 			_shock(at, id, 12.0 + shock * 6.0)
@@ -199,9 +202,11 @@ func _katana_cut(from: Vector2, to: Vector2) -> void:
 
 
 func _cut(enemy: Enemy, weapon: WeaponData, amount: float, crit: bool, dir: Vector2) -> void:
+	Enemy.next_source = &"skill:dash"
 	Enemy.next_kind = &"dash"
 	enemy.take_damage(amount * (weapon.crit_mult if crit else 1.0), dir, crit)
 	Enemy.next_kind = &""
+	Enemy.next_source = &""
 
 
 ## Молот/щит: в конце рывка — удар по площади с оглушением.
@@ -250,9 +255,12 @@ func _shock(at: Vector2, source_id: int, damage: float) -> void:
 		if target is Enemy and not (target as Enemy).is_alive():
 			continue
 		var position := target.global_position
+		Enemy.next_source = &"skill:dash"
 		Enemy.next_kind = &"shock"
+		if target.has_method("set_damage_source"): target.call("set_damage_source", &"skill:dash", Enemy.next_kind)
 		target.call("take_damage", damage, Vector2.ZERO, false)
 		Enemy.next_kind = &""
+		Enemy.next_source = &""
 		if _fx != null:
 			_fx.ring(position, Color("#6adcff"), 32.0)
 		jumps += 1

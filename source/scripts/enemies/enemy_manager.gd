@@ -7,6 +7,7 @@ extends Node
 
 signal enemy_armor_cracked(enemy: Enemy)
 signal enemy_died(enemy: Enemy)
+signal damage_reported(actual: float, kind: StringName, origin: StringName)
 signal enemy_damaged(enemy: Enemy, amount: float, is_crit: bool, kind: StringName)
 signal enemy_exploded(enemy: Enemy, at: Vector2, radius: float, damage: float)
 signal enemy_blocked(enemy: Enemy, at: Vector2)
@@ -30,6 +31,7 @@ func setup(player: Player, container: Node2D, capacity: int, nav: Callable = Cal
 		enemy.physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_ON
 		enemy.died.connect(_on_enemy_died)
 		enemy.damaged.connect(_on_enemy_damaged)
+		enemy.damage_reported.connect(func(actual: float, kind: StringName, origin: StringName) -> void: damage_reported.emit(actual, kind, origin))
 		enemy.armor_cracked.connect(func(e: Enemy) -> void: enemy_armor_cracked.emit(e))
 		enemy.exploded.connect(_on_enemy_exploded)
 		enemy.blocked.connect(func(e: Enemy, at: Vector2) -> void: enemy_blocked.emit(e, at))

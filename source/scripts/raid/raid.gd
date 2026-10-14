@@ -40,6 +40,7 @@ var blizzard: BlizzardFx
 
 var time_left := DURATION
 var damage_dealt := 0.0
+var _combat_report := CombatReport.new()
 
 var _ending := false
 var chill := 0.0
@@ -113,6 +114,7 @@ func start(_weapon_id: StringName = &"") -> void:
 	arena.crystal_destroyed.connect(_on_crystal_destroyed)
 	comets.comet_impacted.connect(_on_comet_impacted)
 	dragon.health_changed.connect(_on_dragon_health_changed)
+	dragon.damage_reported.connect(_combat_report.record_actual)
 	dragon.slammed.connect(_on_dragon_slammed)
 	dragon.fury_started.connect(_on_fury_started)
 	dragon.died.connect(_on_dragon_died)
@@ -466,3 +468,9 @@ func _on_player_died() -> void:
 
 func _report_run(outcome: String) -> void:
 	Platform.send_report("run", "mode=raid outcome=%s hero=%s weapon=%s survived=%ds dragon_hp=%d/%d phase=%d damage=%d chill=%d" % [outcome, SaveService.get_character_id(), player.weapon_controller.base_weapon.id, int(DURATION - time_left), int(dragon.hp), int(dragon.max_hp), dragon.phase_index, int(damage_dealt), int(chill)])
+
+
+func _show_result(victory: bool, lines: PackedStringArray, title: String = "", can_upgrade: bool = true) -> void:
+	var contributions := _combat_report.contribution_lines()
+	if not contributions.is_empty(): lines.append(contributions)
+	super._show_result(victory, lines, title, can_upgrade)

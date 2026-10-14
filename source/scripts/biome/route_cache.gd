@@ -87,6 +87,7 @@ func _apply_zone() -> void:
 	if is_instance_valid(enemies):
 		for enemy in enemies.get_active().duplicate():
 			if enemy.is_alive() and enemy.global_position.distance_squared_to(center) < RADIUS * RADIUS:
+				Enemy.next_source = &"environment"
 				Enemy.next_kind = &"acid" if theme == "junk" else &"shock"
 				enemy.take_damage(12.0)
 				if enemy.is_alive() and not enemy.data.is_boss():

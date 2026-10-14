@@ -27,23 +27,37 @@ func _groups_for_enemies(ids: Array) -> PackedStringArray:
 	return result
 
 
-func chapter_groups(chapter: Dictionary) -> PackedStringArray:
-	var ids: Array = ["dash_rat", str(chapter.get("boss", ""))]
+func chapter_enemy_ids(chapter: Dictionary) -> Array:
+	var ids: Array = ["dash_rat", "rat_punk", "throne_speaker"]
+	# Розыск и события не входят в веса волн, но могут появиться в любой главе.
+	for group: Array in Wanted.GROUPS:
+		for id: StringName in group:
+			if not ids.has(str(id)): ids.append(str(id))
+	if not str(chapter.get("boss", "")).is_empty(): ids.append(str(chapter["boss"]))
 	for wave: Dictionary in chapter.get("waves", []):
-		for id in (wave.get("weights", {}) as Dictionary): ids.append(str(id))
+		for id in (wave.get("weights", {}) as Dictionary):
+			if not ids.has(str(id)): ids.append(str(id))
 		for key in ["boss", "miniboss"]:
-			if not str(wave.get(key, "")).is_empty(): ids.append(str(wave[key]))
+			if not str(wave.get(key, "")).is_empty() and not ids.has(str(wave[key])): ids.append(str(wave[key]))
 	var escort: Dictionary = chapter.get("escort", {})
-	if escort.has("enemy"): ids.append(str(escort["enemy"]))
-	# Разделяющиеся враги и поддержка боссов используют те же таблицы контента.
-	for id in ids.duplicate():
-		var data := ContentDB.get_enemy(StringName(id))
-		if data != null and data.split_into != &"": ids.append(str(data.split_into))
+	if escort.has("enemy") and not ids.has(str(escort["enemy"])): ids.append(str(escort["enemy"]))
 	var map_id := MapCards.chosen()
-	if not map_id.is_empty(): ids.append(str(MapCards.info(map_id).get("enemy", "")))
+	if not map_id.is_empty():
+		var featured := str(MapCards.info(map_id).get("enemy", ""))
+		if not featured.is_empty() and not ids.has(featured): ids.append(featured)
+	var cursor := 0
+	while cursor < ids.size():
+		var data := ContentDB.get_enemy(StringName(ids[cursor]))
+		if data != null and data.split_into != &"" and not ids.has(str(data.split_into)):
+			ids.append(str(data.split_into))
+		cursor += 1
+	return ids
+
+
+func chapter_groups(chapter: Dictionary) -> PackedStringArray:
 	var result := PackedStringArray(["world", "loading_street"])
 	if SaveService.get_character_id() != "raccoon": result.append("heroes")
-	result.append_array(_groups_for_enemies(ids))
+	result.append_array(_groups_for_enemies(chapter_enemy_ids(chapter)))
 	return result
 
 

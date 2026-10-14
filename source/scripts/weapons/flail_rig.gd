@@ -141,7 +141,11 @@ func _hit_enemies(delta: float, weapon: WeaponData) -> void:
 		_cooldown[id] = HIT_COOLDOWN
 		var crit := randf() < weapon.crit_chance
 		var amount := weapon.damage * mult * (weapon.crit_mult if crit else 1.0)
+		Enemy.next_source = weapon.get_damage_source()
+		Enemy.next_kind = &"melee"
 		enemy.take_damage(amount, velocity.normalized(), crit)
+		Enemy.next_source = &""
+		Enemy.next_kind = &""
 		if is_instance_valid(enemy) and enemy.is_alive():
 			enemy.push(velocity.normalized() * 260.0 * weapon.knockback * mult)
 			enemy.add_stagger(float(weapon.stagger) * 0.1 * mult)

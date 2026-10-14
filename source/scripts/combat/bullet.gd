@@ -360,10 +360,14 @@ func _apply_damage(target: Node2D) -> void:
 		amount *= 1.0 + weapon.pierce_ramp * pierced
 		pierced += 1
 	if target is Enemy:
+		Enemy.next_source = weapon.get_damage_source()
 		Enemy.next_kind = &"fire" if weapon.burn > 0.0 else &""
 		(target as Enemy).take_bullet(amount, velocity.normalized(), weapon.knockback, last_hit_crit, weapon.piercing)
 		Enemy.next_kind = &""
+		Enemy.next_source = &""
 	elif target.has_method("take_damage"):
+		if team == Team.PLAYER and target.has_method("set_damage_source"):
+			target.call("set_damage_source", weapon.get_damage_source(), &"fire" if weapon.burn > 0.0 else &"")
 		if target is Player:
 			Player.last_source = &"projectile"
 		target.call("take_damage", amount, velocity.normalized() * weapon.knockback, last_hit_crit)

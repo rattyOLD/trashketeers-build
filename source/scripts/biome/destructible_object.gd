@@ -253,7 +253,7 @@ func _break_art() -> void:
 		_sprite.z_index = -1
 	if _destruct.get("effect", "") == "explode":
 		var cfg: Array = _destruct.get("explode", [120, 50])
-		BulletPool.explode(global_position + Vector2(0, -20), float(cfg[0]), float(cfg[1]), Bullet.Team.PLAYER, Color("#ff8a2a"), 1.3)
+		BulletPool.explode(global_position + Vector2(0, -20), float(cfg[0]), float(cfg[1]), Bullet.Team.PLAYER, Color("#ff8a2a"), 1.3, &"blast", &"environment")
 		var blast_path := str(_destruct.get("blast", ""))
 		if not blast_path.is_empty():
 			_blast = ArenaProp.make_sprite(blast_path, float(cfg[0]) * 1.6)

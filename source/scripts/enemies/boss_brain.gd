@@ -296,6 +296,7 @@ func _tick_speakers(delta: float) -> void:
 func _break_speakers() -> void:
 	for speaker in speakers:
 		if _is_speaker(speaker):
+			Enemy.next_source = &"cleanup"
 			speaker.take_damage(speaker.max_hp * 2.0)
 	speakers.clear()
 	_speakers_alive = 0
