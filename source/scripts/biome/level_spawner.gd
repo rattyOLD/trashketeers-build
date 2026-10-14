@@ -105,10 +105,14 @@ var _boss_cells := Vector2i(16, 8)
 var _area_scale := 1.0
 var _story_clear: Array[Rect2] = []
 var _flow_ready := false
+var combat_plan: CombatMapPlan
+var _route_mask := PackedByteArray()
 
 
 func build(layers: BiomeLayers, chapter_def: Dictionary) -> void:
 	_layers = layers
+	_flow_ready = false
+	_boss_cells = Vector2i(16, 8)
 	chapter = chapter_def
 	layout = str(chapter.get("layout", "junkyard"))
 	var size: Array = chapter.get("size", [40, 50])
@@ -144,6 +148,7 @@ func build(layers: BiomeLayers, chapter_def: Dictionary) -> void:
 	river = null
 	if _organic:
 		_plan_river()
+	_plan_combat_routes()
 	_build_district()
 	if district == null:
 		_build_border()
@@ -168,6 +173,40 @@ func build(layers: BiomeLayers, chapter_def: Dictionary) -> void:
 	_flow.setup(grid_size, _blocked_mask())
 	_flow_ready = true
 	_build_route_caches()
+
+
+func _plan_combat_routes() -> void:
+	combat_plan = null
+	_route_mask.resize(cells.size())
+	_route_mask.fill(0)
+	if not _story.is_empty():
+		return
+	combat_plan = CombatMapPlan.new()
+	combat_plan.build(player_start, boss_rect, _arena_inner(), _river_points, randi())
+	for y in grid_size.y:
+		for x in grid_size.x:
+			var cell := Vector2i(x, y)
+			var p := cell_to_world(cell)
+			if combat_plan.reserves(p, CombatMapPlan.CELL_PAD) or boss_rect.grow(CELL).has_point(p):
+				_route_mask[_index(cell)] = 1
+	var trail := ParkPaths.new()
+	trail.paths.assign(combat_plan.routes)
+	trail.width = CombatMapPlan.ROUTE_RADIUS * 2.0
+	_own(trail, _layers.floor_layer)
+	trail.build_trail(Color(0.04, 0.025, 0.02, 0.13))
+
+
+func _route_reserved(rect: Rect2) -> bool:
+	if combat_plan == null:
+		return false
+	var first := world_to_cell(rect.position)
+	var last := world_to_cell(rect.end)
+	for y in range(first.y, last.y + 1):
+		for x in range(first.x, last.x + 1):
+			var cell := Vector2i(x, y)
+			if _inside(cell) and _route_mask[_index(cell)] == 1:
+				return true
+	return false
 
 
 ## Снос всего построенного (переход в следующую главу).
@@ -202,6 +241,9 @@ func clear() -> void:
 	story_cells.clear()
 	_story_clear.clear()
 	_portal = null
+	combat_plan = null
+	_route_mask.clear()
+	_flow_ready = false
 
 
 func attach_player(player: Player) -> void:
@@ -1646,6 +1688,8 @@ func _build_sectors(root: Dictionary, defs: Dictionary, area: Rect2, center: Vec
 
 ## Двор/сектор в точке p: покрытие, своя планировка предметов и жители (или 1–2 точки интереса).
 func _make_sector(theme: Dictionary, p: Vector2, radius: float, defs: Dictionary, seed_value: int) -> void:
+	if (theme.get("deco", []) as Array).has("pool") and _route_reserved(Rect2(p - Vector2(radius * 0.5, radius * 0.3024), Vector2(radius, radius * 0.6048))):
+		return
 	var ground := str(theme.get("ground", ""))
 	_sectors.append([p, radius, &"grass" if ground.contains("grass") or ground.is_empty() else (&"asphalt" if ground.contains("asphalt") else &"stone")])
 	if not ground.is_empty() and ResourceLoader.exists(ground):
@@ -1938,6 +1982,8 @@ func _build_route_features() -> void:
 		at = _origin + ((at - _origin) / CELL).round() * CELL
 		if layout == "bank" and surface_at(at) != &"stone":
 			continue
+		if _route_reserved(Rect2(at - Vector2(260, 260), Vector2(520, 520))):
+			continue
 		if not _shrine_spot_ok(at, player_start, anchors) or not is_area_clear(at, 260.0):
 			continue
 		if towers.any(func(n: Node2D) -> bool: return n.position.distance_to(at) < 350.0) or safes.any(func(n: Node2D) -> bool: return n.position.distance_to(at) < 350.0) or shrines.any(func(n: Node2D) -> bool: return n.position.distance_to(at) < 350.0):
@@ -2085,6 +2131,8 @@ func _build_map_card_art(area: Rect2, center: Vector2) -> void:
 	var decals := _map_textures(id, "decals")
 	if props.is_empty():
 		return
+	var landmark_id := "scenery_" + (id if id in ["night_dump", "acid_rain", "gold_vault", "pigeon_roofs"] else "night_dump")
+	var landmark_shape := ArenaProp.make_shape(landmark_id)
 	# Группы, а не россыпь: 3 «уголка» карты (бочки с костром, ларёк с тележкой…) по 3 предмета дугой
 	# и 2 декали рядом — читается как место, а не как мусор по всему полю.
 	var anchors: Array[Vector2] = []
@@ -2094,6 +2142,8 @@ func _build_map_card_art(area: Rect2, center: Vector2) -> void:
 		var p := Vector2(randf_range(area.position.x, area.end.x), randf_range(area.position.y, area.end.y)).snapped(Vector2(16, 16))
 		if p.distance_to(center) < 360.0 or boss_rect.grow(220.0).has_point(p) or not is_walkable(p) or not is_area_clear(p, CELL * 2.5):
 			continue
+		if not _can_place(landmark_shape, p + ArenaProp.shape_offset(landmark_id)):
+			continue
 		if anchors.any(func(o: Vector2) -> bool: return o.distance_to(p) < 900.0):
 			continue
 		if towers.any(func(o: Node2D) -> bool: return o.global_position.distance_to(p) < 320.0) or safes.any(func(o: Node2D) -> bool: return o.global_position.distance_to(p) < 320.0) \
@@ -2102,7 +2152,6 @@ func _build_map_card_art(area: Rect2, center: Vector2) -> void:
 		anchors.append(p)
 	for anchor in anchors:
 		_scenery_anchors.append(anchor)
-		var landmark_id := "scenery_" + (id if id in ["night_dump", "acid_rain", "gold_vault", "pigeon_roofs"] else "night_dump")
 		var landmark := _place_prop(anchor, landmark_id, false)
 		if landmark != null:
 			landmarks.append(landmark)
@@ -2213,6 +2262,8 @@ func _spawn_life(list: Array, at: Vector2, half: Vector2, mirror: float) -> void
 
 ## Вода бассейна: в неё не заходят (клетки — стена сетки, коллизия — рельеф, пули пролетают).
 func _block_rect(rect: Rect2) -> void:
+	if _route_reserved(rect):
+		return
 	var body := StaticBody2D.new()
 	body.collision_layer = PhysicsLayers.TERRAIN | PhysicsLayers.OBSTACLE
 	body.collision_mask = 0
@@ -2639,7 +2690,7 @@ func _place_destructible(base: Vector2, id: String) -> DestructibleObject:
 func _place_crate(base: Vector2) -> DestructibleObject:
 	var shape := DestructibleObject.shape_for(DestructibleObject.Kind.WEAPON_CRATE, "")
 	var center := base + DestructibleObject.offset_for(DestructibleObject.Kind.WEAPON_CRATE, "")
-	if not _can_place(shape, center):
+	if not _can_place(shape, center, true):
 		return null
 	var crate := DestructibleObject.new()
 	crate.position = base
@@ -2653,7 +2704,7 @@ func _place_crate(base: Vector2) -> DestructibleObject:
 
 ## 1) все клетки под формой пусты; 2) Shape2D.collide с уже поставленными формами в соседних
 ## клетках (с запасом OVERLAP_MARGIN).
-func _can_place(shape: Shape2D, center: Vector2) -> bool:
+func _can_place(shape: Shape2D, center: Vector2, allow_route: bool = false) -> bool:
 	var footprint := shape.get_rect()
 	footprint.position += center
 	for area in _passage_clear:
@@ -2662,6 +2713,8 @@ func _can_place(shape: Shape2D, center: Vector2) -> bool:
 	var covered := _covered_cells(shape, center)
 	for cell in covered:
 		if not _inside(cell) or cells[_index(cell)] != CellType.EMPTY:
+			return false
+		if not allow_route and combat_plan != null and _route_mask[_index(cell)] == 1:
 			return false
 		var zone: int = zones[_index(cell)]
 		if zone == Zone.EDGE or zone == Zone.GATE:
@@ -2733,12 +2786,15 @@ func _ensure_connectivity() -> void:
 		var isolated := _first_isolated(reached)
 		if isolated == Vector2i(-1, -1):
 			return
-		_carve_to_reached(isolated, reached)
+		if not _carve_to_reached(isolated, reached):
+			return
 
 
 func _reachable_from(start: Vector2i) -> PackedByteArray:
 	var reached := PackedByteArray()
 	reached.resize(cells.size())
+	if not _inside(start) or _is_blocking(start):
+		return reached
 	var queue: Array[Vector2i] = [start]
 	reached[_index(start)] = 1
 	var head := 0
@@ -2762,7 +2818,7 @@ func _first_isolated(reached: PackedByteArray) -> Vector2i:
 
 
 ## BFS от изолированной клетки до ближайшей достижимой; пропы на пути сносятся.
-func _carve_to_reached(from: Vector2i, reached: PackedByteArray) -> void:
+func _carve_to_reached(from: Vector2i, reached: PackedByteArray) -> bool:
 	var parent := {}
 	var queue: Array[Vector2i] = [from]
 	parent[from] = from
@@ -2776,17 +2832,19 @@ func _carve_to_reached(from: Vector2i, reached: PackedByteArray) -> void:
 			break
 		for offset in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
 			var next: Vector2i = cell + offset
-			if _inside(next) and not parent.has(next):
+			if _inside(next) and cells[_index(next)] != CellType.WALL and not parent.has(next):
+				if cells[_index(next)] == CellType.COVER and not _wall_nodes.has(_index(next)):
+					continue
 				parent[next] = cell
 				queue.append(next)
 	if target == Vector2i(-1, -1):
-		cells[_index(from)] = CellType.WALL
-		return
+		return false
 	var cell := target
 	while cell != from:
 		_clear_cell(cell)
 		cell = parent[cell]
 	_clear_cell(from)
+	return true
 
 
 func _clear_cell(cell: Vector2i) -> void:
@@ -2794,12 +2852,14 @@ func _clear_cell(cell: Vector2i) -> void:
 		return
 	var i := _index(cell)
 	if cells[i] == CellType.WALL:
-		cells[i] = CellType.EMPTY
 		return
 	if cells[i] != CellType.COVER:
 		return
 	if _wall_nodes.has(i):
 		var node: Node2D = _wall_nodes[i]
+		if node is CollisionObject2D:
+			node.collision_layer = 0
+			node.collision_mask = 0
 		for key in _wall_nodes.keys():
 			if _wall_nodes[key] == node:
 				cells[key] = CellType.EMPTY

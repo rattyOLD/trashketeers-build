@@ -636,7 +636,7 @@ html.orientation-ready:not(.upright) #rotate .phone, html.orientation-ready:not(
 </script>
 
 <script>
-window.__trash_build = {label: 'v77.3', time: '14.10 18:34'};
+window.__trash_build = {label: 'v78.2', time: '14.10 20:39'};
 document.getElementById('ver').textContent = 'Версия ' + window.__trash_build.label + ' · сборка от ' + window.__trash_build.time;
 </script>
 <script>
@@ -690,7 +690,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 })();
 </script>
 <script src="audio_unlock.js"></script>
-<script src="web_music.js?v=1791977651"></script>
+<script src="web_music.js?v=1791985196"></script>
 <script src="index.js"></script>
 <script>
 (function () {
@@ -702,7 +702,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	// index.wasm / index.pck и отдаём ему уже скачанные и распакованные байты.
 	const FILES = {
 		wasm: { parts: [{url:"raccoon.core.0.wasm?h=4cbe7e5f476b",bytes:5221065,rawBytes:25165824},{url:"raccoon.core.1.wasm?h=a8fbc151befa",bytes:4165384,rawBytes:18533366}] },
-		pck: { parts: [{url:"raccoon.pack.0.wasm?h=2937f6f303ed",bytes:11665710,rawBytes:12582912},{url:"raccoon.pack.1.wasm?h=b30862ad5c90",bytes:12554126,rawBytes:12582912},{url:"raccoon.pack.2.wasm?h=7e42484f7d45",bytes:12568718,rawBytes:12582912},{url:"raccoon.pack.3.wasm?h=8aec3b0b2241",bytes:12564520,rawBytes:12582912},{url:"raccoon.pack.4.wasm?h=2c406a1a6df0",bytes:12560994,rawBytes:12582912},{url:"raccoon.pack.5.wasm?h=4573acb5d68f",bytes:12575739,rawBytes:12582912},{url:"raccoon.pack.6.wasm?h=2cb35ee8cc30",bytes:12560531,rawBytes:12582912},{url:"raccoon.pack.7.wasm?h=62e217a02762",bytes:12533177,rawBytes:12582912},{url:"raccoon.pack.8.wasm?h=fa39eb451fd1",bytes:12528978,rawBytes:12582912},{url:"raccoon.pack.9.wasm?h=8d55e9c2bcc7",bytes:12498256,rawBytes:12582912},{url:"raccoon.pack.10.wasm?h=f64bd2bcb8f5",bytes:12553468,rawBytes:12582912},{url:"raccoon.pack.11.wasm?h=64ae2a8cae8c",bytes:12109589,rawBytes:12582912},{url:"raccoon.pack.12.wasm?h=00efd5fac468",bytes:938547,rawBytes:1075792}] },
+		pck: { parts: [{url:"raccoon.pack.0.wasm?h=e10f14f54728",bytes:11665613,rawBytes:12582912},{url:"raccoon.pack.1.wasm?h=88d7bfacacef",bytes:12554229,rawBytes:12582912},{url:"raccoon.pack.2.wasm?h=c2670aed03ff",bytes:12568696,rawBytes:12582912},{url:"raccoon.pack.3.wasm?h=280c33b3e943",bytes:12564504,rawBytes:12582912},{url:"raccoon.pack.4.wasm?h=21642ec390e0",bytes:12560991,rawBytes:12582912},{url:"raccoon.pack.5.wasm?h=0aab9e62e0be",bytes:12575661,rawBytes:12582912},{url:"raccoon.pack.6.wasm?h=69ffa8360f91",bytes:12560508,rawBytes:12582912},{url:"raccoon.pack.7.wasm?h=395a1b111941",bytes:12533180,rawBytes:12582912},{url:"raccoon.pack.8.wasm?h=e80dd60ebfcc",bytes:12528998,rawBytes:12582912},{url:"raccoon.pack.9.wasm?h=3ff69f0679da",bytes:12498287,rawBytes:12582912},{url:"raccoon.pack.10.wasm?h=46d5d0be3ce1",bytes:12553526,rawBytes:12582912},{url:"raccoon.pack.11.wasm?h=0ce6c32e2a8c",bytes:12109136,rawBytes:12582912},{url:"raccoon.pack.12.wasm?h=e825dcd28f18",bytes:943598,rawBytes:1081024}] },
 	};
 	const GODOT_CONFIG = {
 		args: [],
@@ -710,7 +710,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 		ensureCrossOriginIsolationHeaders: false,
 		executable: 'index',
 		experimentalVK: false,
-		fileSizes: { 'index.pck': 152070736, 'index.wasm': 43699190 },
+		fileSizes: { 'index.pck': 152075968, 'index.wasm': 43699190 },
 		focusCanvas: true,
 		gdextensionLibs: [],
 		onPrint: function () {
@@ -735,7 +735,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 
 	// Адрес сбора отчётов о вылетах (Google Apps Script / Supabase и т.п.); пусто — отчёты не отправляются.
 	const REPORT_URL = 'https://script.google.com/macros/s/AKfycbxVyy-SnRANW0Im-1Blne2TcUbca93WqzyBulpADwWWD7YH6x3KIygBYImTe8VfP5pp/exec';
-	const BUILD_ID_REPORT = '1791977651';
+	const BUILD_ID_REPORT = '1791985196';
 	const SESSION_ID = Math.random().toString(36).slice(2, 8);
 	const SESSION_START = Date.now();
 	const REPORT_CAP = 250;
@@ -952,7 +952,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	window.trkReport('session_start', gpuInfo() + ' | ' + navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + (window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio) + ' | screen ' + screen.width + 'x' + screen.height + ' | cores ' + (navigator.hardwareConcurrency || '?'));
 
 	// Вкладка могла висеть со старой версией: при возврате в неё сверяем номер сборки и предлагаем обновиться.
-	const BUILD_ID = '1791977651';
+	const BUILD_ID = '1791985196';
 	// Важное обновление: старая сборка дальше не работает, иначе аккаунты и сохранения ломаются старым кодом.
 	function blockOldBuild(v) {
 		const wall = document.createElement('div');
