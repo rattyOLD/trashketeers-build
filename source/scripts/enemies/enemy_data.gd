@@ -294,7 +294,7 @@ static func from_dict(raw: Dictionary, resolve_texture: Callable) -> EnemyData:
 
 	e._resolver = resolve_texture
 	e._texture_path = String(d["sprite"])
-	if not e._texture_path.is_empty() and ResourceLoader.exists(e._texture_path, "Texture2D"):
+	if not e._texture_path.is_empty() and (ResourceLoader.exists(e._texture_path, "Texture2D") or WebResourcePacks.declared(e._texture_path)):
 		e.sprite_scale = Vector2.ONE * maxf(d["sprite_scale"], 0.01)
 		e.sprite_modulate = e.tint
 	else:

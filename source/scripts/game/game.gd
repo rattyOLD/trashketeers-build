@@ -628,6 +628,13 @@ func _enter_portal() -> void:
 	if _switching or player.is_dead:
 		return
 	_switching = true
+	var was_paused := get_tree().paused
+	get_tree().paused = true
+	var prepared := await WebResourcePacks.ensure(WebResourcePacks.chapter_groups(ContentDB.get_chapter(director.chapter_index + 1)))
+	get_tree().paused = was_paused
+	if not prepared:
+		_switching = false
+		return
 	SoundManager.play(&"comet_impact", -2.0, false)
 	Platform.haptic("heavy")
 	var tween := create_tween()
@@ -641,6 +648,9 @@ func _enter_portal() -> void:
 
 
 func _switch_chapter(index: int = -1) -> void:
+	var next_index := director.chapter_index + 1 if index < 0 else index
+	if not await WebResourcePacks.ensure(WebResourcePacks.chapter_groups(ContentDB.get_chapter(next_index))):
+		return
 	var chapter := ContentDB.get_chapter(director.chapter_index + 1 if index < 0 else index)
 	enemies.release_all()
 	if tactics != null:

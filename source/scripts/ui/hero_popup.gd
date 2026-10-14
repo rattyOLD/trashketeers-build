@@ -65,6 +65,7 @@ func _on_search(query: String) -> void:
 
 
 func open() -> void:
+	if not await WebResourcePacks.ensure(PackedStringArray(["heroes"])): return
 	var current := SaveService.get_character_id()
 	var all := CharacterDB.all()
 	for i in all.size():

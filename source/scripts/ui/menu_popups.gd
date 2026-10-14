@@ -338,6 +338,10 @@ class Shop:
 			_balance.visible = false
 			search.visible = false
 
+	func open() -> void:
+		if not await WebResourcePacks.ensure(PackedStringArray(["heroes"])): return
+		super.open()
+
 	func _refresh() -> void:
 		_balance.text = "%s · %s" % [SaveService.format_coins(SaveService.get_coins()), Economy.format_gems(SaveService.get_gems())]
 		MenuPopups.clear(_list)

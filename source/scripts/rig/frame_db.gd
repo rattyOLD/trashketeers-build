@@ -21,6 +21,12 @@ static func release_textures() -> void:
 		sheet["texture"] = null
 
 
+static func sheet_available(sheet_id: String) -> bool:
+	_load()
+	var sheet: Dictionary = _sheets.get(sheet_id, {})
+	return not sheet.is_empty() and WebResourcePacks.available(str(sheet["texture_path"]))
+
+
 static func get_sheet(sheet_id: String) -> Dictionary:
 	_load()
 	var sheet: Dictionary = _sheets.get(sheet_id, {})
@@ -69,7 +75,7 @@ static func _load() -> void:
 
 static func _parse(sheet_id: String, raw: Dictionary) -> Dictionary:
 	var texture_path := str(raw.get("texture", ""))
-	if not ResourceLoader.exists(texture_path):
+	if not ResourceLoader.exists(texture_path) and not WebResourcePacks.declared(texture_path):
 		push_warning("FrameDB: нет атласа %s" % texture_path)
 		return {}
 	var rects: Array[Rect2] = []

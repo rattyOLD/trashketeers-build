@@ -531,7 +531,7 @@ html.orientation-ready:not(.upright) #rotate .phone, html.orientation-ready:not(
 	window.addEventListener('pagehide', function () { all.forEach(function (ctx) { try { ctx.suspend(); } catch (e) {} }); });
 })();
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako_inflate.min.js"></script>
+<script src="pako_inflate.min.js"></script>
 <script src="render_scale.js"></script>
 <script>
 (function () {
@@ -700,10 +700,15 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	// ~44 МБ: движок лежит gzip-ом (raccoon.core.wasm), пак ресурсов — как raccoon.pack.wasm.
 	// Загрузчик Godot (Preloader) берёт файлы через window.fetch: подменяем fetch для
 	// index.wasm / index.pck и отдаём ему уже скачанные и распакованные байты.
+	let packEngine = null;
 	const FILES = {
 		wasm: { parts: __WASM_PARTS__ },
 		pck: { parts: __PCK_PARTS__ },
 	};
+	__RESOURCE_PACK_BRIDGE__
+	window.trashPacks = installResourcePacks(__RESOURCE_PACK_MANIFEST__, () => packEngine);
+	__ASSET_CACHE_BRIDGE__
+	const assetCache = installAssetCache(Object.values(FILES).flatMap(file => file.parts.map(part => part.url)).concat(window.trashPacks.urls));
 	const GODOT_CONFIG = {
 		args: [],
 		canvasResizePolicy: 2,
@@ -1277,17 +1282,22 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	function updatePart(key, index, value) {
 		loadedParts[key][index] = value;
 		loaded[key] = loadedParts[key].reduce(function (acc, n) { return acc + n; }, 0);
-		renderProgress();
+		if (!started) renderProgress();
 	}
 
 	function downloadPart(key, index) {
 		const part = FILES[key].parts[index];
-		return fetch(part.url, { cache: 'force-cache' }).then(function (response) {
+		let cached = false;
+		return assetCache.read(part.url).then(function (response) {
+			cached = !!response;
+			return response || fetch(part.url, { cache: 'force-cache' });
+		}).then(function (response) {
 			// Размер не совпал с ожидаемым: в кэше чужая версия части. Качаем заново мимо кэша.
 			const size = Number(response.headers.get('content-length') || 0);
 			if (response.ok && size > 0 && !response.headers.get('content-encoding') && size !== part.bytes && !part.retried) {
 				part.retried = true;
-				return fetch(part.url, { cache: 'reload' });
+				cached = false;
+				return assetCache.drop(part.url).then(function () { return fetch(part.url, { cache: 'reload' }); });
 			}
 			return response;
 		}).then(function (response) {
@@ -1322,7 +1332,15 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 				});
 			}
 			return pump();
-		}).then(gunzipIfNeeded);
+		}).then(async function (bytes) {
+			const piece = await gunzipIfNeeded(bytes);
+			if (piece.length !== part.rawBytes) throw new Error('Неверный размер ресурса ' + part.url);
+			if (!cached && bytes.length === part.bytes) await assetCache.write(part.url, bytes);
+			return piece;
+		}).catch(async function (error) {
+			await assetCache.drop(part.url);
+			throw error;
+		});
 	}
 
 	function download(key) {
@@ -1408,6 +1426,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 			const release = installFetchBridge(parts[0], parts[1]);
 			parts.length = 0;
 			const engine = new Engine(GODOT_CONFIG);
+			packEngine = engine;
 			const watchdog = setTimeout(function () {
 				fail('Движок не запустился за 40 секунд.', true, 'engine');
 			}, 40000);

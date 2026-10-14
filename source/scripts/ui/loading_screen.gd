@@ -681,7 +681,7 @@ func _animate_cast(delta: float) -> void:
 
 
 func _spawn_extra(sheet_id: String, size: float, face: float, at: Vector2, clip: String, ttl: float) -> Extra:
-	if _extras.size() >= MAX_EXTRAS:
+	if _extras.size() >= MAX_EXTRAS or not FrameDB.sheet_available(sheet_id):
 		return null
 	var extra := Extra.new()
 	if not extra.setup(sheet_id, size, face):
@@ -780,7 +780,7 @@ class Scenery:
 			var paths: Array[String] = []
 			for id: String in VARIANTS:
 				var path := str(VARIANTS[id]) % ("portrait" if h > w else "landscape")
-				if ResourceLoader.exists(path) and id != _last_variant:
+				if WebResourcePacks.available(path) and id != _last_variant:
 					paths.append(path)
 			if not paths.is_empty():
 				var pick := paths.pick_random() as String

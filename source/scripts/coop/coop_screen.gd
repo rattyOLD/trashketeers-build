@@ -76,6 +76,7 @@ func _init() -> void:
 	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(center)
 	resized.connect(func() -> void:
+		if not is_inside_tree(): return
 		ScreenSafeArea.fit(center, get_viewport_rect().size)
 		_backdrop.build(get_viewport_rect().size)
 		_fit_lobby.call_deferred())

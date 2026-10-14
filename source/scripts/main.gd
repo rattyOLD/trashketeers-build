@@ -46,6 +46,7 @@ var _moved_prompted := false
 var _resize_serial := 0
 var _menu_view := Vector2.ZERO
 var _loading: LoadingScreen
+var _preparing_battle := false
 
 
 func _ready() -> void:
@@ -267,6 +268,8 @@ func _show_menu() -> void:
 	elif _debug_hash == "coop" or _debug_hash == "coopdemo":
 		var demo := _debug_hash == "coopdemo"
 		_debug_hash = ""
+		if not await WebResourcePacks.ensure(WebResourcePacks.all_battle_groups()): return
+		if not is_instance_valid(menu) or not menu.is_inside_tree(): return
 		var coop := CoopScreen.new()
 		coop.name = "CoopScreen"
 		coop.auto_create = not demo
@@ -403,6 +406,18 @@ func _start_raid(weapon_id: StringName) -> void:
 
 ## Загрузочный экран поверх текущего; новая сцена собирается в пике белой вспышки.
 func _with_loading(resources: Array, build: Callable, mission := "") -> void:
+	if _loading != null or _preparing_battle: return
+	_preparing_battle = true
+	var groups := WebResourcePacks.chapter_groups(ContentDB.get_chapter(Tester.start_chapter()))
+	if Tester.start_chapter() > 0:
+		groups.append_array(WebResourcePacks.chapter_groups(ContentDB.get_chapter(0)))
+	if resources == RAID_RESOURCES:
+		groups = PackedStringArray(["raid", "loading_ice", "heroes"])
+	elif not mission.is_empty():
+		groups = WebResourcePacks.all_battle_groups()
+	var prepared := await WebResourcePacks.ensure(groups)
+	_preparing_battle = false
+	if not prepared: return
 	if _loading != null:
 		return
 	get_tree().paused = false

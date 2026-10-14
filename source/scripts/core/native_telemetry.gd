@@ -9,6 +9,8 @@ const REPORT_URL := "https://script.google.com/macros/s/AKfycbxVyy-SnRANW0Im-1Bl
 const REPORT_CAP := 250
 const HEARTBEAT := 60.0
 const LOG_POLL := 5.0
+const LOG_READ_LIMIT := 32768
+const LOG_LINE_LIMIT := 4096
 const LOG_PATH := "user://logs/godot.log"
 const LOG_DIR := "user://logs"
 const UID_KEY := "trk_uid"
@@ -33,6 +35,8 @@ var _heartbeat := HEARTBEAT
 var _log_poll := LOG_POLL
 var _log_pos := 0
 var _pending_error := ""
+var _log_line := PackedByteArray()
+var _discard_line := false
 
 
 func _init() -> void:
@@ -53,8 +57,9 @@ func _ready() -> void:
 	add_child(_http)
 	report("session_start", device_info())
 	_report_previous_crash()
-	if FileAccess.file_exists(LOG_PATH):
-		_log_pos = FileAccess.get_file_as_bytes(LOG_PATH).size()
+	var current_log := FileAccess.open(LOG_PATH, FileAccess.READ)
+	if current_log != null:
+		_log_pos = current_log.get_length()
 
 
 func _process(delta: float) -> void:
@@ -186,31 +191,60 @@ func _on_sent(_result: int, _code: int, _headers: PackedStringArray, _body: Pack
 
 ## Новые строки журнала движка: ERROR / SCRIPT ERROR вместе со строкой «at:» — отдельным отчётом.
 func _scan_log() -> void:
-	var file := FileAccess.open(LOG_PATH, FileAccess.READ)
-	if file == null:
-		return
+	_scan_log_file(LOG_PATH)
+
+
+func _scan_log_file(path: String) -> void:
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null: return
 	var length := file.get_length()
 	if length < _log_pos:
 		_log_pos = 0
-	if length == _log_pos:
-		return
+		_log_line.clear()
+		_discard_line = false
+		_pending_error = ""
+	if length == _log_pos: return
 	file.seek(_log_pos)
-	var chunk := file.get_buffer(length - _log_pos).get_string_from_utf8()
-	_log_pos = length
-	for line in chunk.split("\n"):
-		var stripped := line.strip_edges()
-		if stripped.begins_with("at:") and not _pending_error.is_empty():
-			_send_error(_pending_error + " | " + stripped)
-			_pending_error = ""
-		elif stripped.begins_with("ERROR:") or stripped.begins_with("SCRIPT ERROR:") or stripped.begins_with("USER ERROR:"):
-			if not _pending_error.is_empty():
-				_send_error(_pending_error)
-			_pending_error = stripped.left(600)
-	if not _pending_error.is_empty() and not chunk.ends_with("\n"):
-		return
-	if not _pending_error.is_empty():
+	var chunk := file.get_buffer(mini(length - _log_pos, LOG_READ_LIMIT))
+	_log_pos = file.get_position()
+	for byte in chunk:
+		if byte == 10:
+			_consume_log_line(_log_line.get_string_from_utf8())
+			_log_line.clear()
+			_discard_line = false
+		elif not _discard_line:
+			_log_line.append(byte)
+			if _log_line.size() > LOG_LINE_LIMIT:
+				var boundary := LOG_LINE_LIMIT
+				while boundary > 0 and (_log_line[boundary] & 0xc0) == 0x80: boundary -= 1
+				_log_line.resize(boundary)
+				_discard_line = true
+	if _log_pos == length and _log_line.is_empty() and not _pending_error.is_empty():
 		_send_error(_pending_error)
 		_pending_error = ""
+
+
+func _consume_log_line(line: String) -> void:
+	var stripped := line.strip_edges()
+	if stripped.begins_with("at:") and not _pending_error.is_empty():
+		_send_error(_pending_error + " | " + stripped.left(600))
+		_pending_error = ""
+	elif stripped.begins_with("ERROR:") or stripped.begins_with("SCRIPT ERROR:") or stripped.begins_with("USER ERROR:"):
+		if not _pending_error.is_empty(): _send_error(_pending_error)
+		_pending_error = stripped.left(600)
+
+
+static func _read_log_tail(path: String) -> String:
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null: return ""
+	var start := maxi(file.get_length() - LOG_READ_LIMIT, 0)
+	file.seek(start)
+	var bytes := file.get_buffer(LOG_READ_LIMIT)
+	if start > 0:
+		var newline := bytes.find(10)
+		bytes = bytes.slice(newline + 1) if newline >= 0 else PackedByteArray()
+	var lines := bytes.get_string_from_utf8().split("\n")
+	return "\n".join(lines.slice(maxi(lines.size() - 40, 0)))
 
 
 func _send_error(text: String) -> void:
@@ -227,8 +261,7 @@ func _report_previous_crash() -> void:
 	var tail := ""
 	var crashed := false
 	if not previous.is_empty():
-		var lines := FileAccess.get_file_as_string(previous).split("\n")
-		tail = "\n".join(lines.slice(maxi(lines.size() - 40, 0)))
+		tail = _read_log_tail(previous)
 		crashed = tail.contains("Program crashed") or tail.contains("CrashHandler") or tail.contains("signal 11") or tail.contains("Fatal")
 	if crashed or killed:
 		report("prev_session_died", "previous session %s | last: %s\nLOG TAIL\n%s" % [

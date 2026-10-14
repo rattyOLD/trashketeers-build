@@ -16,6 +16,7 @@ config/version="dev"
 [autoload]
 
 Platform="*res://scripts/core/platform.gd"
+WebResourcePacks="*res://scripts/core/web_resource_packs.gd"
 WeaponDB="*res://scripts/weapons/weapon_db.gd"
 SaveService="*res://scripts/core/save_service.gd"
 Cloud="*res://scripts/core/cloud.gd"

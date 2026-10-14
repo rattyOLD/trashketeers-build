@@ -223,7 +223,8 @@ func _build_landscape_layout() -> Control:
 	margin.add_theme_constant_override("margin_top", 14)
 	margin.add_theme_constant_override("margin_bottom", 24)
 	add_child(margin)
-	var fit_safe := func() -> void: ScreenSafeArea.fit(margin, get_viewport_rect().size)
+	var fit_safe := func() -> void:
+		if is_inside_tree(): ScreenSafeArea.fit(margin, get_viewport_rect().size)
 	resized.connect(fit_safe)
 	fit_safe.call_deferred()
 	var column := VBoxContainer.new()
@@ -258,6 +259,7 @@ func _build_landscape_layout() -> Control:
 
 
 func _fit_menu() -> void:
+	if not is_inside_tree(): return
 	if _menu_body == null or _dock == null or _menu_center.size.y <= 0.0:
 		return
 	var compact := get_viewport_rect().size.y < 600.0
@@ -634,6 +636,8 @@ func _build_coop_button() -> Control:
 
 
 func open_coop(join_code: String = "", invite_code: String = "") -> void:
+	if not await WebResourcePacks.ensure(WebResourcePacks.all_battle_groups()): return
+	if not is_inside_tree(): return
 	if get_node_or_null("CoopScreen") != null:
 		return
 	var coop := CoopScreen.new()

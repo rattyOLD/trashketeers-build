@@ -1,13 +1,6 @@
-// v2 (03.10): после обновления сбрасываем кеши и перезагружаем открытые вкладки, чтобы не оставалась старая страница загрузки.
+// Resources use content hashes; update checks are handled by the page without restarting an active game.
 self.addEventListener('install', function () { self.skipWaiting(); });
 self.addEventListener('activate', function (event) {
-	event.waitUntil((async function () {
-		try { const keys = await caches.keys(); await Promise.all(keys.map(function (k) { return caches.delete(k); })); } catch (e) {}
-		await self.clients.claim();
-		try {
-			const list = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
-			list.forEach(function (c) { try { c.navigate(c.url); } catch (e) {} });
-		} catch (e) {}
-	})());
+    event.waitUntil(self.clients.claim());
 });
 self.addEventListener('fetch', function () {});
