@@ -23,11 +23,14 @@ var _path := AStarGrid2D.new()
 var _path_map: LevelSpawner
 var _path_left := 0.0
 var _boss_route := PackedVector2Array()
+var _preferred := PackedStringArray()
+var _swap_at := 0.0
 
 
 func _ready() -> void:
 	WeaponController.force_auto = false
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	_preferred = OS.get_environment("BUILD").split(",", false)
 	rng.seed = int(OS.get_environment("SEED")) if OS.get_environment("SEED") != "" else 1
 	seed(rng.seed)
 	_requested_scale = float(OS.get_environment("SCALE")) if OS.get_environment("SCALE") != "" else 3.0
@@ -37,6 +40,10 @@ func _ready() -> void:
 	SaveService.data = SaveService.DEFAULTS.duplicate(true)
 	SaveService._sanitize_arsenal()
 	SaveService.data["tips_off"] = true
+	var secondary := OS.get_environment("SECONDARY")
+	if not secondary.is_empty():
+		SaveService.add_weapon(StringName(secondary), 1, false)
+		SaveService.set_secondary_weapon(StringName(secondary), 1)
 	var hero := OS.get_environment("HERO")
 	if hero != "":
 		SaveService.data["character"] = hero
@@ -119,15 +126,18 @@ func _physics_process(delta: float) -> void:
 			else:
 				var choices := game.hud._level_up._choices
 				if not choices.is_empty():
-					var index := rng.randi_range(0, choices.size() - 1)
+					var index := _choose(choices, p.hp / maxf(p.max_hp, 1.0)) if not _preferred.is_empty() else rng.randi_range(0, choices.size() - 1)
 					_choices.append(String(choices[index].id))
 					game.hud._level_up._pick(index)
 		return
 	# Уход от толпы: от взвешенного центра ближних врагов + обход по кругу; изредка меняем сторону.
 	var away := Vector2.ZERO
+	var nearest_range := INF
+	var projectile_danger := false
 	for enemy in game.enemies.get_active():
 		var d := enemy.global_position - p.global_position
 		var dist := d.length()
+		nearest_range = minf(nearest_range, dist)
 		if dist < 420.0 and dist > 1.0:
 			away -= d / dist * (420.0 - dist) / 420.0
 	# Уклонение: из телеграфов анти-кемпера (молния, кислота, лазер) и из точек падения снарядов.
@@ -158,6 +168,7 @@ func _physics_process(delta: float) -> void:
 			continue
 		var side := rel.dot(dir.orthogonal())
 		if absf(side) < 40.0:
+			projectile_danger = true
 			away += dir.orthogonal() * signf(side + 0.01) * 2.0 * dodge_skill
 	var lp := game.lobs
 	for k in lp.CAPACITY:
@@ -194,11 +205,18 @@ func _physics_process(delta: float) -> void:
 			print("BOSS_TRACE ",JSON.stringify(row))
 	var center := game.map.bounds.get_center() - p.global_position
 	move += center / maxf(game.map.bounds.size.length() * 0.35, 1.0)
+	if _preferred.has("sentry") and target != null and wc._can_aim_at(target) and nearest_range > 240.0 and nearest_range < 450.0 and away.length() < 0.9 and not projectile_danger and fmod(t, 4.5) < 2.2:
+		move = Vector2.ZERO
 	if game.director.phase == WaveDirector.Phase.PORTAL and is_instance_valid(game._portal):
 		move = (game._portal.global_position - p.global_position).normalized()
 	# Управление как у игрока — через джойстик (бой сам переписывает move_input из джойстика каждый кадр).
 	game.hud.joystick._touch_index = 99
 	game.hud.joystick.output = move.limit_length(1.0)
+	if _preferred.has("switcher") and t >= _swap_at and wc.slot_count > 1:
+		_swap_at = t + 4.1
+		wc.switch_slot(0 if wc.active_slot != 0 else 1)
+	if _preferred.has("vanguard") and nearest_range < 400.0:
+		game._request_dash()
 	game._request_skill()
 	if game.director.elapsed >= float(OS.get_environment("DURATION") if OS.get_environment("DURATION") != "" else "900"):
 		_finish(game, "TIMEOUT")
@@ -206,7 +224,7 @@ func _physics_process(delta: float) -> void:
 
 func _finish(game: Game, outcome: String) -> void:
 	_ending = true
-	var report := {"seed": rng.seed, "outcome": outcome, "wave": last_wave, "time": game.director.elapsed, "level": game.level, "kills": game.kills, "coins": game.nuts, "power": game.stats.power(), "peak_loot": _peak_loot, "waves": _waves, "levels": _levels, "choices": _choices, "by": Player.last_source, "boss_samples":_boss_samples}
+	var report := {"seed": rng.seed, "outcome": outcome, "wave": last_wave, "time": game.director.elapsed, "level": game.level, "kills": game.kills, "coins": game.nuts, "power": game.stats.power(), "peak_loot": _peak_loot, "waves": _waves, "levels": _levels, "choices": _choices, "by": Player.last_source, "boss_samples":_boss_samples,"build":CombatTactics.title_line(game.stats),"turret_shots":game.tactics.shots_from_turret,"shatters":game.tactics.shatters,"echoes":game.tactics.echoes}
 	print(outcome, " wave=%d t=%ds lvl=%d kills=%d by=%s" % [last_wave, int(game.director.elapsed), game.level, game.kills, Player.last_source])
 	print("PACE_REPORT ", JSON.stringify(report))
 	var output := OS.get_environment("PACE_OUT")
@@ -254,3 +272,25 @@ func _toward_boss(game: Game, delta: float) -> Vector2:
 	while not _boss_route.is_empty() and _boss_route[0].distance_to(game.player.global_position) < 35.0:
 		_boss_route.remove_at(0)
 	return game.player.global_position.direction_to(_boss_route[0] if not _boss_route.is_empty() else game.director.boss.global_position)
+
+
+func _choose(choices: Array, health: float) -> int:
+	var best := 0
+	var highest := -1.0
+	for i in choices.size():
+		var u := choices[i] as UpgradeData
+		var score := 1.0
+		if String(u.id).begins_with("tactic_"):
+			score = 100.0 if _preferred.has(String(u.id).trim_prefix("tactic_")) else 0.0
+		elif u.stat == &"heal_pct":
+			score = 110.0 if health < 0.35 else 0.0
+		elif u.stat in [&"damage_mult", &"fire_rate_mult", &"extra_projectiles"]:
+			score = 20.0
+		elif u.stat == &"status_power" and (_preferred.has("arson") or _preferred.has("frost")):
+			score = 25.0
+		elif u.stat in [&"damage_resist", &"max_hp_add", &"regen"]:
+			score = 10.0
+		if score > highest:
+			highest = score
+			best = i
+	return best

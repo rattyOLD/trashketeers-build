@@ -1451,6 +1451,9 @@ func _draw_effect_front() -> void:
 
 
 func _draw_star(p: Vector2, r: float, color: Color) -> void:
+	# Subpixel concave polygons can fail triangulation while the death stars appear.
+	if r < 0.25:
+		return
 	var pts := PackedVector2Array()
 	for i in 10:
 		var rr := r if i % 2 == 0 else r * 0.45

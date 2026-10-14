@@ -160,6 +160,8 @@ func _fresh() -> void:
 	await get_tree().create_timer(1.2).timeout
 	game.director.set_physics_process(false)
 	game.enemies.release_all()
+	# Random wave weather must not add poison to status-strength fixtures.
+	game.events._apply_weather("")
 
 
 func _test_combinations() -> void:

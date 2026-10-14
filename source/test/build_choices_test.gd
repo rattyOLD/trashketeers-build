@@ -181,7 +181,8 @@ func _test_turret() -> void:
 		_check(ordinary > 0.0, "turret aims at a flying enemy's body")
 		wc.switch_slot(1)
 		_check(game.stats.switch_boost_left > 0.0, "real swap starts the temporary window")
-		var expected := clampf(sniper.with_run_stats(game.stats).damage * 0.25, 8.0,35.0)
+		var normal_weapon := sniper.with_run_stats(game.stats)
+		var expected := normal_weapon.damage * normal_weapon.projectiles_per_shot / normal_weapon.fire_interval * 0.22 * 0.49
 		var hp := target.hp
 		game.tactics._turret_shot = 0.0
 		game.tactics._tick_sentry(0.01)

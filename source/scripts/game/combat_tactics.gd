@@ -127,6 +127,21 @@ static func echo_damage_scale(tier: int) -> float:
 static func turret_interval(tier: int) -> float:
 	return maxf(0.22, 0.58 - tier * 0.09)
 
+static func weapon_dps(source: WeaponData, run: RunStats) -> float:
+	if source == null:
+		return 0.0
+	var boost := swap_damage_multiplier(rank(run, "switcher")) if run != null and run.switch_boost_left > 0.0 else 1.0
+	return source.damage / boost * source.projectiles_per_shot / maxf(source.fire_interval, 0.005)
+
+static func turret_damage(source: WeaponData, run: RunStats) -> float:
+	return weapon_dps(source, run) * 0.22 * turret_interval(1)
+
+func _effect_power() -> float:
+	return 1.0 + stats.get_stat(&"status_power")
+
+func _fire_zone_damage(tier: int) -> float:
+	return (6.0 * tier + weapon_dps(player.weapon_controller.weapon, stats) * 0.06 * tier) * _effect_power()
+
 static func swap_damage_multiplier(tier: int) -> float:
 	return 1.5 + tier * 0.15 if tier > 0 else 1.0
 
@@ -138,15 +153,15 @@ static func run_description(id: String, run: RunStats) -> String:
 	var next := mini(current + 1, 3)
 	match id:
 		"arson":
-			return "Попадания поджигают. Убийства оставляют огонь на 3 с.\nУрон зоны: %s/с. Прямой урон -8%%." % _rank_change(current, str(current * 6), str(next * 6))
+			return "Попадания поджигают. Убийства оставляют огонь на 3 с.\nБазовый урон зоны: %s/с + доля урона оружия.\nОгонь усиливает Сила эффектов. Прямой урон -8%%." % _rank_change(current, str(current * 6), str(next * 6))
 		"frost":
-			return "Три попадания замораживают обычного врага на %s с.\nПри гибели замороженного: %s осколков. Боссы только замедляются. Прямой урон -8%%." % [_rank_change(current, "%.2f" % freeze_seconds(current), "%.2f" % freeze_seconds(next)), _rank_change(current, str(4 + current), str(4 + next))]
+			return "Три попадания замораживают обычного врага на %s с.\nПри гибели замороженного: %s осколков. Осколки усиливаются от оружия и Силы эффектов. Боссы только замедляются. Прямой урон -8%%." % [_rank_change(current, "%.2f" % freeze_seconds(current), "%.2f" % freeze_seconds(next)), _rank_change(current, str(4 + current), str(4 + next))]
 		"bankshot":
 			return "Отскоков от стен: %s. После каждого урон ×1,25, максимум ×1,9.\nПрямой урон -15%%." % _rank_change(current, str(current + 1), str(next + 1))
 		"vanguard":
 			return "После рывка удар по пройденному пути: %s%% урона оружия.\nДальность оружия -15%%." % _rank_change(current, str(roundi(echo_damage_scale(current) * 100.0)), str(roundi(echo_damage_scale(next) * 100.0)))
 		"sentry":
-			return "Стой 1,2 с — установишь турель. Выстрел раз в %s с.\nПосле ухода работает 3 с. Скорость бега -6%%." % _rank_change(current, "%.2f" % turret_interval(current), "%.2f" % turret_interval(next))
+			return "Стой 1,2 с — установишь турель. Выстрел раз в %s с.\nУрон растёт с уроном и скорострельностью оружия.\nПосле ухода работает 3 с. Скорость бега -6%%." % _rank_change(current, "%.2f" % turret_interval(current), "%.2f" % turret_interval(next))
 		"switcher":
 			return "Смена оружия: +%s%% урона на 2,4 с и отбрасывание.\nПерезарядка эффекта 4 с. Обычный урон -10%%." % _rank_change(current, str(roundi((swap_damage_multiplier(current) - 1.0) * 100.0)), str(roundi((swap_damage_multiplier(next) - 1.0) * 100.0)))
 	return ""
@@ -241,10 +256,10 @@ func _affect(enemy: Enemy, damage: float, bounced: bool) -> void:
 		if burning and fire_rank > 0 and _proc_left <= 0.0:
 			_proc_left = 0.5
 			_busy = true
-			BulletPool.explode(enemy.global_position, 90.0 + frost_rank * 15.0, 16.0 + damage * 0.35, Bullet.Team.PLAYER, Color("#dcc6a8"), 0.5, &"ice")
+			BulletPool.explode(enemy.global_position, 90.0 + frost_rank * 15.0, (16.0 + damage * 0.35) * _effect_power(), Bullet.Team.PLAYER, Color("#dcc6a8"), 0.5, &"ice")
 			_busy = false
 	if fire_rank > 0:
-		enemy.add_bleed(5.0 * fire_rank + damage * 0.12, 2.4, true)
+		enemy.add_bleed((5.0 * fire_rank + damage * 0.12) * _effect_power(), 2.4, true)
 
 func enemy_died(enemy: Enemy) -> void:
 	_frost_hits.erase(enemy.get_instance_id())
@@ -253,7 +268,7 @@ func enemy_died(enemy: Enemy) -> void:
 	var fire_rank := rank(stats, "arson")
 	var frost_rank := rank(stats, "frost")
 	if fire_rank > 0 and _kill_left <= 0.0:
-		_add_field("fire", enemy.global_position, enemy.global_position, 92.0 + fire_rank * 12.0, 3.0, 6.0 * fire_rank)
+		_add_field("fire", enemy.global_position, enemy.global_position, 92.0 + fire_rank * 12.0, 3.0, _fire_zone_damage(fire_rank))
 		_kill_left = 0.18
 	if frost_rank > 0 and enemy.freeze_left > 0.0 and _shatter_left <= 0.0:
 		_shatter(enemy.global_position, frost_rank)
@@ -276,7 +291,7 @@ func _shatter(at: Vector2, tier: int) -> void:
 		var bullet := BulletPool.spawn(_shard_weapon, at, Vector2.from_angle(TAU * i / float(4 + tier)), Bullet.Team.PLAYER)
 		if bullet != null:
 			bullet.tactic_generated = true
-			bullet.damage_scale = 1.0 + tier * 0.35
+			bullet.damage_scale = (1.0 + tier * 0.35) * (9.0 + weapon_dps(player.weapon_controller.weapon, stats) * 0.02) * _effect_power() / 9.0
 	fx.ring(at, Color("#9de1ec"), 60.0)
 
 func _on_dash_ended(at: Vector2) -> void:
@@ -287,7 +302,7 @@ func _on_dash_ended(at: Vector2) -> void:
 	if rank(stats, "arson") > 0:
 		for i in 3:
 			var point := _dash_from.lerp(at, float(i + 1) / 4.0)
-			_add_field("fire", point, point, 60.0, 2.0, 8.0 * rank(stats, "arson"))
+			_add_field("fire", point, point, 60.0, 2.0, _fire_zone_damage(rank(stats, "arson")))
 
 func _add_field(kind: String, at: Vector2, end: Vector2, radius: float, lifetime: float, damage: float) -> void:
 	if _fields.size() >= MAX_FIELDS:
@@ -346,8 +361,7 @@ func _tick_sentry(delta: float) -> void:
 		_turret_source = source
 		_turret_weapon = source.duplicate_data()
 		_turret_weapon.id = &"tactic_sentry"
-		var base_damage := source.damage / (swap_damage_multiplier(rank(stats, "switcher")) if boosted else 1.0)
-		_turret_weapon.damage = clampf(base_damage * 0.25, 8.0, 35.0)
+		_turret_weapon.damage = turret_damage(source, stats)
 		_turret_weapon.bullet_radius = 5.0
 		_turret_weapon.explosion_radius = 0.0
 		_turret_weapon.ricochet_count = 0
