@@ -106,10 +106,7 @@ func reset() -> void:
 	_rain_left = 0.0
 	marauder = null
 	for pool in pools:
-		pool.visible = false
-		pool.set_process(false)
-		pool.collision_mask = 0
-		pool.set_deferred("monitoring", false)
+		pool.deactivate()
 	_apply_weather("")
 
 
@@ -143,6 +140,8 @@ func on_wave_started(is_boss: bool) -> void:
 
 func on_wave_cleared() -> void:
 	_pending = -1
+	for pool in pools:
+		pool.deactivate()
 	if is_instance_valid(activity):
 		activity.reset()
 

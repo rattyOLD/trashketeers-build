@@ -504,8 +504,14 @@ static func wave_bonus(chapter_wave: int, loop: int) -> int:
 
 
 ## Награда босса главы: неонит (первое убийство главы — +FIRST_BOSS_GEMS) и чертежи.
+static func base_boss_gems(chapter_index: int, loop: int) -> int:
+	return (3 if chapter_index % 2 == 0 else 5) + maxi(loop, 0)
+
+static func miniboss_gems(chapter_index: int, loop: int, robbed: bool = false) -> int:
+	return maxi(int(base_boss_gems(chapter_index, loop) * (0.25 if robbed else 0.5)), 1)
+
 static func boss_reward(chapter_index: int, loop: int) -> Dictionary:
-	var gems := (3 if chapter_index % 2 == 0 else 5) + loop
+	var gems := base_boss_gems(chapter_index, loop)
 	var firsts: Array = SaveService.data["boss_firsts"]
 	if not firsts.has(chapter_index):
 		firsts.append(chapter_index)

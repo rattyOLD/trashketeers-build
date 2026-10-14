@@ -42,6 +42,7 @@ const LEASH_INTERVAL := 2.0
 const STUCK_RELOCATE := 4.0
 const BOSS_TARGET_TIME := 75.0
 const MINI_ESCORT_PACKS := 2
+const MINI_REST_TIME := 6.0
 const BOSS_PORTAL_DELAY := 3.0
 ## Хвост волны: бюджет исчерпан, живых ≤ STALL_ALIVE и никто не погиб STALL_TIME секунд —
 ## оставшихся приводит к Еноту (за кадром), чтобы волна не висела из-за одной крысы за пропом.
@@ -183,7 +184,7 @@ func _physics_process(delta: float) -> void:
 		return
 	if phase != Phase.PORTAL:
 		elapsed += delta
-		if not is_boss_wave() and shift_left > 0.0:
+		if phase in [Phase.INTRO, Phase.FIGHT] and not is_boss_wave() and shift_left > 0.0:
 			shift_left -= delta
 			if shift_left <= 0.0 and force_boss():
 				siren.emit()
@@ -215,7 +216,7 @@ func _physics_process(delta: float) -> void:
 					chapter_cleared.emit(chapter_index)
 				else:
 					phase = Phase.INTERMISSION
-					_phase_time = float(_difficulty["intermission"])
+					_phase_time = maxf(float(_difficulty["intermission"]), MINI_REST_TIME) if is_mini_wave() else float(_difficulty["intermission"])
 					_last_tick = -1
 		Phase.INTERMISSION:
 			_phase_time -= delta
@@ -407,7 +408,10 @@ func _adaptive_boss_mult(boss_data: EnemyData) -> float:
 	var w := _player.weapon_controller.weapon
 	if w == null:
 		return 1.0
-	var dps := w.damage * w.projectiles_per_shot / maxf(w.fire_interval, 0.02) * (1.0 + w.crit_chance * (w.crit_mult - 1.0))
+	var direct_damage := w.damage
+	if run_stats != null and run_stats.switch_boost_left > 0.0:
+		direct_damage /= CombatTactics.swap_damage_multiplier(CombatTactics.rank(run_stats, "switcher"))
+	var dps := direct_damage * w.projectiles_per_shot / maxf(w.fire_interval, 0.02) * (1.0 + w.crit_chance * (w.crit_mult - 1.0))
 	var wanted := dps * BOSS_TARGET_TIME / maxf(boss_data.max_hp, 1.0)
 	return clampf(0.5 + 0.5 * sqrt(maxf(wanted, 1.0)), 1.0, 4.0)
 

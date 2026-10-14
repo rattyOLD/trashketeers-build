@@ -572,6 +572,12 @@ func _on_wave_started(number: int, title: String, mood: String, is_boss: bool) -
 func _on_wave_cleared(number: int) -> void:
 	Platform.note_event("wave %d cleared" % number)
 	events.on_wave_cleared()
+	hazards.clear()
+	lobs.clear()
+	BulletPool.release_enemy()
+	for node in layers.decals.get_children():
+		if node is AcidPool:
+			node.deactivate()
 	if is_instance_valid(_arrow) and _arrow._objective:
 		_arrow.hide()
 	_loot_at_clear = pickups.get_coin_count()
@@ -1088,9 +1094,9 @@ func _on_miniboss_killed(boss: Enemy, at: Vector2) -> void:
 	SoundManager.play(&"comet_impact", 0.0, false)
 	pickups.spawn(at, boss.data.nut_drop)
 	pickups.spawn_xp_gold(at, 30 + director.chapter_wave() * 4)
-	var reward := Economy.boss_reward(director.chapter_index, director.loop)
-	run_gems += int(int(reward["gems"]) * 0.5)
-	hud.toast("МИНИ-БОСС", "+%s" % Economy.format_gems(int(int(reward["gems"]) * 0.5)), Color("#ff7ae0"))
+	var gems := Economy.miniboss_gems(director.chapter_index, director.loop)
+	run_gems += gems
+	hud.toast("МИНИ-БОСС", "+%s" % Economy.format_gems(gems), Color("#ff7ae0"))
 	fx.confetti(at, 30)
 	if story != null:
 		_drop_weapon(_roll_weapon("epic" if randf() < 0.5 else "rare"), at, true)
@@ -1148,7 +1154,7 @@ func _on_mini_choice(index: int, name: String, at: Vector2, boss_id: String) -> 
 		hud.toast("ПОЩАДА", "Полное лечение и редкий ствол", Color("#5ff2ff"))
 		hud.radio().push_named("НЭЛЛ", "#5ff2ff", "Ты его пожалел? Он тебя бы нет. Но ладно, красиво.", 6.0)
 	else:
-		var extra := int(int(Economy.boss_reward(director.chapter_index, director.loop)["gems"]) * 0.25)
+		var extra := Economy.miniboss_gems(director.chapter_index, director.loop, true)
 		run_gems += extra
 		_drop_weapon(_roll_weapon("epic"), at, true)
 		pickups.spawn_xp_gold(at, 20)

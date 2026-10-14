@@ -77,6 +77,9 @@ func throw(from: Vector2, to: Vector2, flight: float, height: float, radius: flo
 
 func clear() -> void:
 	_time.fill(-1.0)
+	_tex.fill(null)
+	_blast.fill(null)
+	set_physics_process(false)
 	queue_redraw()
 
 
@@ -89,6 +92,8 @@ func _physics_process(delta: float) -> void:
 		if _time[k] >= _total[k]:
 			_time[k] = -1.0
 			_land(k)
+			_tex[k] = null
+			_blast[k] = null
 			continue
 		any = true
 	queue_redraw()

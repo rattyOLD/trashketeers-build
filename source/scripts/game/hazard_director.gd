@@ -99,7 +99,12 @@ func _physics_process(delta: float) -> void:
 		if _suppressed[i]["left"] <= 0:
 			_suppressed.remove_at(i)
 	var fighting := director.phase == WaveDirector.Phase.FIGHT
-	_track_camping(delta)
+	if fighting:
+		_track_camping(delta)
+	else:
+		_history.clear()
+		_sample_timer = 0.0
+		camping = false
 	_tick_zones(delta)
 	var wave := maxi(director.wave_number, 1)
 	Enemy.global_speed_mult = (1.0 + minf(0.012 * wave, 0.14) + (0.22 if camping else 0.0)) if fighting else 1.0

@@ -125,6 +125,16 @@ func release(bullet: Bullet) -> void:
 	_free.append(bullet)
 
 
+## Зачистка даёт безопасную передышку; снаряды игрока сохраняются.
+func release_enemy() -> void:
+	for i in range(_blast_queue.size() - 1, -1, -1):
+		if _blast_queue[i][3] == Bullet.Team.ENEMY:
+			_blast_queue.remove_at(i)
+	for i in range(_active.size() - 1, -1, -1):
+		if _active[i].team == Bullet.Team.ENEMY:
+			release(_active[i])
+
+
 ## Вызывать при выходе из боя/смене уровня: пул — автолоад и переживает смену сцен.
 func release_all() -> void:
 	_blast_queue.clear()

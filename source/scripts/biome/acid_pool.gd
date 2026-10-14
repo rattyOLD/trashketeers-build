@@ -52,17 +52,22 @@ func activate(at: Vector2, size: float = 1.0, life: float = LIFETIME) -> void:
 	set_process(true)
 
 
+func deactivate() -> void:
+	_time_left = 0.0
+	visible = false
+	EnvLights.remove(_light_id)
+	_light_id = -1
+	collision_mask = 0
+	set_deferred("monitoring", false)
+	_collision.set_deferred("disabled", true)
+	set_process(false)
+
+
 func _process(delta: float) -> void:
 	_age += delta
 	_time_left -= delta
 	if _time_left <= 0.0:
-		visible = false
-		EnvLights.remove(_light_id)
-		_light_id = -1
-		collision_mask = 0
-		set_deferred("monitoring", false)
-		_collision.set_deferred("disabled", true)
-		set_process(false)
+		deactivate()
 		return
 	scale = Vector2.ONE * _size * lerpf(0.15, 1.0, minf(_time_left / _life * 2.0, 1.0))
 	_tick_left -= delta
