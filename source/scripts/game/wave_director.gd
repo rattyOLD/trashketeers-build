@@ -41,6 +41,7 @@ const LEASH_DISTANCE := 1500.0
 const LEASH_INTERVAL := 2.0
 const STUCK_RELOCATE := 4.0
 const BOSS_TARGET_TIME := 75.0
+const MINI_ESCORT_PACKS := 2
 const BOSS_PORTAL_DELAY := 3.0
 ## Хвост волны: бюджет исчерпан, живых ≤ STALL_ALIVE и никто не погиб STALL_TIME секунд —
 ## оставшихся приводит к Еноту (за кадром), чтобы волна не висела из-за одной крысы за пропом.
@@ -71,6 +72,7 @@ var _wave: Dictionary = {}
 var _phase_time := FIRST_WAVE_DELAY
 var _spawn_timer := 0.0
 var _escort_timer := 0.0
+var _escort_remaining := -1
 var _boss_retry := 0.0
 var _boss_pending := false
 var _softlock_timer := 0.0
@@ -365,6 +367,7 @@ func _tick_boss(delta: float) -> void:
 			return
 		_boss_pending = false
 		_escort_timer = 4.0
+		_escort_remaining = int(_chapter.get("escort", {}).get("count", 3)) * MINI_ESCORT_PACKS if is_mini_wave() else -1
 		boss_spawned.emit(boss)
 		return
 
@@ -373,7 +376,7 @@ func _tick_boss(delta: float) -> void:
 	if boss == null or not boss.is_alive():
 		return
 	var escort: Dictionary = _chapter.get("escort", {})
-	if escort.is_empty():
+	if escort.is_empty() or _escort_remaining == 0:
 		return
 	_escort_timer -= delta
 	if _escort_timer > 0.0:
@@ -383,19 +386,21 @@ func _tick_boss(delta: float) -> void:
 	if escort_data == null:
 		return
 	for i in int(escort.get("count", 3)):
+		if _escort_remaining == 0:
+			return
 		if _enemies.get_active_count() >= _cap() + 6:
 			return
 		var at := _level.gate_spawn_point(_player.global_position, 300.0, escort_data.radius)
 		if at == Vector2.INF:
 			var ring := boss.data.radius + ESCORT_GAP
 			at = _level.find_spawn_point(boss.global_position, ring, ring + 140.0, escort_data.radius)
-		if at != Vector2.INF:
-			_enemies.spawn(escort_data, at, _hp_mult, _dmg_mult)
+		if at != Vector2.INF and _enemies.spawn(escort_data, at, _hp_mult, _dmg_mult) != null:
+			if _escort_remaining > 0:
+				_escort_remaining -= 1
 
 
-## Босс не должен таять за 15 секунд у раскачанного Енота: половина запаса HP подстраивается
-## под текущий урон в секунду так, чтобы бой длился около BOSS_TARGET_TIME. Прокачка всё равно
-## ускоряет бой — растёт только вторая половина.
+## Подстройка под прямой урон растёт медленнее оружия. Эффекты против толпы
+## не увеличивают HP одной цели; прокачка сокращает время победы.
 func _adaptive_boss_mult(boss_data: EnemyData) -> float:
 	if boss_data == null or _player == null:
 		return 1.0
@@ -403,9 +408,8 @@ func _adaptive_boss_mult(boss_data: EnemyData) -> float:
 	if w == null:
 		return 1.0
 	var dps := w.damage * w.projectiles_per_shot / maxf(w.fire_interval, 0.02) * (1.0 + w.crit_chance * (w.crit_mult - 1.0))
-	dps *= 1.0 + 0.35 * w.ricochet_count + (0.4 if w.piercing else 0.0)
 	var wanted := dps * BOSS_TARGET_TIME / maxf(boss_data.max_hp, 1.0)
-	return clampf(0.5 + 0.5 * wanted, 1.0, 4.0)
+	return clampf(0.5 + 0.5 * sqrt(maxf(wanted, 1.0)), 1.0, 4.0)
 
 
 ## Призыв босса: подручные текущей волны вокруг него (не больше лимита живых).

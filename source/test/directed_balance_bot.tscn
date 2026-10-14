@@ -1,0 +1,4 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="Script" path="res://test/directed_balance_bot.gd" id="1"]
+[node name="DirectedBalanceBot" type="Node"]
+script = ExtResource("1")
