@@ -1659,9 +1659,11 @@ class Profile:
 		paint_id.call()
 		if not Cloud.has_code():
 			Cloud.sync_profile()
-			Cloud.profile_synced.connect(func() -> void:
-				if is_instance_valid(id_button):
-					paint_id.call(), CONNECT_ONE_SHOT)
+			# Ответ сервера может прийти после закрытия профиля: подписка снимается вместе с кнопкой.
+			Cloud.profile_synced.connect(paint_id, CONNECT_ONE_SHOT)
+			id_button.tree_exiting.connect(func() -> void:
+				if Cloud.profile_synced.is_connected(paint_id):
+					Cloud.profile_synced.disconnect(paint_id), CONNECT_ONE_SHOT)
 		id_button.pressed.connect(func() -> void:
 			if Cloud.has_code():
 				DisplayServer.clipboard_set(Cloud.friend_code)

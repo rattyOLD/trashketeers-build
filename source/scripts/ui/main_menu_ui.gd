@@ -296,7 +296,7 @@ func _fit_menu() -> void:
 
 ## Плашка «Заведи аккаунт» под верхней панелью: не перекрывает экран и не спорит с клавиатурой, как всплывающее окно.
 ## Тап — открыть окно аккаунта, крестик — убрать до следующего раза.
-func show_account_banner(text: String) -> void:
+func show_account_banner(text: String, on_dismiss: Callable = Callable(), action: String = "ЗАВЕСТИ") -> void:
 	if is_instance_valid(_account_banner):
 		return
 	var bar := PanelContainer.new()
@@ -317,13 +317,16 @@ func show_account_banner(text: String) -> void:
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	label.custom_minimum_size = Vector2(maxf(bar.offset_right * 2.0 - 230.0, 160.0), 0)
 	row.add_child(label)
-	var go := UiStyle.button("ЗАВЕСТИ", UiStyle.HOT, 20, Vector2(132, 52))
+	var go := UiStyle.button(action, UiStyle.HOT, 20, Vector2(132, 52))
 	go.pressed.connect(func() -> void:
 		bar.queue_free()
 		_account.open())
 	row.add_child(go)
 	var shut := UiStyle.button("X", UiStyle.PANEL_LIGHT, 20, Vector2(52, 52))
-	shut.pressed.connect(bar.queue_free)
+	shut.pressed.connect(func() -> void:
+		bar.queue_free()
+		if on_dismiss.is_valid():
+			on_dismiss.call())
 	row.add_child(shut)
 	bar.gui_input.connect(func(event: InputEvent) -> void:
 		if (event is InputEventMouseButton and event.pressed) or (event is InputEventScreenTouch and event.pressed):

@@ -293,6 +293,10 @@ func _maybe_ask_returning(menu: MainMenuUI) -> void:
 		return
 	if not Cloud.waiting_choice or not _debug_hash.is_empty():
 		return
+	# Новичка не встречаем окном поверх меню: плашка под верхней панелью, игра доступна сразу.
+	# Начал бой, закрыл плашку или окно входа — значит новенький, заводим гостя.
+	for request: Signal in [menu.start_requested, menu.story_requested, menu.raid_requested]:
+		request.connect(func(_weapon: StringName) -> void: Cloud.start_guest())
 	var menu_ref: WeakRef = weakref(menu)
 	get_tree().create_timer(1.0).timeout.connect(func() -> void:
 		var current := menu_ref.get_ref() as MainMenuUI
@@ -301,11 +305,10 @@ func _maybe_ask_returning(menu: MainMenuUI) -> void:
 		current._account.intro = "Уже играл в Trash Squad? Введи логин и пароль и жми «ВОЙТИ», прогресс вернётся. Новенький? Закрывай окно и беги на помойку, аккаунт заведёшь потом."
 		current._account.closed.connect(func() -> void:
 			var active := menu_ref.get_ref() as MainMenuUI
-			if active == null:
-				return
-			active._account.intro = ""
+			if active != null:
+				active._account.intro = ""
 			Cloud.start_guest(), CONNECT_ONE_SHOT)
-		current._account.open())
+		current.show_account_banner("Уже играл в Trash Squad? Войди — прогресс вернётся. Новенький? Просто жми «В БОЙ».", Cloud.start_guest, "ВОЙТИ"))
 
 
 ## Сессия аккаунта слетела (сервер её больше не принимает) или аккаунт переехал на другое устройство:

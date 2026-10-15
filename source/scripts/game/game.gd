@@ -40,6 +40,7 @@ var run_blueprints: Array = []
 var revives_used := 0
 var _damage_acc := {}
 const DAMAGE_MERGE_TIME := 0.07
+const BOSS_PASSIVE_DELAY := 3.5
 
 var map: LevelSpawner
 var boss_cover: BossCover
@@ -729,16 +730,16 @@ func _flush_damage_numbers(delta: float, force: bool = false) -> void:
 		_damage_acc.erase(key)
 		if enemy == null or enemy.data == null:
 			continue
-		if _number_budget >= 1.0 or acc["crit"] or acc["kind"] == &"melee":
+		var allow_new: bool = _number_budget >= 1.0 or acc["crit"] or acc["kind"] == &"melee"
+		var stack_key := "%d:%d:%s" % [enemy.get_instance_id(), enemy.activation_id, acc["kind"]]
+		var at := enemy.get_aim_point() + Vector2(0, -enemy.data.radius * 1.6)
+		if fx.stacked_number(stack_key, at, acc["amount"], FxManager.kind_color(acc["kind"]), acc["crit"], FxManager.kind_scale(acc["kind"]), allow_new):
 			_number_budget -= 1.0
-			var jitter := Vector2(randf_range(-enemy.data.radius, enemy.data.radius) * 0.6, 0.0)
-			fx.number(enemy.get_aim_point() + Vector2(0, -enemy.data.radius * 1.6) + jitter, acc["amount"], FxManager.kind_color(acc["kind"]), acc["crit"], FxManager.kind_scale(acc["kind"]))
 
 
 func _on_enemy_damaged(enemy: Enemy, amount: float, is_crit: bool, kind: StringName) -> void:
 	if kind == &"melee":
-		var spread := enemy.data.radius * 0.6
-		fx.number(enemy.get_aim_point() + Vector2(randf_range(-spread, spread), -enemy.data.radius * 1.6), amount, FxManager.kind_color(kind), is_crit, FxManager.kind_scale(kind))
+		fx.stacked_number("%d:%d:melee" % [enemy.get_instance_id(), enemy.activation_id], enemy.get_aim_point() + Vector2(0, -enemy.data.radius * 1.6), amount, FxManager.kind_color(kind), is_crit, FxManager.kind_scale(kind))
 		if is_crit:
 			SaveService.add_stat("crits", 1, false)
 			if radio != null:
@@ -1084,7 +1085,10 @@ func _on_boss_spawned(boss: Enemy) -> void:
 	hud.show_banner("БОСС: %s!" % boss.data.display_name.to_upper(), UiStyle.DANGER)
 	var passive := BossBrain.passive_text(boss.data.boss_pattern)
 	if not passive.is_empty():
-		hud.toast("ПАССИВКА БОССА", passive, Color("#ff9a3d"))
+		# Подсказка позже заголовков волны и главы: босс уже вышел из-под верхней полосы, а текст не наслаивается.
+		SceneDelay.after(self, BOSS_PASSIVE_DELAY, func() -> void:
+			if not finished and is_instance_valid(boss) and boss.is_alive():
+				hud.toast("ПАССИВКА БОССА", passive, Color("#ff9a3d")))
 	add_shake(0.6)
 	if map.district != null:
 		map.district.cheer(1.0)

@@ -132,7 +132,7 @@ func _test_kills() -> void:
 	game._multi_left = 0.0
 	var third := game.enemies.spawn(ContentDB.get_enemy(&"rat_punk"), at)
 	third.take_damage(999.0)
-	_check(game._multi == 1 and feed._chain == 1 and feed._total == 10 and feed._lines.size() == 1, "kill after the window starts a fresh series with fresh points")
+	_check(game._multi == 1 and feed._chain == 1 and feed._total == 10 and feed._lines.is_empty(), "kill after the window starts a fresh series with fresh points; plain kills add no line")
 	var start_kills := game.kills
 	for index in 80:
 		var enemy := game.enemies.spawn(ContentDB.get_enemy(&"rat_punk"), at)

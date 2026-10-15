@@ -1,13 +1,14 @@
 class_name CombatFeed
 extends Control
-## Боевой импакт поверх арены (как в шутерах уровня CoD): счётчик очков у прицела со стопкой строк
-## «+10 УБИЙСТВО» и растущей суммой серии, медали серий по центру сверху с ударным появлением,
+## Боевой импакт поверх арены (как в шутерах уровня CoD): растущая сумма серии у прицела (элита и босс
+## подписаны одной строкой), медали серий по центру сверху с ударным появлением,
 ## красные дуги урона у края экрана со стороны удара и пульсирующая красная виньетка на низком здоровье.
 ## Один Control рисует всё сам и обрабатывается, только пока есть что показывать.
 
 const FONT_PATH := "res://assets/fonts/RussoOne-Regular.ttf"
 const LINE_LIFE := 1.5
-const MAX_LINES := 4
+## Под суммой серии — одна строка и только для заметных убийств (элита, босс): обычные идут в сумму.
+const MAX_LINES := 1
 const TOTAL_HOLD := 2.2
 const MEDAL_LIFE := 1.5
 const DAMAGE_LIFE := 0.9
@@ -41,10 +42,11 @@ func _init() -> void:
 	set_process(false)
 
 
-## Убийство: строка в стопку и прибавка к сумме серии.
+## Убийство: прибавка к сумме серии; элита и босс ещё и подписаны строкой.
 func kill(points: int, label: String, color: Color = Color.WHITE) -> void:
 	_last_points = points
-	_lines.push_front({"text": "+%d %s" % [points, label], "color": color, "life": LINE_LIFE})
+	if color != Color.WHITE:
+		_lines.push_front({"text": "+%d %s" % [points, label], "color": color, "life": LINE_LIFE})
 	while _lines.size() > MAX_LINES:
 		_lines.pop_back()
 	_total += points

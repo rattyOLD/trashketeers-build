@@ -640,6 +640,10 @@ func _cells_rect(cell: Vector2i, size_cells: Vector2i) -> Rect2:
 ## тайловая картинка на всю карту, как за забором — арена и район один мир.
 const JUNK_GROUND := "res://assets/maps/night_dump/floor.png"
 const GROUND_SCALE := 1.35
+## Земля Свалки нарисована очень тёмной (средняя яркость ~45 из 255): поднимаем её, чтобы герой и враги
+## читались на фоне. Арт не меняется — только множитель в шейдере земли и светлее заливка теней.
+const JUNK_GROUND_LIFT := 1.5
+const JUNK_SHADOW_FILL := Vector3(0.23, 0.23, 0.27)
 static var _calm: Shader
 
 
@@ -723,8 +727,8 @@ func _build_floor() -> void:
 				tint = Vector3(1.0, 0.95, 0.84)
 			calm.set_shader_parameter("saturation", 0.66)
 			calm.set_shader_parameter("contrast", 0.78)
-			calm.set_shader_parameter("shadow_fill", Vector3(0.16, 0.17, 0.2))
-			calm.set_shader_parameter("floor_tint", tint)
+			calm.set_shader_parameter("shadow_fill", JUNK_SHADOW_FILL if layout == "junkyard" else Vector3(0.16, 0.17, 0.2))
+			calm.set_shader_parameter("floor_tint", tint * (JUNK_GROUND_LIFT if layout == "junkyard" else 1.0))
 			calm.set_shader_parameter("mirror_tiles", ground_path == JUNK_GROUND or map_id in ["night_dump", "acid_rain", "gold_vault", "pigeon_roofs"])
 		if ground_path == JUNK_GROUND:
 			calm.set_shader_parameter("wear_enabled", true)

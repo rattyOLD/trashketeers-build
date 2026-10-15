@@ -277,7 +277,7 @@
      "mood": "alarm"
     },
     {
-     "title": "Junk Overlord",
+     "title": "Король Хлама",
      "count": 22,
      "spawn_interval": 2.1,
      "batch": 2,
@@ -618,7 +618,7 @@
      "mood": "alarm"
     },
     {
-     "title": "Junk Overlord II",
+     "title": "Король Хлама II",
      "count": 22,
      "spawn_interval": 2.1,
      "batch": 2,
@@ -964,7 +964,7 @@
      "mood": "alarm"
     },
     {
-     "title": "Junk Overlord · ФИНАЛ",
+     "title": "Король Хлама · ФИНАЛ",
      "count": 22,
      "spawn_interval": 2.1,
      "batch": 2,
@@ -1304,7 +1304,7 @@
      "mood": "vault"
     },
     {
-     "title": "Mud Magnate",
+     "title": "Грязный Магнат",
      "count": 20,
      "spawn_interval": 2.3,
      "batch": 2,
@@ -1623,7 +1623,7 @@
      "mood": "vault"
     },
     {
-     "title": "Mud Magnate II",
+     "title": "Грязный Магнат II",
      "count": 20,
      "spawn_interval": 2.3,
      "batch": 2,
@@ -1942,7 +1942,7 @@
      "mood": "vault"
     },
     {
-     "title": "Mud Magnate · ФИНАЛ",
+     "title": "Грязный Магнат · ФИНАЛ",
      "count": 20,
      "spawn_interval": 2.3,
      "batch": 2,

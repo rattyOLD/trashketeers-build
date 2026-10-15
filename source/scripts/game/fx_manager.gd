@@ -493,6 +493,40 @@ func number(at: Vector2, value: float, color: Color = DAMAGE_COLOR, is_crit: boo
 		_text(at + Vector2(randf_range(-12, 12), -20), text, color, 34.0 * size_scale)
 
 
+## Нарастающая цифра: удары по одной цели одним типом урона складываются в одно число, пока поток
+## попаданий не прервётся на STACK_WINDOW. Каждое прибавление снова «выпрыгивает», цифры не копятся стопкой.
+const STACK_WINDOW := 0.45
+var _stack: Dictionary = {}
+
+
+## true — появилась новая цифра (её учитывает бюджет вызывающего); прибавка к живой цифре бюджет не тратит.
+func stacked_number(key: String, at: Vector2, value: float, color: Color = DAMAGE_COLOR, is_crit: bool = false, size_scale: float = 1.0, allow_new: bool = true) -> bool:
+	var entry: Array = _stack.get(key, [])
+	if not entry.is_empty():
+		var k: int = entry[0]
+		if _tx_life[k] > TEXT_LIFE - STACK_WINDOW and _tx_text[k] == entry[2]:
+			var total: float = float(entry[1]) + value
+			var crit: bool = bool(entry[3]) or is_crit
+			var text := str(int(round(total))) + ("!" if crit else "")
+			_tx_text[k] = text
+			_tx_life[k] = TEXT_LIFE
+			_tx_origin[k] = Vector2(at.x, minf(at.y, _tx_pos[k].y))
+			_tx_pos[k] = _tx_origin[k]
+			if crit:
+				_tx_color[k] = CRIT_COLOR
+				_tx_size[k] = maxf(_tx_size[k], 46.0 * maxf(size_scale, 1.0))
+			_stack[key] = [k, total, text, crit]
+			return false
+	if not allow_new:
+		return false
+	if _stack.size() > TEXT_CAPACITY * 2:
+		_stack.clear()
+	var slot := _tx_next
+	number(at, value, color, is_crit, size_scale)
+	_stack[key] = [slot, value, _tx_text[slot], is_crit]
+	return true
+
+
 ## Цвет цифры по типу урона: огонь — оранжевый, шок — голубой, яд — зелёный, взрыв — золотой.
 static func kind_color(kind: StringName) -> Color:
 	match kind:

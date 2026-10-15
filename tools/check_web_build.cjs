@@ -36,7 +36,9 @@ const path = require('node:path');
     });
     await page.goto('http://127.0.0.1:8765/' + scenario, {waitUntil: 'domcontentloaded'});
     await page.waitForFunction(() => !document.getElementById('boot'), {timeout: 120000});
-    await page.waitForTimeout(scenario ? 30000 : 8000);
+    // Сюжет сначала докачивает материалы боя (~65 МБ): ждём сам бой, а не фиксированное время.
+    if (scenario) await page.waitForFunction(() => (window.__trash_trail || []).some(line => line.includes('/Game')), {timeout: 180000}).catch(() => {});
+    await page.waitForTimeout(scenario ? 10000 : 8000);
     const label = name + (scenario ? '-' + scenario.slice(1).replace(':', '-') : '-menu');
     const state = await page.evaluate(() => ({trail: window.__trash_trail, crash: document.getElementById('crashlog').textContent, context: localStorage.getItem('__trash_ctx')}));
     await page.screenshot({path: path.join(output, label + '.png')});
