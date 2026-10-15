@@ -177,6 +177,10 @@ var _sway := 0.0
 var _lean := 0.0
 var _shot_squash := 0.0
 var _turn := 0.0
+var _turn_hold := 0.0
+## Цель почти точно сверху/снизу не разворачивает героя: иначе знак aim.x скачет и корпус мигает влево-вправо.
+const TURN_AIM_X := 0.3
+const TURN_HOLD := 0.15
 var _step_phase := 0
 var footsteps := 0
 var _carry_lag := 0.0
@@ -436,6 +440,28 @@ func uses_clips() -> bool:
 	return _clip_mode
 
 
+static var _top_cache: Dictionary = {}
+
+
+## Верх головы над точкой персонажа (по непрозрачным пикселям первого кадра стойки) — под ник и метки.
+func head_top() -> float:
+	if not _clip_mode or not _clip_frames.has("idle"):
+		return -78.0
+	var frame: AtlasTexture = (_clip_frames["idle"] as Array)[0]
+	var key := frame.atlas.resource_path
+	if not _top_cache.has(key):
+		var top := 40.0
+		var img := frame.atlas.get_image()
+		if img != null:
+			if img.is_compressed():
+				img.decompress()
+			var used := img.get_region(Rect2i(frame.region)).get_used_rect()
+			if used.size.y > 0:
+				top = float(used.position.y)
+		_top_cache[key] = top
+	return (float(_top_cache[key]) - CLIP_FEET + SHADOW_OFFSET.y / _sc()) * _sc()
+
+
 func _sc() -> float:
 	return CLIP_SCALE if _clip_mode else SPRITE_SCALE
 
@@ -582,9 +608,13 @@ func update_motion(velocity: Vector2, aim: Vector2, delta: float) -> void:
 	_dash_blend = move_toward(_dash_blend, 1.0 if dashing else 0.0, delta * 12.0)
 	_dash_t = _dash_t + delta if dashing else 0.0
 	aim_direction = aim
-	var look_x := aim.x if absf(aim.x) > 0.05 else velocity.x
-	if absf(look_x) > 0.05 and signf(look_x) != _facing:
+	_turn_hold = maxf(_turn_hold - delta, 0.0)
+	var look_x := aim.x if absf(aim.x) > TURN_AIM_X else (velocity.x if absf(velocity.x) > 20.0 else 0.0)
+	if preview_mode and absf(look_x) <= 0.05:
+		look_x = aim.x
+	if absf(look_x) > 0.05 and signf(look_x) != _facing and (_turn_hold <= 0.0 or preview_mode):
 		_facing = signf(look_x)
+		_turn_hold = TURN_HOLD
 		_turn = 1.0
 		_tail_spring.kick(-3.0)
 		_ear_spring.kick(-2.5)
@@ -709,6 +739,9 @@ func play_death() -> void:
 	_dead = true
 	var tween := create_tween()
 	tween.tween_property(self, "_death_t", 1.0, 0.9).set_trans(Tween.TRANS_LINEAR)
+	# После гибели update_motion не вызывается: вспышку смертельного удара гасим здесь, иначе тело остаётся белым.
+	tween.parallel().tween_property(self, "_flash", 0.0, FLASH_TIME)
+	tween.parallel().tween_property(self, "_hurt", 0.0, HURT_TIME)
 	tween.parallel().tween_method(func(_v: float) -> void: _refresh(), 0.0, 1.0, 0.9)
 	var dizzy := create_tween()
 	dizzy.tween_method(_redraw_dead, 0.0, 1.0, 30.0)

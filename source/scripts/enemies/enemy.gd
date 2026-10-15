@@ -177,6 +177,9 @@ const EMERGE_TIME := 0.42
 var _attack_timer := 0.0
 var _strafe_sign := 1.0
 var _facing_left := false
+## Пауза между разворотами: толпа прямо над/под целью не мигает влево-вправо.
+var _turn_hold := 0.0
+const TURN_HOLD := 0.2
 var _flank := 0.0
 var _step_down := false
 var _size_mult := 1.0
@@ -323,6 +326,7 @@ func activate(enemy_data: EnemyData, at: Vector2, hp_mult: float = 1.0, dmg_mult
 	last_hit_direction = Vector2.ZERO
 	_emerge = 0.0 if data.is_boss() else EMERGE_TIME
 	_recoil = 0.0
+	_turn_hold = 0.0
 	_visual_lean = 0.0
 	_visual_squash = 1.0
 	_alt_time = 0.0
@@ -1317,6 +1321,7 @@ func _animate(delta: float, desired: Vector2) -> void:
 		rise = 22.0 * pow(1.0 - t, 2.0)
 	_recoil = move_toward(_recoil, 0.0, delta * 4.0)
 
+	var was_left := _facing_left
 	if data.shield:
 		if absf(_shield_dir.x) > 0.08:
 			_facing_left = _shield_dir.x < 0.0
@@ -1324,8 +1329,14 @@ func _animate(delta: float, desired: Vector2) -> void:
 		var face_delta := _target_pos.x - global_position.x
 		if absf(face_delta) > maxf(8.0, data.radius * 0.35) and (_brain == null or _brain.windup <= 0.0 and _brain.strike <= 0.0) and _act in [Act.MOVE, Act.RECOVER]:
 			_facing_left = face_delta < 0.0
-	elif absf(desired.x) > 5.0 and _act == Act.MOVE:
+	elif absf(desired.x) > maxf(5.0, desired.length() * 0.3) and _act == Act.MOVE:
 		_facing_left = desired.x < 0.0
+	_turn_hold = maxf(_turn_hold - delta, 0.0)
+	if _facing_left != was_left:
+		if _turn_hold > 0.0 and _brain == null:
+			_facing_left = was_left
+		else:
+			_turn_hold = TURN_HOLD
 	var hover_bob := sin(_time * 3.4) * 5.0 if data.flying else 0.0
 	var tremble := Vector2.ZERO
 	if _brain != null and windup > 0.2:

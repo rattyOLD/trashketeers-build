@@ -871,7 +871,8 @@ class NameTag:
 	var text := ""
 
 	func _ready() -> void:
-		position = Vector2(0, -78)
+		var visual: RaccoonVisual = (get_parent() as Player).visual if get_parent() is Player else null
+		position = Vector2(0, minf(-78.0, visual.head_top() - 2.0) if visual != null else -78.0)
 		z_index = 5
 
 	func _draw() -> void:
