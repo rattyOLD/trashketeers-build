@@ -636,7 +636,7 @@ html.orientation-ready:not(.upright) #rotate .phone, html.orientation-ready:not(
 </script>
 
 <script>
-window.__trash_build = {label: 'v81.1', time: '15.10 12:31'};
+window.__trash_build = {label: 'v82.1', time: '16.10 03:47'};
 document.getElementById('ver').textContent = 'Версия ' + window.__trash_build.label + ' · сборка от ' + window.__trash_build.time;
 </script>
 <script>
@@ -690,7 +690,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 })();
 </script>
 <script src="audio_unlock.js"></script>
-<script src="web_music.js?v=1792042293"></script>
+<script src="web_music.js?v=1792097229"></script>
 <script src="index.js"></script>
 <script>
 (function () {
@@ -703,7 +703,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 	let packEngine = null;
 	const FILES = {
 		wasm: { parts: [{url:"raccoon.core.0.wasm?h=4cbe7e5f476b",bytes:5221065,rawBytes:25165824},{url:"raccoon.core.1.wasm?h=a8fbc151befa",bytes:4165384,rawBytes:18533366}] },
-		pck: { parts: [{url:"raccoon.pack.0.wasm?h=f4bb776d3661",bytes:125634,rawBytes:1048576},{url:"raccoon.pack.1.wasm?h=f7ad083da94b",bytes:4076841,rawBytes:4194304},{url:"raccoon.pack.2.wasm?h=8e09d95fb3ce",bytes:4168473,rawBytes:4194304},{url:"raccoon.pack.3.wasm?h=d80e00ca6e3b",bytes:4150761,rawBytes:4194304},{url:"raccoon.pack.4.wasm?h=cacbbf3f4f23",bytes:4192582,rawBytes:4194304},{url:"raccoon.pack.5.wasm?h=e55cdcc34f4c",bytes:4181797,rawBytes:4194304},{url:"raccoon.pack.6.wasm?h=015f6eafbaff",bytes:4189510,rawBytes:4194304},{url:"raccoon.pack.7.wasm?h=96bea204821c",bytes:4165677,rawBytes:4194304},{url:"raccoon.pack.8.wasm?h=db76da194a89",bytes:4061135,rawBytes:4194304},{url:"raccoon.pack.9.wasm?h=63a4ba5535b1",bytes:4130801,rawBytes:4194304},{url:"raccoon.pack.10.wasm?h=bcd0e233ad7c",bytes:4188813,rawBytes:4194304},{url:"raccoon.pack.11.wasm?h=e879a468dc73",bytes:4183100,rawBytes:4194304},{url:"raccoon.pack.12.wasm?h=f280a9f551b1",bytes:4189363,rawBytes:4194304},{url:"raccoon.pack.13.wasm?h=e16b81587496",bytes:4164603,rawBytes:4194304},{url:"raccoon.pack.14.wasm?h=aff7dc0397d8",bytes:4139252,rawBytes:4194304},{url:"raccoon.pack.15.wasm?h=9a3b6567cae3",bytes:4160652,rawBytes:4194304},{url:"raccoon.pack.16.wasm?h=1fc2cd4eeacd",bytes:4061871,rawBytes:4194304},{url:"raccoon.pack.17.wasm?h=d8f59dbc96b5",bytes:3350407,rawBytes:4194304},{url:"raccoon.pack.18.wasm?h=7839de3a78c8",bytes:39032,rawBytes:56480}] },
+		pck: { parts: [{url:"raccoon.pack.0.wasm?h=a0c82c6a4569",bytes:125559,rawBytes:1048576},{url:"raccoon.pack.1.wasm?h=f7ad083da94b",bytes:4076841,rawBytes:4194304},{url:"raccoon.pack.2.wasm?h=8e09d95fb3ce",bytes:4168473,rawBytes:4194304},{url:"raccoon.pack.3.wasm?h=d80e00ca6e3b",bytes:4150761,rawBytes:4194304},{url:"raccoon.pack.4.wasm?h=cacbbf3f4f23",bytes:4192582,rawBytes:4194304},{url:"raccoon.pack.5.wasm?h=e55cdcc34f4c",bytes:4181797,rawBytes:4194304},{url:"raccoon.pack.6.wasm?h=015f6eafbaff",bytes:4189510,rawBytes:4194304},{url:"raccoon.pack.7.wasm?h=96bea204821c",bytes:4165677,rawBytes:4194304},{url:"raccoon.pack.8.wasm?h=e54e33f309c0",bytes:4055343,rawBytes:4194304},{url:"raccoon.pack.9.wasm?h=4d8638ade4f7",bytes:4136519,rawBytes:4194304},{url:"raccoon.pack.10.wasm?h=8f68f92cf245",bytes:4188641,rawBytes:4194304},{url:"raccoon.pack.11.wasm?h=97cf2a4e55e5",bytes:4182901,rawBytes:4194304},{url:"raccoon.pack.12.wasm?h=00805df140a3",bytes:4189486,rawBytes:4194304},{url:"raccoon.pack.13.wasm?h=7c22573055d4",bytes:4160169,rawBytes:4194304},{url:"raccoon.pack.14.wasm?h=d54ab68faa1b",bytes:4143568,rawBytes:4194304},{url:"raccoon.pack.15.wasm?h=6ccc6fe11a73",bytes:4160171,rawBytes:4194304},{url:"raccoon.pack.16.wasm?h=b591be288ab0",bytes:4061968,rawBytes:4194304},{url:"raccoon.pack.17.wasm?h=2c1e2c9e0114",bytes:3344712,rawBytes:4194304},{url:"raccoon.pack.18.wasm?h=34f7c0eaee2a",bytes:5185,rawBytes:14832}] },
 	};
 	// Additional packs are downloaded only when a screen needs them; buffers are released after MEMFS owns them.
 function installResourcePacks(manifest, engineGetter) {
@@ -805,7 +805,7 @@ function installAssetCache(urls) {
 		ensureCrossOriginIsolationHeaders: false,
 		executable: 'index',
 		experimentalVK: false,
-		fileSizes: { 'index.pck': 72408224, 'index.wasm': 43699190 },
+		fileSizes: { 'index.pck': 72366576, 'index.wasm': 43699190 },
 		focusCanvas: true,
 		gdextensionLibs: [],
 		onPrint: function () {
@@ -830,7 +830,7 @@ function installAssetCache(urls) {
 
 	// Адрес сбора отчётов о вылетах (Google Apps Script / Supabase и т.п.); пусто — отчёты не отправляются.
 	const REPORT_URL = 'https://script.google.com/macros/s/AKfycbxVyy-SnRANW0Im-1Blne2TcUbca93WqzyBulpADwWWD7YH6x3KIygBYImTe8VfP5pp/exec';
-	const BUILD_ID_REPORT = '1792042293';
+	const BUILD_ID_REPORT = '1792097229';
 	const SESSION_ID = Math.random().toString(36).slice(2, 8);
 	const SESSION_START = Date.now();
 	const REPORT_CAP = 250;
@@ -1047,7 +1047,7 @@ function installAssetCache(urls) {
 	window.trkReport('session_start', gpuInfo() + ' | ' + navigator.userAgent + ' | mem ' + (navigator.deviceMemory || '?') + 'GB | dpr ' + (window.__trash_real_dpr ? window.__trash_real_dpr() : window.devicePixelRatio) + ' | screen ' + screen.width + 'x' + screen.height + ' | cores ' + (navigator.hardwareConcurrency || '?'));
 
 	// Вкладка могла висеть со старой версией: при возврате в неё сверяем номер сборки и предлагаем обновиться.
-	const BUILD_ID = '1792042293';
+	const BUILD_ID = '1792097229';
 	// Важное обновление: старая сборка дальше не работает, иначе аккаунты и сохранения ломаются старым кодом.
 	function blockOldBuild(v) {
 		const wall = document.createElement('div');
