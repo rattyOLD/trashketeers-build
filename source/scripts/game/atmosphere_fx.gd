@@ -15,7 +15,7 @@ const MOODS := {
 	"toxic": {"tint": Color("#cde6c6"), "rain": 0.0, "motes": 1.4, "fog": Color(0.4, 1.0, 0.3, 0.12), "vignette": 0.5, "lightning": false, "pulse": false, "motes_color": Color(0.55, 1.0, 0.35), "rise": true},
 	"storm": {"tint": Color("#aeb9e6"), "rain": 1.0, "motes": 0.2, "fog": Color(0.3, 0.4, 0.9, 0.10), "vignette": 0.58, "lightning": true, "pulse": false, "motes_color": Color(0.7, 0.8, 1.0), "rise": false},
 	"night": {"tint": Color("#5b6796"), "rain": 0.0, "motes": 0.5, "fog": Color(0.3, 0.4, 0.8, 0.06), "vignette": 0.68, "lightning": false, "pulse": false, "motes_color": Color(0.6, 0.75, 1.0), "rise": false},
-	"alarm": {"tint": Color("#e8bdb7"), "rain": 0.0, "motes": 1.2, "fog": Color(1.0, 0.15, 0.1, 0.10), "vignette": 0.6, "lightning": false, "pulse": true, "motes_color": Color(1.0, 0.55, 0.2), "rise": true},
+	"alarm": {"tint": Color("#e6cbc6"), "rain": 0.0, "motes": 1.2, "fog": Color(1.0, 0.15, 0.1, 0.06), "vignette": 0.5, "lightning": false, "pulse": true, "motes_color": Color(1.0, 0.55, 0.2), "rise": true},
 	"sunny": {"tint": Color("#fbf1dc"), "rain": 0.0, "motes": 0.5, "fog": Color(1.0, 0.9, 0.6, 0.0), "vignette": 0.3, "lightning": false, "pulse": false, "motes_color": Color(1.0, 0.95, 0.7), "rise": false},
 	"golden": {"tint": Color("#f6e2bd"), "rain": 0.0, "motes": 1.0, "fog": Color(1.0, 0.8, 0.3, 0.06), "vignette": 0.38, "lightning": false, "pulse": false, "motes_color": Color(1.0, 0.85, 0.35), "rise": true},
 	"party": {"tint": Color("#f3dcec"), "rain": 0.0, "motes": 1.3, "fog": Color(1.0, 0.4, 0.8, 0.06), "vignette": 0.4, "lightning": false, "pulse": false, "motes_color": Color(1.0, 0.55, 0.85), "rise": false},
@@ -137,7 +137,7 @@ func set_mood(mood_name: String, animate: bool = true) -> void:
 	else:
 		_modulate.color = _base_tint
 		material.set_shader_parameter(&"strength", strength)
-	material.set_shader_parameter(&"tint", Color(0.55, 0.0, 0.05) if _mood["pulse"] else Color(0.02, 0.0, 0.06))
+	material.set_shader_parameter(&"tint", Color(0.42, 0.02, 0.06) if _mood["pulse"] else Color(0.02, 0.0, 0.06))
 
 
 ## Сплит-тонирование главы: тени и света в свой оттенок (без цветокоррекции — просто no-op).

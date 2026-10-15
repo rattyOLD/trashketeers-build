@@ -105,6 +105,7 @@ func _land(k: int) -> void:
 	BulletPool.explode(_to[k], _radius[k], _damage[k], Bullet.Team.ENEMY, _color[k], 0.9)
 	if fx != null and _blast[k] != null:
 		fx.sprite_flash(_blast[k], _to[k] + Vector2(0, -_radius[k] * 0.25), _radius[k] * 2.3, 0.4)
+		AttackTelegraph.mark_cover(_to[k], _radius[k], 0.4)
 
 
 func _draw() -> void:

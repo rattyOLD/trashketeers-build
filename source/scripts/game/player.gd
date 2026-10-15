@@ -186,6 +186,8 @@ func _physics_process(delta: float) -> void:
 	var steps := visual.footsteps
 	visual.dashing = dashing
 	visual.update_motion(velocity, aim, delta)
+	if visual.battle_marker:
+		visual.set_covered(AttackTelegraph.covers(global_position, 24.0), delta)
 	if visual.footsteps != steps:
 		if fx != null:
 			fx.dust(global_position + Vector2(-8.0 * signf(velocity.x), 6.0), 1, 6.0)

@@ -791,11 +791,13 @@ func _on_enemy_fx(_enemy: Enemy, kind: String, at: Vector2, radius: float) -> vo
 			fx.chunks(at, Color("#ffd257"), 14, 380.0, 5.0)
 			fx.ring(at, Color.WHITE, 260.0)
 			fx.sprite_flash(ArenaProp.texture_of("res://assets/props/ch1/fx_explosion.png"), at + Vector2(0, -60), 320.0, 0.55)
+			AttackTelegraph.mark_cover(at, 140.0, 0.55)
 			atmosphere.flash(Color.WHITE, 0.55, 0.5)
 			add_shake(1.0)
 			hitstop(0.12)
 		"stomp":
 			fx.sprite_flash(ArenaProp.texture_of("res://assets/bosses/mud_wave.png"), at, radius * 2.2, 0.55)
+			AttackTelegraph.mark_cover(at, radius, 0.55)
 			fx.dust(at, 16, radius)
 			fx.ring(at, Color("#c9a26a"), radius)
 			add_shake(0.6)

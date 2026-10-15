@@ -107,6 +107,12 @@ var glint := 0.0
 
 var body: RigSprite
 var hero: Sprite2D
+## Контур поверх меток атак и взрывов (z выше слоёв предупреждений), включается, только когда героя закрыло.
+const XRAY_Z := 31
+const XRAY_FADE_IN := 10.0
+const XRAY_FADE_OUT := 4.0
+var _xray: Sprite2D
+var _xray_amount := 0.0
 var _hero_mode := false
 var _hero_cfg: Dictionary = {}
 var _hero_frames: Array[AtlasTexture] = []
@@ -216,6 +222,15 @@ func _init() -> void:
 	ArtDirection.apply(hero_rim, "scrap", 0.18)
 	hero.material = hero_rim
 	add_child(hero)
+	_xray = Sprite2D.new()
+	_xray.centered = false
+	_xray.visible = false
+	_xray.z_as_relative = false
+	_xray.z_index = XRAY_Z
+	var xray_mat := ShaderMaterial.new()
+	xray_mat.shader = load("res://shaders/hero_xray.gdshader")
+	_xray.material = xray_mat
+	add_child(_xray)
 	_patch_layer = Node2D.new()
 	_patch_layer.draw.connect(_draw_equipment)
 	add_child(_patch_layer)
@@ -685,6 +700,11 @@ func set_env_light(light: Color, delta: float) -> void:
 	_arm_material.set_shader_parameter("env_light", v)
 
 
+## Героя закрыли метка атаки или взрыв: контур плавно проявляется поверх них и гаснет после.
+func set_covered(covered: bool, delta: float) -> void:
+	_xray_amount = move_toward(_xray_amount, 1.0 if covered else 0.0, delta * (XRAY_FADE_IN if covered else XRAY_FADE_OUT))
+
+
 func flash() -> void:
 	_flash = FLASH_TIME
 	if _hurt > HURT_TIME - HIT_CLIP_TIME:
@@ -993,6 +1013,14 @@ func _apply_hero() -> void:
 	hero.modulate = Color(tint.r * lit.r, tint.g * lit.g, tint.b * lit.b, tint.a)
 	hero.self_modulate = Color(3.0, 3.0, 3.0) if _flash > 0.0 else Color.WHITE
 	_rear_layer.queue_redraw()
+	_xray.visible = _xray_amount > 0.01 and hero.visible and not _dead
+	if _xray.visible:
+		_xray.texture = hero.texture
+		_xray.offset = hero.offset
+		_xray.transform = hero.transform
+		var xm := _xray.material as ShaderMaterial
+		xm.set_shader_parameter("frame_rect", (hero.material as ShaderMaterial).get_shader_parameter("frame_rect"))
+		xm.set_shader_parameter("strength", _xray_amount)
 
 
 func _set_bone(bone_name: String, angle: float) -> void:
