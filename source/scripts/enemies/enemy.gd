@@ -177,6 +177,7 @@ const EMERGE_TIME := 0.42
 var _attack_timer := 0.0
 var _strafe_sign := 1.0
 var _facing_left := false
+const BOSS_Z := 4
 ## Пауза между разворотами: толпа прямо над/под целью не мигает влево-вправо.
 var _turn_hold := 0.0
 const TURN_HOLD := 0.2
@@ -279,6 +280,8 @@ func _init() -> void:
 func activate(enemy_data: EnemyData, at: Vector2, hp_mult: float = 1.0, dmg_mult: float = 1.0) -> void:
 	data = enemy_data
 	activation_id += 1
+	# Босс рисуется поверх персонажей и объектов мира (Y-Sort его не прячет), но под метками атак и эффектами.
+	z_index = BOSS_Z if data.is_boss() else 0
 	stuck_time = 0.0
 	_detour_time = 0.0
 	poison_source = &""
@@ -600,6 +603,9 @@ func push(impulse: Vector2) -> void:
 
 func tick(delta: float, player: Player, nav: Callable = Callable()) -> void:
 	_target_pos = player.global_position
+	if z_index == BOSS_Z:
+		# Тело босса закрывает героя — у героя проступает контур (тот же, что под метками атак).
+		AttackTelegraph.mark_boss_cover(global_position + Vector2(0, -data.radius * 1.5 * _size_mult), data.radius * 1.6 * _size_mult)
 	if data.heal_radius > 0.0:
 		_heal_timer -= delta
 		if _heal_timer <= 0.0:

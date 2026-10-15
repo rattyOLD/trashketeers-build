@@ -15,8 +15,18 @@ static func mark_cover(at: Vector2, radius: float, seconds: float) -> void:
 	_cover.append(Vector4(at.x, at.y, radius, until))
 
 
+## Тело босса: одна запись на кадр, не вытесняет круги атак.
+static var _boss_cover := Vector4.ZERO
+
+
+static func mark_boss_cover(at: Vector2, radius: float) -> void:
+	_boss_cover = Vector4(at.x, at.y, radius, float(Time.get_ticks_msec()) + 150.0)
+
+
 static func covers(point: Vector2, margin: float) -> bool:
 	var now := float(Time.get_ticks_msec())
+	if _boss_cover.w >= now and point.distance_squared_to(Vector2(_boss_cover.x, _boss_cover.y)) < _boss_cover.z * _boss_cover.z:
+		return true
 	var i := _cover.size() - 1
 	while i >= 0:
 		var c := _cover[i]
