@@ -60,7 +60,7 @@ func open(order: Dictionary, goals: Array, stats: RunStats = null) -> void:
 		var hint := str(goal.get("hint", HINTS.get(title, "")))
 		if int(goal.get("reward", 0)) > 0:
 			hint += "\nНаграда: %d монет. Цель необязательна и действует до конца волны." % int(goal["reward"])
-		list.add_child(_card("ЦЕЛЬ ВОЛНЫ" if stats != null else "ЦЕЛЬ МИССИИ", title, hint, int(goal.get("progress", 0)), int(goal.get("goal", 1)), bool(goal.get("done", false)), Color("#ffd257")))
+		list.add_child(_card(str(goal.get("tag", "ЦЕЛЬ ВОЛНЫ" if stats != null else "ЦЕЛЬ МИССИИ")), title, hint, int(goal.get("progress", 0)), int(goal.get("goal", 1)), bool(goal.get("done", false)), Color("#ffd257")))
 	var back := UiStyle.button("НАЗАД", UiStyle.PANEL_LIGHT, 32, Vector2(0, 88))
 	back.pressed.connect(_close)
 	column.add_child(back)

@@ -194,6 +194,13 @@ func _draw() -> void:
 				_batch.arc(ep, 5.5 + sin(_time * 7.0), 0.0, TAU, 14, Color("#ffd23f"), 1.5, true)
 	if _director.boss != null and _director.boss.is_alive():
 		_diamond(origin, scale, _director.boss.global_position, 7.0 + sin(_time * 6.0), Color("#ffd23f"))
+	for cache in _level.route_caches:
+		if is_instance_valid(cache) and not cache.claimed:
+			var color := Color("#71dfa2") if cache.control_used else Color("#ffad55")
+			_diamond(origin, scale, cache.global_position + cache.cache_offset, 4.5, color)
+			if cache.alarm_started:
+				var at := _to_map(origin, scale, cache.global_position + cache.cache_offset)
+				_batch.arc(at, 7.0 + sin(_time * 5.0), 0.0, TAU, 16, color, 1.5, true)
 	# Выживание 2.0: значки Астры (assets/world/minimap/) у ещё не использованных объектов.
 	_icons.clear()
 	for tower in _level.towers:

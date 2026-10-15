@@ -259,10 +259,10 @@ func start(_weapon_id: StringName = &"") -> void:
 	pickups.xp_collected.connect(_on_xp_collected)
 	map.object_destroyed.connect(_on_object_destroyed)
 	map.crate_landed.connect(_on_crate_landed)
-	map.cache_reward.connect(_on_activity_reward)
+	map.cache_resolved.connect(_on_route_cache_resolved)
 	map.area_disabled.connect(func(at: Vector2, radius: float, seconds: float) -> void:
 		hazards.suppress_area(at, radius, seconds)
-		hud.toast("ЗОНА ОТКЛЮЧЕНА", "Безопасный проход на 30 с · в складе 15 монет", UiStyle.GOLD))
+		hud.toast("ЗОНА ОТКЛЮЧЕНА", "Проход на 30 с · в складе 15 монет и лечение", UiStyle.GOLD))
 	director.boss_spawned.connect(_on_boss_spawned)
 	director.wave_started.connect(_on_wave_started)
 	director.siren.connect(_on_siren)
@@ -1267,6 +1267,24 @@ func _on_tower_charged(tower: ChargeTower) -> void:
 	SoundManager.play(&"level_up", -6.0, false)
 	fx.burst(tower.global_position + Vector2(0, -150), Color("#6adcff"), 26, 320.0, 4.0)
 	fx.ring(tower.global_position, Color("#6adcff"), 160.0)
+	_queue_bonus(_firmware_choices(), "ВЫШКА ЗАРЯЖЕНА!")
+
+
+func _on_route_cache_resolved(safe: bool, at: Vector2) -> void:
+	if finished or story != null or player.is_dead:
+		return
+	nuts += 15 if safe else 40
+	hud.set_nuts(nuts)
+	fx.ring(at, Color("#71dfa2") if safe else UiStyle.GOLD, 150.0)
+	if safe:
+		var before := player.hp
+		player.heal(player.max_hp * 0.25)
+		hud.toast("ЗАПАСЫ ПОЛУЧЕНЫ", "+15 монет · восстановлено %d HP" % roundi(player.hp - before), Color("#71dfa2"))
+	else:
+		_queue_bonus(_firmware_choices(), "РИСК ОПРАВДАН! +40 МОНЕТ")
+
+
+func _firmware_choices() -> Array[UpgradeData]:
 	var choices: Array[UpgradeData] = []
 	var pool := FIRMWARE.duplicate()
 	pool.shuffle()
@@ -1287,7 +1305,7 @@ func _on_tower_charged(tower: ChargeTower) -> void:
 		u.rarity_rank = rank
 		u.icon = _firmware_icon(FIRMWARE.find(row))
 		choices.append(u)
-	_queue_bonus(choices, "ВЫШКА ЗАРЯЖЕНА!")
+	return choices
 
 
 ## Иконка прошивки из листа Астры (assets/world/firmware_icons.png, 8 ячеек 128 в порядке FIRMWARE).
@@ -1709,6 +1727,11 @@ func _optional_goal_rows() -> Array:
 	var rows := _wave_task.rows()
 	if events != null:
 		rows.append_array(events.goal_rows())
+	if map != null and not map.route_caches.is_empty():
+		var opened := 0
+		for cache in map.route_caches:
+			if is_instance_valid(cache) and cache.claimed: opened += 1
+		rows.append({"tag": "СКЛАДЫ ГЛАВЫ", "title": "Склады в обходах", "hint": "Необязательно. Зелёный/оранжевый ромб на карте. Щиток: 15 монет и 25% HP. Риск: 3 с вскрытия и 10 с обороны, 40 монет и прошивка на выбор. Прогресс сохраняется при отходе, действует до смены главы.", "goal": map.route_caches.size(), "progress": opened, "done": opened >= map.route_caches.size()})
 	return rows
 
 

@@ -188,10 +188,19 @@ func _test_cache(game: Game) -> void:
 	risky._physics_process(1.5)
 	_check(game.player.hp == hp, "danger has a full warning before the first hit")
 	risky._physics_process(0.2)
-	_check(game.player.hp < hp, "entering the active danger has a real cost")
+	_check(game.player.hp == hp, "opening remains safe until the risk is committed")
 	for i in 15:
 		risky._physics_process(0.1)
-	_check(rewards == [15, 40], "risky approach pays forty")
+	_check(risky.alarm_started and rewards == [15], "risky approach starts defense before reward")
+	risky._age = RouteCache.WARNING + 0.01
+	risky._tick = 0.0
+	risky._physics_process(0.1)
+	_check(game.player.hp < hp, "active warned defense has a real cost")
+	game.player._invuln = 100.0
+	game.player.position = risky.global_position + risky.cache_offset + Vector2(150, 0)
+	for i in 101:
+		risky._physics_process(0.1)
+	_check(rewards == [15, 40], "completed risky defense pays forty")
 	var enemy := game.enemies.spawn(ContentDB.get_enemy(&"rat_punk"), risky.global_position + risky.cache_offset)
 	if enemy == null:
 		var data := ContentDB.get_enemy(ContentDB.get_enemy_ids()[0])
@@ -199,6 +208,7 @@ func _test_cache(game: Game) -> void:
 	if enemy != null:
 		enemy.set_physics_process(false)
 		var before := enemy.hp
+		risky._age = 0.0
 		risky._apply_zone()
 		_check(enemy.hp < before, "environment can be used against enemies")
 		game.enemies.release_all()

@@ -18,6 +18,7 @@ extends Node2D
 signal object_destroyed(object: DestructibleObject)
 signal crate_landed(crate: DestructibleObject)
 signal cache_reward(coins: int)
+signal cache_resolved(safe: bool, at: Vector2)
 signal area_disabled(at: Vector2, radius: float, seconds: float)
 
 var passages: Array[MapPassage] = []
@@ -2034,6 +2035,7 @@ func _build_route_caches() -> void:
 		cache.control_offset = control - at
 		cache.enemies = _cache_enemies
 		cache.rewarded.connect(func(coins: int) -> void: cache_reward.emit(coins))
+		cache.resolved.connect(func(safe: bool, center: Vector2) -> void: cache_resolved.emit(safe, center))
 		cache.disabled.connect(func(center: Vector2, radius: float, seconds: float) -> void: area_disabled.emit(center, radius, seconds))
 		_own(cache, _layers.decals)
 		route_caches.append(cache)

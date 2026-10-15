@@ -72,6 +72,7 @@ static func title_for(source: StringName) -> String:
 	match source:
 		&"blast": return "взрыв"
 		&"projectile": return "пуля"
+		&"route_cache": return "импульс склада"
 		&"acid": return "кислота"
 		&"trap": return "магнитная мина"
 		&"shock": return "разряд"
@@ -88,6 +89,7 @@ func avoidance_tip() -> String:
 	match last_source:
 		&"blast": return "Выходи за границу круга до заполнения дуги. Рывок поможет покинуть зону."
 		&"projectile": return "Смещайся поперёк линии огня; используй укрытия и рывок."
+		&"route_cache": return "Чередуй центр и край после предупреждения. За кругом безопасно: отступи, прогресс обороны сохранится."
 		&"acid": return "Не задерживайся в кислоте: обойди лужу или выйди рывком."
 		&"trap": return "Обходи круг магнитной мины, чтобы она не замедляла отход."
 		&"shock", &"collapse": return "Покинь подсвеченную зону до удара; держи рывок для отхода."
