@@ -1,0 +1,35 @@
+{
+  "bank_edge_pairs": 512,
+  "bank_luminance": 156.501,
+  "bank_material_rows": [
+    {
+      "luminance": 179.537,
+      "material": "beige_paving",
+      "row": 0
+    },
+    {
+      "luminance": 86.161,
+      "material": "olive_lawn",
+      "row": 1
+    },
+    {
+      "luminance": 150.938,
+      "material": "rose_paving",
+      "row": 2
+    },
+    {
+      "luminance": 209.369,
+      "material": "ivory_boss_plaza",
+      "row": 3
+    }
+  ],
+  "bank_max_edge_difference_rgba8": 0,
+  "bank_revision": "v34",
+  "bank_tile_layout": "8x4 / 128x128",
+  "brief": "v34",
+  "dimensions_and_sha256": "OK",
+  "physical_devices_tested": false,
+  "png_crc_iend": "OK",
+  "production_bank_replaced": false,
+  "retained_v33_bundle_png_files": 20
+}

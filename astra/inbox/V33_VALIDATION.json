@@ -1,9 +1,35 @@
 {
-  "bank_luminance": 154.385,
+  "bank_edge_pairs": 512,
+  "bank_luminance": 156.501,
+  "bank_material_rows": [
+    {
+      "luminance": 179.537,
+      "material": "beige_paving",
+      "row": 0
+    },
+    {
+      "luminance": 86.161,
+      "material": "olive_lawn",
+      "row": 1
+    },
+    {
+      "luminance": 150.938,
+      "material": "rose_paving",
+      "row": 2
+    },
+    {
+      "luminance": 209.369,
+      "material": "ivory_boss_plaza",
+      "row": 3
+    }
+  ],
+  "bank_max_edge_difference_rgba8": 0,
+  "bank_revision": "v34",
+  "bank_tile_layout": "8x4 / 128x128",
   "brief": "v33",
   "dimensions_and_sha256": "OK",
   "floor_luminance": 81.223,
-  "game_integration": "reserved for Claude by brief",
+  "game_integration": "v33 integrated upstream; Bank v34 awaits Claude integration",
   "manifests": 5,
   "menu_registration": "OK",
   "physical_devices_tested": false,
@@ -53,13 +79,6 @@
       0.0111
     ]
   },
-  "tile_seams": "OK",
-  "wear_edges_match_base": true,
-  "validated_against_commit": "80652e220edb7d10b5006f615abe4b787af032c9",
-  "source_tree": "a4b111b6053fa41b6adf81978ab783517b86d942",
-  "game_source_changes": false,
-  "web_apk_changes": false,
-  "legacy_v32_png_files": 256,
-  "source_face_details_added": false,
-  "delivery": "art-only as required by v33"
+  "tile_seams": "whole-sheet floor/smoke; Bank 512 within-row tile pairings",
+  "wear_edges_match_base": true
 }

@@ -78,7 +78,8 @@ def validate():
     for folder, expected in GROUPS.items():
         manifest = json.loads((INBOX / folder / 'manifest.json').read_text())
         manifests[folder] = manifest
-        require(manifest['brief'] == 'v33' and manifest['alpha_mode'] == 'straight', folder + ': manifest version/alpha')
+        expected_brief = 'v34' if folder == 'biome' else 'v33'
+        require(manifest['brief'] == expected_brief and manifest['alpha_mode'] == 'straight', folder + ': manifest version/alpha')
         require({entry['file'] for entry in manifest['files']} == set(expected), folder + ': file set')
         require(len(manifest['files']) == len(expected), folder + ': duplicate manifest file')
         for entry in manifest['files']:
@@ -93,7 +94,8 @@ def validate():
             require(image.size == (entry['width'], entry['height']), str(path) + ': manifest dimensions')
             if expected[name] is not None:
                 require(image.size == expected[name], str(path) + ': brief dimensions')
-            require(entry['frames'] == (4 if name == 'wear_atlas.png' else 1), str(path) + ': frame count')
+            expected_frames = 4 if name == 'wear_atlas.png' else (32 if folder == 'biome' and name == 'ch2_floor.png' else 1)
+            require(entry['frames'] == expected_frames, str(path) + ': frame count')
             if entry.get('opaque'):
                 require(image.getchannel('A').getextrema() == (255, 255), str(path) + ': ground must be opaque')
             else:
@@ -109,8 +111,44 @@ def validate():
     bank_luma = ImageStat.Stat(bank.convert('L')).mean[0]
     require(75 <= floor_luma <= 90, 'junkyard luminance outside 75–90')
     require(150 <= bank_luma <= 160, 'bank luminance outside 150–160')
-    for label, image in [('floor', ground), ('bank', bank)]:
-        check_seams(image, ['x', 'y'], label)
+    check_seams(ground, ['x', 'y'], 'floor')
+    # Bank is an indexed 8×4 atlas, not a single seamless grass surface.
+    bank_manifest = manifests['biome']
+    atlas = bank_manifest['atlas']
+    require([atlas['columns'], atlas['rows'], atlas['tile_width'], atlas['tile_height'], atlas['tiles']] == [8, 4, 128, 128, 32], 'bank: tile layout')
+    require(atlas['whole_sheet_is_not_a_seamless_surface'], 'bank: full sheet must never be repeated as a ground texture')
+    require(sha(ROOT / bank_manifest['source']['path']) == bank_manifest['source']['sha256'], 'bank: original source atlas changed; recheck tile mapping')
+    materials = [('beige_paving', ['FLOOR']), ('olive_lawn', ['LAWN', 'EDGE']), ('rose_paving', ['LANE', 'GATE']), ('ivory_boss_plaza', ['BOSS'])]
+    bank_rows = []
+    for row, (material, zones) in enumerate(materials):
+        info = atlas['row_materials'][row]
+        require(info['row'] == row and info['material'] == material and info['zones'] == zones, 'bank: row material/zone mapping')
+        require(info['rect'] == [0, row * 128, 1024, 128], 'bank: row rectangle')
+        section = bank.crop(rectangle(info['rect'])).convert('RGB')
+        luminance = ImageStat.Stat(section.convert('L')).mean[0]
+        require(abs(luminance - info['mean_luminance_255']) < 0.01, 'bank: row luminance metadata')
+        for column in range(8):
+            tile = section.crop((column * 128, 0, (column + 1) * 128, 128))
+            red, green, blue = ImageStat.Stat(tile).mean
+            value = ImageStat.Stat(tile.convert('L')).mean[0]
+            if row == 0:
+                require(140 < value < 205 and red > green > blue and red - blue > 15, 'bank: beige paving replaced by another material')
+            elif row == 1:
+                require(75 < value < 135 and green > red + 8 and green > blue + 15, 'bank: lawn must remain living green')
+            elif row == 2:
+                require(125 < value < 180 and red > green + 20 and blue > green + 3, 'bank: rose paving replaced by grass/dirt')
+            else:
+                require(170 < value < 225 and red > blue and abs(red - green) < 25 and max(red, green, blue) - min(red, green, blue) < 55, 'bank: ivory paving replaced by grass/dirt')
+        bank_rows.append({'row': row, 'material': material, 'luminance': round(luminance, 3)})
+    bank_edge_pairs = 0
+    for row in range(4):
+        tiles = [bank.crop((column * 128, row * 128, (column + 1) * 128, (row + 1) * 128)) for column in range(8)]
+        for a, tile_a in enumerate(tiles):
+            for b, tile_b in enumerate(tiles):
+                same_pixels(tile_a.crop((127, 0, 128, 128)), tile_b.crop((0, 0, 1, 128)), f'bank row {row} tiles {a}/{b}: horizontal seam')
+                same_pixels(tile_a.crop((0, 127, 128, 128)), tile_b.crop((0, 0, 128, 1)), f'bank row {row} tiles {a}/{b}: vertical seam')
+                bank_edge_pairs += 2
+    require(bank_edge_pairs == 512, 'bank: incomplete tile adjacency coverage')
     wear = images['maps/night_dump/wear_atlas.png']
     for index in range(4):
         x, y = (index % 2) * 512, (index // 2) * 512
@@ -187,9 +225,11 @@ def validate():
             require(max(ImageStat.Stat(difference, mask).mean) == 0, name + ': pixel registration/color drift')
     return {'brief': 'v33', 'png_files': count, 'manifests': len(manifests), 'png_crc_iend': 'OK',
             'dimensions_and_sha256': 'OK', 'floor_luminance': round(floor_luma, 3),
-            'bank_luminance': round(bank_luma, 3), 'tile_seams': 'OK', 'wear_edges_match_base': True,
+            'bank_luminance': round(bank_luma, 3), 'bank_tile_layout': '8x4 / 128x128', 'bank_material_rows': bank_rows, 'bank_edge_pairs': bank_edge_pairs,
+            'bank_revision': 'v34', 'bank_max_edge_difference_rgba8': 0,
+            'tile_seams': 'whole-sheet floor/smoke; Bank 512 within-row tile pairings', 'wear_edges_match_base': True,
             'portrait_original_faces': identity_results, 'menu_registration': 'OK',
-            'game_integration': 'reserved for Claude by brief', 'physical_devices_tested': False}
+            'game_integration': 'v33 integrated upstream; Bank v34 awaits Claude integration', 'physical_devices_tested': False}
 
 if __name__ == '__main__':
     result = validate()

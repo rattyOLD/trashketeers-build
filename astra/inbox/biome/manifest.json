@@ -1,33 +1,125 @@
 {
-  "schema_version": 1,
-  "brief": "v33",
+  "schema_version": 2,
+  "brief": "v34",
+  "revision": "bank-atlas-final",
   "studio": "TrashSquad · Beer Party Studio",
   "game_directory": "res://assets/biome",
   "color_space": "sRGB",
   "alpha_mode": "straight",
+  "source": {
+    "path": "source/assets/biome/ch2_floor.png",
+    "sha256": "d59c4c65db784c882827f1d96da9f3739f3a81624d5afe118feb67eeed2a8de0",
+    "width": 1024,
+    "height": 512
+  },
+  "atlas": {
+    "columns": 8,
+    "rows": 4,
+    "tile_width": 128,
+    "tile_height": 128,
+    "tiles": 32,
+    "whole_sheet_is_not_a_seamless_surface": true,
+    "row_materials": [
+      {
+        "row": 0,
+        "material": "beige_paving",
+        "zones": [
+          "FLOOR"
+        ],
+        "rect": [
+          0,
+          0,
+          1024,
+          128
+        ],
+        "mean_luminance_255": 179.537
+      },
+      {
+        "row": 1,
+        "material": "olive_lawn",
+        "zones": [
+          "LAWN",
+          "EDGE"
+        ],
+        "rect": [
+          0,
+          128,
+          1024,
+          128
+        ],
+        "mean_luminance_255": 86.161
+      },
+      {
+        "row": 2,
+        "material": "rose_paving",
+        "zones": [
+          "LANE",
+          "GATE"
+        ],
+        "rect": [
+          0,
+          256,
+          1024,
+          128
+        ],
+        "mean_luminance_255": 150.938
+      },
+      {
+        "row": 3,
+        "material": "ivory_boss_plaza",
+        "zones": [
+          "BOSS"
+        ],
+        "rect": [
+          0,
+          384,
+          1024,
+          128
+        ],
+        "mean_luminance_255": 209.369
+      }
+    ],
+    "selection_code": "source/scripts/biome/level_spawner.gd: _zone_row / _pick_column",
+    "edge_compatibility": {
+      "horizontal": "all tile pairs within each row",
+      "vertical": "all tile pairs within each row",
+      "same_tile_repeat": true,
+      "verified_pairs": 512,
+      "max_edge_difference_rgba8": 0
+    }
+  },
   "files": [
     {
       "file": "ch2_floor.png",
       "width": 1024,
       "height": 512,
       "format": "RGBA8",
-      "frames": 1,
-      "bytes": 679907,
-      "sha256": "0489b7121f132858a5babfa113b943c05b83b3080b828ede2fb3e312ad7eb98c",
-      "role": "bank_floor",
-      "seamless_axes": [
-        "x",
-        "y"
-      ],
-      "mean_luminance_255": 154.383543066708,
-      "opaque": true
+      "frames": 32,
+      "bytes": 885473,
+      "sha256": "f7c6499cea355fcb0144c3a1ccad8a570fe82cba3abd21150fcbfb23cfa8b9a2",
+      "role": "bank_floor_tile_atlas",
+      "opaque": true,
+      "mean_luminance_255": 156.501
     }
   ],
   "integration": {
     "owner": "Claude",
-    "optional_art_replacement_in_brief": true,
-    "art_replacement_prepared": true,
-    "remove_existing_bank_saturation_and_warm_tone_patch_when_installed": true,
-    "do_not_stack_code_tint_on_new_art": true
+    "replaces_obsolete_single_grass_surface": true,
+    "preserve_existing_tile_coordinates": true,
+    "preserve_zone_row_selection": true,
+    "preserve_bank_path_and_bank_plaza_textures": true,
+    "palette_baked_into_art": true,
+    "review_removal_of_existing_bank_shader_tint_before_install": true,
+    "production_assets_changed": false,
+    "note": "Не повторять весь лист как одну текстуру. Каждый 128×128 участок — отдельный тайл; файл не подключён в source/assets.",
+    "review_sunny_and_golden_mood_tints_before_install": true,
+    "optional_gate_art_included": false
+  },
+  "preparation": {
+    "material_bands_registered_separately": true,
+    "common_edge_profiles_per_material_row": true,
+    "edge_transition_width_px": 8,
+    "tile_interiors_untouched_outside_edge_band": true,
+    "no_object_shadows": true
   }
 }
