@@ -8,6 +8,8 @@ extends Node
 ##   цветокоррекция (shaders/color_grade.gdshader) — отдельный CanvasLayer под погодой и HUD:
 ##   сплит-тонирование, контраст, зерно, аберрация при уроне (выключается в настройках).
 ## Всё рисуется примитивами из Packed-массивов: никаких нод на частицу.
+## HD-2D (Octopath / Live A Live): цветокоррекция размывает верх и низ кадра, светит яркое и
+##   добавляет дымку сверху; HD2DLayer под ней — лучи света и силуэты переднего плана.
 
 const MOODS := {
 	"clear": {"tint": Color("#dddae8"), "rain": 0.0, "motes": 1.0, "fog": Color(0.5, 0.4, 1.0, 0.0), "vignette": 0.42, "lightning": false, "pulse": false, "motes_color": Color(0.8, 0.9, 1.0), "rise": false},
@@ -21,6 +23,21 @@ const MOODS := {
 	"party": {"tint": Color("#f3dcec"), "rain": 0.0, "motes": 1.3, "fog": Color(1.0, 0.4, 0.8, 0.06), "vignette": 0.4, "lightning": false, "pulse": false, "motes_color": Color(1.0, 0.55, 0.85), "rise": false},
 	"vault": {"tint": Color("#e0cca8"), "rain": 0.0, "motes": 1.0, "fog": Color(0.9, 0.55, 0.15, 0.08), "vignette": 0.55, "lightning": false, "pulse": true, "motes_color": Color(1.0, 0.8, 0.3), "rise": true},
 }
+## Дымка сверху (цвет и плотность), свечение (сила, порог) и лучи света (сила, цвет) по настроению.
+const HD2D := {
+	"clear": {"haze": Color(0.72, 0.76, 0.95, 0.12), "glow": 0.45, "glow_from": 0.62, "rays": 0.07, "ray_color": Color(0.85, 0.9, 1.0)},
+	"pink_haze": {"haze": Color(0.95, 0.6, 0.85, 0.16), "glow": 0.55, "glow_from": 0.6, "rays": 0.06, "ray_color": Color(1.0, 0.7, 0.9)},
+	"toxic": {"haze": Color(0.55, 0.9, 0.5, 0.14), "glow": 0.5, "glow_from": 0.6, "rays": 0.06, "ray_color": Color(0.75, 1.0, 0.6)},
+	"storm": {"haze": Color(0.45, 0.55, 0.85, 0.2), "glow": 0.4, "glow_from": 0.65, "rays": 0.0, "ray_color": Color.WHITE},
+	"night": {"haze": Color(0.22, 0.28, 0.55, 0.2), "glow": 0.8, "glow_from": 0.5, "rays": 0.0, "ray_color": Color.WHITE},
+	"alarm": {"haze": Color(0.85, 0.35, 0.3, 0.1), "glow": 0.5, "glow_from": 0.6, "rays": 0.0, "ray_color": Color.WHITE},
+	"sunny": {"haze": Color(1.0, 0.95, 0.82, 0.16), "glow": 0.25, "glow_from": 0.86, "rays": 0.18, "ray_color": Color(1.0, 0.93, 0.72)},
+	"golden": {"haze": Color(1.0, 0.84, 0.55, 0.18), "glow": 0.32, "glow_from": 0.82, "rays": 0.22, "ray_color": Color(1.0, 0.82, 0.5)},
+	"party": {"haze": Color(0.95, 0.6, 0.85, 0.12), "glow": 0.55, "glow_from": 0.62, "rays": 0.08, "ray_color": Color(1.0, 0.75, 0.9)},
+	"vault": {"haze": Color(0.95, 0.75, 0.4, 0.14), "glow": 0.55, "glow_from": 0.66, "rays": 0.12, "ray_color": Color(1.0, 0.85, 0.5)},
+}
+## Размытие верха и низа кадра в пикселях 720p (резкая полоса вокруг героя).
+const TILT_BLUR := 5.0
 const RAIN_COUNT := 150
 const MOTE_COUNT := 60
 const FOG_BLOBS := 7
@@ -29,6 +46,7 @@ const LETTERBOX := 92.0
 
 var _modulate: CanvasModulate
 var _grade: ColorRect
+var _hd2d: HD2DLayer
 var _aberration := 0.0
 var _weather_layer: CanvasLayer
 var _weather: WeatherDraw
@@ -65,6 +83,10 @@ func build(parent: Node) -> void:
 		grade_material.shader = load("res://shaders/color_grade.gdshader")
 		_grade.material = grade_material
 		grade_layer.add_child(_grade)
+		grade_material.set_shader_parameter(&"tilt_blur", TILT_BLUR)
+
+	_hd2d = HD2DLayer.new()
+	parent.add_child(_hd2d)
 
 	_weather_layer = CanvasLayer.new()
 	_weather_layer.layer = 3
@@ -118,6 +140,12 @@ func build(parent: Node) -> void:
 func set_density(factor: float) -> void:
 	if _grade != null:
 		_grade.visible = BattleQuality.level < 3
+		# Под нагрузкой первыми уходят свечение и размытие: это самые дорогие выборки.
+		var grade_material := _grade.material as ShaderMaterial
+		grade_material.set_shader_parameter(&"tilt_blur", TILT_BLUR if BattleQuality.level < 2 else 0.0)
+		grade_material.set_shader_parameter(&"glow_strength", float(HD2D[_mood_name]["glow"]) if BattleQuality.level < 2 else 0.0)
+	if _hd2d != null:
+		_hd2d.shafts.strength = float(HD2D[_mood_name]["rays"]) if BattleQuality.level < 3 else 0.0
 	if _weather != null:
 		_weather.density = (1.0 if SaveService.get_quality() >= 1 else 0.3) * factor
 		_weather.configure(_mood)
@@ -138,6 +166,35 @@ func set_mood(mood_name: String, animate: bool = true) -> void:
 		_modulate.color = _base_tint
 		material.set_shader_parameter(&"strength", strength)
 	material.set_shader_parameter(&"tint", Color(0.42, 0.02, 0.06) if _mood["pulse"] else Color(0.02, 0.0, 0.06))
+	_apply_hd2d(animate)
+
+
+func _apply_hd2d(animate: bool) -> void:
+	var look: Dictionary = HD2D[_mood_name]
+	var heavy := BattleQuality.level < 2
+	_hd2d.shafts.color = look["ray_color"]
+	var rays: float = look["rays"] if BattleQuality.level < 3 else 0.0
+	if animate:
+		create_tween().tween_property(_hd2d.shafts, "strength", rays, 1.6)
+	else:
+		_hd2d.shafts.strength = rays
+	if _grade == null:
+		return
+	var grade_material := _grade.material as ShaderMaterial
+	grade_material.set_shader_parameter(&"glow_threshold", look["glow_from"])
+	grade_material.set_shader_parameter(&"glow_strength", float(look["glow"]) if heavy else 0.0)
+	var haze: Color = look["haze"]
+	if animate:
+		var from: Color = grade_material.get_shader_parameter(&"haze_color")
+		create_tween().tween_method(func(c: Color) -> void: grade_material.set_shader_parameter(&"haze_color", c), from, haze, 1.6)
+	else:
+		grade_material.set_shader_parameter(&"haze_color", haze)
+
+
+## Силуэты переднего плана под раскладку карты (вызывается после постройки уровня).
+func set_foreground(layout: String, bounds: Rect2) -> void:
+	if _hd2d != null:
+		_hd2d.foreground.setup(layout, bounds)
 
 
 ## Сплит-тонирование главы: тени и света в свой оттенок (без цветокоррекции — просто no-op).
@@ -213,6 +270,7 @@ func _process(delta: float) -> void:
 		_aberration = maxf(_aberration - delta * 3.0, 0.0)
 		(_grade.material as ShaderMaterial).set_shader_parameter(&"aberration", _aberration)
 	_time += delta
+	_track_focus()
 	if _mood["pulse"]:
 		_modulate.color = _base_tint.lerp(Color("#ff9a8a"), 0.25 * (0.5 + 0.5 * sin(_time * 3.2)))
 	if _mood["lightning"]:
@@ -221,6 +279,18 @@ func _process(delta: float) -> void:
 			_lightning_timer = randf_range(4.0, 9.0)
 			flash(Color(0.85, 0.9, 1.0), 0.55, 0.35)
 			SoundManager.play(&"comet_impact", -8.0)
+
+
+## Резкая полоса размытия держится на герое, даже когда камера упёрлась в край карты.
+func _track_focus() -> void:
+	if _grade == null:
+		return
+	var hero := get_tree().get_first_node_in_group(&"hero") as Node2D
+	if hero == null:
+		return
+	var view := get_viewport().get_visible_rect().size
+	var at := get_viewport().get_canvas_transform() * hero.global_position
+	(_grade.material as ShaderMaterial).set_shader_parameter(&"focus_y", clampf(at.y / maxf(view.y, 1.0), 0.3, 0.7))
 
 
 ## Погода в экранных координатах: дождь, пылинки/споры/угли и дрейфующие пятна тумана.
