@@ -222,6 +222,7 @@ func start(_weapon_id: StringName = &"") -> void:
 	_setup_common(map.view_bounds, pickups.nut_texture)
 	light_map.set_layout(map.layout, str(map.chapter.get("map_card", "")))
 	_update_ground_pools()
+	atmosphere.set_foreground(map.layout, map.view_bounds)
 	_last_marker.setup(director, enemies, camera)
 	minimap = Minimap.new()
 	minimap.setup(map, player, enemies, director)
@@ -683,6 +684,7 @@ func _switch_chapter(index: int = -1) -> void:
 	hazards.attach_level(map)
 	light_map.set_layout(map.layout, str(map.chapter.get("map_card", "")))
 	_update_ground_pools()
+	atmosphere.set_foreground(map.layout, map.view_bounds)
 	_portal = null
 	player.global_position = map.player_start
 	player.reset_physics_interpolation()
