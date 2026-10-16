@@ -40,4 +40,4 @@
 
 ## Для Астры
 Арт кладётся в `source/assets/<папка>/`. Нарезку и прозрачность делает `tools/slice_vfx.py`.
-Требования к арту — в `astra/from_claude/BRIEF_v32_all_needs.md`.
+Требования к арту — в `astra/from_claude/BRIEF_v33_graphics.md` (v32 закрыт).
