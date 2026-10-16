@@ -25,6 +25,9 @@ const KICK_DECAY := 14.0
 const AIM_SMOOTH := 20.0
 const TEXTURE_PATH := "res://assets/player/raccoon.png"
 const CLIP_GRIP_LIFT := -4.0
+## Arms across the bone: the part art is a thin strip next to the round torso.
+const CLIP_ARM_THICKEN := {"upper": 1.3, "fore": 1.45}
+const CLIP_FIST_SCALE := 1.15
 const ARM_PATH := "res://assets/player/raccoon_arm.png"
 const OVERLAY_DIR := "res://assets/skins/"
 ## Текстуры хранятся ~3x к миру для чёткости на экранах телефонов: в мире енот ~100 px в высоту.
@@ -1433,11 +1436,29 @@ func _clip_segment_transform(which: String, segment: String, target: Vector2) ->
 	var turn := angle_difference(body_basis.basis_xform(source_to-source_from).angle(),(end-start).angle())
 	var result := Transform2D(turn,Vector2.ZERO)*Transform2D(body_basis.x,body_basis.y,Vector2.ZERO)
 	result.origin = start-result.basis_xform(source_from)
-	return result
+	return result*_clip_thicken(source_from,source_to,CLIP_ARM_THICKEN[segment])
+
+
+## Arm parts are drawn as thin strips; widen each segment across its bone so the arm holding a
+## weapon matches the torso. The bone length stays the same, so grips and IK are untouched.
+func _clip_thicken(from: Vector2, to: Vector2, factor: float) -> Transform2D:
+	var bone := (to-from).normalized()
+	var across := bone.orthogonal()
+	var squash := Transform2D(bone,across*factor,Vector2.ZERO)*Transform2D(bone,across,Vector2.ZERO).affine_inverse()
+	squash.origin = from-squash.basis_xform(from)
+	return squash
 
 
 func _draw_clip_part(canvas: Node2D, which: String, part: String, target: Vector2) -> void:
-	canvas.draw_set_transform_matrix(_clip_segment_transform(which,"fore" if part == "fist" else part,target))
+	var segment := "fore" if part == "fist" else part
+	var place := _clip_segment_transform(which,segment,target)
+	if part == "fist":
+		# The fist keeps its own proportions and grows with the forearm around the palm.
+		var palm := _clip_source_joint(which,"palm")
+		var fore_from := _clip_source_joint(which,"elbow")
+		place = place*_clip_thicken(fore_from,palm,CLIP_ARM_THICKEN["fore"]).affine_inverse()
+		place = place*Transform2D(0.0,Vector2.ONE*CLIP_FIST_SCALE,0.0,palm-palm*CLIP_FIST_SCALE)
+	canvas.draw_set_transform_matrix(place)
 	canvas.draw_texture(_clip_arms[which+"_"+part],Vector2.ZERO,hero.modulate*hero.self_modulate)
 
 

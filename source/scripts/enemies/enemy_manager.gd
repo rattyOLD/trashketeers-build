@@ -257,10 +257,13 @@ func _update_faction_positions() -> void:
 			continue
 		var faction := ArtDirection.faction(str(e.data.id))
 		if not groups.has(faction):
-			groups[faction] = {"ranged": Vector2.ZERO, "count": 0}
+			groups[faction] = {"ranged": Vector2.ZERO, "count": 0, "shields": []}
+		if e.data.shield and not e.data.flying and e.data.heal_radius <= 0.0:
+			groups[faction]["shields"].append(e)
 		if e.data.behavior in [EnemyData.Behavior.RANGED, EnemyData.Behavior.TRAPPER, EnemyData.Behavior.BOMBER]:
 			groups[faction]["ranged"] += e.global_position
 			groups[faction]["count"] += 1
+	var wall_slots := _shield_wall_slots(groups, at)
 	for e in _active:
 		if not e.is_alive() or e.data.is_boss() or e.fleeing or e.data.heal_radius > 0.0 or e.data.flying:
 			continue
@@ -274,7 +277,9 @@ func _update_faction_positions() -> void:
 		if e.data.shield and int(group.get("count", 0)) > 0:
 			var rear: Vector2 = group["ranged"] / float(group["count"])
 			e.tactic_role = &"screen"
-			e.tactic_anchor = rear + rear.direction_to(at) * minf(130.0, rear.distance_to(at) * 0.4) + radial.orthogonal() * side * 44.0
+			var slot: float = wall_slots.get(e.get_instance_id(), side * 0.5)
+			var cover := rear.direction_to(at)
+			e.tactic_anchor = rear + cover * minf(130.0, rear.distance_to(at) * 0.4) + cover.orthogonal() * slot * e.get_radius() * SHIELD_WALL_GAP
 		elif e.data.behavior == EnemyData.Behavior.CHASER and faction in ["scrap", "roofs"]:
 			e.tactic_role = &"flank"
 			var lead := _player.velocity * 0.4 if faction == "roofs" else Vector2.ZERO
@@ -282,6 +287,26 @@ func _update_faction_positions() -> void:
 		elif e.data.behavior == EnemyData.Behavior.RANGED and faction in ["bureau", "toxic"]:
 			e.tactic_role = &"line"
 			e.tactic_anchor = at + radial.rotated(side * 0.22) * e.data.preferred_distance
+
+
+## Щитовики фракции встают стенкой: у каждого своё место поперёк линии огня, по порядку их
+## текущих позиций, чтобы они не сходились в одну точку и не перебегали друг через друга.
+const SHIELD_WALL_GAP := 2.6
+
+
+func _shield_wall_slots(groups: Dictionary, at: Vector2) -> Dictionary:
+	var slots := {}
+	for faction: String in groups:
+		var group: Dictionary = groups[faction]
+		var shields: Array = group["shields"]
+		if shields.is_empty() or int(group["count"]) <= 0:
+			continue
+		var rear: Vector2 = group["ranged"] / float(group["count"])
+		var across := rear.direction_to(at).orthogonal()
+		shields.sort_custom(func(a: Enemy, b: Enemy) -> bool: return a.global_position.dot(across) < b.global_position.dot(across))
+		for k in shields.size():
+			slots[shields[k].get_instance_id()] = float(k) - float(shields.size() - 1) * 0.5
+	return slots
 
 
 ## Толчок пары: возвращает силу на i, на j добавляет противоположную.
@@ -292,7 +317,9 @@ func _sep_pair(i: int, j: int) -> Vector2:
 	if dist_sq >= reach * reach or dist_sq < 0.01:
 		return Vector2.ZERO
 	var dist := sqrt(dist_sq)
-	var force := d / dist * (1.0 - dist / reach) * SEPARATION_SPEED
+	# Чем глубже враги вошли друг в друга, тем сильнее толчок: плотная пачка не сливается в один ком.
+	var overlap := 1.0 - dist / reach
+	var force := d / dist * overlap * (1.0 + overlap) * SEPARATION_SPEED
 	_active[j].separation += force
 	return -force
 

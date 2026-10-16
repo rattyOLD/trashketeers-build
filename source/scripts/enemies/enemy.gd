@@ -54,6 +54,8 @@ const KNOCKBACK_DECAY := 9.0
 const RANGED_BAND := 60.0
 const NAV_DIRECT_DISTANCE := 72.0
 const HOP_HEIGHT := 7.0
+## Доля мультяшного сплющивания у мобов на авто-риге (замах, рывок, шаг).
+const AUTO_SQUASH := 0.3
 const LUNGE_TRIGGER := 125.0
 const LUNGE_WINDUP := 0.36
 const LUNGE_TIME := 0.22
@@ -1354,6 +1356,10 @@ func _animate(delta: float, desired: Vector2) -> void:
 	if _framed:
 		lean *= 0.28
 		squash = 1.0 + (squash - 1.0) * 0.25
+	elif _brain == null:
+		# Рисованный моб на авто-риге: сильное сплющивание при замахе и рывке читается как растянутая
+		# текстура (особенно у бегущих вбок), поэтому только лёгкий намёк.
+		squash = 1.0 + (squash - 1.0) * AUTO_SQUASH
 	var response := 1.0 - exp(-delta * (32.0 if strike > 0.1 else 18.0))
 	_visual_lean = lerpf(_visual_lean, sway + lean * 0.6, response)
 	_visual_squash = lerpf(_visual_squash, squash, response)
