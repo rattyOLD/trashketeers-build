@@ -1,0 +1,1147 @@
+{
+  "schema_version": 1,
+  "brief": "v36",
+  "studio": "TrashSquad · Beer Party Studio",
+  "pixels_per_metre": 32,
+  "palette": "../palettes/bank.png",
+  "color_space": "sRGB",
+  "texture_filter": "nearest_with_mipmaps",
+  "texture_repeat": "enabled",
+  "cast_shadows_baked": false,
+  "directional_light_baked": false,
+  "variant_edge_compatibility": "all ordered pairs, horizontal and vertical, within a material",
+  "normal_convention": "OpenGL +Y; normal_map_invert_y=false; import as linear normal data",
+  "files": [
+    {
+      "file": "cobble_gold_01_n.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGB",
+      "bytes": 5465,
+      "sha256": "d388b1458ed3ed43d362ffdbd907357cea7ce16eef4de531f0a951828d096409",
+      "material": "cobble_gold",
+      "variant": 1,
+      "role": "normal",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "tileable_x": true,
+      "tileable_y": true,
+      "color_space": "linear_data",
+      "normal_convention": "OpenGL +Y"
+    },
+    {
+      "file": "cobble_gold_01.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGBA",
+      "bytes": 1928,
+      "sha256": "d9286fde211f2177d82bff09ae5097b743bf8f61f0181815246e9b69ce848410",
+      "material": "cobble_gold",
+      "variant": 1,
+      "role": "albedo",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "anchor_kind": "surface_uv_origin",
+      "tileable_x": true,
+      "tileable_y": true,
+      "roughness": 0.92,
+      "metallic": 0.0,
+      "palette": "../palettes/bank.png",
+      "normal_map": "cobble_gold_01_n.png",
+      "normal_scale": 0.65
+    },
+    {
+      "file": "cobble_gold_02_n.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGB",
+      "bytes": 5440,
+      "sha256": "67d7a53ecdc71409f07c8277694ae178c5790030a8350dfee3aa6a4045fea86e",
+      "material": "cobble_gold",
+      "variant": 2,
+      "role": "normal",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "tileable_x": true,
+      "tileable_y": true,
+      "color_space": "linear_data",
+      "normal_convention": "OpenGL +Y"
+    },
+    {
+      "file": "cobble_gold_02.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGBA",
+      "bytes": 1949,
+      "sha256": "650ebcee99016338c2a506d0b3a73c85e587baf14ceae4df205789ffd1c93350",
+      "material": "cobble_gold",
+      "variant": 2,
+      "role": "albedo",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "anchor_kind": "surface_uv_origin",
+      "tileable_x": true,
+      "tileable_y": true,
+      "roughness": 0.92,
+      "metallic": 0.0,
+      "palette": "../palettes/bank.png",
+      "normal_map": "cobble_gold_02_n.png",
+      "normal_scale": 0.65
+    },
+    {
+      "file": "cobble_gold_03_n.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGB",
+      "bytes": 5436,
+      "sha256": "0207c5bd3341292c0ff9263bcc9929f7651c554bbafaca051b33915445c1dc34",
+      "material": "cobble_gold",
+      "variant": 3,
+      "role": "normal",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "tileable_x": true,
+      "tileable_y": true,
+      "color_space": "linear_data",
+      "normal_convention": "OpenGL +Y"
+    },
+    {
+      "file": "cobble_gold_03.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGBA",
+      "bytes": 1928,
+      "sha256": "4ee2485e8c0fb17e6cf438deaaf024dfddbf1a1d00fcd7c64b5f7d8807041e67",
+      "material": "cobble_gold",
+      "variant": 3,
+      "role": "albedo",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "anchor_kind": "surface_uv_origin",
+      "tileable_x": true,
+      "tileable_y": true,
+      "roughness": 0.92,
+      "metallic": 0.0,
+      "palette": "../palettes/bank.png",
+      "normal_map": "cobble_gold_03_n.png",
+      "normal_scale": 0.65
+    },
+    {
+      "file": "cobble_worn_01_n.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGB",
+      "bytes": 5665,
+      "sha256": "da6ea9207160d6c66538bcd8561c3a6a1ff2cf0c0faa985c55600b371c3e08b1",
+      "material": "cobble_worn",
+      "variant": 1,
+      "role": "normal",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "tileable_x": true,
+      "tileable_y": true,
+      "color_space": "linear_data",
+      "normal_convention": "OpenGL +Y"
+    },
+    {
+      "file": "cobble_worn_01.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGBA",
+      "bytes": 1955,
+      "sha256": "d61ee9967e9d2f9aed78212519407696ef979e475e319638dff6ca71669b69e1",
+      "material": "cobble_worn",
+      "variant": 1,
+      "role": "albedo",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "anchor_kind": "surface_uv_origin",
+      "tileable_x": true,
+      "tileable_y": true,
+      "roughness": 0.92,
+      "metallic": 0.0,
+      "palette": "../palettes/bank.png",
+      "normal_map": "cobble_worn_01_n.png",
+      "normal_scale": 0.65
+    },
+    {
+      "file": "cobble_worn_02_n.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGB",
+      "bytes": 5640,
+      "sha256": "2d9f1177b11c5aea4e759acb26af4df934d5751d671b9c7f792eb216d904473f",
+      "material": "cobble_worn",
+      "variant": 2,
+      "role": "normal",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "tileable_x": true,
+      "tileable_y": true,
+      "color_space": "linear_data",
+      "normal_convention": "OpenGL +Y"
+    },
+    {
+      "file": "cobble_worn_02.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGBA",
+      "bytes": 1967,
+      "sha256": "120bdbd064768e7ed2400ccfccfdbc7a314057302fac06921a9c96870d5dcabe",
+      "material": "cobble_worn",
+      "variant": 2,
+      "role": "albedo",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "anchor_kind": "surface_uv_origin",
+      "tileable_x": true,
+      "tileable_y": true,
+      "roughness": 0.92,
+      "metallic": 0.0,
+      "palette": "../palettes/bank.png",
+      "normal_map": "cobble_worn_02_n.png",
+      "normal_scale": 0.65
+    },
+    {
+      "file": "cobble_worn_03_n.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGB",
+      "bytes": 5595,
+      "sha256": "a5115f0aa078da5cd35470ad3cdecc1a696ed126a2dc194176da8161d077100a",
+      "material": "cobble_worn",
+      "variant": 3,
+      "role": "normal",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "tileable_x": true,
+      "tileable_y": true,
+      "color_space": "linear_data",
+      "normal_convention": "OpenGL +Y"
+    },
+    {
+      "file": "cobble_worn_03.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGBA",
+      "bytes": 2004,
+      "sha256": "4a89f0fd5ff4764d3f1929e83739c02b79c1a76a61b8997cd856684a7fbd126b",
+      "material": "cobble_worn",
+      "variant": 3,
+      "role": "albedo",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "anchor_kind": "surface_uv_origin",
+      "tileable_x": true,
+      "tileable_y": true,
+      "roughness": 0.92,
+      "metallic": 0.0,
+      "palette": "../palettes/bank.png",
+      "normal_map": "cobble_worn_03_n.png",
+      "normal_scale": 0.65
+    },
+    {
+      "file": "rose_path_01.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGBA",
+      "bytes": 954,
+      "sha256": "2e2fe1435e5b92afd694e19f2f0dc65a047c4f9485f8bfdc5934b058c63e3556",
+      "material": "rose_path",
+      "variant": 1,
+      "role": "albedo",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "anchor_kind": "surface_uv_origin",
+      "tileable_x": true,
+      "tileable_y": true,
+      "roughness": 0.92,
+      "metallic": 0.0,
+      "palette": "../palettes/bank.png"
+    },
+    {
+      "file": "rose_path_02.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGBA",
+      "bytes": 992,
+      "sha256": "1f7dc18840e8dac13c80923fe5c5806c8d787c20149a4fcf2743900017a43014",
+      "material": "rose_path",
+      "variant": 2,
+      "role": "albedo",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "anchor_kind": "surface_uv_origin",
+      "tileable_x": true,
+      "tileable_y": true,
+      "roughness": 0.92,
+      "metallic": 0.0,
+      "palette": "../palettes/bank.png"
+    },
+    {
+      "file": "rose_path_03.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGBA",
+      "bytes": 943,
+      "sha256": "f4910b4287a6c7e75702e083bbb78cf17e86f9d8d64a22c802c90d9ce6003370",
+      "material": "rose_path",
+      "variant": 3,
+      "role": "albedo",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "anchor_kind": "surface_uv_origin",
+      "tileable_x": true,
+      "tileable_y": true,
+      "roughness": 0.92,
+      "metallic": 0.0,
+      "palette": "../palettes/bank.png"
+    },
+    {
+      "file": "marble_01.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGBA",
+      "bytes": 757,
+      "sha256": "9aca4b853f6244c26ea252a055bfc7ea0bbeaee3169292bf73773c8530ea0df1",
+      "material": "marble",
+      "variant": 1,
+      "role": "albedo",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "anchor_kind": "surface_uv_origin",
+      "tileable_x": true,
+      "tileable_y": true,
+      "roughness": 0.48,
+      "metallic": 0.0,
+      "palette": "../palettes/bank.png"
+    },
+    {
+      "file": "marble_02.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGBA",
+      "bytes": 739,
+      "sha256": "829af20553c1990f6e50a0f0a1340a9d5d3536b5e56cea651d5aa28e647e6c86",
+      "material": "marble",
+      "variant": 2,
+      "role": "albedo",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "anchor_kind": "surface_uv_origin",
+      "tileable_x": true,
+      "tileable_y": true,
+      "roughness": 0.48,
+      "metallic": 0.0,
+      "palette": "../palettes/bank.png"
+    },
+    {
+      "file": "marble_03.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGBA",
+      "bytes": 759,
+      "sha256": "beaf56d6e286e9fd5133fdc6c349c07f94f0f28bb2cfb267cd2f1712720426d3",
+      "material": "marble",
+      "variant": 3,
+      "role": "albedo",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "anchor_kind": "surface_uv_origin",
+      "tileable_x": true,
+      "tileable_y": true,
+      "roughness": 0.48,
+      "metallic": 0.0,
+      "palette": "../palettes/bank.png"
+    },
+    {
+      "file": "lawn_01.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGBA",
+      "bytes": 1633,
+      "sha256": "87ff8032fb67063a6238d11f1cf23d10408ba0e47450e0ca8adba010ca0da72c",
+      "material": "lawn",
+      "variant": 1,
+      "role": "albedo",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "anchor_kind": "surface_uv_origin",
+      "tileable_x": true,
+      "tileable_y": true,
+      "roughness": 0.92,
+      "metallic": 0.0,
+      "palette": "../palettes/bank.png"
+    },
+    {
+      "file": "lawn_02.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGBA",
+      "bytes": 1609,
+      "sha256": "a2e3b6e37ce21ca0413a8a9992d62540fd072ede69455c939172679868c44a91",
+      "material": "lawn",
+      "variant": 2,
+      "role": "albedo",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "anchor_kind": "surface_uv_origin",
+      "tileable_x": true,
+      "tileable_y": true,
+      "roughness": 0.92,
+      "metallic": 0.0,
+      "palette": "../palettes/bank.png"
+    },
+    {
+      "file": "lawn_03.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGBA",
+      "bytes": 1606,
+      "sha256": "0761b7baf6672db5f13bf609815b4ca07c3f5d7a2bc7ebeb7fc17a0db6dcfaa3",
+      "material": "lawn",
+      "variant": 3,
+      "role": "albedo",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "anchor_kind": "surface_uv_origin",
+      "tileable_x": true,
+      "tileable_y": true,
+      "roughness": 0.92,
+      "metallic": 0.0,
+      "palette": "../palettes/bank.png"
+    },
+    {
+      "file": "garden_soil_01.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGBA",
+      "bytes": 1590,
+      "sha256": "60751527caa2a35aa94f4d4df70553616e27eb8f03d68291710d4f1cef17611c",
+      "material": "garden_soil",
+      "variant": 1,
+      "role": "albedo",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "anchor_kind": "surface_uv_origin",
+      "tileable_x": true,
+      "tileable_y": true,
+      "roughness": 0.92,
+      "metallic": 0.0,
+      "palette": "../palettes/bank.png"
+    },
+    {
+      "file": "garden_soil_02.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGBA",
+      "bytes": 1632,
+      "sha256": "8eee0437c1e1bf0d69038d62b5b7a80405469b1f5d05f9b518398b5e57f70d87",
+      "material": "garden_soil",
+      "variant": 2,
+      "role": "albedo",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "anchor_kind": "surface_uv_origin",
+      "tileable_x": true,
+      "tileable_y": true,
+      "roughness": 0.92,
+      "metallic": 0.0,
+      "palette": "../palettes/bank.png"
+    },
+    {
+      "file": "garden_soil_03.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGBA",
+      "bytes": 1615,
+      "sha256": "f8b1b65b4fe5e32dfa25f2d1157c152aaf9d883c477f55883a77bfd291a22a67",
+      "material": "garden_soil",
+      "variant": 3,
+      "role": "albedo",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "anchor_kind": "surface_uv_origin",
+      "tileable_x": true,
+      "tileable_y": true,
+      "roughness": 0.92,
+      "metallic": 0.0,
+      "palette": "../palettes/bank.png"
+    },
+    {
+      "file": "stone_wall_01.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGBA",
+      "bytes": 1043,
+      "sha256": "3d01b58fb497e72031041d3de93e3f2602992f0ced737dd86b2c5189184b33a0",
+      "material": "stone_wall",
+      "variant": 1,
+      "role": "albedo",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "anchor_kind": "surface_uv_origin",
+      "tileable_x": true,
+      "tileable_y": true,
+      "roughness": 0.92,
+      "metallic": 0.0,
+      "palette": "../palettes/bank.png"
+    },
+    {
+      "file": "stone_wall_02.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGBA",
+      "bytes": 1097,
+      "sha256": "567f50ac6625f3b4e4bca58316f95e31c33b2f8f3211f370c22bd29f726e8142",
+      "material": "stone_wall",
+      "variant": 2,
+      "role": "albedo",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "anchor_kind": "surface_uv_origin",
+      "tileable_x": true,
+      "tileable_y": true,
+      "roughness": 0.92,
+      "metallic": 0.0,
+      "palette": "../palettes/bank.png"
+    },
+    {
+      "file": "stone_wall_03.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGBA",
+      "bytes": 1053,
+      "sha256": "44b01126e1e9bd8aa61321f1dc9b8098d80ca8ea321837dabfde348e2c16aeeb",
+      "material": "stone_wall",
+      "variant": 3,
+      "role": "albedo",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "anchor_kind": "surface_uv_origin",
+      "tileable_x": true,
+      "tileable_y": true,
+      "roughness": 0.92,
+      "metallic": 0.0,
+      "palette": "../palettes/bank.png"
+    },
+    {
+      "file": "plaster_01.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGBA",
+      "bytes": 927,
+      "sha256": "f251b57ad425cdecaa9b10831869815ebc9458fd7976de6f5e4ddd9c31f64b45",
+      "material": "plaster",
+      "variant": 1,
+      "role": "albedo",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "anchor_kind": "surface_uv_origin",
+      "tileable_x": true,
+      "tileable_y": true,
+      "roughness": 0.92,
+      "metallic": 0.0,
+      "palette": "../palettes/bank.png"
+    },
+    {
+      "file": "plaster_02.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGBA",
+      "bytes": 951,
+      "sha256": "76276d25e0636a15a98e1018e0b46e6d7da3a410333e97817ec392cb1e904316",
+      "material": "plaster",
+      "variant": 2,
+      "role": "albedo",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "anchor_kind": "surface_uv_origin",
+      "tileable_x": true,
+      "tileable_y": true,
+      "roughness": 0.92,
+      "metallic": 0.0,
+      "palette": "../palettes/bank.png"
+    },
+    {
+      "file": "plaster_03.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGBA",
+      "bytes": 953,
+      "sha256": "ceb9b89239ce6c6610bfec4eda7d7b90f008be04d6f07f81136f137497ed8511",
+      "material": "plaster",
+      "variant": 3,
+      "role": "albedo",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "anchor_kind": "surface_uv_origin",
+      "tileable_x": true,
+      "tileable_y": true,
+      "roughness": 0.92,
+      "metallic": 0.0,
+      "palette": "../palettes/bank.png"
+    },
+    {
+      "file": "step_riser_01.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGBA",
+      "bytes": 792,
+      "sha256": "e59671f7e05f4ba50701431f49a1f0dd99902f38b57c54c1318cb70c724a9ac5",
+      "material": "step_riser",
+      "variant": 1,
+      "role": "albedo",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "anchor_kind": "surface_uv_origin",
+      "tileable_x": true,
+      "tileable_y": true,
+      "roughness": 0.92,
+      "metallic": 0.0,
+      "palette": "../palettes/bank.png"
+    },
+    {
+      "file": "step_riser_02.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGBA",
+      "bytes": 780,
+      "sha256": "bdda1c145b8254299fa6650c14c68568e7c5fac7315cb551683a2464a56a07af",
+      "material": "step_riser",
+      "variant": 2,
+      "role": "albedo",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "anchor_kind": "surface_uv_origin",
+      "tileable_x": true,
+      "tileable_y": true,
+      "roughness": 0.92,
+      "metallic": 0.0,
+      "palette": "../palettes/bank.png"
+    },
+    {
+      "file": "step_riser_03.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGBA",
+      "bytes": 799,
+      "sha256": "3faf4f58d8ffe405f2108c1c927e098dc0005b9a3e741f7754419f5cd0e2a7d2",
+      "material": "step_riser",
+      "variant": 3,
+      "role": "albedo",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "anchor_kind": "surface_uv_origin",
+      "tileable_x": true,
+      "tileable_y": true,
+      "roughness": 0.92,
+      "metallic": 0.0,
+      "palette": "../palettes/bank.png"
+    },
+    {
+      "file": "roof_red_01_n.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGB",
+      "bytes": 553,
+      "sha256": "5de1d0c3e6ed66ef53cfa45d248ffc1d556c6a37266b792a2c1788daa1406656",
+      "material": "roof_red",
+      "variant": 1,
+      "role": "normal",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "tileable_x": true,
+      "tileable_y": true,
+      "color_space": "linear_data",
+      "normal_convention": "OpenGL +Y"
+    },
+    {
+      "file": "roof_red_01.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGBA",
+      "bytes": 692,
+      "sha256": "c0f60345bf0df2867e59af1531c2fa86f64a7e8cfa0ce4104946ff45a44175e7",
+      "material": "roof_red",
+      "variant": 1,
+      "role": "albedo",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "anchor_kind": "surface_uv_origin",
+      "tileable_x": true,
+      "tileable_y": true,
+      "roughness": 0.92,
+      "metallic": 0.0,
+      "palette": "../palettes/bank.png",
+      "normal_map": "roof_red_01_n.png",
+      "normal_scale": 0.65
+    },
+    {
+      "file": "roof_red_02_n.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGB",
+      "bytes": 553,
+      "sha256": "5de1d0c3e6ed66ef53cfa45d248ffc1d556c6a37266b792a2c1788daa1406656",
+      "material": "roof_red",
+      "variant": 2,
+      "role": "normal",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "tileable_x": true,
+      "tileable_y": true,
+      "color_space": "linear_data",
+      "normal_convention": "OpenGL +Y"
+    },
+    {
+      "file": "roof_red_02.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGBA",
+      "bytes": 720,
+      "sha256": "4d2cdfb77b281bb4d538932ad2293cec5ba44304dbc0500eded5e34e32b37e3c",
+      "material": "roof_red",
+      "variant": 2,
+      "role": "albedo",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "anchor_kind": "surface_uv_origin",
+      "tileable_x": true,
+      "tileable_y": true,
+      "roughness": 0.92,
+      "metallic": 0.0,
+      "palette": "../palettes/bank.png",
+      "normal_map": "roof_red_02_n.png",
+      "normal_scale": 0.65
+    },
+    {
+      "file": "roof_red_03_n.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGB",
+      "bytes": 553,
+      "sha256": "5de1d0c3e6ed66ef53cfa45d248ffc1d556c6a37266b792a2c1788daa1406656",
+      "material": "roof_red",
+      "variant": 3,
+      "role": "normal",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "tileable_x": true,
+      "tileable_y": true,
+      "color_space": "linear_data",
+      "normal_convention": "OpenGL +Y"
+    },
+    {
+      "file": "roof_red_03.png",
+      "width": 64,
+      "height": 64,
+      "format": "RGBA",
+      "bytes": 709,
+      "sha256": "2f8b750d0a4a2054ab739137f388b5c07f2ad7af9978f166464d8b2b1a1794e8",
+      "material": "roof_red",
+      "variant": 3,
+      "role": "albedo",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "anchor_kind": "surface_uv_origin",
+      "tileable_x": true,
+      "tileable_y": true,
+      "roughness": 0.92,
+      "metallic": 0.0,
+      "palette": "../palettes/bank.png",
+      "normal_map": "roof_red_03_n.png",
+      "normal_scale": 0.65
+    }
+  ]
+}
