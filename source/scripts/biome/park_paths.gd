@@ -6,8 +6,10 @@ extends Node2D
 
 const PATH_TEX := "res://assets/biome/bank_path.png"
 const PLAZA_TEX := "res://assets/biome/bank_plaza.png"
-const CURB := Color("#c9962e")
-const CURB_SHADE := Color("#7a5418")
+## Каменный бордюр и мягкая тень по краю вместо яркой золотой обводки: дорожка лежит в газоне, а не нарисована поверх.
+const CURB := Color("#a89272")
+const CURB_SHADE := Color(0.08, 0.06, 0.03, 0.22)
+const PATH_TINT := Color(0.9, 0.87, 0.82)
 
 var paths: Array[PackedVector2Array] = []
 var width := 150.0
@@ -20,9 +22,10 @@ func build(center: Vector2, plaza_radius: float) -> void:
 	for i in paths.size():
 		var line := paths[i]
 		var flat := flat_ends.has(i)
-		_line(line, width + 22.0, null, CURB_SHADE, flat)
-		_line(line, width + 12.0, null, CURB, flat)
-		_line(line, width, path_tex, Color(0.96, 0.94, 0.92), flat)
+		_line(line, width + 34.0, null, Color(CURB_SHADE, CURB_SHADE.a * 0.5), flat)
+		_line(line, width + 20.0, null, CURB_SHADE, flat)
+		_line(line, width + 8.0, null, CURB, flat)
+		_line(line, width, path_tex, PATH_TINT, flat)
 	if plaza_radius <= 0.0:
 		return
 	# Площадь поверх дорожек: дорожки «вливаются» в неё.
@@ -30,8 +33,8 @@ func build(center: Vector2, plaza_radius: float) -> void:
 	for i in 48:
 		ring.append(center + Vector2.from_angle(TAU * i / 48.0) * Vector2(plaza_radius, plaza_radius * 0.78))
 	_polygon(ring, null, CURB_SHADE, 1.08)
-	_polygon(ring, null, CURB, 1.05)
-	_polygon(ring, load(PLAZA_TEX) as Texture2D, Color(0.98, 0.97, 0.95), 1.0)
+	_polygon(ring, null, CURB, 1.03)
+	_polygon(ring, load(PLAZA_TEX) as Texture2D, PATH_TINT, 1.0)
 
 
 ## Свалка: протоптанная тропа — мягкая тёмная полоса без бордюров (две ширины — размытый край).

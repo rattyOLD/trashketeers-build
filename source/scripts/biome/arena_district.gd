@@ -354,6 +354,9 @@ func _crowd_row(paths: Array[String], from_x: float, to_x: float, foot_y: float,
 
 
 func _blocked(x: float, y: float, half: float) -> bool:
+	# Напротив проёма в нижнем заборе дома не ставим: дорожка уходит между ними на улицу.
+	if bottom_gap.y > 0.0 and y > _inner.end.y and absf(x - bottom_gap.x) < bottom_gap.y + half + 40.0:
+		return true
 	if avoid.is_empty():
 		return false
 	var sx: float = avoid[0] if y < _inner.get_center().y else avoid[1]

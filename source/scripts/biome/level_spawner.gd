@@ -644,8 +644,8 @@ const JUNK_GROUND := "res://assets/maps/night_dump/floor.png"
 const BANK_FLOOR_SATURATION := 0.88
 const BANK_FLOOR_TINT := Vector3(1.02, 0.98, 0.9)
 const GROUND_SCALE := 1.35
-## Срез дорожки парка — по основанию забора: в этом месте забор расступается (ArenaDistrict.bottom_gap).
-const PARK_FENCE_GAP := 0.0
+## Дорожка к старту проходит проём в заборе и между домами выходит на улицу района (машины едут на +250).
+const PARK_STREET_Y := 235.0
 ## Полуширина проёма в заборе под дорожку к старту (дорожка 150 + бордюры 22 → 86 на сторону).
 const PARK_PATH_GAP_HALF := 100.0
 ## Прямой хвост дорожки перед забором: срез получается горизонтальным.
@@ -1469,7 +1469,7 @@ func _build_park(center: Vector2) -> void:
 	_park.paths.append(ParkPaths.curve(center, Vector2(boss_rect.get_center().x, boss_rect.end.y + 60.0), randf_range(-150.0, 150.0)))
 	# Дорожка к старту упирается в нижний забор (его основание — inner.end.y + FENCE_BOTTOM_OFFSET): последний
 	# участок строго вертикальный, поэтому прямой срез параллелен забору, а не ложится на него наискось.
-	var fence_end := Vector2(player_start.x, inner.end.y + ArenaDistrict.FENCE_BOTTOM_OFFSET - PARK_FENCE_GAP)
+	var fence_end := Vector2(player_start.x, inner.end.y + PARK_STREET_Y)
 	var to_start := ParkPaths.curve(center, fence_end - Vector2(0, PARK_STRAIGHT_TAIL), randf_range(-150.0, 150.0))
 	for k in range(1, 5):
 		to_start.append(fence_end - Vector2(0, PARK_STRAIGHT_TAIL * (1.0 - k / 4.0)))
