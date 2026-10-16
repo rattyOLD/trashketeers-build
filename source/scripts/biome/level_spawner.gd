@@ -639,13 +639,17 @@ func _cells_rect(cell: Vector2i, size_cells: Vector2i) -> Rect2:
 ## Земля Свалки во всех режимах — асфальт района Астры в трещинах (лужи, решётки, мусор): одна
 ## тайловая картинка на всю карту, как за забором — арена и район один мир.
 const JUNK_GROUND := "res://assets/maps/night_dump/floor.png"
-const GROUND_SCALE := 1.35
-## Земля Свалки нарисована очень тёмной (средняя яркость ~45 из 255): поднимаем её, чтобы герой и враги
-## читались на фоне. Арт не меняется — только множитель в шейдере земли и светлее заливка теней.
-const JUNK_GROUND_LIFT := 1.5
-const JUNK_SHADOW_FILL := Vector3(0.23, 0.23, 0.27)
+## Трава Банка приглушена и чуть теплее, пока атлас ch2_floor не перерисован (4 ряда плиток: дорожки, газон,
+## розовая и белая площадки — бриф v33, п. 5): две половины игры в одной гамме, яркая лужайка не слепит.
 const BANK_FLOOR_SATURATION := 0.88
 const BANK_FLOOR_TINT := Vector3(1.02, 0.98, 0.9)
+const GROUND_SCALE := 1.35
+## Срез дорожки парка — по основанию забора: в этом месте забор расступается (ArenaDistrict.bottom_gap).
+const PARK_FENCE_GAP := 0.0
+## Полуширина проёма в заборе под дорожку к старту (дорожка 150 + бордюры 22 → 86 на сторону).
+const PARK_PATH_GAP_HALF := 100.0
+## Прямой хвост дорожки перед забором: срез получается горизонтальным.
+const PARK_STRAIGHT_TAIL := 170.0
 static var _calm: Shader
 
 
@@ -729,8 +733,8 @@ func _build_floor() -> void:
 				tint = Vector3(1.0, 0.95, 0.84)
 			calm.set_shader_parameter("saturation", 0.66)
 			calm.set_shader_parameter("contrast", 0.78)
-			calm.set_shader_parameter("shadow_fill", JUNK_SHADOW_FILL if layout == "junkyard" else Vector3(0.16, 0.17, 0.2))
-			calm.set_shader_parameter("floor_tint", tint * (JUNK_GROUND_LIFT if layout == "junkyard" else 1.0))
+			calm.set_shader_parameter("shadow_fill", Vector3(0.16, 0.17, 0.2))
+			calm.set_shader_parameter("floor_tint", tint)
 			calm.set_shader_parameter("mirror_tiles", ground_path == JUNK_GROUND or map_id in ["night_dump", "acid_rain", "gold_vault", "pigeon_roofs"])
 		if ground_path == JUNK_GROUND:
 			calm.set_shader_parameter("wear_enabled", true)
@@ -762,7 +766,6 @@ func _build_floor() -> void:
 	tile_map.scale = Vector2.ONE * (CELL * 2.0 / tile)
 	tile_map.light_mask = BiomeLayers.LIGHT_MASK_FLOOR
 	if layout == "bank":
-		# Трава Банка приглушена и чуть теплее: две половины игры в одной гамме, яркая лужайка не слепит.
 		var calm_bank := ShaderMaterial.new()
 		calm_bank.shader = _calm_shader()
 		calm_bank.set_shader_parameter("saturation", BANK_FLOOR_SATURATION)
@@ -945,6 +948,8 @@ func _build_district() -> void:
 	_own(district, _layers.floor_layer)
 	if not _river_points.is_empty():
 		district.avoid = [_river_points[0].x, _river_points[_river_points.size() - 1].x, RIVER_WIDTH * 0.5 + 80.0]
+	if layout == "bank" and _organic:
+		district.bottom_gap = Vector2(player_start.x, PARK_PATH_GAP_HALF)
 	district.build(layout, str(chapter.get("id", "")), bounds, _arena_inner(), _origin.y + grid_size.y / 2 * CELL, GATE_HALF * CELL)
 	view_bounds = ArenaDistrict.view_rect(bounds)
 
@@ -1462,7 +1467,14 @@ func _build_park(center: Vector2) -> void:
 	_park.paths.append(ParkPaths.curve(center, Vector2(inner.position.x - 20.0, mid_y), 0.0))
 	_park.paths.append(ParkPaths.curve(center, Vector2(inner.end.x + 20.0, mid_y), 0.0))
 	_park.paths.append(ParkPaths.curve(center, Vector2(boss_rect.get_center().x, boss_rect.end.y + 60.0), randf_range(-150.0, 150.0)))
-	_park.paths.append(ParkPaths.curve(center, Vector2(player_start.x, inner.end.y + 20.0), randf_range(-150.0, 150.0)))
+	# Дорожка к старту упирается в нижний забор (его основание — inner.end.y + FENCE_BOTTOM_OFFSET): последний
+	# участок строго вертикальный, поэтому прямой срез параллелен забору, а не ложится на него наискось.
+	var fence_end := Vector2(player_start.x, inner.end.y + ArenaDistrict.FENCE_BOTTOM_OFFSET - PARK_FENCE_GAP)
+	var to_start := ParkPaths.curve(center, fence_end - Vector2(0, PARK_STRAIGHT_TAIL), randf_range(-150.0, 150.0))
+	for k in range(1, 5):
+		to_start.append(fence_end - Vector2(0, PARK_STRAIGHT_TAIL * (1.0 - k / 4.0)))
+	_park.paths.append(to_start)
+	_park.flat_ends.append(_park.paths.size() - 1)
 	_own(_park, _layers.floor_layer)
 	_park.build(center, 300.0)
 	_park.z_index = 1

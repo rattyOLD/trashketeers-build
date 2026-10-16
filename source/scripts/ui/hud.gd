@@ -96,6 +96,8 @@ var _revive: BattlePanels.RevivePanel
 var _run_result: BattlePanels.RunResultPanel
 var _chapter_card: BattlePanels.ChapterCard
 var _boss_card: BattlePanels.ChapterCard
+var _boss_portrait: TextureRect
+var _boss_portrait_tween: Tween
 var _hint: HintBubble
 var _left_column: VBoxContainer
 var _order_card: OrderCard
@@ -215,7 +217,22 @@ func build(currency_icon: Texture2D, weapon: WeaponData) -> void:
 	top.add_child(_chapter_card)
 	_boss_card = BattlePanels.ChapterCard.new()
 	_boss_card.place(BOSS_CARD_TOP_PORTRAIT if Orient.portrait else BOSS_CARD_TOP)
+	if ResourceLoader.exists(BOSS_INTRO_DIR + "stripe.png"):
+		_boss_card.set_backdrop(load(BOSS_INTRO_DIR + "stripe.png") as Texture2D)
 	_root.add_child(_boss_card)
+	_boss_portrait = TextureRect.new()
+	_boss_portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_boss_portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_boss_portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_boss_portrait.visible = false
+	var side := BOSS_PORTRAIT_SIZE_PORTRAIT if Orient.portrait else BOSS_PORTRAIT_SIZE
+	_boss_portrait.anchor_top = 1.0
+	_boss_portrait.anchor_bottom = 1.0
+	_boss_portrait.offset_left = 0.0
+	_boss_portrait.offset_right = side
+	_boss_portrait.offset_bottom = -AtmosphereFX.LETTERBOX + side * 0.12
+	_boss_portrait.offset_top = _boss_portrait.offset_bottom - side
+	_root.add_child(_boss_portrait)
 
 	_level_up = LevelUpPanel.new()
 	_level_up.chosen.connect(func(u: UpgradeData) -> void: upgrade_chosen.emit(u))
@@ -1007,9 +1024,30 @@ const BOSS_CARD_TOP_PORTRAIT := 236.0
 const BOSS_CARD_HOLD := 1.2
 
 
-func show_boss_intro(caption: String, boss_name: String) -> void:
+## Портреты боссов Астры (исходные игровые лица): слева внизу над кинополосой, где джойстик, а не босс.
+const BOSS_INTRO_DIR := "res://assets/ui/boss_intro/"
+const BOSS_PORTRAIT_SIZE := 340.0
+const BOSS_PORTRAIT_SIZE_PORTRAIT := 360.0
+
+
+func show_boss_intro(caption: String, boss_name: String, boss_id: StringName = &"") -> void:
 	_hide_toast_now()
 	_boss_card.play(caption, boss_name, UiStyle.DANGER, BOSS_CARD_HOLD)
+	var path := "%s%s.png" % [BOSS_INTRO_DIR, boss_id]
+	if boss_id == &"" or not ResourceLoader.exists(path):
+		return
+	_boss_portrait.texture = load(path) as Texture2D
+	_boss_portrait.visible = true
+	_boss_portrait.modulate.a = 0.0
+	_boss_portrait.position.x = -70.0
+	if _boss_portrait_tween != null:
+		_boss_portrait_tween.kill()
+	_boss_portrait_tween = _boss_portrait.create_tween().set_parallel(true)
+	_boss_portrait_tween.tween_property(_boss_portrait, "modulate:a", 1.0, 0.35)
+	_boss_portrait_tween.tween_property(_boss_portrait, "position:x", 0.0, 0.45).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_boss_portrait_tween.chain().tween_interval(BOSS_CARD_HOLD + 0.15)
+	_boss_portrait_tween.chain().tween_property(_boss_portrait, "modulate:a", 0.0, 0.5)
+	_boss_portrait_tween.chain().tween_callback(func() -> void: _boss_portrait.visible = false)
 
 
 func show_chapter(subtitle: String, title: String, accent: Color = UiStyle.NEON) -> void:

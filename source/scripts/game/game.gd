@@ -1090,7 +1090,7 @@ func _on_boss_spawned(boss: Enemy) -> void:
 	var main_boss := not director.is_mini_wave()
 	if main_boss:
 		boss_cinematic(boss.global_position + Vector2(0, -boss.data.radius))
-		hud.show_boss_intro("БОСС" if story_mission.is_empty() else "БОСС МИССИИ", boss.data.display_name)
+		hud.show_boss_intro("БОСС" if story_mission.is_empty() else "БОСС МИССИИ", boss.data.display_name, boss.data.id)
 	else:
 		focus_camera(boss.global_position, 1.4)
 	if story != null:

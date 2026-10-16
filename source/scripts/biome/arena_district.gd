@@ -58,6 +58,8 @@ var _textures := {}
 ## Протока: [x у верхнего края, x у нижнего края, полуширина просвета] — там толпа и дома расступаются.
 var avoid: Array = []
 var _inner := Rect2()
+## Проём в нижнем заборе (x центра, полуширина): там проходит дорожка парка Банка.
+var bottom_gap := Vector2.ZERO
 var _holder: Node2D
 ## Ночью на Свалке у домов горят вывески и окна: мягкие пятна света (EnvLights), иначе район тонет в темноте.
 var _neon := false
@@ -136,7 +138,17 @@ func build(layout: String, chapter_id: String, bounds: Rect2, inner: Rect2, gate
 	_crowd_row(crowd, inner.position.x, inner.end.x, inner.position.y - 58.0, TOP_SPACING * 2.0)
 	_backdrop_row(buildings, small, view.position.x, view.end.x, inner.position.y - 215.0, 0.72)
 	# Низ: забор по краю, за ним (ближе к камере) машины и объекты — без зрителей: там кнопки.
-	_fence_row(fence_h, inner.position.x - 40.0, inner.end.x + 40.0, inner.end.y + FENCE_BOTTOM_OFFSET)
+	var foot := inner.end.y + FENCE_BOTTOM_OFFSET
+	if bottom_gap.y > 0.0:
+		# Проход для дорожки парка: забор расступается, на его месте — еле заметный барьер (стена арены остаётся).
+		_fence_row(fence_h, inner.position.x - 40.0, bottom_gap.x - bottom_gap.y, foot)
+		_fence_row(fence_h, bottom_gap.x + bottom_gap.y, inner.end.x + 40.0, foot)
+		var barrier := GateBarrier.new()
+		barrier.from = Vector2(bottom_gap.x - bottom_gap.y, foot - 10.0)
+		barrier.to = Vector2(bottom_gap.x + bottom_gap.y, foot - 10.0)
+		add_child(barrier)
+	else:
+		_fence_row(fence_h, inner.position.x - 40.0, inner.end.x + 40.0, foot)
 	_backdrop_row(buildings, small, view.position.x, view.end.x, inner.end.y + 200.0, 0.55)
 	# Бока: забор столбом по краю площадки (проход у ворот), зрители в два столбца, дома дальше.
 	for side: float in [-1.0, 1.0]:
@@ -443,3 +455,35 @@ func _exit_tree() -> void:
 	for id in _lights:
 		EnvLights.remove(id)
 	_lights.clear()
+
+
+## Невидимая стена в проёме забора: еле заметная светлая кромка проявляется, только когда к ней подходит герой.
+class GateBarrier:
+	extends Node2D
+	const SHOW_DISTANCE := 260.0
+	const MAX_ALPHA := 0.35
+	var from := Vector2.ZERO
+	var to := Vector2.ZERO
+	var _alpha := 0.0
+	var _player: Node2D
+
+	func _process(delta: float) -> void:
+		if _player == null or not is_instance_valid(_player):
+			_player = get_tree().get_first_node_in_group(&"hero") as Node2D
+			if _player == null:
+				return
+		var nearest := Geometry2D.get_closest_point_to_segment(_player.global_position, from, to)
+		var target := clampf(1.0 - _player.global_position.distance_to(nearest) / SHOW_DISTANCE, 0.0, 1.0) * MAX_ALPHA
+		var next := move_toward(_alpha, target, delta * 1.5)
+		if not is_equal_approx(next, _alpha):
+			_alpha = next
+			queue_redraw()
+
+	func _draw() -> void:
+		if _alpha <= 0.005:
+			return
+		var c := Color(0.95, 0.9, 0.75, _alpha)
+		draw_line(from, to, c, 3.0, true)
+		for i in 6:
+			var y := -14.0 * (i + 1)
+			draw_line(from + Vector2(0, y), to + Vector2(0, y), Color(c, _alpha * (0.5 - i * 0.08)), 2.0, true)

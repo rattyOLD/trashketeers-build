@@ -122,6 +122,23 @@ class ChapterCard:
 		UiStyle.anchor(_line, Vector2(0.5, 0.0), Rect2(-120, 62, 240, 3))
 
 	var _fixed_top := -1.0
+	var _backdrop: TextureRect
+
+	## Полоса-подложка под крупным названием (карточка босса, бриф v33).
+	func set_backdrop(texture: Texture2D) -> void:
+		if _backdrop == null:
+			_backdrop = TextureRect.new()
+			_backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			_backdrop.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			_backdrop.stretch_mode = TextureRect.STRETCH_SCALE
+			add_child(_backdrop)
+			move_child(_backdrop, 0)
+		_backdrop.texture = texture
+		_backdrop.set_anchors_preset(Control.PRESET_TOP_WIDE)
+		_backdrop.offset_left = 0.0
+		_backdrop.offset_right = 0.0
+		_backdrop.offset_top = _title.offset_top - 6.0
+		_backdrop.offset_bottom = _title.offset_bottom + 2.0
 
 	## Своя высота на экране вне шапки (карточка босса — низ кадра, над полосой).
 	func place(top: float) -> void:

@@ -83,6 +83,7 @@ var _last_move_direction := Vector2.RIGHT
 
 
 func _init() -> void:
+	add_to_group(&"hero")
 	collision_layer = PhysicsLayers.PLAYER
 	collision_mask = PhysicsLayers.WORLD | PhysicsLayers.OBSTACLE | PhysicsLayers.PROP
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING

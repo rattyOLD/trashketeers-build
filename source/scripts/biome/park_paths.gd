@@ -11,14 +11,18 @@ const CURB_SHADE := Color("#7a5418")
 
 var paths: Array[PackedVector2Array] = []
 var width := 150.0
+## Индексы дорожек, которые упираются в забор: конец прямой, без скругления — дорожка не «пробивает» ограду.
+var flat_ends: Array[int] = []
 
 
 func build(center: Vector2, plaza_radius: float) -> void:
 	var path_tex := load(PATH_TEX) as Texture2D
-	for line in paths:
-		_line(line, width + 22.0, null, CURB_SHADE)
-		_line(line, width + 12.0, null, CURB)
-		_line(line, width, path_tex, Color(0.96, 0.94, 0.92))
+	for i in paths.size():
+		var line := paths[i]
+		var flat := flat_ends.has(i)
+		_line(line, width + 22.0, null, CURB_SHADE, flat)
+		_line(line, width + 12.0, null, CURB, flat)
+		_line(line, width, path_tex, Color(0.96, 0.94, 0.92), flat)
 	if plaza_radius <= 0.0:
 		return
 	# Площадь поверх дорожек: дорожки «вливаются» в неё.
@@ -56,14 +60,14 @@ func distance_to(p: Vector2) -> float:
 	return best
 
 
-func _line(points: PackedVector2Array, w: float, texture: Texture2D, color: Color) -> void:
+func _line(points: PackedVector2Array, w: float, texture: Texture2D, color: Color, flat_end: bool = false) -> void:
 	var line := Line2D.new()
 	line.points = points
 	line.width = w
 	line.default_color = color
 	line.joint_mode = Line2D.LINE_JOINT_ROUND
 	line.begin_cap_mode = Line2D.LINE_CAP_ROUND
-	line.end_cap_mode = Line2D.LINE_CAP_ROUND
+	line.end_cap_mode = Line2D.LINE_CAP_NONE if flat_end else Line2D.LINE_CAP_ROUND
 	if texture != null:
 		line.texture = texture
 		line.texture_mode = Line2D.LINE_TEXTURE_TILE
