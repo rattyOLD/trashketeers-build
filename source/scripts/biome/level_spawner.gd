@@ -639,10 +639,6 @@ func _cells_rect(cell: Vector2i, size_cells: Vector2i) -> Rect2:
 ## Земля Свалки во всех режимах — асфальт района Астры в трещинах (лужи, решётки, мусор): одна
 ## тайловая картинка на всю карту, как за забором — арена и район один мир.
 const JUNK_GROUND := "res://assets/maps/night_dump/floor.png"
-## Трава Банка приглушена и чуть теплее, пока атлас ch2_floor не перерисован (4 ряда плиток: дорожки, газон,
-## розовая и белая площадки — бриф v33, п. 5): две половины игры в одной гамме, яркая лужайка не слепит.
-const BANK_FLOOR_SATURATION := 0.88
-const BANK_FLOOR_TINT := Vector3(1.02, 0.98, 0.9)
 const GROUND_SCALE := 1.35
 ## Дорожка к старту проходит проём в заборе и между домами выходит на улицу района (машины едут на +250).
 const PARK_STREET_Y := 235.0
@@ -765,14 +761,6 @@ func _build_floor() -> void:
 	tile_map.position = _origin
 	tile_map.scale = Vector2.ONE * (CELL * 2.0 / tile)
 	tile_map.light_mask = BiomeLayers.LIGHT_MASK_FLOOR
-	if layout == "bank":
-		var calm_bank := ShaderMaterial.new()
-		calm_bank.shader = _calm_shader()
-		calm_bank.set_shader_parameter("saturation", BANK_FLOOR_SATURATION)
-		calm_bank.set_shader_parameter("contrast", 0.95)
-		calm_bank.set_shader_parameter("shadow_fill", Vector3(0.3, 0.27, 0.24))
-		calm_bank.set_shader_parameter("floor_tint", BANK_FLOOR_TINT)
-		tile_map.material = calm_bank
 	for ty in grid_size.y / 2:
 		for tx in grid_size.x / 2:
 			var zone: int = zones[_index(Vector2i(tx * 2, ty * 2))]
