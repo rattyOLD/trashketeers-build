@@ -115,7 +115,8 @@ func _check_separation() -> void:
 				var ds := d.length_squared()
 				if ds < reach * reach and ds >= 0.01:
 					var dist := sqrt(ds)
-					var force := d / dist * (1.0 - dist / reach) * EnemyManager.SEPARATION_SPEED
+					var overlap := 1.0 - dist / reach
+					var force := d / dist * overlap * (1.0 + overlap) * EnemyManager.SEPARATION_SPEED
 					expected[i] -= force
 					expected[j] += force
 			var dp := a.position - manager._player.position

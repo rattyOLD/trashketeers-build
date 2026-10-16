@@ -61,9 +61,11 @@ func _run() -> void:
 								_check((fore*elbow).distance_to(actor._clip_body_elbow(which)) < 0.02, "forearm begins at the existing sleeve end")
 							else:
 								_check((upper*elbow).distance_to(fore*elbow) < 0.02, "continuous elbow joint")
-							var original_scale := actor._sprite_xform().get_scale()
-							_check(absf(absf(upper.get_scale().x)-absf(original_scale.x)) < 0.001, "upper arm stays original size")
-							_check(absf(absf(fore.get_scale().x)-absf(original_scale.x)) < 0.001, "forearm and hand stay original size")
+							# Сегменты рисуются шире поперёк кости, но длина руки остаётся исходной.
+							var lengths := actor._clip_arm_lengths(which)
+							if not actor._clip_baked_upper(which):
+								_check(absf((upper*elbow).distance_to(upper*shoulder)-lengths.x) < 0.02, "upper arm keeps its original length")
+							_check(absf((fore*palm).distance_to(fore*elbow)-lengths.y) < 0.02, "forearm keeps its original length")
 
 		actor.scale = Vector2.ONE * 2.0
 		var index := actors.size()-1
