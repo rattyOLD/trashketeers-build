@@ -42,4 +42,4 @@
 
 ## Для Астры
 Арт кладётся в `source/assets/<папка>/`. Нарезку и прозрачность делает `tools/slice_vfx.py`.
-Требования к арту — в `astra/from_claude/BRIEF_v34_bank_floor.md` (v33 выполнен, кроме земли Банка).
+Требования к арту — в `astra/from_claude/BRIEF_v35_pixel_art.md`: переход всей игры на HD-пиксель-арт (v33 и v34 выполнены).
