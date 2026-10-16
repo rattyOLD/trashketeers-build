@@ -23,6 +23,7 @@ const SPRITE_TILT := -12.0
 const RACCOON_CELL := Vector2i(300, 200)
 
 var _camera: Camera3D
+var _post: ShaderMaterial
 var _hero: Sprite3D
 var _hero_frames: Array[Texture2D] = []
 var _hero_time := 0.0
@@ -76,14 +77,14 @@ func _build_environment() -> void:
 	var world := WorldEnvironment.new()
 	world.environment = env
 	add_child(world)
-	# Закатное солнце сзади слева: тени ложатся вперёд вправо, к камере.
+	# Закатное солнце спереди слева (со стороны камеры): лица освещены, тени уходят назад вправо.
 	var sun := DirectionalLight3D.new()
 	sun.light_color = Color("#ffd29a")
 	sun.light_energy = 1.0
 	sun.shadow_enabled = true
 	sun.shadow_opacity = 0.85
 	sun.directional_shadow_max_distance = 60.0
-	sun.rotation_degrees = Vector3(-38.0, -145.0, 0.0)
+	sun.rotation_degrees = Vector3(-38.0, -30.0, 0.0)
 	add_child(sun)
 
 
@@ -430,6 +431,10 @@ func _follow_camera(delta: float) -> void:
 	var back := Vector3(0, sin(deg_to_rad(-CAMERA_PITCH)), cos(deg_to_rad(-CAMERA_PITCH))) * CAMERA_DISTANCE
 	var target := _hero.position + Vector3(0, 0.8, -3.0) + back
 	_camera.position = _camera.position.lerp(target, 1.0 - exp(-delta * 4.0))
+	# Резкая полоса держится на герое: размыты только дальний и ближний планы.
+	if _post != null:
+		var at := _camera.unproject_position(_hero.position + Vector3(0, 0.9, 0))
+		_post.set_shader_parameter(&"focus_y", clampf(at.y / get_viewport().get_visible_rect().size.y, 0.3, 0.75))
 
 
 ## Та же цветокоррекция, что в 2D-бою: размытие верха и низа (в наклонной камере это глубина
@@ -451,4 +456,5 @@ func _build_post() -> void:
 	material.set_shader_parameter(&"shadow_tint", Vector3(0.08, 0.02, 0.14))
 	material.set_shader_parameter(&"highlight_tint", Vector3(0.06, 0.03, -0.03))
 	rect.material = material
+	_post = material
 	layer.add_child(rect)
