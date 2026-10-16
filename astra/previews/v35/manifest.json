@@ -1,0 +1,20 @@
+{
+  "brief": "v35",
+  "kind": "art_direction_preview",
+  "production_ready": false,
+  "studio": "TrashSquad · Beer Party Studio",
+  "files": [
+    {
+      "file": "bank_direction.png",
+      "size": [
+        1672,
+        941
+      ],
+      "bytes": 3390633,
+      "sha256": "c3cb0cae69ac73a21a49b3cf75cb812ba75caaafe6d66eb1b6366dd2a3b85ed5"
+    }
+  ],
+  "pixel_palette_and_native_grid_validated": false,
+  "game_integration": false,
+  "reference_videos_or_stills_stored": false
+}
