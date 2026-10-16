@@ -265,12 +265,15 @@ func build_label() -> String:
 func fullscreen_supported() -> bool:
 	if not is_web:
 		return true
-	return _js_bool("!!(document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen)")
+	return _js_bool("return window.__trashHost ? window.__trashHost.supported() : !!(document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen)")
 
 
 ## В вебе запрос идёт напрямую из обработчика тапа: браузер разрешает полноэкранный режим только по жесту пользователя.
 func set_fullscreen(on: bool) -> void:
 	if is_web:
+		if _js_bool("return !!window.__trashHost;"):
+			_js("window.__trashHost.fullscreen(%s);" % ("true" if on else "false"))
+			return
 		if on:
 			_js("var e = document.documentElement; var f = e.requestFullscreen || e.webkitRequestFullscreen; if (f) { var r = f.call(e, {navigationUI: 'hide'}); if (r && r.then) { r.then(function () { try { screen.orientation.lock('landscape').catch(function () {}); } catch (x) {} }).catch(function () {}); } }")
 		else:
@@ -280,21 +283,21 @@ func set_fullscreen(on: bool) -> void:
 
 
 func can_install() -> bool:
-	return is_web and _js_bool("return !!window.__trash_install_evt;")
+	return is_web and _js_bool("return window.__trashHost ? window.__trashHost.canInstall() : !!window.__trash_install_evt;")
 
 
 func is_standalone() -> bool:
-	return is_web and _js_bool("return !!(window.matchMedia('(display-mode: standalone)').matches || window.matchMedia('(display-mode: fullscreen)').matches || navigator.standalone);")
+	return is_web and _js_bool("return window.__trashHost ? window.__trashHost.standalone() : !!(window.matchMedia('(display-mode: standalone)').matches || window.matchMedia('(display-mode: fullscreen)').matches || navigator.standalone);")
 
 
 func install_app() -> void:
 	if is_web:
-		_js("if (window.__trash_install) window.__trash_install();")
+		_js("if (window.__trashHost) window.__trashHost.install(); else if (window.__trash_install) window.__trash_install();")
 
 
 func is_fullscreen() -> bool:
 	if is_web:
-		return _js_bool("return !!(document.fullscreenElement || document.webkitFullscreenElement);")
+		return _js_bool("return window.__trashHost ? window.__trashHost.isFullscreen() : !!(document.fullscreenElement || document.webkitFullscreenElement);")
 	return DisplayServer.window_get_mode() == DisplayServer.WINDOW_MODE_FULLSCREEN
 
 
@@ -513,7 +516,7 @@ func invite_link() -> String:
 		var uid := user_id()
 		return bot_link + ("?startapp=ref_%s" % uid if not uid.is_empty() else "")
 	if is_web:
-		var href = _js("return String(location.href).split('#')[0];")
+		var href = _js("return window.__trashHost ? window.__trashHost.canonical() : String(location.href).split('#')[0];")
 		if typeof(href) == TYPE_STRING:
 			return href
 	return ""
@@ -523,7 +526,7 @@ func invite_link() -> String:
 func page_url() -> String:
 	if not is_web:
 		return ""
-	var href = _js("return location.origin + location.pathname;")
+	var href = _js("return window.__trashHost ? window.__trashHost.canonical() : location.origin + location.pathname;")
 	return str(href) if typeof(href) == TYPE_STRING else ""
 
 
@@ -537,7 +540,7 @@ func consume_url_param(key: String) -> String:
 
 ## Перезагрузка страницы без ?restore= в адресе (иначе мини-апка вернёт прежний аккаунт).
 func reload_clean() -> void:
-	_js("history.replaceState(null, '', location.pathname); location.reload(); return true;")
+	_js("if (window.__trashHost) { window.__trashHost.reloadClean(); return true; } history.replaceState(null, '', location.pathname); location.reload(); return true;")
 
 
 ## Telegram: нативное окно «Поделиться»; браузер: navigator.share или копирование в буфер.

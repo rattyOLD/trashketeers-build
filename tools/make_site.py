@@ -67,7 +67,7 @@ with open(os.path.join(build, "index.pck"), "rb") as src:
     pck_raw = src.read()
 with open(os.path.join(build, "index.wasm"), "rb") as src:
     raw = src.read()
-for extra in ("pako_inflate.min.js", "pako.LICENSE", "manifest.webmanifest", "sw.js", "icon180.png", "icon192.png", "icon512.png", "og.jpg"):
+for extra in ("pako_inflate.min.js", "pako.LICENSE", "landscape_bridge.js", "manifest.webmanifest", "sw.js", "icon180.png", "icon192.png", "icon512.png", "og.jpg"):
     shutil.copy(os.path.join(ROOT, "tools", extra), os.path.join(site, extra))
 shutil.copy(os.path.join(ROOT, "audio_unlock.js"), os.path.join(site, "audio_unlock.js"))
 shutil.copy(os.path.join(ROOT, "source/web/render_scale.js"), os.path.join(site, "render_scale.js"))
@@ -116,6 +116,10 @@ if os.environ.get("FORCE_UPDATE") == "1":
 open(os.path.join(site, "version.json"), "w").write(json.dumps({"build": build_id, "label": build_label, "time": build_time, "min_build": min_build}))
 page = page.replace("__PCK_SIZE__", str(len(pck_raw)))
 page = page.replace("__WASM_SIZE__", str(len(raw)))
-open(os.path.join(site, "index.html"), "w", encoding="utf-8").write(page)
+open(os.path.join(site, "game.html"), "w", encoding="utf-8").write(page)
+metadata = page[:page.index("<link rel=\"preconnect\"")]
+host = open(os.path.join(ROOT, "tools", "landscape_host.html"), encoding="utf-8").read()
+host = host.replace("__PAGE_METADATA__", metadata).replace("__BUILD_ID__", build_id)
+open(os.path.join(site, "index.html"), "w", encoding="utf-8").write(host)
 for name in sorted(os.listdir(site)):
     print(name, os.path.getsize(os.path.join(site, name)))

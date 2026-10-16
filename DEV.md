@@ -28,6 +28,8 @@
 - `GODOT=... tools/verify.sh` — импорт, компиляция всех скриптов (`CHECK checked N, failed 0`), бот играет выживание, сюжет, рейд и мод «враги взрываются». Выкладывать только при `VERIFY OK`.
 - Веб: экспорт `Web` в `source/build/web`, затем `python3 tools/make_site.py source/build/web` → `tools/site/` → скопировать в корень и `docs/`, коммит в `main`. Номер версии берётся как следующий за `version.json`.
 - Проверить загрузку сайта в Chromium (Playwright): игра должна дойти до главного меню.
+- Горизонтальный Web: `landscape_host.html` — внешняя страница `index.html`, `site_template.html` — игра `game.html`. Поворот всего iframe сохраняет координаты касаний. Системная блокировка ориентации запрашивается по жесту, при отказе браузера игра продолжает работать. На iPhone поворачивается содержимое игры; Safari управляет своей ориентацией сам.
+- После правок Web-ориентации: `python3 tools/check_landscape.py` (Playwright Chromium + WebKit), затем проверить экспортированную игру. Проверка охватывает два касания, поворот без перезагрузки, ввод текста/изменение высоты, ссылки, PWA и отказ fullscreen.
 - APK собирает GitHub Actions (`.github/workflows/android-beta.yml`) на каждый пуш в `source/`: подпись, Firebase App Distribution (группа `testers` + секрет `FIREBASE_TESTERS`), релиз `android-beta` с `android-version.json` для окна «ОБНОВИТЬ» в игре (`core/app_updater.gd`).
 
 ## Инструменты проверки (source/test, в сборку не попадают)

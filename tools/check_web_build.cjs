@@ -8,9 +8,7 @@ const path = require('node:path');
   const browser = await type.launch(name === 'chromium' ? {args: ['--no-sandbox', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader']} : {headless: false});
   try {
     for (const scenario of ['', '#story:m1', '#story:m2']) {
-    // A newly installed service worker deliberately reloads its clients. Keep
-    // this isolated startup check on one document, so aborted old-page requests
-    // cannot be mistaken for a runtime crash in WebKit.
+    // Isolate startup from service worker lifecycle and external services.
     const page = await browser.newPage({viewport: {width: 844, height: 390}, deviceScaleFactor: 1.5, isMobile: true, hasTouch: true, serviceWorkers: 'block'});
     const lines = [];
     const errors = [];
@@ -40,7 +38,8 @@ const path = require('node:path');
     if (scenario) await page.waitForFunction(() => (window.__trash_trail || []).some(line => line.includes('/Game')), {timeout: 180000}).catch(() => {});
     await page.waitForTimeout(scenario ? 10000 : 8000);
     const label = name + (scenario ? '-' + scenario.slice(1).replace(':', '-') : '-menu');
-    const state = await page.evaluate(() => ({trail: window.__trash_trail, crash: document.getElementById('crashlog').textContent, context: localStorage.getItem('__trash_ctx')}));
+    const game = page.frames().find(frame => frame.url().includes('/game.html')) || page;
+    const state = await game.evaluate(() => ({trail: window.__trash_trail, crash: document.getElementById('crashlog').textContent, context: localStorage.getItem('__trash_ctx')}));
     await page.screenshot({path: path.join(output, label + '.png')});
     fs.writeFileSync(path.join(output, label + '.log'), lines.join('\n') + '\n' + JSON.stringify(state));
     if (state.crash) errors.push(state.crash);

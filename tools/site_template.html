@@ -22,7 +22,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap">
 <style>
-html.orientation-ready:not(.upright) #rotate { opacity: 0; visibility: hidden; pointer-events: none; }
 :root {
 	color-scheme: dark;
 	--night: #0b171c;
@@ -287,87 +286,7 @@ html, body {
 }
 #crash button.alt { background: #2d5160; }
 #retry:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
-#rotate {
-	position: fixed;
-	inset: 0;
-	z-index: 1000;
-	pointer-events: auto;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	gap: 26px;
-	padding: 24px;
-	text-align: center;
-	transition: opacity 0.25s ease, visibility 0.25s;
-	background:
-		radial-gradient(90% 70% at 50% 45%, rgba(245, 192, 74, 0.12), transparent 65%),
-		#0d1116;
-	font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-}
-#rotate .phone {
-	position: relative;
-	width: 74px;
-	height: 128px;
-	border-radius: 16px;
-	border: 4px solid #f5c04a;
-	box-shadow: 0 0 22px rgba(245, 192, 74, 0.2);
-	background: #23272a;
-	animation: turn 1.8s ease-in-out infinite;
-}
-#rotate .phone::before {
-	content: "";
-	position: absolute;
-	top: 8px;
-	left: 50%;
-	width: 22px;
-	height: 5px;
-	margin-left: -11px;
-	border-radius: 3px;
-	background: #f5c04a;
-	opacity: 0.8;
-}
-#rotate .phone::after {
-	content: "";
-	position: absolute;
-	left: 50%;
-	bottom: 14px;
-	width: 26px;
-	height: 26px;
-	margin-left: -13px;
-	border-radius: 50%;
-	background: radial-gradient(circle, #f5c04a 30%, transparent 70%);
-	animation: pulse 1.3s ease-in-out infinite;
-}
-@keyframes turn {
-	0%, 15%, 100% { transform: rotate(0); }
-	55%, 90% { transform: rotate(90deg); }
-}
-@keyframes pulse { 0%, 100% { opacity: 0.45; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.15); } }
-#rotate h2 {
-	margin: 0;
-	font-family: "Russo One", "Arial Black", Impact, sans-serif;
-	font-weight: 400;
-	font-size: clamp(26px, 8vw, 40px);
-	color: #f1efe6;
-	text-shadow: 0 2px 4px #0d0f0e;
-}
-#rotate p { margin: 0; max-width: 300px; font-size: 15px; line-height: 1.4; color: var(--muted); }
-#rotate p b { color: var(--cyan); font-weight: 600; }
-html.orientation-hidden #rotate .phone, html.orientation-hidden #rotate .phone::after,
-html.orientation-ready:not(.upright) #rotate .phone, html.orientation-ready:not(.upright) #rotate .phone::after { animation-play-state: paused; }
-@media (max-height: 480px) {
-	#rotate { gap: 16px; padding: 16px; }
-	#rotate .phone { width: 56px; height: 96px; border-width: 3px; border-radius: 12px; }
-	#rotate h2 { font-size: clamp(22px, 4vw, 32px); }
-	#rotate p { max-width: 460px; }
-}
-@media (prefers-reduced-motion: reduce) {
-	#rotate .phone, #rotate .phone::after { animation: none; }
-	#rotate .phone { transform: rotate(90deg); }
-	#rotate { transition: none; }
-	#boot, .bar i { transition: none; }
-}
+
 
 #safe-area { position: fixed; inset: 0; visibility: hidden; pointer-events: none; padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); }
 #boot { box-sizing: border-box; padding-left: calc(22px + env(safe-area-inset-left, 0px)); padding-right: calc(22px + env(safe-area-inset-right, 0px)); }
@@ -469,12 +388,6 @@ html.orientation-ready:not(.upright) #rotate .phone, html.orientation-ready:not(
 <script>window.trashSafeInsets = function () { const s = getComputedStyle(document.getElementById("safe-area")); return [s.paddingLeft, s.paddingTop, s.paddingRight, s.paddingBottom].map(function (v) { return parseFloat(v) || 0; }); };</script>
 <canvas id="canvas" tabindex="0">Браузер не поддерживает canvas.</canvas>
 
-<div id="rotate" role="dialog" aria-modal="true" aria-labelledby="rotate-title">
-	<div class="phone"></div>
-	<h2 id="rotate-title">Играем горизонтально</h2>
-	<p id="rotate-hint">Для игры нужен горизонтальный экран.</p>
-</div>
-
 <div id="boot">
 	<div class="boot-copy">
 	<div class="boot-brand">
@@ -531,6 +444,7 @@ html.orientation-ready:not(.upright) #rotate .phone, html.orientation-ready:not(
 	window.addEventListener('pagehide', function () { all.forEach(function (ctx) { try { ctx.suspend(); } catch (e) {} }); });
 })();
 </script>
+<script src="landscape_bridge.js?v=__BUILD_ID__"></script>
 <script src="pako_inflate.min.js"></script>
 <script src="render_scale.js"></script>
 <script>
@@ -547,46 +461,8 @@ html.orientation-ready:not(.upright) #rotate .phone, html.orientation-ready:not(
 			return setTimeout(function () { window.dispatchEvent(new Event('resize')); }, ms);
 		});
 	};
-	try { if (screen.orientation && screen.orientation.lock && window.matchMedia('(pointer: coarse)').matches) { screen.orientation.lock('landscape').catch(function () {}); } } catch (e) {}
-	var touch = window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
-	var rotateTitle = document.getElementById('rotate-title');
-	var rotateHint = document.getElementById('rotate-hint');
-	var judge = function () {
-		var ae = document.activeElement;
-		if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA')) { return; }
-		var blocked = touch && window.innerHeight > window.innerWidth;
-		document.documentElement.classList.toggle('upright', blocked);
-		rotateTitle.textContent = blocked ? 'Поверни телефон горизонтально' : 'Играем горизонтально';
-		rotateHint.textContent = blocked ? 'Для игры нужен горизонтальный экран.' : (touch ? 'Держи телефон горизонтально для удобного управления.' : 'Игра рассчитана на горизонтальный экран.');
-		if (window.__trash_landscape_blocked !== blocked) {
-			window.__trash_landscape_blocked = blocked;
-			window.dispatchEvent(new Event('trashorientationchange'));
-		}
-	};
-	judge();
-	var introRemaining = 1800;
-	var introTimer = null;
-	var introStarted = 0;
-	var syncIntro = function () {
-		if (introTimer !== null) {
-			clearTimeout(introTimer);
-			introRemaining -= performance.now() - introStarted;
-			introTimer = null;
-		}
-		document.documentElement.classList.toggle('orientation-hidden', document.hidden);
-		if (document.hidden || document.documentElement.classList.contains('orientation-ready')) { return; }
-		introStarted = performance.now();
-		introTimer = setTimeout(function () {
-			introTimer = null;
-			document.documentElement.classList.add('orientation-ready');
-		}, Math.max(0, introRemaining));
-	};
-	syncIntro();
-	document.addEventListener('visibilitychange', syncIntro);
-	window.addEventListener('orientationchange', function () { judge(); setTimeout(judge, 400); });
+	window.__trash_landscape_blocked = false;
 	window.addEventListener('orientationchange', kick);
-	window.addEventListener('resize', judge);
-	document.addEventListener('focusout', judge);
 	window.addEventListener('resize', kick);
 	if (window.visualViewport) { window.visualViewport.addEventListener('resize', kick); }
 
@@ -678,10 +554,11 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 		try { history.replaceState(null, '', location.pathname + '?' + params.toString() + location.hash); } catch (e) {}
 		if (baseManifest) {
 			try {
-				var m = {name: 'Trash Squad', short_name: 'Trash Squad', start_url: location.pathname + '?' + key + '=' + encodeURIComponent(value), scope: location.pathname,
+				var m = {name: 'Trash Squad', short_name: 'Trash Squad', start_url: (window.__trashHost ? window.__trashHost.path() : location.pathname) + '?' + key + '=' + encodeURIComponent(value), scope: new URL('.', location.href).pathname,
 					display: 'fullscreen', orientation: 'landscape', background_color: '#0b171c', theme_color: '#0b171c',
 					icons: [{src: new URL('icon192.png', location.href).href, sizes: '192x192', type: 'image/png'}, {src: new URL('icon512.png', location.href).href, sizes: '512x512', type: 'image/png'}]};
 				baseManifest.href = URL.createObjectURL(new Blob([JSON.stringify(m)], {type: 'application/manifest+json'}));
+				if (window.__trashHost) { window.__trashHost.setManifest(m); }
 			} catch (e) {}
 		}
 	}

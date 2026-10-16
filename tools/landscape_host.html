@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ru"><head>
+__PAGE_METADATA__
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;overscroll-behavior:none;background:#0b171c;touch-action:none}
+#game-frame{position:fixed;border:0;display:block;transform-origin:0 0;background:#0b171c}
+#boot{display:none}
+#viewport-probe{position:fixed;inset:0;height:100dvh;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);box-sizing:border-box}
+</style></head><body>
+<div id="viewport-probe"></div><div id="boot" aria-hidden="true"></div>
+<iframe id="game-frame" title="Trash Squad" allow="autoplay; fullscreen; clipboard-write" allowfullscreen></iframe>
+<script>
+(function () {
+    'use strict';
+    var frame = document.getElementById('game-frame');
+    var probe = document.getElementById('viewport-probe');
+    var touch = matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
+    var attempted = false, installer = null, manifestURL = '', pendingFullscreen = null;
+    function isFullscreen() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+    function supported() { return !!(document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen); }
+    function lock() {
+        try { return Promise.resolve(screen.orientation && screen.orientation.lock ? screen.orientation.lock('landscape') : false).catch(function () { return false; }); }
+        catch (error) { return Promise.resolve(false); }
+    }
+    function fullscreen(on) {
+        if (!on) {
+            var exit = document.exitFullscreen || document.webkitExitFullscreen;
+            try { return Promise.resolve(exit && isFullscreen() ? exit.call(document) : false).catch(function () { return false; }); }
+            catch (error) { return Promise.resolve(false); }
+        }
+        if (isFullscreen()) { return lock(); }
+        if (pendingFullscreen) { return pendingFullscreen; }
+        var enter = document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen;
+        try {
+            pendingFullscreen = Promise.resolve(enter ? enter.call(document.documentElement, {navigationUI:'hide'}) : false)
+                .then(lock).catch(function () { return false; }).finally(function () { pendingFullscreen = null; });
+            return pendingFullscreen;
+        } catch (error) { return Promise.resolve(false); }
+    }
+    function typing() {
+        try { var active = frame.contentDocument.activeElement; return active && /INPUT|TEXTAREA/.test(active.tagName); }
+        catch (error) { return false; }
+    }
+    var lastPortrait = innerHeight > innerWidth;
+    function portrait() {
+        if (screen.orientation && screen.orientation.type) { return screen.orientation.type.indexOf('portrait') === 0; }
+        if (typeof window.orientation === 'number') { return Math.abs(window.orientation) % 180 === 0; }
+        if (!typing()) { lastPortrait = innerHeight > innerWidth; }
+        return lastPortrait;
+    }
+    function fit() {
+        var viewport = window.visualViewport;
+        var width = innerWidth, height = Math.min(innerHeight, document.documentElement.clientHeight || innerHeight, probe.getBoundingClientRect().height || innerHeight);
+        if (viewport && Math.abs(viewport.scale - 1) < 0.01) { width = Math.min(width, viewport.width); height = Math.min(height, viewport.height); }
+        var style = getComputedStyle(probe);
+        var top = parseFloat(style.paddingTop) || 0, right = parseFloat(style.paddingRight) || 0;
+        var bottom = parseFloat(style.paddingBottom) || 0, left = parseFloat(style.paddingLeft) || 0;
+        width = Math.max(1, Math.round(width - left - right));
+        height = Math.max(1, Math.round(height - top - bottom));
+        var rotate = touch && portrait();
+        frame.style.left = left + 'px';
+        frame.style.top = (top + (typing() && viewport ? viewport.offsetTop : 0)) + 'px';
+        frame.style.width = (rotate ? height : width) + 'px';
+        frame.style.height = (rotate ? width : height) + 'px';
+        frame.style.transform = rotate ? 'translateX(' + width + 'px) rotate(90deg)' : '';
+        document.documentElement.dataset.gameRotation = rotate ? '90' : '0';
+    }
+    window.trashLandscapeHost = {
+        fit:fit, fullscreen:fullscreen, supported:supported, isFullscreen:isFullscreen,
+        auto:function () { if (!attempted && touch) { attempted = true; fullscreen(true); } },
+        ready:function () { var boot = document.getElementById('boot'); if (boot) { boot.remove(); } },
+        canonical:function () { return location.origin + location.pathname; },
+        path:function () { return location.pathname; },
+        standalone:function () { return matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches || !!navigator.standalone; },
+        canInstall:function () { return !!installer; },
+        install:function () { if (!installer) { return false; } var event = installer; installer = null; event.prompt(); return true; },
+        syncURL:function (search, hash) { var params = new URLSearchParams(search); params.delete('_build'); history.replaceState(null,'',location.pathname + (params.size ? '?' + params.toString() : '') + hash); },
+        reloadClean:function () { location.replace(location.pathname); },
+        setManifest:function (manifest) {
+            var previous = manifestURL;
+            manifestURL = URL.createObjectURL(new Blob([JSON.stringify(manifest)], {type:'application/manifest+json'}));
+            document.querySelector('link[rel="manifest"]').href = manifestURL;
+            if (previous) { URL.revokeObjectURL(previous); }
+        }
+    };
+    // Preserve access to runtime diagnostics without a second game instance.
+    ['__trash_trail','__trash_build','trashPacks','trashAssetCache'].forEach(function (key) {
+        Object.defineProperty(window,key,{configurable:true,get:function () { try { return frame.contentWindow[key]; } catch (error) { return undefined; } }});
+    });
+    function fullscreenChanged() { fit(); try { if (!typing()) { frame.contentWindow.focus(); var canvas = frame.contentDocument.getElementById('canvas'); if (canvas) { canvas.focus(); } } frame.contentWindow.dispatchEvent(new Event('trashfullscreenchange')); } catch (error) {} }
+    addEventListener('resize',fit); addEventListener('orientationchange',function () { fit(); setTimeout(fit,300); });
+    document.addEventListener('fullscreenchange',fullscreenChanged); document.addEventListener('webkitfullscreenchange',fullscreenChanged);
+    document.addEventListener('visibilitychange',function () { if (!document.hidden) { fit(); } });
+    addEventListener('beforeinstallprompt',function (event) { event.preventDefault(); installer = event; });
+    if (window.visualViewport) { visualViewport.addEventListener('resize',fit); visualViewport.addEventListener('scroll',fit); }
+    var url = new URL('game.html',location.href); url.search = location.search; url.hash = location.hash; url.searchParams.set('_build','__BUILD_ID__');
+    fit(); frame.src = url.href;
+    if (touch) { lock(); }
+}());
+</script></body></html>
