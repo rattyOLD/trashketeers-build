@@ -79,6 +79,13 @@ var _focus_point := Vector2.ZERO
 var _focus_left := 0.0
 var _focus_total := 1.0
 var _focus_weight := 0.0
+## Кинопроезд к боссу: камера летит к нему через всю арену и обратно, время замедлено, герой неуязвим.
+const CINE_REACH := 6000.0
+const CINE_TIME := 2.2
+const CINE_SCALE := 0.5
+var _cine_point := Vector2.ZERO
+var _cine_left := 0.0
+var _cine_offset := Vector2.ZERO
 
 var _shake := 0.0
 var _hud_timer := 0.0
@@ -595,6 +602,24 @@ func add_shake(amount: float) -> void:
 
 ## Микропауза (hitstop) 30–60 мс: мир почти замирает, таймер идёт по реальному времени.
 ## Частые убийства не «залипают»: между стопами минимум HITSTOP_COOLDOWN.
+## Кинопауза на выход босса: полосы, замедление и проезд камеры (если игрок не отключил наводку камеры).
+func boss_cinematic(at: Vector2) -> void:
+	if finished or get_tree().paused:
+		return
+	atmosphere.letterbox(true)
+	if bool(SaveService.data.get("camera_focus", true)):
+		_cine_point = at
+		_cine_left = CINE_TIME
+	player.grant_invuln(CINE_TIME * CINE_SCALE + 0.3)
+	_hitstop_active = true
+	Engine.time_scale = CINE_SCALE
+	SceneDelay.after(self, CINE_TIME, func() -> void:
+		if not finished:
+			Engine.time_scale = 1.0
+		_hitstop_active = false
+		atmosphere.letterbox(false), true, true)
+
+
 func hitstop(duration: float) -> void:
 	if finished or _hitstop_active or get_tree().paused:
 		return
@@ -660,6 +685,15 @@ func _update_shake(delta: float) -> void:
 		lead_target += (_focus_point - player.global_position).limit_length(110.0) * _focus_weight
 	_camera_lead = _camera_lead.lerp(lead_target.limit_length(90.0), 1.0 - exp(-4.0 * delta))
 	var base := Vector2(0.0, -PORTRAIT_CAMERA_DROP) if Orient.portrait else Vector2(0.0, 18.0 / LANDSCAPE_ZOOM) + _camera_lead
+	var real_delta := delta / maxf(Engine.time_scale, 0.05)
+	_cine_left = maxf(_cine_left - real_delta, 0.0)
+	var cine_target := Vector2.ZERO
+	if _cine_left > 0.0:
+		var age := CINE_TIME - _cine_left
+		var weight := minf(age / 0.2, 1.0) * minf(_cine_left / 0.7, 1.0)
+		cine_target = (_cine_point - player.global_position).limit_length(CINE_REACH) * weight
+	_cine_offset = _cine_offset.lerp(cine_target, 1.0 - exp(-7.0 * real_delta))
+	base += _cine_offset
 	if not bool(SaveService.data.get("camera_shake", true)):
 		_shake = 0.0
 		_kick = Vector2.ZERO

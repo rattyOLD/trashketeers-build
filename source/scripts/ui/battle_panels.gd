@@ -121,7 +121,15 @@ class ChapterCard:
 		_title.offset_bottom = 60
 		UiStyle.anchor(_line, Vector2(0.5, 0.0), Rect2(-120, 62, 240, 3))
 
-	func play(chapter_text: String, title: String, accent: Color) -> void:
+	var _fixed_top := -1.0
+
+	## Своя высота на экране вне шапки (карточка босса — низ кадра, над полосой).
+	func place(top: float) -> void:
+		_fixed_top = top
+		_top = top
+		UiStyle.anchor(self, Vector2(0.5, 0.0), Rect2(-360, top, 720, _height))
+
+	func play(chapter_text: String, title: String, accent: Color, hold: float = 2.3) -> void:
 		_chapter.text = chapter_text.to_upper()
 		_title.text = title.to_upper()
 		_chapter.add_theme_color_override("font_color", accent)
@@ -134,12 +142,12 @@ class ChapterCard:
 		_line.pivot_offset = Vector2(_line.size.x * 0.5, 2)
 		_tween = create_tween().set_parallel(true)
 		_tween.tween_property(self, "modulate:a", 1.0, 0.35)
-		var top := _top if Orient.portrait else 250.0
+		var top := _fixed_top if _fixed_top >= 0.0 else (_top if Orient.portrait else 250.0)
 		var drop := 50.0 if _height > 100.0 else 16.0
 		_tween.tween_property(self, "offset_top", top, 0.5).from(top - drop).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		_tween.tween_property(self, "offset_bottom", top + _height, 0.5).from(top + _height - drop).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		_tween.tween_property(_line, "scale:x", 1.0, 0.5).set_delay(0.25)
-		_tween.chain().tween_interval(2.3)
+		_tween.chain().tween_interval(hold)
 		_tween.chain().tween_property(self, "modulate:a", 0.0, 0.5)
 		_tween.chain().tween_callback(func() -> void: visible = false)
 

@@ -95,6 +95,7 @@ var _pause: PausePanel
 var _revive: BattlePanels.RevivePanel
 var _run_result: BattlePanels.RunResultPanel
 var _chapter_card: BattlePanels.ChapterCard
+var _boss_card: BattlePanels.ChapterCard
 var _hint: HintBubble
 var _left_column: VBoxContainer
 var _order_card: OrderCard
@@ -212,6 +213,9 @@ func build(currency_icon: Texture2D, weapon: WeaponData) -> void:
 	if Orient.portrait:
 		_chapter_card.dock(EVENT_TOP, _band_font(18), _band_font(30))
 	top.add_child(_chapter_card)
+	_boss_card = BattlePanels.ChapterCard.new()
+	_boss_card.place(BOSS_CARD_TOP_PORTRAIT if Orient.portrait else BOSS_CARD_TOP)
+	_root.add_child(_boss_card)
 
 	_level_up = LevelUpPanel.new()
 	_level_up.chosen.connect(func(u: UpgradeData) -> void: upgrade_chosen.emit(u))
@@ -901,6 +905,8 @@ func show_banner(text: String, color: Color, duration: float = 2.2) -> void:
 
 ## Заставка волны: крупное «ВОЛНА N» влетает сверху, подзаголовок — снизу.
 func show_wave_intro(number: int, title: String, is_boss: bool, chapter: int = 0) -> void:
+	if is_boss and _boss_card != null and _boss_card.visible:
+		return
 	_wave_title.text = "ВОЛНА %d" % number
 	_wave_title.add_theme_font_size_override("font_size", _title_font() if Orient.portrait else 56)
 	_wave_title.add_theme_color_override("font_color", UiStyle.DANGER if is_boss else UiStyle.GOLD)
@@ -992,6 +998,18 @@ func show_result(victory: bool, lines: PackedStringArray, title: String = "", ca
 	_pause.visible = false
 	_hide_thermos()
 	_result.open(victory, lines, title, can_upgrade)
+
+
+## Выход босса: крупное имя под боссом в альбоме и под полосой здоровья босса в портрете — сам босс не закрыт.
+const BOSS_CARD_TOP := 470.0
+const BOSS_CARD_TOP_PORTRAIT := 236.0
+## Вместе с кинопаузой (BattleBase.CINE_TIME 2.2 с): появление 0.5 + показ + исчезновение 0.5.
+const BOSS_CARD_HOLD := 1.2
+
+
+func show_boss_intro(caption: String, boss_name: String) -> void:
+	_hide_toast_now()
+	_boss_card.play(caption, boss_name, UiStyle.DANGER, BOSS_CARD_HOLD)
 
 
 func show_chapter(subtitle: String, title: String, accent: Color = UiStyle.NEON) -> void:

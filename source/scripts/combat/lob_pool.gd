@@ -117,7 +117,7 @@ func _draw() -> void:
 		var r := _radius[k]
 		AttackTelegraph.circle(self, to, r, t, TELEGRAPH)
 		var cr := r * 0.24
-		var cc := Color(TELEGRAPH.lightened(0.2), 0.65)
+		var cc := Color(TELEGRAPH.lightened(0.2), 0.4)
 		draw_line(to + Vector2(-cr, 0), to + Vector2(cr, 0), cc, 2.0, true)
 		draw_line(to + Vector2(0, -cr), to + Vector2(0, cr), cc, 2.0, true)
 		var ground := _from[k].lerp(to, t)

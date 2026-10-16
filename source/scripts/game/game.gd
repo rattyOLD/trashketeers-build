@@ -39,6 +39,7 @@ var run_gems := 0
 var run_blueprints: Array = []
 var revives_used := 0
 var _damage_acc := {}
+var _ground_pools: GroundPools
 const DAMAGE_MERGE_TIME := 0.07
 const BOSS_PASSIVE_DELAY := 3.5
 
@@ -220,6 +221,7 @@ func start(_weapon_id: StringName = &"") -> void:
 
 	_setup_common(map.view_bounds, pickups.nut_texture)
 	light_map.set_layout(map.layout, str(map.chapter.get("map_card", "")))
+	_update_ground_pools()
 	_last_marker.setup(director, enemies, camera)
 	minimap = Minimap.new()
 	minimap.setup(map, player, enemies, director)
@@ -680,6 +682,7 @@ func _switch_chapter(index: int = -1) -> void:
 	SoundManager.start_ambient(map.layout)
 	hazards.attach_level(map)
 	light_map.set_layout(map.layout, str(map.chapter.get("map_card", "")))
+	_update_ground_pools()
 	_portal = null
 	player.global_position = map.player_start
 	player.reset_physics_interpolation()
@@ -715,6 +718,16 @@ func _on_enemy_status(enemy: Enemy, amount: float, kind: String) -> void:
 	status.on_status_damage(enemy, amount, kind)
 	if enemy.data.is_boss():
 		hud.update_boss(maxf(enemy.hp, 0.0), enemy.max_hp)
+
+
+## Пятна света на полу — только ночной Свалке: на светлом Банке сложение лишь засветит траву.
+func _update_ground_pools() -> void:
+	if _ground_pools == null and map.layout == "junkyard":
+		_ground_pools = GroundPools.new()
+		layers.decals.add_child(_ground_pools)
+	if _ground_pools != null:
+		_ground_pools.visible = map.layout == "junkyard"
+		_ground_pools.set_process(_ground_pools.visible)
 
 
 ## Урон по одному врагу за 0.07 с складывается в одну цифру: залп дробовика показывает сумму, а не одну дробинку.
@@ -1074,7 +1087,12 @@ func _on_boss_spawned(boss: Enemy) -> void:
 	if boss_cover.attach(boss, map.destructibles) > 0:
 		hud.toast("УКРЫТИЕ ИЛИ ВЗРЫВ", "Бочки блокируют пули. Разбей отмеченную рядом с Бароном — прервёшь его атаку на 0,9 с.", UiStyle.GOLD)
 	Platform.note_event("boss spawned")
-	focus_camera(boss.global_position, 1.4)
+	var main_boss := not director.is_mini_wave()
+	if main_boss:
+		boss_cinematic(boss.global_position + Vector2(0, -boss.data.radius))
+		hud.show_boss_intro("БОСС" if story_mission.is_empty() else "БОСС МИССИИ", boss.data.display_name)
+	else:
+		focus_camera(boss.global_position, 1.4)
 	if story != null:
 		story.on_boss_spawned(director.is_mini_wave())
 	hud.show_boss(boss.data.display_name, boss.hp, boss.max_hp)
@@ -1082,7 +1100,8 @@ func _on_boss_spawned(boss: Enemy) -> void:
 		_boss_started = director.elapsed
 	if not boss.posture_broken.is_connected(_on_posture_broken):
 		boss.posture_broken.connect(_on_posture_broken)
-	hud.show_banner("БОСС: %s!" % boss.data.display_name.to_upper(), UiStyle.DANGER)
+	if not main_boss:
+		hud.show_banner("БОСС: %s!" % boss.data.display_name.to_upper(), UiStyle.DANGER)
 	var passive := BossBrain.passive_text(boss.data.boss_pattern)
 	if not passive.is_empty():
 		# Подсказка позже заголовков волны и главы: босс уже вышел из-под верхней полосы, а текст не наслаивается.

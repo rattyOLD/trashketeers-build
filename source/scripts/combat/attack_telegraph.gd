@@ -45,17 +45,21 @@ static func circle(canvas: Node2D, center: Vector2, radius: float, progress: flo
 		tint = Color(Color("#fff0b8"), tint.a)
 	var points := 32 if SaveService.is_fx_lite() else 48
 	mark_cover(canvas.get_global_transform() * center, radius, 0.15)
-	canvas.draw_circle(center, radius, Color(tint, (0.09 + 0.12 * t) * tint.a))
-	canvas.draw_arc(center, radius, 0.0, TAU, points, Color(0.08, 0.03, 0.02, 0.9 * tint.a), 7.0, true)
-	canvas.draw_arc(center, radius, 0.0, TAU, points, Color(tint, 0.9 * tint.a), 3.0, true)
+	# Тонкое кольцо зоны и диск, растущий от центра к краю к моменту удара: сроки видны сразу,
+	# а залп из многих кругов не заливает поле сплошным красным — плотная заливка только перед падением.
+	canvas.draw_circle(center, radius, Color(tint, 0.035 * tint.a))
+	canvas.draw_circle(center, radius * t, Color(tint, (0.1 + 0.16 * t * t) * tint.a))
+	canvas.draw_arc(center, radius, 0.0, TAU, points, Color(0.08, 0.03, 0.02, 0.55 * tint.a), 4.5, true)
+	canvas.draw_arc(center, radius, 0.0, TAU, points, Color(tint, (0.7 + 0.25 * t) * tint.a), 2.5, true)
 	if contrast:
 		# Метки формы читаются без различения красного и зелёного, радиус не меняется.
 		for i in 8:
 			var dir := Vector2.from_angle(TAU * i / 8.0)
 			canvas.draw_line(center + dir * radius * 0.78, center + dir * radius * 0.93, Color("#17100b"), 6.0)
 			canvas.draw_line(center + dir * radius * 0.78, center + dir * radius * 0.93, tint, 2.5)
-	if t > 0.0:
-		canvas.draw_arc(center, radius * 0.88, -PI / 2.0, -PI / 2.0 + TAU * t, points, Color(1.0, 0.88, 0.54, tint.a), 3.0, true)
+	if t > 0.85:
+		# Последние доли секунды — светлый край диска: «сейчас».
+		canvas.draw_arc(center, radius * t, 0.0, TAU, points, Color(1.0, 0.88, 0.54, (t - 0.85) / 0.15 * tint.a), 2.5, true)
 
 
 static func ink(tint: Color) -> Color:

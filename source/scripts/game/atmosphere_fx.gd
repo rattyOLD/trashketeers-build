@@ -10,14 +10,14 @@ extends Node
 ## Всё рисуется примитивами из Packed-массивов: никаких нод на частицу.
 
 const MOODS := {
-	"clear": {"tint": Color("#d6dbf2"), "rain": 0.0, "motes": 1.0, "fog": Color(0.5, 0.4, 1.0, 0.0), "vignette": 0.42, "lightning": false, "pulse": false, "motes_color": Color(0.8, 0.9, 1.0), "rise": false},
+	"clear": {"tint": Color("#dddae8"), "rain": 0.0, "motes": 1.0, "fog": Color(0.5, 0.4, 1.0, 0.0), "vignette": 0.42, "lightning": false, "pulse": false, "motes_color": Color(0.8, 0.9, 1.0), "rise": false},
 	"pink_haze": {"tint": Color("#e8cfe0"), "rain": 0.35, "motes": 0.6, "fog": Color(1.0, 0.3, 0.7, 0.10), "vignette": 0.48, "lightning": false, "pulse": false, "motes_color": Color(1.0, 0.6, 0.85), "rise": false},
 	"toxic": {"tint": Color("#cde6c6"), "rain": 0.0, "motes": 1.4, "fog": Color(0.4, 1.0, 0.3, 0.12), "vignette": 0.5, "lightning": false, "pulse": false, "motes_color": Color(0.55, 1.0, 0.35), "rise": true},
 	"storm": {"tint": Color("#aeb9e6"), "rain": 1.0, "motes": 0.2, "fog": Color(0.3, 0.4, 0.9, 0.10), "vignette": 0.58, "lightning": true, "pulse": false, "motes_color": Color(0.7, 0.8, 1.0), "rise": false},
 	"night": {"tint": Color("#5b6796"), "rain": 0.0, "motes": 0.5, "fog": Color(0.3, 0.4, 0.8, 0.06), "vignette": 0.68, "lightning": false, "pulse": false, "motes_color": Color(0.6, 0.75, 1.0), "rise": false},
 	"alarm": {"tint": Color("#e6cbc6"), "rain": 0.0, "motes": 1.2, "fog": Color(1.0, 0.15, 0.1, 0.06), "vignette": 0.5, "lightning": false, "pulse": true, "motes_color": Color(1.0, 0.55, 0.2), "rise": true},
-	"sunny": {"tint": Color("#fbf1dc"), "rain": 0.0, "motes": 0.5, "fog": Color(1.0, 0.9, 0.6, 0.0), "vignette": 0.3, "lightning": false, "pulse": false, "motes_color": Color(1.0, 0.95, 0.7), "rise": false},
-	"golden": {"tint": Color("#f6e2bd"), "rain": 0.0, "motes": 1.0, "fog": Color(1.0, 0.8, 0.3, 0.06), "vignette": 0.38, "lightning": false, "pulse": false, "motes_color": Color(1.0, 0.85, 0.35), "rise": true},
+	"sunny": {"tint": Color("#f4e9d3"), "rain": 0.0, "motes": 0.5, "fog": Color(1.0, 0.9, 0.6, 0.0), "vignette": 0.3, "lightning": false, "pulse": false, "motes_color": Color(1.0, 0.95, 0.7), "rise": false},
+	"golden": {"tint": Color("#ebd6b4"), "rain": 0.0, "motes": 1.0, "fog": Color(1.0, 0.8, 0.3, 0.06), "vignette": 0.38, "lightning": false, "pulse": false, "motes_color": Color(1.0, 0.85, 0.35), "rise": true},
 	"party": {"tint": Color("#f3dcec"), "rain": 0.0, "motes": 1.3, "fog": Color(1.0, 0.4, 0.8, 0.06), "vignette": 0.4, "lightning": false, "pulse": false, "motes_color": Color(1.0, 0.55, 0.85), "rise": false},
 	"vault": {"tint": Color("#e0cca8"), "rain": 0.0, "motes": 1.0, "fog": Color(0.9, 0.55, 0.15, 0.08), "vignette": 0.55, "lightning": false, "pulse": true, "motes_color": Color(1.0, 0.8, 0.3), "rise": true},
 }

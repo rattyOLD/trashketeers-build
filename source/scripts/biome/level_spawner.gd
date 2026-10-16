@@ -644,6 +644,8 @@ const GROUND_SCALE := 1.35
 ## читались на фоне. Арт не меняется — только множитель в шейдере земли и светлее заливка теней.
 const JUNK_GROUND_LIFT := 1.5
 const JUNK_SHADOW_FILL := Vector3(0.23, 0.23, 0.27)
+const BANK_FLOOR_SATURATION := 0.88
+const BANK_FLOOR_TINT := Vector3(1.02, 0.98, 0.9)
 static var _calm: Shader
 
 
@@ -759,6 +761,15 @@ func _build_floor() -> void:
 	tile_map.position = _origin
 	tile_map.scale = Vector2.ONE * (CELL * 2.0 / tile)
 	tile_map.light_mask = BiomeLayers.LIGHT_MASK_FLOOR
+	if layout == "bank":
+		# Трава Банка приглушена и чуть теплее: две половины игры в одной гамме, яркая лужайка не слепит.
+		var calm_bank := ShaderMaterial.new()
+		calm_bank.shader = _calm_shader()
+		calm_bank.set_shader_parameter("saturation", BANK_FLOOR_SATURATION)
+		calm_bank.set_shader_parameter("contrast", 0.95)
+		calm_bank.set_shader_parameter("shadow_fill", Vector3(0.3, 0.27, 0.24))
+		calm_bank.set_shader_parameter("floor_tint", BANK_FLOOR_TINT)
+		tile_map.material = calm_bank
 	for ty in grid_size.y / 2:
 		for tx in grid_size.x / 2:
 			var zone: int = zones[_index(Vector2i(tx * 2, ty * 2))]
