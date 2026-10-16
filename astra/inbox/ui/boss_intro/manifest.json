@@ -1,0 +1,390 @@
+{
+  "schema_version": 1,
+  "brief": "v33",
+  "studio": "TrashSquad · Beer Party Studio",
+  "game_directory": "res://assets/ui/boss_intro",
+  "color_space": "sRGB",
+  "alpha_mode": "straight",
+  "files": [
+    {
+      "file": "junk_overlord.png",
+      "width": 1024,
+      "height": 1024,
+      "format": "RGBA8",
+      "frames": 1,
+      "bytes": 830384,
+      "sha256": "bd22dfc4553a92f85e61fb948563781382cd60ed031c0ff552f4253895468a3b",
+      "role": "boss_portrait",
+      "identity": "junk_overlord",
+      "source_face_rect": [
+        84,
+        20,
+        83,
+        73
+      ],
+      "source": {
+        "path": "source/assets/bosses/overlord_frames.png",
+        "sha256": "423a8b3eadda4cf56ce858ffb910da4dd17c40aac5322db80a6d6f2f077e0d97",
+        "sheet_id": "overlord",
+        "frame_index": 0,
+        "physical_frame": [
+          10,
+          10,
+          251,
+          189
+        ]
+      },
+      "added_detail": false,
+      "destination": [
+        52,
+        157,
+        920,
+        693
+      ],
+      "faces_repainted": false,
+      "frame_crop": [
+        0,
+        0,
+        251,
+        189
+      ],
+      "name_clear_area": [
+        0,
+        864,
+        1024,
+        160
+      ],
+      "sampling": "Godot Image.INTERPOLATE_LANCZOS",
+      "waist_alpha_fade_px": 0
+    },
+    {
+      "file": "mud_magnate.png",
+      "width": 1024,
+      "height": 1024,
+      "format": "RGBA8",
+      "frames": 1,
+      "bytes": 775382,
+      "sha256": "f349bde2755603f9d85588f593c31568b43416a489072f9895ce1213fddbe27d",
+      "role": "boss_portrait",
+      "identity": "mud_magnate",
+      "source_face_rect": [
+        72,
+        10,
+        84,
+        65
+      ],
+      "source": {
+        "path": "source/assets/bosses/magnate_frames.png",
+        "sha256": "7672ff3e486f05e68d0c7dd21e1fadbf3f381f67c10c950e9ecc15d21f691ac5",
+        "sheet_id": "magnate",
+        "frame_index": 0,
+        "physical_frame": [
+          10,
+          10,
+          225,
+          192
+        ]
+      },
+      "added_detail": false,
+      "destination": [
+        52,
+        175,
+        920,
+        675
+      ],
+      "faces_repainted": false,
+      "frame_crop": [
+        0,
+        0,
+        225,
+        165
+      ],
+      "name_clear_area": [
+        0,
+        864,
+        1024,
+        160
+      ],
+      "sampling": "Godot Image.INTERPOLATE_LANCZOS",
+      "waist_alpha_fade_px": 48
+    },
+    {
+      "file": "beer_baron.png",
+      "width": 1024,
+      "height": 1024,
+      "format": "RGBA8",
+      "frames": 1,
+      "bytes": 653920,
+      "sha256": "6501ce74daf79dfd73a7e07d1a97f0f4c21e73b9f11d24a08eff4d87fd0eb09d",
+      "role": "boss_portrait",
+      "identity": "beer_baron",
+      "source_face_rect": [
+        268,
+        45,
+        178,
+        153
+      ],
+      "source": {
+        "path": "source/assets/bosses/baron_frames.png",
+        "sha256": "825c12cd765666a1733e3e3161207330355537851275b141c3f6f80d41e13edd",
+        "sheet_id": "baron",
+        "frame_index": 0,
+        "physical_frame": [
+          2718,
+          962,
+          628,
+          428
+        ]
+      },
+      "added_detail": false,
+      "destination": [
+        52,
+        337,
+        920,
+        513
+      ],
+      "faces_repainted": false,
+      "frame_crop": [
+        0,
+        0,
+        628,
+        350
+      ],
+      "name_clear_area": [
+        0,
+        864,
+        1024,
+        160
+      ],
+      "sampling": "Godot Image.INTERPOLATE_LANCZOS",
+      "waist_alpha_fade_px": 48
+    },
+    {
+      "file": "pig_magnate.png",
+      "width": 1024,
+      "height": 1024,
+      "format": "RGBA8",
+      "frames": 1,
+      "bytes": 842731,
+      "sha256": "5d2f6f3ac5fff8f679ad67a38b099c3e8d77aaf2245ac2fb30b1474ebdd7a789",
+      "role": "boss_portrait",
+      "identity": "pig_magnate",
+      "source_face_rect": [
+        93,
+        26,
+        147,
+        104
+      ],
+      "source": {
+        "path": "source/assets/bosses/pig_magnate.png",
+        "sha256": "1fcbb3a582b6994705027ef358c47a64f189ca6bc4470de12cd8e097edc94211",
+        "sheet_id": "pig_magnate",
+        "frame_index": 0,
+        "physical_frame": [
+          12,
+          12,
+          330,
+          286
+        ]
+      },
+      "added_detail": false,
+      "destination": [
+        52,
+        195,
+        920,
+        655
+      ],
+      "faces_repainted": false,
+      "frame_crop": [
+        0,
+        0,
+        330,
+        235
+      ],
+      "name_clear_area": [
+        0,
+        864,
+        1024,
+        160
+      ],
+      "sampling": "Godot Image.INTERPOLATE_LANCZOS",
+      "waist_alpha_fade_px": 48
+    },
+    {
+      "file": "electric_shaman.png",
+      "width": 1024,
+      "height": 1024,
+      "format": "RGBA8",
+      "frames": 1,
+      "bytes": 908317,
+      "sha256": "10e3d627d6022e263af42a4daa92c19ddf8c7681dd98e2f2070abe401a0700c5",
+      "role": "boss_portrait",
+      "identity": "electric_shaman",
+      "source_face_rect": [
+        155,
+        60,
+        110,
+        100
+      ],
+      "source": {
+        "path": "source/assets/bosses/shaman_frames.png",
+        "sha256": "1b315e6d37d00415331f6722b6d2e9aceb4a430011d551bb44a5b8fce81f42e8",
+        "sheet_id": "shaman",
+        "frame_index": 0,
+        "physical_frame": [
+          12,
+          12,
+          276,
+          306
+        ]
+      },
+      "added_detail": false,
+      "destination": [
+        111,
+        80,
+        802,
+        770
+      ],
+      "faces_repainted": false,
+      "frame_crop": [
+        0,
+        0,
+        276,
+        265
+      ],
+      "name_clear_area": [
+        0,
+        864,
+        1024,
+        160
+      ],
+      "sampling": "Godot Image.INTERPOLATE_LANCZOS",
+      "waist_alpha_fade_px": 48
+    },
+    {
+      "file": "sea_pirate.png",
+      "width": 1024,
+      "height": 1024,
+      "format": "RGBA8",
+      "frames": 1,
+      "bytes": 752013,
+      "sha256": "b81e9e1dca347fd8c2bddd784c412a8687d8cdcd94609685db49cc149368fe0f",
+      "role": "boss_portrait",
+      "identity": "sea_pirate",
+      "source_face_rect": [
+        250,
+        110,
+        178,
+        116
+      ],
+      "source": {
+        "path": "source/assets/bosses/sea_pirate_frames.png",
+        "sha256": "e1dcda4ed84e6bb8f9b97e41e530eb01e8a022685d7d587c764edc0772c558a7",
+        "sheet_id": "sea_pirate",
+        "frame_index": 0,
+        "physical_frame": [
+          8,
+          8,
+          560,
+          440
+        ]
+      },
+      "added_detail": false,
+      "destination": [
+        52,
+        267,
+        920,
+        583
+      ],
+      "faces_repainted": false,
+      "frame_crop": [
+        0,
+        0,
+        560,
+        355
+      ],
+      "name_clear_area": [
+        0,
+        864,
+        1024,
+        160
+      ],
+      "sampling": "Godot Image.INTERPOLATE_LANCZOS",
+      "waist_alpha_fade_px": 48
+    },
+    {
+      "file": "chef_boss.png",
+      "width": 1024,
+      "height": 1024,
+      "format": "RGBA8",
+      "frames": 1,
+      "bytes": 593537,
+      "sha256": "a302ae152d6ca6bece94448a999541c138d8d263656b9713eef366ad71292def",
+      "role": "boss_portrait",
+      "identity": "chef_boss",
+      "source_face_rect": [
+        202,
+        80,
+        164,
+        145
+      ],
+      "source": {
+        "path": "source/assets/bosses/chef_boss_frames.png",
+        "sha256": "a6667252d73ae4c4c4a92c67c425707e980e56d07f4f2f600932fa64bc42e551",
+        "sheet_id": "chef_boss",
+        "frame_index": 0,
+        "physical_frame": [
+          8,
+          8,
+          620,
+          420
+        ]
+      },
+      "added_detail": false,
+      "destination": [
+        52,
+        345,
+        920,
+        505
+      ],
+      "faces_repainted": false,
+      "frame_crop": [
+        0,
+        0,
+        620,
+        340
+      ],
+      "name_clear_area": [
+        0,
+        864,
+        1024,
+        160
+      ],
+      "sampling": "Godot Image.INTERPOLATE_LANCZOS",
+      "waist_alpha_fade_px": 48
+    },
+    {
+      "file": "stripe.png",
+      "width": 1920,
+      "height": 160,
+      "format": "RGBA8",
+      "frames": 1,
+      "bytes": 535052,
+      "sha256": "7cf53400461e98647477adec7fc9f2611cfd46da4b980d4345ed55a836c8c1b3",
+      "role": "boss_name_backplate",
+      "transparent_edges": true,
+      "blend": "MIX"
+    }
+  ],
+  "integration": {
+    "owner": "Claude",
+    "consumer": "BattleBase.boss_cinematic",
+    "existing_code_unchanged": true,
+    "portraits_are_original_game_frame_compositions": true,
+    "faces_repainted": false,
+    "new_detail_generated_for_faces": false,
+    "portrait_note": "Исходные игровые рисунки: кадрирование по пояс и масштабирование; новая детализация лиц не добавлялась.",
+    "source_reference": "source/data/frames.json + source/data/enemy_art.json",
+    "boss_style_source_over_brief_wording": true
+  }
+}

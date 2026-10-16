@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "brief": "v33",
+  "studio": "TrashSquad · Beer Party Studio",
+  "game_directory": "res://assets/biome",
+  "color_space": "sRGB",
+  "alpha_mode": "straight",
+  "files": [
+    {
+      "file": "ch2_floor.png",
+      "width": 1024,
+      "height": 512,
+      "format": "RGBA8",
+      "frames": 1,
+      "bytes": 679907,
+      "sha256": "0489b7121f132858a5babfa113b943c05b83b3080b828ede2fb3e312ad7eb98c",
+      "role": "bank_floor",
+      "seamless_axes": [
+        "x",
+        "y"
+      ],
+      "mean_luminance_255": 154.383543066708,
+      "opaque": true
+    }
+  ],
+  "integration": {
+    "owner": "Claude",
+    "optional_art_replacement_in_brief": true,
+    "art_replacement_prepared": true,
+    "remove_existing_bank_saturation_and_warm_tone_patch_when_installed": true,
+    "do_not_stack_code_tint_on_new_art": true
+  }
+}

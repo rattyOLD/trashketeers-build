@@ -1,0 +1,154 @@
+{
+  "schema_version": 1,
+  "brief": "v33",
+  "studio": "TrashSquad · Beer Party Studio",
+  "game_directory": "res://assets/ui/hub/backdrop_fx",
+  "color_space": "sRGB",
+  "alpha_mode": "straight",
+  "files": [
+    {
+      "file": "sign_on.png",
+      "width": 80,
+      "height": 64,
+      "format": "RGBA8",
+      "frames": 1,
+      "bytes": 7975,
+      "sha256": "7a72bbabc74371b54a186b7cbc1d6a10e4975c2562017e6d836ec9b2dbb438b6",
+      "role": "sign_on",
+      "background_rect": [
+        1288,
+        76,
+        80,
+        64
+      ],
+      "blend": "MIX",
+      "anchor": "top_left",
+      "placement_scale": [
+        1,
+        1
+      ]
+    },
+    {
+      "file": "sign_off.png",
+      "width": 80,
+      "height": 64,
+      "format": "RGBA8",
+      "frames": 1,
+      "bytes": 7425,
+      "sha256": "ff4724e3970f77f8f782ccdc6793f18c55e2cbbcd9a83c13aef756488b284e03",
+      "role": "sign_off",
+      "background_rect": [
+        1288,
+        76,
+        80,
+        64
+      ],
+      "blend": "MIX",
+      "anchor": "top_left",
+      "placement_scale": [
+        1,
+        1
+      ]
+    },
+    {
+      "file": "smoke.png",
+      "width": 512,
+      "height": 512,
+      "format": "RGBA8",
+      "frames": 1,
+      "bytes": 332648,
+      "sha256": "58a52d12c58217098200142d042e49efecde3827225d26bbb48651ace36556c3",
+      "role": "steam",
+      "seamless_axes": [
+        "y"
+      ],
+      "blend": "MIX",
+      "background_rect": [
+        440,
+        415,
+        256,
+        256
+      ],
+      "additional_instances": [
+        [
+          1015,
+          440,
+          160,
+          192
+        ]
+      ],
+      "anchor": "top_left",
+      "recommended_opacity": [
+        0.12,
+        0.3
+      ],
+      "scroll_uv_axis": "y"
+    },
+    {
+      "file": "window_glow.png",
+      "width": 1162,
+      "height": 231,
+      "format": "RGBA8",
+      "frames": 1,
+      "bytes": 53741,
+      "sha256": "bf1433d16f907cfd018723c946c955ce61d0277abbd3dc3dd037079e4958f17d",
+      "role": "warm_windows_and_lamps",
+      "background_rect": [
+        46,
+        258,
+        1162,
+        231
+      ],
+      "blend": "ADD",
+      "anchor": "top_left",
+      "placement_scale": [
+        1,
+        1
+      ],
+      "recommended_opacity": [
+        0.08,
+        0.2
+      ]
+    }
+  ],
+  "background": {
+    "path": "source/assets/ui/hub/menu_backdrop.png",
+    "size": [
+      1536,
+      1024
+    ],
+    "sha256": "0b80cbca24fe813d53ddde9b26d5ed784ded5229568a28c725b56a76abb46a88",
+    "preserve_original": true
+  },
+  "integration": {
+    "owner": "Claude",
+    "existing_code_unchanged": true,
+    "sign_note": "original cyan light box in upper-right; background contains no lettered sign",
+    "apply_same_canvas_transform_as_background": true,
+    "signs_are_alternatives_not_two_added_layers": true,
+    "sign_off_opaque_core_replaces_existing_lit_box": true,
+    "window_light_centers": [
+      [
+        83,
+        291
+      ],
+      [
+        326,
+        384
+      ],
+      [
+        181,
+        412
+      ],
+      [
+        1190,
+        472
+      ],
+      [
+        491,
+        363
+      ]
+    ],
+    "pause_or_reduce_motion_in_background": true
+  }
+}

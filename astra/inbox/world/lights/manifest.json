@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "brief": "v33",
+  "studio": "TrashSquad · Beer Party Studio",
+  "game_directory": "res://assets/world/lights",
+  "color_space": "sRGB",
+  "alpha_mode": "straight",
+  "files": [
+    {
+      "file": "pool_fire.png",
+      "width": 256,
+      "height": 256,
+      "format": "RGBA8",
+      "frames": 1,
+      "bytes": 23943,
+      "sha256": "d481a852c199a654abf8cbc92595b8eac5fb0e60ed83f6d27da9544391313434",
+      "role": "pool_fire",
+      "blend": "ADD",
+      "neutral_white_mask": true,
+      "transparent_edges": true
+    },
+    {
+      "file": "pool_lamp.png",
+      "width": 256,
+      "height": 256,
+      "format": "RGBA8",
+      "frames": 1,
+      "bytes": 21898,
+      "sha256": "7ffa80f4f899a6f70ffe5fca3b1d7b1cfd7b8dc261d5ba83872dcfafd08d85bb",
+      "role": "pool_lamp",
+      "blend": "ADD",
+      "neutral_white_mask": true,
+      "transparent_edges": true
+    },
+    {
+      "file": "pool_neon.png",
+      "width": 256,
+      "height": 128,
+      "format": "RGBA8",
+      "frames": 1,
+      "bytes": 13798,
+      "sha256": "5a3a92371b85719051e45e9f159b2c906faf157d8a468617fa1f950a0ac86116",
+      "role": "pool_neon",
+      "blend": "ADD",
+      "neutral_white_mask": true,
+      "transparent_edges": true
+    },
+    {
+      "file": "reflect_neon_pink.png",
+      "width": 256,
+      "height": 128,
+      "format": "RGBA8",
+      "frames": 1,
+      "bytes": 56115,
+      "sha256": "33af80a377d870c17fc370781417450df086c2b8901ffb0ab23dc6581b14b22d",
+      "role": "reflect_neon_pink",
+      "blend": "ADD",
+      "neutral_white_mask": false,
+      "transparent_edges": true
+    },
+    {
+      "file": "reflect_neon_cyan.png",
+      "width": 256,
+      "height": 128,
+      "format": "RGBA8",
+      "frames": 1,
+      "bytes": 55633,
+      "sha256": "6b2673a1962453f2915aaee54bd42cd50256e5542b2388521a43a04388d736a9",
+      "role": "reflect_neon_cyan",
+      "blend": "ADD",
+      "neutral_white_mask": false,
+      "transparent_edges": true
+    }
+  ],
+  "integration": {
+    "owner": "Claude",
+    "consumer": "GroundPools",
+    "existing_code_unchanged": true,
+    "source_alpha_is_straight": true,
+    "start_from_existing_GAIN_and_adjust_visually": true
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "brief": "v33",
+  "studio": "TrashSquad · Beer Party Studio",
+  "game_directory": "res://assets/maps/night_dump",
+  "color_space": "sRGB",
+  "alpha_mode": "straight",
+  "files": [
+    {
+      "file": "floor.png",
+      "width": 512,
+      "height": 512,
+      "format": "RGBA8",
+      "frames": 1,
+      "bytes": 524605,
+      "sha256": "009ec25d5e37a664e91114d30e27a1c9b9e4dbf335e1edb0ee189d9cb0a463b3",
+      "role": "base_floor",
+      "seamless_axes": [
+        "x",
+        "y"
+      ],
+      "mean_luminance_255": 81.230194894144,
+      "opaque": true
+    },
+    {
+      "file": "wear_atlas.png",
+      "width": 1024,
+      "height": 1024,
+      "format": "RGBA8",
+      "frames": 4,
+      "bytes": 2180209,
+      "sha256": "688f40ea4c937f2f6f96d073d43f9f69f942a977ff98647755fe3dfecb135a5e",
+      "role": "ground_variants",
+      "frame_size": [
+        512,
+        512
+      ],
+      "grid": [
+        2,
+        2
+      ],
+      "order": [
+        "asphalt_cracks_markings",
+        "compacted_dirt",
+        "old_paving",
+        "small_scraps"
+      ],
+      "edge": "matches base floor",
+      "opaque": true
+    }
+  ],
+  "integration": {
+    "owner": "Claude",
+    "reset_JUNK_GROUND_LIFT_to": 1.0,
+    "replace_existing_floor_and_wear_together": true,
+    "do_not_apply_the_old_brightness_lift_to_new_art": true
+  }
+}
