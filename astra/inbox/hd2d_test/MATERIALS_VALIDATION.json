@@ -1,0 +1,89 @@
+{
+  "brief": "v36",
+  "materials": {
+    "cobble_gold": {
+      "variants": 3,
+      "mean_luma": [
+        166.47,
+        166.388,
+        166.469
+      ]
+    },
+    "cobble_worn": {
+      "variants": 3,
+      "mean_luma": [
+        167.645,
+        167.645,
+        167.766
+      ]
+    },
+    "rose_path": {
+      "variants": 3,
+      "mean_luma": [
+        158.226,
+        157.943,
+        158.253
+      ]
+    },
+    "marble": {
+      "variants": 3,
+      "mean_luma": [
+        212.266,
+        212.29,
+        212.258
+      ]
+    },
+    "lawn": {
+      "variants": 3,
+      "mean_luma": [
+        115.613,
+        115.488,
+        115.49
+      ]
+    },
+    "garden_soil": {
+      "variants": 3,
+      "mean_luma": [
+        111.483,
+        111.489,
+        111.566
+      ]
+    },
+    "stone_wall": {
+      "variants": 3,
+      "mean_luma": [
+        172.845,
+        172.264,
+        172.877
+      ]
+    },
+    "plaster": {
+      "variants": 3,
+      "mean_luma": [
+        219.142,
+        219.117,
+        219.128
+      ]
+    },
+    "step_riser": {
+      "variants": 3,
+      "mean_luma": [
+        187.958,
+        187.952,
+        187.963
+      ]
+    },
+    "roof_red": {
+      "variants": 3,
+      "mean_luma": [
+        115.902,
+        115.868,
+        115.897
+      ]
+    }
+  },
+  "checked_png": 39,
+  "edge_pair_checks": 180,
+  "errors": [],
+  "ok": true
+}
