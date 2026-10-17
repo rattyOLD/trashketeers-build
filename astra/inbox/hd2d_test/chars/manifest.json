@@ -1,14 +1,14 @@
 {
   "schema_version": 1,
-  "brief": "v36",
-  "revision": "rico-96-badge-2",
+  "brief": "v38 + v36 character96",
+  "revision": "rico-badge-2+pig-guard-idle-1",
   "studio": "TrashSquad · Beer Party Studio",
-  "delivery_status": "accepted_identity_badge_fix_candidate",
+  "delivery_status": "accepted_riko_identity_plus_guard_review_candidate",
   "owner_visual_approved": false,
   "ready_for_gameplay": false,
   "pixels_per_metre": 96,
   "palette": "../palettes/chars.png",
-  "scope": "Riko idle: accepted identity preserved, canonical star correction; run8 pending",
+  "scope": "Accepted Riko identity/badge preserved. One pig_guard idle candidate; no other pigs or new animation delivered.",
   "files": [
     {
       "file": "raccoon_idle.png",
@@ -97,6 +97,95 @@
       "sha256": "cdf132a5dd4b198894bc938b3bb6dead5135e1b75062dee3b8e7ebdd7d22926c",
       "bytes": 844,
       "frame_rule": "Translation only. No per-frame regeneration, resize, shear or mirroring in the right-facing atlas."
+    },
+    {
+      "file": "pig_guard_idle.png",
+      "character_id": "pig_guard",
+      "width": 256,
+      "height": 256,
+      "sha256": "e1b5cb8990bfcbea499cf0f6dbe2092b76c474572cecc5ef49082b9fff98eb10",
+      "bytes": 13050,
+      "role": "character_idle_sprite",
+      "format": "indexed PNG, binary tRNS",
+      "cell_px": [
+        256,
+        256
+      ],
+      "frame_count": 1,
+      "pixels_per_metre": 96,
+      "size_m": [
+        2.6666666666666665,
+        2.6666666666666665
+      ],
+      "core_body_height_px": 173,
+      "core_body_height_m": 1.8020833333333333,
+      "visible_height_px": 175,
+      "visible_height_m": 1.8229166666666667,
+      "visible_bounds_px": [
+        54,
+        49,
+        214,
+        224
+      ],
+      "anchor_px": [
+        128,
+        224
+      ],
+      "anchor_uv": [
+        0.5,
+        0.875
+      ],
+      "anchor_space": "pixel boundaries from top-left",
+      "collider_radius_m": 0.38,
+      "palette": "pig_guard_palette.png",
+      "alpha": "binary 0/255",
+      "visible_colors": 127,
+      "outline": "continuous dark1px around whole silhouette",
+      "normal_map": "pig_guard_idle_n.png",
+      "normal_map_invert_y": false,
+      "suggested_normal_scale": 0.25,
+      "ground_cast_shadow_baked": false,
+      "local_form_shading_baked": true,
+      "source_image": "../../../previews/v38/pig_guard_source.png",
+      "source_sha256": "482c9840920cee9570d5fef0ad4b6f49c8e3e3dd9f46f6511b0c65680e4b79ca",
+      "creation_method": "reference-based concept, median target-grid sampling, restrained128-color palette and dark1px contour",
+      "resampled_from_concept": true
+    },
+    {
+      "file": "pig_guard_idle_n.png",
+      "character_id": "pig_guard",
+      "width": 256,
+      "height": 256,
+      "sha256": "6ccad0129d7fdcaad535557a1e64c7c0768f19ee3c426188ea0e3220cce450a2",
+      "bytes": 25951,
+      "role": "normal_map",
+      "paired_albedo": "pig_guard_idle.png",
+      "format": "RGB",
+      "size_m": [
+        2.6666666666666665,
+        2.6666666666666665
+      ],
+      "anchor_px": [
+        128,
+        224
+      ],
+      "color_space": "linear_data",
+      "normal_convention": "OpenGL +Y",
+      "normal_map_invert_y": false,
+      "suggested_normal_scale": 0.25,
+      "source": "authored clipped ellipsoid fields/cloth folds and shallow shield curvature; approximate form normals, not albedo luminance or3D sculpt bake"
+    },
+    {
+      "file": "pig_guard_palette.png",
+      "character_id": "pig_guard",
+      "width": 128,
+      "height": 1,
+      "sha256": "3885da6ee82089316b3dd9706491e5e7635e5c490fda5d08895c8d1b5908e8a3",
+      "bytes": 453,
+      "role": "character_palette",
+      "format": "RGB",
+      "color_count": 128,
+      "not_a_world_surface": true
     }
   ],
   "clips": {
@@ -166,5 +255,70 @@
       94,
       124
     ]
-  }
+  },
+  "characters": {
+    "pig_guard": {
+      "delivery_status": "review_candidate",
+      "owner_visual_approved": false,
+      "ready_for_scene_review": true,
+      "ready_for_gameplay": false,
+      "albedo": "pig_guard_idle.png",
+      "normal": "pig_guard_idle_n.png",
+      "palette": "pig_guard_palette.png",
+      "pixels_per_metre": 96,
+      "anchor_px": [
+        128,
+        224
+      ],
+      "collider_radius_m": 0.38,
+      "clips": {
+        "idle": {
+          "frames": [
+            0
+          ],
+          "fps": 1,
+          "loop": true
+        }
+      },
+      "identity_reference": {
+        "source_design": "source/assets/enemies/pig_security.png",
+        "face_head_bounds_px": [
+          88,
+          49,
+          165,
+          120
+        ],
+        "rule": "Preserve face, cap and uniform identity across future clips; use this idle as the approved-reference candidate."
+      },
+      "sprite3d": {
+        "pixel_size": 0.010416666666666666,
+        "quad_size_m": [
+          2.6666666666666665,
+          2.6666666666666665
+        ],
+        "quad_center_m_from_anchor": [
+          0,
+          1,
+          0
+        ],
+        "alpha_scissor": 0.5,
+        "texture_filter": "nearest",
+        "normal_scale": 0.25,
+        "normal_convention": "OpenGL +Y",
+        "shaded": true,
+        "cast_shadow_in_engine": true
+      },
+      "pending": [
+        "Visual review of this single idle",
+        "pig_sniper/pig_angry after guard review",
+        "idle4 run6 windup2 strike3 hit2 death6 after visual review"
+      ],
+      "verification": {
+        "format": "PIG_GUARD_VALIDATION.json",
+        "render_report": "PIG_GUARD_RENDER_VALIDATION.json",
+        "scope": "one idle frame in current plaza copy; artistic review pending"
+      }
+    }
+  },
+  "palette_note": "Riko palette/pixels unchanged. Guard has its own restrained128-color palette with matched dark outline, warm neutrals and brass; shared roster-palette unification is not claimed."
 }

@@ -1,0 +1,29 @@
+{
+  "ok": true,
+  "files": {
+    "pig_guard_idle.png": "e1b5cb8990bfcbea499cf0f6dbe2092b76c474572cecc5ef49082b9fff98eb10",
+    "pig_guard_idle_n.png": "6ccad0129d7fdcaad535557a1e64c7c0768f19ee3c426188ea0e3220cce450a2",
+    "pig_guard_palette.png": "3885da6ee82089316b3dd9706491e5e7635e5c490fda5d08895c8d1b5908e8a3"
+  },
+  "visible_bounds_px": [
+    54,
+    49,
+    214,
+    224
+  ],
+  "visible_height_px": 175,
+  "core_height_m": 1.8020833333333333,
+  "anchor_px": [
+    128,
+    224
+  ],
+  "pixels_per_metre": 96,
+  "palette_colors": 128,
+  "binary_alpha": true,
+  "dark_1px_boundary": true,
+  "single_connected_character": true,
+  "normal_unit_max_error": 0.004979719062408239,
+  "accepted_riko_unchanged": true,
+  "animation_frames": 1,
+  "artistic_approval": false
+}

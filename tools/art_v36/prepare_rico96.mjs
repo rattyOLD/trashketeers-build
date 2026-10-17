@@ -6,13 +6,13 @@ import crypto from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {PNG} from './png_core96.mjs';
 import {fixBadge} from './rico_badge96.mjs';
-export function cleanup(source,PNG){
-const src=PNG.decode(source),bounds=PNG.bbox(src),H=bounds[3]-bounds[1],scale=168/H,W=256;
+export function cleanup(source,PNG,{coreHeight=168,sourceAlpha=128}={}){
+const src=PNG.decode(source),bounds=PNG.bbox(src),H=bounds[3]-bounds[1],scale=coreHeight/H,W=256,top=223-coreHeight;
 let footMin=src.width,footMax=0;
 for(let y=Math.floor(bounds[3]-H*.08);y<bounds[3];y++)for(let x=bounds[0];x<bounds[2];x++)if(src.data[(y*src.width+x)*4+3]>=128){footMin=Math.min(footMin,x);footMax=Math.max(footMax,x+1)}
 const foot=(footMin+footMax)/2,rgba=new Uint8Array(W*W*4);
-for(let y=0;y<W;y++)for(let x=0;x<W;x++){const sx=foot+(x+.5-128)/scale,sy=bounds[1]+(y+.5-55)/scale;let rs=[],gs=[],bs=[];
-for(const dy of [-.32,0,.32])for(const dx of [-.32,0,.32]){const ix=Math.floor(sx+dx/scale),iy=Math.floor(sy+dy/scale);if(ix<0||iy<0||ix>=src.width||iy>=src.height)continue;const i=(iy*src.width+ix)*4;if(src.data[i+3]<128)continue;rs.push(src.data[i]);gs.push(src.data[i+1]);bs.push(src.data[i+2])}
+for(let y=0;y<W;y++)for(let x=0;x<W;x++){const sx=foot+(x+.5-128)/scale,sy=bounds[1]+(y+.5-top)/scale;let rs=[],gs=[],bs=[];
+for(const dy of [-.32,0,.32])for(const dx of [-.32,0,.32]){const ix=Math.floor(sx+dx/scale),iy=Math.floor(sy+dy/scale);if(ix<0||iy<0||ix>=src.width||iy>=src.height)continue;const i=(iy*src.width+ix)*4;if(src.data[i+3]<sourceAlpha)continue;rs.push(src.data[i]);gs.push(src.data[i+1]);bs.push(src.data[i+2])}
 if(rs.length<5)continue;const median=a=>a.sort((a,b)=>a-b)[Math.floor(a.length/2)],i=(y*W+x)*4;rgba[i]=median(rs);rgba[i+1]=median(gs);rgba[i+2]=median(bs);rgba[i+3]=255}
 const hist=new Map();for(let i=0;i<rgba.length;i+=4)if(rgba[i+3]){const r=rgba[i],g=rgba[i+1],b=rgba[i+2],key=((r>>3)<<10)|((g>>3)<<5)|(b>>3);if(!hist.has(key))hist.set(key,{n:0,sum:[0,0,0]});const q=hist.get(key);q.n++;q.sum[0]+=r;q.sum[1]+=g;q.sum[2]+=b}
 const points=[...hist.values()].map(q=>({n:q.n,c:q.sum.map(v=>v/q.n)}));
@@ -26,7 +26,7 @@ const clean=indices.slice();for(let y=1;y<255;y++)for(let x=1;x<255;x++){const k
 for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dy)continue;const v=indices[k+dy*W+dx];if(!v)inside=false;else counts.set(v,(counts.get(v)||0)+1)}if(!inside)continue;let best=old,n=0;for(const[v,count]of counts)if(count>n){best=v;n=count}if(best!==old&&n>=5){const a=palette[old],b=palette[best],delta=Math.sqrt((a[0]-b[0])**2+(a[1]-b[1])**2+(a[2]-b[2])**2);if(delta<22)clean[k]=best}}
 const core=clean.slice();let outlined=0;for(let y=1;y<255;y++)for(let x=1;x<255;x++){const k=y*W+x;if(core[k])continue;if(core[k-1]||core[k+1]||core[k-W]||core[k+W]){clean[k]=1;outlined++}}
 const alpha=palette.map((_,i)=>i?255:0),encoded=PNG.encode(W,W,clean,{palette,alpha}),roundtrip=PNG.decode(encoded),colors=new Set();for(let i=0;i<clean.length;i++)if(clean[i])colors.add(palette[clean[i]].join(","));
-const report={source_dimensions:[src.width,src.height],source_visible_bounds:bounds,canvas:[256,256],pixels_per_metre:96,core_body_height_px:168,anchor_px:[128,224],visible_bounds:PNG.bbox(roundtrip),visible_colors:colors.size,alpha_values:[...new Set(roundtrip.data.filter((_,i)=>i%4===3))],outline_added_pixels:outlined};
+const report={source_dimensions:[src.width,src.height],source_visible_bounds:bounds,canvas:[256,256],pixels_per_metre:96,core_body_height_px:coreHeight,anchor_px:[128,224],visible_bounds:PNG.bbox(roundtrip),visible_colors:colors.size,alpha_values:[...new Set(roundtrip.data.filter((_,i)=>i%4===3))],outline_added_pixels:outlined};
 return{width:W,height:W,indices:clean,core,palette,alpha,rgba:roundtrip.data,encoded,report}
 }
 export function formNormals(asset,recipe,PNG){

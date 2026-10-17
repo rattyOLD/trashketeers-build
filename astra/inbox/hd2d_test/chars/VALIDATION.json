@@ -81,5 +81,6 @@
       94,
       124
     ]
-  }
+  },
+  "scope": "Riko idle/badge retained unchanged; guard has separate PIG_GUARD_VALIDATION.json and PIG_GUARD_RENDER_VALIDATION.json."
 }
