@@ -44,6 +44,8 @@ const RACCOON_CELL := Vector2i(300, 200)
 const RICO96 := "res://prototypes/hd2d/chars/raccoon_idle"
 const RICO96_ANCHOR := Vector2(128, 224)
 const RICO96_DENSITY := 96.0
+const PIG_GUARD96 := "res://prototypes/hd2d/chars/pig_guard_idle.png"
+const PIG_GUARD96_ANCHOR := Vector2(128, 224)
 
 var _camera: Camera3D
 var _post: ShaderMaterial
@@ -491,11 +493,16 @@ func _build_mobs() -> void:
 
 
 func _spawn_mob(i: int) -> void:
-	var kinds := ["pig_default", "pig_heavy", "pig_royal", "pig_angry", "pig_sniper"]
+	# Пока из новых свиней есть только щитовик Астры (96 px/м) — толпа из них; старые — запасной вариант.
+	var kinds := ["pig_guard96"] if ResourceLoader.exists(PIG_GUARD96) else ["pig_default", "pig_heavy", "pig_royal", "pig_angry", "pig_sniper"]
 	var kind: String = kinds[i % kinds.size()]
 	var sprite := Sprite3D.new()
 	var height := 1.9 if kind != "pig_heavy" else 2.2
-	if kind == "pig_sniper":
+	if kind == "pig_guard96":
+		sprite.texture = load(PIG_GUARD96)
+		sprite.pixel_size = 1.0 / RICO96_DENSITY
+		sprite.offset = Vector2(0, PIG_GUARD96_ANCHOR.y - sprite.texture.get_height() * 0.5)
+	elif kind == "pig_sniper":
 		sprite.texture = load("res://assets/enemies/pig_sniper.png")
 		sprite.region_enabled = true
 		sprite.pixel_size = 1.9 / 96.0
