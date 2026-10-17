@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "brief": "v36",
-  "revision": "rico-96-control-1",
+  "revision": "96-control-props-and-rico",
   "studio": "TrashSquad · Beer Party Studio",
   "files": [
     {
@@ -27,6 +27,20 @@
       "role": "character_palette_candidate",
       "colors": 128,
       "visible_character_colors": 127,
+      "size_m": null,
+      "anchor_px": null,
+      "not_a_world_surface": true,
+      "provisional_until_visual_review": true
+    },
+    {
+      "file": "bank96.png",
+      "width": 128,
+      "height": 1,
+      "format": "RGB",
+      "bytes": 453,
+      "sha256": "d9a47fac3ba38013a1b4ec66103aab824e235fcd1f6b983b158c420a4c21a10b",
+      "role": "environment_palette_candidate",
+      "colors": 128,
       "size_m": null,
       "anchor_px": null,
       "not_a_world_surface": true,

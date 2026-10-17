@@ -1,8 +1,26 @@
 {
   "ok": true,
-  "emission_changed_pixels": 1640,
-  "emission_changed_outside_glass_bounds": 0,
-  "normal_changed_pixels": 17318,
-  "isolated_render_scope": "technical mask/normal checks only, not atmosphere or art approval",
-  "actual_plaza_scope": "separate review captures; geometry/materials/props from prototype; smooth characters remain placeholders until Riko lookdev"
+  "godot": "4.4.1.stable.official.49a5bc7b6",
+  "renderer": "Compatibility / llvmpipe OpenGL4.5",
+  "emission_changed_pixels": 800,
+  "emission_changed_outside_projected_glass": 0,
+  "glass_projection_pixels": 5785,
+  "normal_changed_pixels": 16183,
+  "emission_operator": "multiply",
+  "emission_energy": 0.45,
+  "normal_scale": 0.45,
+  "scope": "isolated material validation, plus separate actual plaza day/evening captures",
+  "screenshots_sha256": {
+    "props96_base.png": "f44404910403c9c5947e736c6dfa4a22d52a2aef180a13b59ea9fc0730356235",
+    "props96_emission.png": "dec72cabcd993dd173fba433e45b13afe54623d005acf4ca8922695e06505e2e",
+    "props96_normal.png": "cfa758809a71fa7fdf4454b3dc6f63dce391f89508f8e8985014a4d2c1d7b937",
+    "props96_glass_projection.png": "00ad7717b43b04ae14f170ba4b786e1732623ba2578b1e2ea7ead8a603b4cdbc"
+  },
+  "source_modified": false,
+  "owner_visual_approved": false,
+  "limitations": [
+    "Static sample only; actual plaza retains old48px/m materials and temporary facades",
+    "No new animations, mobs or physical-device/gameplay test",
+    "System V-Sync warning; no scene/script errors"
+  ]
 }

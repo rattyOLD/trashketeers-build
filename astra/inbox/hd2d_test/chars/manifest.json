@@ -118,12 +118,12 @@
   "identity_visual_approval_pending": true,
   "verification": {
     "format": "VALIDATION.json",
-    "godot_render_verified": false,
-    "blocker": "Managed workspace failed to start; no Godot day/evening render performed"
+    "godot_render_verified": true,
+    "render_report": "RENDER_VALIDATION.json",
+    "artistic_approval": false
   },
   "pending": [
     "Owner visual review of identity, personality and material quality",
-    "Godot day/evening normal-on/off and shadow check",
     "Props96: slender lamp/pedestal and planter",
     "After review: run8, 192px materials, mobs"
   ]

@@ -42,8 +42,7 @@
   "dark_outline_complete": true,
   "opaque_pixels": 16007,
   "outline_pixels": 786,
-  "godot_checked": false,
-  "godot_blocker": "Managed environment failed to start: exec-server Noise harness handshake",
+  "godot_checked": true,
   "artistic_approval": false,
   "albedo_sha256": "430078ecb06105a8325f6ed05cc9ef82008a8c53d38eccbf6a33b6c6a69cd47b",
   "normal_sha256": "58ff06aedabfdcb5d6bffa1a30a2cf74173405d17dc728b6fb69381d1878f689",
@@ -55,5 +54,7 @@
   "actual_visible_colors": 127,
   "connected_components": [
     16007
-  ]
+  ],
+  "node_cli_byte_identical_reproduction": true,
+  "render_report": "RENDER_VALIDATION.json"
 }

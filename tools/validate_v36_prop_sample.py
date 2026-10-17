@@ -14,6 +14,9 @@ def validate(root):
         if not ok:errors.append(message)
     folder=root/'props'
     manifest=json.loads((folder/'manifest.json').read_text())
+    if manifest.get('pixels_per_metre')==96:
+        from art_v36.validate_props96 import validate as validate96
+        return validate96(root)
     palette=Image.open(root/'palettes/bank.png').convert('RGB')
     palette_colors=set(map(tuple,np.array(palette).reshape(-1,3)))
     check(palette.size==(64,1) and len(palette_colors)==64,'Bank palette: 64 unique colors')

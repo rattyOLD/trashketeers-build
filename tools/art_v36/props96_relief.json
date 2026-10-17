@@ -1,0 +1,24 @@
+{
+  "source_sha256": "f6178062adc3e9711d4e495b05ec4bd31712d7de082eb0a6251f4b8cd99e078e",
+  "normal_method": "authored planar surfaces and geometric carved profiles, not albedo luminance",
+  "stone_boxes": [
+    {"rect": [38,143,155,172], "bevel": 3.5, "depth": 1.0},
+    {"rect": [49,134,146,144], "bevel": 2.0, "depth": 0.6},
+    {"rect": [51,41,144,138], "bevel": 2.5, "depth": 0.8},
+    {"rect": [38,17,154,40], "bevel": 3.0, "depth": 1.2},
+    {"rect": [42,5,150,20], "normal": [0,0.5,0.8660254]}
+  ],
+  "carved_panel": {
+    "polygon": [[78,49],[112,49],[116,56],[127,57],[127,116],[118,117],[113,126],[79,126],[74,119],[65,117],[65,58],[74,56]],
+    "rim_width": 3.5,
+    "height": 1.25
+  },
+  "glow_panes": [
+    [[39,70],[52,70],[52,121],[40,119]],
+    [[58,70],[70,70],[70,122],[58,122]],
+    [[77,70],[88,70],[87,119],[77,121]]
+  ],
+  "mullion_probe": {"x_columns": [54,73], "y_range": [75,117]},
+  "filament_rect": [61,97,65,107],
+  "reflection_polygon": [[41,78],[48,72],[48,77],[41,90]]
+}

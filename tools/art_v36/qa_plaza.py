@@ -13,6 +13,7 @@ ROOT=Path(__file__).resolve().parents[2]
 def main():
     parser=argparse.ArgumentParser()
     parser.add_argument('destination',type=Path)
+    parser.add_argument('--rico-dir',type=Path)
     args=parser.parse_args()
     out=args.destination.resolve()
     assert out!=ROOT and ROOT not in out.parents
@@ -40,12 +41,44 @@ def main():
         dest.parent.mkdir(parents=True,exist_ok=True)
         shutil.copy2(source,dest)
         copied.append({'file':path,'sha256':hashlib.sha256(source.read_bytes()).hexdigest()})
+    candidates=[]
     for family in ('materials','props'):
         dest=out/'prototypes/hd2d'/family
         dest.mkdir(parents=True,exist_ok=True)
         for source in (ROOT/'astra/inbox/hd2d_test'/family).glob('*.png'):
             shutil.copy2(source,dest/source.name)
+            candidates.append({'file':family+'/'+source.name,'sha256':hashlib.sha256(source.read_bytes()).hexdigest()})
+    shutil.copy2(props/'manifest.json',out/'prototypes/hd2d/props/manifest.json')
     rico_source='original source Riko, temporary smooth art; no accepted pixel redraw'
+    rico_setup=''
+    if args.rico_dir:
+        chars=args.rico_dir.resolve()
+        character=json.loads((chars/'manifest.json').read_text())
+        sprite=next(f for f in character['files'] if f['role']=='character_idle_sprite')
+        assert sprite['frame_count']==1
+        dest=out/'candidate_chars'
+        dest.mkdir(exist_ok=True)
+        for entry in character['files']:
+            shutil.copy2(chars/entry['file'],dest/entry['file'])
+        settings=character['sprite3d']
+        rico_source={'manifest':character,'albedo_sha256':hashlib.sha256((chars/sprite['file']).read_bytes()).hexdigest()}
+        rico_setup=f'''
+\t_hero.texture = load("res://candidate_chars/{sprite['file']}")
+\t_hero.pixel_size = {settings['pixel_size']}
+\t_hero.offset = Vector2({settings['offset_px'][0]}, {settings['offset_px'][1]})
+\tvar m := StandardMaterial3D.new()
+\tm.albedo_texture = _hero.texture
+\tm.normal_enabled = true
+\tm.normal_texture = load("res://candidate_chars/{sprite['normal_map']}")
+\tm.normal_scale = {settings['normal_scale']}
+\tm.roughness = {settings['roughness']}
+\tm.metallic_specular = {settings['metallic_specular']}
+\tm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+\tm.alpha_scissor_threshold = .5
+\tm.cull_mode = BaseMaterial3D.CULL_DISABLED
+\tm.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST_WITH_MIPMAPS
+\t_hero.material_override = m
+'''
     (out/'prototypes/hd2d/plaza.gd').write_text(code)
     (out/'project.godot').write_text('''config_version=5
 [application]
@@ -112,11 +145,27 @@ func _ready() -> void:
 	print("V36_PLAZA_REVIEW_OK: actual prototype geometry, candidate art, unchanged source; Riko source recorded in staging.json, mobs hidden")
 	get_tree().quit()
 ''')
+    if rico_setup:
+        path=out/'review.gd'
+        review=path.read_text().replace('\tset_process(false)','\tset_process(false)\n'+rico_setup)
+        checks='''
+\tvar material := _hero.material_override as StandardMaterial3D
+\tmaterial.normal_enabled = false
+\tawait capture("plaza_sample_evening_flat")
+\tlighting(false)
+\tawait capture("plaza_sample_day_flat")
+\tmaterial.normal_enabled = true
+\t_hero.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+\tawait capture("plaza_sample_day_no_shadow")
+'''
+        path.write_text(review.replace('\tget_tree().quit()',checks+'\tget_tree().quit()'))
     (out/'staging.json').write_text(json.dumps({'prototype_source_sha256':hashlib.sha256((ROOT/'source/prototypes/hd2d/plaza.gd').read_bytes()).hexdigest(),
-        'source_modified':False,'candidate_revision':manifest['revision'],'copied_assets':copied,'rico_source':rico_source,
+        'source_modified':False,'candidate_revision':manifest['revision'],'copied_assets':copied,
+        'candidate_overlays':candidates,'rico_source':rico_source,
         'qa_overrides':['candidate prop anchors and mount','day lamps off; evening Omni .4, emission .45',
                         'overview camera 38deg; closer control camera 30deg',
-                        'frozen actors; unfinished mobs hidden; original smooth Riko retained']},indent=2)+'\n')
+                        'frozen actors; unfinished mobs hidden',
+                        'Riko normal on/off and shadow on/off when --rico-dir provided']},indent=2)+'\n')
     print('V36_PLAZA_STAGED',out)
 
 

@@ -1,52 +1,56 @@
 {
   "ok": true,
   "errors": [],
+  "density": 96,
+  "png_count": 5,
+  "palette_colors": 128,
   "sprites": {
     "bank_lantern.png": {
-      "size": [
-        64,
-        92
+      "bounds": [
+        21,
+        0,
+        107,
+        182
       ],
-      "visible_bounds": [
-        2,
-        1,
-        62,
-        91
-      ],
-      "colors": 14
+      "colors": 81,
+      "components": [
+        9238
+      ]
     },
     "bank_pedestal.png": {
-      "size": [
-        104,
-        88
+      "bounds": [
+        25,
+        0,
+        167,
+        174
       ],
-      "visible_bounds": [
-        8,
-        1,
-        96,
-        87
-      ],
-      "colors": 11
+      "colors": 91,
+      "components": [
+        21295
+      ]
     },
     "bank_flower_planter.png": {
-      "size": [
-        96,
-        100
-      ],
-      "visible_bounds": [
-        3,
+      "bounds": [
         1,
-        93,
-        99
+        6,
+        207,
+        206
       ],
-      "colors": 32
+      "colors": 125,
+      "components": [
+        29599
+      ]
     }
   },
-  "png_count": 5,
-  "density": 48,
-  "assembly_visible_height_px": 163,
-  "palette_colors": 64,
-  "lamp_pedestal_width_ratio": 0.6818,
-  "lamp_pedestal_height_ratio": 1.0465,
-  "owner_visual_approval": false
+  "lamp_pedestal_width_ratio": 0.6056338028169014,
+  "lamp_pedestal_height_ratio": 1.0459770114942528,
+  "assembly_visible_height_px": 330,
+  "normal_unit_max_error": 0.004856081420822389,
+  "owner_visual_approval": false,
+  "byte_identical_reproduction": true,
+  "negative_control": {
+    "solid_glass_with_correct_hashes_rejected": true,
+    "reason": "Opaque mullions overwritten by glow"
+  },
+  "godot_checked": true
 }

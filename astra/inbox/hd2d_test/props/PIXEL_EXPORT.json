@@ -1,0 +1,106 @@
+{
+  "source_sha256": "f6178062adc3e9711d4e495b05ec4bd31712d7de082eb0a6251f4b8cd99e078e",
+  "pixels_per_metre": 96,
+  "palette_colors": 128,
+  "creation_method": "concept-based median material sampling on target grid, shared palette and complete 1px dark contour",
+  "resampled_from_concept": true,
+  "files": [
+    {
+      "file": "bank_lantern.png",
+      "canvas": [
+        128,
+        184
+      ],
+      "anchor_px": [
+        64,
+        182
+      ],
+      "source_bounds": [
+        82,
+        12,
+        450,
+        792
+      ],
+      "visible_bounds": [
+        21,
+        0,
+        107,
+        182
+      ],
+      "visible_colors": 81,
+      "outline_pixels": 546,
+      "sha256": "2e16587cba34b4f3855a8925ef72700d3c4d7556985e8598f78844be2955156c"
+    },
+    {
+      "file": "bank_pedestal.png",
+      "canvas": [
+        192,
+        176
+      ],
+      "anchor_px": [
+        96,
+        174
+      ],
+      "source_bounds": [
+        591,
+        120,
+        1132,
+        785
+      ],
+      "visible_bounds": [
+        25,
+        0,
+        167,
+        174
+      ],
+      "visible_colors": 91,
+      "outline_pixels": 635,
+      "sha256": "2a47d0a21f074efaa14012048fa98cd6ec2222912c012a86966f858b1229a12e"
+    },
+    {
+      "file": "bank_flower_planter.png",
+      "canvas": [
+        208,
+        208
+      ],
+      "anchor_px": [
+        104,
+        206
+      ],
+      "source_bounds": [
+        1201,
+        85,
+        1923,
+        786
+      ],
+      "visible_bounds": [
+        1,
+        6,
+        207,
+        206
+      ],
+      "visible_colors": 125,
+      "outline_pixels": 1242,
+      "sha256": "1695cca3464e54847c9a5cc280a46aef69acb675a62e3e542d595f7f975e5621"
+    },
+    {
+      "file": "bank_lantern_glow.png",
+      "sha256": "94f6727462289b04f7a78314d9d4a32087de1abf52ec3e85a5dfa2aef1977ab0"
+    },
+    {
+      "file": "bank_pedestal_n.png",
+      "sha256": "c5132554c8518481dc782f08208ce1f7429c81a04f0cab707368076b55fa222f"
+    },
+    {
+      "file": "bank96.png",
+      "sha256": "d9a47fac3ba38013a1b4ec66103aab824e235fcd1f6b983b158c420a4c21a10b"
+    }
+  ],
+  "normal_unit_max_error": 0.004856081420822278,
+  "normal_source": "authored planar surfaces and geometric carved profiles, not albedo luminance",
+  "mask_levels": [
+    0,
+    48,
+    255
+  ]
+}
