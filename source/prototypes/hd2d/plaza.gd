@@ -5,8 +5,13 @@ extends Node3D
 ## Временный арт: текущие спрайты и плитки Банка. Игру не затрагивает, запускается отдельной сценой.
 ## Масштаб брифа: 32 px арта = 1 м; временный арт масштабируется по нужной высоте в метрах.
 
-const FLOOR_ATLAS := "res://assets/biome/ch2_floor.png"
-const TILE_PX := 128
+## Материалы Астры (бриф v36): 64×64 px = 2×2 м, по три совместимых по краям варианта.
+const MATERIALS := "res://prototypes/hd2d/materials/"
+const MATERIAL_PX := 64
+const MATERIAL_M := 2.0
+## Варианты раскладываются мозаикой 3×3 (6×6 м на повтор), чтобы плитка не читалась сеткой.
+const MOSAIC := [[0, 1, 2], [2, 0, 1], [1, 2, 0]]
+const NORMAL_STRENGTH := 0.65
 const PLAZA := Vector2(34.0, 26.0)
 const TERRACE_Z := -6.0
 const TERRACE_H := 1.2
@@ -63,6 +68,7 @@ func _build_environment() -> void:
 	env.ambient_light_energy = 0.42
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	env.tonemap_white = 6.0
+	env.tonemap_exposure = 0.88
 	env.glow_enabled = true
 	env.glow_intensity = 0.4
 	env.glow_bloom = 0.08
@@ -90,22 +96,39 @@ func _build_environment() -> void:
 
 # --- Земля, терраса, дома -------------------------------------------------------------------------
 
-func _tile(column: int, row: int) -> Texture2D:
-	var atlas := (load(FLOOR_ATLAS) as Texture2D).get_image()
-	if atlas.is_compressed():
-		atlas.decompress()
-	return ImageTexture.create_from_image(atlas.get_region(Rect2i(column * TILE_PX, row * TILE_PX, TILE_PX, TILE_PX)))
+func _mosaic(material: String, suffix: String) -> Texture2D:
+	var variants: Array[Image] = []
+	for i in 3:
+		var path := "%s%s_%02d%s.png" % [MATERIALS, material, i + 1, suffix]
+		if not ResourceLoader.exists(path):
+			return null
+		var image := (load(path) as Texture2D).get_image()
+		if image.is_compressed():
+			image.decompress()
+		image.convert(Image.FORMAT_RGBA8)
+		variants.append(image)
+	var mosaic := Image.create(MATERIAL_PX * 3, MATERIAL_PX * 3, true, Image.FORMAT_RGBA8)
+	for y in 3:
+		for x in 3:
+			mosaic.blit_rect(variants[MOSAIC[y][x]], Rect2i(0, 0, MATERIAL_PX, MATERIAL_PX), Vector2i(x, y) * MATERIAL_PX)
+	mosaic.generate_mipmaps()
+	return ImageTexture.create_from_image(mosaic)
 
 
-func _material(texture: Texture2D, metres_per_tile: float, tint: Color = Color.WHITE) -> StandardMaterial3D:
+func _material(name: String, tint: Color = Color.WHITE) -> StandardMaterial3D:
 	var material := StandardMaterial3D.new()
-	material.albedo_texture = texture
+	material.albedo_texture = _mosaic(name, "")
 	material.albedo_color = tint
 	material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST_WITH_MIPMAPS
 	material.uv1_triplanar = true
 	material.uv1_world_triplanar = true
-	material.uv1_scale = Vector3.ONE / metres_per_tile
+	material.uv1_scale = Vector3.ONE / (MATERIAL_M * 3.0)
 	material.roughness = 0.9
+	var normal := _mosaic(name, "_n")
+	if normal != null:
+		material.normal_enabled = true
+		material.normal_texture = normal
+		material.normal_scale = NORMAL_STRENGTH
 	return material
 
 
@@ -121,19 +144,28 @@ func _box(size: Vector3, at: Vector3, material: Material) -> MeshInstance3D:
 
 
 func _build_ground() -> void:
-	var lawn := _material(_tile(1, 1), 2.0)
-	var cobble := _material(_tile(0, 0), 2.0)
-	var pink := _material(_tile(2, 2), 2.0)
+	var lawn := _material("lawn")
+	var cobble := _material("cobble_gold")
+	var worn := _material("cobble_worn")
+	var pink := _material("rose_path")
+	var soil := _material("garden_soil")
 	_box(Vector3(PLAZA.x + 40.0, 0.2, PLAZA.y + 40.0), Vector3(0, -0.1, 0), lawn)
 	_box(Vector3(PLAZA.x - 6.0, 0.02, PLAZA.y - 12.0), Vector3(0, 0.01, 3.0), cobble)
 	# Розовые дорожки крестом через площадь.
 	_box(Vector3(3.0, 0.03, PLAZA.y - 12.0), Vector3(-1.5, 0.015, 3.0), pink)
 	_box(Vector3(PLAZA.x - 6.0, 0.03, 2.4), Vector3(0, 0.015, 6.0), pink)
+	# Вытертая брусчатка там, где ходят чаще всего: у ступеней и вокруг фонтана.
+	_box(Vector3(8.0, 0.025, 3.0), Vector3(0, 0.0125, TERRACE_Z + 3.6), worn)
+	_box(Vector3(8.5, 0.025, 7.5), Vector3(6.0, 0.0125, 2.0), worn)
+	# Клумбы по краям площади.
+	for x: float in [-13.5, 13.5]:
+		_box(Vector3(2.4, 0.12, 6.0), Vector3(x, 0.06, 3.5), soil)
 
 
 func _build_terrace() -> void:
-	var marble := _material(_tile(4, 3), 2.0)
-	var stone := _material(_tile(1, 3), 1.0, Color(0.78, 0.72, 0.68))
+	var marble := _material("marble")
+	var stone := _material("stone_wall")
+	var riser := _material("step_riser")
 	var depth := 10.0
 	_box(Vector3(PLAZA.x, TERRACE_H, depth), Vector3(0, TERRACE_H * 0.5, TERRACE_Z - depth * 0.5), marble)
 	# Подпорная стена — отдельная коробка с камнем спереди, ступени по центру.
@@ -142,11 +174,13 @@ func _build_terrace() -> void:
 		var h := TERRACE_H * float(STEPS - i) / float(STEPS)
 		var z := TERRACE_Z + 0.3 + 0.45 * i + 0.225
 		_box(Vector3(6.0, h, 0.45), Vector3(0, h * 0.5, z), marble)
+		# Передняя грань ступени — своя текстура (тонкая плита перед коробкой).
+		_box(Vector3(6.0, TERRACE_H / float(STEPS), 0.02), Vector3(0, h - TERRACE_H / float(STEPS) * 0.5, z + 0.235), riser)
 
 
 func _build_buildings() -> void:
-	var wall := _material(_tile(3, 3), 2.0, Color(0.95, 0.88, 0.8))
-	var roof := _material(_tile(2, 2), 1.0, Color(0.85, 0.45, 0.42))
+	var wall := _material("plaster")
+	var roof := _material("roof_red")
 	var back := TERRACE_Z - 10.0
 	for spec: Array in [[Vector3(14, 8, 6), Vector3(0, 0, back - 1.0)], [Vector3(8, 6, 6), Vector3(-12.5, 0, back + 0.5)], [Vector3(8, 6, 6), Vector3(12.5, 0, back + 0.5)]]:
 		var size: Vector3 = spec[0]
@@ -162,7 +196,7 @@ func _build_buildings() -> void:
 
 func _build_fountain() -> void:
 	var at := Vector3(6.0, 0, 2.0)
-	var marble := _material(_tile(4, 3), 1.0)
+	var marble := _material("marble")
 	for ring: Array in [[3.0, 0.6], [1.5, 1.1]]:
 		var mesh := CylinderMesh.new()
 		mesh.top_radius = ring[0]
@@ -451,8 +485,8 @@ func _build_post() -> void:
 	material.set_shader_parameter(&"focus_half", 0.16)
 	material.set_shader_parameter(&"focus_ramp", 0.26)
 	material.set_shader_parameter(&"glow_strength", 0.3)
-	material.set_shader_parameter(&"glow_threshold", 0.82)
-	material.set_shader_parameter(&"haze_color", Color(1.0, 0.86, 0.62, 0.1))
+	material.set_shader_parameter(&"glow_threshold", 0.9)
+	material.set_shader_parameter(&"haze_color", Color(1.0, 0.86, 0.62, 0.05))
 	material.set_shader_parameter(&"shadow_tint", Vector3(0.08, 0.02, 0.14))
 	material.set_shader_parameter(&"highlight_tint", Vector3(0.06, 0.03, -0.03))
 	rect.material = material
