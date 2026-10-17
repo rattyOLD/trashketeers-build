@@ -17,5 +17,9 @@
   "Звуки: artisticdude — Zombies Sound Pack. CC0 1.0.",
   "Музыка: Komiku — Action Techno; Last Boss: Let's see what we got. CC0 1.0.",
   "Музыка: HoliznaCC0 — Retro Synths. CC0 1.0."
+ ],
+ "notices": [
+  "Portions of this software are copyright © The FreeType Project (www.freetype.org). All rights reserved.",
+  "CA certificates (Mozilla, MPL-2.0) are included unmodified. Source: https://github.com/godotengine/godot/tree/4.4.1-stable/thirdparty/certs"
  ]
 }
