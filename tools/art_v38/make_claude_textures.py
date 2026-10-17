@@ -23,23 +23,34 @@ def outline(mask: Image.Image, fill: Image.Image) -> Image.Image:
 
 
 def inscription() -> None:
-    # 5.4 x 0.5 m plate text, letters ~0.34 m tall.
-    w, h = 520, 48
-    font = ImageFont.truetype("/home/user/trashketeers-build/source/assets/fonts/RussoOne-Regular.ttf", 36)
+    # 4.8 x 0.5 m: antique serif capitals, gilded with a cast shadow below-right so the letters
+    # read as raised metal on stone rather than a flat sticker.
+    w, h = 460, 48
+    font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf", 30)
+    text = "ЗОЛОТОЙ  БАНК"
     mask = Image.new("L", (w, h), 0)
     d = ImageDraw.Draw(mask)
-    text = "ЗОЛОТОЙ  БАНК"
-    box = d.textbbox((0, 0), text, font=font)
-    d.text(((w - (box[2] - box[0])) // 2 - box[0], (h - (box[3] - box[1])) // 2 - box[1]), text, fill=255, font=font)
-    mask = mask.point(lambda v: 255 if v > 110 else 0)
-    # Gilded letters: light top, dark bottom ramp, highlight line.
+    spacing = 6
+    widths = [d.textbbox((0, 0), ch, font=font)[2] for ch in text]
+    total = sum(widths) + spacing * (len(text) - 1)
+    x = (w - total) // 2
+    for ch, cw in zip(text, widths):
+        d.text((x, 6), ch, fill=255, font=font)
+        x += cw + spacing
+    mask = mask.point(lambda v: 255 if v > 120 else 0)
+    shadow = Image.new("L", (w, h), 0)
+    shadow.paste(mask, (2, 2))
     fill = Image.new("RGBA", (w, h))
     px = fill.load()
+    tones = [(255, 226, 140), (232, 184, 74), (196, 140, 44), (150, 98, 28)]
     for y in range(h):
-        tone = GOLD[3] if y < 14 else GOLD[2] if y < 26 else GOLD[1] if y < 36 else GOLD[0]
-        for x in range(w):
-            px[x, y] = tone + (255,)
-    outline(mask, fill).save(OUT / "bank_inscription.png")
+        tone = tones[0] if y < 13 else tones[1] if y < 22 else tones[2] if y < 31 else tones[3]
+        for xx in range(w):
+            px[xx, y] = tone + (255,)
+    out = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    out.paste(Image.new("RGBA", (w, h), (58, 38, 20, 255)), (0, 0), shadow)
+    out.paste(outline(mask, fill), (0, 0), mask.filter(ImageFilter.MaxFilter(3)))
+    out.save(OUT / "bank_inscription.png")
 
 
 def carpet() -> None:

@@ -64,6 +64,12 @@ glass=material('Bank_Window_Glass','bank_glass.png',None,.3,0,False,'bank_glass_
 ivy=material('Bank_Ivy','bank_ivy.png',None,.9,0,True)
 crest=material('Bank_Crowned_Pig_Crest','bank_crest.png',None,.55,.35,True)
 inscription=material('Bank_Inscription','bank_inscription.png',None,.45,.3,True)
+door=material('Bank_Door_Walnut','bank_trim.png','bank_trim_n.png',.55)
+# Darker, richer walnut for the entrance than the generic trim wood (glTF base color factor).
+_p=door.node_tree.nodes.get('Principled BSDF');_t=[n for n in door.node_tree.nodes if n.type=='TEX_IMAGE'][0]
+_mix=door.node_tree.nodes.new('ShaderNodeMix');_mix.data_type='RGBA';_mix.blend_type='MULTIPLY';_mix.inputs[0].default_value=1
+door.node_tree.links.new(_t.outputs['Color'],_mix.inputs[6]);_mix.inputs[7].default_value=(.58,.42,.36,1)
+door.node_tree.links.new(_mix.outputs[2],_p.inputs['Base Color'])
 carpet=material('Bank_Red_Carpet','bank_carpet.png',None,.95)
 banner=material('Bank_Banner','bank_banner.png',None,.9,0,True)
 REGIONS={'frieze':(0,0,256,64),'gold_leaf':(256,0,256,64),'shaft':(512,0,256,256),'brass':(768,0,256,256),
@@ -253,17 +259,19 @@ for x in [-5.45,0,5.45]:
         # fanlight above the transom and a gold keystone crown the arch.
         for sign in [-1,1]:
             cx=sign*.79
-            box('Door_Walnut_Leaf',(cx,-3.86,spring/2),(1.56,.16,spring),wood,'wood')
-            for z0,z1 in [(.22,1.18),(1.42,2.48)]:
-                box('Door_Raised_Panel',(cx,-3.97,(z0+z1)/2),(1.04,.06,z1-z0-.12),wood,'wood')
-                for zz in [z0,z1]:box('Door_Panel_Gold_Rail',(cx,-3.99,zz),(1.16,.07,.06),gold,'brass')
-                for xx in [cx-.55,cx+.55]:box('Door_Panel_Gold_Stile',(xx,-3.99,(z0+z1)/2),(.06,.07,z1-z0),gold,'brass')
-            for xx in [cx-.7,cx+.7]:
-                for zz in [.3,.8,1.3,1.8,2.3]:sphere('Door_Boss',(xx,-3.97,zz),.045,gold,scale=(1,.6,1))
-            sphere('Door_Boss',(sign*.3,-3.99,1.42),.1,gold,scale=(1,.4,1))
-            bpy.ops.mesh.primitive_torus_add(major_segments=12,minor_segments=4,major_radius=.14,minor_radius=.028,location=(sign*.3,-4.03,1.28))
+            # Stiles and rails stand proud; the panels sit 5 cm deeper with a thin gilded bead.
+            box('Door_Walnut_Leaf',(cx,-3.80,spring/2),(1.56,.10,spring),door,'wood')
+            for xx in [cx-.66,cx+.66]:box('Door_Walnut_Stile',(xx,-3.89,spring/2),(.24,.08,spring),door,'wood')
+            for zz in [.11,1.3,2.62]:box('Door_Walnut_Rail',(cx,-3.89,zz),(1.08,.08,.22 if zz<2 else .16),door,'wood')
+            for z0,z1 in [(.22,1.19),(1.41,2.54)]:
+                for zz in [z0,z1]:box('Door_Panel_Gold_Bead',(cx,-3.87,zz),(1.06,.03,.03),gold,'brass')
+                for xx in [cx-.53,cx+.53]:box('Door_Panel_Gold_Bead',(xx,-3.87,(z0+z1)/2),(.03,.03,z1-z0),gold,'brass')
+            for zz in [.5,2.2]:
+                for xx in [cx-.66,cx+.66]:sphere('Door_Boss',(xx,-3.94,zz),.04,gold,scale=(1,.6,1))
+            sphere('Door_Boss',(sign*.24,-3.95,1.42),.08,gold,scale=(1,.4,1))
+            bpy.ops.mesh.primitive_torus_add(major_segments=12,minor_segments=4,major_radius=.11,minor_radius=.022,location=(sign*.24,-3.98,1.3))
             o=bpy.context.object;o.name='Door_Ring_Knocker';o.rotation_euler.x=math.pi/2;finish(o,gold,'brass')
-        box('Door_Meeting_Stile',(0,-3.97,spring/2),(.08,.08,spring),gold,'brass')
+        box('Door_Meeting_Stile',(0,-3.94,spring/2),(.06,.06,spring),gold,'brass')
         box('Door_Transom',(0,-3.96,spring),(w-.12,.16,.16),gold,'brass')
         arch_ring('Fanlight_Hub',0,0,.5,spring,.07,-3.99,-3.8,gold,'brass',steps=6)
         for deg in [30,60,90,120,150]:
@@ -425,29 +433,28 @@ for i in range(15):
     o=mesh_object('Pediment_Sunburst_Ray',verts,[(0,2,1),(3,4,5),(0,1,4,3),(1,2,5,4),(2,0,3,5)],gold,'brass')
     bm=bmesh.new();bm.from_mesh(o.data);bmesh.ops.recalc_face_normals(bm,faces=list(bm.faces));bm.to_mesh(o.data);bm.free();o.data.update()
 # 2) Inscription plaque between the column capitals: "ZOLOTOY BANK" in gilded letters.
-box('Inscription_Plaque',(0,-4.58,4.89),(5.7,.12,.5),plaster)
-for zz in [4.64,5.14]:box('Inscription_Gold_Rail',(0,-4.66,zz),(5.8,.05,.05),gold,'brass')
-for xx in [-2.88,2.88]:box('Inscription_Gold_End',(xx,-4.66,4.89),(.05,.05,.55),gold,'brass')
+box('Inscription_Stone_Frieze',(0,-4.58,4.89),(5.6,.12,.5),masonry)
+for zz in [4.63,5.15]:box('Inscription_Stone_Moulding',(0,-4.65,zz),(5.8,.06,.06),stone,'frieze')
 def flat_card(name,m,at,size_px):
     w,h=size_px[0]/96,size_px[1]/96;x,y,z=at
     o=mesh_object(name,[(x-w/2,y,z-h/2),(x+w/2,y,z-h/2),(x+w/2,y,z+h/2),(x-w/2,y,z+h/2)],[(0,1,2,3)],m)
     for li,uv in zip(o.data.polygons[0].loop_indices,[(0,0),(1,0),(1,1),(0,1)]):o.data.uv_layers[0].data[li].uv=uv
     o['uv_kind']='canonical_cutout_projection';return o
-flat_card('Gilded_Inscription_Zolotoy_Bank',inscription,(0,-4.665,4.89),(520,48))
+flat_card('Gilded_Inscription_Zolotoy_Bank',inscription,(0,-4.665,4.89),(460,48))
 # 3) Crown sculpture on top of the arch and two banner poles flanking it on the roof terrace.
-TOP=5.27+1.4+2.95+.26;K=1.4
-box('Crown_Pedestal',(0,-4.5,TOP+.18*K),(.95*K,.62*K,.36*K),stone,'plinth')
-sphere('Crown_Velvet_Cushion',(0,-4.5,TOP+.44*K),.42*K,carpet,None,scale=(1,.8,.38))
-cylinder('Crown_Gold_Band',(0,-4.5,TOP+.66*K),.34*K,.28*K,gold,'brass',vertices=12)
+TOP=5.27+1.4+2.95+.26;K=2.1
+box('Crown_Pedestal',(0,-4.62,TOP+.18*K),(.95*K,.62*K,.36*K),stone,'plinth')
+sphere('Crown_Velvet_Cushion',(0,-4.62,TOP+.44*K),.42*K,carpet,None,scale=(1,.8,.38))
+cylinder('Crown_Gold_Band',(0,-4.62,TOP+.66*K),.34*K,.28*K,gold,'brass',vertices=12)
 for k in range(6):
     a=k*math.tau/6+math.pi/6
-    px,py=math.sin(a)*.3*K,-4.5-math.cos(a)*.3*K
+    px,py=math.sin(a)*.3*K,-4.62-math.cos(a)*.3*K
     bpy.ops.mesh.primitive_cone_add(vertices=4,radius1=.09*K,radius2=0,depth=.32*K,location=(px,py,TOP+.96*K))
     o=bpy.context.object;o.name='Crown_Gold_Point';finish(o,gold,'brass')
     sphere('Lamp_Finial',(px,py,TOP+1.14*K),.06*K,gold)
-sphere('Gold_Finial_Ball',(0,-4.5,TOP+1.02*K),.16*K,gold)
-box('Crown_Cross_Upright',(0,-4.5,TOP+1.3*K),(.06*K,.06*K,.32*K),gold,'brass')
-box('Crown_Cross_Arm',(0,-4.5,TOP+1.33*K),(.22*K,.06*K,.06*K),gold,'brass')
+sphere('Gold_Finial_Ball',(0,-4.62,TOP+1.02*K),.16*K,gold)
+box('Crown_Cross_Upright',(0,-4.62,TOP+1.3*K),(.06*K,.06*K,.32*K),gold,'brass')
+box('Crown_Cross_Arm',(0,-4.62,TOP+1.33*K),(.22*K,.06*K,.06*K),gold,'brass')
 for sign in [-1,1]:
     x=sign*3.6
     box('Banner_Pole_Plinth',(x,-3.72,DECK+.15),(.4,.4,.3),stone,'plinth')
