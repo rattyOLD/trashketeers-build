@@ -12,6 +12,12 @@ const MATERIAL_M := 2.0
 ## Варианты раскладываются мозаикой 3×3 (6×6 м на повтор), чтобы плитка не читалась сеткой.
 const MOSAIC := [[0, 1, 2], [2, 0, 1], [1, 2, 0]]
 const NORMAL_STRENGTH := 0.65
+## Модульные предметы Астры (v36, 48 px/м): фонарь на тумбе и кадка; опоры и крепление — из manifest.
+const PROPS := "res://prototypes/hd2d/props/"
+const PROP_PX_PER_M := 48.0
+const LANTERN_MOUNT := 1.2708333
+const LANTERN_GLOW := Color("#ffc574")
+const LANTERN_GLOW_ENERGY := 0.8
 const PLAZA := Vector2(34.0, 26.0)
 const TERRACE_Z := -6.0
 const TERRACE_H := 1.2
@@ -236,7 +242,9 @@ func _build_props() -> void:
 	for x in range(-16, 17, 2):
 		if absf(x) > 3.0:
 			_sprite("res://assets/props/ch2/railing_low.png", Vector3(x, TERRACE_H, TERRACE_Z - 0.2), 1.0)
-	for spec: Array in [["planter", Vector3(-3.6, TERRACE_H, TERRACE_Z - 0.8), 1.1], ["planter", Vector3(3.6, TERRACE_H, TERRACE_Z - 0.8), 1.1], ["umbrella", Vector3(-11.0, 0, 0.5), 2.4], ["picnic_table", Vector3(-12.5, 0, 4.0), 1.6], ["cash_pile", Vector3(10.5, TERRACE_H, TERRACE_Z - 3.0), 1.2], ["column", Vector3(-7.0, TERRACE_H, TERRACE_Z - 4.0), 3.2], ["column", Vector3(7.0, TERRACE_H, TERRACE_Z - 4.0), 3.2], ["planter", Vector3(-14.0, 0, 9.0), 1.1], ["umbrella", Vector3(13.0, 0, 8.0), 2.4]]:
+	for at: Vector3 in [Vector3(-3.6, TERRACE_H, TERRACE_Z - 0.8), Vector3(3.6, TERRACE_H, TERRACE_Z - 0.8), Vector3(-14.0, 0, 9.0), Vector3(-11.5, 0, TERRACE_Z + 2.0), Vector3(11.5, 0, TERRACE_Z + 2.0)]:
+		_prop("bank_flower_planter", Vector2(48, 99), at)
+	for spec: Array in [["umbrella", Vector3(-11.0, 0, 0.5), 2.4], ["picnic_table", Vector3(-12.5, 0, 4.0), 1.6], ["cash_pile", Vector3(10.5, TERRACE_H, TERRACE_Z - 3.0), 1.2], ["column", Vector3(-7.0, TERRACE_H, TERRACE_Z - 4.0), 3.2], ["column", Vector3(7.0, TERRACE_H, TERRACE_Z - 4.0), 3.2], ["umbrella", Vector3(13.0, 0, 8.0), 2.4]]:
 		_sprite("res://assets/props/ch2/%s.png" % spec[0], spec[1], spec[2])
 	# Передний план: ограда и фонари у самой камеры — их размоет край кадра.
 	for x in range(-18, 19, 3):
@@ -246,13 +254,55 @@ func _build_props() -> void:
 
 
 func _lamp(at: Vector3) -> void:
-	_sprite("res://assets/props/ch2/lamp_banner.png", at, 3.4)
+	var pivot := _prop("bank_pedestal", Vector2(48, 71), at)
+	# Фонарь крепится к тумбе в той же наклонённой плоскости спрайта, чуть ближе к камере.
+	var lantern := _prop("bank_lantern", Vector2(36, 103), Vector3.ZERO, pivot)
+	lantern.position = Vector3(0, LANTERN_MOUNT, 0.005)
+	lantern.rotation = Vector3.ZERO
 	var light := OmniLight3D.new()
 	light.light_color = Color("#ffb45e")
-	light.light_energy = 2.2
+	light.light_energy = 1.6
 	light.omni_range = 6.0
-	light.position = at + Vector3(0, 3.0, 0.3)
+	light.position = at + Vector3(0, LANTERN_MOUNT + 1.0, 0.3)
 	add_child(light)
+
+
+## Предмет Астры как плоскость с настоящим материалом: альфа-срез, карта нормалей камня и
+## свечение стекла по маске (умножением — светится только стекло, а не железо корпуса).
+func _prop(name: String, anchor: Vector2, at: Vector3, parent: Node3D = self) -> Node3D:
+	var albedo := load(PROPS + name + ".png") as Texture2D
+	var size := albedo.get_size()
+	var material := StandardMaterial3D.new()
+	material.albedo_texture = albedo
+	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+	material.alpha_scissor_threshold = 0.5
+	material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST_WITH_MIPMAPS
+	material.cull_mode = BaseMaterial3D.CULL_DISABLED
+	material.roughness = 0.85
+	if ResourceLoader.exists(PROPS + name + "_n.png"):
+		material.normal_enabled = true
+		material.normal_texture = load(PROPS + name + "_n.png")
+		material.normal_scale = 0.45
+	if ResourceLoader.exists(PROPS + name + "_glow.png"):
+		material.emission_enabled = true
+		material.emission = LANTERN_GLOW
+		material.emission_texture = load(PROPS + name + "_glow.png")
+		material.emission_operator = BaseMaterial3D.EMISSION_OP_MULTIPLY
+		material.emission_energy_multiplier = LANTERN_GLOW_ENERGY
+	var quad := QuadMesh.new()
+	quad.size = size / PROP_PX_PER_M
+	var mesh := MeshInstance3D.new()
+	mesh.mesh = quad
+	mesh.material_override = material
+	mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	# Опора (низ-центр по manifest) приходится на точку pivot.
+	mesh.position = Vector3(size.x * 0.5 - anchor.x, size.y * 0.5 - (size.y - anchor.y), 0) / PROP_PX_PER_M
+	var pivot := Node3D.new()
+	pivot.position = at
+	pivot.rotation_degrees.x = SPRITE_TILT
+	parent.add_child(pivot)
+	pivot.add_child(mesh)
+	return pivot
 
 
 ## Вертикальный спрайт с низом в точке at, высотой height метров; слегка наклонён к камере.
