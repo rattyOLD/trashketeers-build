@@ -59,6 +59,19 @@
       "anchor_px": null,
       "not_a_world_surface": true,
       "provisional_until_visual_review": true
+    },
+    {
+      "file": "street96.png",
+      "width": 128,
+      "height": 1,
+      "format": "RGB",
+      "sha256": "ff01f854158aae994824cdadd4e7572bc96ca9089c254bf012ebaf2916adc157",
+      "bytes": 453,
+      "role": "street_prop_palette_candidate",
+      "colors": 128,
+      "size_m": null,
+      "anchor_px": null,
+      "not_a_world_surface": true
     }
   ],
   "definition_file": "colors.json",

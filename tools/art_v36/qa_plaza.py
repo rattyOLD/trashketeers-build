@@ -14,6 +14,7 @@ def main():
     parser=argparse.ArgumentParser()
     parser.add_argument('destination',type=Path)
     parser.add_argument('--rico-dir',type=Path)
+    parser.add_argument('--street',action='store_true',help='Use new balustrade/parasol/table in the QA copy')
     args=parser.parse_args()
     out=args.destination.resolve()
     assert out!=ROOT and ROOT not in out.parents
@@ -45,9 +46,12 @@ def main():
     for family in ('materials','props'):
         dest=out/'prototypes/hd2d'/family
         dest.mkdir(parents=True,exist_ok=True)
-        for source in (ROOT/'astra/inbox/hd2d_test'/family).glob('*.png'):
-            shutil.copy2(source,dest/source.name)
-            candidates.append({'file':family+'/'+source.name,'sha256':hashlib.sha256(source.read_bytes()).hexdigest()})
+        for source in (ROOT/'astra/inbox/hd2d_test'/family).rglob('*.png'):
+            relative=source.relative_to(ROOT/'astra/inbox/hd2d_test'/family)
+            target=dest/relative
+            target.parent.mkdir(parents=True,exist_ok=True)
+            shutil.copy2(source,target)
+            candidates.append({'file':family+'/'+str(relative),'sha256':hashlib.sha256(source.read_bytes()).hexdigest()})
     shutil.copy2(props/'manifest.json',out/'prototypes/hd2d/props/manifest.json')
     rico_source='original source Riko, temporary smooth art; no accepted pixel redraw'
     rico_setup=''
@@ -166,13 +170,52 @@ func _ready() -> void:
 \tawait capture("plaza_sample_day_no_shadow")
 '''
         path.write_text(review.replace('\tget_tree().quit()',checks+'\tget_tree().quit()')+rico_setup)
+    if args.street:
+        street='''
+func _build_props() -> void:
+\tsuper._build_props()
+\tfor node in get_children():
+\t\tif not node is Sprite3D:
+\t\t\tcontinue
+\t\tvar original := node as Sprite3D
+\t\tvar path := original.texture.resource_path
+\t\tif path.ends_with("railing_low.png"):
+\t\t\toriginal.visible = false
+\t\t\tvar index := posmod(int(original.position.x/2),3)
+\t\t\tvar variant := "bank_balustrade" if index==0 else "bank_balustrade_02" if index==1 else "bank_balustrade_03"
+\t\t\t_prop("street96/"+variant,Vector2(96,126),original.position)
+\t\telif path.ends_with("umbrella.png"):
+\t\t\toriginal.visible = false
+\t\t\tvar cafe := _prop("street96/bank_umbrella",Vector2(144,270),original.position)
+\t\t\tfor spec: Array in [["bank_chair_left",Vector2(64,126),Vector3(-65.0/96,0,.005)],["bank_chair_right",Vector2(64,126),Vector3(65.0/96,0,.005)],["bank_bistro_table_parasol",Vector2(64,126),Vector3(0,0,.025)],["bank_umbrella_pole_front",Vector2(144,270),Vector3(0,0,.04)]]:
+\t\t\t\tvar child := _prop("street96/"+spec[0],spec[1],spec[2],cafe)
+\t\t\t\tchild.rotation = Vector3.ZERO
+\t\t\t\tif spec[0]=="bank_umbrella_pole_front":
+\t\t\t\t\t(child.get_child(0) as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+\t\telif path.ends_with("picnic_table.png"):
+\t\t\toriginal.visible = false
+'''
+        path=out/'review.gd'
+        controls='''
+\tif _hero is GeometryInstance3D:
+\t\t(_hero as GeometryInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+\t_camera.position = Vector3(-9,8.2,11)
+\t_camera.look_at(Vector3(-9,1.4,-1))
+\t_camera.fov = 36
+\tlighting(false)
+\tawait capture("street96_control_day")
+\tlighting(true)
+\tawait capture("street96_control_evening")
+'''
+        path.write_text(path.read_text().replace('\tget_tree().quit()',controls+'\tget_tree().quit()')+street)
     (out/'staging.json').write_text(json.dumps({'prototype_source_sha256':hashlib.sha256((ROOT/'source/prototypes/hd2d/plaza.gd').read_bytes()).hexdigest(),
         'source_modified':False,'candidate_revision':manifest['revision'],'copied_assets':copied,
         'candidate_overlays':candidates,'rico_source':rico_source,
         'qa_overrides':['candidate prop anchors and mount','day lamps off; evening Omni .4, emission .45',
                         'overview camera 38deg; closer control camera 30deg',
                         'frozen actors; unfinished mobs hidden',
-                        'Riko normal on/off and shadow on/off when --rico-dir provided']},indent=2)+'\n')
+                        'Riko normal on/off and shadow on/off when --rico-dir provided',
+                        'street96 replaces old low rails/parasol/table in QA only' if args.street else 'original street props']},indent=2)+'\n')
     print('V36_PLAZA_STAGED',out)
 
 

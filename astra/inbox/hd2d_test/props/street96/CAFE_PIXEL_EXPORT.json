@@ -1,0 +1,134 @@
+{
+  "pixels_per_metre": 96,
+  "source_sha256": "9323ea655a6e85e516ed2d43fed76aab927ab70016249bc7f6ca22f8be44d204",
+  "palette_sha256": "ff01f854158aae994824cdadd4e7572bc96ca9089c254bf012ebaf2916adc157",
+  "method": "median target-grid samples, fixed accepted street palette; canopy same-material5x5 medians and7-tone ramps, cluster cleanup and dark1px outline",
+  "camera_down_angle_deg": 35,
+  "canopy_underside_visible": false,
+  "files": [
+    {
+      "file": "bank_umbrella.png",
+      "canvas": [
+        288,
+        272
+      ],
+      "anchor_px": [
+        144,
+        270
+      ],
+      "source_bounds": [
+        22,
+        19,
+        768,
+        739
+      ],
+      "visible_bounds": [
+        15,
+        20,
+        273,
+        270
+      ],
+      "sha256": "88d55a72cf63a01ac425fe61c86023d4156e5fddb5f2d35f4f8e577146733811",
+      "colors": 90
+    },
+    {
+      "file": "bank_bistro_table_parasol.png",
+      "canvas": [
+        128,
+        128
+      ],
+      "anchor_px": [
+        64,
+        126
+      ],
+      "source_bounds": [
+        836,
+        282,
+        1282,
+        749
+      ],
+      "visible_bounds": [
+        20,
+        34,
+        108,
+        126
+      ],
+      "sha256": "6aa3cb54d01cf20ff64db8e91f0f2260d11026500ff7d7e45c3a080d64439e92",
+      "colors": 94
+    },
+    {
+      "file": "bank_chair_left.png",
+      "canvas": [
+        128,
+        128
+      ],
+      "anchor_px": [
+        64,
+        126
+      ],
+      "source_bounds": [
+        1313,
+        281,
+        1608,
+        740
+      ],
+      "visible_bounds": [
+        32,
+        26,
+        96,
+        126
+      ],
+      "sha256": "23d1dc30d8b8ca3fe5679700d0673345b87f022592e5d2452faeacb8bd4d44fb",
+      "colors": 59
+    },
+    {
+      "file": "bank_chair_right.png",
+      "canvas": [
+        128,
+        128
+      ],
+      "anchor_px": [
+        64,
+        126
+      ],
+      "source_bounds": [
+        1711,
+        281,
+        2006,
+        741
+      ],
+      "visible_bounds": [
+        32,
+        26,
+        96,
+        126
+      ],
+      "sha256": "19847ee04555ff74c7813750f1ffe7d59f9a2a52713dde64b9a847ba5e3875b8",
+      "colors": 64
+    },
+    {
+      "file": "bank_umbrella_pole_front.png",
+      "canvas": [
+        288,
+        272
+      ],
+      "anchor_px": [
+        144,
+        270
+      ],
+      "role": "assembly_overlay",
+      "sha256": "79386dbb1caee38e631e6902446d39e5a6502f4d32f745ebdc3d336ff2895253",
+      "clip_rect_px": [
+        136,
+        146,
+        152,
+        202
+      ]
+    }
+  ],
+  "table_socket_px": [
+    64,
+    57
+  ],
+  "table_socket_height_m": 0.71875
+}
