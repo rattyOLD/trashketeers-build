@@ -1,0 +1,29 @@
+{
+  "brief": "v36",
+  "studio": "TrashSquad · Beer Party Studio",
+  "kind": "art_direction_preview",
+  "production_ready": false,
+  "owner_approved": false,
+  "file": "prop_direction.png",
+  "width": 1145,
+  "height": 1374,
+  "format": "RGBA",
+  "sha256": "1705c18846e34a241d4d7997895b3e08def4347c78b62cfc8d5d4f667e2863e5",
+  "bytes": 1756898,
+  "game_integration": false,
+  "native_pixel_grid_validated": false,
+  "bank_palette_validated": false,
+  "alpha_binary": false,
+  "notes": [
+    "New lamp, limestone pedestal and flower planter sample after owner rejected simplified prop drawings.",
+    "This is a large close-up. It does not prove art quality at 32 px per metre.",
+    "Do not automatically resize and treat as native v36 art.",
+    "No user video frames were saved, copied into repository, or sent for image generation."
+  ],
+  "pending": [
+    "Owner feedback on visual direction",
+    "Native size art sample with consistent pixel grid and binary alpha",
+    "Comparison inside actual 3D plaza under neutral and evening lighting",
+    "Only then remaining props and facades"
+  ]
+}
