@@ -33,10 +33,16 @@ const FIRE_GAP := 0.16
 const BULLET_SPEED := 16.0
 const SPRITE_TILT := -12.0
 const RACCOON_CELL := Vector2i(300, 200)
+const RICO96 := "res://prototypes/hd2d/chars/raccoon_idle"
+const RICO96_ANCHOR := Vector2(128, 224)
+const RICO96_DENSITY := 96.0
 
 var _camera: Camera3D
 var _post: ShaderMaterial
-var _hero: Sprite3D
+var _hero: Node3D
+## Новый Рико Астры (96 px/м, нормали): плоскость с материалом вместо старого спрайта.
+var _hero_body: MeshInstance3D
+var _hero_sprite: Sprite3D
 var _hero_frames: Array[Texture2D] = []
 var _hero_time := 0.0
 var _hero_dir := Vector2.RIGHT
@@ -349,19 +355,48 @@ func _style(sprite: Sprite3D) -> void:
 # --- Герой и мобы ---------------------------------------------------------------------------------
 
 func _build_hero() -> void:
+	if ResourceLoader.exists(RICO96 + ".png"):
+		_hero = Node3D.new()
+		_hero.position = Vector3(-3, 0, 4)
+		add_child(_hero)
+		var albedo := load(RICO96 + ".png") as Texture2D
+		var size := albedo.get_size()
+		var material := StandardMaterial3D.new()
+		material.albedo_texture = albedo
+		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+		material.alpha_scissor_threshold = 0.5
+		material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST_WITH_MIPMAPS
+		material.cull_mode = BaseMaterial3D.CULL_DISABLED
+		material.roughness = 0.8
+		material.normal_enabled = true
+		material.normal_texture = load(RICO96 + "_n.png")
+		material.normal_scale = 0.25
+		var quad := QuadMesh.new()
+		quad.size = size / RICO96_DENSITY
+		_hero_body = MeshInstance3D.new()
+		_hero_body.mesh = quad
+		_hero_body.material_override = material
+		_hero_body.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+		_hero_body.position = Vector3(size.x * 0.5 - RICO96_ANCHOR.x, size.y * 0.5 - (size.y - RICO96_ANCHOR.y), 0) / RICO96_DENSITY
+		var tilt := Node3D.new()
+		tilt.rotation_degrees.x = SPRITE_TILT
+		_hero.add_child(tilt)
+		tilt.add_child(_hero_body)
+		return
 	var sheet := (load("res://assets/heroes/tactical/raccoon_run.png") as Texture2D).get_image()
 	if sheet.is_compressed():
 		sheet.decompress()
 	for i in 8:
 		_hero_frames.append(ImageTexture.create_from_image(sheet.get_region(Rect2i((i % 4) * RACCOON_CELL.x, (i / 4) * RACCOON_CELL.y, RACCOON_CELL.x, RACCOON_CELL.y))))
-	_hero = Sprite3D.new()
-	_hero.texture = _hero_frames[0]
+	_hero_sprite = Sprite3D.new()
+	_hero_sprite.texture = _hero_frames[0]
 	# Рост Енота в кадре ~165 px из 200; временный арт тоньше свиней, поэтому 1.9 м.
-	_hero.pixel_size = 1.9 / 165.0
-	_hero.offset = Vector2(0, RACCOON_CELL.y * 0.5 - 10.0)
-	_style(_hero)
-	_hero.position = Vector3(-3, 0, 4)
-	add_child(_hero)
+	_hero_sprite.pixel_size = 1.9 / 165.0
+	_hero_sprite.offset = Vector2(0, RACCOON_CELL.y * 0.5 - 10.0)
+	_style(_hero_sprite)
+	_hero_sprite.position = Vector3(-3, 0, 4)
+	add_child(_hero_sprite)
+	_hero = _hero_sprite
 
 
 func _build_mobs() -> void:
@@ -424,9 +459,18 @@ func _move_hero(delta: float) -> void:
 	_hero.position = target
 	if absf(input.x) > 0.1:
 		_hero_dir = Vector2(signf(input.x), 0)
-	_hero.flip_h = _hero_dir.x < 0
 	_hero_time += delta
-	_hero.texture = _hero_frames[int(_hero_time * 12.0) % _hero_frames.size()]
+	if _hero_sprite != null:
+		_hero_sprite.flip_h = _hero_dir.x < 0
+		_hero_sprite.texture = _hero_frames[int(_hero_time * 12.0) % _hero_frames.size()]
+	else:
+		# Один кадр idle: шаг передаётся лёгким подпрыгиванием, пока Астра рисует бег. Разворот —
+		# через UV: отражённая плоскость повернулась бы к свету обратной стороной и стала чёрной.
+		var material := _hero_body.material_override as StandardMaterial3D
+		var left := _hero_dir.x < 0
+		material.uv1_scale = Vector3(-1.0 if left else 1.0, 1.0, 1.0)
+		material.uv1_offset = Vector3(1.0 if left else 0.0, 0.0, 0.0)
+		_hero_body.get_parent().position.y = absf(sin(_hero_time * 9.0)) * 0.05
 
 
 func _move_mobs(delta: float) -> void:
