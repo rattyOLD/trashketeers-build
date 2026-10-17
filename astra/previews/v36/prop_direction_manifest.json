@@ -3,7 +3,7 @@
   "studio": "TrashSquad · Beer Party Studio",
   "kind": "art_direction_preview",
   "production_ready": false,
-  "owner_approved": false,
+  "owner_approved": true,
   "file": "prop_direction.png",
   "width": 1145,
   "height": 1374,
@@ -21,9 +21,23 @@
     "No user video frames were saved, copied into repository, or sent for image generation."
   ],
   "pending": [
-    "Owner feedback on visual direction",
-    "Native size art sample with consistent pixel grid and binary alpha",
-    "Comparison inside actual 3D plaza under neutral and evening lighting",
+    "Art-quality native pixel sprites; latest geometric draft rejected",
+    "Independent format and visual checks",
+    "Integration beside Riko by scene developer, day/evening screenshots",
     "Only then remaining props and facades"
-  ]
+  ],
+  "approval_scope": "Art quality and material conviction of large illustration only; not game readiness.",
+  "required_native_delivery": {
+    "parts": [
+      "lantern",
+      "pedestal",
+      "flower_planter"
+    ],
+    "pixels_per_metre": 32,
+    "assembled_height_px": 110,
+    "view": "front + top, no yaw",
+    "lighting": "neutral, glass emission in separate _glow mask",
+    "alpha": "0 or 255 only",
+    "pixel_grid": "native, one consistent grid, no downsampling"
+  }
 }
