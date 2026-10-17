@@ -12,6 +12,7 @@ const MATERIAL_M := 2.0
 ## Варианты раскладываются мозаикой 3×3 (6×6 м на повтор), чтобы плитка не читалась сеткой.
 const MOSAIC := [[0, 1, 2], [2, 0, 1], [1, 2, 0]]
 const NORMAL_STRENGTH := 0.65
+## Пиксель жёсткий, как в HD-2D: спрайты без mip-уровней, земля — анизотропно (без каши вдали).
 ## Модульные предметы Астры (v36, 48 px/м): фонарь на тумбе и кадка; опоры и крепление — из manifest.
 const PROPS := "res://prototypes/hd2d/props/"
 ## Плотность пикселя и крепление фонаря берутся из manifest сдачи (48 или 96 px/м).
@@ -138,7 +139,7 @@ func _material(name: String, tint: Color = Color.WHITE) -> StandardMaterial3D:
 	var material := StandardMaterial3D.new()
 	material.albedo_texture = _mosaic(name, "")
 	material.albedo_color = tint
-	material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST_WITH_MIPMAPS
+	material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST_WITH_MIPMAPS_ANISOTROPIC
 	material.uv1_triplanar = true
 	material.uv1_world_triplanar = true
 	material.uv1_scale = Vector3.ONE / (MATERIAL_M * 3.0)
@@ -322,7 +323,7 @@ func _prop(name: String, anchor: Vector2, at: Vector3, parent: Node3D = self) ->
 	material.albedo_texture = albedo
 	material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
 	material.alpha_scissor_threshold = 0.5
-	material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST_WITH_MIPMAPS
+	material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 	material.cull_mode = BaseMaterial3D.CULL_DISABLED
 	material.roughness = 0.85
 	if ResourceLoader.exists(PROPS + name + "_n.png"):
@@ -366,7 +367,7 @@ func _sprite(path: String, at: Vector3, height: float) -> Sprite3D:
 
 
 func _style(sprite: Sprite3D) -> void:
-	sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST_WITH_MIPMAPS
+	sprite.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 	sprite.alpha_cut = SpriteBase3D.ALPHA_CUT_DISCARD
 	sprite.shaded = true
 	sprite.double_sided = true
@@ -387,7 +388,7 @@ func _build_hero() -> void:
 		material.albedo_texture = albedo
 		material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
 		material.alpha_scissor_threshold = 0.5
-		material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST_WITH_MIPMAPS
+		material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 		material.cull_mode = BaseMaterial3D.CULL_DISABLED
 		material.roughness = 0.8
 		material.normal_enabled = true
@@ -615,10 +616,10 @@ func _build_post() -> void:
 	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var material := ShaderMaterial.new()
 	material.shader = load("res://shaders/color_grade.gdshader")
-	material.set_shader_parameter(&"tilt_blur", 9.0)
-	material.set_shader_parameter(&"focus_half", 0.16)
-	material.set_shader_parameter(&"focus_ramp", 0.26)
-	material.set_shader_parameter(&"glow_strength", 0.3)
+	material.set_shader_parameter(&"tilt_blur", 4.0)
+	material.set_shader_parameter(&"focus_half", 0.3)
+	material.set_shader_parameter(&"focus_ramp", 0.2)
+	material.set_shader_parameter(&"glow_strength", 0.2)
 	material.set_shader_parameter(&"glow_threshold", 0.9)
 	material.set_shader_parameter(&"haze_color", Color(1.0, 0.86, 0.62, 0.03))
 	material.set_shader_parameter(&"shadow_tint", Vector3(0.08, 0.02, 0.14))
