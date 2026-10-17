@@ -257,14 +257,15 @@ func _build_bank() -> void:
 ## Координаты — в плане модели (x вправо, y от фасада вглубь, как в Blender).
 func _furnish_bank_roof(origin: Vector3) -> void:
 	var at := func(x: float, y: float) -> Vector3: return origin + Vector3(x, BANK_ROOF, -y)
-	for xy: Vector2 in [Vector2(-6.7, 3.1), Vector2(6.7, 3.1)]:
+	# Выход на крышу стоит в западном углу; кафе и кадки — на открытой части террасы.
+	for xy: Vector2 in [Vector2(-1.6, 2.8), Vector2(6.7, 3.1)]:
 		_item("bank_flower_planter", at.call(xy.x, xy.y))
-	for x: float in [-4.4, 4.4]:
-		var spot: Vector3 = at.call(x, -1.2)
+	for xy: Vector2 in [Vector2(1.6, -1.0), Vector2(5.0, -1.0)]:
+		var spot: Vector3 = at.call(xy.x, xy.y)
 		_item("cafe96/bank_cafe_table", spot)
 		_item("cafe96/bank_cafe_chair_left", spot + Vector3(-0.85, 0, 0.05))
 		_item("cafe96/bank_cafe_chair_right", spot + Vector3(0.85, 0, 0.05))
-		_item("cafe96/bank_umbrella_standalone", spot + Vector3(0.9 * signf(x), 0, -0.6))
+		_item("cafe96/bank_umbrella_standalone", spot + Vector3(0.9, 0, -0.6))
 
 
 func _build_fountain() -> void:

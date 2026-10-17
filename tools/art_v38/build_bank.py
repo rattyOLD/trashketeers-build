@@ -19,10 +19,14 @@ scene=bpy.context.scene;scene.unit_settings.system='METRIC';scene.unit_settings.
 ROOT=Path(__file__).resolve().parents[2]
 images={};materials={};model=[];uv_records=[]
 
+CLAUDE_TEX=Path(__file__).resolve().parent/'claude_textures'
+
 def image(name,data=False):
     key=(name,data)
     if key not in images:
-        im=bpy.data.images.load(str(TEX/name),check_existing=False)
+        # Temporary textures (inscription, carpet, banner) live next to this script until Astra's art.
+        path=TEX/name if (TEX/name).exists() else CLAUDE_TEX/name
+        im=bpy.data.images.load(str(path),check_existing=False)
         if data:im.colorspace_settings.name='Non-Color'
         images[key]=im
     return images[key]
@@ -59,6 +63,9 @@ amber=material('Bank_Lantern_Glass','bank_trim.png',None,.28,0,False,'bank_trim_
 glass=material('Bank_Window_Glass','bank_glass.png',None,.3,0,False,'bank_glass_glow.png')
 ivy=material('Bank_Ivy','bank_ivy.png',None,.9,0,True)
 crest=material('Bank_Crowned_Pig_Crest','bank_crest.png',None,.55,.35,True)
+inscription=material('Bank_Inscription','bank_inscription.png',None,.45,.3,True)
+carpet=material('Bank_Red_Carpet','bank_carpet.png',None,.95)
+banner=material('Bank_Banner','bank_banner.png',None,.9,0,True)
 REGIONS={'frieze':(0,0,256,64),'gold_leaf':(256,0,256,64),'shaft':(512,0,256,256),'brass':(768,0,256,256),
          'plinth':(0,256,128,128),'wood':(256,256,256,256),'iron':(512,256,256,256),'amber':(768,256,256,256)}
 
@@ -129,6 +136,19 @@ def cylinder(name,at,radius,depth,m,region=None,vertices=10,axis='Z'):
     if vertices>=8:
         for p in o.data.polygons:p.use_smooth=len(p.vertices)==4
     finish(o,m,region);return o
+
+def bar(name,p0,p1,width,depth,m,region=None):
+    # Straight beam of rectangular section from p0 to p1 (any direction).
+    a=Vector(p0);b=Vector(p1);axis=(b-a).normalized()
+    side=axis.cross(Vector((0,1,0)))
+    if side.length<.01:side=axis.cross(Vector((1,0,0)))
+    side.normalize();up=side.cross(axis).normalized()
+    ring=lambda c:[c+side*sx*width/2+up*sy*depth/2 for sx,sy in ((-1,-1),(1,-1),(1,1),(-1,1))]
+    verts=[tuple(v) for v in ring(a)+ring(b)]
+    faces=[(0,1,2,3),(7,6,5,4),(0,4,5,1),(1,5,6,2),(2,6,7,3),(3,7,4,0)]
+    o=mesh_object(name,verts,faces,m,region)
+    bm=bmesh.new();bm.from_mesh(o.data);bmesh.ops.recalc_face_normals(bm,faces=list(bm.faces));bm.to_mesh(o.data);bm.free();o.data.update()
+    return o
 
 def baluster(name,x,y,z,height=.66):
     # Five-sided turned stone profile: real silhouette/recesses, not a billboard.
@@ -221,17 +241,35 @@ for x in [-5.45,0,5.45]:
         box('Stone_Jamb',(x+sign*(w/2+.12),-4.10,bottom+spring/2),(.24,.24,spring),stone,'plinth')
         box('Brass_Jamb',(x+sign*(w/2-.04),-4.025,bottom+spring/2),(.08,.13,spring),gold,'brass')
     box('Window_Sill',(x,-4.23,.09 if x==0 else bottom-.025),(w+.66,.48,.18),stone,'plinth')
-    for frac in [-.5,0,.5]:
-        xx=x+frac*w/2;top=bottom+spring+math.sqrt(max(0,(w/2-.06)**2-(xx-x)**2))
-        box('Arch_Window_Mullion',(xx,-3.96,(bottom+top)/2),(.055,.08,top-bottom),gold,'brass')
-    for zz in [bottom+1.,bottom+2.,bottom+spring]:
-        box('Window_Crossbar',(x,-3.97,zz),(w-.12,.075,.055),gold,'brass')
-    if x==0:
+    if x!=0:
+        for frac in [-.5,0,.5]:
+            xx=x+frac*w/2;top=bottom+spring+math.sqrt(max(0,(w/2-.06)**2-(xx-x)**2))
+            box('Arch_Window_Mullion',(xx,-3.96,(bottom+top)/2),(.055,.08,top-bottom),gold,'brass')
+        for zz in [bottom+1.,bottom+2.,bottom+spring]:
+            box('Window_Crossbar',(x,-3.97,zz),(w-.12,.075,.055),gold,'brass')
+    else:
+        # Owner revision3: a vault-like bank entrance, not a glazed window. Two solid walnut
+        # leaves with gilded raised panels, rows of brass studs and ring knockers; a sunburst
+        # fanlight above the transom and a gold keystone crown the arch.
         for sign in [-1,1]:
-            box('Door_Walnut_Lower_Panel',(sign*.8,-3.98,.5),(1.5,.12,.94),wood,'wood')
-            box('Door_Panel_Upper_Rail',(sign*.8,-4.06,.98),(1.5,.10,.10),gold,'gold_leaf')
-            sphere('Door_Boss',(sign*.8,-4.10,.51),.13,gold,scale=(1,.35,1))
-            box('Door_Pull',(sign*.13,-4.13,1.42),(.055,.10,.38),gold,'brass')
+            cx=sign*.79
+            box('Door_Walnut_Leaf',(cx,-3.86,spring/2),(1.56,.16,spring),wood,'wood')
+            for z0,z1 in [(.22,1.18),(1.42,2.48)]:
+                box('Door_Raised_Panel',(cx,-3.97,(z0+z1)/2),(1.04,.06,z1-z0-.12),wood,'wood')
+                for zz in [z0,z1]:box('Door_Panel_Gold_Rail',(cx,-3.99,zz),(1.16,.07,.06),gold,'brass')
+                for xx in [cx-.55,cx+.55]:box('Door_Panel_Gold_Stile',(xx,-3.99,(z0+z1)/2),(.06,.07,z1-z0),gold,'brass')
+            for xx in [cx-.7,cx+.7]:
+                for zz in [.3,.8,1.3,1.8,2.3]:sphere('Door_Boss',(xx,-3.97,zz),.045,gold,scale=(1,.6,1))
+            sphere('Door_Boss',(sign*.3,-3.99,1.42),.1,gold,scale=(1,.4,1))
+            bpy.ops.mesh.primitive_torus_add(major_segments=12,minor_segments=4,major_radius=.14,minor_radius=.028,location=(sign*.3,-4.03,1.28))
+            o=bpy.context.object;o.name='Door_Ring_Knocker';o.rotation_euler.x=math.pi/2;finish(o,gold,'brass')
+        box('Door_Meeting_Stile',(0,-3.97,spring/2),(.08,.08,spring),gold,'brass')
+        box('Door_Transom',(0,-3.96,spring),(w-.12,.16,.16),gold,'brass')
+        arch_ring('Fanlight_Hub',0,0,.5,spring,.07,-3.99,-3.8,gold,'brass',steps=6)
+        for deg in [30,60,90,120,150]:
+            a=math.radians(deg);r0,r1=.32,w/2-.1
+            bar('Fanlight_Sunburst_Spoke',(math.cos(a)*r0,-3.9,spring+math.sin(a)*r0),(math.cos(a)*r1,-3.9,spring+math.sin(a)*r1),.06,.08,gold,'brass')
+        box('Door_Gold_Keystone',(0,-4.3,spring+w/2+.14),(.4,.22,.46),gold,'gold_leaf')
 
 # Upper wing windows, same physical scale; masonry remains between the openings.
 for x in [-6.32,-4.58,4.58,6.32]:
@@ -337,7 +375,8 @@ for x in [-7.42,7.42]:
 
 # Rooftop access pavilion (stair house) behind the crest: arched walnut door facing the camera,
 # corner pilasters, cornice and a small hipped terracotta roof with a gold finial.
-PX,PY,PW,PD,PH=0.0,1.75,4.0,2.9,2.7
+# Stair house sits in the west corner: the crown sculpture on the arch must not project into its door.
+PX,PY,PW,PD,PH=-4.6,1.6,4.0,2.9,2.7
 front_y=PY-PD/2
 pavilion=box('Pavilion_Walls',(PX,PY,DECK+PH/2),(PW,PD,PH),plaster)[0]
 cutter=arch_solid('Pavilion_Door_Cutter',PX,DECK,1.5,1.55,front_y-.3,front_y+.25,plaster);boolean_cut(pavilion,cutter)
@@ -375,6 +414,47 @@ for sign in [-1,1]:
         scroll('Pediment_Acanthus_Leaf',[(sign*x,-4.78,z),(sign*(x-.17),-4.83,z+.22),(sign*(x-.07),-4.78,z+.36)],.065)
 for x in [-5.45,5.45]:
     cylinder('Window_Keystone_Gold_Medallion',(x,-4.25,4.31),.20,.12,gold,'gold_leaf',8,'Y')
+
+# Owner revision3: the pediment is no longer an empty plaster arch.
+# 1) Gilded sunburst rays fan out behind the crest across the tympanum.
+for i in range(15):
+    a=math.radians(8+i*(164/14));r0=1.3;r1=2.32 if i%2==0 else 1.95;half=.09 if i%2==0 else .065
+    c=Vector((0,0,6.9));d=Vector((math.cos(a),0,math.sin(a)));n=Vector((-d.z,0,d.x))
+    tip=c+d*r0;l=c+d*r1+n*half;r=c+d*r1-n*half
+    verts=[tuple(v+Vector((0,-4.6,0))) for v in (tip,l,r)]+[tuple(v+Vector((0,-4.53,0))) for v in (tip,l,r)]
+    o=mesh_object('Pediment_Sunburst_Ray',verts,[(0,2,1),(3,4,5),(0,1,4,3),(1,2,5,4),(2,0,3,5)],gold,'brass')
+    bm=bmesh.new();bm.from_mesh(o.data);bmesh.ops.recalc_face_normals(bm,faces=list(bm.faces));bm.to_mesh(o.data);bm.free();o.data.update()
+# 2) Inscription plaque between the column capitals: "ZOLOTOY BANK" in gilded letters.
+box('Inscription_Plaque',(0,-4.58,4.89),(5.7,.12,.5),plaster)
+for zz in [4.64,5.14]:box('Inscription_Gold_Rail',(0,-4.66,zz),(5.8,.05,.05),gold,'brass')
+for xx in [-2.88,2.88]:box('Inscription_Gold_End',(xx,-4.66,4.89),(.05,.05,.55),gold,'brass')
+def flat_card(name,m,at,size_px):
+    w,h=size_px[0]/96,size_px[1]/96;x,y,z=at
+    o=mesh_object(name,[(x-w/2,y,z-h/2),(x+w/2,y,z-h/2),(x+w/2,y,z+h/2),(x-w/2,y,z+h/2)],[(0,1,2,3)],m)
+    for li,uv in zip(o.data.polygons[0].loop_indices,[(0,0),(1,0),(1,1),(0,1)]):o.data.uv_layers[0].data[li].uv=uv
+    o['uv_kind']='canonical_cutout_projection';return o
+flat_card('Gilded_Inscription_Zolotoy_Bank',inscription,(0,-4.665,4.89),(520,48))
+# 3) Crown sculpture on top of the arch and two banner poles flanking it on the roof terrace.
+TOP=5.27+1.4+2.95+.26;K=1.4
+box('Crown_Pedestal',(0,-4.5,TOP+.18*K),(.95*K,.62*K,.36*K),stone,'plinth')
+sphere('Crown_Velvet_Cushion',(0,-4.5,TOP+.44*K),.42*K,carpet,None,scale=(1,.8,.38))
+cylinder('Crown_Gold_Band',(0,-4.5,TOP+.66*K),.34*K,.28*K,gold,'brass',vertices=12)
+for k in range(6):
+    a=k*math.tau/6+math.pi/6
+    px,py=math.sin(a)*.3*K,-4.5-math.cos(a)*.3*K
+    bpy.ops.mesh.primitive_cone_add(vertices=4,radius1=.09*K,radius2=0,depth=.32*K,location=(px,py,TOP+.96*K))
+    o=bpy.context.object;o.name='Crown_Gold_Point';finish(o,gold,'brass')
+    sphere('Lamp_Finial',(px,py,TOP+1.14*K),.06*K,gold)
+sphere('Gold_Finial_Ball',(0,-4.5,TOP+1.02*K),.16*K,gold)
+box('Crown_Cross_Upright',(0,-4.5,TOP+1.3*K),(.06*K,.06*K,.32*K),gold,'brass')
+box('Crown_Cross_Arm',(0,-4.5,TOP+1.33*K),(.22*K,.06*K,.06*K),gold,'brass')
+for sign in [-1,1]:
+    x=sign*3.6
+    box('Banner_Pole_Plinth',(x,-3.72,DECK+.15),(.4,.4,.3),stone,'plinth')
+    for k in range(2):cylinder('Banner_Pole',(x,-3.72,DECK+1.0+k*1.5),.05,1.5,iron,'iron',8)
+    sphere('Gold_Finial_Ball',(x,-3.72,DECK+3.32),.11,gold)
+    box('Banner_Crossbar',(x,-3.79,DECK+3.05),(1.1,.05,.05),gold,'brass')
+    flat_card('Bank_Hanging_Banner',banner,(x,-3.82,DECK+3.05-80/96),(96,160))
 
 def textured_card(name,m,at,size,curve=False,flip=False,region=None):
     nx,ny=(6,4) if curve else (1,1);w,h=size;verts=[];faces=[];uvs=[]
@@ -414,6 +494,24 @@ box('Rusticated_Foundation',(0,0,-.30),(16.20,8.15,.60),masonry)
 for i in range(4):
     height=.15*(i+1);depth=1.80-i*.40
     box('Entrance_Step_'+str(i+1),(0,-3.95-depth/2,height/2-.60),(8.0-i*.22,depth,height),masonry)
+# Owner revision3: red carpet up the steps with brass stair rods and velvet-rope stanchions.
+fronts=[-3.95-(1.80-i*.40) for i in range(4)]+[-4.47]
+for i in range(4):
+    top=.15*(i+1)-.60
+    box('Red_Carpet_Tread',(0,(fronts[i]+fronts[i+1])/2,top+.012),(1.9,fronts[i+1]-fronts[i],.024),carpet)
+    box('Red_Carpet_Riser',(0,fronts[i]-.012,top-.075),(1.9,.024,.15),carpet)
+    box('Brass_Stair_Rod',(0,fronts[i+1]-.04,top+.035),(2.0,.04,.04),gold,'brass')
+box('Red_Carpet_Threshold',(0,-4.23,.192),(1.9,.48,.024),carpet)
+box('Red_Carpet_Threshold_Riser',(0,-4.482,.09),(1.9,.024,.18),carpet)
+box('Red_Carpet_Runner',(0,-6.1,-.588),(1.9,.7,.024),carpet)
+for sign in [-1,1]:
+    for y in [-5.9,-6.35]:
+        cylinder('Stanchion_Base',(sign*1.25,y,-.575),.15,.05,gold,'brass',8)
+        cylinder('Stanchion_Post',(sign*1.25,y,-.13),.04,.88,gold,'brass',8)
+        sphere('Lamp_Finial',(sign*1.25,y,.34),.07,gold)
+    pts=[(sign*1.25,-5.9+(-.45)*t/4,.26-.12*math.sin(math.pi*t/4)) for t in range(5)]
+    for a,b in zip(pts,pts[1:]):bar('Velvet_Rope',a,b,.05,.05,carpet)
+
 for x in [-5.3,5.3]:
     box('Wing_Rusticated_Plinth',(x,-4.13,.34),(4.25,.38,.68),masonry)
     box('Wing_Plinth_Coping',(x,-4.26,.70),(4.35,.48,.12),stone,'frieze')
@@ -485,7 +583,7 @@ lo=[min(v[i] for v in bounds) for i in range(3)];hi=[max(v[i] for v in bounds) f
 report={'triangles':triangles,'mesh_count':len(joined),'material_count':len(materials),'blender_bounds':[lo,hi],
     'native_up':'Z','export_up':'Y','native_front':'-Y','export_front':'+Z','body_size_m':[16,10.5,8],
     'roof':'walkable terrace with access pavilion',
-    'revision':'bank3d-roof-terrace-3','hidden_triangles_removed':culled,'foundation_height_m':.6,'entrance_steps':4,'step_rise_m':.15,
+    'revision':'bank3d-front-4','hidden_triangles_removed':culled,'foundation_height_m':.6,'entrance_steps':4,'step_rise_m':.15,
     'uv_policy':'Face-local metric isometry96px/m. Canonical curved crest/ivy cards preserve their source-grid projection.',
     'real_features':['Boolean recessed arches/windows0.28m','gilded columns/capitals/bases','projecting cornices15-30cm','walkable roof terrace, open balustrade on four sides, access pavilion with arched door and hipped roof','four real balconettes','pediment raised gilded acanthus relief','rusticated plinth and four entrance steps','separate curved crest and flowering ivy','wall lantern metal/glass'],
     'materials':{name:{'albedo':m['albedo_file'],'cutout':m['cutout'],'glow':m['glow_file']} for name,m in materials.items()}}
