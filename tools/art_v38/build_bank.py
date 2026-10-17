@@ -300,28 +300,60 @@ for x in [-7.42,7.42]:
     box('Pilaster_Base',(x,-4.2,.40),(.91,.47,.8),stone,'plinth')
     box('Pilaster_Gold_Capital',(x,-4.2,7.74),(.93,.49,.38),gold,'gold_leaf')
 
-# Owner revision2: shallow roof BELOW the balustraded parapet; no huge roof face.
-roofverts=[(-7.88,-3.78,7.88),(7.88,-3.78,7.88),(-7.88,0,8.40),(7.88,0,8.40),(-7.88,3.78,7.88),(7.88,3.78,7.88)]
-mesh_object('Terracotta_Roof_Slopes',roofverts,[(0,1,3,2),(2,3,5,4)],roofmat)
-mesh_object('Roof_Gable_Ends',roofverts,[(0,2,4),(1,5,3)],masonry)
-box('Ridge_Capping',(0,0,8.40),(15.76,.22,.12),roofmat)
-for y in [-4.02,4.02]:
-    for center,width in ([(-5.62,4.72),(5.62,4.72)] if y<0 else [(0,16.2)]):
-        box('Parapet_Solid_Base',(center,y,8.43),(width,.42,.66),masonry)
-        box('Parapet_Lower_Rail',(center,y,8.79),(width,.46,.12),stone,'frieze')
-        box('Parapet_Coping',(center,y,9.39),(width,.51,.18),stone,'frieze')
-        count=7 if y<0 else 0
-        if y>0:box('Rear_Parapet_Panel',(center,y,9.06),(width,.28,.42),masonry)
-        for i in range(count):baluster('Roof_Baluster',center-width/2+.32+(width-.64)*i/(count-1),y,8.85,.46)
-# Side and rear parapets have solid panels; the front balustrade remains open.
+# Owner revision3: the roof is a walkable terrace. Stone paving, a low open balustrade on all
+# four sides and a rooftop access pavilion with a real arched door, so the balcony zone reads
+# as a place people go up to, not a parapet stuck onto a tiled roof.
+DECK=8.22
+box('Roof_Terrace_Paving',(0,0,DECK-.06),(16,8,.12),masonry)
+def balustrade(name,a,b,count):
+    # Straight run from a to b (x,y): solid base, rail, turned balusters and coping, ~0.9 m tall.
+    (ax,ay),(bx,by)=a,b;cx,cy=(ax+bx)/2,(ay+by)/2;length=math.hypot(bx-ax,by-ay);along_x=abs(bx-ax)>abs(by-ay)
+    size=lambda w,h:(length,w,h) if along_x else (w,length,h)
+    box(name+'_Base',(cx,cy,DECK+.12),size(.42,.24),masonry)
+    box(name+'_Rail',(cx,cy,DECK+.30),size(.46,.12),stone,'frieze')
+    box(name+'_Coping',(cx,cy,DECK+.88),size(.50,.16),stone,'frieze')
+    for i in range(count):
+        t=(i+.5)/count;baluster(name+'_Baluster',ax+(bx-ax)*t,ay+(by-ay)*t,DECK+.30,.50)
+for center,width in [(-5.62,4.72),(5.62,4.72)]:
+    balustrade('Roof_Front_Balustrade',(center-width/2,-4.02),(center+width/2,-4.02),8)
+balustrade('Roof_Rear_Balustrade',(-7.6,4.02),(7.6,4.02),20)
 for x in [-8.02,8.02]:
-    box('Parapet_Return',(x,0,8.79),(.38,7.9,1.32),masonry)
-    box('Parapet_Return_Coping',(x,0,9.39),(.51,8.12,.18),stone,'frieze')
+    balustrade('Roof_Side_Balustrade',(x,-3.75),(x,3.75),10)
 for x in [-7.42,7.42]:
     for y in [-4.02,4.02]:
-        box('Finial_Stone_Pedestal',(x,y,9.13),(.71,.70,.58),stone,'plinth')
-        cylinder('Finial_Gold_Collar',(x,y,9.39),.24,.14,gold,'brass',vertices=8)
-        sphere('Gold_Finial_Ball',(x,y,9.63),.27,gold)
+        box('Finial_Stone_Pedestal',(x,y,DECK+.45),(.71,.70,.90),stone,'plinth')
+        cylinder('Finial_Gold_Collar',(x,y,DECK+.97),.24,.14,gold,'brass',vertices=8)
+        sphere('Gold_Finial_Ball',(x,y,DECK+1.21),.27,gold)
+
+# Rooftop access pavilion (stair house) behind the crest: arched walnut door facing the camera,
+# corner pilasters, cornice and a small hipped terracotta roof with a gold finial.
+PX,PY,PW,PD,PH=0.0,1.75,4.0,2.9,2.7
+front_y=PY-PD/2
+pavilion=box('Pavilion_Walls',(PX,PY,DECK+PH/2),(PW,PD,PH),plaster)[0]
+cutter=arch_solid('Pavilion_Door_Cutter',PX,DECK,1.5,1.55,front_y-.3,front_y+.25,plaster);boolean_cut(pavilion,cutter)
+while pavilion.data.uv_layers:pavilion.data.uv_layers.remove(pavilion.data.uv_layers[0])
+metric_uv(pavilion)
+arch_glass('Pavilion_Fanlight_Glass',PX,DECK,1.38,1.55,front_y+.2)
+arch_ring('Pavilion_Door_Arch',PX,DECK,1.5,1.55,.2,front_y-.12,front_y+.02,stone)
+for sign in [-1,1]:
+    box('Pavilion_Door_Leaf',(PX+sign*.34,front_y+.16,DECK+.78),(.66,.08,1.52),wood,'wood')
+    box('Pavilion_Door_Jamb',(PX+sign*.86,front_y-.05,DECK+.78),(.2,.2,1.56),stone,'plinth')
+    box('Pavilion_Door_Pull',(PX+sign*.08,front_y+.1,DECK+.95),(.05,.08,.3),gold,'brass')
+box('Pavilion_Threshold',(PX,front_y-.25,DECK+.06),(1.9,.5,.12),stone,'plinth')
+for sx in [-1,1]:
+    for sy in [-1,1]:
+        box('Pavilion_Corner_Pilaster',(PX+sx*(PW/2-.12),PY+sy*(PD/2-.12),DECK+PH/2),(.34,.34,PH),stone,'shaft')
+box('Pavilion_Cornice',(PX,PY,DECK+PH+.1),(PW+.36,PD+.36,.2),stone,'plinth')
+EAVE=DECK+PH+.2;RIDGE=EAVE+.95;ex,ey=PW/2+.35,PD/2+.35
+hip=[(PX-ex,PY-ey,EAVE),(PX+ex,PY-ey,EAVE),(PX+ex,PY+ey,EAVE),(PX-ex,PY+ey,EAVE),(PX-.7,PY,RIDGE),(PX+.7,PY,RIDGE)]
+mesh_object('Pavilion_Hipped_Roof',hip,[(0,1,5,4),(2,3,4,5),(1,2,5),(3,0,4)],roofmat)
+box('Pavilion_Ridge_Capping',(PX,PY,RIDGE+.04),(1.5,.2,.1),roofmat)
+cylinder('Pavilion_Finial_Collar',(PX,PY,RIDGE+.14),.16,.12,gold,'brass',vertices=8)
+sphere('Gold_Finial_Ball',(PX,PY,RIDGE+.34),.22,gold)
+for x in [PX-1.15,PX+1.15]:
+    box('Pavilion_Lamp_Bracket',(x,front_y-.12,DECK+2.05),(.08,.3,.08),iron,'iron')
+    cylinder('Pavilion_Lamp_Glass',(x,front_y-.3,DECK+1.75),.11,.36,amber,'amber',4)
+    cylinder('Pavilion_Lamp_Roof',(x,front_y-.3,DECK+1.98),.17,.1,iron,'iron',4)
 
 # Central raised pediment: real stone blockwork/arch in front of roof.
 arch_solid('Central_Attic_Stone_Pediment',0,5.27,5.9,1.4,-4.52,-4.15,plaster)
@@ -448,10 +480,10 @@ bounds=[(o.matrix_world@v.co) for o in joined for v in o.data.vertices]
 lo=[min(v[i] for v in bounds) for i in range(3)];hi=[max(v[i] for v in bounds) for i in range(3)]
 report={'triangles':triangles,'mesh_count':len(joined),'material_count':len(materials),'blender_bounds':[lo,hi],
     'native_up':'Z','export_up':'Y','native_front':'-Y','export_front':'+Z','body_size_m':[16,10.5,8],
-    'roof_pitch_deg':math.degrees(math.atan2(.52,3.78)),
-    'revision':'bank3d-detail-2','hidden_triangles_removed':culled,'foundation_height_m':.6,'entrance_steps':4,'step_rise_m':.15,
+    'roof':'walkable terrace with access pavilion',
+    'revision':'bank3d-roof-terrace-3','hidden_triangles_removed':culled,'foundation_height_m':.6,'entrance_steps':4,'step_rise_m':.15,
     'uv_policy':'Face-local metric isometry96px/m. Canonical curved crest/ivy cards preserve their source-grid projection.',
-    'real_features':['Boolean recessed arches/windows0.28m','gilded columns/capitals/bases','projecting cornices15-30cm','low roof behind open balustraded parapet and gold finials','four real balconettes','pediment raised gilded acanthus relief','rusticated plinth and four entrance steps','separate curved crest and flowering ivy','wall lantern metal/glass'],
+    'real_features':['Boolean recessed arches/windows0.28m','gilded columns/capitals/bases','projecting cornices15-30cm','walkable roof terrace, open balustrade on four sides, access pavilion with arched door and hipped roof','four real balconettes','pediment raised gilded acanthus relief','rusticated plinth and four entrance steps','separate curved crest and flowering ivy','wall lantern metal/glass'],
     'materials':{name:{'albedo':m['albedo_file'],'cutout':m['cutout'],'glow':m['glow_file']} for name,m in materials.items()}}
 (OUT/'model_report.json').write_text(json.dumps(report,indent=2)+'\n')
 # glTF separate is packed into GLB later with external PNG URIs retained.

@@ -20,6 +20,8 @@ const BANK_MODEL := BANK_DIR + "bank_hall.glb"
 const BANK_FRONT := 5.75
 const BANK_GLOW := Color(1.0, 0.53, 0.16)
 const BANK_GLOW_ENERGY := 0.55
+## Плита террасы на крыше банка — высота над опорой модели (8.22 м + цоколь 0.6 м).
+const BANK_ROOF := 8.82
 ## Плотность пикселя и крепление фонаря берутся из manifest сдачи (48 или 96 px/м).
 const PROP_PX_PER_M := 48.0
 const LANTERN_MOUNT := 1.2708333
@@ -240,6 +242,7 @@ func _build_bank() -> void:
 		material.emission_operator = BaseMaterial3D.EMISSION_OP_MULTIPLY
 		material.emission_energy_multiplier = BANK_GLOW_ENERGY
 		mesh.material_override = material
+	_furnish_bank_roof(bank.position)
 	# Настенные фонари по сторонам двери дают настоящий тёплый свет на фасад.
 	for x: float in [-1.8, 1.8]:
 		var light := OmniLight3D.new()
@@ -248,6 +251,20 @@ func _build_bank() -> void:
 		light.omni_range = 5.0
 		light.position = bank.position + Vector3(x, 3.4, 4.4)
 		add_child(light)
+
+
+## Терраса на крыше обжита: кадки по углам и столики кафе под зонтами у выхода на крышу.
+## Координаты — в плане модели (x вправо, y от фасада вглубь, как в Blender).
+func _furnish_bank_roof(origin: Vector3) -> void:
+	var at := func(x: float, y: float) -> Vector3: return origin + Vector3(x, BANK_ROOF, -y)
+	for xy: Vector2 in [Vector2(-6.7, -3.2), Vector2(6.7, -3.2), Vector2(-6.7, 3.1), Vector2(6.7, 3.1)]:
+		_item("bank_flower_planter", at.call(xy.x, xy.y))
+	for x: float in [-4.4, 4.4]:
+		var spot: Vector3 = at.call(x, -1.2)
+		_item("cafe96/bank_cafe_table", spot)
+		_item("cafe96/bank_cafe_chair_left", spot + Vector3(-0.85, 0, 0.05))
+		_item("cafe96/bank_cafe_chair_right", spot + Vector3(0.85, 0, 0.05))
+		_item("cafe96/bank_umbrella_standalone", spot + Vector3(0.9 * signf(x), 0, -0.6))
 
 
 func _build_fountain() -> void:
