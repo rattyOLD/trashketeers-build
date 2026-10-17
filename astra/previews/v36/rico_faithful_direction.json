@@ -1,0 +1,14 @@
+{
+  "brief": "v36",
+  "role": "faithful_redraw_direction_only",
+  "production_ready": false,
+  "native_pixel_grid_verified": false,
+  "owner_visual_approved": false,
+  "file": "rico_faithful_direction.png",
+  "width": 1254,
+  "height": 1254,
+  "sha256": "00e7a30bfe135354f5dbce4fb75b50f084f7efa636acc94e9fe50ee514280ca5",
+  "reference": "source/assets/heroes/tactical/raccoon_idle.png",
+  "warning": "Large generated reference, not a 128x128 game sprite. Do not downsample and substitute for a native redraw. Rejected 3D Riko removed from inbox; no new accepted character delivered.",
+  "studio": "TrashSquad · Beer Party Studio"
+}

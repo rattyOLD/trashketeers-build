@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "brief": "v36",
-  "revision": "modular-48-1",
+  "revision": "modular-48-2",
   "studio": "TrashSquad · Beer Party Studio",
   "delivery_status": "review_candidate",
   "owner_visual_approved": false,
@@ -11,23 +11,23 @@
   "files": [
     {
       "file": "bank_lantern.png",
-      "width": 72,
-      "height": 104,
+      "width": 64,
+      "height": 92,
       "format": "RGBA",
-      "bytes": 2720,
-      "sha256": "863671535130b4992aab8ce5291a7be5708ce7c0756d3a38ffe809d9b27b7946",
+      "bytes": 2318,
+      "sha256": "572dd17d0cd4928230ea8605dd1954115cf1fdeb5fe2cd4702ccd4652ec12207",
       "role": "vertical_sprite",
       "size_m": [
-        1.5,
-        2.1666666666666665
+        1.3333333333333333,
+        1.9166666666666667
       ],
       "anchor_px": [
-        36,
-        103
+        32,
+        91
       ],
       "anchor_uv": [
         0.5,
-        0.9903846153846154
+        0.9891304347826086
       ],
       "anchor_space": "pixel boundaries from top-left",
       "collider_radius_m": 0.28,
@@ -37,21 +37,36 @@
       "local_form_shading_baked": true,
       "ground_cast_shadow_baked": false,
       "source_render_size_px": [
-        72,
-        104
+        64,
+        92
       ],
       "resampled": false,
       "glow_mask": "bank_lantern_glow.png",
       "light_source_px": [
-        36,
+        32,
         54
       ],
       "light_source_m_from_anchor": [
         0,
-        1.0208333333333333,
+        0.7708333333333334,
         0.2
       ],
       "day_emission_energy": 0,
+      "emission_mask_levels": {
+        "0": "iron, ribs, mullions, reflection",
+        "48": "dim amber glass",
+        "255": "filament"
+      },
+      "mullion_probe_px": {
+        "y_range": [
+          48,
+          59
+        ],
+        "x_columns": [
+          26,
+          37
+        ]
+      },
       "emission_operator": "multiply",
       "suggested_emission_color": "#ffc574",
       "suggested_emission_energy": 0.55,
@@ -60,34 +75,34 @@
     },
     {
       "file": "bank_pedestal.png",
-      "width": 96,
-      "height": 72,
+      "width": 104,
+      "height": 88,
       "format": "RGBA",
-      "bytes": 2614,
-      "sha256": "54d2d906a44645ed14f850cbc39d002bd4b08333ec72c683cfd30daba656073c",
+      "bytes": 3041,
+      "sha256": "ddc7e3a347dd0b2ea31da7aa5ff6645dbadf0060d7c3b192126441f8707b235f",
       "role": "vertical_sprite",
       "size_m": [
-        2.0,
-        1.5
+        2.1666666666666665,
+        1.8333333333333333
       ],
       "anchor_px": [
-        48,
-        71
+        52,
+        87
       ],
       "anchor_uv": [
         0.5,
-        0.9861111111111112
+        0.9886363636363636
       ],
       "anchor_space": "pixel boundaries from top-left",
-      "collider_radius_m": 0.64,
+      "collider_radius_m": 0.76,
       "palette": "../palettes/bank.png",
       "alpha": "binary",
       "view": "front + top; yaw 0",
       "local_form_shading_baked": true,
       "ground_cast_shadow_baked": false,
       "source_render_size_px": [
-        96,
-        72
+        104,
+        88
       ],
       "resampled": false,
       "normal_map": "bank_pedestal_n.png",
@@ -98,12 +113,12 @@
       "mount_points": {
         "lantern": {
           "anchor_px": [
-            48,
-            10
+            52,
+            14
           ],
           "position_m_from_anchor": [
             0,
-            1.2708333333333333,
+            1.5208333333333333,
             0
           ]
         }
@@ -114,8 +129,8 @@
       "width": 96,
       "height": 100,
       "format": "RGBA",
-      "bytes": 5819,
-      "sha256": "951889146b43c9fb7eb1ad763551173cebe3fb0b714e0ff78db360b1baf9c237",
+      "bytes": 5806,
+      "sha256": "06a9864ae7a54a646570a1c5706dad887ba4536b8bf4687d367cf43d19e74cbd",
       "role": "vertical_sprite",
       "size_m": [
         2.0,
@@ -144,58 +159,58 @@
     },
     {
       "file": "bank_lantern_glow.png",
-      "width": 72,
-      "height": 104,
+      "width": 64,
+      "height": 92,
       "format": "RGB",
-      "bytes": 159,
-      "sha256": "719aad7a6a804e79fbc2edcb8795ae8828d075a20666a07344ed25bca8356d78",
+      "bytes": 305,
+      "sha256": "4b758cee758c4e9442f736947313291f09eaf3942d6e82c29ee5d568f0b00e07",
       "role": "emission_mask",
       "paired_albedo": "bank_lantern.png",
       "size_m": [
-        1.5,
-        2.1666666666666665
+        1.3333333333333333,
+        1.9166666666666667
       ],
       "anchor_px": [
-        36,
-        103
+        32,
+        91
       ],
       "anchor_uv": [
         0.5,
-        0.9903846153846154
+        0.9891304347826086
       ],
       "color_space": "linear_data"
     },
     {
       "file": "bank_pedestal_n.png",
-      "width": 96,
-      "height": 72,
+      "width": 104,
+      "height": 88,
       "format": "RGB",
-      "bytes": 4664,
-      "sha256": "8677e55685fbdad72f66078aea50c49c1eaa339ad870d6476e26af93bc0bd816",
+      "bytes": 6107,
+      "sha256": "ac7e7213c2ff6dde26d2593405b693c38346cf5594fc96848236eb7928f9d27a",
       "role": "normal_map",
       "paired_albedo": "bank_pedestal.png",
       "size_m": [
-        2.0,
-        1.5
+        2.1666666666666665,
+        1.8333333333333333
       ],
       "anchor_px": [
-        48,
-        71
+        52,
+        87
       ],
       "anchor_uv": [
         0.5,
-        0.9861111111111112
+        0.9886363636363636
       ],
       "color_space": "linear_data"
     }
   ],
   "assembly": {
     "canvas_px": [
-      96,
+      104,
       165
     ],
     "anchor_px": [
-      48,
+      52,
       164
     ],
     "visible_height_px": 163,
@@ -207,7 +222,7 @@
         "file": "bank_pedestal.png",
         "top_left_px": [
           0,
-          93
+          77
         ],
         "position_m": [
           0,
@@ -219,12 +234,12 @@
       {
         "file": "bank_lantern.png",
         "top_left_px": [
-          12,
+          20,
           0
         ],
         "position_m": [
           0,
-          1.2708333333333333,
+          1.5208333333333333,
           0
         ],
         "collision_enabled": false,

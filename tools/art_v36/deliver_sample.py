@@ -26,8 +26,8 @@ def main():
     out=INBOX/'props'
     out.mkdir(parents=True,exist_ok=True)
     files=[]
-    for stem,size,anchor,radius in [('bank_lantern',(72,104),(36,103),.28),
-            ('bank_pedestal',(96,72),(48,71),.64),('bank_flower_planter',(96,100),(48,99),.48)]:
+    for stem,size,anchor,radius in [('bank_lantern',(64,92),(32,91),.28),
+            ('bank_pedestal',(104,88),(52,87),.76),('bank_flower_planter',(96,100),(48,99),.48)]:
         src=SOURCE/'encoded'/f'{stem}.png'
         assert Image.open(src).size==size
         dst=out/src.name
@@ -46,23 +46,25 @@ def main():
         parent=next(f for f in files if f['file']==albedo)
         files.append(info(dst,role=role,paired_albedo=albedo,size_m=parent['size_m'],
             anchor_px=parent['anchor_px'],anchor_uv=parent['anchor_uv'],color_space='linear_data'))
-    files[0].update(glow_mask='bank_lantern_glow.png',light_source_px=[36,54],
-        light_source_m_from_anchor=[0,49/48,.20],day_emission_energy=0,
+    files[0].update(glow_mask='bank_lantern_glow.png',light_source_px=[32,54],
+        light_source_m_from_anchor=[0,37/48,.20],day_emission_energy=0,
+        emission_mask_levels={'0':'iron, ribs, mullions, reflection','48':'dim amber glass','255':'filament'},
+        mullion_probe_px={'y_range':[48,59],'x_columns':[26,37]},
         emission_operator='multiply',suggested_emission_color='#ffc574',
         suggested_emission_energy=.55,suggested_light_energy=.4,suggested_light_range_m=5.)
     files[1].update(normal_map='bank_pedestal_n.png',normal_convention='OpenGL +Y',
         normal_map_invert_y=False,suggested_normal_scale=.45,
         normal_source='same-size geometry normal render; not albedo luminance',
-        mount_points={'lantern':{'anchor_px':[48,10],'position_m_from_anchor':[0,61/48,0]}})
-    write(out/'manifest.json',{'schema_version':1,'brief':'v36','revision':'modular-48-1',
+        mount_points={'lantern':{'anchor_px':[52,14],'position_m_from_anchor':[0,73/48,0]}})
+    write(out/'manifest.json',{'schema_version':1,'brief':'v36','revision':'modular-48-2',
         'studio':'TrashSquad · Beer Party Studio','delivery_status':'review_candidate',
         'owner_visual_approved':False,'scope':'three new props only; remaining v36 props/facades/characters pending',
         'pixels_per_metre':48,'palette':'../palettes/bank.png','files':files,
-        'assembly':{'canvas_px':[96,165],'anchor_px':[48,164],
+        'assembly':{'canvas_px':[104,165],'anchor_px':[52,164],
             'visible_height_px':163,'visible_height_m':163/48,'canvas_height_m':165/48,
             'collision_owner':'bank_pedestal.png',
-            'parts':[{'file':'bank_pedestal.png','top_left_px':[0,93],'position_m':[0,0,0],'collision_enabled':True},
-                     {'file':'bank_lantern.png','top_left_px':[12,0],'position_m':[0,61/48,0],
+            'parts':[{'file':'bank_pedestal.png','top_left_px':[0,77],'position_m':[0,0,0],'collision_enabled':True},
+                     {'file':'bank_lantern.png','top_left_px':[20,0],'position_m':[0,73/48,0],
                       'collision_enabled':False,'depth_offset_m':.005}],
             'transform_with_common_sprite_plane':True,
             'note':'Mount/depth offsets use the common sprite plane basis. Rotate offsets with its tilt/billboard. Depth offset prevents coplanar z-fighting.'},
@@ -81,7 +83,7 @@ def main():
     write(INBOX/'palettes/colors.json',{'schema_version':1,'revision':'v36-warm-48',
         'colors':['#%02x%02x%02x'%c for c in colors],
         'props_ramps':data['new_material_ramps'],'existing_material_colors_preserved':32,
-        'note':'Palette itself has no world size. Existing material textures remain 32 px/m; new props use 48 px/m.'})
+        'note':'Palette itself has no world size. New 96px material tiles and props use 48 px/m.'})
     write(INBOX/'palettes/manifest.json',{'schema_version':1,'brief':'v36',
         'revision':'warm-48-sample','studio':'TrashSquad · Beer Party Studio',
         'files':[info(INBOX/'palettes/bank.png',role='environment_palette',colors=64,

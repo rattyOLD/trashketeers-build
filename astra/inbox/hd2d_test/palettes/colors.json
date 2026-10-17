@@ -114,5 +114,5 @@
     ]
   },
   "existing_material_colors_preserved": 32,
-  "note": "Palette itself has no world size. Existing material textures remain 32 px/m; new props use 48 px/m."
+  "note": "Palette itself has no world size. New 96px material tiles and props use 48 px/m."
 }

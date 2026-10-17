@@ -58,7 +58,7 @@ def mat(name,color,cat,metal=0,rough=.55,alpha=1):
     return m
 
 
-iron=mat('Oxidised iron','44414a','iron',.35,.45)
+iron=mat('Oxidised iron','292a32','iron',.25,.6)
 iron_dark=mat('Iron underside','272832','iron',.2,.55)
 brass=mat('Brass','ca923c','brass',.65,.3)
 brass_dark=mat('Brass crevice','805128','brass',.35,.45)
@@ -207,53 +207,57 @@ def leaf(name,loc,size,angle,m,tilt=0):
 
 
 def make_lamp():
-    bevelbox('Stepped cast-iron foot',(0,0,.055),(.62,.4,.11),iron_dark,.025)
-    bevelbox('Brass foot edge',(0,-.005,.115),(.56,.36,.04),brass_light,.014)
-    lathe('Turned stem',[(.13,.19),(.17,.15),(.19,.11),(.36,.10),(.39,.15),(.43,.17)],iron)
-    for z,r in [(.17,.16),(.25,.108),(.38,.15),(.43,.18)]:
-        lathe('Stem collar',[(z-.018,r),(z+.018,r)],brass_light)
+    bevelbox('Stepped cast-iron foot',(0,0,.035),(.42,.30,.07),iron_dark,.02)
+    bevelbox('Brass foot edge',(0,0,.078),(.38,.27,.025),brass_light,.009)
+    lathe('Turned slender stem',[(.09,.13),(.13,.095),(.16,.057),(.30,.057),(.33,.10),(.36,.12)],iron)
+    for z,r in [(.12,.10),(.20,.065),(.32,.10),(.36,.125)]:
+        lathe('Stem collar',[(z-.012,r),(z+.012,r)],brass_light)
     # Spirals are real rounded metal, with a dark cavity and bright upper lip.
     for sign in (-1,1):
         pts=[]
         for i in range(42):
             t=i/41*math.pi*2.1
-            r=.16*(1-.62*i/41)
-            pts.append((sign*(.30+r*math.cos(t)),-.20,.48+r*math.sin(t)))
-        tube('Forged brass scroll',pts,.026,brass)
-        tube('Scroll root',[(sign*.1,-.1,.39),(sign*.20,-.16,.44),pts[0]],.025,brass_dark)
-    bevelbox('Chamber bottom',(0,0,.66),(.83,.51,.10),iron_dark,.026)
-    bevelbox('Bottom brass lip',(0,-.005,.72),(.78,.48,.035),brass_light,.012)
-    bevelbox('Inner chamber back',(0,.19,1.10),(.69,.045,.74),iron_dark,.02)
-    bevelbox('Interior floor',(0,0,.76),(.68,.4,.035),brass_dark,.01)
+            r=.125*(1-.62*i/41)
+            pts.append((sign*(.25+r*math.cos(t)),-.15,.40+r*math.sin(t)))
+        tube('Forged brass scroll',pts,.022,brass)
+        tube('Scroll root',[(sign*.07,-.1,.30),(sign*.15,-.14,.37),pts[0]],.02,brass_dark)
+    bevelbox('Chamber bottom',(0,0,.53),(.75,.44,.065),iron_dark,.02)
+    bevelbox('Bottom brass lip',(0,0,.572),(.70,.40,.025),brass_light,.009)
+    bevelbox('Inner chamber back',(0,.16,.90),(.61,.035,.62),iron_dark,.012)
+    bevelbox('Interior floor',(0,0,.60),(.60,.32,.025),brass_dark,.008)
     # Unlit bulb and tungsten loop: warm glass, no emission at all in albedo.
-    lathe('Bulb socket',[(.76,.075),(.81,.075),(.84,.045),(.90,.043)],brass)
-    sphere('Quartz bulb',(0,-.065,1.04),(.08,.07,.19),bulb)
-    tube('Visible filament',[(-.025,-.145,.94),(-.025,-.145,1.15),(0,-.15,1.18),(.025,-.145,1.15),(.025,-.145,.94)],.014,filament)
-    bevelbox('Single front glass plane',(0,-.231,1.115),(.65,.009,.74),glass,.02)
+    lathe('Bulb socket',[(.60,.065),(.66,.065),(.69,.035),(.73,.035)],brass)
+    sphere('Quartz bulb',(0,-.04,.85),(.07,.055,.16),bulb)
+    tube('Visible filament',[(-.025,-.19,.76),(-.025,-.19,.96),(0,-.19,.99),(.025,-.19,.96),(.025,-.19,.76)],.013,filament)
+    bevelbox('Amber glass plane',(0,-.176,.905),(.59,.007,.61),glass,.01)
     # A restrained reflection, equally present on both panes.
-    for sign in (-1,1):
-        bevelbox('Glass vertical glint',(sign*.235,-.242,1.24),(.045,.005,.35),glass_glint,.01)
-    for x in (-.355,.355):
-        bevelbox('Iron vertical mullion',(x,-.246,1.10),(.045,.042,.82),iron_dark,.014)
-        bevelbox('Brass bevel',(x-.006,-.272,1.11),(.014,.010,.77),brass,.005)
-    for x in (-.36,.36):
-        for y in (-.22,.22):
-            tube('Brass corner post',[(x,y,.75),(x,y,1.49)],.025,brass)
-            for z in (.73,1.48):sphere('Frame rivet',(x,y-.015,z),.047,brass_light)
-    bevelbox('Eave shadow',(0,0,1.515),(.98,.64,.065),iron_dark,.018)
-    bevelbox('Thick brass eave',(0,0,1.565),(1.08,.72,.065),brass,.02)
-    bevelbox('Eave top highlight',(0,0,1.604),(1.09,.73,.025),brass_light,.01)
-    frustum('Sloping iron roof',1.62,1.89,1.0,.65,.42,.29,iron)
+    for x in (-.235,.22):
+        bevelbox('Glass vertical glint',(x,-.195,1.015),(.023,.005,.22),glass_glint,.004)
+    # Two internal mullions plus the outer frame are opaque iron geometry.
+    # They remain black in the glow pass rather than painted over by emission.
+    for x in (-.32,-.115,.115,.32):
+        bevelbox('Iron vertical mullion',(x,-.204,.90),(.035,.035,.66),iron_dark,.006)
+        if abs(x)>.3:
+            bevelbox('Brass frame bevel',(x-.006,-.227,.90),(.011,.008,.62),brass,.003)
+    for x in (-.32,.32):
+        for y in (-.19,.19):
+            tube('Brass corner post',[(x,y,.60),(x,y,1.21)],.018,brass)
+            for z in (.59,1.20):sphere('Frame rivet',(x,y-.015,z),.032,brass_light)
+    bevelbox('Eave deep shadow',(0,0,1.245),(.94,.58,.07),iron_dark,.012)
+    bevelbox('Brass eave rim',(0,0,1.29),(1.16,.67,.035),brass,.012)
+    bevelbox('Eave upper bead',(0,0,1.318),(1.18,.69,.022),brass_light,.008)
+    frustum('Steep dark iron roof',1.33,1.64,1.12,.63,.32,.22,iron)
     for sx in (-1,1):
         for sy in (-1,1):
-            tube('Roof brass seam',[(sx*.50,sy*.325,1.63),(sx*.21,sy*.145,1.89)],.020,brass)
-    for x in (-.50,.50):
-        lathe_o=lathe('Corner finial neck',[(1.64,.045),(1.69,.045)],brass)
-        lathe_o.location=(x,-.30,0)
-        sphere('Corner ball',(x,-.30,1.73),.075,brass_light)
-    lathe('Top finial collars',[(1.89,.20),(1.92,.20),(1.94,.13),(1.97,.13)],brass)
-    sphere('Large brass finial',(0,0,2.06),(.14,.14,.135),brass_light)
-    lathe('Finial crown',[(2.16,.04),(2.20,.025)],brass)
+            tube('Roof brass seam',[(sx*.56,sy*.315,1.34),(sx*.16,sy*.11,1.64)],.019,brass)
+    tube('Front central roof rib',[(0,-.325,1.34),(0,-.12,1.64)],.018,brass)
+    for x in (-.54,.54):
+        neck=lathe('Corner finial neck',[(1.34,.031),(1.40,.031)],brass)
+        neck.location=(x,-.29,0)
+        sphere('Corner ball',(x,-.29,1.445),.06,brass_light)
+    lathe('Top finial collars',[(1.64,.15),(1.67,.15),(1.70,.09),(1.72,.09)],brass)
+    sphere('Large brass finial',(0,0,1.82),(.12,.12,.115),brass_light)
+    lathe('Finial crown',[(1.91,.035),(1.95,.02)],brass)
 
 
 def chip(o,loc,r):
@@ -280,7 +284,7 @@ def seam(o,loc,size):
 
 
 def make_pedestal():
-    foot=bevelbox('Broad limestone plinth',(0,0,.08),(1.78,1.04,.16),stone,.035)
+    foot=bevelbox('Broad limestone plinth',(0,0,.08),(1.78,1.04,.16),stone_patch,.035)
     bevelbox('Plinth upper step',(0,0,.205),(1.58,.90,.095),stone_top,.025)
     body=bevelbox('Masonry core',(0,0,.75),(1.38,.78,1.02),stone,.025)
     bevelbox('Under cornice shadow',(0,0,1.27),(1.52,.86,.07),stone_patch,.018)
@@ -335,7 +339,7 @@ def make_pedestal():
     for x,z in [(-.61,.16),(.53,.16),(-.67,1.43),(.56,1.43)]:
         y=-.54 if z>1 else -.51
         for i in range(5):
-            sphere('Moss patch',(x+random.uniform(-.06,.06),y,z+random.uniform(-.015,.015)),(.055,.025,.03),greens[0])
+            sphere('Moss patch',(x+random.uniform(-.06,.06),y,z+random.uniform(-.015,.015)),(.055,.025,.03),greens[i%3])
 
 
 def flower(loc,r,white_flower=False):
@@ -354,7 +358,7 @@ def flower(loc,r,white_flower=False):
 def make_planter():
     lathe('Deep round fluted terracotta',[(.12,.30),(.16,.34),(.22,.38),(.34,.44),(.53,.49),(.72,.51),(.86,.49),(.91,.51)],terra,64,.09)
     lathe('Pot foot',[(.025,.32),(.06,.36),(.11,.36),(.14,.31)],terra_dark)
-    lathe('Foot bead',[(.09,.355),(.115,.355)],terra_rim)
+    lathe('Foot bead',[(.09,.355),(.115,.355)],terra_dark)
     lathe('Thick elliptical lip',[(.87,.51),(.89,.55),(.94,.56),(.97,.53),(.97,.44),(.91,.43)],terra_rim)
     lathe('Rim underside',[(.845,.497),(.88,.52)],terra_dark)
     lathe('Soil',[(.91,.43),(.94,.43)],soil)
@@ -413,7 +417,11 @@ def emission_override(mode):
             color=IDS[CATS.index(m['category'])]
             em.inputs['Color'].default_value=(*color,1)
         elif mode=='glow':
-            value=1 if m['category']=='amber_glass' else 0
+            # The glass glows gently; the thread is brighter. Iron and the
+            # reflection stay black so they survive the evening emission.
+            value=0
+            if m.name=='Amber glass':value=48/255
+            elif m.name=='Visible tungsten thread':value=1
             em.inputs['Color'].default_value=(value,value,value,1)
         elif mode=='normal':
             geom=nodes.new('ShaderNodeNewGeometry')
@@ -494,7 +502,7 @@ def render(name,size,make):
 if __name__=='__main__':
     import sys
     name=sys.argv[sys.argv.index('--')+1]
-    if name=='lamp':render('bank_lantern',(72,104),make_lamp)
-    elif name=='pedestal':render('bank_pedestal',(96,72),make_pedestal)
+    if name=='lamp':render('bank_lantern',(64,92),make_lamp)
+    elif name=='pedestal':render('bank_pedestal',(104,88),make_pedestal)
     elif name=='planter':render('bank_flower_planter',(96,100),make_planter)
     else:raise ValueError(name)

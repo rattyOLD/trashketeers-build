@@ -18,9 +18,9 @@ def validate(root):
     palette_colors=set(map(tuple,np.array(palette).reshape(-1,3)))
     check(palette.size==(64,1) and len(palette_colors)==64,'Bank palette: 64 unique colors')
     check(manifest['pixels_per_metre']==48,'Prop density must be 48 px/m')
-    expected={'bank_lantern.png':(72,104),'bank_pedestal.png':(96,72),
-              'bank_flower_planter.png':(96,100),'bank_lantern_glow.png':(72,104),
-              'bank_pedestal_n.png':(96,72)}
+    expected={'bank_lantern.png':(64,92),'bank_pedestal.png':(104,88),
+              'bank_flower_planter.png':(96,100),'bank_lantern_glow.png':(64,92),
+              'bank_pedestal_n.png':(104,88)}
     check({f['file'] for f in manifest['files']}==set(expected),'Complete 3 sprites + 2 data maps')
     check({p.name for p in folder.glob('*.png')}==set(expected),'Unlisted or missing PNG')
     images={}
@@ -56,19 +56,37 @@ def validate(root):
     mask_rgb=np.array(images['bank_lantern_glow.png'])[:,:,:3]
     mask=mask_rgb[:,:,0]
     check(np.all(mask_rgb==mask[:,:,None]),'Emission mask must be grayscale data')
-    check(set(mask.ravel())=={0,255},'Emission mask: nonempty white on black')
+    check(set(mask.ravel())=={0,48,255},'Emission mask: dim glass and bright filament on black')
     check(np.all(mask[lamp[:,:,3]==0]==0),'Emission mask outside lamp silhouette')
     yy,xx=np.nonzero(mask)
     check(xx.max()-xx.min()>8 and yy.max()-yy.min()>12,'Glass mask is implausibly small')
     check(yy.min()>lamp.shape[0]*.25 and yy.max()<lamp.shape[0]*.8,'Mask incorrectly includes roof/base')
     check(entries['bank_lantern.png']['emission_operator']=='multiply','Emission must not light the whole casing')
+    # Independent silhouette measurements: no relying on the manifest claims.
+    lb=images['bank_lantern.png'].getbbox()
+    pb=images['bank_pedestal.png'].getbbox()
+    width_ratio=(lb[2]-lb[0])/(pb[2]-pb[0])
+    height_ratio=(lb[3]-lb[1])/(pb[3]-pb[1])
+    check(.60<=width_ratio<=.72,'Lamp must be about 2/3 of pedestal width')
+    check(height_ratio<=1.2,'Lamp overwhelms pedestal height')
+    # Fixed glass cross-sections: two opaque internal bars must separate the
+    # three pane regions; a full rectangle must fail even with correct hashes.
+    for y in (49,53,57):
+        row=mask[y,20:44]>0
+        runs=sum(v and (i==0 or not row[i-1]) for i,v in enumerate(row))
+        check(runs>=3,f'Glass row {y}: internal mullions missing from mask')
+    for x in (26,37):
+        check(np.all(mask[49:59,x]==0),f'Iron mullion {x} emits light')
+    for x in (24,29,35,40):
+        check(np.all(mask[49:59,x]==48),f'Glass pane {x} missing gentle emission')
+    check(np.count_nonzero(mask==255)>=3,'Visible filament missing')
     n=np.array(images['bank_pedestal_n.png'])[:,:,:3].astype(float)/255*2-1
     check(np.max(np.abs(np.linalg.norm(n,axis=2)-1))<.015,'Stone normals not normalized')
     check(n[:,:,2].min()>=-.01,'Stone normal faces away from sprite')
     check(len(np.unique(n.reshape(-1,3),axis=0))>50,'Stone normal lacks actual relief')
     check(entries['bank_pedestal.png']['normal_map_invert_y'] is False,'OpenGL normal convention')
     assembly=manifest['assembly']
-    check(assembly['canvas_px']==[96,165],'Assembly canvas must be 165px tall')
+    check(assembly['canvas_px']==[104,165],'Assembly canvas must be 165px tall')
     combined=Image.new('RGBA',tuple(assembly['canvas_px']))
     for part in assembly['parts']:
         combined.alpha_composite(images[part['file']],tuple(part['top_left_px']))
@@ -84,7 +102,9 @@ def validate(root):
     check(lamp_part.get('depth_offset_m',0)>0,'Coplanar parts risk z-fighting')
     return {'ok':not errors,'errors':errors,'sprites':stats,'png_count':len(expected),
             'density':48,'assembly_visible_height_px':bounds[3]-bounds[1],
-            'palette_colors':len(palette_colors),'owner_visual_approval':manifest['owner_visual_approved']}
+            'palette_colors':len(palette_colors),'lamp_pedestal_width_ratio':round(width_ratio,4),
+            'lamp_pedestal_height_ratio':round(height_ratio,4),
+            'owner_visual_approval':manifest['owner_visual_approved']}
 
 
 if __name__=='__main__':

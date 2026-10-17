@@ -4,29 +4,29 @@
   "sprites": {
     "bank_lantern.png": {
       "size": [
-        72,
-        104
+        64,
+        92
       ],
       "visible_bounds": [
-        7,
+        2,
         1,
-        65,
-        103
+        62,
+        91
       ],
-      "colors": 15
+      "colors": 14
     },
     "bank_pedestal.png": {
       "size": [
-        96,
-        72
+        104,
+        88
       ],
       "visible_bounds": [
-        12,
+        8,
         1,
-        84,
-        71
+        96,
+        87
       ],
-      "colors": 14
+      "colors": 11
     },
     "bank_flower_planter.png": {
       "size": [
@@ -39,12 +39,14 @@
         93,
         99
       ],
-      "colors": 33
+      "colors": 32
     }
   },
   "png_count": 5,
   "density": 48,
   "assembly_visible_height_px": 163,
   "palette_colors": 64,
+  "lamp_pedestal_width_ratio": 0.6818,
+  "lamp_pedestal_height_ratio": 1.0465,
   "owner_visual_approval": false
 }

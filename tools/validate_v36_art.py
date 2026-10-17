@@ -29,7 +29,7 @@ def validate(root):
     require(palette.height==1 and 48<=palette.width<=64, "Bank palette must be a 48–64 color strip")
     require(len(colors)==palette.width, "Palette contains duplicate colors")
     manifest=json.loads((root/"materials/manifest.json").read_text())
-    require(manifest.get("pixels_per_metre")==32, "World density is not 32 px/m")
+    require(manifest.get("pixels_per_metre")==48, "World density is not 48 px/m")
     groups={}
     names=set()
     for f in manifest["files"]:
@@ -45,7 +45,7 @@ def validate(root):
             probe.verify()
         im=Image.open(path)
         report["checked_png"]+=1
-        require(im.size==(64,64),f"{name}: wrong native dimensions")
+        require(im.size==(96,96),f"{name}: wrong native dimensions")
         require((f["width"],f["height"])==im.size,f"{name}: manifest dimensions")
         require(hashlib.sha256(path.read_bytes()).hexdigest()==f["sha256"],f"{name}: SHA256 mismatch")
         require(path.stat().st_size==f["bytes"],f"{name}: size mismatch")
@@ -55,6 +55,8 @@ def validate(root):
         rgba=im.convert("RGBA")
         require(set(pixels(rgba.getchannel("A")))=={255},f"{name}: surface must be opaque")
         if f["role"]=="albedo":
+            require(f.get('authored_size_px')==[96,96] and f.get('resampled') is False,
+                    f'{name}: native-grid provenance missing')
             used_colors=set(pixels(im.convert("RGB")))
             require(used_colors<=colors,f"{name}: colors outside Bank palette")
             require(len(used_colors)>=3,f"{name}: material lacks color steps")
@@ -68,17 +70,25 @@ def validate(root):
             require(all(p[2]>.8 for p in xyz),f"{name}: unreasonable/inverted normal Z")
     require(set(groups)==REQUIRED_MATERIALS,"Missing or extra material family")
     pairs=0
+    normal_pairs=0
     for material,files in groups.items():
         require(2<=len(files)<=3,f"{material}: expected 2–3 variants")
         require(len({f[2]["sha256"] for f in files})==len(files),f"{material}: duplicate variants")
         for (an,a,_),(bn,b,_) in itertools.product(files,repeat=2):
-            require(a.crop((63,0,64,64)).tobytes()==b.crop((0,0,1,64)).tobytes(),f"X seam {an}/{bn}")
-            require(a.crop((0,63,64,64)).tobytes()==b.crop((0,0,64,1)).tobytes(),f"Y seam {an}/{bn}")
+            require(a.crop((95,0,96,96)).tobytes()==b.crop((0,0,1,96)).tobytes(),f"X seam {an}/{bn}")
+            require(a.crop((0,95,96,96)).tobytes()==b.crop((0,0,96,1)).tobytes(),f"Y seam {an}/{bn}")
             pairs+=2
+        normal_files=[f for f in manifest['files'] if f['material']==material and f['role']=='normal']
+        for an,bn in itertools.product(normal_files,repeat=2):
+            a=Image.open(root/'materials'/an['file'])
+            b=Image.open(root/'materials'/bn['file'])
+            require(a.crop((95,0,96,96)).tobytes()==b.crop((0,0,1,96)).tobytes(),f"Normal X seam {an['file']}/{bn['file']}")
+            require(a.crop((0,95,96,96)).tobytes()==b.crop((0,0,96,1)).tobytes(),f"Normal Y seam {an['file']}/{bn['file']}")
+            normal_pairs+=2
         # Check edge neighborhoods too: a pasted uniform border would produce
         # anomalous flat strips even if first/last pixels matched exactly.
         for name,im,_ in files:
-            edge=im.convert("RGB").crop((0,0,4,64))
+            edge=im.convert("RGB").crop((0,0,4,96))
             require(len(set(pixels(edge)))>=3,f"{name}: artificially flat seam strip")
         values=[ImageStat.Stat(f[1].convert("L")).mean[0] for f in files]
         report["materials"][material]={"variants":len(files),"mean_luma":[round(v,3) for v in values]}
@@ -91,7 +101,7 @@ def validate(root):
     if "marble" in groups:
         require(report["materials"]["marble"]["mean_luma"][0]>190,"Marble should read as pale stone")
     require(names=={p.name for p in (root/"materials").glob("*.png")},"PNG files omitted from manifest")
-    report.update(edge_pair_checks=pairs,errors=errors,ok=not errors)
+    report.update(edge_pair_checks=pairs,normal_edge_pair_checks=normal_pairs,errors=errors,ok=not errors)
     return report
 
 

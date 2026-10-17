@@ -19,7 +19,7 @@ ramps.update({
 CATS=['iron','brass','amber_glass','stone','terracotta','foliage','petals','white','earth']
 IDS=np.array([(1,0,0),(0,1,0),(0,0,1),(1,1,0),(1,0,1),(0,1,1),(.5,0,1),(1,.5,0),(.5,1,0)])*255
 RGB={k:np.array([list(bytes.fromhex(h.lstrip('#'))) for h in v],dtype=np.float32) for k,v in ramps.items()}
-GAINS={'brass':1.10,'amber_glass':1.10,'stone':1.04,'terracotta':1.22,'foliage':1.03,'petals':1.08,'white':1.08}
+GAINS={'iron':.65,'brass':1.10,'amber_glass':1.10,'stone':1.04,'terracotta':1.22,'foliage':1.03,'petals':1.08,'white':1.08}
 
 
 def bake(stem):
@@ -75,7 +75,9 @@ def bake(stem):
     im.save(OUT/f'{stem}.png')
     if stem=='bank_lantern':
         glow=np.array(Image.open(HERE/f'{stem}_glow.png').convert('RGB'))
-        m=((glow.max(axis=2)>=128)&visible).astype(np.uint8)*255
+        levels=np.array([0,48,255])
+        m=levels[np.argmin(abs(glow[:,:,0,None].astype(float)-levels),axis=2)].astype(np.uint8)
+        m[~visible]=0
         Image.fromarray(np.repeat(m[:,:,None],3,axis=2)).save(OUT/f'{stem}_glow.png')
     if stem=='bank_pedestal':
         n=np.array(Image.open(HERE/f'{stem}_normal.png').convert('RGB'),dtype=np.float32)/255*2-1
@@ -94,23 +96,23 @@ def main():
     lamp=bake('bank_lantern')
     stone=bake('bank_pedestal')
     pot=bake('bank_flower_planter')
-    group=Image.new('RGBA',(196,165))
-    group.alpha_composite(stone,(0,93))
-    group.alpha_composite(lamp,(12,0))
-    group.alpha_composite(pot,(100,65))
+    group=Image.new('RGBA',(204,165))
+    group.alpha_composite(stone,(0,77))
+    group.alpha_composite(lamp,(20,0))
+    group.alpha_composite(pot,(108,65))
     group.save(HERE/'assembly_native.png')
-    board=Image.new('RGB',(860,610),(32,40,48))
+    board=Image.new('RGB',(900,610),(32,40,48))
     d=ImageDraw.Draw(board)
     fontpath='/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
     font=ImageFont.truetype(fontpath,15)
     small=ImageFont.truetype(fontpath,12)
     d.text((20,12),'BANK / 48 px/m · MODULAR SAMPLE · native pixels, warm material ramps',font=font,fill=(238,216,171))
-    for x,bg in [(20,(32,40,48)),(448,(220,209,186))]:
-        d.rectangle((x-4,48,x+396,387),fill=bg)
-        im=group.resize((392,330),Image.Resampling.NEAREST)
+    for x,bg in [(20,(32,40,48)),(468,(220,209,186))]:
+        d.rectangle((x-4,48,x+412,387),fill=bg)
+        im=group.resize((408,330),Image.Resampling.NEAREST)
         board.paste(im,(x,52),im)
     d.text((20,397),'2× / dark ground',font=font,fill=(212,211,195))
-    d.text((448,397),'2× / pale ground',font=font,fill=(212,211,195))
+    d.text((468,397),'2× / pale ground',font=font,fill=(212,211,195))
     board.paste(group,(20,438),group)
     d.text((20,419),'1× / same source pixels',font=small,fill=(212,211,195))
     mask=Image.open(OUT/'bank_lantern_glow.png')
