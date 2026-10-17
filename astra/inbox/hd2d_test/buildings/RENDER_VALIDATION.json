@@ -1,0 +1,78 @@
+{
+  "ok": true,
+  "glb_sha256": "480b8ba26372f89fd6135e1e5b4dc39795235525d036444d5b9ff8c6e9d6caf0",
+  "godot": "4.4.1.stable.official.49a5bc7b6",
+  "renderer": "Compatibility / Mesa llvmpipe software OpenGL4.5",
+  "actual_glb_loaded": true,
+  "external_png_loaded": true,
+  "source_modified": false,
+  "scene_script_errors": false,
+  "camera": {
+    "fov_vertical": 30,
+    "pitch_down": 32,
+    "distance_m": 28,
+    "resolution": [
+      1920,
+      1080
+    ]
+  },
+  "normal_comparison": {
+    "pixels_delta_above1": 368877,
+    "max_channel_delta": 98
+  },
+  "screenshots_sha256": {
+    "bank_godot_day.png": "a224549fadfb421593053978f6421e57ddba45e247057e9b7bd8844187dbe206",
+    "bank_godot_day_flat.png": "da83270f79ba101b90e2fa016afdeca7ef2090162d5cd15771e34e4da60a6d19",
+    "bank_godot_three_quarter.png": "a4e0045902031072a86498b403203940f4abf0a4540076c8bd46af1d45d62105",
+    "bank_godot_evening.png": "353e1f9d751d34c470e6b05d1df1a725ccd442b5bb9e530c31b0973fd829f06d"
+  },
+  "artistic_approval": false,
+  "limits": [
+    "Standalone bank inspection with accepted Riko and paving, not the complete Bank plaza or gameplay.",
+    "No physical device/performance test; preview uses software OpenGL.",
+    "Editor initialization reports unavailable local Vulkan surface in this environment; runtime Compatibility scene completes without scene/resource errors.",
+    "System V-Sync warning; no physical camera DOF or atmosphere tuning claimed."
+  ],
+  "stored_reviews": {
+    "bank_blender_day": {
+      "capture_sha256": "c29a2cc1c3b9c0ad4085e42df690fc4a0e45ac92cb602ca7b3ff6c9a6476c953",
+      "jpeg_sha256": "59abfd5c23e302292552e57d3925570de2836afe5c13511a869f62e4c442c1d9",
+      "resolution_px": [
+        1920,
+        1080
+      ]
+    },
+    "bank_godot_day": {
+      "capture_sha256": "a224549fadfb421593053978f6421e57ddba45e247057e9b7bd8844187dbe206",
+      "jpeg_sha256": "a75dac7c6375baf8b939139bf4205d16e2570d6a5e5b325c12d25a470cbdf83e",
+      "resolution_px": [
+        1920,
+        1080
+      ]
+    },
+    "bank_godot_three_quarter": {
+      "capture_sha256": "a4e0045902031072a86498b403203940f4abf0a4540076c8bd46af1d45d62105",
+      "jpeg_sha256": "cafc8ab461f309e3f735251c1be88062bb2d873e7593cbdf8fd68e54d16ffeaa",
+      "resolution_px": [
+        1920,
+        1080
+      ]
+    },
+    "bank_godot_evening": {
+      "capture_sha256": "353e1f9d751d34c470e6b05d1df1a725ccd442b5bb9e530c31b0973fd829f06d",
+      "jpeg_sha256": "9b550aa98661ee14cc9182a64106b67a26e6ea5ac2689137648c7f7858f27996",
+      "resolution_px": [
+        1920,
+        1080
+      ]
+    }
+  },
+  "blender": {
+    "version": "4.3.2",
+    "renderer": "Cycles CPU64samples, no denoiser",
+    "camera_fov_vertical": 30,
+    "pitch_down": 32,
+    "distance_m": 28,
+    "source": "tools/art_v38/build_bank.py --day-only"
+  }
+}

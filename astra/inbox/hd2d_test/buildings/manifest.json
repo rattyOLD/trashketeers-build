@@ -1,0 +1,525 @@
+{
+  "schema_version": 1,
+  "brief": "v38 + v37",
+  "revision": "bank3d-control-1",
+  "studio": "TrashSquad · Beer Party Studio",
+  "scope": "First review delivery: bank only. No3D cafe/shop/terrace/fountain or characters delivered in this stage.",
+  "delivery_status": "review_candidate",
+  "owner_visual_approved": false,
+  "ready_for_scene_review": true,
+  "pixels_per_metre": 96,
+  "files": [
+    {
+      "file": "bank_crest.png",
+      "sha256": "2050d4d8f47dc4cadd55ea4f057790e903012de95d7a82bf7d2ea83d3d054874",
+      "bytes": 27842,
+      "width": 384,
+      "height": 288,
+      "format": "P",
+      "pixels_per_metre": 96,
+      "role": "albedo",
+      "color_space": "sRGB",
+      "palette": "bank_palette.png",
+      "alpha": "binary 0/255",
+      "size_m": [
+        4,
+        3
+      ],
+      "anchor_px": [
+        192,
+        144
+      ],
+      "collision": false,
+      "description": "Approved heraldic face extracted from accepted elevation; curved relief mesh in GLB"
+    },
+    {
+      "file": "bank_glass.png",
+      "sha256": "b5fd56471d46c9a7eb329915d9f732e372f91ba286ca6110c0b50660a81e5d5d",
+      "bytes": 7009,
+      "width": 192,
+      "height": 192,
+      "format": "P",
+      "pixels_per_metre": 96,
+      "role": "albedo",
+      "color_space": "sRGB",
+      "palette": "bank_palette.png",
+      "alpha": "binary 0/255",
+      "size_m": [
+        2,
+        2
+      ],
+      "tileable": true,
+      "anchor_px": [
+        0,
+        0
+      ]
+    },
+    {
+      "file": "bank_glass_glow.png",
+      "sha256": "7428a67cf0b9c7ca75aa0381d22486056726457b4da943739c581cd29597b9e0",
+      "bytes": 408,
+      "width": 192,
+      "height": 192,
+      "format": "RGB",
+      "pixels_per_metre": 96,
+      "role": "emission_mask",
+      "color_space": "linear_data",
+      "operator": "multiply",
+      "size_m": [
+        2,
+        2
+      ],
+      "tileable": true,
+      "anchor_px": [
+        0,
+        0
+      ]
+    },
+    {
+      "file": "bank_hall.glb",
+      "sha256": "480b8ba26372f89fd6135e1e5b4dc39795235525d036444d5b9ff8c6e9d6caf0",
+      "bytes": 614240,
+      "role": "building_model",
+      "body_size_m": [
+        16,
+        10.5,
+        8
+      ],
+      "actual_render_bounds_m": [
+        [
+          -8.390000343322754,
+          0.0,
+          -4.400000095367432
+        ],
+        [
+          8.390000343322754,
+          10.5,
+          4.979520797729492
+        ]
+      ],
+      "anchor_m": [
+        0,
+        0,
+        0
+      ],
+      "up_axis": "+Y",
+      "front_axis": "+Z",
+      "units": "metres",
+      "triangles": 5993,
+      "collider_radius_m": 9.1,
+      "collider_shape": "compound boxes",
+      "collision_boxes": [
+        {
+          "center_m": [
+            0,
+            4.05,
+            0
+          ],
+          "size_m": [
+            16,
+            8.1,
+            8
+          ]
+        },
+        {
+          "center_m": [
+            -3.18,
+            2.44,
+            4.25
+          ],
+          "size_m": [
+            0.98,
+            4.88,
+            0.95
+          ]
+        },
+        {
+          "center_m": [
+            3.18,
+            2.44,
+            4.25
+          ],
+          "size_m": [
+            0.98,
+            4.88,
+            0.95
+          ]
+        }
+      ]
+    },
+    {
+      "file": "bank_ivy.png",
+      "sha256": "adb4c2d9e22533838987bcf53f8792d1ab23945108df1792e674b15e43af9a10",
+      "bytes": 10463,
+      "width": 128,
+      "height": 512,
+      "format": "P",
+      "pixels_per_metre": 96,
+      "role": "albedo",
+      "color_space": "sRGB",
+      "palette": "bank_palette.png",
+      "alpha": "binary 0/255",
+      "size_m": [
+        1.3333333333333333,
+        5.333333333333333
+      ],
+      "anchor_px": [
+        64,
+        512
+      ],
+      "collision": false,
+      "description": "Separate alpha-scissor cards over architecture"
+    },
+    {
+      "file": "bank_masonry.png",
+      "sha256": "a86cc8f6e635d6454229267878765c4de2146ab49cb5fbea986f6dacdea3f3a0",
+      "bytes": 20674,
+      "width": 192,
+      "height": 192,
+      "format": "P",
+      "pixels_per_metre": 96,
+      "role": "albedo",
+      "color_space": "sRGB",
+      "palette": "bank_palette.png",
+      "alpha": "binary 0/255",
+      "size_m": [
+        2,
+        2
+      ],
+      "tileable": true,
+      "anchor_px": [
+        0,
+        0
+      ]
+    },
+    {
+      "file": "bank_masonry_n.png",
+      "sha256": "a378cd0ed6dc686d688c515be6eb3e80f7d2d50eeaa7555a1461ff5949bcbc8f",
+      "bytes": 2032,
+      "width": 192,
+      "height": 192,
+      "format": "RGB",
+      "pixels_per_metre": 96,
+      "role": "normal",
+      "color_space": "linear_data",
+      "convention": "OpenGL +Y",
+      "normal_map_invert_y": false,
+      "suggested_strength": 0.3,
+      "size_m": [
+        2,
+        2
+      ],
+      "tileable": true,
+      "anchor_px": [
+        0,
+        0
+      ]
+    },
+    {
+      "file": "bank_palette.png",
+      "sha256": "8e721de24e276cfd6be82090511c43162a495a6cee05e400094e43551a2c0f51",
+      "bytes": 453,
+      "width": 128,
+      "height": 1,
+      "format": "RGB",
+      "pixels_per_metre": 96,
+      "role": "palette",
+      "color_count": 128
+    },
+    {
+      "file": "bank_plaster.png",
+      "sha256": "618b293760813f506b0ed4fa4d043b57af4db63952cf08b8aca8138e9989929a",
+      "bytes": 18630,
+      "width": 192,
+      "height": 192,
+      "format": "P",
+      "pixels_per_metre": 96,
+      "role": "albedo",
+      "color_space": "sRGB",
+      "palette": "bank_palette.png",
+      "alpha": "binary 0/255",
+      "size_m": [
+        2,
+        2
+      ],
+      "tileable": true,
+      "anchor_px": [
+        0,
+        0
+      ]
+    },
+    {
+      "file": "bank_plaster_n.png",
+      "sha256": "3302bfaa81f4d3675a8e528ff44ac361f3842facb5e770fbe9a77df1d92708df",
+      "bytes": 410,
+      "width": 192,
+      "height": 192,
+      "format": "RGB",
+      "pixels_per_metre": 96,
+      "role": "normal",
+      "color_space": "linear_data",
+      "convention": "OpenGL +Y",
+      "normal_map_invert_y": false,
+      "suggested_strength": 0.3,
+      "size_m": [
+        2,
+        2
+      ],
+      "tileable": true,
+      "anchor_px": [
+        0,
+        0
+      ]
+    },
+    {
+      "file": "bank_roof.png",
+      "sha256": "15dae3cb92b468fd805da6db3c25ac287c348c298c9ce9949013a9cc7121f842",
+      "bytes": 14691,
+      "width": 192,
+      "height": 192,
+      "format": "P",
+      "pixels_per_metre": 96,
+      "role": "albedo",
+      "color_space": "sRGB",
+      "palette": "bank_palette.png",
+      "alpha": "binary 0/255",
+      "size_m": [
+        2,
+        2
+      ],
+      "tileable": true,
+      "anchor_px": [
+        0,
+        0
+      ]
+    },
+    {
+      "file": "bank_roof_n.png",
+      "sha256": "20fcd5a678b5f7a9a1fbbc88f34829a561d30e77e5591323431bfd0037318944",
+      "bytes": 4433,
+      "width": 192,
+      "height": 192,
+      "format": "RGB",
+      "pixels_per_metre": 96,
+      "role": "normal",
+      "color_space": "linear_data",
+      "convention": "OpenGL +Y",
+      "normal_map_invert_y": false,
+      "suggested_strength": 0.3,
+      "size_m": [
+        2,
+        2
+      ],
+      "tileable": true,
+      "anchor_px": [
+        0,
+        0
+      ]
+    },
+    {
+      "file": "bank_trim.png",
+      "sha256": "1cb7b1d91a9705e835f4d1e87fede5f26593f0f5962ff83ed9fed2ca3b1b3133",
+      "bytes": 197438,
+      "width": 1024,
+      "height": 1024,
+      "format": "P",
+      "pixels_per_metre": 96,
+      "role": "albedo",
+      "color_space": "sRGB",
+      "palette": "bank_palette.png",
+      "alpha": "binary 0/255"
+    },
+    {
+      "file": "bank_trim_glow.png",
+      "sha256": "f3fe1f0f0d9408495aaef0b443fb01a01d86b3d5bbfd96ccb65b8f6fe23424a9",
+      "bytes": 3839,
+      "width": 1024,
+      "height": 1024,
+      "format": "RGB",
+      "pixels_per_metre": 96,
+      "role": "emission_mask",
+      "color_space": "linear_data",
+      "operator": "multiply"
+    },
+    {
+      "file": "bank_trim_n.png",
+      "sha256": "1180a51b7d2fdaa682d8e52243193911406472087dadb18f0faa416e26dcb752",
+      "bytes": 21444,
+      "width": 1024,
+      "height": 1024,
+      "format": "RGB",
+      "pixels_per_metre": 96,
+      "role": "normal",
+      "color_space": "linear_data",
+      "convention": "OpenGL +Y",
+      "normal_map_invert_y": false,
+      "suggested_strength": 0.3
+    }
+  ],
+  "trim_sheet": {
+    "file": "bank_trim.png",
+    "size_px": [
+      1024,
+      1024
+    ],
+    "regions_px": {
+      "frieze": [
+        0,
+        0,
+        256,
+        64
+      ],
+      "gold_leaf": [
+        256,
+        0,
+        256,
+        64
+      ],
+      "shaft": [
+        512,
+        0,
+        256,
+        256
+      ],
+      "brass": [
+        768,
+        0,
+        256,
+        256
+      ],
+      "plinth": [
+        0,
+        256,
+        128,
+        128
+      ],
+      "wood": [
+        256,
+        256,
+        256,
+        256
+      ],
+      "iron": [
+        512,
+        256,
+        256,
+        256
+      ],
+      "amber_glass": [
+        768,
+        256,
+        256,
+        256
+      ]
+    },
+    "normal": "bank_trim_n.png",
+    "emission_mask": "bank_trim_glow.png",
+    "unused_regions": "reserved; not sampled by model"
+  },
+  "materials": {
+    "Bank_Limestone_Plaster": {
+      "albedo": "bank_plaster.png",
+      "cutout": false,
+      "glow": ""
+    },
+    "Bank_Ashlar": {
+      "albedo": "bank_masonry.png",
+      "cutout": false,
+      "glow": ""
+    },
+    "Bank_Terracotta": {
+      "albedo": "bank_roof.png",
+      "cutout": false,
+      "glow": ""
+    },
+    "Bank_Stone_Trim": {
+      "albedo": "bank_trim.png",
+      "cutout": false,
+      "glow": ""
+    },
+    "Bank_Gilded_Trim": {
+      "albedo": "bank_trim.png",
+      "cutout": false,
+      "glow": ""
+    },
+    "Bank_Walnut": {
+      "albedo": "bank_trim.png",
+      "cutout": false,
+      "glow": ""
+    },
+    "Bank_Iron": {
+      "albedo": "bank_trim.png",
+      "cutout": false,
+      "glow": ""
+    },
+    "Bank_Lantern_Glass": {
+      "albedo": "bank_trim.png",
+      "cutout": false,
+      "glow": "bank_trim_glow.png"
+    },
+    "Bank_Window_Glass": {
+      "albedo": "bank_glass.png",
+      "cutout": false,
+      "glow": "bank_glass_glow.png"
+    },
+    "Bank_Ivy": {
+      "albedo": "bank_ivy.png",
+      "cutout": true,
+      "glow": ""
+    },
+    "Bank_Crowned_Pig_Crest": {
+      "albedo": "bank_crest.png",
+      "cutout": true,
+      "glow": ""
+    }
+  },
+  "normal_maps_note": "Broad approximate relief; macro shape from true geometry. No claim of carved/scanned microscopic normals.",
+  "import_settings": {
+    "filter": "nearest (GLB sampler9728)",
+    "alpha_mode": "MASK / cutoff0.5 for ivy and crest",
+    "png_files": "external next to bank_hall.glb; do not move GLB alone",
+    "normal_convention": "OpenGL +Y",
+    "review_texture_compression": "lossless; avoid BC artifacts during visual evaluation"
+  },
+  "night_settings": {
+    "day_emission_off": true,
+    "emission_operator": "multiply",
+    "warm_tint_rgb": [
+      1,
+      0.53,
+      0.16
+    ],
+    "suggested_energy": 0.55,
+    "windows_material": "Bank_Window_Glass",
+    "windows_mask": "bank_glass_glow.png",
+    "wall_lamps_material": "Bank_Lantern_Glass",
+    "wall_lamps_mask": "bank_trim_glow.png",
+    "note": "Opaque frames and metal are separate geometry/materials; black mask does not emit. Scene lights supplied by developer."
+  },
+  "camera_review": {
+    "vertical_fov_deg": 30,
+    "pitch_down_deg": 32,
+    "distance_m": 28,
+    "target_m_y_up": [
+      0,
+      4.75,
+      1.2
+    ],
+    "three_quarter_yaw_deg": 24,
+    "resolution_px": [
+      1920,
+      1080
+    ]
+  },
+  "geometry": {
+    "triangles": 5993,
+    "meshes": 11,
+    "materials": 11,
+    "roof_pitch_deg": 29.68811066452907,
+    "recess_m": 0.28,
+    "eaves_m": 0.35,
+    "body_depth_m": 8,
+    "actual_bounds_note": "Cornices, finials and front crest extend beyond the16x8m wall body; use actual_render_bounds_m for framing."
+  },
+  "next_v38_stage": "One pig_guard idle for review; then Riko run8 and remaining ordered assets.3D cafe/shop only after bank assessment."
+}

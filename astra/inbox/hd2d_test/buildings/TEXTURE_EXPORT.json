@@ -1,0 +1,231 @@
+{
+  "pixels_per_metre": 96,
+  "palette_colors": 128,
+  "sources": [
+    "72dd8dbd337e30fa44a1c2314104c37e648c5dd7b72a50480b994187478b027d",
+    "3296bafebc8fc8116e3252e4cd680ec94e4266547f1581c4e461c7445d990934",
+    "39c1eabf8cd29be207df4667b44770e4450c6216530146040b074a21a0b51f25"
+  ],
+  "files": [
+    {
+      "file": "bank_palette.png",
+      "width": 128,
+      "height": 1,
+      "role": "palette",
+      "bytes": 453,
+      "uncompressed_sha256": "0a3eef112d48158c2457373265ebe2322efc6dd2800aa3a2834bedf5e4bc12f7",
+      "sha256": "8e721de24e276cfd6be82090511c43162a495a6cee05e400094e43551a2c0f51"
+    },
+    {
+      "file": "bank_trim.png",
+      "width": 1024,
+      "height": 1024,
+      "role": "albedo",
+      "bytes": 197438,
+      "regions": [
+        [
+          0,
+          0,
+          256,
+          64
+        ],
+        [
+          256,
+          0,
+          256,
+          64
+        ],
+        [
+          512,
+          0,
+          256,
+          256
+        ],
+        [
+          768,
+          0,
+          256,
+          256
+        ],
+        [
+          0,
+          256,
+          128,
+          128
+        ],
+        [
+          256,
+          256,
+          256,
+          256
+        ],
+        [
+          512,
+          256,
+          256,
+          256
+        ],
+        [
+          768,
+          256,
+          256,
+          256
+        ]
+      ],
+      "uncompressed_sha256": "57a5e6adb17d05aea70bdb7ac582bae8435d7e641410088f739b553db652ecfa",
+      "sha256": "1cb7b1d91a9705e835f4d1e87fede5f26593f0f5962ff83ed9fed2ca3b1b3133"
+    },
+    {
+      "file": "bank_plaster.png",
+      "width": 192,
+      "height": 192,
+      "role": "albedo",
+      "bytes": 18630,
+      "size_m": [
+        2,
+        2
+      ],
+      "tileable": true,
+      "uncompressed_sha256": "9a30a4f8925d0361fec0708517eaef931f4032045a8252bda77747dd658988e9",
+      "sha256": "618b293760813f506b0ed4fa4d043b57af4db63952cf08b8aca8138e9989929a"
+    },
+    {
+      "file": "bank_masonry.png",
+      "width": 192,
+      "height": 192,
+      "role": "albedo",
+      "bytes": 20674,
+      "size_m": [
+        2,
+        2
+      ],
+      "tileable": true,
+      "uncompressed_sha256": "dcf14c0e8cdf2dd046785e71d8325cd931798022b444da277ef627e695773ef7",
+      "sha256": "a86cc8f6e635d6454229267878765c4de2146ab49cb5fbea986f6dacdea3f3a0"
+    },
+    {
+      "file": "bank_roof.png",
+      "width": 192,
+      "height": 192,
+      "role": "albedo",
+      "bytes": 14691,
+      "size_m": [
+        2,
+        2
+      ],
+      "tileable": true,
+      "uncompressed_sha256": "3d15c40411fe7c7bcfe658ea4b0724189047e9ee27800dad360ff2f038d8f340",
+      "sha256": "15dae3cb92b468fd805da6db3c25ac287c348c298c9ce9949013a9cc7121f842"
+    },
+    {
+      "file": "bank_glass.png",
+      "width": 192,
+      "height": 192,
+      "role": "albedo",
+      "bytes": 7009,
+      "size_m": [
+        2,
+        2
+      ],
+      "tileable": true,
+      "uncompressed_sha256": "54362ceedcb1ac5be310c547b71282024a3885113049f0479d0bfa80dcaf51fb",
+      "sha256": "b5fd56471d46c9a7eb329915d9f732e372f91ba286ca6110c0b50660a81e5d5d"
+    },
+    {
+      "file": "bank_crest.png",
+      "width": 384,
+      "height": 288,
+      "role": "cutout",
+      "bytes": 27842,
+      "source_box": [
+        600,
+        105,
+        988,
+        365
+      ],
+      "binary_alpha": true,
+      "canonical_elevation_sha256": "39c1eabf8cd29be207df4667b44770e4450c6216530146040b074a21a0b51f25",
+      "uncompressed_sha256": "e1d7ec52b79bedb67d524c20fa402bacd97be0d1bed076c50f39acbd706465df",
+      "sha256": "2050d4d8f47dc4cadd55ea4f057790e903012de95d7a82bf7d2ea83d3d054874"
+    },
+    {
+      "file": "bank_ivy.png",
+      "width": 128,
+      "height": 512,
+      "role": "cutout",
+      "bytes": 10463,
+      "source_box": [
+        5,
+        115,
+        205,
+        950
+      ],
+      "binary_alpha": true,
+      "canonical_elevation_sha256": "39c1eabf8cd29be207df4667b44770e4450c6216530146040b074a21a0b51f25",
+      "uncompressed_sha256": "51195f8e0b3335dbf38c9d968252014f81b47ba37f3c4da5b31b6037c8158781",
+      "sha256": "adb4c2d9e22533838987bcf53f8792d1ab23945108df1792e674b15e43af9a10"
+    },
+    {
+      "file": "bank_trim_n.png",
+      "width": 1024,
+      "height": 1024,
+      "role": "normal",
+      "bytes": 21444,
+      "method": "authored broad cornice/flute/panel relief fields; not albedo luminance and not a sculpt scan",
+      "uncompressed_sha256": "99261112a60581f6904258ccd0e61daf51b677d61e14a17ca05d99cbc0754950",
+      "sha256": "1180a51b7d2fdaa682d8e52243193911406472087dadb18f0faa416e26dcb752"
+    },
+    {
+      "file": "bank_plaster_n.png",
+      "width": 192,
+      "height": 192,
+      "role": "normal",
+      "bytes": 410,
+      "method": "flat smooth plaster tangent normal",
+      "uncompressed_sha256": "e41b0f3dffa64e9bbc72329033e299e8b044d2cfe70a18ba55156b6b34ad6161",
+      "sha256": "3302bfaa81f4d3675a8e528ff44ac361f3842facb5e770fbe9a77df1d92708df"
+    },
+    {
+      "file": "bank_masonry_n.png",
+      "width": 192,
+      "height": 192,
+      "role": "normal",
+      "bytes": 2032,
+      "method": "approximate authored block mortar profile; no mineral fleck embossing",
+      "uncompressed_sha256": "880ade2fb6ef82fa3752d1147ddfeef6f6be47a1d2c09a2c170b0f544cadef3f",
+      "sha256": "a378cd0ed6dc686d688c515be6eb3e80f7d2d50eeaa7555a1461ff5949bcbc8f"
+    },
+    {
+      "file": "bank_roof_n.png",
+      "width": 192,
+      "height": 192,
+      "role": "normal",
+      "bytes": 4433,
+      "method": "approximate authored curved clay courses and overlapping lips",
+      "uncompressed_sha256": "436fdc3fa9e80571bfeb3fbefc44cdd6dc81151d227008dafc1defa1767e6bf8",
+      "sha256": "20fcd5a678b5f7a9a1fbbc88f34829a561d30e77e5591323431bfd0037318944"
+    },
+    {
+      "file": "bank_trim_glow.png",
+      "width": 1024,
+      "height": 1024,
+      "role": "emission_mask",
+      "bytes": 3839,
+      "active_region": "amber only; metal/wood/stone zero",
+      "uncompressed_sha256": "0c1d5f0924cd7a59738eb3e47265f7a7fe98d31f6457ae60debfdb77a9d1bbbf",
+      "sha256": "f3fe1f0f0d9408495aaef0b443fb01a01d86b3d5bbfd96ccb65b8f6fe23424a9"
+    },
+    {
+      "file": "bank_glass_glow.png",
+      "width": 192,
+      "height": 192,
+      "role": "emission_mask",
+      "bytes": 408,
+      "active_region": "window-glass material only; opaque mullions are separate geometry",
+      "uncompressed_sha256": "ef562bbfab9a6c70abeb73aef3680ec4103c2217eecff149c5e339e5643de6bb",
+      "sha256": "7428a67cf0b9c7ca75aa0381d22486056726457b4da943739c581cd29597b9e0"
+    }
+  ],
+  "normal_note": "Broad approximate relief; macro shape from true geometry. No claim of carved/scanned microscopic normals.",
+  "lossless_idat_optimized": true
+}

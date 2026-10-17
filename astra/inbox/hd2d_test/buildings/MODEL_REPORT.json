@@ -1,0 +1,93 @@
+{
+  "triangles": 5993,
+  "mesh_count": 11,
+  "material_count": 11,
+  "blender_bounds": [
+    [
+      -8.390000343322754,
+      -4.979520797729492,
+      0.0
+    ],
+    [
+      8.390000343322754,
+      4.400000095367432,
+      10.5
+    ]
+  ],
+  "native_up": "Z",
+  "export_up": "Y",
+  "native_front": "-Y",
+  "export_front": "+Z",
+  "body_size_m": [
+    16,
+    10.5,
+    8
+  ],
+  "roof_pitch_deg": 29.68811066452907,
+  "uv_policy": "Face-local metric isometry96px/m. Canonical curved crest/ivy cards preserve their source-grid projection.",
+  "real_features": [
+    "Boolean recessed arches/windows0.28m",
+    "columns/capitals",
+    "projecting cornices15-30cm",
+    "sloped roof/eaves35cm",
+    "separate curved crest and ivy",
+    "wall lantern metal/glass"
+  ],
+  "materials": {
+    "Bank_Limestone_Plaster": {
+      "albedo": "bank_plaster.png",
+      "cutout": false,
+      "glow": ""
+    },
+    "Bank_Ashlar": {
+      "albedo": "bank_masonry.png",
+      "cutout": false,
+      "glow": ""
+    },
+    "Bank_Terracotta": {
+      "albedo": "bank_roof.png",
+      "cutout": false,
+      "glow": ""
+    },
+    "Bank_Stone_Trim": {
+      "albedo": "bank_trim.png",
+      "cutout": false,
+      "glow": ""
+    },
+    "Bank_Gilded_Trim": {
+      "albedo": "bank_trim.png",
+      "cutout": false,
+      "glow": ""
+    },
+    "Bank_Walnut": {
+      "albedo": "bank_trim.png",
+      "cutout": false,
+      "glow": ""
+    },
+    "Bank_Iron": {
+      "albedo": "bank_trim.png",
+      "cutout": false,
+      "glow": ""
+    },
+    "Bank_Lantern_Glass": {
+      "albedo": "bank_trim.png",
+      "cutout": false,
+      "glow": "bank_trim_glow.png"
+    },
+    "Bank_Window_Glass": {
+      "albedo": "bank_glass.png",
+      "cutout": false,
+      "glow": "bank_glass_glow.png"
+    },
+    "Bank_Ivy": {
+      "albedo": "bank_ivy.png",
+      "cutout": true,
+      "glow": ""
+    },
+    "Bank_Crowned_Pig_Crest": {
+      "albedo": "bank_crest.png",
+      "cutout": true,
+      "glow": ""
+    }
+  }
+}
