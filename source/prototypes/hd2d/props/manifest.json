@@ -1,29 +1,29 @@
 {
   "schema_version": 1,
   "brief": "v36",
-  "revision": "modular-48-2",
+  "revision": "modular-96-control-1",
   "studio": "TrashSquad · Beer Party Studio",
-  "delivery_status": "review_candidate",
-  "owner_visual_approved": false,
-  "scope": "three new props only; remaining v36 props/facades/characters pending",
-  "pixels_per_metre": 48,
-  "palette": "../palettes/bank.png",
+  "delivery_status": "accepted_control_sample",
+  "owner_visual_approved": true,
+  "pixels_per_metre": 96,
+  "palette": "../palettes/bank96.png",
+  "scope": "three props only, not the remaining HD-2D set",
   "files": [
     {
       "file": "bank_lantern.png",
-      "width": 64,
-      "height": 92,
-      "format": "RGBA",
-      "bytes": 2318,
-      "sha256": "572dd17d0cd4928230ea8605dd1954115cf1fdeb5fe2cd4702ccd4652ec12207",
+      "width": 128,
+      "height": 184,
+      "format": "P",
+      "bytes": 24340,
+      "sha256": "2e16587cba34b4f3855a8925ef72700d3c4d7556985e8598f78844be2955156c",
       "role": "vertical_sprite",
       "size_m": [
         1.3333333333333333,
         1.9166666666666667
       ],
       "anchor_px": [
-        32,
-        91
+        64,
+        182
       ],
       "anchor_uv": [
         0.5,
@@ -31,63 +31,68 @@
       ],
       "anchor_space": "pixel boundaries from top-left",
       "collider_radius_m": 0.28,
-      "palette": "../palettes/bank.png",
-      "alpha": "binary",
+      "palette": "../palettes/bank96.png",
+      "alpha": "binary 0/255",
       "view": "front + top; yaw 0",
       "local_form_shading_baked": true,
       "ground_cast_shadow_baked": false,
-      "source_render_size_px": [
-        64,
-        92
+      "resampled_from_concept": true,
+      "visible_bounds_px": [
+        21,
+        0,
+        107,
+        182
       ],
-      "resampled": false,
+      "visible_colors": 81,
+      "outline": "uninterrupted dark colored 1px",
+      "source_image": "../../../previews/v36/props96_source.png",
       "glow_mask": "bank_lantern_glow.png",
       "light_source_px": [
-        32,
-        54
+        63,
+        101
       ],
       "light_source_m_from_anchor": [
-        0,
-        0.7708333333333334,
+        -0.010416666666666666,
+        0.84375,
         0.2
       ],
       "day_emission_energy": 0,
       "emission_mask_levels": {
-        "0": "iron, ribs, mullions, reflection",
-        "48": "dim amber glass",
+        "0": "iron, roof, mullions, reflection",
+        "48": "amber glass",
         "255": "filament"
       },
       "mullion_probe_px": {
         "y_range": [
-          48,
-          59
+          75,
+          117
         ],
         "x_columns": [
-          26,
-          37
+          54,
+          73
         ]
       },
       "emission_operator": "multiply",
       "suggested_emission_color": "#ffc574",
-      "suggested_emission_energy": 0.55,
+      "suggested_emission_energy": 0.45,
       "suggested_light_energy": 0.4,
       "suggested_light_range_m": 5.0
     },
     {
       "file": "bank_pedestal.png",
-      "width": 104,
-      "height": 88,
-      "format": "RGBA",
-      "bytes": 3041,
-      "sha256": "ddc7e3a347dd0b2ea31da7aa5ff6645dbadf0060d7c3b192126441f8707b235f",
+      "width": 192,
+      "height": 176,
+      "format": "P",
+      "bytes": 34572,
+      "sha256": "2a47d0a21f074efaa14012048fa98cd6ec2222912c012a86966f858b1229a12e",
       "role": "vertical_sprite",
       "size_m": [
-        2.1666666666666665,
+        2.0,
         1.8333333333333333
       ],
       "anchor_px": [
-        52,
-        87
+        96,
+        174
       ],
       "anchor_uv": [
         0.5,
@@ -95,30 +100,35 @@
       ],
       "anchor_space": "pixel boundaries from top-left",
       "collider_radius_m": 0.76,
-      "palette": "../palettes/bank.png",
-      "alpha": "binary",
+      "palette": "../palettes/bank96.png",
+      "alpha": "binary 0/255",
       "view": "front + top; yaw 0",
       "local_form_shading_baked": true,
       "ground_cast_shadow_baked": false,
-      "source_render_size_px": [
-        104,
-        88
+      "resampled_from_concept": true,
+      "visible_bounds_px": [
+        25,
+        0,
+        167,
+        174
       ],
-      "resampled": false,
+      "visible_colors": 91,
+      "outline": "uninterrupted dark colored 1px",
+      "source_image": "../../../previews/v36/props96_source.png",
       "normal_map": "bank_pedestal_n.png",
       "normal_convention": "OpenGL +Y",
       "normal_map_invert_y": false,
       "suggested_normal_scale": 0.45,
-      "normal_source": "same-size geometry normal render; not albedo luminance",
+      "normal_source": "authored planar surfaces and geometric carved profiles, not albedo luminance",
       "mount_points": {
         "lantern": {
           "anchor_px": [
-            52,
-            14
+            96,
+            26
           ],
           "position_m_from_anchor": [
             0,
-            1.5208333333333333,
+            1.5416666666666667,
             0
           ]
         }
@@ -126,44 +136,49 @@
     },
     {
       "file": "bank_flower_planter.png",
-      "width": 96,
-      "height": 100,
-      "format": "RGBA",
-      "bytes": 5806,
-      "sha256": "06a9864ae7a54a646570a1c5706dad887ba4536b8bf4687d367cf43d19e74cbd",
+      "width": 208,
+      "height": 208,
+      "format": "P",
+      "bytes": 44076,
+      "sha256": "1695cca3464e54847c9a5cc280a46aef69acb675a62e3e542d595f7f975e5621",
       "role": "vertical_sprite",
       "size_m": [
-        2.0,
-        2.0833333333333335
+        2.1666666666666665,
+        2.1666666666666665
       ],
       "anchor_px": [
-        48,
-        99
+        104,
+        206
       ],
       "anchor_uv": [
         0.5,
-        0.99
+        0.9903846153846154
       ],
       "anchor_space": "pixel boundaries from top-left",
-      "collider_radius_m": 0.48,
-      "palette": "../palettes/bank.png",
-      "alpha": "binary",
+      "collider_radius_m": 0.65,
+      "palette": "../palettes/bank96.png",
+      "alpha": "binary 0/255",
       "view": "front + top; yaw 0",
       "local_form_shading_baked": true,
       "ground_cast_shadow_baked": false,
-      "source_render_size_px": [
-        96,
-        100
+      "resampled_from_concept": true,
+      "visible_bounds_px": [
+        1,
+        6,
+        207,
+        206
       ],
-      "resampled": false
+      "visible_colors": 125,
+      "outline": "uninterrupted dark colored 1px",
+      "source_image": "../../../previews/v36/props96_source.png"
     },
     {
       "file": "bank_lantern_glow.png",
-      "width": 64,
-      "height": 92,
+      "width": 128,
+      "height": 184,
       "format": "RGB",
-      "bytes": 305,
-      "sha256": "4b758cee758c4e9442f736947313291f09eaf3942d6e82c29ee5d568f0b00e07",
+      "bytes": 70913,
+      "sha256": "94f6727462289b04f7a78314d9d4a32087de1abf52ec3e85a5dfa2aef1977ab0",
       "role": "emission_mask",
       "paired_albedo": "bank_lantern.png",
       "size_m": [
@@ -171,8 +186,8 @@
         1.9166666666666667
       ],
       "anchor_px": [
-        32,
-        91
+        64,
+        182
       ],
       "anchor_uv": [
         0.5,
@@ -182,20 +197,20 @@
     },
     {
       "file": "bank_pedestal_n.png",
-      "width": 104,
-      "height": 88,
+      "width": 192,
+      "height": 176,
       "format": "RGB",
-      "bytes": 6107,
-      "sha256": "ac7e7213c2ff6dde26d2593405b693c38346cf5594fc96848236eb7928f9d27a",
+      "bytes": 101625,
+      "sha256": "c5132554c8518481dc782f08208ce1f7429c81a04f0cab707368076b55fa222f",
       "role": "normal_map",
       "paired_albedo": "bank_pedestal.png",
       "size_m": [
-        2.1666666666666665,
+        2.0,
         1.8333333333333333
       ],
       "anchor_px": [
-        52,
-        87
+        96,
+        174
       ],
       "anchor_uv": [
         0.5,
@@ -204,25 +219,26 @@
       "color_space": "linear_data"
     }
   ],
+  "source_pipeline": "concept-based median material sampling on target grid, shared palette and complete 1px dark contour",
+  "resampled_from_concept": true,
   "assembly": {
     "canvas_px": [
-      104,
-      165
+      192,
+      332
     ],
     "anchor_px": [
-      52,
-      164
+      96,
+      330
     ],
-    "visible_height_px": 163,
-    "visible_height_m": 3.3958333333333335,
-    "canvas_height_m": 3.4375,
+    "visible_height_px": 330,
+    "visible_height_m": 3.4375,
     "collision_owner": "bank_pedestal.png",
     "parts": [
       {
         "file": "bank_pedestal.png",
         "top_left_px": [
           0,
-          77
+          156
         ],
         "position_m": [
           0,
@@ -234,30 +250,38 @@
       {
         "file": "bank_lantern.png",
         "top_left_px": [
-          20,
+          32,
           0
         ],
         "position_m": [
           0,
-          1.5208333333333333,
+          1.5416666666666667,
           0
         ],
         "collision_enabled": false,
         "depth_offset_m": 0.005
       }
     ],
-    "transform_with_common_sprite_plane": true,
-    "note": "Mount/depth offsets use the common sprite plane basis. Rotate offsets with its tilt/billboard. Depth offset prevents coplanar z-fighting."
+    "transform_with_common_sprite_plane": true
   },
   "sprite3d": {
-    "pixel_size": 0.020833333333333332,
+    "pixel_size": 0.010416666666666666,
     "centered": true,
     "offset_formula": "Vector2(width/2-anchor_x, anchor_y-height/2)",
-    "albedo_color_space": "sRGB",
-    "normal_mask_color_space": "linear_data",
     "alpha_scissor": 0.5,
-    "filter": "nearest with optional mipmaps",
-    "glow_note": "Use emission color MULTIPLIED by mask; ADD makes the whole iron frame emit."
+    "filter": "nearest with optional mipmaps"
   },
-  "source_pipeline": "native-resolution 3D form render, material-ramp encoding and 1px selective outline; no high-res art downsampling"
+  "verification": {
+    "godot_render_verified": true,
+    "format_report": "VALIDATION.json",
+    "render_report": "RENDER_VALIDATION.json"
+  },
+  "pending": [
+    "Remaining props, facades, materials192 and character animations"
+  ],
+  "approval_note": "Owner accepted idle Riko in brief e099467; props96 explicitly accepted in current conversation 17.10",
+  "additional_batches": [
+    "street96/manifest.json",
+    "cafe96/manifest.json"
+  ]
 }

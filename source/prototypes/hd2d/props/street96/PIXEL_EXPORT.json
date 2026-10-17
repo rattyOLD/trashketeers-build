@@ -1,0 +1,89 @@
+{
+  "pixels_per_metre": 96,
+  "source_sha256": "2a0225de184f98ca505b9f91257fee8bf88fa68a4597c36d9137e0f0500270bf",
+  "palette_colors": 128,
+  "method": "concept-based target-grid median sampling; shared palette; complete outline except open tile connections",
+  "files": [
+    {
+      "file": "bank_balustrade.png",
+      "canvas": [
+        192,
+        128
+      ],
+      "anchor_px": [
+        96,
+        126
+      ],
+      "source_bounds": [
+        23,
+        388,
+        856,
+        780
+      ],
+      "visible_bounds": [
+        0,
+        26,
+        192,
+        126
+      ],
+      "sha256": "7a4bb440c487fece95b17a38a0c84ee77616d602d9fbee8d01021c68651d7c60",
+      "tileable_x": true
+    },
+    {
+      "file": "bank_umbrella.png",
+      "canvas": [
+        288,
+        272
+      ],
+      "anchor_px": [
+        144,
+        270
+      ],
+      "source_bounds": [
+        761,
+        14,
+        1535,
+        784
+      ],
+      "visible_bounds": [
+        18,
+        20,
+        270,
+        270
+      ],
+      "sha256": "b7892b137a43143ecd547e75376923ba42fb4ebb2479e57194a182de528ccf2b",
+      "tileable_x": false
+    },
+    {
+      "file": "bank_bistro_table.png",
+      "canvas": [
+        128,
+        128
+      ],
+      "anchor_px": [
+        64,
+        126
+      ],
+      "source_bounds": [
+        1516,
+        370,
+        1924,
+        792
+      ],
+      "visible_bounds": [
+        19,
+        34,
+        109,
+        126
+      ],
+      "sha256": "85e73d8fdfc887b12d4a5ba159e834f6a5d95ddb8900b63757c870f61eaf4a2a",
+      "tileable_x": false
+    },
+    {
+      "file": "bank_balustrade_n.png",
+      "sha256": "9e1a584db7924d8ce14ba1a1935d8cb9998022713cf81f5839c9c52456cd9074",
+      "normal_source": "authored turned-shaft ellipsoids and rail planes; approximate form normals, not albedo brightness",
+      "normal_unit_max_error": 0.005108061122221841
+    }
+  ]
+}

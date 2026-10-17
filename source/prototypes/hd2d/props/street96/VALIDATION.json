@@ -1,0 +1,103 @@
+{
+  "ok": true,
+  "errors": [],
+  "pixels_per_metre": 96,
+  "png_count": 12,
+  "sprites": {
+    "bank_balustrade.png": {
+      "visible_bounds": [
+        0,
+        26,
+        192,
+        126
+      ],
+      "colors": 94,
+      "components": 1
+    },
+    "bank_bistro_table.png": {
+      "visible_bounds": [
+        19,
+        34,
+        109,
+        126
+      ],
+      "colors": 95,
+      "components": 1
+    },
+    "bank_umbrella.png": {
+      "visible_bounds": [
+        15,
+        20,
+        273,
+        270
+      ],
+      "colors": 90,
+      "components": 1
+    },
+    "bank_bistro_table_parasol.png": {
+      "visible_bounds": [
+        20,
+        34,
+        108,
+        126
+      ],
+      "colors": 94,
+      "components": 1
+    },
+    "bank_chair_left.png": {
+      "visible_bounds": [
+        32,
+        26,
+        96,
+        126
+      ],
+      "colors": 59,
+      "components": 1
+    },
+    "bank_chair_right.png": {
+      "visible_bounds": [
+        32,
+        26,
+        96,
+        126
+      ],
+      "colors": 64,
+      "components": 1
+    },
+    "bank_umbrella_pole_front.png": {
+      "visible_bounds": [
+        136,
+        146,
+        152,
+        202
+      ],
+      "colors": 34,
+      "components": 1
+    },
+    "bank_balustrade_02.png": {
+      "visible_bounds": [
+        0,
+        26,
+        192,
+        126
+      ],
+      "colors": 94,
+      "components": 1
+    },
+    "bank_balustrade_03.png": {
+      "visible_bounds": [
+        0,
+        26,
+        192,
+        126
+      ],
+      "colors": 93,
+      "components": 1
+    }
+  },
+  "horizontal_connections_checked": [
+    "albedo RGBA",
+    "normal RGB"
+  ],
+  "owner_visual_approved": false
+}

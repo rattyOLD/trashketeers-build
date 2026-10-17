@@ -1,0 +1,32 @@
+{
+  "file": "bank_umbrella_standalone.png",
+  "canvas": [
+    288,
+    272
+  ],
+  "anchor": [
+    144,
+    270
+  ],
+  "height": 248,
+  "pixels_per_metre": 96,
+  "role": "vertical_sprite",
+  "camera_down_angle_deg": 35,
+  "construction": "Independent parasol on a heavy brass foot; no pole through table",
+  "source_sha256": "2739a70b45f7303ddad14abc88add1af21792bc5e4de578faf124ef104a099b0",
+  "source_bounds": [
+    25,
+    39,
+    1109,
+    1322
+  ],
+  "source_scale": 0.19329696024941542,
+  "visible_bounds": [
+    38,
+    20,
+    250,
+    270
+  ],
+  "sha256": "49a1cdb71bc8a7c98d5132036f4838fadf99c403a3508746bdd209431f792fe5",
+  "method": "median target-grid material samples, fixed palette, binary silhouette, dark1px contour"
+}

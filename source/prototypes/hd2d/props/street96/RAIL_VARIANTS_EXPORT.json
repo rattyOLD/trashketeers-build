@@ -1,0 +1,23 @@
+{
+  "pixels_per_metre": 96,
+  "source_sha256": "6916460b1b9c68dc48bde1ca94352273d2062b0451fbab54c7c7b1979cabee90",
+  "base_albedo_sha256": "7a4bb440c487fece95b17a38a0c84ee77616d602d9fbee8d01021c68651d7c60",
+  "base_normal_sha256": "9e1a584db7924d8ce14ba1a1935d8cb9998022713cf81f5839c9c52456cd9074",
+  "method": "image-generated damage transferred only into selected interior patches; accepted geometry/colors and connection neighborhoods preserved",
+  "variants": [
+    {
+      "file": "bank_balustrade_02.png",
+      "normal_map": "bank_balustrade_02_n.png",
+      "changed_pixels": 287,
+      "sha256": "d8c1549f8c89f9e13f03b7efbbedeee1306fac5576d4ed516faf1142d0904565",
+      "normal_sha256": "ef35fdebca19311f1c597f0d41db1a84b718e5ca6581d4b202b4b6e0740e6816"
+    },
+    {
+      "file": "bank_balustrade_03.png",
+      "normal_map": "bank_balustrade_03_n.png",
+      "changed_pixels": 286,
+      "sha256": "e01bd8e437c43bc1695613a5dced64b3448dc6205fa80e82259c9391d6111cc4",
+      "normal_sha256": "51791dab88d2f0f976a58fb2772831eb8d42c071aacdb4bb447a07f0e3d93e61"
+    }
+  ]
+}

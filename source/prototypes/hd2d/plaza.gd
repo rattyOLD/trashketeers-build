@@ -56,6 +56,8 @@ var _sniper_run: Array = []
 var _rng := RandomNumberGenerator.new()
 var _prop_density := PROP_PX_PER_M
 var _lantern_mount := LANTERN_MOUNT
+## Опоры предметов из всех manifest сдачи: "папка/файл" → anchor_px.
+var _anchors := {}
 
 
 func _ready() -> void:
@@ -80,11 +82,11 @@ func _build_environment() -> void:
 	env.background_mode = Environment.BG_COLOR
 	env.background_color = Color("#e9c79a")
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Color("#9a8fb8")
-	env.ambient_light_energy = 0.42
+	env.ambient_light_color = Color("#6f7bb0")
+	env.ambient_light_energy = 0.32
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	env.tonemap_white = 6.0
-	env.tonemap_exposure = 0.88
+	env.tonemap_exposure = 0.8
 	env.glow_enabled = true
 	env.glow_intensity = 0.4
 	env.glow_bloom = 0.08
@@ -94,17 +96,17 @@ func _build_environment() -> void:
 	env.fog_density = 0.0035
 	env.fog_sky_affect = 0.0
 	env.adjustment_enabled = true
-	env.adjustment_saturation = 1.15
-	env.adjustment_contrast = 1.12
+	env.adjustment_saturation = 1.2
+	env.adjustment_contrast = 1.18
 	var world := WorldEnvironment.new()
 	world.environment = env
 	add_child(world)
 	# Закатное солнце спереди слева (со стороны камеры): лица освещены, тени уходят назад вправо.
 	var sun := DirectionalLight3D.new()
-	sun.light_color = Color("#ffd29a")
-	sun.light_energy = 1.0
+	sun.light_color = Color("#ffcb8a")
+	sun.light_energy = 1.15
 	sun.shadow_enabled = true
-	sun.shadow_opacity = 0.85
+	sun.shadow_opacity = 0.9
 	sun.directional_shadow_max_distance = 60.0
 	sun.rotation_degrees = Vector3(-38.0, -30.0, 0.0)
 	add_child(sun)
@@ -165,7 +167,6 @@ func _build_ground() -> void:
 	var cobble := _material("cobble_gold")
 	var worn := _material("cobble_worn")
 	var pink := _material("rose_path")
-	var soil := _material("garden_soil")
 	_box(Vector3(PLAZA.x + 40.0, 0.2, PLAZA.y + 40.0), Vector3(0, -0.1, 0), lawn)
 	_box(Vector3(PLAZA.x - 6.0, 0.02, PLAZA.y - 12.0), Vector3(0, 0.01, 3.0), cobble)
 	# Розовые дорожки крестом через площадь.
@@ -174,9 +175,7 @@ func _build_ground() -> void:
 	# Вытертая брусчатка там, где ходят чаще всего: у ступеней и вокруг фонтана.
 	_box(Vector3(8.0, 0.025, 3.0), Vector3(0, 0.0125, TERRACE_Z + 3.6), worn)
 	_box(Vector3(8.5, 0.025, 7.5), Vector3(6.0, 0.0125, 2.0), worn)
-	# Клумбы по краям площади.
-	for x: float in [-13.5, 13.5]:
-		_box(Vector3(2.4, 0.12, 6.0), Vector3(x, 0.06, 3.5), soil)
+	# Клумбы по краям площади появятся с клумбой Астры (бортик и цветы); голая земля смотрелась заглушкой.
 
 
 func _build_terrace() -> void:
@@ -250,13 +249,21 @@ func _build_props() -> void:
 		_lamp(Vector3(x, 0, TERRACE_Z + 2.0))
 	for x: float in [-5.0, 5.0]:
 		_lamp(Vector3(x, TERRACE_H, TERRACE_Z - 1.5))
+	# Балюстрада по краю террасы: секции по 2 м, три варианта сколов вперемешку; проход у ступеней.
+	var sections := ["street96/bank_balustrade", "street96/bank_balustrade_02", "street96/bank_balustrade_03"]
+	var k := 0
 	for x in range(-16, 17, 2):
 		if absf(x) > 3.0:
-			_sprite("res://assets/props/ch2/railing_low.png", Vector3(x, TERRACE_H, TERRACE_Z - 0.2), 1.0)
+			_item(sections[(k * 7 + 3) % 3], Vector3(x, TERRACE_H, TERRACE_Z - 0.2))
+			k += 1
 	for at: Vector3 in [Vector3(-3.6, TERRACE_H, TERRACE_Z - 0.8), Vector3(3.6, TERRACE_H, TERRACE_Z - 0.8), Vector3(-14.0, 0, 9.0), Vector3(-11.5, 0, TERRACE_Z + 2.0), Vector3(11.5, 0, TERRACE_Z + 2.0)]:
-		_prop("bank_flower_planter", Vector2(48, 99), at)
-	for spec: Array in [["umbrella", Vector3(-11.0, 0, 0.5), 2.4], ["picnic_table", Vector3(-12.5, 0, 4.0), 1.6], ["cash_pile", Vector3(10.5, TERRACE_H, TERRACE_Z - 3.0), 1.2], ["column", Vector3(-7.0, TERRACE_H, TERRACE_Z - 4.0), 3.2], ["column", Vector3(7.0, TERRACE_H, TERRACE_Z - 4.0), 3.2], ["umbrella", Vector3(13.0, 0, 8.0), 2.4]]:
-		_sprite("res://assets/props/ch2/%s.png" % spec[0], spec[1], spec[2])
+		_item("bank_flower_planter", at)
+	# Уличное кафе: зонт на своей подставке рядом со столиком, стулья по бокам.
+	for at: Vector3 in [Vector3(-11.5, 0, 1.5), Vector3(12.5, 0, 8.0)]:
+		_item("cafe96/bank_cafe_table", at)
+		_item("cafe96/bank_cafe_chair_left", at + Vector3(-0.85, 0, 0.05))
+		_item("cafe96/bank_cafe_chair_right", at + Vector3(0.85, 0, 0.05))
+		_item("cafe96/bank_umbrella_standalone", at + Vector3(0.9, 0, -0.6))
 	# Передний план: ограда и фонари у самой камеры — их размоет край кадра.
 	for x in range(-18, 19, 3):
 		_sprite("res://assets/props/ch2/railing.png", Vector3(x, 0, PLAZA.y * 0.5 + 1.0), 1.6)
@@ -265,6 +272,12 @@ func _build_props() -> void:
 
 
 func _read_prop_manifest() -> void:
+	for folder: String in ["", "cafe96/", "street96/"]:
+		var sub: Variant = JSON.parse_string(FileAccess.get_file_as_string(PROPS + folder + "manifest.json")) if FileAccess.file_exists(PROPS + folder + "manifest.json") else null
+		if sub is Dictionary:
+			for file: Dictionary in sub.get("files", []):
+				if file.has("anchor_px"):
+					_anchors[folder + str(file["file"]).get_basename()] = Vector2(file["anchor_px"][0], file["anchor_px"][1])
 	var path := PROPS + "manifest.json"
 	if not FileAccess.file_exists(path):
 		return
@@ -277,10 +290,19 @@ func _read_prop_manifest() -> void:
 			_lantern_mount = float(part.get("position_m", [0, LANTERN_MOUNT, 0])[1])
 
 
+func _anchor(name: String, fallback: Vector2) -> Vector2:
+	return _anchors.get(name, fallback)
+
+
+## Предмет Астры по имени из manifest (опора — оттуда же).
+func _item(name: String, at: Vector3) -> Node3D:
+	return _prop(name, _anchor(name, Vector2(0, 0)), at)
+
+
 func _lamp(at: Vector3) -> void:
-	var pivot := _prop("bank_pedestal", Vector2(48, 71), at)
+	var pivot := _prop("bank_pedestal", _anchor("bank_pedestal", Vector2(48, 71)), at)
 	# Фонарь крепится к тумбе в той же наклонённой плоскости спрайта, чуть ближе к камере.
-	var lantern := _prop("bank_lantern", Vector2(36, 103), Vector3.ZERO, pivot)
+	var lantern := _prop("bank_lantern", _anchor("bank_lantern", Vector2(36, 103)), Vector3.ZERO, pivot)
 	lantern.position = Vector3(0, _lantern_mount, 0.005)
 	lantern.rotation = Vector3.ZERO
 	var light := OmniLight3D.new()
@@ -598,7 +620,7 @@ func _build_post() -> void:
 	material.set_shader_parameter(&"focus_ramp", 0.26)
 	material.set_shader_parameter(&"glow_strength", 0.3)
 	material.set_shader_parameter(&"glow_threshold", 0.9)
-	material.set_shader_parameter(&"haze_color", Color(1.0, 0.86, 0.62, 0.05))
+	material.set_shader_parameter(&"haze_color", Color(1.0, 0.86, 0.62, 0.03))
 	material.set_shader_parameter(&"shadow_tint", Vector3(0.08, 0.02, 0.14))
 	material.set_shader_parameter(&"highlight_tint", Vector3(0.06, 0.03, -0.03))
 	rect.material = material

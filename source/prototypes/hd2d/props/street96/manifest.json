@@ -1,0 +1,548 @@
+{
+  "schema_version": 1,
+  "brief": "v36",
+  "revision": "street96-control-2",
+  "studio": "TrashSquad · Beer Party Studio",
+  "pixels_per_metre": 96,
+  "owner_visual_approved": false,
+  "delivery_status": "review_candidate",
+  "files": [
+    {
+      "file": "bank_balustrade.png",
+      "width": 192,
+      "height": 128,
+      "format": "P",
+      "sha256": "7a4bb440c487fece95b17a38a0c84ee77616d602d9fbee8d01021c68651d7c60",
+      "bytes": 25308,
+      "role": "vertical_sprite",
+      "pixels_per_metre": 96,
+      "size_m": [
+        2.0,
+        1.3333333333333333
+      ],
+      "anchor_px": [
+        96,
+        126
+      ],
+      "anchor_uv": [
+        0.5,
+        0.984375
+      ],
+      "visible_bounds_px": [
+        0,
+        26,
+        192,
+        126
+      ],
+      "palette": "../../palettes/street96.png",
+      "alpha": "binary0/255",
+      "resampled_from_concept": true,
+      "tileable_x": true,
+      "ground_cast_shadow_baked": false,
+      "local_form_shading_baked": true,
+      "outline": "dark1px; open horizontal rail connections intentionally have no vertical end outline",
+      "collider_radius_m": 1.0,
+      "normal_map": "bank_balustrade_n.png",
+      "normal_map_invert_y": false,
+      "normal_convention": "OpenGL +Y",
+      "suggested_normal_scale": 0.35,
+      "collider_shape": "box",
+      "collider_size_m": [
+        2,
+        1.0416666666666667,
+        0.2
+      ],
+      "repeat_step_m": [
+        2,
+        0,
+        0
+      ],
+      "end_pillars_baked": false,
+      "connection_rule": "abut full192px frames; no padding between copies",
+      "owner_visual_approved": true
+    },
+    {
+      "file": "bank_bistro_table.png",
+      "width": 128,
+      "height": 128,
+      "format": "P",
+      "sha256": "85e73d8fdfc887b12d4a5ba159e834f6a5d95ddb8900b63757c870f61eaf4a2a",
+      "bytes": 17116,
+      "role": "vertical_sprite",
+      "pixels_per_metre": 96,
+      "size_m": [
+        1.3333333333333333,
+        1.3333333333333333
+      ],
+      "anchor_px": [
+        64,
+        126
+      ],
+      "anchor_uv": [
+        0.5,
+        0.984375
+      ],
+      "visible_bounds_px": [
+        19,
+        34,
+        109,
+        126
+      ],
+      "palette": "../../palettes/street96.png",
+      "alpha": "binary0/255",
+      "resampled_from_concept": true,
+      "tileable_x": false,
+      "ground_cast_shadow_baked": false,
+      "local_form_shading_baked": true,
+      "outline": "dark1px; open horizontal rail connections intentionally have no vertical end outline",
+      "collider_radius_m": 0.48,
+      "estimated_tabletop_height_m": 0.8,
+      "visible_height_including_bottle_m": 0.9583333333333334
+    },
+    {
+      "file": "bank_balustrade_n.png",
+      "width": 192,
+      "height": 128,
+      "format": "RGB",
+      "sha256": "9e1a584db7924d8ce14ba1a1935d8cb9998022713cf81f5839c9c52456cd9074",
+      "bytes": 73929,
+      "role": "normal_map",
+      "paired_albedo": "bank_balustrade.png",
+      "pixels_per_metre": 96,
+      "size_m": [
+        2.0,
+        1.3333333333333333
+      ],
+      "anchor_px": [
+        96,
+        126
+      ],
+      "anchor_uv": [
+        0.5,
+        0.984375
+      ],
+      "normal_convention": "OpenGL +Y",
+      "color_space": "linear_data",
+      "normal_source": "authored turned-shaft ellipsoids and rail planes; approximate form normals, not albedo brightness"
+    },
+    {
+      "file": "bank_umbrella.png",
+      "width": 288,
+      "height": 272,
+      "format": "P",
+      "bytes": 79217,
+      "sha256": "88d55a72cf63a01ac425fe61c86023d4156e5fddb5f2d35f4f8e577146733811",
+      "role": "vertical_sprite",
+      "pixels_per_metre": 96,
+      "size_m": [
+        3.0,
+        2.8333333333333335
+      ],
+      "anchor_px": [
+        144,
+        270
+      ],
+      "anchor_uv": [
+        0.5,
+        0.9926470588235294
+      ],
+      "palette": "../../palettes/street96.png",
+      "alpha": "binary0/255",
+      "resampled_from_concept": true,
+      "ground_cast_shadow_baked": false,
+      "local_form_shading_baked": true,
+      "owner_visual_approved": false,
+      "collider_radius_m": 0.16,
+      "outline": "uninterrupted dark1px",
+      "visible_bounds_px": [
+        15,
+        20,
+        273,
+        270
+      ],
+      "camera_down_angle_deg": 35,
+      "canopy_view": "top dome; no exposed underside/ribs",
+      "canopy_material_tone_limit": 7,
+      "cluster_cleanup": "same-material5x5 medians on canopy, target-grid hard quantization",
+      "assembled_collision_enabled": false
+    },
+    {
+      "file": "bank_bistro_table_parasol.png",
+      "width": 128,
+      "height": 128,
+      "format": "P",
+      "bytes": 17116,
+      "sha256": "6aa3cb54d01cf20ff64db8e91f0f2260d11026500ff7d7e45c3a080d64439e92",
+      "role": "vertical_sprite",
+      "pixels_per_metre": 96,
+      "size_m": [
+        1.3333333333333333,
+        1.3333333333333333
+      ],
+      "anchor_px": [
+        64,
+        126
+      ],
+      "anchor_uv": [
+        0.5,
+        0.984375
+      ],
+      "palette": "../../palettes/street96.png",
+      "alpha": "binary0/255",
+      "resampled_from_concept": true,
+      "ground_cast_shadow_baked": false,
+      "local_form_shading_baked": true,
+      "owner_visual_approved": false,
+      "collider_radius_m": 0.48,
+      "outline": "uninterrupted dark1px",
+      "visible_bounds_px": [
+        20,
+        34,
+        108,
+        126
+      ],
+      "pole_socket_px": [
+        64,
+        57
+      ],
+      "pole_socket_height_m": 0.71875,
+      "center_bottle": false,
+      "estimated_tabletop_height_m": 0.8,
+      "requires_upper_pole_overlay": true
+    },
+    {
+      "file": "bank_chair_left.png",
+      "width": 128,
+      "height": 128,
+      "format": "P",
+      "bytes": 17116,
+      "sha256": "23d1dc30d8b8ca3fe5679700d0673345b87f022592e5d2452faeacb8bd4d44fb",
+      "role": "vertical_sprite",
+      "pixels_per_metre": 96,
+      "size_m": [
+        1.3333333333333333,
+        1.3333333333333333
+      ],
+      "anchor_px": [
+        64,
+        126
+      ],
+      "anchor_uv": [
+        0.5,
+        0.984375
+      ],
+      "palette": "../../palettes/street96.png",
+      "alpha": "binary0/255",
+      "resampled_from_concept": true,
+      "ground_cast_shadow_baked": false,
+      "local_form_shading_baked": true,
+      "owner_visual_approved": false,
+      "collider_radius_m": 0.3,
+      "outline": "uninterrupted dark1px",
+      "visible_bounds_px": [
+        32,
+        26,
+        96,
+        126
+      ]
+    },
+    {
+      "file": "bank_chair_right.png",
+      "width": 128,
+      "height": 128,
+      "format": "P",
+      "bytes": 17116,
+      "sha256": "19847ee04555ff74c7813750f1ffe7d59f9a2a52713dde64b9a847ba5e3875b8",
+      "role": "vertical_sprite",
+      "pixels_per_metre": 96,
+      "size_m": [
+        1.3333333333333333,
+        1.3333333333333333
+      ],
+      "anchor_px": [
+        64,
+        126
+      ],
+      "anchor_uv": [
+        0.5,
+        0.984375
+      ],
+      "palette": "../../palettes/street96.png",
+      "alpha": "binary0/255",
+      "resampled_from_concept": true,
+      "ground_cast_shadow_baked": false,
+      "local_form_shading_baked": true,
+      "owner_visual_approved": false,
+      "collider_radius_m": 0.3,
+      "outline": "uninterrupted dark1px",
+      "visible_bounds_px": [
+        32,
+        26,
+        96,
+        126
+      ]
+    },
+    {
+      "file": "bank_umbrella_pole_front.png",
+      "width": 288,
+      "height": 272,
+      "format": "P",
+      "bytes": 79217,
+      "sha256": "79386dbb1caee38e631e6902446d39e5a6502f4d32f745ebdc3d336ff2895253",
+      "role": "assembly_overlay",
+      "pixels_per_metre": 96,
+      "size_m": [
+        3.0,
+        2.8333333333333335
+      ],
+      "anchor_px": [
+        144,
+        270
+      ],
+      "anchor_uv": [
+        0.5,
+        0.9926470588235294
+      ],
+      "palette": "../../palettes/street96.png",
+      "alpha": "binary0/255",
+      "resampled_from_concept": true,
+      "ground_cast_shadow_baked": false,
+      "local_form_shading_baked": true,
+      "owner_visual_approved": false,
+      "collider_radius_m": 0,
+      "assembly_only": true,
+      "cast_shadow": false,
+      "collision_enabled": false,
+      "clip_rect_px": [
+        136,
+        146,
+        152,
+        202
+      ]
+    },
+    {
+      "file": "bank_balustrade_02.png",
+      "width": 192,
+      "height": 128,
+      "format": "P",
+      "bytes": 25308,
+      "sha256": "d8c1549f8c89f9e13f03b7efbbedeee1306fac5576d4ed516faf1142d0904565",
+      "role": "vertical_sprite",
+      "pixels_per_metre": 96,
+      "size_m": [
+        2.0,
+        1.3333333333333333
+      ],
+      "anchor_px": [
+        96,
+        126
+      ],
+      "anchor_uv": [
+        0.5,
+        0.984375
+      ],
+      "owner_visual_approved": false,
+      "palette": "../../palettes/street96.png",
+      "alpha": "binary0/255",
+      "resampled_from_concept": true,
+      "ground_cast_shadow_baked": false,
+      "local_form_shading_baked": true,
+      "tileable_x": true,
+      "normal_map": "bank_balustrade_02_n.png",
+      "suggested_normal_scale": 0.35,
+      "normal_map_invert_y": false,
+      "collider_radius_m": 1.0,
+      "collider_shape": "box",
+      "collider_size_m": [
+        2,
+        1.0416666666666667,
+        0.2
+      ],
+      "repeat_step_m": [
+        2,
+        0,
+        0
+      ],
+      "end_pillars_baked": false,
+      "damage_changed_pixels": 287
+    },
+    {
+      "file": "bank_balustrade_02_n.png",
+      "width": 192,
+      "height": 128,
+      "format": "RGB",
+      "bytes": 73929,
+      "sha256": "ef35fdebca19311f1c597f0d41db1a84b718e5ca6581d4b202b4b6e0740e6816",
+      "role": "normal_map",
+      "pixels_per_metre": 96,
+      "size_m": [
+        2.0,
+        1.3333333333333333
+      ],
+      "anchor_px": [
+        96,
+        126
+      ],
+      "anchor_uv": [
+        0.5,
+        0.984375
+      ],
+      "owner_visual_approved": false,
+      "paired_albedo": "bank_balustrade_02.png",
+      "color_space": "linear_data",
+      "normal_convention": "OpenGL +Y",
+      "normal_source": "accepted form normals plus shallow grooves from transferred fracture masks"
+    },
+    {
+      "file": "bank_balustrade_03.png",
+      "width": 192,
+      "height": 128,
+      "format": "P",
+      "bytes": 25308,
+      "sha256": "e01bd8e437c43bc1695613a5dced64b3448dc6205fa80e82259c9391d6111cc4",
+      "role": "vertical_sprite",
+      "pixels_per_metre": 96,
+      "size_m": [
+        2.0,
+        1.3333333333333333
+      ],
+      "anchor_px": [
+        96,
+        126
+      ],
+      "anchor_uv": [
+        0.5,
+        0.984375
+      ],
+      "owner_visual_approved": false,
+      "palette": "../../palettes/street96.png",
+      "alpha": "binary0/255",
+      "resampled_from_concept": true,
+      "ground_cast_shadow_baked": false,
+      "local_form_shading_baked": true,
+      "tileable_x": true,
+      "normal_map": "bank_balustrade_03_n.png",
+      "suggested_normal_scale": 0.35,
+      "normal_map_invert_y": false,
+      "collider_radius_m": 1.0,
+      "collider_shape": "box",
+      "collider_size_m": [
+        2,
+        1.0416666666666667,
+        0.2
+      ],
+      "repeat_step_m": [
+        2,
+        0,
+        0
+      ],
+      "end_pillars_baked": false,
+      "damage_changed_pixels": 286
+    },
+    {
+      "file": "bank_balustrade_03_n.png",
+      "width": 192,
+      "height": 128,
+      "format": "RGB",
+      "bytes": 73929,
+      "sha256": "51791dab88d2f0f976a58fb2772831eb8d42c071aacdb4bb447a07f0e3d93e61",
+      "role": "normal_map",
+      "pixels_per_metre": 96,
+      "size_m": [
+        2.0,
+        1.3333333333333333
+      ],
+      "anchor_px": [
+        96,
+        126
+      ],
+      "anchor_uv": [
+        0.5,
+        0.984375
+      ],
+      "owner_visual_approved": false,
+      "paired_albedo": "bank_balustrade_03.png",
+      "color_space": "linear_data",
+      "normal_convention": "OpenGL +Y",
+      "normal_source": "accepted form normals plus shallow grooves from transferred fracture masks"
+    }
+  ],
+  "palette": "../../palettes/street96.png",
+  "source_pipeline": "median target-grid samples, fixed accepted street palette; canopy same-material5x5 medians and7-tone ramps, cluster cleanup and dark1px outline",
+  "source_image": "../../../../previews/v36/cafe96_source.png",
+  "sprite3d": {
+    "pixel_size": 0.010416666666666666,
+    "centered": true,
+    "alpha_scissor": 0.5,
+    "filter": "nearest with optional mipmaps",
+    "offset_formula": "Vector2(width/2-anchor_x,anchor_y-height/2)"
+  },
+  "assembly": {
+    "shared_ground_anchor": true,
+    "common_sprite_plane": true,
+    "collision_owners": [
+      "bank_bistro_table_parasol.png",
+      "bank_chair_left.png",
+      "bank_chair_right.png"
+    ],
+    "parts": [
+      {
+        "file": "bank_umbrella.png",
+        "position_m": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "file": "bank_chair_left.png",
+        "position_m": [
+          -0.6770833333333334,
+          0,
+          0.005
+        ]
+      },
+      {
+        "file": "bank_chair_right.png",
+        "position_m": [
+          0.6770833333333334,
+          0,
+          0.005
+        ]
+      },
+      {
+        "file": "bank_bistro_table_parasol.png",
+        "position_m": [
+          0,
+          0,
+          0.025
+        ]
+      },
+      {
+        "file": "bank_umbrella_pole_front.png",
+        "position_m": [
+          0,
+          0,
+          0.04
+        ],
+        "cast_shadow": false,
+        "collision_enabled": false
+      }
+    ],
+    "note": "Upper pole overlay ends at table socket; table cloth occludes lower pole. Standalone table remains separate."
+  },
+  "verification": {
+    "godot_render_verified": true,
+    "report": "VALIDATION.json",
+    "render_report": "RENDER_VALIDATION.json"
+  },
+  "accepted_files": [
+    "bank_balustrade.png",
+    "bank_balustrade_n.png"
+  ],
+  "balustrade_variants": [
+    "bank_balustrade.png",
+    "bank_balustrade_02.png",
+    "bank_balustrade_03.png"
+  ]
+}

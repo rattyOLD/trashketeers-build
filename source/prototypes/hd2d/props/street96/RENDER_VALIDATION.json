@@ -1,0 +1,23 @@
+{
+  "ok": true,
+  "engine": "Godot4.4.1 Compatibility / Mesa llvmpipe",
+  "scope": "static Bank prototype copy, mixed3rail variants, corrected cafe with2chairs, accepted Riko; day/evening",
+  "source_modified": false,
+  "scene_script_errors": 0,
+  "warning": "System V-Sync unsupported",
+  "cafe_parts_share_plane": true,
+  "pole_overlay_shadow_disabled": true,
+  "screenshots_sha256": {
+    "street96_control_day.png": "13e3900fe13000f97148903103e2ae6a31e8d7804e86a35f3482f773c5849518",
+    "street96_control_evening.png": "9d9c729a63acd06bbf567f0a834989985620f3711b5a6f19929535c69a7a98d3"
+  },
+  "owner_visual_approval": {
+    "base_balustrade": true,
+    "new_variants_and_cafe": false
+  },
+  "limits": [
+    "temporary facades and legacy props remain",
+    "static review, no combat or phone test",
+    "screen-mip focus/glow, not physicalDOF"
+  ]
+}
