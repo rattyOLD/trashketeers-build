@@ -1,0 +1,61 @@
+{
+  "source_dimensions": [
+    1254,
+    1254
+  ],
+  "source_visible_bounds": [
+    160,
+    91,
+    1190,
+    1212
+  ],
+  "canvas": [
+    256,
+    256
+  ],
+  "pixels_per_metre": 96,
+  "core_body_height_px": 173,
+  "anchor_px": [
+    128,
+    224
+  ],
+  "visible_bounds": [
+    54,
+    49,
+    214,
+    224
+  ],
+  "visible_colors": 127,
+  "alpha_values": [
+    0,
+    255
+  ],
+  "outline_added_pixels": 797,
+  "source_sha256": "482c9840920cee9570d5fef0ad4b6f49c8e3e3dd9f46f6511b0c65680e4b79ca",
+  "creation_method": "reference-based concept, median target-grid sampling, restrained128-color palette and dark1px contour",
+  "resampled_from_concept": true,
+  "normal_source": "authored clipped ellipsoid fields/cloth folds and shallow shield curvature; approximate form normals, not albedo luminance or3D sculpt bake",
+  "normal_unit_max_error": 0.00497971906240835,
+  "normal_unique_vectors": 4394,
+  "albedo_sha256": "55bc01482f2e71696fb7cc633795a2312adb671ea387107880071f111aecae46",
+  "normal_sha256": "2cb066ecb75a9edfce9054162d63b142ac71a00e624fce2de8bb238b073efbd7",
+  "files": {
+    "pig_guard_idle.png": {
+      "sha256": "e1b5cb8990bfcbea499cf0f6dbe2092b76c474572cecc5ef49082b9fff98eb10",
+      "bytes": 13050
+    },
+    "pig_guard_idle_n.png": {
+      "sha256": "6ccad0129d7fdcaad535557a1e64c7c0768f19ee3c426188ea0e3220cce450a2",
+      "bytes": 25951
+    },
+    "pig_guard_palette.png": {
+      "sha256": "3885da6ee82089316b3dd9706491e5e7635e5c490fda5d08895c8d1b5908e8a3",
+      "bytes": 453
+    }
+  },
+  "accepted_riko_unchanged": {
+    "raccoon_idle.png": "07e6aff3fd9686c076e1d1595c745c8023a89e80805021f3417feca66beb7e8d",
+    "raccoon_idle_n.png": "58ff06aedabfdcb5d6bffa1a30a2cf74173405d17dc728b6fb69381d1878f689",
+    "raccoon_badge.png": "cdf132a5dd4b198894bc938b3bb6dead5135e1b75062dee3b8e7ebdd7d22926c"
+  }
+}

@@ -22,14 +22,18 @@ def validate(chars):
         im=Image.open(p); im.load()
         assert im.size==(entry['width'],entry['height']), p
         a=np.array(im.convert('RGBA')); images[p.name]=a
-        if entry['role']=='normal_map':
+        if entry['role']=='character_palette':
+            assert im.size==(128,1) and len(set(map(tuple,a[:,:,:3].reshape(-1,3))))==128,p
+        elif entry['role']=='normal_map':
             n=a[:,:,:3].astype(float)/255*2-1
             assert np.max(abs(np.linalg.norm(n,axis=2)-1))<.015, p
             assert n[:,:,2].min()>.65, p
         else:
             assert set(np.unique(a[:,:,3]))<={0,255}, p
             mask=a[:,:,3]>0
-            assert set(map(tuple,a[:,:,:3][mask]))<=colors, p
+            entry_palette=entry.get('palette',manifest['palette'])
+            entry_colors=set(Image.open(chars/entry_palette).convert('RGB').getdata())
+            assert set(map(tuple,a[:,:,:3][mask]))<=entry_colors, p
             assert mask.sum()>30, p
             if p.name=='raccoon_idle.png':
                 _,count=label(mask,np.ones((3,3))); assert count==1

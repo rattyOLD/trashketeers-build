@@ -1,0 +1,84 @@
+{
+  "ok": true,
+  "godot": "4.4.1.stable.official.49a5bc7b6",
+  "renderer": "Compatibility / Mesa llvmpipe software OpenGL4.5",
+  "prototype_source_sha256": "65098ccd892edb13de9834a8833ed7c9629134d1e8389d2d30c51cae2b383b9d",
+  "developer_bank_model_sha256": "5875669f4b032efd51a67f937e58fc4db0fad76641cdb705d89f473629f3eb4c",
+  "delivered_files": {
+    "pig_guard_idle.png": "e1b5cb8990bfcbea499cf0f6dbe2092b76c474572cecc5ef49082b9fff98eb10",
+    "pig_guard_idle_n.png": "6ccad0129d7fdcaad535557a1e64c7c0768f19ee3c426188ea0e3220cce450a2"
+  },
+  "delivered_pixels_equal_rendered_pixels": true,
+  "source_modified": false,
+  "scene_script_errors": false,
+  "artistic_approval": false,
+  "camera": {
+    "vertical_fov": 30,
+    "pitch_down": 32,
+    "overview_distance_m": 28,
+    "pair_distance_m": 9
+  },
+  "comparisons": {
+    "day/day_flat": {
+      "changed_pixels_above1": 20674,
+      "max_channel_delta": 4,
+      "bounds_inclusive": [
+        1050,
+        339,
+        1391,
+        706
+      ]
+    },
+    "evening/evening_flat": {
+      "changed_pixels_above1": 14944,
+      "max_channel_delta": 4,
+      "bounds_inclusive": [
+        1050,
+        341,
+        1391,
+        706
+      ]
+    },
+    "day/no_shadow": {
+      "changed_pixels_above1": 15088,
+      "max_channel_delta": 109,
+      "bounds_inclusive": [
+        1074,
+        462,
+        1478,
+        706
+      ]
+    }
+  },
+  "screenshots_sha256": {
+    "pig_guard_pair_day.png": "e63080ab6fe9a6522d2b2643a0bd2e809a684869072029b223bab17dda42efb7",
+    "pig_guard_pair_day_flat.png": "762154daf755f307e622a6105e5bc4aade014a2530c7939980164dba4475ce52",
+    "pig_guard_pair_no_shadow.png": "b965b49192af7b2a7b402402abc00417a70309ae64d8ddf85d013d167ce62fee",
+    "pig_guard_pair_evening.png": "8c5b1696d72a7fe9073e5c51f0e5957355bdea6fad86c58315a900d5e6b3274d",
+    "pig_guard_pair_evening_flat.png": "6c660bdb13e2c0253ea1d29c01cb66ad5dcf2937d061d195e8d32c439b56dc97",
+    "pig_guard_plaza_day.png": "0e3216fa371215a4ee032cec3a40a0335080a2a38225d246c7e3e682cff5998e"
+  },
+  "limits": [
+    "Single static idle frame in current Bank prototype copy; no animation, combat or physical-device test.",
+    "Old side buildings/fountain remain temporary; no claim of complete plaza delivery.",
+    "QA close cameras disable shader blur/glow for inspection; source scene/settings unchanged.",
+    "Editor initialization reports missing local Vulkan surface; Compatibility runtime completes without scene/resource errors."
+  ],
+  "jpeg_previews": [
+    {
+      "file": "pig_guard_pair_day.jpg",
+      "bytes": 536969,
+      "sha256": "0e13974fadd2ae0d03e40e2cb9de58c1c4c6d258abe8dca8d974c6c2d009d611"
+    },
+    {
+      "file": "pig_guard_pair_evening.jpg",
+      "bytes": 446910,
+      "sha256": "4134e1d57ea4adf1ad125a14a9aea9836c851ad7b28fe0546df586a524afe3d0"
+    },
+    {
+      "file": "pig_guard_plaza_day.jpg",
+      "bytes": 678131,
+      "sha256": "ae6e6f3a81e923e2a31b6d38a9bcfebf12d18180884ac346d6e8925ca44ee51c"
+    }
+  ]
+}

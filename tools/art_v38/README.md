@@ -18,3 +18,14 @@ python tools/art_v38/validate_bank.py /tmp/bank38-delivery
 `qa_bank.py` создаёт отдельный Godot-проект с реальным GLB, принятыми Рико и брусчаткой. В QA импортировать PNG без потерь (`compress/mode=0`, `detect_3d/compress_to=0`, `roughness/mode=1`). `check_bank_render.py` проверяет четыре кадра и лог; `package_bank.py` собирает inbox и manifest. PNG сжимаются без изменения декодированных пикселей. Макронормали приближённые, OpenGL+Y. Проверка не изменяет рабочий source/ и не подменяет показ модели в полной площади.
 
 TrashSquad · Beer Party Studio.
+
+## Первая партия персонажей — щитовик
+
+```bash
+node tools/art_v38/prepare_pig_guard.mjs astra/previews/v38/pig_guard_source.png /tmp/guard38
+python tools/art_v38/deliver_pig_guard.py /tmp/guard38
+python tools/art_v38/validate_pig_guard.py astra/inbox/hd2d_test/chars
+python tools/art_v38/qa_pig_guard.py /tmp/guard38 /tmp/guard38-plaza
+```
+
+Дальше импорт/запуск отдельного Godot-проекта через Compatibility; лог runtime сохранить как render.log. `check_pig_guard_render.py` сверяет кадры, нормаль/тень и совпадение декодированных пикселей с inbox после сжатия PNG. `prepare_rico96.cleanup` теперь принимает необязательные coreHeight/sourceAlpha; значения по умолчанию прежние. Принятый экспорт Рико повторён с теми же SHA. Собственная палитра щитовика не заменяет chars.png Рико. Общий manifest содержит раздельные данные персонажей.
