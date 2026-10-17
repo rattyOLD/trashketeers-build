@@ -101,7 +101,7 @@ func _build_environment() -> void:
 	env.glow_hdr_threshold = 1.0
 	env.fog_enabled = true
 	env.fog_light_color = Color("#f2cf9c")
-	env.fog_density = 0.0035
+	env.fog_density = 0.0015
 	env.fog_sky_affect = 0.0
 	env.adjustment_enabled = true
 	env.adjustment_saturation = 1.2
@@ -257,7 +257,7 @@ func _build_bank() -> void:
 ## Координаты — в плане модели (x вправо, y от фасада вглубь, как в Blender).
 func _furnish_bank_roof(origin: Vector3) -> void:
 	var at := func(x: float, y: float) -> Vector3: return origin + Vector3(x, BANK_ROOF, -y)
-	for xy: Vector2 in [Vector2(-6.7, -3.2), Vector2(6.7, -3.2), Vector2(-6.7, 3.1), Vector2(6.7, 3.1)]:
+	for xy: Vector2 in [Vector2(-6.7, 3.1), Vector2(6.7, 3.1)]:
 		_item("bank_flower_planter", at.call(xy.x, xy.y))
 	for x: float in [-4.4, 4.4]:
 		var spot: Vector3 = at.call(x, -1.2)
@@ -313,7 +313,7 @@ func _build_props() -> void:
 		if absf(x) > 3.0:
 			_item(sections[(k * 7 + 3) % 3], Vector3(x, TERRACE_H, TERRACE_Z - 0.2))
 			k += 1
-	for at: Vector3 in [Vector3(-3.6, TERRACE_H, TERRACE_Z - 0.8), Vector3(3.6, TERRACE_H, TERRACE_Z - 0.8), Vector3(-14.0, 0, 9.0), Vector3(-11.5, 0, TERRACE_Z + 2.0), Vector3(11.5, 0, TERRACE_Z + 2.0)]:
+	for at: Vector3 in [Vector3(-14.0, 0, 9.0), Vector3(-11.5, 0, TERRACE_Z + 2.0), Vector3(11.5, 0, TERRACE_Z + 2.0)]:
 		_item("bank_flower_planter", at)
 	# Уличное кафе: зонт на своей подставке рядом со столиком, стулья по бокам.
 	for at: Vector3 in [Vector3(-11.5, 0, 1.5), Vector3(12.5, 0, 8.0)]:
@@ -672,12 +672,12 @@ func _build_post() -> void:
 	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var material := ShaderMaterial.new()
 	material.shader = load("res://shaders/color_grade.gdshader")
-	material.set_shader_parameter(&"tilt_blur", 4.0)
-	material.set_shader_parameter(&"focus_half", 0.3)
-	material.set_shader_parameter(&"focus_ramp", 0.2)
-	material.set_shader_parameter(&"glow_strength", 0.2)
+	material.set_shader_parameter(&"tilt_blur", 2.0)
+	material.set_shader_parameter(&"focus_half", 0.4)
+	material.set_shader_parameter(&"focus_ramp", 0.12)
+	material.set_shader_parameter(&"glow_strength", 0.12)
 	material.set_shader_parameter(&"glow_threshold", 0.9)
-	material.set_shader_parameter(&"haze_color", Color(1.0, 0.86, 0.62, 0.03))
+	material.set_shader_parameter(&"haze_color", Color(1.0, 0.86, 0.62, 0.0))
 	material.set_shader_parameter(&"shadow_tint", Vector3(0.08, 0.02, 0.14))
 	material.set_shader_parameter(&"highlight_tint", Vector3(0.06, 0.03, -0.03))
 	rect.material = material
