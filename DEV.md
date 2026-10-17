@@ -42,4 +42,4 @@
 
 ## Для Астры
 Арт кладётся в `source/assets/<папка>/`. Нарезку и прозрачность делает `tools/slice_vfx.py`.
-Требования к арту — `astra/from_claude/BRIEF_v37_3d_buildings.md` (здания в 3D, .glb + пиксельные текстуры 96 px/м) и `BRIEF_v36_hd2d_test.md` (спрайты, материалы, Рико).
+Требования к арту — сводный `astra/from_claude/BRIEF_v38_bank_plan.md` (очередь для площади Банка); здания — `BRIEF_v37_3d_buildings.md`, правила спрайтов 96 px/м — `BRIEF_v36_hd2d_test.md`.
