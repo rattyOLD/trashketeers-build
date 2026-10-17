@@ -15,6 +15,11 @@ const NORMAL_STRENGTH := 0.65
 ## Пиксель жёсткий, как в HD-2D: спрайты без mip-уровней, земля — анизотропно (без каши вдали).
 ## Модульные предметы Астры (v36, 48 px/м): фонарь на тумбе и кадка; опоры и крепление — из manifest.
 const PROPS := "res://prototypes/hd2d/props/"
+const BANK_DIR := "res://prototypes/hd2d/buildings/"
+const BANK_MODEL := BANK_DIR + "bank_hall.glb"
+const BANK_FRONT := 5.75
+const BANK_GLOW := Color(1.0, 0.53, 0.16)
+const BANK_GLOW_ENERGY := 0.55
 ## Плотность пикселя и крепление фонаря берутся из manifest сдачи (48 или 96 px/м).
 const PROP_PX_PER_M := 48.0
 const LANTERN_MOUNT := 1.2708333
@@ -183,7 +188,7 @@ func _build_terrace() -> void:
 	var marble := _material("marble")
 	var stone := _material("stone_wall")
 	var riser := _material("step_riser")
-	var depth := 10.0
+	var depth := 13.0
 	_box(Vector3(PLAZA.x, TERRACE_H, depth), Vector3(0, TERRACE_H * 0.5, TERRACE_Z - depth * 0.5), marble)
 	# Подпорная стена — отдельная коробка с камнем спереди, ступени по центру.
 	_box(Vector3(PLAZA.x, TERRACE_H, 0.3), Vector3(0, TERRACE_H * 0.5, TERRACE_Z + 0.15), stone)
@@ -199,16 +204,50 @@ func _build_buildings() -> void:
 	var wall := _material("plaster")
 	var roof := _material("roof_red")
 	var back := TERRACE_Z - 10.0
-	for spec: Array in [[Vector3(14, 8, 6), Vector3(0, 0, back - 1.0)], [Vector3(8, 6, 6), Vector3(-12.5, 0, back + 0.5)], [Vector3(8, 6, 6), Vector3(12.5, 0, back + 0.5)]]:
-		var size: Vector3 = spec[0]
-		var at: Vector3 = spec[1]
+	# Лавки по бокам — пока коробки со старыми спрайтами; их 3D-версии Астра делает после банка.
+	for at: Vector3 in [Vector3(-13.0, 0, back + 0.5), Vector3(13.0, 0, back + 0.5)]:
+		var size := Vector3(8, 6, 6)
 		_box(size, at + Vector3(0, TERRACE_H + size.y * 0.5, 0), wall)
-		var cap := _box(Vector3(size.x + 0.6, 0.6, size.z + 0.6), at + Vector3(0, TERRACE_H + size.y + 0.3, 0), roof)
-		cap.rotation_degrees.x = 0.0
-	# Временные «фасады»: дома из 2D-района стоят спрайтами перед коробками.
-	_sprite("res://assets/district/bank/pigs_villa.png", Vector3(-12.5, TERRACE_H, back + 3.6), 6.5)
-	_sprite("res://assets/district/bank/pigs_boutique.png", Vector3(12.5, TERRACE_H, back + 3.6), 5.5)
-	_sprite("res://assets/props/ch2/vault_door.png", Vector3(0, TERRACE_H, back + 2.1), 4.2)
+		_box(Vector3(size.x + 0.6, 0.6, size.z + 0.6), at + Vector3(0, TERRACE_H + size.y + 0.3, 0), roof)
+	_sprite("res://assets/district/bank/pigs_villa.png", Vector3(-13.0, TERRACE_H, back + 3.6), 6.5)
+	_sprite("res://assets/district/bank/pigs_boutique.png", Vector3(13.0, TERRACE_H, back + 3.6), 5.5)
+	_build_bank()
+
+
+## Банк Астры в 3D (v37/v38): .glb с пиксельными текстурами 96 px/м. Ступени входа выходят
+## к балюстраде террасы; вечером стекло окон и настенных фонарей светится по маскам.
+func _build_bank() -> void:
+	if not ResourceLoader.exists(BANK_MODEL):
+		return
+	var bank := (load(BANK_MODEL) as PackedScene).instantiate() as Node3D
+	# Передний край ступеней модели — z = +5.75 от опоры; ставим его в 0.8 м от балюстрады.
+	bank.position = Vector3(0, TERRACE_H, TERRACE_Z - 0.8 - BANK_FRONT)
+	add_child(bank)
+	for node in bank.find_children("*", "MeshInstance3D", true, false):
+		var mesh := node as MeshInstance3D
+		mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+		var glow := ""
+		if "Window_Glass" in str(mesh.name):
+			glow = "bank_glass_glow.png"
+		elif "Lantern_Glass" in str(mesh.name):
+			glow = "bank_trim_glow.png"
+		if glow.is_empty():
+			continue
+		var material := (mesh.get_active_material(0) as StandardMaterial3D).duplicate() as StandardMaterial3D
+		material.emission_enabled = true
+		material.emission = BANK_GLOW
+		material.emission_texture = load(BANK_DIR + glow)
+		material.emission_operator = BaseMaterial3D.EMISSION_OP_MULTIPLY
+		material.emission_energy_multiplier = BANK_GLOW_ENERGY
+		mesh.material_override = material
+	# Настенные фонари по сторонам двери дают настоящий тёплый свет на фасад.
+	for x: float in [-1.8, 1.8]:
+		var light := OmniLight3D.new()
+		light.light_color = Color("#ffb45e")
+		light.light_energy = 1.2
+		light.omni_range = 5.0
+		light.position = bank.position + Vector3(x, 3.4, 4.4)
+		add_child(light)
 
 
 func _build_fountain() -> void:
