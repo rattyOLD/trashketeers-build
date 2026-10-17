@@ -14,6 +14,7 @@ const MOSAIC := [[0, 1, 2], [2, 0, 1], [1, 2, 0]]
 const NORMAL_STRENGTH := 0.65
 ## Модульные предметы Астры (v36, 48 px/м): фонарь на тумбе и кадка; опоры и крепление — из manifest.
 const PROPS := "res://prototypes/hd2d/props/"
+## Плотность пикселя и крепление фонаря берутся из manifest сдачи (48 или 96 px/м).
 const PROP_PX_PER_M := 48.0
 const LANTERN_MOUNT := 1.2708333
 const LANTERN_GLOW := Color("#ffc574")
@@ -47,10 +48,13 @@ var _sniper_frames: Array[Rect2] = []
 var _sniper_feet: Array[Vector2] = []
 var _sniper_run: Array = []
 var _rng := RandomNumberGenerator.new()
+var _prop_density := PROP_PX_PER_M
+var _lantern_mount := LANTERN_MOUNT
 
 
 func _ready() -> void:
 	_rng.seed = 35
+	_read_prop_manifest()
 	_build_environment()
 	_build_ground()
 	_build_terrace()
@@ -254,17 +258,30 @@ func _build_props() -> void:
 	_sprite("res://assets/props/ch2/lamp_banner.png", Vector3(10.0, 0, PLAZA.y * 0.5 + 2.0), 4.2)
 
 
+func _read_prop_manifest() -> void:
+	var path := PROPS + "manifest.json"
+	if not FileAccess.file_exists(path):
+		return
+	var manifest: Variant = JSON.parse_string(FileAccess.get_file_as_string(path))
+	if not manifest is Dictionary:
+		return
+	_prop_density = float(manifest.get("pixels_per_metre", PROP_PX_PER_M))
+	for part: Dictionary in manifest.get("assembly", {}).get("parts", []):
+		if str(part.get("file", "")).begins_with("bank_lantern"):
+			_lantern_mount = float(part.get("position_m", [0, LANTERN_MOUNT, 0])[1])
+
+
 func _lamp(at: Vector3) -> void:
 	var pivot := _prop("bank_pedestal", Vector2(48, 71), at)
 	# Фонарь крепится к тумбе в той же наклонённой плоскости спрайта, чуть ближе к камере.
 	var lantern := _prop("bank_lantern", Vector2(36, 103), Vector3.ZERO, pivot)
-	lantern.position = Vector3(0, LANTERN_MOUNT, 0.005)
+	lantern.position = Vector3(0, _lantern_mount, 0.005)
 	lantern.rotation = Vector3.ZERO
 	var light := OmniLight3D.new()
 	light.light_color = Color("#ffb45e")
 	light.light_energy = 1.6
 	light.omni_range = 6.0
-	light.position = at + Vector3(0, LANTERN_MOUNT + 1.0, 0.3)
+	light.position = at + Vector3(0, _lantern_mount + 1.0, 0.3)
 	add_child(light)
 
 
@@ -291,13 +308,13 @@ func _prop(name: String, anchor: Vector2, at: Vector3, parent: Node3D = self) ->
 		material.emission_operator = BaseMaterial3D.EMISSION_OP_MULTIPLY
 		material.emission_energy_multiplier = LANTERN_GLOW_ENERGY
 	var quad := QuadMesh.new()
-	quad.size = size / PROP_PX_PER_M
+	quad.size = size / _prop_density
 	var mesh := MeshInstance3D.new()
 	mesh.mesh = quad
 	mesh.material_override = material
 	mesh.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 	# Опора (низ-центр по manifest) приходится на точку pivot.
-	mesh.position = Vector3(size.x * 0.5 - anchor.x, size.y * 0.5 - (size.y - anchor.y), 0) / PROP_PX_PER_M
+	mesh.position = Vector3(size.x * 0.5 - anchor.x, size.y * 0.5 - (size.y - anchor.y), 0) / _prop_density
 	var pivot := Node3D.new()
 	pivot.position = at
 	pivot.rotation_degrees.x = SPRITE_TILT
