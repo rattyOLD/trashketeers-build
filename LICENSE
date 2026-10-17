@@ -1,13 +1,14 @@
-TrashSquad — Beer Party Studio
-Copyright (c) 2026 автор проекта, выступающий под названием Beer Party Studio.
+TrashSquad
+© 2026 Beer Party Studio. All rights reserved.
 
-Все права защищены. All rights reserved.
+Все права защищены.
 
 Исходный код, графика, тексты, музыка, звуки и другие материалы этого репозитория,
-кроме сторонних ассетов с собственными лицензиями (см. source/CREDITS.md),
+кроме сторонних ассетов с собственными лицензиями (см. source/CREDITS.md и THIRD_PARTY_LICENSES.txt),
 принадлежат правообладателю. Копирование, распространение, изменение и использование
 любой части проекта без письменного разрешения правообладателя запрещены.
 
 This repository is proprietary. No license is granted to copy, distribute, modify
 or use any part of it without written permission of the copyright holder.
-Third-party assets are covered by their own licenses listed in source/CREDITS.md.
+Third-party assets are covered by their own licenses listed in source/CREDITS.md
+and THIRD_PARTY_LICENSES.txt.

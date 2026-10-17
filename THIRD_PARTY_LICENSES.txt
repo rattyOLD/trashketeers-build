@@ -1,5 +1,5 @@
-LICENSES
-TrashSquad © 2026 Beer Party Studio. All rights reserved.
+TRASHSQUAD — THIRD-PARTY LICENSES
+© 2026 Beer Party Studio. All rights reserved.
 
 This game uses third-party assets and the Godot Engine.
 Below is the complete licensing information.

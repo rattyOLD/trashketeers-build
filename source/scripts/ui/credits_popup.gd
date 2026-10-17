@@ -1,15 +1,16 @@
 class_name CreditsPopup
 extends GlassPopup
-## Создатели: название команды, благодарности тестерам (data/brand.json) и лицензии.
+## Создатели: игра, копирайт и движок, благодарности тестерам (data/brand.json) и полные лицензии.
+## Короткий блок — по образцу титров; полный текст ещё и в THIRD_PARTY_LICENSES.txt рядом с ПК-сборкой.
 
 
 func _init() -> void:
 	super("СОЗДАТЕЛИ")
 	var brand := ConfigLoader.load_json("res://data/brand.json")
-	var studio := str(brand.get("studio", "")).strip_edges()
-	if not studio.is_empty():
-		content.add_child(_label("Игра сделана командой", 22, UiStyle.TEXT_DIM))
-		content.add_child(_label(studio, 40, UiStyle.GOLD))
+	content.add_child(_label(str(brand.get("game", "")).to_upper(), 44, UiStyle.GOLD))
+	content.add_child(_label(str(brand.get("copyright", "")), 24, UiStyle.TEXT))
+	content.add_child(_label("Made with Godot Engine\ngodotengine.org", 22, UiStyle.TEXT_DIM))
+	content.add_child(_label("Third-party licenses and attributions:\nsee the file THIRD_PARTY_LICENSES.txt included with the game,\nor press LICENSES below.", 20, UiStyle.TEXT_DIM))
 	content.add_child(_label("Спасибо тестерам", 28, UiStyle.NEON))
 	var names: Array = brand.get("thanks", [])
 	var line := ", ".join(PackedStringArray(names))
@@ -19,7 +20,7 @@ func _init() -> void:
 	content.add_child(_label("Вы сделали эту свалку чище. Ненамного.", 20, UiStyle.TEXT_DIM))
 	var licenses := LicensesPopup.new()
 	add_child(licenses)
-	var button := UiStyle.button("ЛИЦЕНЗИИ", UiStyle.PANEL_LIGHT, 22, Vector2(0, 66))
+	var button := UiStyle.button("LICENSES", UiStyle.PANEL_LIGHT, 22, Vector2(0, 66))
 	button.pressed.connect(licenses.open)
 	content.add_child(button)
 

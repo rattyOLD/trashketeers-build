@@ -14,7 +14,8 @@ func _init() -> void:
 func _refresh() -> void:
 	if _list.get_child_count() > 0:
 		return
-	_text("TrashSquad © 2026 Beer Party Studio. Все права защищены.", UiStyle.GOLD)
+	var brand := ConfigLoader.load_json("res://data/brand.json")
+	_text("%s\n%s" % [brand.get("game", ""), brand.get("copyright", "")], UiStyle.GOLD)
 	var data := ConfigLoader.load_json("res://data/licenses.json")
 	_section("ЗВУКИ И МУЗЫКА")
 	for line: Variant in data.get("assets", []):

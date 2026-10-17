@@ -1,4 +1,13 @@
 {
-  "studio": "Beer Party Studio",
-  "thanks": ["Nosfefatu", "Milka", "Loyalby", "A1one", "Jainex", "Kisik"]
+ "game": "TrashSquad",
+ "studio": "Beer Party Studio",
+ "copyright": "© 2026 Beer Party Studio. All rights reserved.",
+ "thanks": [
+  "Nosfefatu",
+  "Milka",
+  "Loyalby",
+  "A1one",
+  "Jainex",
+  "Kisik"
+ ]
 }
