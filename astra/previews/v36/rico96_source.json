@@ -1,0 +1,12 @@
+{
+  "brief": "v36",
+  "role": "source_illustration_for_pixel_cleanup",
+  "production_ready": false,
+  "width": 1254,
+  "height": 1254,
+  "sha256": "9fb0e1b833dbf5cb26b165829a709f81963d72e4ac403db296236aa4ea65111c",
+  "reference": "source/assets/heroes/tactical/raccoon_idle.png",
+  "method": "image-assisted faithful character redraw; final game PNG is separate in inbox/chars",
+  "target_density": 96,
+  "studio": "TrashSquad · Beer Party Studio"
+}

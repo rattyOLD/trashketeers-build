@@ -1,0 +1,59 @@
+{
+  "source_dimensions": [
+    1254,
+    1254
+  ],
+  "source_visible_bounds": [
+    89,
+    99,
+    1142,
+    1166
+  ],
+  "canvas": [
+    256,
+    256
+  ],
+  "pixels_per_metre": 96,
+  "core_body_height_px": 168,
+  "anchor_px": [
+    128,
+    224
+  ],
+  "visible_bounds": [
+    29,
+    54,
+    197,
+    224
+  ],
+  "visible_colors": 127,
+  "alpha_values": [
+    0,
+    255
+  ],
+  "outline_added_pixels": 786,
+  "method": "concept image sampled on target grid with median material samples, 127-color palette encoding, isolated near-color cluster cleanup and complete dark exterior contour; no soft alpha",
+  "ok": true,
+  "png_crc": true,
+  "zlib_adler": true,
+  "rgba_roundtrip": true,
+  "normal_unit_max_error": 0.005412571842407066,
+  "normal_unique_vectors": 6117,
+  "normal_source": "authored ellipse/polygon geometry fields and fold profiles; not albedo luminance",
+  "dark_outline_complete": true,
+  "opaque_pixels": 16007,
+  "outline_pixels": 786,
+  "godot_checked": false,
+  "godot_blocker": "Managed environment failed to start: exec-server Noise harness handshake",
+  "artistic_approval": false,
+  "albedo_sha256": "430078ecb06105a8325f6ed05cc9ef82008a8c53d38eccbf6a33b6c6a69cd47b",
+  "normal_sha256": "58ff06aedabfdcb5d6bffa1a30a2cf74173405d17dc728b6fb69381d1878f689",
+  "palette_sha256": "31dfacf6fb58e975f7417082305d3d6f7bbfe33af5aeef8b5fad8d01fffb2a4b",
+  "albedo_bytes": 66401,
+  "normal_bytes": 196947,
+  "palette_bytes": 453,
+  "unique_palette_colors": 128,
+  "actual_visible_colors": 127,
+  "connected_components": [
+    16007
+  ]
+}

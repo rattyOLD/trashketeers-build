@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "brief": "v36",
+  "revision": "rico-96-control-1",
+  "studio": "TrashSquad · Beer Party Studio",
+  "delivery_status": "single_idle_review_candidate",
+  "owner_visual_approved": false,
+  "ready_for_gameplay": false,
+  "pixels_per_metre": 96,
+  "palette": "../palettes/chars.png",
+  "scope": "Riko idle, one frame only; run8, props96, materials192 and mobs pending",
+  "files": [
+    {
+      "file": "raccoon_idle.png",
+      "width": 256,
+      "height": 256,
+      "format": "indexed PNG, binary tRNS",
+      "role": "character_idle_sprite",
+      "character_id": "raccoon",
+      "cell_px": [
+        256,
+        256
+      ],
+      "frame_count": 1,
+      "size_m": [
+        2.6666666666666665,
+        2.6666666666666665
+      ],
+      "core_body_height_px": 168,
+      "core_body_height_m": 1.75,
+      "visible_height_px": 170,
+      "visible_height_m": 1.7708333333333333,
+      "visible_bounds_px": [
+        29,
+        54,
+        197,
+        224
+      ],
+      "anchor_px": [
+        128,
+        224
+      ],
+      "anchor_uv": [
+        0.5,
+        0.875
+      ],
+      "anchor_space": "pixel boundaries from top-left",
+      "collider_radius_m": 0.32,
+      "alpha": "binary 0/255",
+      "visible_colors": 127,
+      "palette": "../palettes/chars.png",
+      "outline": "uninterrupted dark colored 1px, whole silhouette",
+      "normal_map": "raccoon_idle_n.png",
+      "normal_map_invert_y": false,
+      "suggested_normal_scale": 0.25,
+      "ground_cast_shadow_baked": false,
+      "local_form_shading_baked": true,
+      "creation_method": "concept-based target-grid palette cleanup, median material samples, local cluster cleanup, complete dark contour",
+      "source_image": "../../../previews/v36/rico96_source.png",
+      "resampled_from_concept": true,
+      "sha256": "430078ecb06105a8325f6ed05cc9ef82008a8c53d38eccbf6a33b6c6a69cd47b",
+      "bytes": 66401
+    },
+    {
+      "file": "raccoon_idle_n.png",
+      "width": 256,
+      "height": 256,
+      "format": "RGB",
+      "role": "normal_map",
+      "paired_albedo": "raccoon_idle.png",
+      "size_m": [
+        2.6666666666666665,
+        2.6666666666666665
+      ],
+      "anchor_px": [
+        128,
+        224
+      ],
+      "anchor_uv": [
+        0.5,
+        0.875
+      ],
+      "color_space": "linear_data",
+      "normal_convention": "OpenGL +Y",
+      "source": "authored geometry fields and fold profiles; not albedo luminance",
+      "sha256": "58ff06aedabfdcb5d6bffa1a30a2cf74173405d17dc728b6fb69381d1878f689",
+      "bytes": 196947
+    }
+  ],
+  "clips": {
+    "idle": {
+      "frames": [
+        0
+      ],
+      "fps": 1,
+      "loop": true
+    }
+  },
+  "sprite3d": {
+    "pixel_size": 0.010416666666666666,
+    "centered": true,
+    "offset_px": [
+      0,
+      96
+    ],
+    "alpha_scissor": 0.5,
+    "filter": "nearest with optional mipmaps",
+    "normal_scale": 0.25,
+    "roughness": 0.85,
+    "metallic_specular": 0.15,
+    "shaded": true,
+    "cast_shadow_in_engine": true
+  },
+  "design_reference": [
+    "source/assets/heroes/tactical/raccoon_idle.png",
+    "astra/previews/v35/bank_direction.png"
+  ],
+  "identity_visual_approval_pending": true,
+  "verification": {
+    "format": "VALIDATION.json",
+    "godot_render_verified": false,
+    "blocker": "Managed workspace failed to start; no Godot day/evening render performed"
+  },
+  "pending": [
+    "Owner visual review of identity, personality and material quality",
+    "Godot day/evening normal-on/off and shadow check",
+    "Props96: slender lamp/pedestal and planter",
+    "After review: run8, 192px materials, mobs"
+  ]
+}

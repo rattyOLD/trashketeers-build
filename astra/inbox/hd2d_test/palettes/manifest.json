@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "brief": "v36",
-  "revision": "warm-48-sample",
+  "revision": "rico-96-control-1",
   "studio": "TrashSquad · Beer Party Studio",
   "files": [
     {
@@ -16,10 +16,25 @@
       "size_m": null,
       "anchor_px": null,
       "not_a_world_surface": true
+    },
+    {
+      "file": "chars.png",
+      "width": 128,
+      "height": 1,
+      "format": "RGB",
+      "bytes": 453,
+      "sha256": "31dfacf6fb58e975f7417082305d3d6f7bbfe33af5aeef8b5fad8d01fffb2a4b",
+      "role": "character_palette_candidate",
+      "colors": 128,
+      "visible_character_colors": 127,
+      "size_m": null,
+      "anchor_px": null,
+      "not_a_world_surface": true,
+      "provisional_until_visual_review": true
     }
   ],
   "definition_file": "colors.json",
   "pending": [
-    "chars.png with an approved faithful Riko redraw; the 3D redesign was rejected"
+    "Full chapter palette consolidation with future96px/m environment assets; existing bank.png belongs to old48px/m batch"
   ]
 }
