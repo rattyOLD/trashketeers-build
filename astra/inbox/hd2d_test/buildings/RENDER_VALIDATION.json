@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "glb_sha256": "480b8ba26372f89fd6135e1e5b4dc39795235525d036444d5b9ff8c6e9d6caf0",
+  "glb_sha256": "8ecbaf657ca64ab94e868bf24ed4357ffe5eda2058326a7232659f279f57afa2",
   "godot": "4.4.1.stable.official.49a5bc7b6",
   "renderer": "Compatibility / Mesa llvmpipe software OpenGL4.5",
   "actual_glb_loaded": true,
@@ -17,14 +17,14 @@
     ]
   },
   "normal_comparison": {
-    "pixels_delta_above1": 368877,
-    "max_channel_delta": 98
+    "pixels_delta_above1": 347817,
+    "max_channel_delta": 70
   },
   "screenshots_sha256": {
-    "bank_godot_day.png": "a224549fadfb421593053978f6421e57ddba45e247057e9b7bd8844187dbe206",
-    "bank_godot_day_flat.png": "da83270f79ba101b90e2fa016afdeca7ef2090162d5cd15771e34e4da60a6d19",
-    "bank_godot_three_quarter.png": "a4e0045902031072a86498b403203940f4abf0a4540076c8bd46af1d45d62105",
-    "bank_godot_evening.png": "353e1f9d751d34c470e6b05d1df1a725ccd442b5bb9e530c31b0973fd829f06d"
+    "bank_godot_day.png": "fd5b5255fb1e4012e5f90af110b8cd45f653bd4e3df6c374c49925e57a1cdd2b",
+    "bank_godot_day_flat.png": "36b3639b2832b6759521ace4d87e443dc662c5491c90514ad6b631efd2a15c9a",
+    "bank_godot_three_quarter.png": "37c2ea57cecd650de80251712411ef987c316a18e7809e61f1018da9cf19e82c",
+    "bank_godot_evening.png": "123a3e2a64175c3182fd41394b4e3d365c669b9974ab175c6c506c2338a23647"
   },
   "artistic_approval": false,
   "limits": [
@@ -33,46 +33,28 @@
     "Editor initialization reports unavailable local Vulkan surface in this environment; runtime Compatibility scene completes without scene/resource errors.",
     "System V-Sync warning; no physical camera DOF or atmosphere tuning claimed."
   ],
-  "stored_reviews": {
-    "bank_blender_day": {
-      "capture_sha256": "c29a2cc1c3b9c0ad4085e42df690fc4a0e45ac92cb602ca7b3ff6c9a6476c953",
-      "jpeg_sha256": "59abfd5c23e302292552e57d3925570de2836afe5c13511a869f62e4c442c1d9",
-      "resolution_px": [
-        1920,
-        1080
-      ]
-    },
-    "bank_godot_day": {
-      "capture_sha256": "a224549fadfb421593053978f6421e57ddba45e247057e9b7bd8844187dbe206",
-      "jpeg_sha256": "a75dac7c6375baf8b939139bf4205d16e2570d6a5e5b325c12d25a470cbdf83e",
-      "resolution_px": [
-        1920,
-        1080
-      ]
-    },
-    "bank_godot_three_quarter": {
-      "capture_sha256": "a4e0045902031072a86498b403203940f4abf0a4540076c8bd46af1d45d62105",
-      "jpeg_sha256": "cafc8ab461f309e3f735251c1be88062bb2d873e7593cbdf8fd68e54d16ffeaa",
-      "resolution_px": [
-        1920,
-        1080
-      ]
-    },
-    "bank_godot_evening": {
-      "capture_sha256": "353e1f9d751d34c470e6b05d1df1a725ccd442b5bb9e530c31b0973fd829f06d",
-      "jpeg_sha256": "9b550aa98661ee14cc9182a64106b67a26e6ea5ac2689137648c7f7858f27996",
-      "resolution_px": [
-        1920,
-        1080
-      ]
-    }
-  },
   "blender": {
     "version": "4.3.2",
-    "renderer": "Cycles CPU64samples, no denoiser",
-    "camera_fov_vertical": 30,
-    "pitch_down": 32,
-    "distance_m": 28,
-    "source": "tools/art_v38/build_bank.py --day-only"
+    "engine": "Cycles CPU64samples",
+    "day_sha256": "dad5fa0248ec407b2426ecc4071a53a0222489c932c50c7eb4c4e40874743588",
+    "same_geometry_build": true
+  },
+  "jpeg_previews": {
+    "bank_blender_day.jpg": {
+      "bytes": 601590,
+      "sha256": "10019e2c5d383245b3ae827d7cfa6ea3f7d7c4329a1d43132f5d3b1facb7533f"
+    },
+    "bank_godot_day.jpg": {
+      "bytes": 1038500,
+      "sha256": "ebc5592e6142e7f5d45be53b1fbb06ad5f13373a2f01582e9734cba0f8de943b"
+    },
+    "bank_godot_three_quarter.jpg": {
+      "bytes": 1025609,
+      "sha256": "9b58fffc39fed4ef08ea8acfad32fcf00fbdfe2cbd2108f803e11a8c71cb9ab0"
+    },
+    "bank_godot_evening.jpg": {
+      "bytes": 803890,
+      "sha256": "1a8bbe48f31823ec0b8713e46755ca079d3e6308e786b14542eb31e133b185b2"
+    }
   }
 }

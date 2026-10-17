@@ -6,8 +6,8 @@ import crypto from 'node:crypto';
 import {PNG} from '../art_v36/png_core96.mjs';
 import {makePalette,quantizer,sampleMedian} from '../art_v36/palette96.mjs';
 import {outline} from '../art_v36/object_pixels96.mjs';
-const [materialsPath,trimPath,elevationPath,out]=process.argv.slice(2);
-if(!out)throw Error('Usage: prepare_bank_textures.mjs materials.png trim.png approved_elevation.png export_dir');
+const [materialsPath,trimPath,elevationPath,out,cutoutsPath]=process.argv.slice(2);
+if(!out||!cutoutsPath)throw Error('Usage: prepare_bank_textures.mjs pixel_materials.png trim.png approved_elevation.png export_dir isolated_cutouts.png');
 const raw=[materialsPath,trimPath,elevationPath].map(p=>fs.readFileSync(p)),[src,trim,elevation]=raw.map(b=>PNG.decode(b));
 const sha=b=>crypto.createHash('sha256').update(b).digest('hex'),samples=[],tiles=[];
 fs.mkdirSync(out,{recursive:true});
@@ -16,6 +16,20 @@ function sampleCell(image,col,row,cols,rows,w,h){
  const rgb=new Uint8Array(w*h*3),cw=image.width/cols,ch=image.height/rows;
  for(let y=0;y<h;y++)for(let x=0;x<w;x++)rgb.set(sampleMedian(image,(col+(x+.5)/w)*cw,(row+(y+.5)/h)*ch,cw/w),(y*w+x)*3);
  return rgb;
+}
+function reduceRamp(rgb,count){
+ const colors=makePalette([rgb],count),q=quantizer(colors),out=new Uint8Array(rgb.length);
+ for(let i=0;i<rgb.length;i+=3)out.set(colors[q(Array.from(rgb.slice(i,i+3)))],i);
+ return out;
+}
+function clusterMedian(rgb,w,h){
+ // Export cleanup of isolated scan-grain only, retaining established drawn forms.
+ const out=rgb.slice();
+ for(let y=1;y<h-1;y++)for(let x=1;x<w-1;x++)for(let c=0;c<3;c++){
+  const a=[];for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)a.push(rgb[((y+dy)*w+x+dx)*3+c]);
+  a.sort((a,b)=>a-b);out[(y*w+x)*3+c]=a[4];
+ }
+ return out;
 }
 function periodic(rgb,w,h){
  // Only the small edge neighborhoods change; source pixel clusters remain discrete after quantization.
@@ -28,12 +42,22 @@ function periodic(rgb,w,h){
  return rgb;
 }
 for(let i=0;i<4;i++){
- const rgb=periodic(sampleCell(src,i%2,Math.floor(i/2),2,2,192,192),192,192);
+ let rgb=sampleCell(src,i%2,Math.floor(i/2),2,2,192,192);
+ if(i===3){
+  // Preserve the accepted soft navy reflection instead of repeating the master's
+  // demonstration window frame/diagonal stripe inside every real3D opening.
+  const b=fs.readFileSync(new URL('../../astra/previews/v38/bank_glass_reflection_reference.png',import.meta.url)),glass=PNG.decode(b);
+  raw.push(b);rgb=new Uint8Array(192*192*3);
+  for(let j=0;j<192*192;j++)rgb.set(glass.data.slice(j*4,j*4+3),j*3);
+ }
+ if(i===2)for(let j=0;j<rgb.length;j++)rgb[j]=Math.round(rgb[j]*[.80,.82,.90][j%3]);
+ rgb=periodic(reduceRamp(rgb,cutoutsPath?(i===0?6:10):24),192,192);
  tiles.push({name:['bank_plaster','bank_masonry','bank_roof','bank_glass'][i],rgb});samples.push(rgb);
 }
 const trimPixels=new Uint8Array(1024*1024*3);
 for(let i=0;i<8;i++){
- const [x0,y0,w,h]=rects[i],rgb=sampleCell(trim,i%4,Math.floor(i/4),4,2,w,h);
+ const [x0,y0,w,h]=rects[i];let rgb=sampleCell(trim,i%4,Math.floor(i/4),4,2,w,h);
+ if(cutoutsPath)rgb=reduceRamp(clusterMedian(rgb,w,h),[16,16,8,8,12,8,6,6][i]);
  for(let y=0;y<h;y++)trimPixels.set(rgb.slice(y*w*3,(y+1)*w*3),((y+y0)*1024+x0)*3);
  samples.push(rgb);
 }
@@ -66,12 +90,42 @@ function cutout(box,kind,w,h){
  }
  const colors=[];for(let i=0;i<core.length;i++)if(core[i])colors.push(...rgb.slice(i*3,i*3+3));samples.push(new Uint8Array(colors));return{rgb,core,w,h,box};
 }
-const crest=cutout([600,105,988,365],'crest',384,288),ivy=cutout([5,115,205,950],'ivy',128,512);
+let crest=cutout([600,105,988,365],'crest',384,288),ivy=cutout([5,115,205,950],'ivy',128,512),flourish=null;
+if(cutoutsPath){
+ const bytes=fs.readFileSync(cutoutsPath),sheet=PNG.decode(bytes);raw.push(bytes);
+ function isolated(box,w,h){
+  const rgb=new Uint8Array(w*h*3),core=new Uint8Array(w*h),[x0,y0,x1,y1]=box;
+  const scale=Math.min((w-6)/(x1-x0),(h-6)/(y1-y0)),left=(w-(x1-x0)*scale)/2,top=(h-(y1-y0)*scale)/2;
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++){
+   const xx=Math.floor(x0+(x+.5-left)/scale),yy=Math.floor(y0+(y+.5-top)/scale);
+   if(xx<x0||xx>=x1||yy<y0||yy>=y1)continue;
+   const i=(yy*sheet.width+xx)*4,[r,g,b,a]=sheet.data.slice(i,i+4);
+   if(a<240||(r>145&&g<70&&b<65)||(g>r*1.7&&r<45))continue;
+   core[y*w+x]=1;rgb.set(sampleMedian(sheet,xx,yy,.6/scale),(y*w+x)*3);
+  }
+  // Tiny detached pixels are matte remnants, not parts of the ornament.
+  const visited=new Uint8Array(core.length),components=[];
+  for(let i=0;i<core.length;i++)if(core[i]&&!visited[i]){
+   const queue=[i];visited[i]=1;
+   for(let j=0;j<queue.length;j++){const p=queue[j],x=p%w,y=Math.floor(p/w);for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const xx=x+dx,yy=y+dy,n=yy*w+xx;if(xx>=0&&xx<w&&yy>=0&&yy<h&&core[n]&&!visited[n]){visited[n]=1;queue.push(n)}}}
+   components.push(queue);
+  }
+  components.sort((a,b)=>b.length-a.length);core.fill(0);
+  for(const p of components[0])core[p]=1;
+  // Preserve small adjacent fragments of petals/ornaments, never other assets
+  // whose bounding rectangle happens to overlap this one on the master sheet.
+  for(const part of components.slice(1))if(part.length>=5&&part.some(p=>{const x=p%w,y=Math.floor(p/w);for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){const xx=x+dx,yy=y+dy;if(xx>=0&&xx<w&&yy>=0&&yy<h&&core[yy*w+xx])return true}return false}))for(const p of part)core[p]=1;
+  const colors=[];for(let i=0;i<core.length;i++)if(core[i])colors.push(...rgb.slice(i*3,i*3+3));samples.push(new Uint8Array(colors));
+  return{rgb,core,w,h,box};
+ }
+ crest=isolated([16,54,1078,848],384,288);
+ ivy=isolated([1034,42,1760,689],256,256);
+ flourish=isolated([1020,687,1768,851],128,64);
+}
 const sampledPalette=[[0,0,0],[30,27,25],...makePalette(samples,126)],nearest=quantizer(sampledPalette.slice(1));
-// The sky remains reflected in glass, but the window is a restrained navy field.
-// Keep indices and all non-blue materials unchanged; avoid electric-blue glazing.
-const palette=sampledPalette.map(c=>c[2]>130&&c[2]>c[0]*1.25&&c[2]>c[1]*1.1?
- [Math.round(18+(c[0]-12)*.54),Math.round(46+(c[1]-85)*.74),Math.round(75+(c[2]-191)*.8+Math.max(0,c[0]-12)*.35)]:c);
+// Glass already uses the accepted navy reference; retain its colors without a
+// second grade that would turn these restrained blues into gray.
+const palette=sampledPalette;
 function indexed(rgb,core=null){const ids=new Uint8Array(rgb.length/3);for(let i=0;i<ids.length;i++)if(!core||core[i])ids[i]=nearest(Array.from(rgb.slice(i*3,i*3+3)))+1;return ids}
 const files=[];
 function save(file,w,h,data,options,role,extra={}){const bytes=PNG.encode(w,h,data,options);fs.writeFileSync(path.join(out,file),bytes);files.push({file,width:w,height:h,role,sha256:sha(bytes),bytes:bytes.length,...extra})}
@@ -80,7 +134,12 @@ save('bank_trim.png',1024,1024,indexed(trimPixels),{palette},'albedo',{regions:r
 for(const t of tiles)save(t.name+'.png',192,192,indexed(t.rgb),{palette},'albedo',{size_m:[2,2],tileable:true});
 for(const[c,name]of [[crest,'bank_crest'],[ivy,'bank_ivy']]){
  const ids=indexed(c.rgb,c.core),final=outline(ids,c.core,c.w,c.h);
- save(name+'.png',c.w,c.h,final,{palette,alpha:palette.map((_,i)=>i?255:0)},'cutout',{source_box:c.box,binary_alpha:true,canonical_elevation_sha256:sha(raw[2])});
+ if(name==='bank_crest'&&flourish){
+  const atlas=new Uint8Array(512*512),orn=outline(indexed(flourish.rgb,flourish.core),flourish.core,128,64);
+  for(let y=0;y<288;y++)atlas.set(final.slice(y*384,(y+1)*384),y*512+64);
+  for(let y=0;y<64;y++)atlas.set(orn.slice(y*128,(y+1)*128),(y+320)*512);
+  save(name+'.png',512,512,atlas,{palette,alpha:palette.map((_,i)=>i?255:0)},'cutout_atlas',{regions:{crest:[64,0,384,288],window_flourish:[0,320,128,64]},binary_alpha:true});
+ }else save(name+'.png',c.w,c.h,final,{palette,alpha:palette.map((_,i)=>i?255:0)},'cutout',{source_box:c.box,binary_alpha:true,canonical_elevation_sha256:sha(raw[2])});
 }
 function normal(w,h,height,periodicEdges=false){
  const data=new Uint8Array(w*h*3);

@@ -1,17 +1,17 @@
 {
-  "triangles": 5993,
+  "triangles": 5919,
   "mesh_count": 11,
   "material_count": 11,
   "blender_bounds": [
     [
-      -8.390000343322754,
-      -4.979520797729492,
-      0.0
+      -8.613333702087402,
+      -5.75,
+      -5.960464477539063e-08
     ],
     [
-      8.390000343322754,
-      4.400000095367432,
-      10.5
+      8.59333324432373,
+      4.369999885559082,
+      10.500000953674316
     ]
   ],
   "native_up": "Z",
@@ -23,14 +23,22 @@
     10.5,
     8
   ],
-  "roof_pitch_deg": 29.68811066452907,
+  "roof_pitch_deg": 7.832795566234645,
+  "revision": "bank3d-detail-2",
+  "hidden_triangles_removed": 1224,
+  "foundation_height_m": 0.6,
+  "entrance_steps": 4,
+  "step_rise_m": 0.15,
   "uv_policy": "Face-local metric isometry96px/m. Canonical curved crest/ivy cards preserve their source-grid projection.",
   "real_features": [
     "Boolean recessed arches/windows0.28m",
-    "columns/capitals",
+    "gilded columns/capitals/bases",
     "projecting cornices15-30cm",
-    "sloped roof/eaves35cm",
-    "separate curved crest and ivy",
+    "low roof behind open balustraded parapet and gold finials",
+    "four real balconettes",
+    "pediment raised gilded acanthus relief",
+    "rusticated plinth and four entrance steps",
+    "separate curved crest and flowering ivy",
     "wall lantern metal/glass"
   ],
   "materials": {

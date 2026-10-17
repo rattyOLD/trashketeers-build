@@ -82,16 +82,29 @@ def validate(folder,budget=6000):
             else:densities.extend(d.tolist())
             if 'emissiveTexture' in mat:assert mat['emissiveFactor']==[0,0,0],('Day emission must default off',name)
     assert 3000<=triangles<=budget,triangles
-    d=np.array(densities);assert d.min()>95 and d.max()<97,('Metric UV density',d.min(),d.max())
+    d=np.array(densities);assert d.min()>95.99 and d.max()<96.01,('Metric UV density',d.min(),d.max())
     cut=np.array(cutout_samples);assert cut.min()>90 and cut.max()<98,('Cutout projection density',cut.min(),cut.max())
     pts=np.vstack(positions);lo=pts.min(axis=0);hi=pts.max(axis=0)
-    # Exported model is Y-up, feet/base at Y0, ridgeY10.5, front positiveZ.
+    # Exported model is Y-up, feet/base at Y0, finialY10.5, front positiveZ.
     assert abs(lo[1])<1e-5 and abs(hi[1]-10.5)<1e-5,(lo,hi)
-    assert 16<=hi[0]-lo[0]<=17.5 and 8<=hi[2]-lo[2]<=9.8
+    # Revision2 includes the four real entrance steps projecting past the wall.
+    assert 16<=hi[0]-lo[0]<=17.5 and 10<=hi[2]-lo[2]<=10.5
+    assert hi[2]>5.7 and lo[2]<-4,('Entrance stair footprint',lo,hi)
+    assert png['bank_crest.png'].shape==(512,512,4)
+    assert png['bank_ivy.png'].shape==(256,256,4)
+    # Both ornament atlas islands are separated by empty padding; no matte
+    # pixels from adjacent source assets may survive outside the two rectangles.
+    alpha=png['bank_crest.png'][:,:,3];outside=alpha.copy()
+    outside[:288,64:448]=0;outside[320:384,:128]=0
+    assert not np.any(outside),'Crest atlas spill'
+    for name in ['bank_crest.png','bank_ivy.png']:
+        a=png[name];solid=a[:,:,3]>0
+        edge=solid&~(np.roll(solid,1,0)&np.roll(solid,-1,0)&np.roll(solid,1,1)&np.roll(solid,-1,1))
+        assert np.max(a[:,:,:3][edge])<55,('Cutout must have continuous dark1px contour',name)
     return dict(ok=True,triangles=triangles,materials=len(g['materials']),meshes=len(g['meshes']),external_png=len(png),
         bounds_m=[lo.tolist(),hi.tolist()],uv_texels_per_metre=[float(d.min()),float(d.max())],
         cutout_projected_density=[float(cut.min()),float(cut.max())],nearest_filter=True,day_emission_off=True,
-        material_triangles=per_material,glb_sha256=hashlib.sha256((folder/'bank_hall.glb').read_bytes()).hexdigest())
+        binary_alpha_clean_outline=True,entrance_steps=4,material_triangles=per_material,glb_sha256=hashlib.sha256((folder/'bank_hall.glb').read_bytes()).hexdigest())
 
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('folder',type=Path);p.add_argument('--report',type=Path);p.add_argument('--budget',type=int,default=6000);a=p.parse_args()

@@ -1,43 +1,45 @@
 {
   "ok": true,
-  "triangles": 5993,
+  "triangles": 5919,
   "materials": 11,
   "meshes": 11,
   "external_png": 13,
   "bounds_m": [
     [
-      -8.390000343322754,
-      0.0,
-      -4.400000095367432
+      -8.613333702087402,
+      -5.960464477539063e-08,
+      -4.369999885559082
     ],
     [
-      8.390000343322754,
-      10.5,
-      4.979520797729492
+      8.59333324432373,
+      10.500000953674316,
+      5.75
     ]
   ],
   "uv_texels_per_metre": [
-    95.99930932323774,
+    95.9991258069814,
     96.00126473027947
   ],
   "cutout_projected_density": [
-    95.71383370293825,
-    96.00001001358224
+    95.7669369583052,
+    96.00000572204624
   ],
   "nearest_filter": true,
   "day_emission_off": true,
+  "binary_alpha_clean_outline": true,
+  "entrance_steps": 4,
   "material_triangles": {
-    "Bank_Ashlar": 14,
-    "Bank_Crowned_Pig_Crest": 120,
-    "Bank_Gilded_Trim": 2344,
-    "Bank_Iron": 96,
-    "Bank_Ivy": 8,
+    "Bank_Ashlar": 210,
+    "Bank_Crowned_Pig_Crest": 56,
+    "Bank_Gilded_Trim": 2124,
+    "Bank_Iron": 60,
+    "Bank_Ivy": 16,
     "Bank_Lantern_Glass": 24,
-    "Bank_Limestone_Plaster": 594,
-    "Bank_Stone_Trim": 2536,
-    "Bank_Terracotta": 16,
-    "Bank_Walnut": 160,
-    "Bank_Window_Glass": 81
+    "Bank_Limestone_Plaster": 528,
+    "Bank_Stone_Trim": 2798,
+    "Bank_Terracotta": 12,
+    "Bank_Walnut": 20,
+    "Bank_Window_Glass": 71
   },
-  "glb_sha256": "480b8ba26372f89fd6135e1e5b4dc39795235525d036444d5b9ff8c6e9d6caf0"
+  "glb_sha256": "8ecbaf657ca64ab94e868bf24ed4357ffe5eda2058326a7232659f279f57afa2"
 }

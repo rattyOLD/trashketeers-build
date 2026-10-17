@@ -2,9 +2,11 @@
   "pixels_per_metre": 96,
   "palette_colors": 128,
   "sources": [
-    "72dd8dbd337e30fa44a1c2314104c37e648c5dd7b72a50480b994187478b027d",
+    "40f6ed5292e4cf3340eab38c2f2251b103956ba9b462f9e795fc851d5423c5cd",
     "3296bafebc8fc8116e3252e4cd680ec94e4266547f1581c4e461c7445d990934",
-    "39c1eabf8cd29be207df4667b44770e4450c6216530146040b074a21a0b51f25"
+    "39c1eabf8cd29be207df4667b44770e4450c6216530146040b074a21a0b51f25",
+    "b5fd56471d46c9a7eb329915d9f732e372f91ba286ca6110c0b50660a81e5d5d",
+    "ec3bd79ce03f2dc1d1051f24327eefdde0eb29eda3592a4f6cb81e27dafd4ffc"
   ],
   "files": [
     {
@@ -13,15 +15,15 @@
       "height": 1,
       "role": "palette",
       "bytes": 453,
-      "uncompressed_sha256": "0a3eef112d48158c2457373265ebe2322efc6dd2800aa3a2834bedf5e4bc12f7",
-      "sha256": "8e721de24e276cfd6be82090511c43162a495a6cee05e400094e43551a2c0f51"
+      "uncompressed_sha256": "e0ff1858777682755e3b4c6c75c4d031f35f70553bb13a4631be0d7b5f44c795",
+      "sha256": "0e48db728cecfc56a8f9de7c3d1fe94361057384c77b754f95021fda99dcd704"
     },
     {
       "file": "bank_trim.png",
       "width": 1024,
       "height": 1024,
       "role": "albedo",
-      "bytes": 197438,
+      "bytes": 77804,
       "regions": [
         [
           0,
@@ -72,98 +74,105 @@
           256
         ]
       ],
-      "uncompressed_sha256": "57a5e6adb17d05aea70bdb7ac582bae8435d7e641410088f739b553db652ecfa",
-      "sha256": "1cb7b1d91a9705e835f4d1e87fede5f26593f0f5962ff83ed9fed2ca3b1b3133"
+      "uncompressed_sha256": "1837fd70d8ebbddcf07eb579a0b508b1a6476220467e0f52308697d644de0b8d",
+      "sha256": "32469a2dfe532bd5618bf43542b7c1720d8122dce75e358da3125fe0e25fe6c7"
     },
     {
       "file": "bank_plaster.png",
       "width": 192,
       "height": 192,
       "role": "albedo",
-      "bytes": 18630,
+      "bytes": 8484,
       "size_m": [
         2,
         2
       ],
       "tileable": true,
-      "uncompressed_sha256": "9a30a4f8925d0361fec0708517eaef931f4032045a8252bda77747dd658988e9",
-      "sha256": "618b293760813f506b0ed4fa4d043b57af4db63952cf08b8aca8138e9989929a"
+      "uncompressed_sha256": "1acfa27b6929206bae60765873c6e91c0f86b6bc9d41ad2e8dec1e030070f45b",
+      "sha256": "402b9761d9f887885ed1289e300a20e29fb50d7e69c58bf6ed371f6a42708dfa"
     },
     {
       "file": "bank_masonry.png",
       "width": 192,
       "height": 192,
       "role": "albedo",
-      "bytes": 20674,
+      "bytes": 10413,
       "size_m": [
         2,
         2
       ],
       "tileable": true,
-      "uncompressed_sha256": "dcf14c0e8cdf2dd046785e71d8325cd931798022b444da277ef627e695773ef7",
-      "sha256": "a86cc8f6e635d6454229267878765c4de2146ab49cb5fbea986f6dacdea3f3a0"
+      "uncompressed_sha256": "2372edd4d498e5746268fa25516e8184ebe4283f0259475999b7c56a2c6f4c1c",
+      "sha256": "804b9aeadf68422f95587939365ea09907107179322037aa94a4073b5d8ff72f"
     },
     {
       "file": "bank_roof.png",
       "width": 192,
       "height": 192,
       "role": "albedo",
-      "bytes": 14691,
+      "bytes": 7469,
       "size_m": [
         2,
         2
       ],
       "tileable": true,
-      "uncompressed_sha256": "3d15c40411fe7c7bcfe658ea4b0724189047e9ee27800dad360ff2f038d8f340",
-      "sha256": "15dae3cb92b468fd805da6db3c25ac287c348c298c9ce9949013a9cc7121f842"
+      "uncompressed_sha256": "048ab71d9ccbcc61dfc2a839ee6d90936a519f735ddf29e0223e1ecb5af93e3b",
+      "sha256": "0976dee8c71a2cad6e31c524d5344782d09a4b226504f70370015cc428faa347"
     },
     {
       "file": "bank_glass.png",
       "width": 192,
       "height": 192,
       "role": "albedo",
-      "bytes": 7009,
+      "bytes": 4081,
       "size_m": [
         2,
         2
       ],
       "tileable": true,
-      "uncompressed_sha256": "54362ceedcb1ac5be310c547b71282024a3885113049f0479d0bfa80dcaf51fb",
-      "sha256": "b5fd56471d46c9a7eb329915d9f732e372f91ba286ca6110c0b50660a81e5d5d"
+      "uncompressed_sha256": "0f7466f5398773f2318e081f9d184fcc7f1a4dc57767f50c89e2c2c682ef8bb5",
+      "sha256": "3df0ded9d215e8c53481f02dcc7c6fe350c41eff0a9d3897ac8038d74063d26d"
     },
     {
       "file": "bank_crest.png",
-      "width": 384,
-      "height": 288,
-      "role": "cutout",
-      "bytes": 27842,
-      "source_box": [
-        600,
-        105,
-        988,
-        365
-      ],
+      "width": 512,
+      "height": 512,
+      "role": "cutout_atlas",
+      "bytes": 31106,
+      "regions": {
+        "crest": [
+          64,
+          0,
+          384,
+          288
+        ],
+        "window_flourish": [
+          0,
+          320,
+          128,
+          64
+        ]
+      },
       "binary_alpha": true,
-      "canonical_elevation_sha256": "39c1eabf8cd29be207df4667b44770e4450c6216530146040b074a21a0b51f25",
-      "uncompressed_sha256": "e1d7ec52b79bedb67d524c20fa402bacd97be0d1bed076c50f39acbd706465df",
-      "sha256": "2050d4d8f47dc4cadd55ea4f057790e903012de95d7a82bf7d2ea83d3d054874"
+      "uncompressed_sha256": "16c527a3d56337feab42a207263a7f5844e69e071dda3932b2167175c6f63690",
+      "sha256": "778dd786bb1521fd68d5f86b5e9b54ff30fa089bcfe4e12b5703401d05233fb5"
     },
     {
       "file": "bank_ivy.png",
-      "width": 128,
-      "height": 512,
+      "width": 256,
+      "height": 256,
       "role": "cutout",
-      "bytes": 10463,
+      "bytes": 14833,
       "source_box": [
-        5,
-        115,
-        205,
-        950
+        1034,
+        42,
+        1760,
+        689
       ],
       "binary_alpha": true,
       "canonical_elevation_sha256": "39c1eabf8cd29be207df4667b44770e4450c6216530146040b074a21a0b51f25",
-      "uncompressed_sha256": "51195f8e0b3335dbf38c9d968252014f81b47ba37f3c4da5b31b6037c8158781",
-      "sha256": "adb4c2d9e22533838987bcf53f8792d1ab23945108df1792e674b15e43af9a10"
+      "uncompressed_sha256": "d298dcd3dda1c0419ca2bf77611890d8f5a2039bb1a02ab43723e2dfee896b6a",
+      "sha256": "1d17f4154dd176835bec1552019fb519c1a5c1dde97372eb1287e441277e5884"
     },
     {
       "file": "bank_trim_n.png",

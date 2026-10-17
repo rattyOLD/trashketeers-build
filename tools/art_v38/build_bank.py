@@ -10,6 +10,7 @@ import json
 import sys
 from pathlib import Path
 from mathutils import Vector,Matrix
+from mathutils.bvhtree import BVHTree
 
 args=sys.argv[sys.argv.index('--')+1:]
 OUT=Path(args[0]).resolve();TEX=Path(args[1]).resolve();OUT.mkdir(parents=True,exist_ok=True)
@@ -51,7 +52,7 @@ plaster=material('Bank_Limestone_Plaster','bank_plaster.png','bank_plaster_n.png
 masonry=material('Bank_Ashlar','bank_masonry.png','bank_masonry_n.png')
 roofmat=material('Bank_Terracotta','bank_roof.png','bank_roof_n.png')
 stone=material('Bank_Stone_Trim','bank_trim.png','bank_trim_n.png')
-gold=material('Bank_Gilded_Trim','bank_trim.png','bank_trim_n.png',.36,.62)
+gold=material('Bank_Gilded_Trim','bank_trim.png','bank_trim_n.png',.45,.32)
 wood=material('Bank_Walnut','bank_trim.png','bank_trim_n.png',.62)
 iron=material('Bank_Iron','bank_trim.png','bank_trim_n.png',.55,.35)
 amber=material('Bank_Lantern_Glass','bank_trim.png',None,.28,0,False,'bank_trim_glow.png')
@@ -114,10 +115,14 @@ def box(name,at,size,m,region=None):
             ss=list(size);ss[axis]/=count;aa=list(at);aa[axis]+=-size[axis]/2+ss[axis]*(i+.5)
             result+=box(name+f'_{i:02}',aa,ss,m,region)
         return result
-    bpy.ops.mesh.primitive_cube_add(size=1,location=at);o=bpy.context.object;o.name=name;o.dimensions=size
+    # Thin glazing bars keep real front/top reveals; backs face opaque glass.
+    if any(s in name for s in ('Mullion','Crossbar')):
+        x,y,z=at;w,d,h=[v/2 for v in size]
+        return [mesh_object(name,[(x-w,y-d,z-h),(x+w,y-d,z-h),(x+w,y-d,z+h),(x-w,y-d,z+h),(x-w,y+d,z+h),(x+w,y+d,z+h)],[(0,1,2,3),(3,2,5,4)],m,region)]
+    bpy.ops.mesh.primitive_cube_add(size=1,location=at);o=bpy.context.object;o.name=name;o.dimensions=size;o['solid_occluder']=True
     return [finish(o,m,region)]
 
-def cylinder(name,at,radius,depth,m,region=None,vertices=12,axis='Z'):
+def cylinder(name,at,radius,depth,m,region=None,vertices=10,axis='Z'):
     bpy.ops.mesh.primitive_cylinder_add(vertices=vertices,radius=radius,depth=depth,end_fill_type='NGON',location=at)
     o=bpy.context.object;o.name=name
     if axis=='Y':o.rotation_euler.x=math.pi/2
@@ -125,14 +130,35 @@ def cylinder(name,at,radius,depth,m,region=None,vertices=12,axis='Z'):
         for p in o.data.polygons:p.use_smooth=len(p.vertices)==4
     finish(o,m,region);return o
 
+def baluster(name,x,y,z,height=.66):
+    # Five-sided turned stone profile: real silhouette/recesses, not a billboard.
+    profile=[(0,.105),(.40,.112),(.78,.047),(1,.075)]
+    verts=[(x+r*math.cos(k*math.tau/5),y+r*math.sin(k*math.tau/5),z+t*height) for t,r in profile for k in range(5)]
+    faces=[(j*5+k,j*5+(k+1)%5,(j+1)*5+(k+1)%5,(j+1)*5+k) for j in range(3) for k in range(5)]
+    o=mesh_object(name,verts,faces,stone,'plinth')
+    for p in o.data.polygons:p.use_smooth=True
+    return o
+
+def scroll(name,points,radius=.045):
+    # Compact gilded relief strips, cross-section4. No scene lighting baked in.
+    verts=[]
+    for i,p in enumerate(points):
+        tangent=Vector(points[min(i+1,len(points)-1)])-Vector(points[max(0,i-1)])
+        tangent.normalize();n=Vector((0,1,0));b=tangent.cross(n).normalized()
+        verts += [tuple(Vector(p)+radius*(math.cos(k*math.tau/4)*n+math.sin(k*math.tau/4)*b)) for k in range(4)]
+    # Bent quads are not coplanar: split before metric UV projection.
+    quads=[(j*4+k,j*4+(k+1)%4,(j+1)*4+(k+1)%4,(j+1)*4+k) for j in range(len(points)-1) for k in range(4)]
+    faces=[t for a,b,c,d in quads for t in [(a,b,c),(a,c,d)]]
+    return mesh_object(name,verts,faces,gold,'brass')
+
 def sphere(name,at,radius,m,region='brass',scale=(1,1,1)):
-    small=name in ('Door_Boss','Lamp_Finial');volute=name=='Capital_Volute'
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=8 if small else 10 if volute else 12,ring_count=3 if small or volute else 4,radius=radius,location=at)
+    small=name in ('Door_Boss','Lamp_Finial','Capital_Volute') or (name=='Gold_Finial_Ball' and at[1]>0)
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=8 if small else 12,ring_count=3 if small else 6,radius=radius,location=at)
     o=bpy.context.object;o.name=name;o.scale=scale
     for p in o.data.polygons:p.use_smooth=True
     return finish(o,m,region)
 
-def arch_profile(width,spring,bottom=0,steps=12):
+def arch_profile(width,spring,bottom=0,steps=10):
     r=width/2
     return [(-r,bottom),(r,bottom)]+[(r*math.cos(t*math.pi/steps),spring+r*math.sin(t*math.pi/steps)) for t in range(steps+1)]
 
@@ -147,7 +173,7 @@ def arch_solid(name,x,bottom,width,spring,yfront,yback,m):
     metric_uv(o)
     return o
 
-def arch_ring(name,x,bottom,width,spring,thick,yfront,yback,m,region=None,steps=12):
+def arch_ring(name,x,bottom,width,spring,thick,yfront,yback,m,region=None,steps=10):
     r=width/2;verts=[];faces=[]
     for i in range(steps+1):
         angle=i*math.pi/steps
@@ -207,6 +233,11 @@ for x in [-6.32,-4.58,4.58,6.32]:
         box('Upper_Stone_Rail',(x,-4.13,bottom+(h if sign>0 else 0)),(w+.36,.30,.17),stone,'frieze')
     box('Upper_Brass_Mullion',(x,-3.96,bottom+h/2),(.055,.08,h),gold,'brass')
     for zz in [bottom+.58,bottom+1.16]:box('Upper_Crossbar',(x,-3.96,zz),(w,.08,.045),gold,'brass')
+    # Four genuine balconettes and gilded over-window relief panels.
+    box('Balcony_Floor',(x,-4.32,5.44),(1.66,.76,.16),stone,'plinth')
+    box('Balcony_Handrail',(x,-4.64,6.05),(1.66,.20,.13),stone,'frieze')
+    for dx in [-.51,0,.51]:baluster('Window_Baluster',x+dx,-4.64,5.52,.47)
+    box('Window_Gold_Ornament',(x,-4.29,7.57),(1.35,.15,.27),gold,'gold_leaf')
 
 # UVs rebuilt after Boolean tessellation so reveals retain metric texture density.
 while front.data.uv_layers:front.data.uv_layers.remove(front.data.uv_layers[0])
@@ -238,51 +269,75 @@ for side,wall in sidewalls.items():
     metric_uv(wall)
 for y in [-3.99,3.99]:
     for z,h,depth in [(.18,.36,.28),(4.85,.22,.25),(5.12,.26,.4),(7.72,.18,.22),(8.02,.28,.58)]:
+        if y>0:
+            if z in (.18,8.02):box('Rear_Plain_Cornice',(0,4.08,z),(16.4,depth,h),masonry)
+            continue
         for xx,ww in ([(-5.65,5.1),(5.65,5.1)] if y<0 and z>7.5 else [(0,16.4)]):
             outer=min(.30,max(.15,depth/2))
             box('Running_Stone_Cornice',(xx,math.copysign(4+outer-depth/2,y),z),(ww,depth,h),stone,'frieze')
 for x in [-7.99,7.99]:
     for z,h,depth in [(.18,.36,.28),(5.05,.26,.35),(8.02,.28,.58)]:
         outer=min(.30,max(.15,depth/2))
-        box('Return_Cornice',(math.copysign(8+outer-depth/2,x),0,z),(depth,8,h),stone,'frieze')
+        box('Return_Cornice',(math.copysign(8+outer-depth/2,x),0,z),(depth,8,h),stone if z>7 else masonry,'frieze' if z>7 else None)
 
 # Genuine projecting columns and pilasters. Capital/base rings and flutes cast shadows.
 for x in [-3.18,3.18]:
     box('Column_Square_Plinth',(x,-4.25,.26),(.98,.95,.52),stone,'plinth')
     cylinder('Column_Base_Torus',(x,-4.25,.59),.44,.16,gold,'brass')
     cylinder('Column_Base_Stone',(x,-4.25,.75),.39,.18,stone,'plinth')
-    for i in range(2):cylinder('Column_Fluted_Shaft',(x,-4.25,1.7+i*1.7),.335,1.7,stone,'shaft')
+    for i in range(2):cylinder('Column_Fluted_Shaft',(x,-4.25,1.7+i*1.7),.335,1.7,stone,'shaft',vertices=10)
+    cylinder('Column_Gilded_Base_Collar',(x,-4.25,.90),.37,.14,gold,'gold_leaf',vertices=10)
     cylinder('Column_Neck',(x,-4.25,4.31),.37,.16,gold,'brass')
-    # Flared acanthus basket as sixteen real facets, relief comes from shared trim.
+    # Flared acanthus basket as twelve real facets, relief comes from shared trim.
     bpy.ops.mesh.primitive_cone_add(vertices=12,radius1=.37,radius2=.49,depth=.35,location=(x,-4.25,4.55))
     o=bpy.context.object;o.name='Gilded_Corinthian_Capital';finish(o,gold,'gold_leaf')
     box('Capital_Abacus',(x,-4.25,4.80),(1.03,.98,.16),gold,'gold_leaf')
     for sign in [-1,1]:
         sphere('Capital_Volute',(x+sign*.35,-4.59,4.65),.16,gold,scale=(1,.45,.8))
+        scroll('Capital_Acanthus_Leaf',[(x+sign*.12,-4.63,4.39),(x+sign*.25,-4.68,4.52),(x+sign*.29,-4.65,4.68)],.065)
 for x in [-7.42,7.42]:
     box('Corner_Pilaster',(x,-4.10,3.95),(.61,.31,7.9),stone,'shaft')
     box('Pilaster_Base',(x,-4.2,.40),(.91,.47,.8),stone,'plinth')
     box('Pilaster_Gold_Capital',(x,-4.2,7.74),(.93,.49,.38),gold,'gold_leaf')
 
-# Roof25-35deg:8m body +0.35m eaves, actual ridge height10.5m.
-roofverts=[(-8.35,-4.35,8.02),(8.35,-4.35,8.02),(-8.35,0,10.5),(8.35,0,10.5),(-8.35,4.35,8.02),(8.35,4.35,8.02)]
+# Owner revision2: shallow roof BELOW the balustraded parapet; no huge roof face.
+roofverts=[(-7.88,-3.78,7.88),(7.88,-3.78,7.88),(-7.88,0,8.40),(7.88,0,8.40),(-7.88,3.78,7.88),(7.88,3.78,7.88)]
 mesh_object('Terracotta_Roof_Slopes',roofverts,[(0,1,3,2),(2,3,5,4)],roofmat)
 mesh_object('Roof_Gable_Ends',roofverts,[(0,2,4),(1,5,3)],masonry)
-for y in [-4.32,4.32]:box('Roof_Fascia',(0,y,8.0),(16.7,.16,.20),wood,'wood')
-box('Ridge_Capping',(0,0,10.43),(16.7,.28,.14),roofmat)
+box('Ridge_Capping',(0,0,8.40),(15.76,.22,.12),roofmat)
+for y in [-4.02,4.02]:
+    for center,width in ([(-5.62,4.72),(5.62,4.72)] if y<0 else [(0,16.2)]):
+        box('Parapet_Solid_Base',(center,y,8.43),(width,.42,.66),masonry)
+        box('Parapet_Lower_Rail',(center,y,8.79),(width,.46,.12),stone,'frieze')
+        box('Parapet_Coping',(center,y,9.39),(width,.51,.18),stone,'frieze')
+        count=7 if y<0 else 0
+        if y>0:box('Rear_Parapet_Panel',(center,y,9.06),(width,.28,.42),masonry)
+        for i in range(count):baluster('Roof_Baluster',center-width/2+.32+(width-.64)*i/(count-1),y,8.85,.46)
+# Side and rear parapets have solid panels; the front balustrade remains open.
+for x in [-8.02,8.02]:
+    box('Parapet_Return',(x,0,8.79),(.38,7.9,1.32),masonry)
+    box('Parapet_Return_Coping',(x,0,9.39),(.51,8.12,.18),stone,'frieze')
 for x in [-7.42,7.42]:
-    box('Finial_Stone_Pedestal',(x,-4.05,8.3),(.76,.74,.46),stone,'plinth')
-    cylinder('Finial_Gold_Collar',(x,-4.05,8.59),.25,.14,gold,'brass')
-    sphere('Gold_Finial_Ball',(x,-4.05,8.87),.27,gold)
+    for y in [-4.02,4.02]:
+        box('Finial_Stone_Pedestal',(x,y,9.13),(.71,.70,.58),stone,'plinth')
+        cylinder('Finial_Gold_Collar',(x,y,9.39),.24,.14,gold,'brass',vertices=8)
+        sphere('Gold_Finial_Ball',(x,y,9.63),.27,gold)
 
 # Central raised pediment: real stone blockwork/arch in front of roof.
 arch_solid('Central_Attic_Stone_Pediment',0,5.27,5.9,1.4,-4.52,-4.15,plaster)
 box('Attic_Lower_Cornice',(0,-4.25,5.28),(6.65,.58,.24),stone,'frieze')
-arch_ring('Attic_Arch_Moulding',0,5.27,5.90,1.4,.26,-4.68,-4.33,stone,steps=16)
+arch_ring('Attic_Arch_Moulding',0,5.27,5.90,1.4,.26,-4.68,-4.33,stone,steps=12)
 for sign in [-1,1]:box('Attic_Side_Pier',(sign*3.0,-4.44,6.16),(.44,.44,1.8),stone,'plinth')
+arch_ring('Pediment_Gilded_Inner_Relief',0,5.70,4.92,1.20,.085,-4.73,-4.60,gold,steps=10)
+for sign in [-1,1]:
+    scroll('Pediment_Acanthus_Curl',[(sign*.40,-4.76,6.03),(sign*1.10,-4.77,6.10),(sign*1.77,-4.76,6.40),(sign*2.21,-4.76,6.93),(sign*2.18,-4.76,7.35),(sign*1.95,-4.76,7.42)],.075)
+    for x,z in [(1.35,6.2),(1.80,6.55),(2.15,6.98)]:
+        scroll('Pediment_Acanthus_Leaf',[(sign*x,-4.78,z),(sign*(x-.17),-4.83,z+.22),(sign*(x-.07),-4.78,z+.36)],.065)
+for x in [-5.45,5.45]:
+    cylinder('Window_Keystone_Gold_Medallion',(x,-4.25,4.31),.20,.12,gold,'gold_leaf',8,'Y')
 
-def textured_card(name,m,at,size,curve=False,flip=False):
-    nx,ny=(10,6) if curve else (1,1);w,h=size;verts=[];faces=[];uvs=[]
+def textured_card(name,m,at,size,curve=False,flip=False,region=None):
+    nx,ny=(6,4) if curve else (1,1);w,h=size;verts=[];faces=[];uvs=[]
     for j in range(ny+1):
         for i in range(nx+1):
             u=i/nx;v=j/ny;xx=(u-.5)*w;zz=(v-.5)*h
@@ -293,14 +348,20 @@ def textured_card(name,m,at,size,curve=False,flip=False):
             a=j*(nx+1)+i;faces.append((a,a+1,a+nx+2,a+nx+1))
     o=mesh_object(name,verts,faces,m)
     for poly in o.data.polygons:
-        for li in poly.loop_indices:o.data.uv_layers[0].data[li].uv=uvs[o.data.loops[li].vertex_index]
+        for li in poly.loop_indices:
+            u,v=uvs[o.data.loops[li].vertex_index]
+            if region:
+                rx,ry,rw,rh=region;u=(rx+u*rw)/512;v=1-(ry+(1-v)*rh)/512
+            o.data.uv_layers[0].data[li].uv=(u,v)
     o['uv_kind']='canonical_cutout_projection';return o
 
 # Crowned pig emblem: canonical approved artwork on a curved relief card + bronze mount.
 cylinder('Crest_Raised_Mount',(0,-4.70,7.44),1.0,.23,gold,'brass',16,'Y')
-textured_card('Crowned_Pig_Heraldic_Relief',crest,(0,-4.86,7.55),(4,3),curve=True)
-for x,z,flip in [(-7.33,5.95,False),(7.32,5.87,True),(-3.32,7.4,False),(3.27,7.32,True)]:
-    textured_card('Separate_Ivy_Cutout',ivy,(x,-4.75 if abs(x)<4 else -4.47,z),(128/96,512/96),flip=flip)
+textured_card('Crowned_Pig_Heraldic_Relief',crest,(0,-4.86,7.55),(4,3),curve=True,region=(64,0,384,288))
+for x in [-6.32,-4.58,4.58,6.32]:
+    textured_card('Window_Acanthus_Ornament',crest,(x,-4.39,7.73),(128/96,64/96),region=(0,320,128,64))
+for x,z,flip in [(-7.28,6.74,False),(7.22,6.65,True),(-3.18,8.02,False),(3.23,8.05,True),(-7.26,3.95,True),(7.26,3.58,False),(-3.17,4.85,True),(3.13,4.73,False)]:
+    textured_card('Separate_Ivy_Cutout',ivy,(x,-4.81 if abs(x)<4 else -4.47,z),(256/96,256/96),flip=flip)
 
 # Two small real wall lanterns; metal, glass and emissive mask are separate.
 for x in [-2.28,2.28]:
@@ -310,6 +371,53 @@ for x in [-2.28,2.28]:
     cylinder('Lamp_Lower_Rim',(x,-4.53,3.09),.18,.11,gold,'brass',4)
     for sign in [-1,1]:box('Lamp_Front_Mullion',(x+sign*.105,-4.645,3.39),(.025,.04,.52),iron,'iron')
     sphere('Lamp_Finial',(x,-4.53,3.83),.07,gold)
+
+# The whole architectural body is raised60cm, supported by real rusticated stone.
+# Four broad15cm risers meet the actual doorway threshold, not a painted decal.
+box('Rusticated_Foundation',(0,0,-.30),(16.20,8.15,.60),masonry)
+for i in range(4):
+    height=.15*(i+1);depth=1.80-i*.40
+    box('Entrance_Step_'+str(i+1),(0,-3.95-depth/2,height/2-.60),(8.0-i*.22,depth,height),masonry)
+for x in [-5.3,5.3]:
+    box('Wing_Rusticated_Plinth',(x,-4.13,.34),(4.25,.38,.68),masonry)
+    box('Wing_Plinth_Coping',(x,-4.26,.70),(4.35,.48,.12),stone,'frieze')
+for o in model:o.location.z+=.60
+bpy.context.view_layer.update()
+detail_counts={}
+for o in model:
+    key=o.name.split('.')[0];detail_counts[key]=detail_counts.get(key,0)+sum(len(p.vertices)-2 for p in o.data.polygons)
+print('DETAIL_TRIANGLES',json.dumps(dict(sorted(detail_counts.items(),key=lambda x:-x[1]))))
+print('HIGHEST_DETAIL',max((max((o.matrix_world@v.co).z for v in o.data.vertices),o.name) for o in model))
+
+# Cull only fully enclosed faces of small opaque details. Every corner and the face
+# centroid must be inside one closed architectural solid. Never cull alpha cards.
+# This recovers hidden trim/back faces for real balusters within the6k budget.
+occluders=[]
+for o in model:
+    if o.data.materials[0] in (ivy,crest,glass):continue
+    if not (o.get('solid_occluder',False) or o.name.startswith(('Front_Ashlar','Back_Wall','West_Wall','East_Wall','Central_Attic'))):continue
+    bm=bmesh.new();bm.from_mesh(o.data);bm.transform(o.matrix_world);bmesh.ops.recalc_face_normals(bm,faces=list(bm.faces))
+    tree=BVHTree.FromBMesh(bm);bounds=[o.matrix_world@v.co for v in o.data.vertices]
+    lo=Vector(tuple(min(v[k] for v in bounds) for k in range(3)));hi=Vector(tuple(max(v[k] for v in bounds) for k in range(3)))
+    occluders.append((o,tree,lo,hi));bm.free()
+culled=0
+for o in model:
+    if o.data.materials[0] in (ivy,crest,glass):continue
+    bm=bmesh.new();bm.from_mesh(o.data);remove=[]
+    for face in bm.faces:
+        points=[o.matrix_world@v.co for v in face.verts];center=sum(points,Vector())/len(points)
+        face_normal=(o.matrix_world.to_3x3()@face.normal).normalized()
+        probes=[p.lerp(center,.002) for p in points]+[center]
+        for solid,tree,lo,hi in occluders:
+            if solid==o or any(center[k]<lo[k]-1e-5 or center[k]>hi[k]+1e-5 for k in range(3)):continue
+            inside=True
+            for p in probes:
+                q,n,_,dist=tree.find_nearest(p)
+                dot=(p-q).dot(n) if q is not None else 1
+                if q is None or dot>1e-5 or (dot>=-1e-5 and n.dot(face_normal)>-.99):inside=False;break
+            if inside:remove.append(face);break
+    if remove:culled+=sum(len(f.verts)-2 for f in remove);bmesh.ops.delete(bm,geom=remove,context='FACES_ONLY')
+    bm.to_mesh(o.data);bm.free();o.data.update()
 
 # Retain logical assembly nodes, but join surfaces by material to keep draw calls low.
 bpy.ops.object.select_all(action='DESELECT')
@@ -340,9 +448,10 @@ bounds=[(o.matrix_world@v.co) for o in joined for v in o.data.vertices]
 lo=[min(v[i] for v in bounds) for i in range(3)];hi=[max(v[i] for v in bounds) for i in range(3)]
 report={'triangles':triangles,'mesh_count':len(joined),'material_count':len(materials),'blender_bounds':[lo,hi],
     'native_up':'Z','export_up':'Y','native_front':'-Y','export_front':'+Z','body_size_m':[16,10.5,8],
-    'roof_pitch_deg':math.degrees(math.atan2(10.5-8.02,4.35)),
+    'roof_pitch_deg':math.degrees(math.atan2(.52,3.78)),
+    'revision':'bank3d-detail-2','hidden_triangles_removed':culled,'foundation_height_m':.6,'entrance_steps':4,'step_rise_m':.15,
     'uv_policy':'Face-local metric isometry96px/m. Canonical curved crest/ivy cards preserve their source-grid projection.',
-    'real_features':['Boolean recessed arches/windows0.28m','columns/capitals','projecting cornices15-30cm','sloped roof/eaves35cm','separate curved crest and ivy','wall lantern metal/glass'],
+    'real_features':['Boolean recessed arches/windows0.28m','gilded columns/capitals/bases','projecting cornices15-30cm','low roof behind open balustraded parapet and gold finials','four real balconettes','pediment raised gilded acanthus relief','rusticated plinth and four entrance steps','separate curved crest and flowering ivy','wall lantern metal/glass'],
     'materials':{name:{'albedo':m['albedo_file'],'cutout':m['cutout'],'glow':m['glow_file']} for name,m in materials.items()}}
 (OUT/'model_report.json').write_text(json.dumps(report,indent=2)+'\n')
 # glTF separate is packed into GLB later with external PNG URIs retained.

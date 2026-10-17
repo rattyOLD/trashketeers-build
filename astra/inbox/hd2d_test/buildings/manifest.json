@@ -1,41 +1,58 @@
 {
   "schema_version": 1,
-  "brief": "v38 + v37",
-  "revision": "bank3d-control-1",
+  "brief": "v38 + v37 + owner bank-detail revision",
+  "revision": "bank3d-detail-2",
   "studio": "TrashSquad · Beer Party Studio",
-  "scope": "First review delivery: bank only. No3D cafe/shop/terrace/fountain or characters delivered in this stage.",
+  "scope": "Bank refinement only: low parapet roof, v36 detail, pixel materials, plinth/stairs and clean crest. Other v38 stages pending.",
   "delivery_status": "review_candidate",
+  "owner_approach_approved": true,
   "owner_visual_approved": false,
   "ready_for_scene_review": true,
   "pixels_per_metre": 96,
   "files": [
     {
       "file": "bank_crest.png",
-      "sha256": "2050d4d8f47dc4cadd55ea4f057790e903012de95d7a82bf7d2ea83d3d054874",
-      "bytes": 27842,
-      "width": 384,
-      "height": 288,
+      "sha256": "778dd786bb1521fd68d5f86b5e9b54ff30fa089bcfe4e12b5703401d05233fb5",
+      "bytes": 31106,
+      "width": 512,
+      "height": 512,
       "format": "P",
       "pixels_per_metre": 96,
-      "role": "albedo",
+      "role": "cutout_atlas",
       "color_space": "sRGB",
       "palette": "bank_palette.png",
       "alpha": "binary 0/255",
-      "size_m": [
-        4,
-        3
-      ],
-      "anchor_px": [
-        192,
-        144
-      ],
       "collision": false,
-      "description": "Approved heraldic face extracted from accepted elevation; curved relief mesh in GLB"
+      "regions_px": {
+        "crowned_pig": [
+          64,
+          0,
+          384,
+          288
+        ],
+        "window_acanthus": [
+          0,
+          320,
+          128,
+          64
+        ]
+      },
+      "region_sizes_m": {
+        "crowned_pig": [
+          4,
+          3
+        ],
+        "window_acanthus": [
+          1.3333333333333333,
+          0.6666666666666666
+        ]
+      },
+      "description": "Clean isolated crest and window ornament, separate padded atlas islands; mapped at96px/m"
     },
     {
       "file": "bank_glass.png",
-      "sha256": "b5fd56471d46c9a7eb329915d9f732e372f91ba286ca6110c0b50660a81e5d5d",
-      "bytes": 7009,
+      "sha256": "3df0ded9d215e8c53481f02dcc7c6fe350c41eff0a9d3897ac8038d74063d26d",
+      "bytes": 4081,
       "width": 192,
       "height": 192,
       "format": "P",
@@ -77,8 +94,8 @@
     },
     {
       "file": "bank_hall.glb",
-      "sha256": "480b8ba26372f89fd6135e1e5b4dc39795235525d036444d5b9ff8c6e9d6caf0",
-      "bytes": 614240,
+      "sha256": "8ecbaf657ca64ab94e868bf24ed4357ffe5eda2058326a7232659f279f57afa2",
+      "bytes": 618720,
       "role": "building_model",
       "body_size_m": [
         16,
@@ -87,14 +104,14 @@
       ],
       "actual_render_bounds_m": [
         [
-          -8.390000343322754,
-          0.0,
-          -4.400000095367432
+          -8.613333702087402,
+          -5.960464477539063e-08,
+          -4.369999885559082
         ],
         [
-          8.390000343322754,
-          10.5,
-          4.979520797729492
+          8.59333324432373,
+          10.500000953674316,
+          5.75
         ]
       ],
       "anchor_m": [
@@ -105,14 +122,14 @@
       "up_axis": "+Y",
       "front_axis": "+Z",
       "units": "metres",
-      "triangles": 5993,
+      "triangles": 5919,
       "collider_radius_m": 9.1,
       "collider_shape": "compound boxes",
       "collision_boxes": [
         {
           "center_m": [
             0,
-            4.05,
+            4.65,
             0
           ],
           "size_m": [
@@ -123,8 +140,20 @@
         },
         {
           "center_m": [
+            0,
+            0.3,
+            0
+          ],
+          "size_m": [
+            16.2,
+            0.6,
+            8.15
+          ]
+        },
+        {
+          "center_m": [
             -3.18,
-            2.44,
+            3.04,
             4.25
           ],
           "size_m": [
@@ -136,7 +165,7 @@
         {
           "center_m": [
             3.18,
-            2.44,
+            3.04,
             4.25
           ],
           "size_m": [
@@ -144,15 +173,63 @@
             4.88,
             0.95
           ]
+        },
+        {
+          "center_m": [
+            0,
+            0.075,
+            4.8500000000000005
+          ],
+          "size_m": [
+            8.0,
+            0.15,
+            1.8
+          ]
+        },
+        {
+          "center_m": [
+            0,
+            0.15,
+            4.65
+          ],
+          "size_m": [
+            7.78,
+            0.3,
+            1.4
+          ]
+        },
+        {
+          "center_m": [
+            0,
+            0.22499999999999998,
+            4.45
+          ],
+          "size_m": [
+            7.56,
+            0.44999999999999996,
+            1.0
+          ]
+        },
+        {
+          "center_m": [
+            0,
+            0.3,
+            4.25
+          ],
+          "size_m": [
+            7.34,
+            0.6,
+            0.5999999999999999
+          ]
         }
       ]
     },
     {
       "file": "bank_ivy.png",
-      "sha256": "adb4c2d9e22533838987bcf53f8792d1ab23945108df1792e674b15e43af9a10",
-      "bytes": 10463,
-      "width": 128,
-      "height": 512,
+      "sha256": "1d17f4154dd176835bec1552019fb519c1a5c1dde97372eb1287e441277e5884",
+      "bytes": 14833,
+      "width": 256,
+      "height": 256,
       "format": "P",
       "pixels_per_metre": 96,
       "role": "albedo",
@@ -160,20 +237,20 @@
       "palette": "bank_palette.png",
       "alpha": "binary 0/255",
       "size_m": [
-        1.3333333333333333,
-        5.333333333333333
+        2.6666666666666665,
+        2.6666666666666665
       ],
       "anchor_px": [
-        64,
-        512
+        128,
+        256
       ],
       "collision": false,
-      "description": "Separate alpha-scissor cards over architecture"
+      "description": "Lush flowering ivy on eight separate alpha-scissor cards"
     },
     {
       "file": "bank_masonry.png",
-      "sha256": "a86cc8f6e635d6454229267878765c4de2146ab49cb5fbea986f6dacdea3f3a0",
-      "bytes": 20674,
+      "sha256": "804b9aeadf68422f95587939365ea09907107179322037aa94a4073b5d8ff72f",
+      "bytes": 10413,
       "width": 192,
       "height": 192,
       "format": "P",
@@ -217,7 +294,7 @@
     },
     {
       "file": "bank_palette.png",
-      "sha256": "8e721de24e276cfd6be82090511c43162a495a6cee05e400094e43551a2c0f51",
+      "sha256": "0e48db728cecfc56a8f9de7c3d1fe94361057384c77b754f95021fda99dcd704",
       "bytes": 453,
       "width": 128,
       "height": 1,
@@ -228,8 +305,8 @@
     },
     {
       "file": "bank_plaster.png",
-      "sha256": "618b293760813f506b0ed4fa4d043b57af4db63952cf08b8aca8138e9989929a",
-      "bytes": 18630,
+      "sha256": "402b9761d9f887885ed1289e300a20e29fb50d7e69c58bf6ed371f6a42708dfa",
+      "bytes": 8484,
       "width": 192,
       "height": 192,
       "format": "P",
@@ -273,8 +350,8 @@
     },
     {
       "file": "bank_roof.png",
-      "sha256": "15dae3cb92b468fd805da6db3c25ac287c348c298c9ce9949013a9cc7121f842",
-      "bytes": 14691,
+      "sha256": "0976dee8c71a2cad6e31c524d5344782d09a4b226504f70370015cc428faa347",
+      "bytes": 7469,
       "width": 192,
       "height": 192,
       "format": "P",
@@ -318,8 +395,8 @@
     },
     {
       "file": "bank_trim.png",
-      "sha256": "1cb7b1d91a9705e835f4d1e87fede5f26593f0f5962ff83ed9fed2ca3b1b3133",
-      "bytes": 197438,
+      "sha256": "32469a2dfe532bd5618bf43542b7c1720d8122dce75e358da3125fe0e25fe6c7",
+      "bytes": 77804,
       "width": 1024,
       "height": 1024,
       "format": "P",
@@ -512,14 +589,19 @@
     ]
   },
   "geometry": {
-    "triangles": 5993,
+    "triangles": 5919,
     "meshes": 11,
     "materials": 11,
-    "roof_pitch_deg": 29.68811066452907,
+    "roof_pitch_deg": 7.832795566234645,
     "recess_m": 0.28,
-    "eaves_m": 0.35,
+    "roof_behind_parapet": true,
     "body_depth_m": 8,
-    "actual_bounds_note": "Cornices, finials and front crest extend beyond the16x8m wall body; use actual_render_bounds_m for framing."
+    "foundation_height_m": 0.6,
+    "entrance_steps": 4,
+    "step_rise_m": 0.15,
+    "parapet_balusters": 14,
+    "balconettes": 4,
+    "actual_bounds_note": "Ivy, cornices and four entrance steps extend beyond the16x8m wall body; use actual_render_bounds_m for framing."
   },
-  "next_v38_stage": "One pig_guard idle for review; then Riko run8 and remaining ordered assets.3D cafe/shop only after bank assessment."
+  "next_v38_stage": "Bank refinement awaits scene review. Then one pig_guard idle and the remaining ordered stages; no3D cafe/shop before bank assessment."
 }
