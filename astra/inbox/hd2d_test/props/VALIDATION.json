@@ -46,11 +46,5 @@
   "lamp_pedestal_height_ratio": 1.0459770114942528,
   "assembly_visible_height_px": 330,
   "normal_unit_max_error": 0.004856081420822389,
-  "owner_visual_approval": false,
-  "byte_identical_reproduction": true,
-  "negative_control": {
-    "solid_glass_with_correct_hashes_rejected": true,
-    "reason": "Opaque mullions overwritten by glow"
-  },
-  "godot_checked": true
+  "owner_visual_approval": true
 }

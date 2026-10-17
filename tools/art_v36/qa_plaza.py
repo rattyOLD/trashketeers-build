@@ -63,11 +63,14 @@ def main():
         settings=character['sprite3d']
         rico_source={'manifest':character,'albedo_sha256':hashlib.sha256((chars/sprite['file']).read_bytes()).hexdigest()}
         rico_setup=f'''
-\t_hero.texture = load("res://candidate_chars/{sprite['file']}")
-\t_hero.pixel_size = {settings['pixel_size']}
-\t_hero.offset = Vector2({settings['offset_px'][0]}, {settings['offset_px'][1]})
+func _build_hero() -> void:
+\tvar candidate := Sprite3D.new()
+\t_hero = candidate
+\tcandidate.texture = load("res://candidate_chars/{sprite['file']}")
+\tcandidate.pixel_size = {settings['pixel_size']}
+\tcandidate.offset = Vector2({settings['offset_px'][0]}, {settings['offset_px'][1]})
 \tvar m := StandardMaterial3D.new()
-\tm.albedo_texture = _hero.texture
+\tm.albedo_texture = candidate.texture
 \tm.normal_enabled = true
 \tm.normal_texture = load("res://candidate_chars/{sprite['normal_map']}")
 \tm.normal_scale = {settings['normal_scale']}
@@ -77,7 +80,10 @@ def main():
 \tm.alpha_scissor_threshold = .5
 \tm.cull_mode = BaseMaterial3D.CULL_DISABLED
 \tm.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST_WITH_MIPMAPS
-\t_hero.material_override = m
+\tcandidate.material_override = m
+\t_style(candidate)
+\tcandidate.position = Vector3(-3,0,4)
+\tadd_child(candidate)
 '''
     (out/'prototypes/hd2d/plaza.gd').write_text(code)
     (out/'project.godot').write_text('''config_version=5
@@ -147,18 +153,19 @@ func _ready() -> void:
 ''')
     if rico_setup:
         path=out/'review.gd'
-        review=path.read_text().replace('\tset_process(false)','\tset_process(false)\n'+rico_setup)
+        review=path.read_text()
         checks='''
-\tvar material := _hero.material_override as StandardMaterial3D
+\tvar candidate := _hero as Sprite3D
+\tvar material := candidate.material_override as StandardMaterial3D
 \tmaterial.normal_enabled = false
 \tawait capture("plaza_sample_evening_flat")
 \tlighting(false)
 \tawait capture("plaza_sample_day_flat")
 \tmaterial.normal_enabled = true
-\t_hero.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+\tcandidate.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 \tawait capture("plaza_sample_day_no_shadow")
 '''
-        path.write_text(review.replace('\tget_tree().quit()',checks+'\tget_tree().quit()'))
+        path.write_text(review.replace('\tget_tree().quit()',checks+'\tget_tree().quit()')+rico_setup)
     (out/'staging.json').write_text(json.dumps({'prototype_source_sha256':hashlib.sha256((ROOT/'source/prototypes/hd2d/plaza.gd').read_bytes()).hexdigest(),
         'source_modified':False,'candidate_revision':manifest['revision'],'copied_assets':copied,
         'candidate_overlays':candidates,'rico_source':rico_source,

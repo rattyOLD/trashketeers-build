@@ -3,8 +3,8 @@
   "brief": "v36",
   "revision": "modular-96-control-1",
   "studio": "TrashSquad · Beer Party Studio",
-  "delivery_status": "review_candidate",
-  "owner_visual_approved": false,
+  "delivery_status": "accepted_control_sample",
+  "owner_visual_approved": true,
   "pixels_per_metre": 96,
   "palette": "../palettes/bank96.png",
   "scope": "three props only, not the remaining HD-2D set",
@@ -277,7 +277,7 @@
     "render_report": "RENDER_VALIDATION.json"
   },
   "pending": [
-    "Owner visual review",
     "Remaining props, facades, materials192 and character animations"
-  ]
+  ],
+  "approval_note": "Owner accepted idle Riko in brief e099467; props96 explicitly accepted in current conversation 17.10"
 }

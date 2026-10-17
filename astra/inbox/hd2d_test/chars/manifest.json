@@ -3,8 +3,8 @@
   "brief": "v36",
   "revision": "rico-96-control-1",
   "studio": "TrashSquad · Beer Party Studio",
-  "delivery_status": "single_idle_review_candidate",
-  "owner_visual_approved": false,
+  "delivery_status": "accepted_control_sample",
+  "owner_visual_approved": true,
   "ready_for_gameplay": false,
   "pixels_per_metre": 96,
   "palette": "../palettes/chars.png",
@@ -115,7 +115,7 @@
     "source/assets/heroes/tactical/raccoon_idle.png",
     "astra/previews/v35/bank_direction.png"
   ],
-  "identity_visual_approval_pending": true,
+  "identity_visual_approval_pending": false,
   "verification": {
     "format": "VALIDATION.json",
     "godot_render_verified": true,
@@ -123,8 +123,8 @@
     "artistic_approval": false
   },
   "pending": [
-    "Owner visual review of identity, personality and material quality",
     "Props96: slender lamp/pedestal and planter",
     "After review: run8, 192px materials, mobs"
-  ]
+  ],
+  "approval_note": "Owner accepted idle Riko in brief e099467; props96 explicitly accepted in current conversation 17.10"
 }
