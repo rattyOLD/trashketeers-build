@@ -1,6 +1,6 @@
 # Trashketeers.io: карта проекта
 
-Игра: топ-даун автошутер, Godot 4.4.1 (GDScript). Направление с 17.10 — экшн-шутер с элементами JRPG в HD-2D: бой в реальном времени, вокруг него районы для прогулки, NPC, поручения и сюжетные сцены (бриф `astra/from_claude/BRIEF_v39_district_concept.md`). Экспорт Web (Compatibility). Тест на телефоне через GitHub Pages
+Игра: топ-даун автошутер, Godot 4.4.1 (GDScript). Направление с 17.10 — экшн-шутер с элементами JRPG в HD-2D: бой в реальном времени, вокруг него районы для прогулки, NPC, поручения и сюжетные сцены (бриф `astra/from_claude/BRIEF_v39_district_concept.md`). Рендер: ПК — Forward+, Web и телефоны — Compatibility (переопределения в `project.godot`). Экспорт Web (Compatibility). Тест на телефоне через GitHub Pages
 (корень репозитория и `docs/` — свежая сборка). Это НЕ Telegram mini app.
 
 ## Где что лежит

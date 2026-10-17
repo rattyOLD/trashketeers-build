@@ -75,6 +75,7 @@ world_time={
 
 textures/vram_compression/import_etc2_astc=true
 
-renderer/rendering_method="gl_compatibility"
+renderer/rendering_method="forward_plus"
 renderer/rendering_method.mobile="gl_compatibility"
+renderer/rendering_method.web="gl_compatibility"
 environment/defaults/default_clear_color=Color(0.05, 0.04, 0.11, 1)
