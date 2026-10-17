@@ -5,9 +5,9 @@ extends Node3D
 ## Временный арт: текущие спрайты и плитки Банка. Игру не затрагивает, запускается отдельной сценой.
 ## Масштаб брифа: 32 px арта = 1 м; временный арт масштабируется по нужной высоте в метрах.
 
-## Материалы Астры (бриф v36): 64×64 px = 2×2 м, по три совместимых по краям варианта.
+## Материалы Астры (бриф v36): плитка на 2×2 м (64 или 96 px — размер берётся из файла), по три
+## совместимых по краям варианта.
 const MATERIALS := "res://prototypes/hd2d/materials/"
-const MATERIAL_PX := 64
 const MATERIAL_M := 2.0
 ## Варианты раскладываются мозаикой 3×3 (6×6 м на повтор), чтобы плитка не читалась сеткой.
 const MOSAIC := [[0, 1, 2], [2, 0, 1], [1, 2, 0]]
@@ -17,7 +17,7 @@ const PROPS := "res://prototypes/hd2d/props/"
 const PROP_PX_PER_M := 48.0
 const LANTERN_MOUNT := 1.2708333
 const LANTERN_GLOW := Color("#ffc574")
-const LANTERN_GLOW_ENERGY := 0.8
+const LANTERN_GLOW_ENERGY := 0.45
 const PLAZA := Vector2(34.0, 26.0)
 const TERRACE_Z := -6.0
 const TERRACE_H := 1.2
@@ -113,10 +113,11 @@ func _mosaic(material: String, suffix: String) -> Texture2D:
 			image.decompress()
 		image.convert(Image.FORMAT_RGBA8)
 		variants.append(image)
-	var mosaic := Image.create(MATERIAL_PX * 3, MATERIAL_PX * 3, true, Image.FORMAT_RGBA8)
+	var side := variants[0].get_width()
+	var mosaic := Image.create(side * 3, side * 3, true, Image.FORMAT_RGBA8)
 	for y in 3:
 		for x in 3:
-			mosaic.blit_rect(variants[MOSAIC[y][x]], Rect2i(0, 0, MATERIAL_PX, MATERIAL_PX), Vector2i(x, y) * MATERIAL_PX)
+			mosaic.blit_rect(variants[MOSAIC[y][x]], Rect2i(0, 0, side, side), Vector2i(x, y) * side)
 	mosaic.generate_mipmaps()
 	return ImageTexture.create_from_image(mosaic)
 
