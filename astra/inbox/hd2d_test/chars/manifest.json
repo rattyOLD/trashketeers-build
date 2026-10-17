@@ -1,14 +1,14 @@
 {
   "schema_version": 1,
   "brief": "v36",
-  "revision": "rico-96-control-1",
+  "revision": "rico-96-badge-2",
   "studio": "TrashSquad · Beer Party Studio",
-  "delivery_status": "accepted_control_sample",
-  "owner_visual_approved": true,
+  "delivery_status": "accepted_identity_badge_fix_candidate",
+  "owner_visual_approved": false,
   "ready_for_gameplay": false,
   "pixels_per_metre": 96,
   "palette": "../palettes/chars.png",
-  "scope": "Riko idle, one frame only; run8, props96, materials192 and mobs pending",
+  "scope": "Riko idle: accepted identity preserved, canonical star correction; run8 pending",
   "files": [
     {
       "file": "raccoon_idle.png",
@@ -58,7 +58,7 @@
       "creation_method": "concept-based target-grid palette cleanup, median material samples, local cluster cleanup, complete dark contour",
       "source_image": "../../../previews/v36/rico96_source.png",
       "resampled_from_concept": true,
-      "sha256": "430078ecb06105a8325f6ed05cc9ef82008a8c53d38eccbf6a33b6c6a69cd47b",
+      "sha256": "07e6aff3fd9686c076e1d1595c745c8023a89e80805021f3417feca66beb7e8d",
       "bytes": 66401
     },
     {
@@ -85,6 +85,18 @@
       "source": "authored geometry fields and fold profiles; not albedo luminance",
       "sha256": "58ff06aedabfdcb5d6bffa1a30a2cf74173405d17dc728b6fb69381d1878f689",
       "bytes": 196947
+    },
+    {
+      "file": "raccoon_badge.png",
+      "role": "canonical_badge_reference",
+      "width": 15,
+      "height": 15,
+      "format": "indexed PNG, binary tRNS",
+      "pixels_per_metre": 96,
+      "palette": "../palettes/chars.png",
+      "sha256": "cdf132a5dd4b198894bc938b3bb6dead5135e1b75062dee3b8e7ebdd7d22926c",
+      "bytes": 844,
+      "frame_rule": "Translation only. No per-frame regeneration, resize, shear or mirroring in the right-facing atlas."
     }
   ],
   "clips": {
@@ -123,8 +135,36 @@
     "artistic_approval": false
   },
   "pending": [
-    "Props96: slender lamp/pedestal and planter",
-    "After review: run8, 192px materials, mobs"
+    "Run8 with matched face and badge",
+    "Gameplay and weapons integration after review",
+    "Remaining environment/facades and mobs"
   ],
-  "approval_note": "Owner accepted idle Riko in brief e099467; props96 explicitly accepted in current conversation 17.10"
+  "approval_note": "Owner accepted idle Riko in brief e099467; props96 explicitly accepted in current conversation 17.10",
+  "identity_reference_accepted": true,
+  "badge_fix_visual_approved": false,
+  "canonical_badge": {
+    "file": "raccoon_badge.png",
+    "idle_origin_px": [
+      82,
+      112
+    ],
+    "star_mask_9x9": [
+      "....#....",
+      "...###...",
+      "...###...",
+      "#########",
+      ".#######.",
+      "..#####..",
+      "..##.##..",
+      ".##...##.",
+      ".#.....#."
+    ],
+    "changed_pixels_from_accepted_idle": 85,
+    "change_bounds_inclusive": [
+      84,
+      114,
+      94,
+      124
+    ]
+  }
 }

@@ -5,6 +5,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {PNG} from './png_core96.mjs';
+import {fixBadge} from './rico_badge96.mjs';
 export function cleanup(source,PNG){
 const src=PNG.decode(source),bounds=PNG.bbox(src),H=bounds[3]-bounds[1],scale=168/H,W=256;
 let footMin=src.width,footMax=0;
@@ -44,10 +45,10 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
   const recipe=JSON.parse(fs.readFileSync(new URL('./rico96_form_normals.json',import.meta.url),'utf8'));
   if(sha(raw)!==recipe.source_sha256) throw Error('Use the source illustration paired with this geometry recipe');
-  const asset=cleanup(raw,PNG),normals=formNormals(asset,recipe,PNG);
+  const asset=cleanup(raw,PNG),badge=fixBadge(asset,PNG),normals=formNormals(asset,recipe,PNG);
   fs.mkdirSync(outPath,{recursive:true});
   const palette=PNG.encode(128,1,new Uint8Array(asset.palette.flat()),{rgb:true});
-  for(const [name,data] of [['raccoon_idle.png',asset.encoded],['raccoon_idle_n.png',normals.encoded],['chars.png',palette]]) fs.writeFileSync(path.join(outPath,name),data);
+  for(const [name,data] of [['raccoon_idle.png',asset.encoded],['raccoon_idle_n.png',normals.encoded],['raccoon_badge.png',badge.encoded],['chars.png',palette]]) fs.writeFileSync(path.join(outPath,name),data);
   const report={...asset.report,png_crc:true,zlib_adler:true,normal_unit_max_error:normals.maxUnitError,normal_unique_vectors:normals.uniqueVectors,albedo_sha256:sha(asset.encoded),normal_sha256:sha(normals.encoded),godot_checked:false,artistic_approval:false};
   fs.writeFileSync(path.join(outPath,'pixel_validation.json'),JSON.stringify(report,null,2)+'\n');
   console.log('RICO96_PIXEL_EXPORT_OK',JSON.stringify(report));

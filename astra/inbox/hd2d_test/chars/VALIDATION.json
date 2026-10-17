@@ -44,7 +44,7 @@
   "outline_pixels": 786,
   "godot_checked": true,
   "artistic_approval": false,
-  "albedo_sha256": "430078ecb06105a8325f6ed05cc9ef82008a8c53d38eccbf6a33b6c6a69cd47b",
+  "albedo_sha256": "07e6aff3fd9686c076e1d1595c745c8023a89e80805021f3417feca66beb7e8d",
   "normal_sha256": "58ff06aedabfdcb5d6bffa1a30a2cf74173405d17dc728b6fb69381d1878f689",
   "palette_sha256": "31dfacf6fb58e975f7417082305d3d6f7bbfe33af5aeef8b5fad8d01fffb2a4b",
   "albedo_bytes": 66401,
@@ -56,5 +56,30 @@
     16007
   ],
   "node_cli_byte_identical_reproduction": true,
-  "render_report": "RENDER_VALIDATION.json"
+  "render_report": "RENDER_VALIDATION.json",
+  "canonical_badge": {
+    "file": "raccoon_badge.png",
+    "idle_origin_px": [
+      82,
+      112
+    ],
+    "star_mask_9x9": [
+      "....#....",
+      "...###...",
+      "...###...",
+      "#########",
+      ".#######.",
+      "..#####..",
+      "..##.##..",
+      ".##...##.",
+      ".#.....#."
+    ],
+    "changed_pixels_from_accepted_idle": 85,
+    "change_bounds_inclusive": [
+      84,
+      114,
+      94,
+      124
+    ]
+  }
 }

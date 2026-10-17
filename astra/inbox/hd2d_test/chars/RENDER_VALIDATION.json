@@ -7,42 +7,42 @@
   "postprocess": "prototype screen-mip focus blur, glow and color grade; not physical camera DOF",
   "artistic_approval": false,
   "screenshots_sha256": {
-    "plaza_sample_day.png": "a8114280689f7dd26514d3b32e01682ab019d2b676898401116eca547d473260",
-    "plaza_sample_evening.png": "1d18cd20db8e9bf06060504211f6c60a999c7277933595af95e1e59888e4a6c5",
-    "plaza_sample_day_flat.png": "a236a1a56e39681ad44af05306c1a9b29154aaee6d67edd547755bc7843bdc59",
-    "plaza_sample_evening_flat.png": "aa945984b4490197eac9a56daa83aa61fc437a5ba1748a38bbc2f9bb1d12ab54",
-    "plaza_sample_day_no_shadow.png": "4d10aeafa35b87f373ba97cb16bd997d1ec809a1f5ead32cd7f8b627310213b0"
+    "plaza_sample_day.png": "189773e81a0bbb70580a6815f774739deba6297472fa61685794f3fda6548fa9",
+    "plaza_sample_evening.png": "b87355e509e61b21ee3e8476d7c48589ce86b4997843da08636d9e913341ee5d",
+    "plaza_sample_day_flat.png": "594a72d9cb6db54a4a7b9755967cc36e2a3dfdc9c3b7647a147d2db59249d078",
+    "plaza_sample_evening_flat.png": "c5f8d10e21db5647bba7df97481f400140f9c1776a2fe1a0c5718ab8d951162e",
+    "plaza_sample_day_no_shadow.png": "64763e4ec6ea3b1bd380373d57a1deb5df4a9d1820dfb308b6427df91bd7d05d"
   },
   "comparisons": {
     "day/day_flat": {
-      "changed_pixels_above_1": 4180,
+      "changed_pixels_above_1": 4264,
       "bounds_inclusive": [
         732,
         372,
-        894,
-        525
-      ],
-      "max_channel_delta": 4
-    },
-    "evening/evening_flat": {
-      "changed_pixels_above_1": 3319,
-      "bounds_inclusive": [
-        733,
-        371,
         895,
         525
       ],
       "max_channel_delta": 4
     },
+    "evening/evening_flat": {
+      "changed_pixels_above_1": 3293,
+      "bounds_inclusive": [
+        733,
+        371,
+        888,
+        525
+      ],
+      "max_channel_delta": 4
+    },
     "day/day_no_shadow": {
-      "changed_pixels_above_1": 3919,
+      "changed_pixels_above_1": 3798,
       "bounds_inclusive": [
         751,
-        413,
-        931,
+        417,
+        925,
         526
       ],
-      "max_channel_delta": 71
+      "max_channel_delta": 70
     }
   },
   "limits": [
