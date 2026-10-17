@@ -1,0 +1,95 @@
+{
+  "brief": "v36",
+  "kind": "palette_proposal",
+  "production_ready": false,
+  "installed": false,
+  "not_a_prop_or_game_art": true,
+  "density_decision": "48 px/m proposed; explicit owner decision pending",
+  "file": "bank_palette_proposal.png",
+  "width": 64,
+  "height": 1,
+  "sha256": "ed10c9be0447bfdcfbba65f3c43ab7bf3e8771e5a260005f70c8868de94c1494",
+  "colors": 64,
+  "existing_material_colors_preserved": 32,
+  "replaced_unused_slots": [
+    0,
+    6,
+    13,
+    18,
+    19,
+    24,
+    25,
+    30,
+    31,
+    32,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52,
+    53,
+    59,
+    60,
+    61,
+    62,
+    63
+  ],
+  "new_material_ramps": {
+    "brass": [
+      "#493326",
+      "#77502a",
+      "#a16d2d",
+      "#c28d38",
+      "#e2b750",
+      "#ffe39a"
+    ],
+    "iron": [
+      "#20222c",
+      "#33343e",
+      "#4c4b55",
+      "#67616b",
+      "#90818a"
+    ],
+    "amber_glass": [
+      "#4b3d34",
+      "#776047",
+      "#a68659",
+      "#c4ab77",
+      "#dfd0a0"
+    ],
+    "terracotta": [
+      "#613c35",
+      "#8e4d38",
+      "#b76240",
+      "#ce8050",
+      "#e3a16c",
+      "#f0c293"
+    ],
+    "foliage": [
+      "#203b2a",
+      "#365332",
+      "#4c7337",
+      "#6d963d",
+      "#98b94c",
+      "#c6d77c"
+    ],
+    "petals": [
+      "#7f394a",
+      "#b45868",
+      "#df8693",
+      "#f7bdbe"
+    ]
+  },
+  "note": "Only unused slots are proposed for replacement. Existing bank.png and all material pixels unchanged. Art still needs a successful native redraw."
+}
