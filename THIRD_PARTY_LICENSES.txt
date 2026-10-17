@@ -1,9 +1,12 @@
-TRASHSQUAD — THIRD-PARTY LICENSES
-© 2026 Beer Party Studio. All rights reserved.
+LICENSES / THIRD-PARTY NOTICES
+TrashSquad © 2026 Beer Party Studio. All rights reserved.
 
-This game uses third-party assets and the Godot Engine.
-Below is the complete licensing information.
+This game is proprietary software.
+It uses the Godot Engine and various third-party libraries and assets.
+This file contains the required copyright notices and license texts.
+This file MUST be distributed together with the game.
 
+Godot Engine version used: 4.4.1-stable
 
 ══════════════════════════════════════════════════════════════
 1. SOUNDS AND MUSIC
@@ -14,6 +17,8 @@ Below is the complete licensing information.
 • artisticdude — Zombies Sound Pack — CC0 1.0
 • Komiku — Action Techno; Last Boss: Let's see what we got — CC0 1.0
 • HoliznaCC0 — Retro Synths — CC0 1.0
+
+All of the above are licensed under CC0 1.0 (public domain dedication).
 
 ══════════════════════════════════════════════════════════════
 2. FONTS
@@ -31,7 +36,7 @@ Full text of the SIL Open Font License 1.1 is provided in section 6.
 3. GODOT ENGINE
 ══════════════════════════════════════════════════════════════
 
-This game is made with Godot Engine (godotengine.org).
+This game is made with Godot Engine (https://godotengine.org).
 
 Copyright (c) 2014-present Godot Engine contributors (see AUTHORS.md).
 Copyright (c) 2007-2014 Juan Linietsky, Ariel Manzur.
@@ -54,6 +59,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
+Godot Engine logo — Creative Commons Attribution 4.0 International (CC-BY-4.0)
+Copyright (c) 2017 Andrea Calabró
 
 ══════════════════════════════════════════════════════════════
 4. NOTICES
@@ -402,7 +409,7 @@ Zstandard — BSD-3-clause
 
 
 ══════════════════════════════════════════════════════════════
-6. LICENSE TEXTS
+6. FULL LICENSE TEXTS
 ══════════════════════════════════════════════════════════════
 
 --- OFL-1.1 (SIL Open Font License) ---
@@ -2127,3 +2134,9 @@ appreciated but is not required.
 misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 
+
+
+END OF THIRD-PARTY LICENSES
+This file is provided to comply with the attribution and notice requirements
+of the licenses under which the third-party components are distributed.
+The game itself remains proprietary © 2026 Beer Party Studio.
