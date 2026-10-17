@@ -189,6 +189,16 @@ def arch_glass(name,x,bottom,width,spring,y):
     pts=arch_profile(width,spring)
     return mesh_object(name,[(x+xx,y,bottom+zz) for xx,zz in pts],[tuple(range(len(pts)))],glass)
 
+def wall_lantern(x,face_y,zc):
+    # One wall lantern design for the facade and the roof pavilion: iron bracket, amber chamber
+    # with front mullions, brass rim and finial. face_y is the wall plane; the lamp hangs toward -Y.
+    box('Lamp_Wall_Bracket',(x,face_y-.20,zc+.45),(.10,.48,.10),iron,'iron')
+    cylinder('Lamp_Amber_Chamber',(x,face_y-.53,zc),.145,.49,amber,'amber',4)
+    cylinder('Lamp_Roof',(x,face_y-.53,zc+.31),.23,.13,iron,'iron',4)
+    cylinder('Lamp_Lower_Rim',(x,face_y-.53,zc-.30),.18,.11,gold,'brass',4)
+    for sign in [-1,1]:box('Lamp_Front_Mullion',(x+sign*.105,face_y-.645,zc),(.025,.04,.52),iron,'iron')
+    sphere('Lamp_Finial',(x,face_y-.53,zc+.44),.07,gold)
+
 def boolean_cut(wall,cutter):
     bpy.context.view_layer.objects.active=wall
     mod=wall.modifiers.new('Actual recessed aperture','BOOLEAN');mod.operation='DIFFERENCE';mod.solver='EXACT';mod.object=cutter
@@ -350,10 +360,8 @@ mesh_object('Pavilion_Hipped_Roof',hip,[(0,1,5,4),(2,3,4,5),(1,2,5),(3,0,4)],roo
 box('Pavilion_Ridge_Capping',(PX,PY,RIDGE+.04),(1.5,.2,.1),roofmat)
 cylinder('Pavilion_Finial_Collar',(PX,PY,RIDGE+.14),.16,.12,gold,'brass',vertices=8)
 sphere('Gold_Finial_Ball',(PX,PY,RIDGE+.34),.22,gold)
-for x in [PX-1.15,PX+1.15]:
-    box('Pavilion_Lamp_Bracket',(x,front_y-.12,DECK+2.05),(.08,.3,.08),iron,'iron')
-    cylinder('Pavilion_Lamp_Glass',(x,front_y-.3,DECK+1.75),.11,.36,amber,'amber',4)
-    cylinder('Pavilion_Lamp_Roof',(x,front_y-.3,DECK+1.98),.17,.1,iron,'iron',4)
+for x in [PX-1.2,PX+1.2]:
+    wall_lantern(x,front_y,DECK+1.75)
 
 # Central raised pediment: real stone blockwork/arch in front of roof.
 arch_solid('Central_Attic_Stone_Pediment',0,5.27,5.9,1.4,-4.52,-4.15,plaster)
@@ -398,12 +406,7 @@ for x,z,flip in [(-7.28,6.74,False),(7.22,6.65,True)]:
 
 # Two small real wall lanterns; metal, glass and emissive mask are separate.
 for x in [-2.28,2.28]:
-    box('Lamp_Wall_Bracket',(x,-4.20,3.84),(.10,.48,.10),iron,'iron')
-    cylinder('Lamp_Amber_Chamber',(x,-4.53,3.39),.145,.49,amber,'amber',4)
-    cylinder('Lamp_Roof',(x,-4.53,3.70),.23,.13,iron,'iron',4)
-    cylinder('Lamp_Lower_Rim',(x,-4.53,3.09),.18,.11,gold,'brass',4)
-    for sign in [-1,1]:box('Lamp_Front_Mullion',(x+sign*.105,-4.645,3.39),(.025,.04,.52),iron,'iron')
-    sphere('Lamp_Finial',(x,-4.53,3.83),.07,gold)
+    wall_lantern(x,-4.0,3.39)
 
 # The whole architectural body is raised60cm, supported by real rusticated stone.
 # Four broad15cm risers meet the actual doorway threshold, not a painted decal.
