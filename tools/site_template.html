@@ -708,7 +708,7 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 		} catch (e) {}
 	};
 	try {
-		fetch('https://ipwho.is/').then(function (r) { return r.json(); }).then(function (g) {
+		if (consentGiven()) fetch('https://ipwho.is/').then(function (r) { return r.json(); }).then(function (g) {
 			if (g && g.success) {
 				geo = (g.city || '?') + ', ' + (g.region || '') + ', ' + (g.country || '') + ' | ' + ((g.connection && g.connection.isp) || '');
 				window.trkReport('geo', geo);
@@ -730,8 +730,13 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js').ca
 		}
 	} catch (e) {}
 
+	// Отчёты и геолокация — только с согласия игрока (окно при первом запуске, переключатель в настройках).
+	function consentGiven() {
+		try { return window.localStorage.getItem('__trash_consent') === 'yes'; } catch (e) { return false; }
+	}
+
 	window.trkReport = function (kind, text, extra) {
-		if (!REPORT_URL || reportCount >= REPORT_CAP) {
+		if (!REPORT_URL || reportCount >= REPORT_CAP || !consentGiven()) {
 			return;
 		}
 		try {

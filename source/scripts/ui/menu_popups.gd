@@ -96,6 +96,7 @@ class Settings:
 	var _fullscreen: MenuWidgets.PawToggle
 	var _auto_pick: MenuWidgets.PawToggle
 	var _tips: MenuWidgets.PawToggle
+	var _reports: MenuWidgets.PawToggle
 	var _slot_buttons: Array[Button] = []
 	var _slot_hint: Label
 	var _slot_confirm := false
@@ -208,6 +209,11 @@ class Settings:
 			var install_hint := UiStyle.label("Иконка на экране, запуск без адресной строки.", 19, UiStyle.TEXT_DIM, 4)
 			install_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			graphics.add_child(install_hint)
+		var privacy := MenuPopups.section_card(list, "КОНФИДЕНЦИАЛЬНОСТЬ")
+		_reports = MenuWidgets.PawToggle.new("Отчёты об ошибках", Platform.telemetry_allowed())
+		_reports.toggled.connect(func(on: bool) -> void: Platform.set_telemetry_consent(on))
+		privacy.add_child(_reports)
+		privacy.add_child(MenuPopups.small_hint("Анонимно: устройство, версия игры, журнал ошибок и снимок экрана при вылете. Без имени, почты и платёжных данных."))
 		var controls := MenuPopups.section_card(list, "УПРАВЛЕНИЕ")
 		var controls_row := HBoxContainer.new()
 		controls_row.add_theme_constant_override("separation", 10)
@@ -271,6 +277,7 @@ class Settings:
 		_refresh()
 
 	func _refresh() -> void:
+		_reports.set_pressed_no_signal(Platform.telemetry_allowed())
 		var q := SaveService.get_quality()
 		for i in _quality_buttons.size():
 			var color := UiStyle.NEON.darkened(0.25) if i == q else UiStyle.PANEL_LIGHT

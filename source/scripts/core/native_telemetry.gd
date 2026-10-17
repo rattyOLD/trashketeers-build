@@ -110,6 +110,8 @@ func trail(text: String) -> void:
 
 
 func report(kind: String, text: String, extra: String = "") -> void:
+	if not Platform.telemetry_allowed():
+		return
 	if _count >= REPORT_CAP:
 		return
 	var key := kind + text.left(100)

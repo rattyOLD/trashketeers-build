@@ -1,6 +1,6 @@
 class_name CreditsPopup
 extends GlassPopup
-## Создатели: название команды и благодарности тестерам (data/brand.json).
+## Создатели: название команды, благодарности тестерам (data/brand.json) и лицензии.
 
 
 func _init() -> void:
@@ -17,6 +17,11 @@ func _init() -> void:
 		line += " и всем остальным, кто нашёл баги и не промолчал."
 		content.add_child(_label(line, 24, UiStyle.TEXT))
 	content.add_child(_label("Вы сделали эту свалку чище. Ненамного.", 20, UiStyle.TEXT_DIM))
+	var licenses := LicensesPopup.new()
+	add_child(licenses)
+	var button := UiStyle.button("ЛИЦЕНЗИИ", UiStyle.PANEL_LIGHT, 22, Vector2(0, 66))
+	button.pressed.connect(licenses.open)
+	content.add_child(button)
 
 
 func _label(text: String, size: int, color: Color) -> Label:

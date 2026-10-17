@@ -119,6 +119,31 @@ func _process(delta: float) -> void:
 		cloud_loaded.emit("")
 
 
+# --- Согласие на отчёты ---------------------------------------------------------------------------
+
+const CONSENT_KEY := "__trash_consent"
+var _consent := ""
+
+
+## Отчёты об ошибках и производительности уходят только с согласия игрока (первый запуск или настройки).
+func telemetry_allowed() -> bool:
+	if _consent.is_empty():
+		_consent = storage_get(CONSENT_KEY)
+	return _consent == "yes"
+
+
+func consent_asked() -> bool:
+	telemetry_allowed()
+	return not _consent.is_empty()
+
+
+func set_telemetry_consent(allowed: bool) -> void:
+	_consent = "yes" if allowed else "no"
+	storage_set(CONSENT_KEY, _consent)
+	if allowed:
+		send_report("session_start", device_info())
+
+
 # --- Локальное хранилище --------------------------------------------------------------------------
 
 func storage_get(key: String) -> String:
@@ -347,6 +372,8 @@ func note_event(text: String) -> void:
 
 
 func send_report(kind: String, text: String, extra: String = "") -> void:
+	if not telemetry_allowed():
+		return
 	if telemetry != null:
 		telemetry.report(kind, text, extra)
 	if is_web:

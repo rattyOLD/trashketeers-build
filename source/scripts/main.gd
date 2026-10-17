@@ -73,6 +73,9 @@ func _ready() -> void:
 	_register_input()
 	_show_menu()
 	_accept_card_link.call_deferred()
+	# В редакторе и тестах окно не нужно: там отчёты не уходят.
+	if not Platform.consent_asked() and not OS.has_feature("editor"):
+		_show_consent.call_deferred()
 	if OS.has_feature("web"):
 		var url_hash := str(JavaScriptBridge.eval("window.location.hash"))
 		if url_hash.begins_with("#boss:"):
@@ -174,6 +177,16 @@ func _accept_card_link() -> void:
 	elif card_result == "self":
 		note = "Это твоя собственная визитка. С собой дружить можно и без ссылки"
 	_toast_note(note)
+
+
+func _show_consent() -> void:
+	var layer := CanvasLayer.new()
+	layer.layer = 95
+	add_child(layer)
+	var popup := ConsentPopup.new()
+	layer.add_child(popup)
+	popup.closed.connect(layer.queue_free)
+	popup.open()
 
 
 func _show_badge_welcome(level: int) -> void:
