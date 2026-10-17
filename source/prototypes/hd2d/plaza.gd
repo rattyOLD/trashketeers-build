@@ -108,6 +108,26 @@ func _build_environment() -> void:
 	env.adjustment_enabled = true
 	env.adjustment_saturation = 1.2
 	env.adjustment_contrast = 1.18
+	var forward_plus := RenderingServer.get_current_rendering_method() == "forward_plus"
+	if forward_plus:
+		# ПК: контактные тени в углах и швах, отражённый свет от стен, лёгкий объёмный воздух у фонарей.
+		env.ssao_enabled = true
+		env.ssao_radius = 1.2
+		env.ssao_intensity = 1.6
+		env.ssao_power = 1.4
+		env.ssil_enabled = true
+		env.ssil_radius = 4.0
+		env.ssil_intensity = 0.7
+		env.volumetric_fog_enabled = true
+		env.volumetric_fog_density = 0.006
+		env.volumetric_fog_albedo = Color("#f4d8b0")
+		env.volumetric_fog_anisotropy = 0.55
+		env.volumetric_fog_length = 70.0
+		env.fog_density = 0.0008
+		# Forward+ считает свет в линейном HDR: те же числа дают кадр темнее и насыщеннее, чем Compatibility.
+		env.tonemap_exposure = 1.55
+		env.adjustment_saturation = 1.14
+		env.adjustment_contrast = 1.08
 	var world := WorldEnvironment.new()
 	world.environment = env
 	add_child(world)
@@ -119,6 +139,11 @@ func _build_environment() -> void:
 	sun.shadow_opacity = 0.9
 	sun.directional_shadow_max_distance = 60.0
 	sun.rotation_degrees = Vector3(-38.0, -30.0, 0.0)
+	if forward_plus:
+		# Мягкий край тени от размера солнечного диска и четыре каскада: резко у героя, без лесенки вдали.
+		sun.light_angular_distance = 0.6
+		sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
+		sun.light_volumetric_fog_energy = 0.6
 	add_child(sun)
 
 
@@ -680,7 +705,8 @@ func _build_post() -> void:
 	rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var material := ShaderMaterial.new()
 	material.shader = load("res://shaders/color_grade.gdshader")
-	material.set_shader_parameter(&"tilt_blur", 2.0)
+	# В Forward+ мип-цепочка экрана мягче, поэтому то же размытие края там слабее.
+	material.set_shader_parameter(&"tilt_blur", 1.1 if RenderingServer.get_current_rendering_method() == "forward_plus" else 2.0)
 	material.set_shader_parameter(&"focus_half", 0.4)
 	material.set_shader_parameter(&"focus_ramp", 0.12)
 	material.set_shader_parameter(&"glow_strength", 0.12)
