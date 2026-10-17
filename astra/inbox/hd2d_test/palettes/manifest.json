@@ -1,6 +1,7 @@
 {
   "schema_version": 1,
   "brief": "v36",
+  "revision": "warm-48-sample",
   "studio": "TrashSquad · Beer Party Studio",
   "files": [
     {
@@ -8,8 +9,8 @@
       "width": 64,
       "height": 1,
       "format": "RGB",
-      "bytes": 250,
-      "sha256": "991fd92ec0adfdef067affde6870dc54950ee47a26f3a61ebb90b0398bcebe5a",
+      "bytes": 261,
+      "sha256": "ed10c9be0447bfdcfbba65f3c43ab7bf3e8771e5a260005f70c8868de94c1494",
       "role": "environment_palette",
       "colors": 64,
       "size_m": null,
@@ -17,95 +18,8 @@
       "not_a_world_surface": true
     }
   ],
-  "ramps": {
-    "stone": [
-      "#706d70",
-      "#8c8784",
-      "#a49b8d",
-      "#bab09e",
-      "#cec3ad",
-      "#dfd5bf"
-    ],
-    "gold": [
-      "#8e795e",
-      "#a28b69",
-      "#b49a73",
-      "#c3a97f",
-      "#d0b68b",
-      "#ddc69c"
-    ],
-    "rose": [
-      "#806b70",
-      "#96777a",
-      "#ac8887",
-      "#bd9993",
-      "#cda99f",
-      "#dbbdb0"
-    ],
-    "marble": [
-      "#a19c94",
-      "#b7b1a5",
-      "#cbc5b7",
-      "#d9d3c3",
-      "#e4decd",
-      "#eee7d5"
-    ],
-    "green": [
-      "#344c46",
-      "#415a47",
-      "#4e684c",
-      "#5e7652",
-      "#70885d",
-      "#859967",
-      "#99a775",
-      "#b1b98b"
-    ],
-    "earth": [
-      "#58494a",
-      "#6c5550",
-      "#7b6254",
-      "#8b715c",
-      "#9d8268",
-      "#ac9576"
-    ],
-    "blue": [
-      "#273d50",
-      "#355469",
-      "#497185",
-      "#6593a1",
-      "#8aafb5",
-      "#bbd1cb"
-    ],
-    "metal": [
-      "#353b46",
-      "#4d5157",
-      "#68706f",
-      "#8f9690",
-      "#b7bbb0"
-    ],
-    "wood": [
-      "#4d3e3f",
-      "#70514b",
-      "#926a54",
-      "#ad845d",
-      "#c5a079"
-    ],
-    "red": [
-      "#67474f",
-      "#805157",
-      "#975e5b",
-      "#ae7265",
-      "#c28a75",
-      "#d5a38b"
-    ],
-    "ivory": [
-      "#e0c790",
-      "#eed9a5",
-      "#f4e6c0",
-      "#faf0d7"
-    ]
-  },
+  "definition_file": "colors.json",
   "pending": [
-    "chars.png — will be delivered with the character batch; not substituted by rejected v35 drafts"
+    "chars.png with future character batch"
   ]
 }

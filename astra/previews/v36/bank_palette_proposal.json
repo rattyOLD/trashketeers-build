@@ -1,10 +1,10 @@
 {
   "brief": "v36",
-  "kind": "palette_proposal",
-  "production_ready": false,
-  "installed": false,
+  "kind": "palette_source_for_modular_sample",
+  "production_ready": true,
+  "installed": true,
   "not_a_prop_or_game_art": true,
-  "density_decision": "48 px/m proposed; explicit owner decision pending",
+  "density_decision": "48 px/m for new environment confirmed by owner: Так работай",
   "file": "bank_palette_proposal.png",
   "width": 64,
   "height": 1,
@@ -91,5 +91,5 @@
       "#f7bdbe"
     ]
   },
-  "note": "Only unused slots are proposed for replacement. Existing bank.png and all material pixels unchanged. Art still needs a successful native redraw."
+  "note": "Installed in inbox palette. All 32 old material colors preserved; new props use 48 px/m. Visual sample approval in actual plaza remains pending."
 }

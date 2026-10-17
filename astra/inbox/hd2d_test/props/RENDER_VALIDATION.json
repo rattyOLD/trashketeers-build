@@ -1,0 +1,15 @@
+{
+  "emission_screen_bounds": [
+    449.090911865234,
+    243.609771728516,
+    503.636383056641,
+    294.423065185547
+  ],
+  "hero_visible_height_m": 1.75,
+  "main_game_or_prototype_changed": false,
+  "sprite_pixel_size": 0.0208333333333333,
+  "emission_changed_pixels": 2746,
+  "emission_changed_outside_glass": 0,
+  "normal_changed_pixels": 11064,
+  "ok": true
+}

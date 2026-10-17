@@ -273,8 +273,14 @@ def write_json(path, data):
 def main():
     for folder in (OUT/"materials", OUT/"palettes", PREVIEW):
         folder.mkdir(parents=True, exist_ok=True)
+    # Later prop deliveries may use previously unused palette slots. Preserve
+    # that master palette when reproducing the unchanged 32px/m materials.
+    definition=OUT/"palettes/colors.json"
+    palette_colors=PALETTE
+    if definition.exists():
+        palette_colors=[tuple(bytes.fromhex(c.lstrip("#"))) for c in json.loads(definition.read_text())["colors"]]
     palette = Image.new("RGB",(64,1))
-    palette.putdata(PALETTE)
+    palette.putdata(palette_colors)
     palette.save(OUT/"palettes/bank.png")
     manifest={"schema_version":1,"brief":"v36","studio":"TrashSquad · Beer Party Studio",
               "pixels_per_metre":32,"palette":"../palettes/bank.png","color_space":"sRGB",
@@ -326,12 +332,17 @@ def main():
                 tiled.paste(images[rng.randrange(3)].convert("RGB"),(x*64,y*64))
         board.paste(tiled,(728,yy+26))
     write_json(OUT/"materials/manifest.json",manifest)
-    write_json(OUT/"palettes/manifest.json",{
+    palette_manifest={
         "schema_version":1,"brief":"v36","studio":"TrashSquad · Beer Party Studio",
         "files":[file_info(OUT/"palettes/bank.png",role="environment_palette",colors=64,
              size_m=None,anchor_px=None,not_a_world_surface=True)],
         "ramps":{k:["#"+s for s in v] for k,v in RAMPS.items()},
-        "pending":["chars.png — will be delivered with the character batch; not substituted by rejected v35 drafts"]})
+        "pending":["chars.png — will be delivered with the character batch; not substituted by rejected v35 drafts"]}
+    if definition.exists():
+        palette_manifest=json.loads((OUT/"palettes/manifest.json").read_text())
+        palette_manifest["files"]=[file_info(OUT/"palettes/bank.png",role="environment_palette",colors=64,
+             size_m=None,anchor_px=None,not_a_world_surface=True)]
+    write_json(OUT/"palettes/manifest.json",palette_manifest)
     board.save(PREVIEW/"materials_review.png")
     print(f"DRAW_V36_MATERIALS_OK albedo=30 normals=9 colors={len(PALETTE)}")
 

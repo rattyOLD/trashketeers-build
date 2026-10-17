@@ -1,0 +1,50 @@
+{
+  "ok": true,
+  "errors": [],
+  "sprites": {
+    "bank_lantern.png": {
+      "size": [
+        72,
+        104
+      ],
+      "visible_bounds": [
+        7,
+        1,
+        65,
+        103
+      ],
+      "colors": 15
+    },
+    "bank_pedestal.png": {
+      "size": [
+        96,
+        72
+      ],
+      "visible_bounds": [
+        12,
+        1,
+        84,
+        71
+      ],
+      "colors": 14
+    },
+    "bank_flower_planter.png": {
+      "size": [
+        96,
+        100
+      ],
+      "visible_bounds": [
+        3,
+        1,
+        93,
+        99
+      ],
+      "colors": 33
+    }
+  },
+  "png_count": 5,
+  "density": 48,
+  "assembly_visible_height_px": 163,
+  "palette_colors": 64,
+  "owner_visual_approval": false
+}

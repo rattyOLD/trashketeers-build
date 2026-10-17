@@ -1,0 +1,248 @@
+{
+  "schema_version": 1,
+  "brief": "v36",
+  "revision": "modular-48-1",
+  "studio": "TrashSquad · Beer Party Studio",
+  "delivery_status": "review_candidate",
+  "owner_visual_approved": false,
+  "scope": "three new props only; remaining v36 props/facades/characters pending",
+  "pixels_per_metre": 48,
+  "palette": "../palettes/bank.png",
+  "files": [
+    {
+      "file": "bank_lantern.png",
+      "width": 72,
+      "height": 104,
+      "format": "RGBA",
+      "bytes": 2720,
+      "sha256": "863671535130b4992aab8ce5291a7be5708ce7c0756d3a38ffe809d9b27b7946",
+      "role": "vertical_sprite",
+      "size_m": [
+        1.5,
+        2.1666666666666665
+      ],
+      "anchor_px": [
+        36,
+        103
+      ],
+      "anchor_uv": [
+        0.5,
+        0.9903846153846154
+      ],
+      "anchor_space": "pixel boundaries from top-left",
+      "collider_radius_m": 0.28,
+      "palette": "../palettes/bank.png",
+      "alpha": "binary",
+      "view": "front + top; yaw 0",
+      "local_form_shading_baked": true,
+      "ground_cast_shadow_baked": false,
+      "source_render_size_px": [
+        72,
+        104
+      ],
+      "resampled": false,
+      "glow_mask": "bank_lantern_glow.png",
+      "light_source_px": [
+        36,
+        54
+      ],
+      "light_source_m_from_anchor": [
+        0,
+        1.0208333333333333,
+        0.2
+      ],
+      "day_emission_energy": 0,
+      "emission_operator": "multiply",
+      "suggested_emission_color": "#ffc574",
+      "suggested_emission_energy": 0.55,
+      "suggested_light_energy": 0.4,
+      "suggested_light_range_m": 5.0
+    },
+    {
+      "file": "bank_pedestal.png",
+      "width": 96,
+      "height": 72,
+      "format": "RGBA",
+      "bytes": 2614,
+      "sha256": "54d2d906a44645ed14f850cbc39d002bd4b08333ec72c683cfd30daba656073c",
+      "role": "vertical_sprite",
+      "size_m": [
+        2.0,
+        1.5
+      ],
+      "anchor_px": [
+        48,
+        71
+      ],
+      "anchor_uv": [
+        0.5,
+        0.9861111111111112
+      ],
+      "anchor_space": "pixel boundaries from top-left",
+      "collider_radius_m": 0.64,
+      "palette": "../palettes/bank.png",
+      "alpha": "binary",
+      "view": "front + top; yaw 0",
+      "local_form_shading_baked": true,
+      "ground_cast_shadow_baked": false,
+      "source_render_size_px": [
+        96,
+        72
+      ],
+      "resampled": false,
+      "normal_map": "bank_pedestal_n.png",
+      "normal_convention": "OpenGL +Y",
+      "normal_map_invert_y": false,
+      "suggested_normal_scale": 0.45,
+      "normal_source": "same-size geometry normal render; not albedo luminance",
+      "mount_points": {
+        "lantern": {
+          "anchor_px": [
+            48,
+            10
+          ],
+          "position_m_from_anchor": [
+            0,
+            1.2708333333333333,
+            0
+          ]
+        }
+      }
+    },
+    {
+      "file": "bank_flower_planter.png",
+      "width": 96,
+      "height": 100,
+      "format": "RGBA",
+      "bytes": 5819,
+      "sha256": "951889146b43c9fb7eb1ad763551173cebe3fb0b714e0ff78db360b1baf9c237",
+      "role": "vertical_sprite",
+      "size_m": [
+        2.0,
+        2.0833333333333335
+      ],
+      "anchor_px": [
+        48,
+        99
+      ],
+      "anchor_uv": [
+        0.5,
+        0.99
+      ],
+      "anchor_space": "pixel boundaries from top-left",
+      "collider_radius_m": 0.48,
+      "palette": "../palettes/bank.png",
+      "alpha": "binary",
+      "view": "front + top; yaw 0",
+      "local_form_shading_baked": true,
+      "ground_cast_shadow_baked": false,
+      "source_render_size_px": [
+        96,
+        100
+      ],
+      "resampled": false
+    },
+    {
+      "file": "bank_lantern_glow.png",
+      "width": 72,
+      "height": 104,
+      "format": "RGB",
+      "bytes": 159,
+      "sha256": "719aad7a6a804e79fbc2edcb8795ae8828d075a20666a07344ed25bca8356d78",
+      "role": "emission_mask",
+      "paired_albedo": "bank_lantern.png",
+      "size_m": [
+        1.5,
+        2.1666666666666665
+      ],
+      "anchor_px": [
+        36,
+        103
+      ],
+      "anchor_uv": [
+        0.5,
+        0.9903846153846154
+      ],
+      "color_space": "linear_data"
+    },
+    {
+      "file": "bank_pedestal_n.png",
+      "width": 96,
+      "height": 72,
+      "format": "RGB",
+      "bytes": 4664,
+      "sha256": "8677e55685fbdad72f66078aea50c49c1eaa339ad870d6476e26af93bc0bd816",
+      "role": "normal_map",
+      "paired_albedo": "bank_pedestal.png",
+      "size_m": [
+        2.0,
+        1.5
+      ],
+      "anchor_px": [
+        48,
+        71
+      ],
+      "anchor_uv": [
+        0.5,
+        0.9861111111111112
+      ],
+      "color_space": "linear_data"
+    }
+  ],
+  "assembly": {
+    "canvas_px": [
+      96,
+      165
+    ],
+    "anchor_px": [
+      48,
+      164
+    ],
+    "visible_height_px": 163,
+    "visible_height_m": 3.3958333333333335,
+    "canvas_height_m": 3.4375,
+    "collision_owner": "bank_pedestal.png",
+    "parts": [
+      {
+        "file": "bank_pedestal.png",
+        "top_left_px": [
+          0,
+          93
+        ],
+        "position_m": [
+          0,
+          0,
+          0
+        ],
+        "collision_enabled": true
+      },
+      {
+        "file": "bank_lantern.png",
+        "top_left_px": [
+          12,
+          0
+        ],
+        "position_m": [
+          0,
+          1.2708333333333333,
+          0
+        ],
+        "collision_enabled": false,
+        "depth_offset_m": 0.005
+      }
+    ],
+    "transform_with_common_sprite_plane": true,
+    "note": "Mount/depth offsets use the common sprite plane basis. Rotate offsets with its tilt/billboard. Depth offset prevents coplanar z-fighting."
+  },
+  "sprite3d": {
+    "pixel_size": 0.020833333333333332,
+    "centered": true,
+    "offset_formula": "Vector2(width/2-anchor_x, anchor_y-height/2)",
+    "albedo_color_space": "sRGB",
+    "normal_mask_color_space": "linear_data",
+    "alpha_scissor": 0.5,
+    "filter": "nearest with optional mipmaps",
+    "glow_note": "Use emission color MULTIPLIED by mask; ADD makes the whole iron frame emit."
+  },
+  "source_pipeline": "native-resolution 3D form render, material-ramp encoding and 1px selective outline; no high-res art downsampling"
+}
