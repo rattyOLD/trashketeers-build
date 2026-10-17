@@ -42,4 +42,4 @@
 
 ## Для Астры
 Арт кладётся в `source/assets/<папка>/`. Нарезку и прозрачность делает `tools/slice_vfx.py`.
-Требования к арту — в `astra/from_claude/BRIEF_v36_hd2d_test.md`: тест HD-2D на площади Банка, всё в 96 px/м (Рико ≈170 px), уровень концепта.
+Требования к арту — `astra/from_claude/BRIEF_v37_3d_buildings.md` (здания в 3D, .glb + пиксельные текстуры 96 px/м) и `BRIEF_v36_hd2d_test.md` (спрайты, материалы, Рико).
