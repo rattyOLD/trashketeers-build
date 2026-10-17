@@ -1,0 +1,28 @@
+{
+  "source_sha256": "ef8059ac36d7b9b2bed226784f5ec6e1db7933188c9f5f440f54c0e62491869f",
+  "pixels_per_metre": 96,
+  "tile_px": [
+    192,
+    192
+  ],
+  "size_m": [
+    2,
+    2
+  ],
+  "palette_preserved": true,
+  "normal_method": "flat tangent normal; blade form comes from albedo, no noisy luminance embossing",
+  "files": [
+    {
+      "file": "lawn_01.png",
+      "sha256": "d40945d7d80f97a6469c052ea77e88565268d58581768c8b06a9b7e4104daa13"
+    },
+    {
+      "file": "lawn_02.png",
+      "sha256": "ebda4bb0fb7a5796092c51262390a3acce249c1e0f5ffc0c04712d12f43e7b54"
+    },
+    {
+      "file": "lawn_03.png",
+      "sha256": "ebf3b36363a509349675275212b97ce12ad760b0e7ffe3d741f25a46c7538a93"
+    }
+  ]
+}

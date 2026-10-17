@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "brief": "v36",
-  "revision": "seven-materials-96-control-1",
+  "revision": "seven-materials-96-lawn-2",
   "studio": "TrashSquad · Beer Party Studio",
   "pixels_per_metre": 96,
   "uniform_density": false,
@@ -816,7 +816,7 @@
       "height": 192,
       "format": "P",
       "bytes": 37520,
-      "sha256": "f03ef60b81f06b927d541d772a847e825ca8c83dabba5a7a75f0c8cb297fcbb0",
+      "sha256": "d40945d7d80f97a6469c052ea77e88565268d58581768c8b06a9b7e4104daa13",
       "material": "lawn",
       "variant": 1,
       "role": "albedo",
@@ -839,11 +839,12 @@
       "palette": "../palettes/materials96.png",
       "resampled_from_concept": true,
       "normal_map": "lawn_01_n.png",
-      "normal_scale": 0.35,
+      "normal_scale": 0.0,
       "roughness": 0.92,
       "metallic": 0.0,
       "ground_cast_shadow_baked": false,
-      "directional_light_baked": false
+      "directional_light_baked": false,
+      "source_image": "../../../previews/v36/lawn96_source.png"
     },
     {
       "file": "lawn_01_n.png",
@@ -851,7 +852,7 @@
       "height": 192,
       "format": "RGB",
       "bytes": 110857,
-      "sha256": "e64e554bbc08fee27bebb3e1ac2b838cf11c8c93033bdf1c58406a39ab0f3eab",
+      "sha256": "e41b0f3dffa64e9bbc72329033e299e8b044d2cfe70a18ba55156b6b34ad6161",
       "material": "lawn",
       "variant": 1,
       "role": "normal",
@@ -873,7 +874,8 @@
       "color_space": "linear_data",
       "normal_convention": "OpenGL +Y",
       "normal_map_invert_y": false,
-      "normal_source": "shallow approximate joint relief from texture structure; not a scanned or geometric 3D normal bake"
+      "normal_source": "shallow approximate joint relief from texture structure; not a scanned or geometric 3D normal bake",
+      "source": "flat tangent normal; no luminance-derived grass embossing"
     },
     {
       "file": "lawn_02.png",
@@ -881,7 +883,7 @@
       "height": 192,
       "format": "P",
       "bytes": 37520,
-      "sha256": "558e57e9a5333967a051ee851b5927a6663f7910d69cde94e4ca860f4a980d67",
+      "sha256": "ebda4bb0fb7a5796092c51262390a3acce249c1e0f5ffc0c04712d12f43e7b54",
       "material": "lawn",
       "variant": 2,
       "role": "albedo",
@@ -904,11 +906,12 @@
       "palette": "../palettes/materials96.png",
       "resampled_from_concept": true,
       "normal_map": "lawn_02_n.png",
-      "normal_scale": 0.35,
+      "normal_scale": 0.0,
       "roughness": 0.92,
       "metallic": 0.0,
       "ground_cast_shadow_baked": false,
-      "directional_light_baked": false
+      "directional_light_baked": false,
+      "source_image": "../../../previews/v36/lawn96_source.png"
     },
     {
       "file": "lawn_02_n.png",
@@ -916,7 +919,7 @@
       "height": 192,
       "format": "RGB",
       "bytes": 110857,
-      "sha256": "e2a5cbe3ad7e2dc5c5e083ae718e8cb787ffda298527702ffebcbd0464839873",
+      "sha256": "e41b0f3dffa64e9bbc72329033e299e8b044d2cfe70a18ba55156b6b34ad6161",
       "material": "lawn",
       "variant": 2,
       "role": "normal",
@@ -938,7 +941,8 @@
       "color_space": "linear_data",
       "normal_convention": "OpenGL +Y",
       "normal_map_invert_y": false,
-      "normal_source": "shallow approximate joint relief from texture structure; not a scanned or geometric 3D normal bake"
+      "normal_source": "shallow approximate joint relief from texture structure; not a scanned or geometric 3D normal bake",
+      "source": "flat tangent normal; no luminance-derived grass embossing"
     },
     {
       "file": "lawn_03.png",
@@ -946,7 +950,7 @@
       "height": 192,
       "format": "P",
       "bytes": 37520,
-      "sha256": "d955dd25dcaded5e3b2858a914c319890e4bd9cc228ba28416c11f41eef65ea5",
+      "sha256": "ebf3b36363a509349675275212b97ce12ad760b0e7ffe3d741f25a46c7538a93",
       "material": "lawn",
       "variant": 3,
       "role": "albedo",
@@ -969,11 +973,12 @@
       "palette": "../palettes/materials96.png",
       "resampled_from_concept": true,
       "normal_map": "lawn_03_n.png",
-      "normal_scale": 0.35,
+      "normal_scale": 0.0,
       "roughness": 0.92,
       "metallic": 0.0,
       "ground_cast_shadow_baked": false,
-      "directional_light_baked": false
+      "directional_light_baked": false,
+      "source_image": "../../../previews/v36/lawn96_source.png"
     },
     {
       "file": "lawn_03_n.png",
@@ -981,7 +986,7 @@
       "height": 192,
       "format": "RGB",
       "bytes": 110857,
-      "sha256": "fa3cd99f2b041fa7e2494a8f1fa9d58971805a8b718e4f769049c2dfc9af6b15",
+      "sha256": "e41b0f3dffa64e9bbc72329033e299e8b044d2cfe70a18ba55156b6b34ad6161",
       "material": "lawn",
       "variant": 3,
       "role": "normal",
@@ -1003,7 +1008,8 @@
       "color_space": "linear_data",
       "normal_convention": "OpenGL +Y",
       "normal_map_invert_y": false,
-      "normal_source": "shallow approximate joint relief from texture structure; not a scanned or geometric 3D normal bake"
+      "normal_source": "shallow approximate joint relief from texture structure; not a scanned or geometric 3D normal bake",
+      "source": "flat tangent normal; no luminance-derived grass embossing"
     },
     {
       "file": "stone_wall_01.png",
@@ -1812,5 +1818,6 @@
       "pixels_per_metre": 48,
       "delivery_status": "legacy_48_not_migrated"
     }
-  ]
+  ],
+  "lawn_revision_note": "Larger readable grass/clover clusters and sparse flowers; accepted other six families and palette preserved"
 }

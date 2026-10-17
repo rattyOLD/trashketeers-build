@@ -186,12 +186,15 @@ func _build_props() -> void:
 \t\t\t_prop("street96/"+variant,Vector2(96,126),original.position)
 \t\telif path.ends_with("umbrella.png"):
 \t\t\toriginal.visible = false
-\t\t\tvar cafe := _prop("street96/bank_umbrella",Vector2(144,270),original.position)
-\t\t\tfor spec: Array in [["bank_chair_left",Vector2(64,126),Vector3(-65.0/96,0,.005)],["bank_chair_right",Vector2(64,126),Vector3(65.0/96,0,.005)],["bank_bistro_table_parasol",Vector2(64,126),Vector3(0,0,.025)],["bank_umbrella_pole_front",Vector2(144,270),Vector3(0,0,.04)]]:
-\t\t\t\tvar child := _prop("street96/"+spec[0],spec[1],spec[2],cafe)
+\t\t\t# Standalone umbrella beside the furniture, never through the table.
+\t\t\t_prop("cafe96/bank_umbrella_standalone",Vector2(144,270),original.position+Vector3(-1.15,0,-.55))
+\t\t\tvar cafe := Node3D.new()
+\t\t\tcafe.position = original.position
+\t\t\tadd_child(cafe)
+\t\t\tcafe.rotation_degrees.x = -12
+\t\t\tfor spec: Array in [["bank_cafe_chair_left",Vector2(64,126),Vector3(-65.0/96,0,.005)],["bank_cafe_chair_right",Vector2(64,126),Vector3(65.0/96,0,.005)],["bank_cafe_table",Vector2(64,126),Vector3(0,0,.025)]]:
+\t\t\t\tvar child := _prop("cafe96/"+spec[0],spec[1],spec[2],cafe)
 \t\t\t\tchild.rotation = Vector3.ZERO
-\t\t\t\tif spec[0]=="bank_umbrella_pole_front":
-\t\t\t\t\t(child.get_child(0) as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 \t\telif path.ends_with("picnic_table.png"):
 \t\t\toriginal.visible = false
 '''

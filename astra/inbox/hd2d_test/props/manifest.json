@@ -281,6 +281,7 @@
   ],
   "approval_note": "Owner accepted idle Riko in brief e099467; props96 explicitly accepted in current conversation 17.10",
   "additional_batches": [
-    "street96/manifest.json"
+    "street96/manifest.json",
+    "cafe96/manifest.json"
   ]
 }

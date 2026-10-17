@@ -1,0 +1,188 @@
+{
+  "schema_version": 1,
+  "brief": "v36",
+  "revision": "cafe96-independent-1",
+  "studio": "TrashSquad · Beer Party Studio",
+  "pixels_per_metre": 96,
+  "delivery_status": "review_candidate",
+  "owner_visual_approved": false,
+  "files": [
+    {
+      "file": "bank_umbrella_standalone.png",
+      "width": 288,
+      "height": 272,
+      "format": "P",
+      "sha256": "49a1cdb71bc8a7c98d5132036f4838fadf99c403a3508746bdd209431f792fe5",
+      "bytes": 79217,
+      "role": "vertical_sprite",
+      "pixels_per_metre": 96,
+      "size_m": [
+        3.0,
+        2.8333333333333335
+      ],
+      "anchor_px": [
+        144,
+        270
+      ],
+      "anchor_uv": [
+        0.5,
+        0.9926470588235294
+      ],
+      "visible_bounds_px": [
+        38,
+        20,
+        250,
+        270
+      ],
+      "palette": "../../palettes/street96.png",
+      "alpha": "binary 0/255",
+      "collider_radius_m": 0.25,
+      "ground_cast_shadow_baked": false,
+      "local_form_shading_baked": true,
+      "resampled_from_concept": true,
+      "outline": "dark 1px",
+      "cast_shadow_in_engine": true
+    },
+    {
+      "file": "bank_cafe_table.png",
+      "width": 128,
+      "height": 128,
+      "format": "P",
+      "sha256": "85e73d8fdfc887b12d4a5ba159e834f6a5d95ddb8900b63757c870f61eaf4a2a",
+      "bytes": 17116,
+      "role": "vertical_sprite",
+      "pixels_per_metre": 96,
+      "size_m": [
+        1.3333333333333333,
+        1.3333333333333333
+      ],
+      "anchor_px": [
+        64,
+        126
+      ],
+      "anchor_uv": [
+        0.5,
+        0.984375
+      ],
+      "visible_bounds_px": [
+        19,
+        34,
+        109,
+        126
+      ],
+      "palette": "../../palettes/street96.png",
+      "alpha": "binary 0/255",
+      "collider_radius_m": 0.48,
+      "ground_cast_shadow_baked": false,
+      "local_form_shading_baked": true,
+      "resampled_from_concept": true,
+      "outline": "dark 1px",
+      "cast_shadow_in_engine": true
+    },
+    {
+      "file": "bank_cafe_chair_left.png",
+      "width": 128,
+      "height": 128,
+      "format": "P",
+      "sha256": "23d1dc30d8b8ca3fe5679700d0673345b87f022592e5d2452faeacb8bd4d44fb",
+      "bytes": 17116,
+      "role": "vertical_sprite",
+      "pixels_per_metre": 96,
+      "size_m": [
+        1.3333333333333333,
+        1.3333333333333333
+      ],
+      "anchor_px": [
+        64,
+        126
+      ],
+      "anchor_uv": [
+        0.5,
+        0.984375
+      ],
+      "visible_bounds_px": [
+        32,
+        26,
+        96,
+        126
+      ],
+      "palette": "../../palettes/street96.png",
+      "alpha": "binary 0/255",
+      "collider_radius_m": 0.3,
+      "ground_cast_shadow_baked": false,
+      "local_form_shading_baked": true,
+      "resampled_from_concept": true,
+      "outline": "dark 1px",
+      "cast_shadow_in_engine": true
+    },
+    {
+      "file": "bank_cafe_chair_right.png",
+      "width": 128,
+      "height": 128,
+      "format": "P",
+      "sha256": "19847ee04555ff74c7813750f1ffe7d59f9a2a52713dde64b9a847ba5e3875b8",
+      "bytes": 17116,
+      "role": "vertical_sprite",
+      "pixels_per_metre": 96,
+      "size_m": [
+        1.3333333333333333,
+        1.3333333333333333
+      ],
+      "anchor_px": [
+        64,
+        126
+      ],
+      "anchor_uv": [
+        0.5,
+        0.984375
+      ],
+      "visible_bounds_px": [
+        32,
+        26,
+        96,
+        126
+      ],
+      "palette": "../../palettes/street96.png",
+      "alpha": "binary 0/255",
+      "collider_radius_m": 0.3,
+      "ground_cast_shadow_baked": false,
+      "local_form_shading_baked": true,
+      "resampled_from_concept": true,
+      "outline": "dark 1px",
+      "cast_shadow_in_engine": true
+    }
+  ],
+  "palette": "../../palettes/street96.png",
+  "umbrella_pole_through_table": false,
+  "supersedes": "street96 shared-pole cafe assembly; old files are historical, not the current composition",
+  "suggested_layout": {
+    "table_position_m": [
+      0,
+      0,
+      0
+    ],
+    "chair_left_position_m": [
+      -0.6770833333333334,
+      0,
+      0.005
+    ],
+    "chair_right_position_m": [
+      0.6770833333333334,
+      0,
+      0.005
+    ],
+    "umbrella_position_m": [
+      -1.15,
+      0,
+      -0.55
+    ],
+    "umbrella_is_independent": true,
+    "note": "Positions are a QA suggestion; developer controls real placement and lighting."
+  },
+  "import_settings": {
+    "filter": "nearest_with_mipmaps",
+    "alpha_scissor": 0.5,
+    "shaded": true,
+    "roughness": 0.85
+  }
+}

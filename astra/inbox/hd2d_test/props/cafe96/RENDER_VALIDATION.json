@@ -1,0 +1,53 @@
+{
+  "ok": true,
+  "godot": "4.4.1.stable.official.49a5bc7b6",
+  "renderer": "Compatibility / Mesa llvmpipe software OpenGL 4.5",
+  "source_modified": false,
+  "scope": "static single idle in actual Bank prototype copy",
+  "postprocess": "prototype screen-mip focus blur, glow and color grade; not physical camera DOF",
+  "artistic_approval": false,
+  "screenshots_sha256": {
+    "plaza_sample_day.png": "744d640b81a30683f50c42b508373ea60c58eb8f66e3de0da8b3dc34fc63c430",
+    "plaza_sample_evening.png": "cbce713d6939c40c08f9102ce8a54ef8cbd21b18251b5b72013bf054ef760212",
+    "plaza_sample_day_flat.png": "b0bf7affe170f4e641bb48797755939660ab2feabae316a52e79faf32a64255f",
+    "plaza_sample_evening_flat.png": "ba3da669c3e5a9d0f995f35ea093e740d76cc3b3eb7bcea89395e9475b44f409",
+    "plaza_sample_day_no_shadow.png": "e6503533bab6bcad2e086b5e48349ff5d2e78dfd7f803b35f75f37efba024d55"
+  },
+  "comparisons": {
+    "day/day_flat": {
+      "changed_pixels_above_1": 4212,
+      "bounds_inclusive": [
+        732,
+        372,
+        895,
+        525
+      ],
+      "max_channel_delta": 4
+    },
+    "evening/evening_flat": {
+      "changed_pixels_above_1": 3286,
+      "bounds_inclusive": [
+        733,
+        371,
+        888,
+        525
+      ],
+      "max_channel_delta": 4
+    },
+    "day/day_no_shadow": {
+      "changed_pixels_above_1": 3795,
+      "bounds_inclusive": [
+        751,
+        417,
+        925,
+        526
+      ],
+      "max_channel_delta": 70
+    }
+  },
+  "limits": [
+    "Old 48 px/m environment and temporary facade art remain",
+    "Mobs hidden, actors frozen; no animation/gameplay or phone performance validation",
+    "System V-Sync warning only; no scene/script errors"
+  ]
+}

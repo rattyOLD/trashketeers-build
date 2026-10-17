@@ -15,6 +15,19 @@
   "normal_edge_pair_checks": 126,
   "palette_colors": 128,
   "materials": {
+    "cobble_worn": {
+      "variants": 3,
+      "mean_luma": [
+        155.913,
+        155.949,
+        155.962
+      ],
+      "luma_std": [
+        19.873,
+        19.837,
+        19.856
+      ]
+    },
     "cobble_gold": {
       "variants": 3,
       "mean_luma": [
@@ -26,45 +39,6 @@
         24.317,
         24.413,
         24.202
-      ]
-    },
-    "rose_path": {
-      "variants": 3,
-      "mean_luma": [
-        146.392,
-        146.378,
-        146.394
-      ],
-      "luma_std": [
-        19.495,
-        19.567,
-        19.536
-      ]
-    },
-    "step_riser": {
-      "variants": 3,
-      "mean_luma": [
-        161.871,
-        161.857,
-        161.847
-      ],
-      "luma_std": [
-        24.53,
-        24.556,
-        24.539
-      ]
-    },
-    "lawn": {
-      "variants": 3,
-      "mean_luma": [
-        85.729,
-        85.656,
-        85.796
-      ],
-      "luma_std": [
-        21.802,
-        21.769,
-        21.806
       ]
     },
     "stone_wall": {
@@ -80,6 +54,32 @@
         21.833
       ]
     },
+    "step_riser": {
+      "variants": 3,
+      "mean_luma": [
+        161.871,
+        161.857,
+        161.847
+      ],
+      "luma_std": [
+        24.53,
+        24.556,
+        24.539
+      ]
+    },
+    "rose_path": {
+      "variants": 3,
+      "mean_luma": [
+        146.392,
+        146.378,
+        146.394
+      ],
+      "luma_std": [
+        19.495,
+        19.567,
+        19.536
+      ]
+    },
     "marble": {
       "variants": 3,
       "mean_luma": [
@@ -93,22 +93,19 @@
         18.452
       ]
     },
-    "cobble_worn": {
+    "lawn": {
       "variants": 3,
       "mean_luma": [
-        155.913,
-        155.949,
-        155.962
+        91.088,
+        91.093,
+        91.094
       ],
       "luma_std": [
-        19.873,
-        19.837,
-        19.856
+        19.596,
+        18.862,
+        18.863
       ]
     }
   },
-  "owner_visual_approved": false,
-  "byte_identical_reproduction": true,
-  "damaged_edge_with_correct_hashes_rejected": true,
-  "godot_checked": true
+  "owner_visual_approved": false
 }

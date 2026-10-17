@@ -1,0 +1,10 @@
+{
+  "file": "bank_umbrella_standalone.png",
+  "canvas": [288,272],
+  "anchor": [144,270],
+  "height": 248,
+  "pixels_per_metre": 96,
+  "role": "vertical_sprite",
+  "camera_down_angle_deg": 35,
+  "construction": "Independent parasol on a heavy brass foot; no pole through table"
+}
