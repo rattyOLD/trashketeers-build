@@ -400,8 +400,8 @@ cylinder('Crest_Raised_Mount',(0,-4.70,7.44),1.0,.23,gold,'brass',16,'Y')
 textured_card('Crowned_Pig_Heraldic_Relief',crest,(0,-4.86,7.55),(4,3),curve=True,region=(64,0,384,288))
 for x in [-6.32,-4.58,4.58,6.32]:
     textured_card('Window_Acanthus_Ornament',crest,(x,-4.39,7.73),(128/96,64/96),region=(0,320,128,64))
-# Owner revision3: fewer flowers — ivy only on the two corner pilasters, nothing over the columns.
-for x,z,flip in [(-7.28,6.74,False),(7.22,6.65,True)]:
+# Owner revision3: flowers only on the outer corner pilasters (upper and lower), none over the columns.
+for x,z,flip in [(-7.28,6.74,False),(7.22,6.65,True),(-7.26,3.95,True),(7.26,3.58,False)]:
     textured_card('Separate_Ivy_Cutout',ivy,(x,-4.81 if abs(x)<4 else -4.47,z),(256/96,256/96),flip=flip)
 
 # Two small real wall lanterns; metal, glass and emissive mask are separate.
