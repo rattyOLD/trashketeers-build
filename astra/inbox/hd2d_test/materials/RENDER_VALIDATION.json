@@ -1,0 +1,18 @@
+{
+  "ok": true,
+  "engine": "Godot4.4.1 Compatibility, llvmpipe OpenGL4.5",
+  "scope": "static actual Bank prototype copy, day/evening",
+  "source_modified": false,
+  "scene_script_errors": 0,
+  "warning": "System V-Sync unsupported",
+  "screenshots_sha256": {
+    "plaza_sample_day.png": "0e87dfcb7813171e0c920a88c06ba0c1a4a48675ac14824ae0e2fbb9259684d5",
+    "plaza_sample_evening.png": "7d989ed936f223ae13577f114b59f9035625fe5b8c47c247c4c19dd2db22991a"
+  },
+  "owner_visual_approved": false,
+  "limitations": [
+    "temporary facade/legacy props remain",
+    "mobs hidden, no gameplay or phone test",
+    "approximate shallow material normals, not geometric bake"
+  ]
+}

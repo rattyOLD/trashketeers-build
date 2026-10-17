@@ -1,0 +1,461 @@
+{
+  "prototype_source_sha256": "00005b12aa45a74d15af23911b4c3b44cdace572f00bd386d21b619895d7032e",
+  "source_modified": false,
+  "candidate_revision": "modular-96-control-1",
+  "copied_assets": [
+    {
+      "file": "assets/district/bank/pigs_boutique.png",
+      "sha256": "12fea5bad6d0d77df5fe04c18d7a37a5d395db7debccb63659a677fb79c626ad"
+    },
+    {
+      "file": "assets/district/bank/pigs_villa.png",
+      "sha256": "ea0941a68a9cfe97931426ebb6739b0440c286180d5d4ca28015316c7e6eef92"
+    },
+    {
+      "file": "assets/enemies/pig_angry.png",
+      "sha256": "82d2799a7e311e8957950e9426e76ad62162bc06d7e793d9309f54f634dbe71f"
+    },
+    {
+      "file": "assets/enemies/pig_default.png",
+      "sha256": "9d6356004ac4e0e981e730b5c1c02f9f9f50f440ed89557c7ad6f61e6543ac20"
+    },
+    {
+      "file": "assets/enemies/pig_heavy.png",
+      "sha256": "dac80ab3c17cecae564b6dc4c0fbd0d3867a098a48782bff44e1cca91413035c"
+    },
+    {
+      "file": "assets/enemies/pig_royal.png",
+      "sha256": "6adf2234cfbf66700cc0f2bc9cc40823ff3a6a97445f90f1e8e9aac3424e2c8f"
+    },
+    {
+      "file": "assets/enemies/pig_sniper.png",
+      "sha256": "d5a9001f33b3981894184bad05cef89b18c1293e7e728f35d0cbf93ad7cf0f8e"
+    },
+    {
+      "file": "assets/heroes/tactical/raccoon_run.png",
+      "sha256": "67c1b8fc54e6fe4a48a25123d56c1c8d7be07000f7dbd060c04e21721b6f77be"
+    },
+    {
+      "file": "assets/props/ch2/cash_pile.png",
+      "sha256": "e89a5bf77989c9c475443c425ea0ca334d98b5036ceba00067d21813fe5f4480"
+    },
+    {
+      "file": "assets/props/ch2/column.png",
+      "sha256": "57b25f7c6e7f594c54c68d84e9ab2ae9a5651b6ddf7322245faeda94db06ea73"
+    },
+    {
+      "file": "assets/props/ch2/lamp_banner.png",
+      "sha256": "2b92ded8c07bea4f62c7b40222546077cd927138dabdc1ff277fbb67856023f5"
+    },
+    {
+      "file": "assets/props/ch2/picnic_table.png",
+      "sha256": "46d8978aa79810c01fba5742f994667b63de69cf7fc06cba59d9e0363305c954"
+    },
+    {
+      "file": "assets/props/ch2/pig_statue.png",
+      "sha256": "8f3e16e2527a4d69ff96d8ce84068d0f14f0d439f59f6d272e7fd185fd74b03e"
+    },
+    {
+      "file": "assets/props/ch2/railing.png",
+      "sha256": "e1b377bbcfe3751c7eeb47d2b6424cfd581d9ee4610e073fc7f31a6332495e3e"
+    },
+    {
+      "file": "assets/props/ch2/railing_low.png",
+      "sha256": "395e9eb90361e2d1b27ffc7a2b574261886f2554b849bc3fb13960c6ea650c18"
+    },
+    {
+      "file": "assets/props/ch2/umbrella.png",
+      "sha256": "a56dd874d4dc5edb135956e5415b5a3c39ee9f3a20cae6bd6fa6ad8153fa245a"
+    },
+    {
+      "file": "assets/props/ch2/vault_door.png",
+      "sha256": "de1e3478861ef3fbf3e452e8f57553f348102a03c0a4dbda2fb4711ddb6f995b"
+    },
+    {
+      "file": "data/frames.json",
+      "sha256": "ea867497047c5caac09a17eca08d42c5efda1320a4ae54dc80231cebff133ed7"
+    },
+    {
+      "file": "shaders/color_grade.gdshader",
+      "sha256": "080d867e027eb4d1f49424986c6b55e565934bc6c0797336126b4b72257c213c"
+    }
+  ],
+  "candidate_overlays": [
+    {
+      "file": "materials/marble_03.png",
+      "sha256": "2ef591b296ffbbd590bb215427e6acdb29242aa043b181077e5c689ffb5edede"
+    },
+    {
+      "file": "materials/roof_red_03.png",
+      "sha256": "91f6fadf8292dabc32a680c3c0c3b312a4bdd26c7e32049558c2e3c268e170f4"
+    },
+    {
+      "file": "materials/rose_path_02.png",
+      "sha256": "e36c6c63b946272d6a136483e8d288f2015f201a0f5746dea2f15720b776ab14"
+    },
+    {
+      "file": "materials/marble_02_n.png",
+      "sha256": "aca0df29f12b220bbe5319fff7e0c736977d0325374c2f76a6d9d999c075b9ec"
+    },
+    {
+      "file": "materials/cobble_worn_01.png",
+      "sha256": "76eedc4c594d6e80d63d3fe4ae191aa007a74334c3de43d4af01739c2926ba31"
+    },
+    {
+      "file": "materials/cobble_gold_01.png",
+      "sha256": "51940c53c5972d985990155ae534fecab65b113bf522f5964af3f45f47b00bf2"
+    },
+    {
+      "file": "materials/lawn_03.png",
+      "sha256": "d955dd25dcaded5e3b2858a914c319890e4bd9cc228ba28416c11f41eef65ea5"
+    },
+    {
+      "file": "materials/plaster_01.png",
+      "sha256": "d58386a798b60d50ee0f8ae84d8463633dca78b76a95c6bc3b57658ef2426e36"
+    },
+    {
+      "file": "materials/garden_soil_02.png",
+      "sha256": "a9363c6f7177806246013a079a30b49348990c855e611c066f7eb9728f8e5958"
+    },
+    {
+      "file": "materials/step_riser_01.png",
+      "sha256": "6931ff06c9db32bb0fba8b2a2a28cfcfae8f265f8b94c87dd2d7ce5057d90b9d"
+    },
+    {
+      "file": "materials/lawn_01_n.png",
+      "sha256": "e64e554bbc08fee27bebb3e1ac2b838cf11c8c93033bdf1c58406a39ab0f3eab"
+    },
+    {
+      "file": "materials/stone_wall_03.png",
+      "sha256": "cb1c80c37503570f47faec6238b4e53f6dd2a7170951e301f75752dded1e0792"
+    },
+    {
+      "file": "materials/stone_wall_03_n.png",
+      "sha256": "80d5cf7de4f4521474b842c676e4f106864144acbba7958d4234c04a37b7df8c"
+    },
+    {
+      "file": "materials/rose_path_02_n.png",
+      "sha256": "563ab96072ff7ea493aebbdc284e5642f4f47ef7c6d3aa5e95970ee84ae037d7"
+    },
+    {
+      "file": "materials/rose_path_01.png",
+      "sha256": "d841544e3f830d1180b20815c527b040d8b7e8dc7f8a199d4780efab55a56086"
+    },
+    {
+      "file": "materials/step_riser_02.png",
+      "sha256": "f50345e4b9cc7497e7f83aebad5f4e72fa37d754d8df506cefb6539e5da0859a"
+    },
+    {
+      "file": "materials/lawn_03_n.png",
+      "sha256": "fa3cd99f2b041fa7e2494a8f1fa9d58971805a8b718e4f769049c2dfc9af6b15"
+    },
+    {
+      "file": "materials/cobble_gold_03.png",
+      "sha256": "37804dc5955e1a74a79beb4a43e1ef69572a3b195e47abbd245954b008eb624c"
+    },
+    {
+      "file": "materials/step_riser_03_n.png",
+      "sha256": "33c167a4838de5b171860588e34855755623fda1da08caba84b6b1c5cdb33f53"
+    },
+    {
+      "file": "materials/garden_soil_01.png",
+      "sha256": "725d42ce288336f29a428839e18d6d45e52fd3efa2d1b8727c132fe419eb4845"
+    },
+    {
+      "file": "materials/stone_wall_01.png",
+      "sha256": "fe68ce9debc4576be7439d4d88985d7ecc3f5da4bd667ab920a9d2e657e5b7b8"
+    },
+    {
+      "file": "materials/plaster_02.png",
+      "sha256": "373159c8b99da1c0db1498606b4805d417f73bc47478224abd884f8bfe024237"
+    },
+    {
+      "file": "materials/roof_red_03_n.png",
+      "sha256": "d468e488ffb8d5b9ea524aefa298a14a3f667e81b409995fd079b5f8a2566b81"
+    },
+    {
+      "file": "materials/rose_path_03.png",
+      "sha256": "cc7f03b5554e520fccf5e863060b79fe53fc3870c1369c77cfbccfd374bd1ced"
+    },
+    {
+      "file": "materials/lawn_02_n.png",
+      "sha256": "e2a5cbe3ad7e2dc5c5e083ae718e8cb787ffda298527702ffebcbd0464839873"
+    },
+    {
+      "file": "materials/stone_wall_01_n.png",
+      "sha256": "eea4f4935a558cff364acc4716990cfa219ee55f581685979fa664d672751920"
+    },
+    {
+      "file": "materials/cobble_worn_03_n.png",
+      "sha256": "cc485e949c46b58358d7e18b2e7446ff59bf7ad287b13cb0ae5682725a0982dd"
+    },
+    {
+      "file": "materials/lawn_02.png",
+      "sha256": "558e57e9a5333967a051ee851b5927a6663f7910d69cde94e4ca860f4a980d67"
+    },
+    {
+      "file": "materials/roof_red_02_n.png",
+      "sha256": "d468e488ffb8d5b9ea524aefa298a14a3f667e81b409995fd079b5f8a2566b81"
+    },
+    {
+      "file": "materials/cobble_gold_03_n.png",
+      "sha256": "1f172d1fd7e05b60c0ccc06c44f99ecf595d6487837fb0b0486d4870026f39e3"
+    },
+    {
+      "file": "materials/cobble_worn_03.png",
+      "sha256": "96585f1c6f013138fa4d71c207887753345c820e40f7847f88e0674da878b463"
+    },
+    {
+      "file": "materials/stone_wall_02.png",
+      "sha256": "6b247a50726f3934763bc1be892fa1f62761393099d414bc9128850fd0a83b1c"
+    },
+    {
+      "file": "materials/roof_red_01.png",
+      "sha256": "dc5ee2ff1fda8def605c860d9de2fa576194d1f9e94daf714541bf8ca88a6709"
+    },
+    {
+      "file": "materials/cobble_gold_01_n.png",
+      "sha256": "b1ab03a154b64535b5a0a7fa6981b612a9004203c9e8a231dbc1ebb4236d78cc"
+    },
+    {
+      "file": "materials/step_riser_02_n.png",
+      "sha256": "b5bff505a6dfb58c2ea2e32e82f6308c48ed43077411a932b6dc497dbacf7a28"
+    },
+    {
+      "file": "materials/cobble_worn_02.png",
+      "sha256": "d4522c870979691ac0eac9676165a6f359169d9eb10fa6d4e232d7dadfcd8799"
+    },
+    {
+      "file": "materials/marble_02.png",
+      "sha256": "d0a509ce95149e4ac9fe0e2e2a46b57d700b36c57173509e8ca169f9713ccb70"
+    },
+    {
+      "file": "materials/roof_red_02.png",
+      "sha256": "fec3e19d92292cbba54eefe903e6a886db4a1374c9502a6896c29cafaadf4289"
+    },
+    {
+      "file": "materials/cobble_gold_02_n.png",
+      "sha256": "1c1b72f712c6cfc3ac7705c26942d276b0590cd083e62b6a90e037a0bc00a8c5"
+    },
+    {
+      "file": "materials/step_riser_03.png",
+      "sha256": "72a4aae0cc826064b4fd91378eb13d011ba6d4d9377800d7c83da357b15613c6"
+    },
+    {
+      "file": "materials/marble_01.png",
+      "sha256": "7e22656745a842bd16b335b664e6789019b067f636b0fe455e2a9cd66642623a"
+    },
+    {
+      "file": "materials/lawn_01.png",
+      "sha256": "f03ef60b81f06b927d541d772a847e825ca8c83dabba5a7a75f0c8cb297fcbb0"
+    },
+    {
+      "file": "materials/marble_03_n.png",
+      "sha256": "460e65e39a744261869d4a156c3c5f6bb09959b456925c50b8ef5e1b54befc69"
+    },
+    {
+      "file": "materials/rose_path_01_n.png",
+      "sha256": "47ba3a4653c1e2a042a0e8efaf39a52cfdb8d0522944696c47f4b879b643f47d"
+    },
+    {
+      "file": "materials/rose_path_03_n.png",
+      "sha256": "cb41f542bc5373aecd5957632f3444cb05295e7a7cad9faa3bd9442c59df53a3"
+    },
+    {
+      "file": "materials/step_riser_01_n.png",
+      "sha256": "26c5571f2524a6230e4b7a9ec03d352c0c1684fb01ba354ee7aa905fb139b732"
+    },
+    {
+      "file": "materials/garden_soil_03.png",
+      "sha256": "ee9ef1707532401d3269f3b113209bb1f4baccb95680ada39cfc0fdefc263678"
+    },
+    {
+      "file": "materials/cobble_worn_02_n.png",
+      "sha256": "cf7486959344a206643df33b3b71686cbcebb476bb831c94ee69783ea223bc53"
+    },
+    {
+      "file": "materials/marble_01_n.png",
+      "sha256": "259aeff4ce0aca56d693d424fcbab608ea7991e389793b8c8d9fcca76a87ced0"
+    },
+    {
+      "file": "materials/stone_wall_02_n.png",
+      "sha256": "bc61751b24e1dbd299817ee3b140b223d369cb8fec552fafb2ec059076ba8d79"
+    },
+    {
+      "file": "materials/cobble_gold_02.png",
+      "sha256": "0d05a74ad95c301800a962c0b2c3ac2e0e50138ac319617b677788b45c30d51a"
+    },
+    {
+      "file": "materials/cobble_worn_01_n.png",
+      "sha256": "d6409c1b647acbdc0d1d340b720a1a8713b619a80e4893219da92078afb235b1"
+    },
+    {
+      "file": "materials/plaster_03.png",
+      "sha256": "85c0a669d5342c1c50edb68d411b8b24b2c695f8772fe30a2a4b638aefe2ea7f"
+    },
+    {
+      "file": "materials/roof_red_01_n.png",
+      "sha256": "d468e488ffb8d5b9ea524aefa298a14a3f667e81b409995fd079b5f8a2566b81"
+    },
+    {
+      "file": "props/bank_lantern.png",
+      "sha256": "2e16587cba34b4f3855a8925ef72700d3c4d7556985e8598f78844be2955156c"
+    },
+    {
+      "file": "props/bank_flower_planter.png",
+      "sha256": "1695cca3464e54847c9a5cc280a46aef69acb675a62e3e542d595f7f975e5621"
+    },
+    {
+      "file": "props/bank_pedestal_n.png",
+      "sha256": "c5132554c8518481dc782f08208ce1f7429c81a04f0cab707368076b55fa222f"
+    },
+    {
+      "file": "props/bank_pedestal.png",
+      "sha256": "2a47d0a21f074efaa14012048fa98cd6ec2222912c012a86966f858b1229a12e"
+    },
+    {
+      "file": "props/bank_lantern_glow.png",
+      "sha256": "94f6727462289b04f7a78314d9d4a32087de1abf52ec3e85a5dfa2aef1977ab0"
+    }
+  ],
+  "rico_source": {
+    "manifest": {
+      "schema_version": 1,
+      "brief": "v36",
+      "revision": "rico-96-control-1",
+      "studio": "TrashSquad \u00b7 Beer Party Studio",
+      "delivery_status": "accepted_control_sample",
+      "owner_visual_approved": true,
+      "ready_for_gameplay": false,
+      "pixels_per_metre": 96,
+      "palette": "../palettes/chars.png",
+      "scope": "Riko idle, one frame only; run8, props96, materials192 and mobs pending",
+      "files": [
+        {
+          "file": "raccoon_idle.png",
+          "width": 256,
+          "height": 256,
+          "format": "indexed PNG, binary tRNS",
+          "role": "character_idle_sprite",
+          "character_id": "raccoon",
+          "cell_px": [
+            256,
+            256
+          ],
+          "frame_count": 1,
+          "size_m": [
+            2.6666666666666665,
+            2.6666666666666665
+          ],
+          "core_body_height_px": 168,
+          "core_body_height_m": 1.75,
+          "visible_height_px": 170,
+          "visible_height_m": 1.7708333333333333,
+          "visible_bounds_px": [
+            29,
+            54,
+            197,
+            224
+          ],
+          "anchor_px": [
+            128,
+            224
+          ],
+          "anchor_uv": [
+            0.5,
+            0.875
+          ],
+          "anchor_space": "pixel boundaries from top-left",
+          "collider_radius_m": 0.32,
+          "alpha": "binary 0/255",
+          "visible_colors": 127,
+          "palette": "../palettes/chars.png",
+          "outline": "uninterrupted dark colored 1px, whole silhouette",
+          "normal_map": "raccoon_idle_n.png",
+          "normal_map_invert_y": false,
+          "suggested_normal_scale": 0.25,
+          "ground_cast_shadow_baked": false,
+          "local_form_shading_baked": true,
+          "creation_method": "concept-based target-grid palette cleanup, median material samples, local cluster cleanup, complete dark contour",
+          "source_image": "../../../previews/v36/rico96_source.png",
+          "resampled_from_concept": true,
+          "sha256": "430078ecb06105a8325f6ed05cc9ef82008a8c53d38eccbf6a33b6c6a69cd47b",
+          "bytes": 66401
+        },
+        {
+          "file": "raccoon_idle_n.png",
+          "width": 256,
+          "height": 256,
+          "format": "RGB",
+          "role": "normal_map",
+          "paired_albedo": "raccoon_idle.png",
+          "size_m": [
+            2.6666666666666665,
+            2.6666666666666665
+          ],
+          "anchor_px": [
+            128,
+            224
+          ],
+          "anchor_uv": [
+            0.5,
+            0.875
+          ],
+          "color_space": "linear_data",
+          "normal_convention": "OpenGL +Y",
+          "source": "authored geometry fields and fold profiles; not albedo luminance",
+          "sha256": "58ff06aedabfdcb5d6bffa1a30a2cf74173405d17dc728b6fb69381d1878f689",
+          "bytes": 196947
+        }
+      ],
+      "clips": {
+        "idle": {
+          "frames": [
+            0
+          ],
+          "fps": 1,
+          "loop": true
+        }
+      },
+      "sprite3d": {
+        "pixel_size": 0.010416666666666666,
+        "centered": true,
+        "offset_px": [
+          0,
+          96
+        ],
+        "alpha_scissor": 0.5,
+        "filter": "nearest with optional mipmaps",
+        "normal_scale": 0.25,
+        "roughness": 0.85,
+        "metallic_specular": 0.15,
+        "shaded": true,
+        "cast_shadow_in_engine": true
+      },
+      "design_reference": [
+        "source/assets/heroes/tactical/raccoon_idle.png",
+        "astra/previews/v35/bank_direction.png"
+      ],
+      "identity_visual_approval_pending": false,
+      "verification": {
+        "format": "VALIDATION.json",
+        "godot_render_verified": true,
+        "render_report": "RENDER_VALIDATION.json",
+        "artistic_approval": false
+      },
+      "pending": [
+        "Props96: slender lamp/pedestal and planter",
+        "After review: run8, 192px materials, mobs"
+      ],
+      "approval_note": "Owner accepted idle Riko in brief e099467; props96 explicitly accepted in current conversation 17.10"
+    },
+    "albedo_sha256": "430078ecb06105a8325f6ed05cc9ef82008a8c53d38eccbf6a33b6c6a69cd47b"
+  },
+  "qa_overrides": [
+    "candidate prop anchors and mount",
+    "day lamps off; evening Omni .4, emission .45",
+    "overview camera 38deg; closer control camera 30deg",
+    "frozen actors; unfinished mobs hidden",
+    "Riko normal on/off and shadow on/off when --rico-dir provided"
+  ]
+}

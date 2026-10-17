@@ -1,0 +1,219 @@
+{
+  "pixels_per_metre": 96,
+  "source_sha256": "996f777a29030cac46890a9fb7c0b598bbb6677c707fbbd9f1a3fb43857501e1",
+  "palette_colors": 128,
+  "source_method": "new concept texture atlas, median target-grid samples, restrained material colors, toroidal edge cleanup, three interior geometry variations",
+  "normal_method": "shallow approximate joint relief from texture structure; not a scanned or geometric 3D normal bake",
+  "files": [
+    {
+      "file": "cobble_gold_01.png",
+      "material": "cobble_gold",
+      "variant": 1,
+      "sha256": "51940c53c5972d985990155ae534fecab65b113bf522f5964af3f45f47b00bf2",
+      "normal_map": "cobble_gold_01_n.png",
+      "normal_sha256": "b1ab03a154b64535b5a0a7fa6981b612a9004203c9e8a231dbc1ebb4236d78cc",
+      "mean_luma": 149.12,
+      "normal_unit_max_error": 0.004373366475281637
+    },
+    {
+      "file": "cobble_gold_02.png",
+      "material": "cobble_gold",
+      "variant": 2,
+      "sha256": "0d05a74ad95c301800a962c0b2c3ac2e0e50138ac319617b677788b45c30d51a",
+      "normal_map": "cobble_gold_02_n.png",
+      "normal_sha256": "1c1b72f712c6cfc3ac7705c26942d276b0590cd083e62b6a90e037a0bc00a8c5",
+      "mean_luma": 149.1,
+      "normal_unit_max_error": 0.004373366475281637
+    },
+    {
+      "file": "cobble_gold_03.png",
+      "material": "cobble_gold",
+      "variant": 3,
+      "sha256": "37804dc5955e1a74a79beb4a43e1ef69572a3b195e47abbd245954b008eb624c",
+      "normal_map": "cobble_gold_03_n.png",
+      "normal_sha256": "1f172d1fd7e05b60c0ccc06c44f99ecf595d6487837fb0b0486d4870026f39e3",
+      "mean_luma": 149.13,
+      "normal_unit_max_error": 0.004373366475281637
+    },
+    {
+      "file": "cobble_worn_01.png",
+      "material": "cobble_worn",
+      "variant": 1,
+      "sha256": "76eedc4c594d6e80d63d3fe4ae191aa007a74334c3de43d4af01739c2926ba31",
+      "normal_map": "cobble_worn_01_n.png",
+      "normal_sha256": "d6409c1b647acbdc0d1d340b720a1a8713b619a80e4893219da92078afb235b1",
+      "mean_luma": 155.91,
+      "normal_unit_max_error": 0.004373366475281637
+    },
+    {
+      "file": "cobble_worn_02.png",
+      "material": "cobble_worn",
+      "variant": 2,
+      "sha256": "d4522c870979691ac0eac9676165a6f359169d9eb10fa6d4e232d7dadfcd8799",
+      "normal_map": "cobble_worn_02_n.png",
+      "normal_sha256": "cf7486959344a206643df33b3b71686cbcebb476bb831c94ee69783ea223bc53",
+      "mean_luma": 155.95,
+      "normal_unit_max_error": 0.004373366475281637
+    },
+    {
+      "file": "cobble_worn_03.png",
+      "material": "cobble_worn",
+      "variant": 3,
+      "sha256": "96585f1c6f013138fa4d71c207887753345c820e40f7847f88e0674da878b463",
+      "normal_map": "cobble_worn_03_n.png",
+      "normal_sha256": "cc485e949c46b58358d7e18b2e7446ff59bf7ad287b13cb0ae5682725a0982dd",
+      "mean_luma": 155.96,
+      "normal_unit_max_error": 0.004373366475281637
+    },
+    {
+      "file": "rose_path_01.png",
+      "material": "rose_path",
+      "variant": 1,
+      "sha256": "d841544e3f830d1180b20815c527b040d8b7e8dc7f8a199d4780efab55a56086",
+      "normal_map": "rose_path_01_n.png",
+      "normal_sha256": "47ba3a4653c1e2a042a0e8efaf39a52cfdb8d0522944696c47f4b879b643f47d",
+      "mean_luma": 146.39,
+      "normal_unit_max_error": 0.004361684386790632
+    },
+    {
+      "file": "rose_path_02.png",
+      "material": "rose_path",
+      "variant": 2,
+      "sha256": "e36c6c63b946272d6a136483e8d288f2015f201a0f5746dea2f15720b776ab14",
+      "normal_map": "rose_path_02_n.png",
+      "normal_sha256": "563ab96072ff7ea493aebbdc284e5642f4f47ef7c6d3aa5e95970ee84ae037d7",
+      "mean_luma": 146.38,
+      "normal_unit_max_error": 0.004361684386790632
+    },
+    {
+      "file": "rose_path_03.png",
+      "material": "rose_path",
+      "variant": 3,
+      "sha256": "cc7f03b5554e520fccf5e863060b79fe53fc3870c1369c77cfbccfd374bd1ced",
+      "normal_map": "rose_path_03_n.png",
+      "normal_sha256": "cb41f542bc5373aecd5957632f3444cb05295e7a7cad9faa3bd9442c59df53a3",
+      "mean_luma": 146.39,
+      "normal_unit_max_error": 0.004361684386790632
+    },
+    {
+      "file": "marble_01.png",
+      "material": "marble",
+      "variant": 1,
+      "sha256": "7e22656745a842bd16b335b664e6789019b067f636b0fe455e2a9cd66642623a",
+      "normal_map": "marble_01_n.png",
+      "normal_sha256": "259aeff4ce0aca56d693d424fcbab608ea7991e389793b8c8d9fcca76a87ced0",
+      "mean_luma": 209.69,
+      "normal_unit_max_error": 0.004373366475281637
+    },
+    {
+      "file": "marble_02.png",
+      "material": "marble",
+      "variant": 2,
+      "sha256": "d0a509ce95149e4ac9fe0e2e2a46b57d700b36c57173509e8ca169f9713ccb70",
+      "normal_map": "marble_02_n.png",
+      "normal_sha256": "aca0df29f12b220bbe5319fff7e0c736977d0325374c2f76a6d9d999c075b9ec",
+      "mean_luma": 209.68,
+      "normal_unit_max_error": 0.004373366475281637
+    },
+    {
+      "file": "marble_03.png",
+      "material": "marble",
+      "variant": 3,
+      "sha256": "2ef591b296ffbbd590bb215427e6acdb29242aa043b181077e5c689ffb5edede",
+      "normal_map": "marble_03_n.png",
+      "normal_sha256": "460e65e39a744261869d4a156c3c5f6bb09959b456925c50b8ef5e1b54befc69",
+      "mean_luma": 209.67,
+      "normal_unit_max_error": 0.004373366475281637
+    },
+    {
+      "file": "lawn_01.png",
+      "material": "lawn",
+      "variant": 1,
+      "sha256": "f03ef60b81f06b927d541d772a847e825ca8c83dabba5a7a75f0c8cb297fcbb0",
+      "normal_map": "lawn_01_n.png",
+      "normal_sha256": "e64e554bbc08fee27bebb3e1ac2b838cf11c8c93033bdf1c58406a39ab0f3eab",
+      "mean_luma": 85.73,
+      "normal_unit_max_error": 0.0012448998526628507
+    },
+    {
+      "file": "lawn_02.png",
+      "material": "lawn",
+      "variant": 2,
+      "sha256": "558e57e9a5333967a051ee851b5927a6663f7910d69cde94e4ca860f4a980d67",
+      "normal_map": "lawn_02_n.png",
+      "normal_sha256": "e2a5cbe3ad7e2dc5c5e083ae718e8cb787ffda298527702ffebcbd0464839873",
+      "mean_luma": 85.66,
+      "normal_unit_max_error": 0.0012448998526628507
+    },
+    {
+      "file": "lawn_03.png",
+      "material": "lawn",
+      "variant": 3,
+      "sha256": "d955dd25dcaded5e3b2858a914c319890e4bd9cc228ba28416c11f41eef65ea5",
+      "normal_map": "lawn_03_n.png",
+      "normal_sha256": "fa3cd99f2b041fa7e2494a8f1fa9d58971805a8b718e4f769049c2dfc9af6b15",
+      "mean_luma": 85.8,
+      "normal_unit_max_error": 0.0012448998526628507
+    },
+    {
+      "file": "stone_wall_01.png",
+      "material": "stone_wall",
+      "variant": 1,
+      "sha256": "fe68ce9debc4576be7439d4d88985d7ecc3f5da4bd667ab920a9d2e657e5b7b8",
+      "normal_map": "stone_wall_01_n.png",
+      "normal_sha256": "eea4f4935a558cff364acc4716990cfa219ee55f581685979fa664d672751920",
+      "mean_luma": 160.89,
+      "normal_unit_max_error": 0.004114577909133721
+    },
+    {
+      "file": "stone_wall_02.png",
+      "material": "stone_wall",
+      "variant": 2,
+      "sha256": "6b247a50726f3934763bc1be892fa1f62761393099d414bc9128850fd0a83b1c",
+      "normal_map": "stone_wall_02_n.png",
+      "normal_sha256": "bc61751b24e1dbd299817ee3b140b223d369cb8fec552fafb2ec059076ba8d79",
+      "mean_luma": 160.9,
+      "normal_unit_max_error": 0.004067085042079421
+    },
+    {
+      "file": "stone_wall_03.png",
+      "material": "stone_wall",
+      "variant": 3,
+      "sha256": "cb1c80c37503570f47faec6238b4e53f6dd2a7170951e301f75752dded1e0792",
+      "normal_map": "stone_wall_03_n.png",
+      "normal_sha256": "80d5cf7de4f4521474b842c676e4f106864144acbba7958d4234c04a37b7df8c",
+      "mean_luma": 160.88,
+      "normal_unit_max_error": 0.004067085042079421
+    },
+    {
+      "file": "step_riser_01.png",
+      "material": "step_riser",
+      "variant": 1,
+      "sha256": "6931ff06c9db32bb0fba8b2a2a28cfcfae8f265f8b94c87dd2d7ce5057d90b9d",
+      "normal_map": "step_riser_01_n.png",
+      "normal_sha256": "26c5571f2524a6230e4b7a9ec03d352c0c1684fb01ba354ee7aa905fb139b732",
+      "mean_luma": 161.87,
+      "normal_unit_max_error": 0.004373366475281637
+    },
+    {
+      "file": "step_riser_02.png",
+      "material": "step_riser",
+      "variant": 2,
+      "sha256": "f50345e4b9cc7497e7f83aebad5f4e72fa37d754d8df506cefb6539e5da0859a",
+      "normal_map": "step_riser_02_n.png",
+      "normal_sha256": "b5bff505a6dfb58c2ea2e32e82f6308c48ed43077411a932b6dc497dbacf7a28",
+      "mean_luma": 161.86,
+      "normal_unit_max_error": 0.004373366475281637
+    },
+    {
+      "file": "step_riser_03.png",
+      "material": "step_riser",
+      "variant": 3,
+      "sha256": "72a4aae0cc826064b4fd91378eb13d011ba6d4d9377800d7c83da357b15613c6",
+      "normal_map": "step_riser_03_n.png",
+      "normal_sha256": "33c167a4838de5b171860588e34855755623fda1da08caba84b6b1c5cdb33f53",
+      "mean_luma": 161.85,
+      "normal_unit_max_error": 0.004373366475281637
+    }
+  ]
+}

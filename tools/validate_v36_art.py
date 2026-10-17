@@ -20,6 +20,10 @@ def pixels(image):
 
 
 def validate(root):
+    current=json.loads((root/'materials/manifest.json').read_text())
+    if current.get('pixels_per_metre')==96:
+        from art_v36.validate_materials96 import validate as validate96
+        return validate96(root)
     errors, report = [], {"brief":"v36", "materials":{}, "checked_png":0}
     def require(ok, message):
         if not ok:

@@ -1,64 +1,50 @@
 {
   "schema_version": 1,
   "brief": "v36",
-  "revision": "native-96-48pxm",
+  "revision": "seven-materials-96-control-1",
   "studio": "TrashSquad · Beer Party Studio",
-  "pixels_per_metre": 48,
-  "palette": "../palettes/bank.png",
+  "pixels_per_metre": 96,
+  "uniform_density": false,
+  "requested_materials": [
+    "cobble_gold",
+    "cobble_worn",
+    "lawn",
+    "marble",
+    "rose_path",
+    "step_riser",
+    "stone_wall"
+  ],
+  "legacy_materials_pending_96": [
+    "garden_soil",
+    "plaster",
+    "roof_red"
+  ],
+  "palette": "../palettes/materials96.png",
   "color_space": "sRGB",
   "texture_filter": "nearest_with_mipmaps",
   "texture_repeat": "enabled",
   "cast_shadows_baked": false,
   "directional_light_baked": false,
-  "variant_edge_compatibility": "all ordered pairs, horizontal and vertical, within a material",
-  "normal_convention": "OpenGL +Y; normal_map_invert_y=false; import as linear normal data",
+  "variant_edge_compatibility": "all ordered pairs horizontal/vertical within each family, including normals",
+  "normal_convention": "OpenGL +Y, normal_map_invert_y=false; import data linear",
+  "source_pipeline": "new concept texture atlas, median target-grid samples, restrained material colors, toroidal edge cleanup, three interior geometry variations",
+  "owner_visual_approved": false,
   "files": [
     {
-      "file": "cobble_gold_01_n.png",
-      "width": 96,
-      "height": 96,
-      "format": "RGB",
-      "bytes": 8593,
-      "sha256": "bdcf30ecfa2653bdf563dc86dfad6d9b0575317c95f370a4e654739b8fec5269",
-      "material": "cobble_gold",
-      "variant": 1,
-      "role": "normal",
-      "size_m": [
-        2.0,
-        2.0
-      ],
-      "anchor_px": [
-        0,
-        0
-      ],
-      "anchor_uv": [
-        0.0,
-        0.0
-      ],
-      "tileable_x": true,
-      "tileable_y": true,
-      "color_space": "linear_data",
-      "normal_convention": "OpenGL +Y"
-    },
-    {
       "file": "cobble_gold_01.png",
-      "width": 96,
-      "height": 96,
-      "format": "RGBA",
-      "bytes": 3081,
-      "sha256": "84292f846d80f8b3e62bacadfb3a9e6a0c6306c5aa1eef4b12ecf416a4e47f8e",
+      "width": 192,
+      "height": 192,
+      "format": "P",
+      "bytes": 37520,
+      "sha256": "51940c53c5972d985990155ae534fecab65b113bf522f5964af3f45f47b00bf2",
       "material": "cobble_gold",
       "variant": 1,
       "role": "albedo",
+      "pixels_per_metre": 96,
       "size_m": [
         2.0,
         2.0
       ],
-      "authored_size_px": [
-        96,
-        96
-      ],
-      "resampled": false,
       "anchor_px": [
         0,
         0
@@ -67,25 +53,29 @@
         0.0,
         0.0
       ],
-      "anchor_kind": "surface_uv_origin",
       "tileable_x": true,
       "tileable_y": true,
+      "color_space": "sRGB",
+      "palette": "../palettes/materials96.png",
+      "resampled_from_concept": true,
+      "normal_map": "cobble_gold_01_n.png",
+      "normal_scale": 0.35,
       "roughness": 0.92,
       "metallic": 0.0,
-      "palette": "../palettes/bank.png",
-      "normal_map": "cobble_gold_01_n.png",
-      "normal_scale": 0.65
+      "ground_cast_shadow_baked": false,
+      "directional_light_baked": false
     },
     {
-      "file": "cobble_gold_02_n.png",
-      "width": 96,
-      "height": 96,
+      "file": "cobble_gold_01_n.png",
+      "width": 192,
+      "height": 192,
       "format": "RGB",
-      "bytes": 8472,
-      "sha256": "1303a4170891f50360f850f325481d59eaef4091107ee7cdfb62b76c55282ce9",
+      "bytes": 110857,
+      "sha256": "b1ab03a154b64535b5a0a7fa6981b612a9004203c9e8a231dbc1ebb4236d78cc",
       "material": "cobble_gold",
-      "variant": 2,
+      "variant": 1,
       "role": "normal",
+      "pixels_per_metre": 96,
       "size_m": [
         2.0,
         2.0
@@ -101,27 +91,25 @@
       "tileable_x": true,
       "tileable_y": true,
       "color_space": "linear_data",
-      "normal_convention": "OpenGL +Y"
+      "normal_convention": "OpenGL +Y",
+      "normal_map_invert_y": false,
+      "normal_source": "shallow approximate joint relief from texture structure; not a scanned or geometric 3D normal bake"
     },
     {
       "file": "cobble_gold_02.png",
-      "width": 96,
-      "height": 96,
-      "format": "RGBA",
-      "bytes": 3091,
-      "sha256": "076237965f2a428ec6fb837390b1f094059598d4ea8c843ed28cbe4b93d77f8f",
+      "width": 192,
+      "height": 192,
+      "format": "P",
+      "bytes": 37520,
+      "sha256": "0d05a74ad95c301800a962c0b2c3ac2e0e50138ac319617b677788b45c30d51a",
       "material": "cobble_gold",
       "variant": 2,
       "role": "albedo",
+      "pixels_per_metre": 96,
       "size_m": [
         2.0,
         2.0
       ],
-      "authored_size_px": [
-        96,
-        96
-      ],
-      "resampled": false,
       "anchor_px": [
         0,
         0
@@ -130,25 +118,29 @@
         0.0,
         0.0
       ],
-      "anchor_kind": "surface_uv_origin",
       "tileable_x": true,
       "tileable_y": true,
+      "color_space": "sRGB",
+      "palette": "../palettes/materials96.png",
+      "resampled_from_concept": true,
+      "normal_map": "cobble_gold_02_n.png",
+      "normal_scale": 0.35,
       "roughness": 0.92,
       "metallic": 0.0,
-      "palette": "../palettes/bank.png",
-      "normal_map": "cobble_gold_02_n.png",
-      "normal_scale": 0.65
+      "ground_cast_shadow_baked": false,
+      "directional_light_baked": false
     },
     {
-      "file": "cobble_gold_03_n.png",
-      "width": 96,
-      "height": 96,
+      "file": "cobble_gold_02_n.png",
+      "width": 192,
+      "height": 192,
       "format": "RGB",
-      "bytes": 8643,
-      "sha256": "2aa8c9b1433f2f35403cb21443fabad982396426694662e05afbe1a2c306eacb",
+      "bytes": 110857,
+      "sha256": "1c1b72f712c6cfc3ac7705c26942d276b0590cd083e62b6a90e037a0bc00a8c5",
       "material": "cobble_gold",
-      "variant": 3,
+      "variant": 2,
       "role": "normal",
+      "pixels_per_metre": 96,
       "size_m": [
         2.0,
         2.0
@@ -164,27 +156,25 @@
       "tileable_x": true,
       "tileable_y": true,
       "color_space": "linear_data",
-      "normal_convention": "OpenGL +Y"
+      "normal_convention": "OpenGL +Y",
+      "normal_map_invert_y": false,
+      "normal_source": "shallow approximate joint relief from texture structure; not a scanned or geometric 3D normal bake"
     },
     {
       "file": "cobble_gold_03.png",
-      "width": 96,
-      "height": 96,
-      "format": "RGBA",
-      "bytes": 3043,
-      "sha256": "063d6d3acfa70998a50edbd5b94c25080e106d6131c577a1fb3b210796aa03a1",
+      "width": 192,
+      "height": 192,
+      "format": "P",
+      "bytes": 37520,
+      "sha256": "37804dc5955e1a74a79beb4a43e1ef69572a3b195e47abbd245954b008eb624c",
       "material": "cobble_gold",
       "variant": 3,
       "role": "albedo",
+      "pixels_per_metre": 96,
       "size_m": [
         2.0,
         2.0
       ],
-      "authored_size_px": [
-        96,
-        96
-      ],
-      "resampled": false,
       "anchor_px": [
         0,
         0
@@ -193,25 +183,29 @@
         0.0,
         0.0
       ],
-      "anchor_kind": "surface_uv_origin",
       "tileable_x": true,
       "tileable_y": true,
+      "color_space": "sRGB",
+      "palette": "../palettes/materials96.png",
+      "resampled_from_concept": true,
+      "normal_map": "cobble_gold_03_n.png",
+      "normal_scale": 0.35,
       "roughness": 0.92,
       "metallic": 0.0,
-      "palette": "../palettes/bank.png",
-      "normal_map": "cobble_gold_03_n.png",
-      "normal_scale": 0.65
+      "ground_cast_shadow_baked": false,
+      "directional_light_baked": false
     },
     {
-      "file": "cobble_worn_01_n.png",
-      "width": 96,
-      "height": 96,
+      "file": "cobble_gold_03_n.png",
+      "width": 192,
+      "height": 192,
       "format": "RGB",
-      "bytes": 8708,
-      "sha256": "98d43453a84c483fc3a2e06239edba959ab3190a393a4da8c383a7f32edf02de",
-      "material": "cobble_worn",
-      "variant": 1,
+      "bytes": 110857,
+      "sha256": "1f172d1fd7e05b60c0ccc06c44f99ecf595d6487837fb0b0486d4870026f39e3",
+      "material": "cobble_gold",
+      "variant": 3,
       "role": "normal",
+      "pixels_per_metre": 96,
       "size_m": [
         2.0,
         2.0
@@ -227,27 +221,25 @@
       "tileable_x": true,
       "tileable_y": true,
       "color_space": "linear_data",
-      "normal_convention": "OpenGL +Y"
+      "normal_convention": "OpenGL +Y",
+      "normal_map_invert_y": false,
+      "normal_source": "shallow approximate joint relief from texture structure; not a scanned or geometric 3D normal bake"
     },
     {
       "file": "cobble_worn_01.png",
-      "width": 96,
-      "height": 96,
-      "format": "RGBA",
-      "bytes": 2979,
-      "sha256": "adc3e864dea9ff07730f343320437bd215d45f136925dcef486253c5c324136e",
+      "width": 192,
+      "height": 192,
+      "format": "P",
+      "bytes": 37520,
+      "sha256": "76eedc4c594d6e80d63d3fe4ae191aa007a74334c3de43d4af01739c2926ba31",
       "material": "cobble_worn",
       "variant": 1,
       "role": "albedo",
+      "pixels_per_metre": 96,
       "size_m": [
         2.0,
         2.0
       ],
-      "authored_size_px": [
-        96,
-        96
-      ],
-      "resampled": false,
       "anchor_px": [
         0,
         0
@@ -256,25 +248,29 @@
         0.0,
         0.0
       ],
-      "anchor_kind": "surface_uv_origin",
       "tileable_x": true,
       "tileable_y": true,
+      "color_space": "sRGB",
+      "palette": "../palettes/materials96.png",
+      "resampled_from_concept": true,
+      "normal_map": "cobble_worn_01_n.png",
+      "normal_scale": 0.35,
       "roughness": 0.92,
       "metallic": 0.0,
-      "palette": "../palettes/bank.png",
-      "normal_map": "cobble_worn_01_n.png",
-      "normal_scale": 0.65
+      "ground_cast_shadow_baked": false,
+      "directional_light_baked": false
     },
     {
-      "file": "cobble_worn_02_n.png",
-      "width": 96,
-      "height": 96,
+      "file": "cobble_worn_01_n.png",
+      "width": 192,
+      "height": 192,
       "format": "RGB",
-      "bytes": 8797,
-      "sha256": "030137c8c330beb2ffd23efa22602c46bd760d8f6c6c9c4d2569c5c0944676bb",
+      "bytes": 110857,
+      "sha256": "d6409c1b647acbdc0d1d340b720a1a8713b619a80e4893219da92078afb235b1",
       "material": "cobble_worn",
-      "variant": 2,
+      "variant": 1,
       "role": "normal",
+      "pixels_per_metre": 96,
       "size_m": [
         2.0,
         2.0
@@ -290,27 +286,25 @@
       "tileable_x": true,
       "tileable_y": true,
       "color_space": "linear_data",
-      "normal_convention": "OpenGL +Y"
+      "normal_convention": "OpenGL +Y",
+      "normal_map_invert_y": false,
+      "normal_source": "shallow approximate joint relief from texture structure; not a scanned or geometric 3D normal bake"
     },
     {
       "file": "cobble_worn_02.png",
-      "width": 96,
-      "height": 96,
-      "format": "RGBA",
-      "bytes": 3071,
-      "sha256": "9fb8748b532c7b5b07c04fc23a79553f0da7917f7b923648c59070bbc2771678",
+      "width": 192,
+      "height": 192,
+      "format": "P",
+      "bytes": 37520,
+      "sha256": "d4522c870979691ac0eac9676165a6f359169d9eb10fa6d4e232d7dadfcd8799",
       "material": "cobble_worn",
       "variant": 2,
       "role": "albedo",
+      "pixels_per_metre": 96,
       "size_m": [
         2.0,
         2.0
       ],
-      "authored_size_px": [
-        96,
-        96
-      ],
-      "resampled": false,
       "anchor_px": [
         0,
         0
@@ -319,25 +313,29 @@
         0.0,
         0.0
       ],
-      "anchor_kind": "surface_uv_origin",
       "tileable_x": true,
       "tileable_y": true,
+      "color_space": "sRGB",
+      "palette": "../palettes/materials96.png",
+      "resampled_from_concept": true,
+      "normal_map": "cobble_worn_02_n.png",
+      "normal_scale": 0.35,
       "roughness": 0.92,
       "metallic": 0.0,
-      "palette": "../palettes/bank.png",
-      "normal_map": "cobble_worn_02_n.png",
-      "normal_scale": 0.65
+      "ground_cast_shadow_baked": false,
+      "directional_light_baked": false
     },
     {
-      "file": "cobble_worn_03_n.png",
-      "width": 96,
-      "height": 96,
+      "file": "cobble_worn_02_n.png",
+      "width": 192,
+      "height": 192,
       "format": "RGB",
-      "bytes": 8536,
-      "sha256": "9d3897e603de5633cb9d7c9ea88f307c4ee8546efd7ce65b1dea9633b8458b70",
+      "bytes": 110857,
+      "sha256": "cf7486959344a206643df33b3b71686cbcebb476bb831c94ee69783ea223bc53",
       "material": "cobble_worn",
-      "variant": 3,
+      "variant": 2,
       "role": "normal",
+      "pixels_per_metre": 96,
       "size_m": [
         2.0,
         2.0
@@ -353,27 +351,25 @@
       "tileable_x": true,
       "tileable_y": true,
       "color_space": "linear_data",
-      "normal_convention": "OpenGL +Y"
+      "normal_convention": "OpenGL +Y",
+      "normal_map_invert_y": false,
+      "normal_source": "shallow approximate joint relief from texture structure; not a scanned or geometric 3D normal bake"
     },
     {
       "file": "cobble_worn_03.png",
-      "width": 96,
-      "height": 96,
-      "format": "RGBA",
-      "bytes": 2944,
-      "sha256": "155ce693e276430855c5fe2ca7dec9b5705b9bb12f517f5eaafe4f0d798f7fff",
+      "width": 192,
+      "height": 192,
+      "format": "P",
+      "bytes": 37520,
+      "sha256": "96585f1c6f013138fa4d71c207887753345c820e40f7847f88e0674da878b463",
       "material": "cobble_worn",
       "variant": 3,
       "role": "albedo",
+      "pixels_per_metre": 96,
       "size_m": [
         2.0,
         2.0
       ],
-      "authored_size_px": [
-        96,
-        96
-      ],
-      "resampled": false,
       "anchor_px": [
         0,
         0
@@ -382,34 +378,63 @@
         0.0,
         0.0
       ],
-      "anchor_kind": "surface_uv_origin",
       "tileable_x": true,
       "tileable_y": true,
+      "color_space": "sRGB",
+      "palette": "../palettes/materials96.png",
+      "resampled_from_concept": true,
+      "normal_map": "cobble_worn_03_n.png",
+      "normal_scale": 0.35,
       "roughness": 0.92,
       "metallic": 0.0,
-      "palette": "../palettes/bank.png",
-      "normal_map": "cobble_worn_03_n.png",
-      "normal_scale": 0.65
+      "ground_cast_shadow_baked": false,
+      "directional_light_baked": false
+    },
+    {
+      "file": "cobble_worn_03_n.png",
+      "width": 192,
+      "height": 192,
+      "format": "RGB",
+      "bytes": 110857,
+      "sha256": "cc485e949c46b58358d7e18b2e7446ff59bf7ad287b13cb0ae5682725a0982dd",
+      "material": "cobble_worn",
+      "variant": 3,
+      "role": "normal",
+      "pixels_per_metre": 96,
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "tileable_x": true,
+      "tileable_y": true,
+      "color_space": "linear_data",
+      "normal_convention": "OpenGL +Y",
+      "normal_map_invert_y": false,
+      "normal_source": "shallow approximate joint relief from texture structure; not a scanned or geometric 3D normal bake"
     },
     {
       "file": "rose_path_01.png",
-      "width": 96,
-      "height": 96,
-      "format": "RGBA",
-      "bytes": 1504,
-      "sha256": "7efd08a4864536fd8d8dba95fbe23b2f9e77c867c02b138417a4aaeb30310bfd",
+      "width": 192,
+      "height": 192,
+      "format": "P",
+      "bytes": 37520,
+      "sha256": "d841544e3f830d1180b20815c527b040d8b7e8dc7f8a199d4780efab55a56086",
       "material": "rose_path",
       "variant": 1,
       "role": "albedo",
+      "pixels_per_metre": 96,
       "size_m": [
         2.0,
         2.0
       ],
-      "authored_size_px": [
-        96,
-        96
-      ],
-      "resampled": false,
       "anchor_px": [
         0,
         0
@@ -418,32 +443,63 @@
         0.0,
         0.0
       ],
-      "anchor_kind": "surface_uv_origin",
       "tileable_x": true,
       "tileable_y": true,
+      "color_space": "sRGB",
+      "palette": "../palettes/materials96.png",
+      "resampled_from_concept": true,
+      "normal_map": "rose_path_01_n.png",
+      "normal_scale": 0.35,
       "roughness": 0.92,
       "metallic": 0.0,
-      "palette": "../palettes/bank.png"
+      "ground_cast_shadow_baked": false,
+      "directional_light_baked": false
+    },
+    {
+      "file": "rose_path_01_n.png",
+      "width": 192,
+      "height": 192,
+      "format": "RGB",
+      "bytes": 110857,
+      "sha256": "47ba3a4653c1e2a042a0e8efaf39a52cfdb8d0522944696c47f4b879b643f47d",
+      "material": "rose_path",
+      "variant": 1,
+      "role": "normal",
+      "pixels_per_metre": 96,
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "tileable_x": true,
+      "tileable_y": true,
+      "color_space": "linear_data",
+      "normal_convention": "OpenGL +Y",
+      "normal_map_invert_y": false,
+      "normal_source": "shallow approximate joint relief from texture structure; not a scanned or geometric 3D normal bake"
     },
     {
       "file": "rose_path_02.png",
-      "width": 96,
-      "height": 96,
-      "format": "RGBA",
-      "bytes": 1594,
-      "sha256": "4f3530a431edf42d2b34f492745bc50af8d42c00fb168b139f97291d6cc0690f",
+      "width": 192,
+      "height": 192,
+      "format": "P",
+      "bytes": 37520,
+      "sha256": "e36c6c63b946272d6a136483e8d288f2015f201a0f5746dea2f15720b776ab14",
       "material": "rose_path",
       "variant": 2,
       "role": "albedo",
+      "pixels_per_metre": 96,
       "size_m": [
         2.0,
         2.0
       ],
-      "authored_size_px": [
-        96,
-        96
-      ],
-      "resampled": false,
       "anchor_px": [
         0,
         0
@@ -452,32 +508,63 @@
         0.0,
         0.0
       ],
-      "anchor_kind": "surface_uv_origin",
       "tileable_x": true,
       "tileable_y": true,
+      "color_space": "sRGB",
+      "palette": "../palettes/materials96.png",
+      "resampled_from_concept": true,
+      "normal_map": "rose_path_02_n.png",
+      "normal_scale": 0.35,
       "roughness": 0.92,
       "metallic": 0.0,
-      "palette": "../palettes/bank.png"
+      "ground_cast_shadow_baked": false,
+      "directional_light_baked": false
+    },
+    {
+      "file": "rose_path_02_n.png",
+      "width": 192,
+      "height": 192,
+      "format": "RGB",
+      "bytes": 110857,
+      "sha256": "563ab96072ff7ea493aebbdc284e5642f4f47ef7c6d3aa5e95970ee84ae037d7",
+      "material": "rose_path",
+      "variant": 2,
+      "role": "normal",
+      "pixels_per_metre": 96,
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "tileable_x": true,
+      "tileable_y": true,
+      "color_space": "linear_data",
+      "normal_convention": "OpenGL +Y",
+      "normal_map_invert_y": false,
+      "normal_source": "shallow approximate joint relief from texture structure; not a scanned or geometric 3D normal bake"
     },
     {
       "file": "rose_path_03.png",
-      "width": 96,
-      "height": 96,
-      "format": "RGBA",
-      "bytes": 1578,
-      "sha256": "8dad73ec4ac26bb29fc3078986178a8df811d4d7b11c6e47b03e2496c84cb017",
+      "width": 192,
+      "height": 192,
+      "format": "P",
+      "bytes": 37520,
+      "sha256": "cc7f03b5554e520fccf5e863060b79fe53fc3870c1369c77cfbccfd374bd1ced",
       "material": "rose_path",
       "variant": 3,
       "role": "albedo",
+      "pixels_per_metre": 96,
       "size_m": [
         2.0,
         2.0
       ],
-      "authored_size_px": [
-        96,
-        96
-      ],
-      "resampled": false,
       "anchor_px": [
         0,
         0
@@ -486,32 +573,63 @@
         0.0,
         0.0
       ],
-      "anchor_kind": "surface_uv_origin",
       "tileable_x": true,
       "tileable_y": true,
+      "color_space": "sRGB",
+      "palette": "../palettes/materials96.png",
+      "resampled_from_concept": true,
+      "normal_map": "rose_path_03_n.png",
+      "normal_scale": 0.35,
       "roughness": 0.92,
       "metallic": 0.0,
-      "palette": "../palettes/bank.png"
+      "ground_cast_shadow_baked": false,
+      "directional_light_baked": false
+    },
+    {
+      "file": "rose_path_03_n.png",
+      "width": 192,
+      "height": 192,
+      "format": "RGB",
+      "bytes": 110857,
+      "sha256": "cb41f542bc5373aecd5957632f3444cb05295e7a7cad9faa3bd9442c59df53a3",
+      "material": "rose_path",
+      "variant": 3,
+      "role": "normal",
+      "pixels_per_metre": 96,
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "tileable_x": true,
+      "tileable_y": true,
+      "color_space": "linear_data",
+      "normal_convention": "OpenGL +Y",
+      "normal_map_invert_y": false,
+      "normal_source": "shallow approximate joint relief from texture structure; not a scanned or geometric 3D normal bake"
     },
     {
       "file": "marble_01.png",
-      "width": 96,
-      "height": 96,
-      "format": "RGBA",
-      "bytes": 1211,
-      "sha256": "f1b91249f780c5b62ef2736f22dddd219d933ad5cb048ea28205c8cda4e91964",
+      "width": 192,
+      "height": 192,
+      "format": "P",
+      "bytes": 37520,
+      "sha256": "7e22656745a842bd16b335b664e6789019b067f636b0fe455e2a9cd66642623a",
       "material": "marble",
       "variant": 1,
       "role": "albedo",
+      "pixels_per_metre": 96,
       "size_m": [
         2.0,
         2.0
       ],
-      "authored_size_px": [
-        96,
-        96
-      ],
-      "resampled": false,
       "anchor_px": [
         0,
         0
@@ -520,32 +638,63 @@
         0.0,
         0.0
       ],
-      "anchor_kind": "surface_uv_origin",
       "tileable_x": true,
       "tileable_y": true,
-      "roughness": 0.48,
+      "color_space": "sRGB",
+      "palette": "../palettes/materials96.png",
+      "resampled_from_concept": true,
+      "normal_map": "marble_01_n.png",
+      "normal_scale": 0.35,
+      "roughness": 0.55,
       "metallic": 0.0,
-      "palette": "../palettes/bank.png"
+      "ground_cast_shadow_baked": false,
+      "directional_light_baked": false
+    },
+    {
+      "file": "marble_01_n.png",
+      "width": 192,
+      "height": 192,
+      "format": "RGB",
+      "bytes": 110857,
+      "sha256": "259aeff4ce0aca56d693d424fcbab608ea7991e389793b8c8d9fcca76a87ced0",
+      "material": "marble",
+      "variant": 1,
+      "role": "normal",
+      "pixels_per_metre": 96,
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "tileable_x": true,
+      "tileable_y": true,
+      "color_space": "linear_data",
+      "normal_convention": "OpenGL +Y",
+      "normal_map_invert_y": false,
+      "normal_source": "shallow approximate joint relief from texture structure; not a scanned or geometric 3D normal bake"
     },
     {
       "file": "marble_02.png",
-      "width": 96,
-      "height": 96,
-      "format": "RGBA",
-      "bytes": 1244,
-      "sha256": "f7bc41a4395e094ba0940dd3c832209ba3d9625ebf314ac6f05b87e4b3c8891a",
+      "width": 192,
+      "height": 192,
+      "format": "P",
+      "bytes": 37520,
+      "sha256": "d0a509ce95149e4ac9fe0e2e2a46b57d700b36c57173509e8ca169f9713ccb70",
       "material": "marble",
       "variant": 2,
       "role": "albedo",
+      "pixels_per_metre": 96,
       "size_m": [
         2.0,
         2.0
       ],
-      "authored_size_px": [
-        96,
-        96
-      ],
-      "resampled": false,
       "anchor_px": [
         0,
         0
@@ -554,32 +703,63 @@
         0.0,
         0.0
       ],
-      "anchor_kind": "surface_uv_origin",
       "tileable_x": true,
       "tileable_y": true,
-      "roughness": 0.48,
+      "color_space": "sRGB",
+      "palette": "../palettes/materials96.png",
+      "resampled_from_concept": true,
+      "normal_map": "marble_02_n.png",
+      "normal_scale": 0.35,
+      "roughness": 0.55,
       "metallic": 0.0,
-      "palette": "../palettes/bank.png"
+      "ground_cast_shadow_baked": false,
+      "directional_light_baked": false
+    },
+    {
+      "file": "marble_02_n.png",
+      "width": 192,
+      "height": 192,
+      "format": "RGB",
+      "bytes": 110857,
+      "sha256": "aca0df29f12b220bbe5319fff7e0c736977d0325374c2f76a6d9d999c075b9ec",
+      "material": "marble",
+      "variant": 2,
+      "role": "normal",
+      "pixels_per_metre": 96,
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "tileable_x": true,
+      "tileable_y": true,
+      "color_space": "linear_data",
+      "normal_convention": "OpenGL +Y",
+      "normal_map_invert_y": false,
+      "normal_source": "shallow approximate joint relief from texture structure; not a scanned or geometric 3D normal bake"
     },
     {
       "file": "marble_03.png",
-      "width": 96,
-      "height": 96,
-      "format": "RGBA",
-      "bytes": 1203,
-      "sha256": "5cf38e7614009ee79626d173b410844735fbc425efc9e22de88ba7e8d82b1e89",
+      "width": 192,
+      "height": 192,
+      "format": "P",
+      "bytes": 37520,
+      "sha256": "2ef591b296ffbbd590bb215427e6acdb29242aa043b181077e5c689ffb5edede",
       "material": "marble",
       "variant": 3,
       "role": "albedo",
+      "pixels_per_metre": 96,
       "size_m": [
         2.0,
         2.0
       ],
-      "authored_size_px": [
-        96,
-        96
-      ],
-      "resampled": false,
       "anchor_px": [
         0,
         0
@@ -588,32 +768,63 @@
         0.0,
         0.0
       ],
-      "anchor_kind": "surface_uv_origin",
       "tileable_x": true,
       "tileable_y": true,
-      "roughness": 0.48,
+      "color_space": "sRGB",
+      "palette": "../palettes/materials96.png",
+      "resampled_from_concept": true,
+      "normal_map": "marble_03_n.png",
+      "normal_scale": 0.35,
+      "roughness": 0.55,
       "metallic": 0.0,
-      "palette": "../palettes/bank.png"
+      "ground_cast_shadow_baked": false,
+      "directional_light_baked": false
+    },
+    {
+      "file": "marble_03_n.png",
+      "width": 192,
+      "height": 192,
+      "format": "RGB",
+      "bytes": 110857,
+      "sha256": "460e65e39a744261869d4a156c3c5f6bb09959b456925c50b8ef5e1b54befc69",
+      "material": "marble",
+      "variant": 3,
+      "role": "normal",
+      "pixels_per_metre": 96,
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "tileable_x": true,
+      "tileable_y": true,
+      "color_space": "linear_data",
+      "normal_convention": "OpenGL +Y",
+      "normal_map_invert_y": false,
+      "normal_source": "shallow approximate joint relief from texture structure; not a scanned or geometric 3D normal bake"
     },
     {
       "file": "lawn_01.png",
-      "width": 96,
-      "height": 96,
-      "format": "RGBA",
-      "bytes": 2622,
-      "sha256": "1ea02b697364b0084444fa7ced424f92df30eaa1eabc973e5a119a692acf8ff0",
+      "width": 192,
+      "height": 192,
+      "format": "P",
+      "bytes": 37520,
+      "sha256": "f03ef60b81f06b927d541d772a847e825ca8c83dabba5a7a75f0c8cb297fcbb0",
       "material": "lawn",
       "variant": 1,
       "role": "albedo",
+      "pixels_per_metre": 96,
       "size_m": [
         2.0,
         2.0
       ],
-      "authored_size_px": [
-        96,
-        96
-      ],
-      "resampled": false,
       "anchor_px": [
         0,
         0
@@ -622,32 +833,63 @@
         0.0,
         0.0
       ],
-      "anchor_kind": "surface_uv_origin",
       "tileable_x": true,
       "tileable_y": true,
+      "color_space": "sRGB",
+      "palette": "../palettes/materials96.png",
+      "resampled_from_concept": true,
+      "normal_map": "lawn_01_n.png",
+      "normal_scale": 0.35,
       "roughness": 0.92,
       "metallic": 0.0,
-      "palette": "../palettes/bank.png"
+      "ground_cast_shadow_baked": false,
+      "directional_light_baked": false
+    },
+    {
+      "file": "lawn_01_n.png",
+      "width": 192,
+      "height": 192,
+      "format": "RGB",
+      "bytes": 110857,
+      "sha256": "e64e554bbc08fee27bebb3e1ac2b838cf11c8c93033bdf1c58406a39ab0f3eab",
+      "material": "lawn",
+      "variant": 1,
+      "role": "normal",
+      "pixels_per_metre": 96,
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "tileable_x": true,
+      "tileable_y": true,
+      "color_space": "linear_data",
+      "normal_convention": "OpenGL +Y",
+      "normal_map_invert_y": false,
+      "normal_source": "shallow approximate joint relief from texture structure; not a scanned or geometric 3D normal bake"
     },
     {
       "file": "lawn_02.png",
-      "width": 96,
-      "height": 96,
-      "format": "RGBA",
-      "bytes": 2652,
-      "sha256": "4cae4c8a0b421cbccced258480adf60306ab8983c101b18fce6eec705e0d55bc",
+      "width": 192,
+      "height": 192,
+      "format": "P",
+      "bytes": 37520,
+      "sha256": "558e57e9a5333967a051ee851b5927a6663f7910d69cde94e4ca860f4a980d67",
       "material": "lawn",
       "variant": 2,
       "role": "albedo",
+      "pixels_per_metre": 96,
       "size_m": [
         2.0,
         2.0
       ],
-      "authored_size_px": [
-        96,
-        96
-      ],
-      "resampled": false,
       "anchor_px": [
         0,
         0
@@ -656,32 +898,63 @@
         0.0,
         0.0
       ],
-      "anchor_kind": "surface_uv_origin",
       "tileable_x": true,
       "tileable_y": true,
+      "color_space": "sRGB",
+      "palette": "../palettes/materials96.png",
+      "resampled_from_concept": true,
+      "normal_map": "lawn_02_n.png",
+      "normal_scale": 0.35,
       "roughness": 0.92,
       "metallic": 0.0,
-      "palette": "../palettes/bank.png"
+      "ground_cast_shadow_baked": false,
+      "directional_light_baked": false
+    },
+    {
+      "file": "lawn_02_n.png",
+      "width": 192,
+      "height": 192,
+      "format": "RGB",
+      "bytes": 110857,
+      "sha256": "e2a5cbe3ad7e2dc5c5e083ae718e8cb787ffda298527702ffebcbd0464839873",
+      "material": "lawn",
+      "variant": 2,
+      "role": "normal",
+      "pixels_per_metre": 96,
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "tileable_x": true,
+      "tileable_y": true,
+      "color_space": "linear_data",
+      "normal_convention": "OpenGL +Y",
+      "normal_map_invert_y": false,
+      "normal_source": "shallow approximate joint relief from texture structure; not a scanned or geometric 3D normal bake"
     },
     {
       "file": "lawn_03.png",
-      "width": 96,
-      "height": 96,
-      "format": "RGBA",
-      "bytes": 2617,
-      "sha256": "21d751f82d1e3c79ea657a565ebf28f5045f1daa9255d2e21b03a9999a03cc1f",
+      "width": 192,
+      "height": 192,
+      "format": "P",
+      "bytes": 37520,
+      "sha256": "d955dd25dcaded5e3b2858a914c319890e4bd9cc228ba28416c11f41eef65ea5",
       "material": "lawn",
       "variant": 3,
       "role": "albedo",
+      "pixels_per_metre": 96,
       "size_m": [
         2.0,
         2.0
       ],
-      "authored_size_px": [
-        96,
-        96
-      ],
-      "resampled": false,
       "anchor_px": [
         0,
         0
@@ -690,12 +963,437 @@
         0.0,
         0.0
       ],
-      "anchor_kind": "surface_uv_origin",
       "tileable_x": true,
       "tileable_y": true,
+      "color_space": "sRGB",
+      "palette": "../palettes/materials96.png",
+      "resampled_from_concept": true,
+      "normal_map": "lawn_03_n.png",
+      "normal_scale": 0.35,
       "roughness": 0.92,
       "metallic": 0.0,
-      "palette": "../palettes/bank.png"
+      "ground_cast_shadow_baked": false,
+      "directional_light_baked": false
+    },
+    {
+      "file": "lawn_03_n.png",
+      "width": 192,
+      "height": 192,
+      "format": "RGB",
+      "bytes": 110857,
+      "sha256": "fa3cd99f2b041fa7e2494a8f1fa9d58971805a8b718e4f769049c2dfc9af6b15",
+      "material": "lawn",
+      "variant": 3,
+      "role": "normal",
+      "pixels_per_metre": 96,
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "tileable_x": true,
+      "tileable_y": true,
+      "color_space": "linear_data",
+      "normal_convention": "OpenGL +Y",
+      "normal_map_invert_y": false,
+      "normal_source": "shallow approximate joint relief from texture structure; not a scanned or geometric 3D normal bake"
+    },
+    {
+      "file": "stone_wall_01.png",
+      "width": 192,
+      "height": 192,
+      "format": "P",
+      "bytes": 37520,
+      "sha256": "fe68ce9debc4576be7439d4d88985d7ecc3f5da4bd667ab920a9d2e657e5b7b8",
+      "material": "stone_wall",
+      "variant": 1,
+      "role": "albedo",
+      "pixels_per_metre": 96,
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "tileable_x": true,
+      "tileable_y": true,
+      "color_space": "sRGB",
+      "palette": "../palettes/materials96.png",
+      "resampled_from_concept": true,
+      "normal_map": "stone_wall_01_n.png",
+      "normal_scale": 0.35,
+      "roughness": 0.92,
+      "metallic": 0.0,
+      "ground_cast_shadow_baked": false,
+      "directional_light_baked": false
+    },
+    {
+      "file": "stone_wall_01_n.png",
+      "width": 192,
+      "height": 192,
+      "format": "RGB",
+      "bytes": 110857,
+      "sha256": "eea4f4935a558cff364acc4716990cfa219ee55f581685979fa664d672751920",
+      "material": "stone_wall",
+      "variant": 1,
+      "role": "normal",
+      "pixels_per_metre": 96,
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "tileable_x": true,
+      "tileable_y": true,
+      "color_space": "linear_data",
+      "normal_convention": "OpenGL +Y",
+      "normal_map_invert_y": false,
+      "normal_source": "shallow approximate joint relief from texture structure; not a scanned or geometric 3D normal bake"
+    },
+    {
+      "file": "stone_wall_02.png",
+      "width": 192,
+      "height": 192,
+      "format": "P",
+      "bytes": 37520,
+      "sha256": "6b247a50726f3934763bc1be892fa1f62761393099d414bc9128850fd0a83b1c",
+      "material": "stone_wall",
+      "variant": 2,
+      "role": "albedo",
+      "pixels_per_metre": 96,
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "tileable_x": true,
+      "tileable_y": true,
+      "color_space": "sRGB",
+      "palette": "../palettes/materials96.png",
+      "resampled_from_concept": true,
+      "normal_map": "stone_wall_02_n.png",
+      "normal_scale": 0.35,
+      "roughness": 0.92,
+      "metallic": 0.0,
+      "ground_cast_shadow_baked": false,
+      "directional_light_baked": false
+    },
+    {
+      "file": "stone_wall_02_n.png",
+      "width": 192,
+      "height": 192,
+      "format": "RGB",
+      "bytes": 110857,
+      "sha256": "bc61751b24e1dbd299817ee3b140b223d369cb8fec552fafb2ec059076ba8d79",
+      "material": "stone_wall",
+      "variant": 2,
+      "role": "normal",
+      "pixels_per_metre": 96,
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "tileable_x": true,
+      "tileable_y": true,
+      "color_space": "linear_data",
+      "normal_convention": "OpenGL +Y",
+      "normal_map_invert_y": false,
+      "normal_source": "shallow approximate joint relief from texture structure; not a scanned or geometric 3D normal bake"
+    },
+    {
+      "file": "stone_wall_03.png",
+      "width": 192,
+      "height": 192,
+      "format": "P",
+      "bytes": 37520,
+      "sha256": "cb1c80c37503570f47faec6238b4e53f6dd2a7170951e301f75752dded1e0792",
+      "material": "stone_wall",
+      "variant": 3,
+      "role": "albedo",
+      "pixels_per_metre": 96,
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "tileable_x": true,
+      "tileable_y": true,
+      "color_space": "sRGB",
+      "palette": "../palettes/materials96.png",
+      "resampled_from_concept": true,
+      "normal_map": "stone_wall_03_n.png",
+      "normal_scale": 0.35,
+      "roughness": 0.92,
+      "metallic": 0.0,
+      "ground_cast_shadow_baked": false,
+      "directional_light_baked": false
+    },
+    {
+      "file": "stone_wall_03_n.png",
+      "width": 192,
+      "height": 192,
+      "format": "RGB",
+      "bytes": 110857,
+      "sha256": "80d5cf7de4f4521474b842c676e4f106864144acbba7958d4234c04a37b7df8c",
+      "material": "stone_wall",
+      "variant": 3,
+      "role": "normal",
+      "pixels_per_metre": 96,
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "tileable_x": true,
+      "tileable_y": true,
+      "color_space": "linear_data",
+      "normal_convention": "OpenGL +Y",
+      "normal_map_invert_y": false,
+      "normal_source": "shallow approximate joint relief from texture structure; not a scanned or geometric 3D normal bake"
+    },
+    {
+      "file": "step_riser_01.png",
+      "width": 192,
+      "height": 192,
+      "format": "P",
+      "bytes": 37520,
+      "sha256": "6931ff06c9db32bb0fba8b2a2a28cfcfae8f265f8b94c87dd2d7ce5057d90b9d",
+      "material": "step_riser",
+      "variant": 1,
+      "role": "albedo",
+      "pixels_per_metre": 96,
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "tileable_x": true,
+      "tileable_y": true,
+      "color_space": "sRGB",
+      "palette": "../palettes/materials96.png",
+      "resampled_from_concept": true,
+      "normal_map": "step_riser_01_n.png",
+      "normal_scale": 0.35,
+      "roughness": 0.92,
+      "metallic": 0.0,
+      "ground_cast_shadow_baked": false,
+      "directional_light_baked": false
+    },
+    {
+      "file": "step_riser_01_n.png",
+      "width": 192,
+      "height": 192,
+      "format": "RGB",
+      "bytes": 110857,
+      "sha256": "26c5571f2524a6230e4b7a9ec03d352c0c1684fb01ba354ee7aa905fb139b732",
+      "material": "step_riser",
+      "variant": 1,
+      "role": "normal",
+      "pixels_per_metre": 96,
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "tileable_x": true,
+      "tileable_y": true,
+      "color_space": "linear_data",
+      "normal_convention": "OpenGL +Y",
+      "normal_map_invert_y": false,
+      "normal_source": "shallow approximate joint relief from texture structure; not a scanned or geometric 3D normal bake"
+    },
+    {
+      "file": "step_riser_02.png",
+      "width": 192,
+      "height": 192,
+      "format": "P",
+      "bytes": 37520,
+      "sha256": "f50345e4b9cc7497e7f83aebad5f4e72fa37d754d8df506cefb6539e5da0859a",
+      "material": "step_riser",
+      "variant": 2,
+      "role": "albedo",
+      "pixels_per_metre": 96,
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "tileable_x": true,
+      "tileable_y": true,
+      "color_space": "sRGB",
+      "palette": "../palettes/materials96.png",
+      "resampled_from_concept": true,
+      "normal_map": "step_riser_02_n.png",
+      "normal_scale": 0.35,
+      "roughness": 0.92,
+      "metallic": 0.0,
+      "ground_cast_shadow_baked": false,
+      "directional_light_baked": false
+    },
+    {
+      "file": "step_riser_02_n.png",
+      "width": 192,
+      "height": 192,
+      "format": "RGB",
+      "bytes": 110857,
+      "sha256": "b5bff505a6dfb58c2ea2e32e82f6308c48ed43077411a932b6dc497dbacf7a28",
+      "material": "step_riser",
+      "variant": 2,
+      "role": "normal",
+      "pixels_per_metre": 96,
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "tileable_x": true,
+      "tileable_y": true,
+      "color_space": "linear_data",
+      "normal_convention": "OpenGL +Y",
+      "normal_map_invert_y": false,
+      "normal_source": "shallow approximate joint relief from texture structure; not a scanned or geometric 3D normal bake"
+    },
+    {
+      "file": "step_riser_03.png",
+      "width": 192,
+      "height": 192,
+      "format": "P",
+      "bytes": 37520,
+      "sha256": "72a4aae0cc826064b4fd91378eb13d011ba6d4d9377800d7c83da357b15613c6",
+      "material": "step_riser",
+      "variant": 3,
+      "role": "albedo",
+      "pixels_per_metre": 96,
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "tileable_x": true,
+      "tileable_y": true,
+      "color_space": "sRGB",
+      "palette": "../palettes/materials96.png",
+      "resampled_from_concept": true,
+      "normal_map": "step_riser_03_n.png",
+      "normal_scale": 0.35,
+      "roughness": 0.92,
+      "metallic": 0.0,
+      "ground_cast_shadow_baked": false,
+      "directional_light_baked": false
+    },
+    {
+      "file": "step_riser_03_n.png",
+      "width": 192,
+      "height": 192,
+      "format": "RGB",
+      "bytes": 110857,
+      "sha256": "33c167a4838de5b171860588e34855755623fda1da08caba84b6b1c5cdb33f53",
+      "material": "step_riser",
+      "variant": 3,
+      "role": "normal",
+      "pixels_per_metre": 96,
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "anchor_px": [
+        0,
+        0
+      ],
+      "anchor_uv": [
+        0.0,
+        0.0
+      ],
+      "tileable_x": true,
+      "tileable_y": true,
+      "color_space": "linear_data",
+      "normal_convention": "OpenGL +Y",
+      "normal_map_invert_y": false,
+      "normal_source": "shallow approximate joint relief from texture structure; not a scanned or geometric 3D normal bake"
     },
     {
       "file": "garden_soil_01.png",
@@ -729,7 +1427,9 @@
       "tileable_y": true,
       "roughness": 0.92,
       "metallic": 0.0,
-      "palette": "../palettes/bank.png"
+      "palette": "../palettes/bank.png",
+      "pixels_per_metre": 48,
+      "delivery_status": "legacy_48_not_migrated"
     },
     {
       "file": "garden_soil_02.png",
@@ -763,7 +1463,9 @@
       "tileable_y": true,
       "roughness": 0.92,
       "metallic": 0.0,
-      "palette": "../palettes/bank.png"
+      "palette": "../palettes/bank.png",
+      "pixels_per_metre": 48,
+      "delivery_status": "legacy_48_not_migrated"
     },
     {
       "file": "garden_soil_03.png",
@@ -797,109 +1499,9 @@
       "tileable_y": true,
       "roughness": 0.92,
       "metallic": 0.0,
-      "palette": "../palettes/bank.png"
-    },
-    {
-      "file": "stone_wall_01.png",
-      "width": 96,
-      "height": 96,
-      "format": "RGBA",
-      "bytes": 1547,
-      "sha256": "3788435393061b4cf758b4024d5a79c41538cf68f711ef45b5ee6c2586a20711",
-      "material": "stone_wall",
-      "variant": 1,
-      "role": "albedo",
-      "size_m": [
-        2.0,
-        2.0
-      ],
-      "authored_size_px": [
-        96,
-        96
-      ],
-      "resampled": false,
-      "anchor_px": [
-        0,
-        0
-      ],
-      "anchor_uv": [
-        0.0,
-        0.0
-      ],
-      "anchor_kind": "surface_uv_origin",
-      "tileable_x": true,
-      "tileable_y": true,
-      "roughness": 0.92,
-      "metallic": 0.0,
-      "palette": "../palettes/bank.png"
-    },
-    {
-      "file": "stone_wall_02.png",
-      "width": 96,
-      "height": 96,
-      "format": "RGBA",
-      "bytes": 1679,
-      "sha256": "7aecdecb9b63c557d7ed88cd37392ab5683abef39fdfde0318a41f6962771c50",
-      "material": "stone_wall",
-      "variant": 2,
-      "role": "albedo",
-      "size_m": [
-        2.0,
-        2.0
-      ],
-      "authored_size_px": [
-        96,
-        96
-      ],
-      "resampled": false,
-      "anchor_px": [
-        0,
-        0
-      ],
-      "anchor_uv": [
-        0.0,
-        0.0
-      ],
-      "anchor_kind": "surface_uv_origin",
-      "tileable_x": true,
-      "tileable_y": true,
-      "roughness": 0.92,
-      "metallic": 0.0,
-      "palette": "../palettes/bank.png"
-    },
-    {
-      "file": "stone_wall_03.png",
-      "width": 96,
-      "height": 96,
-      "format": "RGBA",
-      "bytes": 1578,
-      "sha256": "de84a0f6737a68e2b8e56a9d5d0ab9f0d3d201ee341240cd9ba787509db3676e",
-      "material": "stone_wall",
-      "variant": 3,
-      "role": "albedo",
-      "size_m": [
-        2.0,
-        2.0
-      ],
-      "authored_size_px": [
-        96,
-        96
-      ],
-      "resampled": false,
-      "anchor_px": [
-        0,
-        0
-      ],
-      "anchor_uv": [
-        0.0,
-        0.0
-      ],
-      "anchor_kind": "surface_uv_origin",
-      "tileable_x": true,
-      "tileable_y": true,
-      "roughness": 0.92,
-      "metallic": 0.0,
-      "palette": "../palettes/bank.png"
+      "palette": "../palettes/bank.png",
+      "pixels_per_metre": 48,
+      "delivery_status": "legacy_48_not_migrated"
     },
     {
       "file": "plaster_01.png",
@@ -933,7 +1535,9 @@
       "tileable_y": true,
       "roughness": 0.92,
       "metallic": 0.0,
-      "palette": "../palettes/bank.png"
+      "palette": "../palettes/bank.png",
+      "pixels_per_metre": 48,
+      "delivery_status": "legacy_48_not_migrated"
     },
     {
       "file": "plaster_02.png",
@@ -967,7 +1571,9 @@
       "tileable_y": true,
       "roughness": 0.92,
       "metallic": 0.0,
-      "palette": "../palettes/bank.png"
+      "palette": "../palettes/bank.png",
+      "pixels_per_metre": 48,
+      "delivery_status": "legacy_48_not_migrated"
     },
     {
       "file": "plaster_03.png",
@@ -1001,109 +1607,9 @@
       "tileable_y": true,
       "roughness": 0.92,
       "metallic": 0.0,
-      "palette": "../palettes/bank.png"
-    },
-    {
-      "file": "step_riser_01.png",
-      "width": 96,
-      "height": 96,
-      "format": "RGBA",
-      "bytes": 1256,
-      "sha256": "b795b5cd9100b60cd911f9e1eaa7473f7e3916249f46a13b4a14ee50fcc6f6df",
-      "material": "step_riser",
-      "variant": 1,
-      "role": "albedo",
-      "size_m": [
-        2.0,
-        2.0
-      ],
-      "authored_size_px": [
-        96,
-        96
-      ],
-      "resampled": false,
-      "anchor_px": [
-        0,
-        0
-      ],
-      "anchor_uv": [
-        0.0,
-        0.0
-      ],
-      "anchor_kind": "surface_uv_origin",
-      "tileable_x": true,
-      "tileable_y": true,
-      "roughness": 0.92,
-      "metallic": 0.0,
-      "palette": "../palettes/bank.png"
-    },
-    {
-      "file": "step_riser_02.png",
-      "width": 96,
-      "height": 96,
-      "format": "RGBA",
-      "bytes": 1246,
-      "sha256": "f4a8e6deaebfc9a16fa5058cf706c71d5b31ebe10c6c79f035deaea539413cf2",
-      "material": "step_riser",
-      "variant": 2,
-      "role": "albedo",
-      "size_m": [
-        2.0,
-        2.0
-      ],
-      "authored_size_px": [
-        96,
-        96
-      ],
-      "resampled": false,
-      "anchor_px": [
-        0,
-        0
-      ],
-      "anchor_uv": [
-        0.0,
-        0.0
-      ],
-      "anchor_kind": "surface_uv_origin",
-      "tileable_x": true,
-      "tileable_y": true,
-      "roughness": 0.92,
-      "metallic": 0.0,
-      "palette": "../palettes/bank.png"
-    },
-    {
-      "file": "step_riser_03.png",
-      "width": 96,
-      "height": 96,
-      "format": "RGBA",
-      "bytes": 1245,
-      "sha256": "a4a44a685a90291ec4d6cdc109365d7824db2d6e213c9e73e5673e5b174468f8",
-      "material": "step_riser",
-      "variant": 3,
-      "role": "albedo",
-      "size_m": [
-        2.0,
-        2.0
-      ],
-      "authored_size_px": [
-        96,
-        96
-      ],
-      "resampled": false,
-      "anchor_px": [
-        0,
-        0
-      ],
-      "anchor_uv": [
-        0.0,
-        0.0
-      ],
-      "anchor_kind": "surface_uv_origin",
-      "tileable_x": true,
-      "tileable_y": true,
-      "roughness": 0.92,
-      "metallic": 0.0,
-      "palette": "../palettes/bank.png"
+      "palette": "../palettes/bank.png",
+      "pixels_per_metre": 48,
+      "delivery_status": "legacy_48_not_migrated"
     },
     {
       "file": "roof_red_01_n.png",
@@ -1130,7 +1636,9 @@
       "tileable_x": true,
       "tileable_y": true,
       "color_space": "linear_data",
-      "normal_convention": "OpenGL +Y"
+      "normal_convention": "OpenGL +Y",
+      "pixels_per_metre": 48,
+      "delivery_status": "legacy_48_not_migrated"
     },
     {
       "file": "roof_red_01.png",
@@ -1166,7 +1674,9 @@
       "metallic": 0.0,
       "palette": "../palettes/bank.png",
       "normal_map": "roof_red_01_n.png",
-      "normal_scale": 0.65
+      "normal_scale": 0.65,
+      "pixels_per_metre": 48,
+      "delivery_status": "legacy_48_not_migrated"
     },
     {
       "file": "roof_red_02_n.png",
@@ -1193,7 +1703,9 @@
       "tileable_x": true,
       "tileable_y": true,
       "color_space": "linear_data",
-      "normal_convention": "OpenGL +Y"
+      "normal_convention": "OpenGL +Y",
+      "pixels_per_metre": 48,
+      "delivery_status": "legacy_48_not_migrated"
     },
     {
       "file": "roof_red_02.png",
@@ -1229,7 +1741,9 @@
       "metallic": 0.0,
       "palette": "../palettes/bank.png",
       "normal_map": "roof_red_02_n.png",
-      "normal_scale": 0.65
+      "normal_scale": 0.65,
+      "pixels_per_metre": 48,
+      "delivery_status": "legacy_48_not_migrated"
     },
     {
       "file": "roof_red_03_n.png",
@@ -1256,7 +1770,9 @@
       "tileable_x": true,
       "tileable_y": true,
       "color_space": "linear_data",
-      "normal_convention": "OpenGL +Y"
+      "normal_convention": "OpenGL +Y",
+      "pixels_per_metre": 48,
+      "delivery_status": "legacy_48_not_migrated"
     },
     {
       "file": "roof_red_03.png",
@@ -1292,7 +1808,9 @@
       "metallic": 0.0,
       "palette": "../palettes/bank.png",
       "normal_map": "roof_red_03_n.png",
-      "normal_scale": 0.65
+      "normal_scale": 0.65,
+      "pixels_per_metre": 48,
+      "delivery_status": "legacy_48_not_migrated"
     }
   ]
 }

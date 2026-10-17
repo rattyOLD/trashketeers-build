@@ -45,10 +45,24 @@
       "anchor_px": null,
       "not_a_world_surface": true,
       "provisional_until_visual_review": true
+    },
+    {
+      "file": "materials96.png",
+      "width": 128,
+      "height": 1,
+      "format": "RGB",
+      "bytes": 453,
+      "sha256": "95d2e5354e7cf02623ee9a043b0d77d6a990ddbd4276ca1a1fd61e686dcf0b51",
+      "role": "material_palette_candidate",
+      "colors": 128,
+      "size_m": null,
+      "anchor_px": null,
+      "not_a_world_surface": true,
+      "provisional_until_visual_review": true
     }
   ],
   "definition_file": "colors.json",
   "pending": [
-    "Full chapter palette consolidation with future96px/m environment assets; existing bank.png belongs to old48px/m batch"
+    "Consolidate authoring palettes to the chapter palette after material/prop review; accepted sprites preserved"
   ]
 }
